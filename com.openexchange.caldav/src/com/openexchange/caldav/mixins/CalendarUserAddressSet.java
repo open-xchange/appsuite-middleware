@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -73,7 +73,7 @@ public class CalendarUserAddressSet extends SingleXMLPropertyMixin {
     protected String getValue() {
         String mail = sessionHolder.getUser().getMail();
 
-        com.openexchange.java.StringAllocator addresses = new com.openexchange.java.StringAllocator();
+        StringBuilder addresses = new StringBuilder();
         addresses.append("<D:href>mailto:").append(mail).append("</D:href>");
 
         addresses.append("<D:href>/principals/users/"+sessionHolder.getUser().getLoginInfo()+"</D:href>");

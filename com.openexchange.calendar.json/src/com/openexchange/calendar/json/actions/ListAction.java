@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -71,11 +71,13 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -165,7 +167,11 @@ public final class ListAction extends AppointmentAction {
             }
         }
 
-        final AppointmentSQLInterface appointmentsql = getService().createAppointmentSql(req.getSession());
+        final AppointmentSqlFactoryService factoryService = getService();
+        if (null == factoryService) {
+            throw ServiceExceptionCode.absentService(AppointmentSqlFactoryService.class);
+        }
+        final AppointmentSQLInterface appointmentsql = factoryService.createAppointmentSql(req.getSession());
         final CalendarCollectionService recColl = getService(CalendarCollectionService.class);
         it = appointmentsql.getObjectsById(objectIdAndFolderId, _appointmentFields);
         final List<Appointment> appointmentList = new ArrayList<Appointment>(16);

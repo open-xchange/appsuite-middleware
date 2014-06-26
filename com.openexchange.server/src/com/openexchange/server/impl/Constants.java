@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,7 +49,6 @@
 
 package com.openexchange.server.impl;
 
-import com.openexchange.groupware.contact.ContactInterface;
 
 
 /**
@@ -62,8 +61,8 @@ public class Constants {
 
     public static final String OX_MODULE = "com.openexchange.server.module";
 
-    public static final String OX_OVERRIDE_FOLDER = ContactInterface.OVERRIDE_FOLDER_ATTRIBUTE;
-    public static final String OX_OVERRIDE_CONTEXT = ContactInterface.OVERRIDE_CONTEXT_ATTRIBUTE;
+    public static final String OX_OVERRIDE_FOLDER = "override_folder";
+    public static final String OX_OVERRIDE_CONTEXT = "override_context";
 
 
 }

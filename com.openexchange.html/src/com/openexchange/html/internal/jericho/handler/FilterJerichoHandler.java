@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -83,7 +83,6 @@ import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
 import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.java.AsciiReader;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.StringBuilderStringer;
 import com.openexchange.java.Stringer;
 import com.openexchange.java.Strings;
@@ -175,19 +174,16 @@ public final class FilterJerichoHandler implements JerichoHandler {
      */
 
     private final Map<String, Map<String, Set<String>>> htmlMap;
-
     private final Map<String, Set<String>> styleMap;
 
     private final StringBuilder htmlBuilder;
-
     private final StringBuilder attrBuilder;
+    private final StringBuilder urlBuilder;
 
     private final HtmlServiceImpl htmlService;
 
     private boolean body;
-
     private boolean isCss;
-
     private final Stringer cssBuffer;
 
     /**
@@ -200,16 +196,17 @@ public final class FilterJerichoHandler implements JerichoHandler {
      */
     private int depth;
 
+    /**
+     * The max. content size.
+     */
+    private int maxContentSize;
+
+    private boolean maxContentSizeExceeded;
+
     private boolean[] depthInfo;
-
     private boolean dropExternalImages;
-
     private boolean imageURLFound;
-
-    private final StringBuilder urlBuilder;
-
     private boolean replaceUrls = true;
-
     private String cssPrefix;
 
     private final boolean changed = false;
@@ -220,6 +217,8 @@ public final class FilterJerichoHandler implements JerichoHandler {
     public FilterJerichoHandler(final int capacity, final HtmlServiceImpl htmlService) {
         super();
         this.htmlService = htmlService;
+        maxContentSize = -1;
+        maxContentSizeExceeded = false;
         urlBuilder = new StringBuilder(256);
         cssBuffer = new StringBuilderStringer(new StringBuilder(256));
         htmlBuilder = new StringBuilder(capacity);
@@ -237,6 +236,8 @@ public final class FilterJerichoHandler implements JerichoHandler {
     public FilterJerichoHandler(final int capacity, final String mapStr, final HtmlServiceImpl htmlService) {
         super();
         this.htmlService = htmlService;
+        maxContentSize = -1;
+        maxContentSizeExceeded = false;
         urlBuilder = new StringBuilder(256);
         cssBuffer = new StringBuilderStringer(new StringBuilder(256));
         htmlBuilder = new StringBuilder(capacity);
@@ -258,6 +259,18 @@ public final class FilterJerichoHandler implements JerichoHandler {
         }
         htmlMap = Collections.unmodifiableMap(map);
         styleMap = Collections.unmodifiableMap(parseStyleMap(mapStr));
+    }
+
+    /**
+     * Sets the max. content size
+     *
+     * @param maxContentSize The max. content size to set
+     * @return This handler with new behavior applied
+     */
+    public FilterJerichoHandler setMaxContentSize(final int maxContentSize) {
+        this.maxContentSize = maxContentSize;
+        maxContentSizeExceeded = false;
+        return this;
     }
 
     /**
@@ -367,6 +380,23 @@ public final class FilterJerichoHandler implements JerichoHandler {
         System.arraycopy(tmp, 0, depthInfo, 0, tmp.length);
     }
 
+    /**
+     * Checks if max. allowed content size is exceeded.
+     *
+     * @param addLen The expected length the content will grow
+     * @return <code>true</code> if not exceeded; otherwise <code>false</code> if exceeded
+     */
+    private boolean checkMaxContentSize(final int addLen) {
+        if (maxContentSize <= 0) {
+            return true;
+        }
+        if (maxContentSizeExceeded) {
+            return false;
+        }
+        maxContentSizeExceeded = htmlBuilder.length() + addLen > maxContentSize;
+        return !maxContentSizeExceeded;
+    }
+
     @Override
     public void handleUnknownTag(final Tag tag) {
         if (!body) {
@@ -377,7 +407,10 @@ public final class FilterJerichoHandler implements JerichoHandler {
     @Override
     public void handleCharacterReference(final CharacterReference characterReference) {
         if (skipLevel == 0) {
-            htmlBuilder.append(CharacterReference.getDecimalCharacterReferenceString(characterReference.getChar()));
+            final String str = CharacterReference.getDecimalCharacterReferenceString(characterReference.getChar());
+            if (checkMaxContentSize(str.length())) {
+                htmlBuilder.append(str);
+            }
         }
     }
 
@@ -385,30 +418,36 @@ public final class FilterJerichoHandler implements JerichoHandler {
     public void handleSegment(final Segment content) {
         if (skipLevel == 0) {
             if (isCss) {
-                /*
-                 * Handle style attribute
-                 */
-                checkCSS(cssBuffer.append(content), styleMap, cssPrefix);
-                String checkedCSS = cssBuffer.toString();
-                cssBuffer.setLength(0);
-                if (dropExternalImages) {
-                    imageURLFound |= checkCSS(cssBuffer.append(checkedCSS), IMAGE_STYLE_MAP, null, false);
-                    // imageURLFound |= checkCSS(cssBuffer.append(checkedCSS), IMAGE_STYLE_MAP, true, false);
-                    checkedCSS = cssBuffer.toString();
-                    cssBuffer.setLength(0);
-                }
-                htmlBuilder.append(checkedCSS);
-            } else {
-                if (content.isWhiteSpace()) {
-                    htmlBuilder.append(content);
-                } else {
-                    /*-
-                     * Should we re-encode prior to appending?
-                     * E.g. "<" ==> "&lt;"
-                     *
-                     * htmlBuilder.append(CharacterReference.reencode(content));
+                if (false == maxContentSizeExceeded) {
+                    /*
+                     * Handle style attribute
                      */
-                    htmlBuilder.append(content);
+                    checkCSS(cssBuffer.append(content), styleMap, cssPrefix);
+                    String checkedCSS = cssBuffer.toString();
+                    cssBuffer.setLength(0);
+                    if (dropExternalImages) {
+                        imageURLFound |= checkCSS(cssBuffer.append(checkedCSS), IMAGE_STYLE_MAP, null, false);
+                        // imageURLFound |= checkCSS(cssBuffer.append(checkedCSS), IMAGE_STYLE_MAP, true, false);
+                        checkedCSS = cssBuffer.toString();
+                        cssBuffer.setLength(0);
+                    }
+                    if (checkMaxContentSize(checkedCSS.length())) {
+                        htmlBuilder.append(checkedCSS);
+                    }
+                }
+            } else {
+                if (checkMaxContentSize(content.length())) {
+                    if (content.isWhiteSpace()) {
+                        htmlBuilder.append(content);
+                    } else {
+                        /*-
+                         * Should we re-encode prior to appending?
+                         * E.g. "<" ==> "&lt;"
+                         *
+                         * htmlBuilder.append(CharacterReference.reencode(content));
+                         */
+                        htmlBuilder.append(content);
+                    }
                 }
             }
         }
@@ -435,6 +474,10 @@ public final class FilterJerichoHandler implements JerichoHandler {
 
     @Override
     public void handleStartTag(final StartTag startTag) {
+        if (maxContentSizeExceeded) {
+            // Do not append more elements
+            return;
+        }
         final String tagName = startTag.getName();
         if (startTag.isEndTagForbidden() || SINGLE_TAGS.contains(tagName)) {
             // Simple tag
@@ -472,7 +515,11 @@ public final class FilterJerichoHandler implements JerichoHandler {
                     /*
                      * Just remove tag definition: "<tag>text<subtag>text</subtag></tag>" would be "text<subtag>text</subtag>"
                      */
-                    mark();
+                    if (startTag.isSyntacticalEmptyElementTag()) {
+                        // Swallow
+                    } else {
+                        mark();
+                    }
                 } else if (isRemoveWholeTag(startTag)) {
                     /*
                      * Remove whole tag incl. subsequent content and tags
@@ -482,7 +529,11 @@ public final class FilterJerichoHandler implements JerichoHandler {
                     /*
                      * Just remove tag definition: "<tag>text<subtag>text</subtag></tag>" would be "text<subtag>text</subtag>"
                      */
-                    mark();
+                    if (startTag.isSyntacticalEmptyElementTag()) {
+                        // Swallow
+                    } else {
+                        mark();
+                    }
                 }
             }
         }
@@ -736,10 +787,36 @@ public final class FilterJerichoHandler implements JerichoHandler {
     public void handleCData(final String cdata) {
         if (skipLevel == 0) {
             if (isCss) {
-                /*
-                 * Handle style attribute
-                 */
-                checkCSS(cssBuffer.append(cdata), styleMap, cssPrefix);
+                if (false == maxContentSizeExceeded) {
+                    /*
+                     * Handle style attribute
+                     */
+                    checkCSS(cssBuffer.append(cdata), styleMap, cssPrefix);
+                    String checkedCSS = cssBuffer.toString();
+                    cssBuffer.setLength(0);
+                    if (dropExternalImages) {
+                        imageURLFound |= checkCSS(cssBuffer.append(checkedCSS), IMAGE_STYLE_MAP, null, false);
+                        // imageURLFound |= checkCSS(cssBuffer.append(checkedCSS), IMAGE_STYLE_MAP, true, false);
+                        checkedCSS = cssBuffer.toString();
+                        cssBuffer.setLength(0);
+                    }
+                    if (checkMaxContentSize(checkedCSS.length())) {
+                        htmlBuilder.append(checkedCSS);
+                    }
+                }
+            } else {
+                if (checkMaxContentSize(cdata.length())) {
+                    htmlBuilder.append(cdata);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void handleComment(final String comment) {
+        if (isCss) {
+            if (false == maxContentSizeExceeded) {
+                checkCSS(cssBuffer.append(comment), styleMap, cssPrefix);
                 String checkedCSS = cssBuffer.toString();
                 cssBuffer.setLength(0);
                 if (dropExternalImages) {
@@ -748,28 +825,14 @@ public final class FilterJerichoHandler implements JerichoHandler {
                     checkedCSS = cssBuffer.toString();
                     cssBuffer.setLength(0);
                 }
-                htmlBuilder.append(checkedCSS);
-            } else {
-                htmlBuilder.append(cdata);
+                if (checkMaxContentSize(checkedCSS.length())) {
+                    htmlBuilder.append(checkedCSS);
+                }
             }
-        }
-    }
-
-    @Override
-    public void handleComment(final String comment) {
-        if (isCss) {
-            checkCSS(cssBuffer.append(comment), styleMap, cssPrefix);
-            String checkedCSS = cssBuffer.toString();
-            cssBuffer.setLength(0);
-            if (dropExternalImages) {
-                imageURLFound |= checkCSS(cssBuffer.append(checkedCSS), IMAGE_STYLE_MAP, null, false);
-                // imageURLFound |= checkCSS(cssBuffer.append(checkedCSS), IMAGE_STYLE_MAP, true, false);
-                checkedCSS = cssBuffer.toString();
-                cssBuffer.setLength(0);
-            }
-            htmlBuilder.append(checkedCSS);
         } else {
-            htmlBuilder.append(comment);
+            if (checkMaxContentSize(comment.length())) {
+                htmlBuilder.append(comment);
+            }
         }
     }
 
@@ -1169,7 +1232,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
             return null;
         }
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);

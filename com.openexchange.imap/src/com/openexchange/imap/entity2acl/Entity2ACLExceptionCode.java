@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,48 +50,50 @@
 package com.openexchange.imap.entity2acl;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
-public enum Entity2ACLExceptionCode implements OXExceptionCode {
+public enum Entity2ACLExceptionCode implements DisplayableOXExceptionCode {
 
     /**
      * Implementing class could not be found
      */
-    CLASS_NOT_FOUND(Entity2ACLExceptionMessage.CLASS_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 1),
+    CLASS_NOT_FOUND("Implementing class could not be found", Category.CATEGORY_ERROR, 1, null),
     /**
      * An I/O error occurred while creating the socket connection to IMAP server (%1$s): %2$s
      */
-    CREATING_SOCKET_FAILED(Entity2ACLExceptionMessage.CREATING_SOCKET_FAILED_MSG, Category.CATEGORY_SERVICE_DOWN, 2),
+    CREATING_SOCKET_FAILED("An I/O error occurred while creating the socket connection to IMAP server (%1$s): %2$s",
+        Category.CATEGORY_SERVICE_DOWN, 2, null),
     /**
      * Instantiating the class failed.
      */
-    INSTANTIATION_FAILED(Entity2ACLExceptionMessage.INSTANTIATION_FAILED_MSG, Category.CATEGORY_ERROR, 3),
+    INSTANTIATION_FAILED("Instantiating the class failed.", Category.CATEGORY_ERROR, 3, null),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(Entity2ACLExceptionMessage.IO_ERROR_MSG, Category.CATEGORY_SERVICE_DOWN, 4),
+    IO_ERROR("An I/O error occurred: %1$s", Category.CATEGORY_SERVICE_DOWN, 4, null),
     /**
      * Missing property %1$s in system.properties.
      */
-    MISSING_SETTING(Entity2ACLExceptionMessage.MISSING_SETTING_MSG, Category.CATEGORY_CONFIGURATION, 5),
+    MISSING_SETTING("Missing property %1$s in imap.properties.", Category.CATEGORY_CONFIGURATION, 5, null),
     /**
      * Unknown IMAP server: %1$s
      */
-    UNKNOWN_IMAP_SERVER(Entity2ACLExceptionMessage.UNKNOWN_IMAP_SERVER_MSG, Category.CATEGORY_ERROR, 6),
+    UNKNOWN_IMAP_SERVER("Unknown IMAP server: %1$s", Category.CATEGORY_ERROR, 6, null),
     /**
      * Missing IMAP server arguments to resolve IMAP login to a user
      */
-    MISSING_ARG(Entity2ACLExceptionMessage.MISSING_ARG_MSG, Category.CATEGORY_ERROR, 7),
+    MISSING_ARG("Missing IMAP server arguments to resolve IMAP login to a user", Category.CATEGORY_ERROR, 7, null),
     /**
      * IMAP login %1$s could not be resolved to a user
      */
-    RESOLVE_USER_FAILED(Entity2ACLExceptionMessage.RESOLVE_USER_FAILED_MSG, Category.CATEGORY_ERROR, 8),
+    RESOLVE_USER_FAILED("IMAP login %1$s could not be resolved to a user", Category.CATEGORY_ERROR, 8, null),
     /**
      * User %1$s from context %2$s is not known on IMAP server "%3$s".
      */
-    UNKNOWN_USER(Entity2ACLExceptionMessage.UNKNOWN_USER_MSG, Category.CATEGORY_ERROR, 9);
+    UNKNOWN_USER("User %1$s from context %2$s is not known on IMAP server \"%3$s\".", Category.CATEGORY_ERROR, 9, null);
 
     /**
      * Category of the exception.
@@ -107,6 +109,8 @@ public enum Entity2ACLExceptionCode implements OXExceptionCode {
      * Detail number of the exception.
      */
     final int number;
+    
+    private String displayMessage;
 
     /**
      * Default constructor.
@@ -115,10 +119,11 @@ public enum Entity2ACLExceptionCode implements OXExceptionCode {
      * @param category category.
      * @param detailNumber detail number.
      */
-    private Entity2ACLExceptionCode(final String message, final Category category, final int detailNumber) {
+    private Entity2ACLExceptionCode(final String message, final Category category, final int detailNumber, String displayMessage) {
         this.message = message;
         this.category = category;
-        number = detailNumber;
+        this.number = detailNumber;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -148,6 +153,11 @@ public enum Entity2ACLExceptionCode implements OXExceptionCode {
     @Override
     public int getNumber() {
         return number;
+    }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override

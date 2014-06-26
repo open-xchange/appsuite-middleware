@@ -59,13 +59,13 @@ import java.io.StringWriter;
  */
 public class UnsynchronizedStringWriter extends StringWriter {
 
-    private final com.openexchange.java.StringAllocator buf;
+    private final StringBuilder buf;
 
     /**
      * Create a new string writer, using the default initial string-buffer size.
      */
     public UnsynchronizedStringWriter() {
-        buf = new com.openexchange.java.StringAllocator();
+        buf = new StringBuilder();
         lock = buf;
     }
 
@@ -79,7 +79,7 @@ public class UnsynchronizedStringWriter extends StringWriter {
         if (initialSize < 0) {
             throw new IllegalArgumentException("Negative buffer size");
         }
-        buf = new com.openexchange.java.StringAllocator(initialSize);
+        buf = new StringBuilder(initialSize);
         lock = buf;
     }
 

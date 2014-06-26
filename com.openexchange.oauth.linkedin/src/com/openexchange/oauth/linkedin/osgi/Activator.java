@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,6 +53,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthService;
@@ -95,6 +96,7 @@ public class Activator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         final OAuthServiceMetaDataLinkedInImpl linkedInMetaDataService = new OAuthServiceMetaDataLinkedInImpl(this);
         registerService(OAuthServiceMetaData.class, linkedInMetaDataService, null);
+        registerService(Reloadable.class, linkedInMetaDataService);
         LOG.info("OAuthServiceMetaData for LinkedIn was started");
 
         final LinkedInService linkedInService = new LinkedInServiceImpl(this);

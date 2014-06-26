@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -56,8 +56,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Scanner;
@@ -87,7 +89,7 @@ import org.json.JSONInputStream;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.xing.exception.XingApiException;
 import com.openexchange.xing.exception.XingException;
 import com.openexchange.xing.exception.XingIOException;
@@ -120,6 +122,55 @@ public class RESTUtility {
     }
 
     /**
+     * Creates and sends a basic request to the XING API, without building the url, parses the response as JSON, and returns the result.
+     *
+     * @param method GET or POST
+     * @param url the URL to use.
+     * @param requestInformation The request's JSON object
+     * @param session the {@link Session} to use for this request
+     * @param expectedStatusCode the expected status code which should be returned on success
+     * @return a parsed JSON object, typically a Map or a JSONArray
+     * @throws XingServerException if the server responds with an error code. See the constants in {@link XingServerException} for the
+     *             meaning of each error code
+     * @throws XingIOException if any network-related error occurs
+     * @throws XingUnlinkedException if the user has revoked access
+     * @throws XingException for any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
+     *             catch this exception which signals that some kind of error occurred.
+     */
+    public static JSONValue basicRequest(final Method method, final String url, final JSONObject requestInformation, final Session session, final List<Integer> expectedStatusCode) throws XingException {
+        final HttpRequestBase req;
+        switch (method) {
+        case PUT: {
+            final HttpPut put = new HttpPut(url);
+            if (null != requestInformation) {
+                put.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, "UTF-8"), -1L, ContentType.APPLICATION_JSON));
+            }
+            req = put;
+        }
+        break;
+        case POST: {
+            final HttpPost post = new HttpPost(url);
+            if (null != requestInformation) {
+                post.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, "UTF-8"),requestInformation.toString().getBytes().length, ContentType.APPLICATION_JSON));
+            }
+            req = post;
+        }
+        break;
+        case GET:
+            req = new HttpGet(url);
+            break;
+        case DELETE:
+            req = new HttpDelete(url);
+            break;
+        default:
+            throw new XingException("Unsupported HTTP method: " + method);
+        }
+        final HttpResponse resp = execute(session, req, expectedStatusCode);
+
+        return parseAsJSON(resp, expectedStatusCode);
+    }
+
+    /**
      * Creates and sends a request to the XING API, parses the response as JSON, and returns the result.
      *
      * @param method GET or POST.
@@ -138,7 +189,7 @@ public class RESTUtility {
      */
     public static JSONValue request(final Method method, final String host, final String path, final int apiVersion, final Session session) throws XingException {
         final HttpResponse resp = streamRequest(method, host, path, apiVersion, null, session).response;
-        return parseAsJSON(resp);
+        return parseAsJSON(resp, Arrays.asList(XingServerException._200_OK));
     }
 
     /**
@@ -163,7 +214,32 @@ public class RESTUtility {
      */
     public static JSONValue request(final Method method, final String host, final String path, final int apiVersion, final String[] params, final Session session) throws XingException {
         final HttpResponse resp = streamRequest(method, host, path, apiVersion, params, session).response;
-        return parseAsJSON(resp);
+        return parseAsJSON(resp, Arrays.asList(XingServerException._200_OK));
+    }
+
+    /**
+     * Creates and sends a request to the XING API, parses the response as JSON, and returns the result.
+     *
+     * @param method GET or POST.
+     * @param host the hostname to use. Should be either api server, content server, or web server.
+     * @param path the URL path, starting with a '/'.
+     * @param apiVersion the API version to use. This should almost always be set to {@code XingAPI.VERSION}.
+     * @param params the URL params in an array, with the even numbered elements the parameter names and odd numbered elements the values,
+     *            e.g. <code>new String[] {"path", "/Public", "locale",
+     *         "en"}</code>.
+     * @param session the {@link Session} to use for this request.
+     * @return a parsed JSON object, typically a Map or a JSONArray.
+     * @throws XingServerException if the server responds with an error code. See the constants in {@link XingServerException} for the
+     *             meaning of each error code.
+     * @throws XingIOException if any network-related error occurs.
+     * @throws XingUnlinkedException if the user has revoked access.
+     * @throws XingParseException if a malformed or unknown response was received from the server.
+     * @throws XingException for any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
+     *             catch this exception which signals that some kind of error occurred.
+     */
+    public static JSONValue request(final Method method, final String host, final String path, final int apiVersion, final String[] params, final Session session, final List<Integer> expectedStatusCode) throws XingException {
+        final HttpResponse resp = streamRequest(method, host, path, apiVersion, params, session, expectedStatusCode).response;
+        return parseAsJSON(resp, expectedStatusCode);
     }
 
     /**
@@ -187,7 +263,40 @@ public class RESTUtility {
      *             catch this exception which signals that some kind of error occurred.
      */
     public static RequestAndResponse streamRequest(final Method method, final String host, final String path, final int apiVersion, final String params[], final Session session) throws XingException {
-        return streamRequest(method, host, path, apiVersion, params, null, session);
+        return streamRequest(
+            method,
+            host,
+            path,
+            apiVersion,
+            params,
+            null,
+            session,
+            Arrays.asList(XingServerException._200_OK, XingServerException._206_PARTIAL_CONTENT));
+    }
+
+    /**
+     * Creates and sends a request to the XING API, and returns a {@link RequestAndResponse} containing the {@link HttpUriRequest} and
+     * {@link HttpResponse}.
+     *
+     * @param method GET or POST.
+     * @param host the hostname to use. Should be either api server, content server, or web server.
+     * @param path the URL path, starting with a '/'.
+     * @param apiVersion the API version to use. This should almost always be set to {@code XingAPI.VERSION}.
+     * @param params the URL params in an array, with the even numbered elements the parameter names and odd numbered elements the values,
+     *            e.g. <code>new String[] {"path", "/Public", "locale",
+     *         "en"}</code>.
+     * @param session the {@link Session} to use for this request.
+     * @param expectedStatusCode the expected status code which should be returned on success.
+     * @return a parsed JSON object, typically a Map or a JSONArray.
+     * @throws XingServerException if the server responds with an error code. See the constants in {@link XingServerException} for the
+     *             meaning of each error code.
+     * @throws XingIOException if any network-related error occurs.
+     * @throws XingUnlinkedException if the user has revoked access.
+     * @throws XingException for any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
+     *             catch this exception which signals that some kind of error occurred.
+     */
+    public static RequestAndResponse streamRequest(final Method method, final String host, final String path, final int apiVersion, final String params[], final Session session, final List<Integer> expectedStatusCode) throws XingException {
+        return streamRequest(method, host, path, apiVersion, params, null, session, expectedStatusCode);
     }
 
     /**
@@ -212,26 +321,60 @@ public class RESTUtility {
      *             catch this exception which signals that some kind of error occurred.
      */
     public static RequestAndResponse streamRequest(final Method method, final String host, final String path, final int apiVersion, final String params[], final JSONObject requestInformation, final Session session) throws XingException {
+        return streamRequest(
+            method,
+            host,
+            path,
+            apiVersion,
+            params,
+            requestInformation,
+            session,
+            Arrays.asList(XingServerException._200_OK, XingServerException._206_PARTIAL_CONTENT));
+    }
+
+    /**
+     * Creates and sends a request to the XING API, and returns a {@link RequestAndResponse} containing the {@link HttpUriRequest} and
+     * {@link HttpResponse}.
+     *
+     * @param method GET or POST.
+     * @param host the hostname to use. Should be either api server, content server, or web server.
+     * @param path the URL path, starting with a '/'.
+     * @param apiVersion the API version to use. This should almost always be set to {@code XingAPI.VERSION}.
+     * @param params the URL params in an array, with the even numbered elements the parameter names and odd numbered elements the values,
+     *            e.g. <code>new String[] {"path", "/Public", "locale",
+     *         "en"}</code>.
+     * @param requestInformation The request's JSON object
+     * @param session the {@link Session} to use for this request.
+     * @param expectedStatusCode the expected status code which should be returned on success.
+     * @return a parsed JSON object, typically a Map or a JSONArray.
+     * @throws XingServerException if the server responds with an error code. See the constants in {@link XingServerException} for the
+     *             meaning of each error code.
+     * @throws XingIOException if any network-related error occurs.
+     * @throws XingUnlinkedException if the user has revoked access.
+     * @throws XingException for any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
+     *             catch this exception which signals that some kind of error occurred.
+     */
+    public static RequestAndResponse streamRequest(final Method method, final String host, final String path, final int apiVersion, final String params[], final JSONObject requestInformation, final Session session, final List<Integer> expectedStatusCode) throws XingException {
         final HttpRequestBase req;
         switch (method) {
         case PUT:
-            {
-                final HttpPut put = new HttpPut(buildURL(host, apiVersion, path, params));
-                if (null != requestInformation) {
-                    put.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, "UTF-8"), -1L, ContentType.APPLICATION_JSON));
-                }
-                req = put;
+        {
+            final HttpPut put = new HttpPut(buildURL(host, apiVersion, path, params));
+            if (null != requestInformation) {
+                put.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, "UTF-8"), -1L, ContentType.APPLICATION_JSON));
             }
-            break;
+            req = put;
+        }
+        break;
         case POST:
-            {
-                final HttpPost post = new HttpPost(buildURL(host, apiVersion, path, params));
-                if (null != requestInformation) {
-                    post.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, "UTF-8"), -1L, ContentType.APPLICATION_JSON));
-                }
-                req = post;
+        {
+            final HttpPost post = new HttpPost(buildURL(host, apiVersion, path, params));
+            if (null != requestInformation) {
+                post.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, "UTF-8"), requestInformation.toString().length(), ContentType.APPLICATION_JSON));
             }
-            break;
+            req = post;
+        }
+        break;
         case GET:
             req = new HttpGet(buildURL(host, apiVersion, path, params));
             break;
@@ -243,7 +386,7 @@ public class RESTUtility {
         }
         // Sign request
         session.sign(req);
-        final HttpResponse resp = execute(session, req);
+        final HttpResponse resp = execute(session, req, expectedStatusCode);
         return new RequestAndResponse(req, resp);
     }
 
@@ -251,6 +394,7 @@ public class RESTUtility {
      * Reads in content from an {@link HttpResponse} and parses it as JSON.
      *
      * @param response the {@link HttpResponse}.
+     * @param expectedStatusCode - Contains the expected status code on successful response
      * @return a parsed JSON object, typically a Map or a JSONArray.
      * @throws XingServerException if the server responds with an error code. See the constants in {@link XingServerException} for the
      *             meaning of each error code.
@@ -260,7 +404,7 @@ public class RESTUtility {
      * @throws XingException for any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
      *             catch this exception which signals that some kind of error occurred.
      */
-    public static JSONValue parseAsJSON(final HttpResponse response) throws XingException {
+    private static JSONValue parseAsJSON(final HttpResponse response, final List<Integer> expectedStatusCode) throws XingException {
         JSONValue result = null;
 
         BufferedReader bin = null;
@@ -275,7 +419,6 @@ public class RESTUtility {
                 // and otherwise the reset() call won't work
                 bin = new BufferedReader(in, 16384);
                 bin.mark(16384);
-
                 result = JSONObject.parse(bin);
                 if (result.isObject()) {
                     checkForError(result.toObject());
@@ -289,7 +432,11 @@ public class RESTUtility {
                 throw new XingServerException(response);
             }
             // This is from Xing, and we shouldn't be getting it
-            throw new XingParseException(bin);
+            String body = XingParseException.stringifyBody(bin);
+            if (Strings.isEmpty(body)) {
+                throw new XingServerException(response, result);
+            }
+            throw new XingParseException("failed to parse: " + body);
         } catch (final OutOfMemoryError e) {
             throw new XingException(e);
         } finally {
@@ -297,7 +444,7 @@ public class RESTUtility {
         }
 
         final int statusCode = response.getStatusLine().getStatusCode();
-        if (statusCode != XingServerException._200_OK) {
+        if (false == expectedStatusCode.contains(statusCode)) {
             if (statusCode == XingServerException._401_UNAUTHORIZED) {
                 throw new XingUnlinkedException();
             }
@@ -353,6 +500,7 @@ public class RESTUtility {
      *
      * @param session The session to use.
      * @param req The request to execute.
+     * @param expectedStatusCode the expected status code which should be returned on success.
      * @return An {@link HttpResponse}.
      * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the
      *             meaning of each error code.
@@ -361,8 +509,8 @@ public class RESTUtility {
      * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
      *             catch this exception which signals that some kind of error occurred.
      */
-    public static HttpResponse execute(final Session session, final HttpUriRequest req) throws XingException {
-        return execute(session, req, -1);
+    private static HttpResponse execute(final Session session, final HttpUriRequest req, final List<Integer> expectedStatusCode) throws XingException {
+        return execute(session, req, -1, expectedStatusCode);
     }
 
     /**
@@ -371,6 +519,7 @@ public class RESTUtility {
      * @param session The session to use.
      * @param req The request to execute.
      * @param socketTimeoutOverrideMs If >= 0, the socket timeout to set on this request. Does nothing if set to a negative number.
+     * @param expectedStatusCode - Contains the expected status code on successful response
      * @return An {@link HttpResponse}.
      * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the
      *             meaning of each error code.
@@ -379,7 +528,7 @@ public class RESTUtility {
      * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
      *             catch this exception which signals that some kind of error occurred.
      */
-    public static HttpResponse execute(final Session session, final HttpUriRequest req, final int socketTimeoutOverrideMs) throws XingException {
+    private static HttpResponse execute(final Session session, final HttpUriRequest req, final int socketTimeoutOverrideMs, final List<Integer> expectedStatusCode) throws XingException {
         final HttpClient client = updatedHttpClient(session);
 
         // Set request timeouts.
@@ -424,11 +573,11 @@ public class RESTUtility {
             }
 
             final int statusCode = response.getStatusLine().getStatusCode();
-            if (statusCode != XingServerException._200_OK && statusCode != XingServerException._206_PARTIAL_CONTENT) {
-                // This will throw the right thing: either a XingServerException or a XingProxyException
-                parseAsJSON(response);
-            }
 
+            if (false == expectedStatusCode.contains(statusCode)) {
+                // This will throw the right thing: either a XingServerException or a XingProxyException
+                parseAsJSON(response, expectedStatusCode);
+            }
             return response;
         } catch (final SSLException e) {
             throw new XingSSLException(e);
@@ -474,7 +623,11 @@ public class RESTUtility {
         try {
             // We have to encode the whole line, then remove + and / encoding
             // to get a good OAuth URL.
-            trgt = URLEncoder.encode(new StringAllocator(16).append("/v").append(apiVersion).append(trgt).toString(), "UTF-8");
+            if (apiVersion > 0) {
+                trgt = URLEncoder.encode(new StringBuilder(16).append("/v").append(apiVersion).append(trgt).toString(), "UTF-8");
+            } else {
+                trgt = URLEncoder.encode(new StringBuilder(16).append(trgt).toString(), "UTF-8");
+            }
             trgt = trgt.replace("%2F", "/");
 
             if (params != null && params.length > 0) {
@@ -487,7 +640,7 @@ public class RESTUtility {
             return null;
         }
 
-        return new StringAllocator(32).append("https://").append(host).append(":443").append(trgt).toString();
+        return new StringBuilder(32).append("https://").append(host).append(":443").append(trgt).toString();
     }
 
     /**
@@ -541,7 +694,7 @@ public class RESTUtility {
             throw new IllegalArgumentException("Params must have an even number of elements.");
         }
         try {
-            final StringAllocator result = new StringAllocator(params.length << 4);
+            final StringBuilder result = new StringBuilder(params.length << 4);
             boolean firstTime = true;
             for (int i = 0; i < params.length; i += 2) {
                 final String value = params[i + 1];
@@ -567,22 +720,9 @@ public class RESTUtility {
      */
     public static final String encodeUrl(String s) {
         try {
-            return isEmpty(s) ? s : URL_CODEC.encode(s);
+            return com.openexchange.java.Strings.isEmpty(s) ? s : URL_CODEC.encode(s);
         } catch (EncoderException e) {
             return s;
         }
     }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -60,7 +60,7 @@ import junit.framework.TestSuite;
 public final class CardDAVBugSuite {
 
     public static Test suite() {
-        final TestSuite suite = new TestSuite();
+        final TestSuite suite = new TestSuite("com.openexchange.dav.carddav.bugs.CardDAVBugSuite");
         suite.addTestSuite(Bug20665Test.class);
         suite.addTestSuite(Bug21079Test.class);
         suite.addTestSuite(Bug21177Test.class);

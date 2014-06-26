@@ -142,9 +142,9 @@ public class CacheEventWrapper {
                 CacheKeyService cacheKeyService = CKS_REFERENCE.get();
                 if (null != cacheKeyService) {
                     int contextID = ((Integer)cacheKeyArray.get(0)).intValue();
-                    Serializable[] objs = new Serializable[cacheKeyArray.size() - 1];
+                    String[] objs = new String[cacheKeyArray.size() - 1];
                     for (int i = 0; i < objs.length; i++) {
-                        objs[i] = cacheKeyArray.get(i+1);
+                        objs[i] = (String) cacheKeyArray.get(i+1);
                     }
                     return cacheKeyService.newCacheKey(contextID, objs);
                 }

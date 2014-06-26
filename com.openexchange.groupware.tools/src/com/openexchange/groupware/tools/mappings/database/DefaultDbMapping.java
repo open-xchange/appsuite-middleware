@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,7 +52,6 @@ package com.openexchange.groupware.tools.mappings.database;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.DefaultMapping;
 
@@ -121,7 +120,7 @@ public abstract class DefaultDbMapping<T, O> extends DefaultMapping<T, O> implem
 	}
 
 	@Override
-	public String getReadableName() {
+	public String getReadableName(O Object) {
 		return this.readableName;
 	}
 
@@ -132,7 +131,7 @@ public abstract class DefaultDbMapping<T, O> extends DefaultMapping<T, O> implem
 
 	@Override
 	public String toString() {
-		return String.format("[%s] %s", this.getColumnLabel(), this.getReadableName());
+		return String.format("[%s] %s", columnLabel, readableName);
 	}
 
 }

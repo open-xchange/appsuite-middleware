@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,6 +50,7 @@
 package com.openexchange.ajax.parser;
 
 import java.util.Date;
+import java.util.Map;
 import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -274,6 +275,28 @@ public class JSONDocumentMetadata implements DocumentMetadata {
             jsonObject.put(Metadata.ID_LITERAL.getName(), id);
         } catch (final JSONException e) {
             LOG.error("",e);
+        }
+    }
+
+    @Override
+    public Map<String, Object> getMeta() {
+        final JSONObject jMeta = jsonObject.optJSONObject(Metadata.META_LITERAL.getName());
+        if (null == jMeta) {
+            return null;
+        }
+        return jMeta.asMap();
+    }
+
+    @Override
+    public void setMeta(final Map<String, Object> properties) {
+        if (null == properties || properties.isEmpty()) {
+            jsonObject.remove(Metadata.META_LITERAL.getName());
+        } else {
+            try {
+                jsonObject.put(Metadata.META_LITERAL.getName(), new JSONObject(properties));
+            } catch (final JSONException e) {
+                LOG.error("",e);
+            }
         }
     }
 

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -76,8 +76,11 @@ public interface MessageDispatcher {
     
     /**
      * Delivers a stanza using the resource directory to resolve the recipients
+     * 
+     * @param stanza The Stanza to send
+     * @throws OXException when delivery fails
      */
-    public Map<ID, OXException> send(Stanza stanza) throws OXException;
+    public void send(Stanza stanza) throws OXException;
 
     /**
      * Send a message and synchronously waits for a response. The recipient is supposed to send exactly one Stanza

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -81,7 +81,7 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
 
     private static final String SQL_CHECK = "SELECT url FROM user_mail_account WHERE cid = ? AND user = ? AND name = ?";
 
-    private static final String SQL_ENABLED = "SELECT id FROM user_mail_account WHERE cid = ? AND user = ? AND unified_inbox > 0";
+    private static final String SQL_ENABLED = "SELECT 1 FROM user_mail_account WHERE cid = ? AND user = ? AND unified_inbox > 0";
 
     /**
      * Initializes a new {@link UnifiedInboxManagementImpl}.
@@ -131,7 +131,7 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
             mailAccountDescription.setMailSecure(false);
             mailAccountDescription.setMailServer("localhost");
             mailAccountDescription.setPassword("");
-            mailAccountDescription.setPrimaryAddress(new com.openexchange.java.StringAllocator(32).append(login).append("@unifiedinbox.com").toString());
+            mailAccountDescription.setPrimaryAddress(new StringBuilder(32).append(login).append("@unifiedinbox.com").toString());
             mailAccountDescription.setSent("sent");
             mailAccountDescription.setSpam("spam");
             mailAccountDescription.setSpamHandler("NoSpamHandler");

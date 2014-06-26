@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.infostore;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.Quota;
@@ -61,8 +62,11 @@ import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
+import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
+import com.openexchange.folderstorage.type.TrashType;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.tools.session.ServerSession;
 
@@ -112,15 +116,13 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
 
     @Override
     public String deleteFolder(final String folderId) throws OXException {
-        final FolderService service = Services.getService(FolderService.class);
-        service.deleteFolder(REAL_TREE_ID, folderId, null, session);
-        return folderId;
+        return deleteFolder(folderId, false);
     }
 
     @Override
     public String deleteFolder(final String folderId, final boolean hardDelete) throws OXException {
-        final FolderService service = Services.getService(FolderService.class);
-        service.deleteFolder(REAL_TREE_ID, folderId, null, session);
+        Services.getService(FolderService.class).deleteFolder(REAL_TREE_ID, folderId, null, session,
+            new FolderServiceDecorator().put("hardDelete", String.valueOf(hardDelete)));
         return folderId;
     }
 
@@ -145,11 +147,21 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
     public FileStorageFolder getPersonalFolder() throws OXException {
         final FolderService service = Services.getService(FolderService.class);
         return FolderWriter.writeFolder(service.getDefaultFolder(
-            session.getUser(),
-            REAL_TREE_ID,
-            FolderParser.getContentType(),
-            session,
-            null));
+            session.getUser(), REAL_TREE_ID, InfostoreContentType.getInstance(), session, null));
+    }
+
+    @Override
+    public FileStorageFolder getTrashFolder() throws OXException {
+        FolderService service = Services.getService(FolderService.class);
+        try {
+            return FolderWriter.writeFolder(service.getDefaultFolder(
+                session.getUser(), REAL_TREE_ID, InfostoreContentType.getInstance(), TrashType.getInstance(), session, null));
+        } catch (OXException e) {
+            if (FolderExceptionErrorMessage.NO_DEFAULT_FOLDER.equals(e)) {
+                throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create(e);
+            }
+            throw e;
+        }
     }
 
     @Override
@@ -235,27 +247,12 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
 
     @Override
     public String moveFolder(final String folderId, final String newParentId, String newName) throws OXException {
-        final FolderService service = Services.getService(FolderService.class);
-        final ParsedFolder folder = new ParsedFolder();
-        folder.setID(folderId);
-        folder.setParentID(newParentId);
-        folder.setTreeID(REAL_TREE_ID);
-        if (null != newName) {
-            folder.setName(newName);
-        }
-        service.updateFolder(folder, null, session, null);
-        return folder.getNewID() == null ? folderId : folder.getNewID();
+        return moveFolder(folderId, newParentId, newName, null);
     }
 
     @Override
     public String renameFolder(final String folderId, final String newName) throws OXException {
-        final FolderService service = Services.getService(FolderService.class);
-        final ParsedFolder folder = new ParsedFolder();
-        folder.setID(folderId);
-        folder.setName(newName);
-        folder.setTreeID(REAL_TREE_ID);
-        service.updateFolder(folder, null, session, null);
-        return folder.getNewID() == null ? folderId : folder.getNewID();
+        return moveFolder(folderId, null, newName, null);
     }
 
     @Override
@@ -264,6 +261,31 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
         final Folder parsedFolder = FolderParser.parseFolder(toUpdate);
         service.updateFolder(parsedFolder, null, session, null);
         return parsedFolder.getNewID();
+    }
+
+    /**
+     * Moves and/or renames a folder.
+     *
+     * @param folderId the ID of the folder to move
+     * @param newParentId The ID of the target folder, or <code>null</code> to leave unchanged
+     * @param newName The target name of the folder, or <code>null</code> to leave unchanged
+     * @param decorator The decorator, or <code>null</code> if not used
+     * @return The ID of the moved folder
+     * @throws OXException
+     */
+    private String moveFolder(final String folderId, final String newParentId, String newName, FolderServiceDecorator decorator) throws OXException {
+        FolderService service = Services.getService(FolderService.class);
+        ParsedFolder folder = new ParsedFolder();
+        folder.setTreeID(REAL_TREE_ID);
+        folder.setID(folderId);
+        if (null != newParentId) {
+            folder.setParentID(newParentId);
+        }
+        if (null != newName) {
+            folder.setName(newName);
+        }
+        service.updateFolder(folder, null, session, decorator);
+        return null == folder.getNewID() ? folderId : folder.getNewID();
     }
 
 }

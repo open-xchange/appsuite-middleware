@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -183,13 +183,13 @@ public class CachingUserStorage extends UserStorage {
     @Override
     public void setUserAttribute(final String name, final String value, final int userId, final Context context) throws OXException {
         delegate.setUserAttribute(name, value, userId, context);
-        invalidateUser(context, userId);
+        invalidateUserCache(context, userId);
     }
 
     @Override
     public void setAttribute(final String name, final String value, final int userId, final Context context) throws OXException {
         delegate.setAttribute(name, value, userId, context);
-        invalidateUser(context, userId);
+        invalidateUserCache(context, userId);
     }
 
     @Override
@@ -300,6 +300,15 @@ public class CachingUserStorage extends UserStorage {
 
     @Override
     public void invalidateUser(final Context ctx, final int userId) throws OXException {
+        invalidateUserCache(ctx, userId);
+        try {
+            UserConfigurationStorage.getInstance().invalidateCache(userId, ctx);
+        } catch (final Exception e) {
+            // Ignore
+        }
+    }
+
+    private void invalidateUserCache(final Context ctx, final int userId) throws OXException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (null != cacheService) {
             try {
@@ -308,11 +317,6 @@ public class CachingUserStorage extends UserStorage {
             } catch (final OXException e) {
                 throw UserExceptionCode.CACHE_PROBLEM.create(e);
             }
-        }
-        try {
-            UserConfigurationStorage.getInstance().invalidateCache(userId, ctx);
-        } catch (final Exception e) {
-            // Ignore
         }
     }
 

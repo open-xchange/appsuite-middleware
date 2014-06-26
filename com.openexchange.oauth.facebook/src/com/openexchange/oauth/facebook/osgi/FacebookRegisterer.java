@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -60,6 +60,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.OAuthService;
@@ -86,6 +87,7 @@ public class FacebookRegisterer implements ServiceTrackerCustomizer<Object,Objec
 
     private ServiceRegistration<OAuthServiceMetaData> registration;
     private ServiceRegistration<FacebookService> registration2;
+    private ServiceRegistration<Reloadable> registration3;
     private volatile ServiceRegistration<CapabilityChecker> capabilityChecker;
     private ConfigurationService configurationService;
     private OAuthService oAuthService;
@@ -124,9 +126,10 @@ public class FacebookRegisterer implements ServiceTrackerCustomizer<Object,Objec
             LOG.info("Parameter com.openexchange.facebook.secretKey :{}", configurationService.getProperty("com.openexchange.facebook.secretKey"));
             final OAuthServiceMetaDataFacebookImpl facebookMetaDataService = new OAuthServiceMetaDataFacebookImpl(deferrer);
             registration = context.registerService(OAuthServiceMetaData.class, facebookMetaDataService, null);
+
             LOG.info("Registering Facebook service.");
             registration2 = context.registerService(FacebookService.class, new FacebookServiceImpl(oAuthService, facebookMetaDataService), null);
-
+            registration3 = context.registerService(Reloadable.class, facebookMetaDataService, null);
             final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
             final String sCapability = "facebook";
             properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, sCapability);
@@ -187,6 +190,9 @@ public class FacebookRegisterer implements ServiceTrackerCustomizer<Object,Objec
             if (registration2 != null){
                 LOG.info("Unregistering facebook service.");
                 registration2.unregister();
+            }
+            if (null != registration3) {
+                registration3.unregister();
             }
 
         }

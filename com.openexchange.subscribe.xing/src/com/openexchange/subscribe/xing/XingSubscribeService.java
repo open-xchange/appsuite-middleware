@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,14 +49,7 @@
 
 package com.openexchange.subscribe.xing;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.MalformedURLException;
-import java.net.SocketTimeoutException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -64,32 +57,43 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.activation.FileTypeMap;
+import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.generic.FolderUpdaterRegistry;
+import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionSource;
-import com.openexchange.subscribe.xing.session.XingOAuthAccess;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.tools.iterator.SearchIteratorDelegator;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.xing.Address;
 import com.openexchange.xing.Contacts;
+import com.openexchange.xing.PhotoUrls;
 import com.openexchange.xing.User;
 import com.openexchange.xing.UserField;
+import com.openexchange.xing.XingAPI;
+import com.openexchange.xing.access.XingExceptionCodes;
+import com.openexchange.xing.access.XingOAuthAccess;
+import com.openexchange.xing.access.XingOAuthAccessProvider;
 import com.openexchange.xing.exception.XingException;
 import com.openexchange.xing.exception.XingUnlinkedException;
+import com.openexchange.xing.session.WebAuthSession;
 
 /**
  * {@link XingSubscribeService}
@@ -98,7 +102,77 @@ import com.openexchange.xing.exception.XingUnlinkedException;
  */
 public class XingSubscribeService extends AbstractSubscribeService {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(XingSubscribeService.class);
+    /** The logger constant */
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(XingSubscribeService.class);
+
+    // -------------------------------------------------------------------------------------------------------------------------- //
+
+    private interface PhotoHandler {
+
+        void handlePhoto(User xingUser, Contact contact, ServerSession session) throws OXException;
+    }
+
+    private final class CollectingPhotoHandler implements PhotoHandler {
+
+        private final Map<String, String> photoUrlsMap;
+
+        /**
+         * Initializes a new {@link CollectingPhotoHandler}.
+         */
+        CollectingPhotoHandler(Map<String, String> photoUrlsMap) {
+            super();
+            this.photoUrlsMap = photoUrlsMap;
+        }
+
+        @Override
+        public void handlePhoto(User xingUser, Contact contact, ServerSession session) throws OXException {
+            final PhotoUrls photoUrls = xingUser.getPhotoUrls();
+            String url = photoUrls.getMaxiThumbUrl();
+            if (url == null) {
+                url = photoUrls.getLargestAvailableUrl();
+            }
+
+            final String id = xingUser.getId();
+            if (url != null && isNotNull(id)) {
+                photoUrlsMap.put(id, url);
+            }
+        }
+    }
+
+    private final PhotoHandler loadingPhotoHandler = new PhotoHandler() {
+
+        @Override
+        public void handlePhoto(final User xingUser, final Contact contact, ServerSession session) throws OXException {
+            if (null == xingUser || null == contact) {
+                return;
+            }
+
+            final PhotoUrls photoUrls = xingUser.getPhotoUrls();
+            String url = photoUrls.getMaxiThumbUrl();
+            if (url == null) {
+                url = photoUrls.getLargestAvailableUrl();
+            }
+
+            if (url != null) {
+                XingOAuthAccess xingAccess = getXingOAuthAccess(session);
+                XingAPI<WebAuthSession> api = xingAccess.getXingAPI();
+                try {
+                    IFileHolder photo = api.getPhoto(url);
+                    if (photo != null) {
+                        byte[] bytes = Streams.stream2bytes(photo.getStream());
+                        contact.setImage1(bytes);
+                        contact.setImageContentType(photo.getContentType());
+                    }
+                } catch (XingException e) {
+                    throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+                } catch (IOException e) {
+                    throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+                }
+            }
+        }
+    };
+
+    // -------------------------------------------------------------------------------------------------------------------------- //
 
     private final ServiceLookup services;
     private final SubscriptionSource source;
@@ -115,7 +189,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
         final SubscriptionSource source = new SubscriptionSource();
         source.setDisplayName("XING");
         source.setFolderModule(FolderObject.CONTACT);
-        source.setId("com.openexchange.subscribe.socialplugin.xing");
+        source.setId("com.openexchange.subscribe.xing");
         source.setSubscribeService(this);
 
         final DynamicFormDescription form = new DynamicFormDescription();
@@ -128,45 +202,113 @@ public class XingSubscribeService extends AbstractSubscribeService {
         this.source = source;
     }
 
-    private OAuthAccount getXingOAuthAccount(final Session session) throws OXException {
-        OAuthAccount defaultAccount = (OAuthAccount) session.getParameter("com.openexchange.subscribe.xing.defaultAccount");
-        if (null != defaultAccount) {
-            return defaultAccount;
+    /**
+     * Gets the XING OAuth access.
+     *
+     * @param session The associated session
+     * @return The XING OAuth access
+     * @throws OXException If XING OAuth access cannot be returned
+     */
+    protected XingOAuthAccess getXingOAuthAccess(final ServerSession session) throws OXException {
+        final XingOAuthAccessProvider provider = services.getService(XingOAuthAccessProvider.class);
+        if (null == provider) {
+            throw ServiceExceptionCode.absentService(XingOAuthAccessProvider.class);
         }
-        // Determine default XING access
-        final OAuthService oAuthService = services.getService(OAuthService.class);
-        defaultAccount = oAuthService.getDefaultAccount(API.XING, session);
-        if (null != defaultAccount) {
-            // Cache in session
-            session.setParameter("com.openexchange.subscribe.xing.defaultAccount", defaultAccount);
-        }
-        return defaultAccount;
+
+        final int xingOAuthAccount = provider.getXingOAuthAccount(session);
+        return provider.accessFor(xingOAuthAccount, session);
     }
 
     @Override
     public Collection<?> getContent(final Subscription subscription) throws OXException {
         try {
             final ServerSession session = subscription.getSession();
-            final OAuthAccount xingOAuthAccount = getXingOAuthAccount(session);
+            final XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(session);
+            final XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
+            final String userId = xingOAuthAccess.getXingUserId();
+            final List<UserField> userFields = Arrays.asList(UserField.values());
 
-            final XingOAuthAccess xingOAuthAccess = XingOAuthAccess.accessFor(xingOAuthAccount, session);
-            final Contacts xingContacts = xingOAuthAccess.getXingAPI().getContactsFrom(
-                xingOAuthAccess.getXingUserId(),
-                UserField.ID,
-                Arrays.asList(UserField.values()));
-
-            final List<Contact> ret = new ArrayList<Contact>(xingContacts.getTotal());
-            for (final User xingContact : xingContacts.getUsers()) {
-                ret.add(convert(xingContact));
+            // Request first chunk to determine total number of contacts
+            final int firstChunkLimit = 25;
+            final Contacts contacts = xingAPI.getContactsFrom(userId, firstChunkLimit, 0, null, userFields);
+            List<User> chunk = contacts.getUsers();
+            if (chunk.size() < firstChunkLimit) {
+                // Obtained less than requested; no more contacts available then
+                return convert(chunk, loadingPhotoHandler, session);
             }
-            return ret;
+            final int maxLimit = 25;
+            final int total = contacts.getTotal();
+            // Check availability of tracked services needed for manual storing for contacts
+            final FolderUpdaterRegistry folderUpdaterRegistry = Services.getOptionalService(FolderUpdaterRegistry.class);
+            final ThreadPoolService threadPool = Services.getOptionalService(ThreadPoolService.class);
+            final FolderUpdaterService<Contact> folderUpdater = null == folderUpdaterRegistry ? null : folderUpdaterRegistry.<Contact> getFolderUpdater(subscription);
+            if (null == threadPool || null == folderUpdater) {
+                // Retrieve all
+                final List<User> users = new ArrayList<User>(total);
+                users.addAll(chunk);
+                int offset = chunk.size();
+                // Request remaining chunks
+                while (offset < total) {
+                    final int remain = total - offset;
+                    chunk = xingAPI.getContactsFrom(userId, remain > maxLimit ? maxLimit : remain, offset, null, userFields).getUsers();
+                    users.addAll(chunk);
+                    offset += chunk.size();
+                }
+                // All retrieved
+                LOG.info("Going to converted {} XING contacts for user {} in context {}", total, session.getUserId(), session.getContextId());
+                final Map<String, String> photoUrlsMap = new HashMap<String, String>(total);
+                final PhotoHandler photoHandler = new CollectingPhotoHandler(photoUrlsMap);
+                final List<Contact> retval = convert(chunk, photoHandler, session);
+                LOG.info("Converted {} XING contacts for user {} in context {}", total, session.getUserId(), session.getContextId());
+
+                // TODO: Schedule a separate task to fill photos
+
+                return retval;
+            }
+            // Schedule task for remainder...
+            final int startOffset = chunk.size();
+            threadPool.submit(new AbstractTask<Void>() {
+
+                @Override
+                public Void call() throws Exception {
+                    int off = startOffset;
+                    while (off < total) {
+                        final int remain = total - off;
+                        final List<User> chunk = xingAPI.getContactsFrom(userId, remain > maxLimit ? maxLimit : remain, off, null, userFields).getUsers();
+                        // Store them
+                        final List<Contact> convertees = convert(chunk, loadingPhotoHandler, session);
+                        LOG.info("Converted {} XING contacts for user {} in context {}", chunk.size(), session.getUserId(), session.getContextId());
+                        folderUpdater.save(new SearchIteratorDelegator<Contact>(convertees), subscription);
+                        // Next chunk...
+                        off += chunk.size();
+                    }
+                    return null;
+                }
+            });
+            // Return first chunk with this thread
+            return convert(chunk, loadingPhotoHandler, session);
         } catch (final XingUnlinkedException e) {
-            throw XingSubscribeExceptionCodes.UNLINKED_ERROR.create();
+            throw XingExceptionCodes.UNLINKED_ERROR.create();
         } catch (final XingException e) {
-            throw XingSubscribeExceptionCodes.XING_ERROR.create(e, e.getMessage());
+            throw XingExceptionCodes.XING_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            throw XingSubscribeExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw XingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    /**
+     * Converts specified XING users to contacts
+     *
+     * @param xingContacts The XING users
+     * @param optPhotoHandler The photo handler
+     * @return The resulting contacts
+     */
+    protected List<Contact> convert(final List<User> xingContacts, final PhotoHandler optPhotoHandler, final ServerSession session) {
+        final List<Contact> ret = new ArrayList<Contact>(xingContacts.size());
+        for (final User xingContact : xingContacts) {
+            ret.add(convert(xingContact, optPhotoHandler, session));
+        }
+        return ret;
     }
 
     @Override
@@ -198,6 +340,21 @@ public class XingSubscribeService extends AbstractSubscribeService {
         }
     }
 
+    /**
+     * Gets the XING OAuth account.
+     *
+     * @param session The associated session
+     * @return The XING OAuth account
+     * @throws OXException If XING OAuth account cannot be returned
+     */
+    protected OAuthAccount getXingOAuthAccount(final ServerSession session) throws OXException {
+        final OAuthService oAuthService = services.getService(OAuthService.class);
+        if (null == oAuthService) {
+            throw ServiceExceptionCode.absentService(OAuthService.class);
+        }
+        return oAuthService.getDefaultAccount(API.XING, session);
+    }
+
     @Override
     public void modifyOutgoing(final Subscription subscription) throws OXException {
         final String accountId = (String) subscription.getConfiguration().get("account");
@@ -210,7 +367,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
             if (subscription.getSecret() != null) {
                 displayName = getXingOAuthAccount(subscription.getSession()).getDisplayName();
             }
-            if (isEmpty(displayName)) {
+            if (com.openexchange.java.Strings.isEmpty(displayName)) {
                 subscription.setDisplayName("XING");
             } else {
                 subscription.setDisplayName(displayName);
@@ -226,39 +383,35 @@ public class XingSubscribeService extends AbstractSubscribeService {
         removeWhereConfigMatches(context, query);
     }
 
-    private Contact convert(final User xingUser) {
+    private Contact convert(final User xingUser, final PhotoHandler optPhotoHandler, final ServerSession session) {
         if (null == xingUser) {
             return null;
         }
         final Contact oxContact = new Contact();
-        {
-            final String s = xingUser.getId();
-            if (isNotNull(s)) {
-                oxContact.setUserField20(s);
-            }
-        }
+        boolean email1Set = false;
         {
             final String s = xingUser.getActiveMail();
             if (isNotNull(s)) {
                 oxContact.setEmail1(s);
+                email1Set = true;
             }
         }
         {
             final String s = xingUser.getDisplayName();
             if (isNotNull(s)) {
-                oxContact.setDisplayName(s);
+                oxContact.setDisplayName(Strings.abbreviate(s, 320));
             }
         }
         {
             final String s = xingUser.getFirstName();
             if (isNotNull(s)) {
-                oxContact.setGivenName(s);
+                oxContact.setGivenName(Strings.abbreviate(s, 128));
             }
         }
         {
             final String s = xingUser.getLastName();
             if (isNotNull(s)) {
-                oxContact.setSurName(s);
+                oxContact.setSurName(Strings.abbreviate(s, 128));
             }
         }
         {
@@ -270,31 +423,50 @@ public class XingSubscribeService extends AbstractSubscribeService {
         {
             final String s = xingUser.getHaves();
             if (isNotNull(s)) {
-                oxContact.setUserField02(s);
+                oxContact.setUserField02(Strings.abbreviate(s, 64));
             }
         }
         {
             final String s = xingUser.getInterests();
             if (isNotNull(s)) {
-                oxContact.setUserField01(s);
+                oxContact.setUserField01(Strings.abbreviate(s, 64));
             }
         }
         {
             final String s = xingUser.getWants();
             if (isNotNull(s)) {
-                oxContact.setUserField03(s);
+                oxContact.setUserField03(Strings.abbreviate(s, 64));
+            }
+        }
+        {
+            final Map<String, Object> m = xingUser.getProfessionalExperience();
+            if (null != m && !m.isEmpty()) {
+                final Map<String, Object> primaryCompany = (Map<String, Object>) m.get("primary_company");
+                if (null != primaryCompany && !primaryCompany.isEmpty()) {
+                    // Name
+                    String s = (String) primaryCompany.get("name");
+                    if (isNotNull(s)) {
+                        oxContact.setCompany(Strings.abbreviate(s, 512));
+                    }
+
+                    // Title
+                    s = (String) primaryCompany.get("title");
+                    if (isNotNull(s)) {
+                        oxContact.setPosition(Strings.abbreviate(s, 128));
+                    }
+                }
             }
         }
         {
             final String s = xingUser.getOrganisationMember();
             if (isNotNull(s)) {
-                oxContact.setPosition(s);
+                oxContact.setUserField04(Strings.abbreviate(s, 64));
             }
         }
         {
             final String s = xingUser.getPermalink();
             if (isNotNull(s)) {
-                oxContact.setURL(s);
+                oxContact.setURL(Strings.abbreviate(s, 128));
             }
         }
         {
@@ -303,85 +475,102 @@ public class XingSubscribeService extends AbstractSubscribeService {
                 oxContact.setBirthday(d);
             }
         }
-        {
-            final Address a = xingUser.getPrivateAddress();
-            if (null != a) {
-                String s = a.getCity();
-                if (isNotNull(s)) {
-                    oxContact.setCityHome(s);
-                }
-                s = a.getCountry();
-                if (isNotNull(s)) {
-                    oxContact.setCountryHome(s);
-                }
-                s = a.getEmail();
-                if (isNotNull(s)) {
-                    oxContact.setEmail3(s);
-                }
-                s = a.getFax();
-                if (isNotNull(s)) {
-                    oxContact.setFaxHome(s);
-                }
-                s = a.getMobilePhone();
-                if (isNotNull(s)) {
-                    oxContact.setCellularTelephone2(s);
-                }
-                s = a.getPhone();
-                if (isNotNull(s)) {
-                    oxContact.setTelephoneHome1(s);
-                }
-                s = a.getProvince();
-                if (isNotNull(s)) {
-                    oxContact.setStateHome(s);
-                }
-                s = a.getStreet();
-                if (isNotNull(s)) {
-                    oxContact.setStreetHome(s);
-                }
-                s = a.getZipCode();
-                if (isNotNull(s)) {
-                    oxContact.setPostalCodeHome(s);
-                }
-            }
-        }
+        boolean email2Set = false;
         {
             final Address a = xingUser.getBusinessAddress();
             if (null != a) {
                 String s = a.getCity();
                 if (isNotNull(s)) {
-                    oxContact.setCityBusiness(s);
+                    oxContact.setCityBusiness(Strings.abbreviate(s, 64));
                 }
                 s = a.getCountry();
                 if (isNotNull(s)) {
-                    oxContact.setCountryBusiness(s);
+                    oxContact.setCountryBusiness(Strings.abbreviate(s, 64));
                 }
                 s = a.getEmail();
                 if (isNotNull(s)) {
-                    oxContact.setEmail2(s);
+                    if (email1Set) {
+                        oxContact.setEmail2(Strings.abbreviate(s, 256));
+                        email2Set = true;
+                    } else {
+                        oxContact.setEmail1(Strings.abbreviate(s, 256));
+                        email1Set = true;
+                    }
                 }
                 s = a.getFax();
                 if (isNotNull(s)) {
-                    oxContact.setFaxBusiness(s);
+                    oxContact.setFaxBusiness(Strings.abbreviate(s, 64));
                 }
                 s = a.getMobilePhone();
                 if (isNotNull(s)) {
-                    oxContact.setCellularTelephone1(s);
+                    oxContact.setCellularTelephone1(Strings.abbreviate(s, 64));
                 }
                 s = a.getPhone();
                 if (isNotNull(s)) {
-                    oxContact.setTelephoneBusiness1(s);
+                    oxContact.setTelephoneBusiness1(Strings.abbreviate(s, 64));
                 }
                 s = a.getProvince();
                 if (isNotNull(s)) {
-                    oxContact.setStateBusiness(s);
+                    oxContact.setStateBusiness(Strings.abbreviate(s, 64));
                 }
                 s = a.getStreet();
                 if (isNotNull(s)) {
-                    oxContact.setStreetBusiness(s);
+                    oxContact.setStreetBusiness(Strings.abbreviate(s, 64));
                 }
                 s = a.getZipCode();
                 if (isNotNull(s)) {
-                    oxContact.setPostalCodeBusiness(s);
+                    oxContact.setPostalCodeBusiness(Strings.abbreviate(s, 64));
+                }
+            }
+        }
+        {
+            final Address a = xingUser.getPrivateAddress();
+            if (null != a) {
+                String s = a.getCity();
+                if (isNotNull(s)) {
+                    oxContact.setCityHome(Strings.abbreviate(s, 64));
+                }
+                s = a.getCountry();
+                if (isNotNull(s)) {
+                    oxContact.setCountryHome(Strings.abbreviate(s, 64));
+                }
+                s = a.getEmail();
+                if (isNotNull(s)) {
+                    if (email1Set) {
+                        if (email2Set) {
+                            oxContact.setEmail3(Strings.abbreviate(s, 256));
+                        } else {
+                            oxContact.setEmail2(Strings.abbreviate(s, 256));
+                            email2Set = true;
+                        }
+                    } else {
+                        oxContact.setEmail1(Strings.abbreviate(s, 256));
+                        email1Set = true;
+                    }
+                }
+                s = a.getFax();
+                if (isNotNull(s)) {
+                    oxContact.setFaxHome(Strings.abbreviate(s, 64));
+                }
+                s = a.getMobilePhone();
+                if (isNotNull(s)) {
+                    oxContact.setCellularTelephone2(Strings.abbreviate(s, 64));
+                }
+                s = a.getPhone();
+                if (isNotNull(s)) {
+                    oxContact.setTelephoneHome1(Strings.abbreviate(s, 64));
+                }
+                s = a.getProvince();
+                if (isNotNull(s)) {
+                    oxContact.setStateHome(Strings.abbreviate(s, 64));
+                }
+                s = a.getStreet();
+                if (isNotNull(s)) {
+                    oxContact.setStreetHome(Strings.abbreviate(s, 64));
+                }
+                s = a.getZipCode();
+                if (isNotNull(s)) {
+                    oxContact.setPostalCodeHome(Strings.abbreviate(s, 64));
                 }
             }
         }
@@ -390,133 +579,28 @@ public class XingSubscribeService extends AbstractSubscribeService {
             if (null != instantMessagingAccounts) {
                 final String skypeId = instantMessagingAccounts.get("skype");
                 if (isNotNull(skypeId)) {
-                    oxContact.setInstantMessenger1(skypeId);
+                    oxContact.setInstantMessenger1(Strings.abbreviate(skypeId, 64));
                 }
                 for (final Map.Entry<String, String> e : instantMessagingAccounts.entrySet()) {
                     if (!"skype".equals(e.getKey()) && !"null".equals(e.getValue())) {
-                        oxContact.setInstantMessenger2(e.getValue());
+                        oxContact.setInstantMessenger2(Strings.abbreviate(e.getValue(), 64));
                         break;
                     }
                 }
             }
 
         }
-        {
-            final Map<String, Object> photoUrls = xingUser.getPhotoUrls();
-            if (null != photoUrls) {
-                final Object pic = photoUrls.get("maxi_thumb");
-                if (null != pic && !"null".equals(pic.toString())) {
-                    try {
-                        final String sUrl = pic.toString();
-                        loadImageFromURL(oxContact, sUrl);
-                    } catch (final OXException e) {
-                        final Throwable cause = e.getCause();
-                        LOG.warn("Couldn't load XING user's image", null == cause ? e : cause);
-                    }
-                }
+        if (null != optPhotoHandler) {
+            try {
+                optPhotoHandler.handlePhoto(xingUser, oxContact, session);
+            } catch (final Exception e) {
+                LOG.warn("Could not handle photo from XING contact {} ({}).", xingUser.getDisplayName(), xingUser.getId());
             }
         }
         return oxContact;
     }
 
-    private boolean isNotNull(final String s) {
+    protected boolean isNotNull(final String s) {
         return null != s && !"null".equals(s);
     }
-
-    private boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
-    /**
-     * Open a new {@link URLConnection URL connection} to specified parameter's value which indicates to be an URI/URL. The image's data and
-     * its MIME type is then read from opened connection and put into given {@link Contact contact container}.
-     *
-     * @param contact The contact container to fill
-     * @param url The URI parameter's value
-     * @throws OXException If converting image's data fails
-     */
-    private void loadImageFromURL(final Contact contact, final String url) throws OXException {
-        try {
-            loadImageFromURL(contact, new URL(url));
-        } catch (final MalformedURLException e) {
-            throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    /**
-     * Open a new {@link URLConnection URL connection} to specified parameter's value which indicates to be an URI/URL. The image's data and
-     * its MIME type is then read from opened connection and put into given {@link Contact contact container}.
-     *
-     * @param contact The contact container to fill
-     * @param url The image URL
-     * @throws OXException If converting image's data fails
-     */
-    private void loadImageFromURL(final Contact contact, final URL url) throws OXException {
-        String mimeType = null;
-        byte[] bytes = null;
-        try {
-            final URLConnection urlCon = url.openConnection();
-            urlCon.setConnectTimeout(2500);
-            urlCon.setReadTimeout(2500);
-            urlCon.connect();
-            mimeType = urlCon.getContentType();
-            final InputStream in = urlCon.getInputStream();
-            try {
-                final ByteArrayOutputStream buffer = Streams.newByteArrayOutputStream(in.available());
-                transfer(in, buffer);
-                bytes = buffer.toByteArray();
-            } finally {
-                Streams.close(in);
-            }
-        } catch (final SocketTimeoutException e) {
-            throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
-            throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-        if (mimeType == null) {
-            mimeType = ImageTypeDetector.getMimeType(bytes);
-            if ("application/octet-stream".equals(mimeType)) {
-                mimeType = getMimeType(url.toString());
-            }
-        }
-        if (bytes != null && isValidImage(bytes)) {
-            // Mime type should be of image type. Otherwise web server send some error page instead of 404 error code.
-            contact.setImage1(bytes);
-            contact.setImageContentType(mimeType);
-        }
-    }
-
-    private static final FileTypeMap DEFAULT_FILE_TYPE_MAP = FileTypeMap.getDefaultFileTypeMap();
-
-    private String getMimeType(final String filename) {
-        return DEFAULT_FILE_TYPE_MAP.getContentType(filename);
-    }
-
-    private boolean isValidImage(final byte[] data) {
-        java.awt.image.BufferedImage bimg = null;
-        try {
-            bimg = javax.imageio.ImageIO.read(Streams.newByteArrayInputStream(data));
-        } catch (final Exception e) {
-            return false;
-        }
-        return (bimg != null);
-    }
-
-    private static void transfer(final InputStream in, final OutputStream out) throws IOException {
-        final byte[] buffer = new byte[4096];
-        int length;
-        while ((length = in.read(buffer)) > 0) {
-            out.write(buffer, 0, length);
-        }
-        out.flush();
-    }
-
 }

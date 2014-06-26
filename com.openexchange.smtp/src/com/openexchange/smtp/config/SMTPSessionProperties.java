@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,10 +49,14 @@
 
 package com.openexchange.smtp.config;
 
+import java.util.Map;
 import java.util.Properties;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeSessionPropertyNames;
+import com.openexchange.smtp.SmtpReloadable;
 
 /**
  * {@link SMTPSessionProperties} - Default properties for an SMTP session established via <code>JavaMail</code> API
@@ -100,6 +104,21 @@ public final class SMTPSessionProperties {
                 }
             }
         }
+    }
+
+    static {
+        SmtpReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(final ConfigurationService configService) {
+                sessionProperties = null;
+            }
+
+            @Override
+            public Map<String, String[]> getConfigFileNames() {
+                return null;
+            }
+        });
     }
 
     /**

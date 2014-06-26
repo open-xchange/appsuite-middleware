@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -80,8 +80,8 @@ public final class PreviewCacheCreateTableService extends AbstractCreateTableImp
             " id VARCHAR(128) CHARACTER SET latin1 NOT NULL," +
             " size BIGINT(64) NOT NULL," +
             " createdAt BIGINT(64) NOT NULL," +
-            " fileName VARCHAR(128) COLLATE utf8_unicode_ci DEFAULT NULL," +
-            " fileType VARCHAR(32) CHARACTER SET latin1 DEFAULT NULL," +
+            " fileName VARCHAR(767) COLLATE utf8_unicode_ci DEFAULT NULL," +
+            " fileType VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
             " refId VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
             " PRIMARY KEY (cid, user, id)," +
             " INDEX `globaldocument` (cid, id)" +

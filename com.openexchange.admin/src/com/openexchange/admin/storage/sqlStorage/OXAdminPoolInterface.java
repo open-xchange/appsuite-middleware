@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -64,6 +64,8 @@ public interface OXAdminPoolInterface {
 
     Connection getConnectionForContextNoTimeout(int contextId) throws PoolException;
 
+    Connection getConnection(int poolId, String schema) throws PoolException;
+
     boolean pushConnectionForConfigDB(Connection con) throws PoolException;
 
     boolean pushConnectionForContext(int contextId, Connection con) throws PoolException;
@@ -72,10 +74,27 @@ public interface OXAdminPoolInterface {
 
     boolean pushConnectionForContextNoTimeout(int contextId, Connection con) throws PoolException;
 
+    boolean pushConnection(int poolId, Connection con) throws PoolException;
+
     int getServerId() throws PoolException;
 
     void writeAssignment(Connection con, Assignment assign) throws PoolException;
 
+    void deleteAssignment(Connection con, int contextId) throws PoolException;
+
     void removeService();
 
+    int[] getContextInSameSchema(Connection con, int contextId) throws PoolException;
+
+    int[] getContextInSchema(Connection con, int poolId, String schema) throws PoolException;
+
+    int[] listContexts(int poolId) throws PoolException;
+
+    int getWritePool(int contextId) throws PoolException;
+
+    String getSchemaName(int contextId) throws PoolException;
+
+    String[] getUnfilledSchemas(Connection con, int poolId, int maxContexts) throws PoolException;
+
+    void lock(Connection con) throws PoolException;
 }

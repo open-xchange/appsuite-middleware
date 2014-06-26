@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -57,6 +57,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.ajax.AJAXUtility;
 
 /**
  * {@link RedirectServlet}
@@ -85,7 +86,7 @@ public class RedirectServlet extends HttpServlet {
         }
 
         if (isServerRelative(location)) {
-            resp.sendRedirect(encodeUrl(location, true));
+            resp.sendRedirect(AJAXUtility.encodeUrl(location, true));
             return;
         }
 
@@ -98,7 +99,7 @@ public class RedirectServlet extends HttpServlet {
 
         location = assumeRelative(referer, location);
 
-        resp.sendRedirect(encodeUrl(location, true, true));
+        resp.sendRedirect(AJAXUtility.encodeUrl(location, true, true));
 
     }
 

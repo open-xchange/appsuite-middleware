@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -55,11 +55,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.webdav.LockManager;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.session.Session;
 
 public interface FolderLockManager extends LockManager{
 
 	@Override
-    void unlock(int id, Context ctx, User user) throws OXException;
+    void unlock(int id, Session session) throws OXException;
 
 	int lock(int entity, long timeout, Scope exclusive, Type write, int depth, String ownerDesc, Context ctx, User user) throws OXException;
 

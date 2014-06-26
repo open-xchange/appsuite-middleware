@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,6 +50,7 @@
 package com.openexchange.admin.console;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
@@ -110,6 +111,9 @@ public class StatisticTools extends AbstractJMXTools {
     private static final char OPT_MEMORY_THREADS_STATS_SHORT = 'm';
     private static final String OPT_MEMORY_THREADS_STATS_LONG = "memory";
 
+    private static final char OPT_EVENT_ADMIN_STATS_SHORT = 'e';
+    private static final String OPT_EVENT_ADMIN_STATS_LONG = "eventstats";
+
     private static final char OPT_GC_STATS_SHORT = 'z';
 
     private static final String OPT_GC_STATS_LONG = "gcstats";
@@ -123,6 +127,27 @@ public class StatisticTools extends AbstractJMXTools {
     private static final char OPT_OFFICE_STATS_SHORT = 'f';
     private static final String OPT_OFFICE_STATS_LONG = "officestats";
 
+    private static final char OPT_CACHE_STATS_SHORT = 'j';
+    private static final String OPT_CACHE_STATS_LONG = "cachestats";
+
+    private static final String OPT_AJPTHREADS_STATS_LONG = "ajpthreadsstats";
+
+    private static final String OPT_AJPTASKS_STATS_LONG = "ajptasksstats";
+
+    private static final String OPT_GENERAL_STATS_LONG = "generalstats";
+
+    private static final String OPT_MAILINTERFACE_STATS_LONG = "mailinterfacestats";
+
+    private static final String OPT_POOLING_STATS_LONG = "poolingstats";
+
+    private static final String OPT_CALLMONITOR_STATS_LONG = "callmonitorstats";
+
+    private static final String OPT_MISC_STATS_LONG = "misc";
+
+    private static final String OPT_OVERVIEW_STATS_LONG = "overview";
+
+    private static final String OPT_MEMORYPOOL_STATS_LONG = "memorypool";
+
     private CLIOption xchangestats = null;
     private CLIOption threadpoolstats = null;
     private CLIOption runtimestats = null;
@@ -134,11 +159,22 @@ public class StatisticTools extends AbstractJMXTools {
     private CLIOption memorythreadstats = null;
     private CLIOption memorythreadstatsfull = null;
     private CLIOption sessionStats = null;
+    private CLIOption cacheStats = null;
     private CLIOption usmSessionStats = null;
     private CLIOption clusterStats = null;
     private CLIOption grizzlyStats = null;
     private CLIOption documentconverterstats = null;
     private CLIOption officestats = null;
+    private CLIOption eventadminstats = null;
+    private CLIOption ajpthreadsstats = null;
+    private CLIOption ajptasksstats = null;
+    private CLIOption generalstats = null;
+    private CLIOption mailinterfacestats = null;
+    private CLIOption poolingstats = null;
+    private CLIOption callmonitorstats = null;
+    private CLIOption miscstats = null;
+    private CLIOption overviewstats = null;
+    private CLIOption memorypoolstats = null;
 
     /**
      * Option for garbage collection statistics
@@ -167,6 +203,10 @@ public class StatisticTools extends AbstractJMXTools {
             System.out.print(showMemoryPoolData(mbc));
             count++;
         }
+        if (null != parser.getOptionValue(this.memorypoolstats) && 0 == count) {
+            System.out.print(showMemoryPoolData(mbc));
+            count++;
+        }
         if (null != parser.getOptionValue(this.osstats) && 0 == count) {
             System.out.print(getStats(mbc, "java.lang:type=OperatingSystem"));
             count++;
@@ -177,6 +217,10 @@ public class StatisticTools extends AbstractJMXTools {
         }
         if (null != parser.getOptionValue(this.sessionStats) && 0 == count) {
             System.out.print(getStats(mbc, "com.openexchange.sessiond", "name", "SessionD Toolkit"));
+            count++;
+        }
+        if (null != parser.getOptionValue(this.cacheStats) && 0 == count) {
+            System.out.print(showCacheData(mbc));
             count++;
         }
         if (null != parser.getOptionValue(this.usmSessionStats) && 0 == count) {
@@ -195,9 +239,14 @@ public class StatisticTools extends AbstractJMXTools {
             System.out.print(showGcData(mbc));
             count++;
         }
+        if (null != parser.getOptionValue(this.eventadminstats) && 0 == count) {
+            System.out.print(showEventAdminData(mbc));
+            count++;
+        }
         if (null != parser.getOptionValue(this.allstats) && 0 == count) {
             System.out.print(showOXData(mbc));
             System.out.print(getStats(mbc, "com.openexchange.sessiond", "name", "SessionD Toolkit"));
+            System.out.print(showCacheData(mbc));
             System.out.print(showThreadPoolData(mbc));
             System.out.print(getStats(mbc, "java.lang:type=OperatingSystem"));
             System.out.print(getStats(mbc, "java.lang:type=Runtime"));
@@ -206,6 +255,7 @@ public class StatisticTools extends AbstractJMXTools {
             System.out.print(showGrizzlyData(mbc));
             System.out.print(showGcData(mbc));
             System.out.print(getStats(mbc, "com.openexchange.usm.session", "name", "com.openexchange.usm.session.impl.USMSessionInformation"));
+            System.out.println(showEventAdminData(mbc));
             count++;
         }
         if (null != parser.getOptionValue(this.showoperation) && 0 == count) {
@@ -234,6 +284,41 @@ public class StatisticTools extends AbstractJMXTools {
         }
         if (null != parser.getOptionValue(this.officestats) && 0 == count) {
             System.out.print(showOfficeData(mbc));
+            count++;
+        }
+        if (null != parser.getOptionValue(this.ajpthreadsstats) && 0 == count) {
+            System.out.print(showAJPv13ServerThreadsMonitor(mbc));
+            count++;
+        }
+        if (null != parser.getOptionValue(this.ajptasksstats) && 0 == count) {
+            System.out.print(showAJPv13TaskMonitor(mbc));
+            count++;
+        }
+        if (null != parser.getOptionValue(this.generalstats) && 0 == count) {
+            System.out.print(showGeneralMonitor(mbc));
+            count++;
+        }
+        if (null != parser.getOptionValue(this.mailinterfacestats) && 0 == count) {
+            System.out.print(showMailInterfaceMonitor(mbc));
+            count++;
+        }
+        if (null != parser.getOptionValue(this.poolingstats) && 0 == count) {
+            System.out.print(showPooling(mbc));
+            count++;
+        }
+        if (null != parser.getOptionValue(this.callmonitorstats) && 0 == count) {
+            System.out.print(showCallMonitor(mbc));
+            count++;
+        }
+        if (null != parser.getOptionValue(this.miscstats) && 0 == count) {
+            System.out.print(showGeneralMonitor(mbc));
+            System.out.print(showSysThreadingData(mbc));
+            count++;
+        }
+        if (null != parser.getOptionValue(this.overviewstats) && 0 == count) {
+            System.out.print(showGeneralMonitor(mbc));
+            System.out.print(showPooling(mbc));
+            System.out.print(getStats(mbc, "java.lang:type=OperatingSystem"));
             count++;
         }
         if (0 == count) {
@@ -418,6 +503,13 @@ public class StatisticTools extends AbstractJMXTools {
             "shows the statistics of the session container",
             false,
             NeededQuadState.notneeded);
+        this.cacheStats = setShortLongOpt(
+            parser,
+            OPT_CACHE_STATS_SHORT,
+            OPT_CACHE_STATS_LONG,
+            "shows the statistics of the cache objects",
+            false,
+            NeededQuadState.notneeded);
         this.usmSessionStats = setShortLongOpt(
             parser,
             'u',
@@ -462,6 +554,23 @@ public class StatisticTools extends AbstractJMXTools {
             "shows the office stats",
             false,
             NeededQuadState.notneeded);
+        this.eventadminstats = setShortLongOpt(
+            parser,
+            OPT_EVENT_ADMIN_STATS_SHORT,
+            OPT_EVENT_ADMIN_STATS_LONG,
+            "shows the OSGi EventAdmin stats",
+            false,
+            NeededQuadState.notneeded);
+        this.ajpthreadsstats = setLongOpt(parser, OPT_AJPTHREADS_STATS_LONG, "shows the AJP Thread stats", false, false);
+        this.ajptasksstats = setLongOpt(parser, OPT_AJPTASKS_STATS_LONG, "shows the AJP Tasks stats", false, false);
+        this.generalstats = setLongOpt(parser, OPT_GENERAL_STATS_LONG, "shows the open-xchange general stats", false, false);
+        this.mailinterfacestats = setLongOpt(parser, OPT_MAILINTERFACE_STATS_LONG, "shows the open-xchange mailinterface stats", false, false);
+        this.poolingstats = setLongOpt(parser, OPT_POOLING_STATS_LONG, "shows the open-xchange pooling stats", false, false);
+        this.callmonitorstats = setLongOpt(parser, OPT_CALLMONITOR_STATS_LONG, "shows admin.monitor Call Monitor stats", false, false);
+        this.miscstats = setLongOpt(parser, OPT_MISC_STATS_LONG, "shows stats for general and threading", false, false);
+        this.overviewstats = setLongOpt(parser, OPT_OVERVIEW_STATS_LONG, "shows stats for pooling and OperatingSystem", false, false);
+        this.memorypoolstats = setLongOpt(parser, OPT_MEMORYPOOL_STATS_LONG, "shows stats for memory pool usage of the Java runtime", false, false);
+
     }
 
     static String showMemoryPoolData(MBeanServerConnection con) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException {
@@ -474,15 +583,56 @@ public class StatisticTools extends AbstractJMXTools {
 
     private static String showOXData(MBeanServerConnection con) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException {
         StringBuilder sb = new StringBuilder();
-        sb.append(getStats(con, "com.openexchange.admin.monitor:name=CallMonitor"));
-        sb.append(getStats(con, "com.openexchange.monitoring:name=AJPv13ServerThreadsMonitor"));
-        sb.append(getStats(con, "com.openexchange.monitoring:name=AJPv13TaskMonitor"));
-        sb.append(getStats(con, "com.openexchange.monitoring:name=GeneralMonitor"));
-        sb.append(getStats(con, "com.openexchange.monitoring:name=MailInterfaceMonitor"));
-        sb.append(getStats(con, "com.openexchange.pooling:name=*"));
+        sb.append(showCallMonitor(con));
+        sb.append(showGeneralMonitor(con));
+        sb.append(showMailInterfaceMonitor(con));
+        sb.append(showPooling(con));
         return sb.toString();
     }
 
+    private static StringBuffer showPooling(MBeanServerConnection con) throws IOException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, ReflectionException, IntrospectionException, MalformedObjectNameException {
+        return getStats(con, "com.openexchange.pooling:name=*");
+    }
+
+    private static StringBuffer showMailInterfaceMonitor(MBeanServerConnection con) throws IOException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, ReflectionException, IntrospectionException, MalformedObjectNameException {
+        return getStats(con, "com.openexchange.monitoring:name=MailInterfaceMonitor");
+    }
+
+    private static StringBuffer showGeneralMonitor(MBeanServerConnection con) throws IOException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, ReflectionException, IntrospectionException, MalformedObjectNameException {
+        return getStats(con, "com.openexchange.monitoring:name=GeneralMonitor");
+    }
+
+    private static StringBuffer showAJPv13TaskMonitor(MBeanServerConnection con) throws IOException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, ReflectionException, IntrospectionException, MalformedObjectNameException {
+        return getStats(con, "com.openexchange.monitoring:name=AJPv13TaskMonitor");
+    }
+
+    private static StringBuffer showAJPv13ServerThreadsMonitor(MBeanServerConnection con) throws IOException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, ReflectionException, IntrospectionException, MalformedObjectNameException {
+        return getStats(con, "com.openexchange.monitoring:name=AJPv13ServerThreadsMonitor");
+    }
+
+    private static StringBuffer showCallMonitor(MBeanServerConnection con) throws IOException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, ReflectionException, IntrospectionException, MalformedObjectNameException {
+        return getStats(con, "com.openexchange.admin.monitor:name=CallMonitor");
+    }
+
+    private static String showCacheData(MBeanServerConnection mbc) throws MalformedObjectNameException, InstanceNotFoundException, NullPointerException, MBeanException, ReflectionException, IOException, InvalidDataException {
+        StringBuilder sb = new StringBuilder();
+        sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!Context"));
+        sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!Filestore"));
+        sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!OXDBPoolCache"));
+        sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!User"));
+        sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!UserConfiguration"));
+        sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!UserSettingMail"));
+        sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!OXFolderCache"));
+        sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!OXFolderQueryCache"));
+        sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!OXIMAPConCache"));
+        sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!OXMessageCache"));
+        sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!MailMessageCache"));
+        sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!MailConnectionCache"));
+        sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!CalendarCache"));
+        sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!SessionCache"));
+        return sb.toString();
+    }
+    
     static String showThreadPoolData(final MBeanServerConnection mbc) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException {
         return getStats(mbc, "com.openexchange.threadpool:name=ThreadPoolInformation").toString();
     }
@@ -505,19 +655,20 @@ public class StatisticTools extends AbstractJMXTools {
         return sb.toString();
     }
 
-    static String showClusterData(final MBeanServerConnection mbc) throws MalformedObjectNameException, NullPointerException, IOException, InstanceNotFoundException, IntrospectionException, ReflectionException, AttributeNotFoundException, MBeanException {
+    static String showClusterData(MBeanServerConnection mbc) throws MalformedObjectNameException, NullPointerException, IOException, InstanceNotFoundException, IntrospectionException, ReflectionException, AttributeNotFoundException, MBeanException {
         // general info
         StringBuilder sb = new StringBuilder();
-        for (final String type : new String[] { "Cluster", "Statistics", "Member" }) {
-            for (final ObjectInstance mbean : mbc.queryMBeans(new ObjectName("com.hazelcast:type=" + type + ",*"), null)) {
-                final ObjectName objectName = mbean.getObjectName();
-                final MBeanInfo beanInfo = mbc.getMBeanInfo(objectName);
-                for (final MBeanAttributeInfo attributeInfo : beanInfo.getAttributes()) {
-                    if ("Cluster".equals(type) && "Config".equals(attributeInfo.getName())) {
-                        final String value = mbc.getAttribute(mbean.getObjectName(), attributeInfo.getName()).toString();
-                        for (final String keyword : new String[] {
+        for (String type : new String[] { "HazelcastInstance", "HazelcastInstance.Node",
+            "HazelcastInstance.ClientEngine", "HazelcastInstance.ConnectionManager" }) {
+            for (ObjectInstance mbean : mbc.queryMBeans(new ObjectName("com.hazelcast:type=" + type + ",*"), null)) {
+                ObjectName objectName = mbean.getObjectName();
+                MBeanInfo beanInfo = mbc.getMBeanInfo(objectName);
+                for (MBeanAttributeInfo attributeInfo : beanInfo.getAttributes()) {
+                    if ("HazelcastInstance".equals(type) && "config".equals(attributeInfo.getName())) {
+                        String value = mbc.getAttribute(mbean.getObjectName(), attributeInfo.getName()).toString();
+                        for (String keyword : new String[] {
                             "groupConfig=", "properties=", "interfaces=", "tcpIpConfig=", "multicastConfig=" }) {
-                            final int startIdx = value.indexOf(keyword);
+                            int startIdx = value.indexOf(keyword);
                             if (-1 < startIdx && startIdx + keyword.length() < value.length()) {
                                 sb.append(objectName);
                                 sb.append(',');
@@ -545,18 +696,18 @@ public class StatisticTools extends AbstractJMXTools {
             }
         }
         // maps
-        for (final String type : new String[] { "Map", "MultiMap", "Topic", "Queue" }) {
-            for (final ObjectInstance mbean : mbc.queryMBeans(new ObjectName("com.hazelcast:type=" + type + ",Cluster=*,name=*"), null)) {
-                final ObjectName objectName = mbean.getObjectName();
-                final MBeanInfo beanInfo = mbc.getMBeanInfo(objectName);
-                for (final MBeanAttributeInfo attributeInfo : beanInfo.getAttributes()) {
+        for (String type : new String[] { "IMap", "IMultiMap", "ITopic", "IQueue" }) {
+            for (ObjectInstance mbean : mbc.queryMBeans(new ObjectName("com.hazelcast:type=" + type + ",instance=*,name=*"), null)) {
+                ObjectName objectName = mbean.getObjectName();
+                MBeanInfo beanInfo = mbc.getMBeanInfo(objectName);
+                for (MBeanAttributeInfo attributeInfo : beanInfo.getAttributes()) {
                     sb.append(objectName);
                     sb.append(',');
                     sb.append(attributeInfo.getName());
                     sb.append(" = ");
                     try {
                         sb.append(mbc.getAttribute(objectName, attributeInfo.getName()));
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         sb.append('[');
                         sb.append(e.getMessage());
                         sb.append(']');
@@ -613,6 +764,10 @@ public class StatisticTools extends AbstractJMXTools {
         return getStats(mbeanServerConnection, "com.openexchange.office:name=OfficeMonitoring").toString();
     }
 
+    static String showEventAdminData(final MBeanServerConnection mbeanServerConnection) throws IOException, NullPointerException, IllegalStateException, JMException {
+        return getStats(mbeanServerConnection, "org.apache.felix.eventadmin.monitoring", "type", "EventAdminMBean").toString();
+    }
+
     /**
      * Method to prepare and display the garbage collection information.
      *
@@ -657,19 +812,7 @@ public class StatisticTools extends AbstractJMXTools {
                         final long[] longArray = (long[]) attribute;
                         sb.append(Arrays.toString(longArray) + "\n");
                     } else {
-                        if (attributeInfo.getName().equalsIgnoreCase("collectioncount") || attributeInfo.getName().equalsIgnoreCase(
-                            "collectiontime")) {
-                            if (attribute instanceof Long) {
-                                Long attributeValue = (Long) attribute;
-                                if (uptimeHours > 1) {
-                                    sb.append((attributeValue.doubleValue() / uptimeHours) + "\n");
-                                } else {
-                                    sb.append(0 + "\n");
-                                }
-                            }
-                        } else {
-                            sb.append(attribute.toString() + "\n");
-                        }
+                        sb.append(attribute.toString() + "\n");
                     }
                 }
             }

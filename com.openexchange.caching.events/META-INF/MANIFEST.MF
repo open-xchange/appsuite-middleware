@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Cache Event Service
 Bundle-SymbolicName: com.openexchange.caching.events
-Bundle-Version: 7.4.2
+Bundle-Version: 7.6.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.exception,
@@ -16,5 +16,3 @@ Import-Package: com.openexchange.exception,
  org.slf4j
 Bundle-Activator: com.openexchange.caching.events.osgi.CacheEventServiceActivator
 Export-Package: com.openexchange.caching.events
-Require-Bundle: com.hazelcast;resolution:=optional
-Eclipse-RegisterBuddy: com.hazelcast

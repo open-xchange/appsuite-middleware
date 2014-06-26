@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,9 +50,10 @@
 package com.openexchange.oauth;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link OAuthExceptionCodes} - Enumeration of all {@link OXException}s.
@@ -60,82 +61,98 @@ import com.openexchange.exception.OXExceptionFactory;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
-public enum OAuthExceptionCodes implements OXExceptionCode {
+public enum OAuthExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(OAuthExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR("An error occurred: %1$s", CATEGORY_ERROR, 1, null),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(OAuthExceptionMessages.IO_ERROR_MSG, CATEGORY_ERROR, 2),
+    IO_ERROR("An I/O error occurred: %1$s", CATEGORY_ERROR, 2, null),
     /**
      * A JSON occurred: %1$s
      */
-    JSON_ERROR(OAuthExceptionMessages.JSON_ERROR_MSG, CATEGORY_ERROR, 3),
+    JSON_ERROR("A JSON error occurred: %1$s", CATEGORY_ERROR, 3, null),
     /**
      * Unknown OAuth service meta data: %1$s
      */
-    UNKNOWN_OAUTH_SERVICE_META_DATA(OAuthExceptionMessages.UNKNOWN_OAUTH_SERVICE_META_DATA_MSG, CATEGORY_ERROR, 4),
+    UNKNOWN_OAUTH_SERVICE_META_DATA("Unknown OAuth service meta data: %1$s", CATEGORY_ERROR, 4, null),
     /**
      * A SQL error occurred: %1$s
      */
-    SQL_ERROR(OAuthExceptionMessages.SQL_ERROR_MSG, CATEGORY_ERROR, 5),
+    SQL_ERROR("A SQL error occurred: %1$s", CATEGORY_ERROR, 5, OXExceptionStrings.SQL_ERROR_MSG),
     /**
      * Account not found with identifier %1$s for user %2$s in context %3$s.
      */
-    ACCOUNT_NOT_FOUND(OAuthExceptionMessages.ACCOUNT_NOT_FOUND_MSG, CATEGORY_USER_INPUT, 6),
+    ACCOUNT_NOT_FOUND("Account not found with identifier %1$s for user %2$s in context %3$s.", CATEGORY_USER_INPUT, 6,
+        OAuthExceptionMessages.ACCOUNT_NOT_FOUND_MSG),
     /**
      * Unsupported OAuth service: %1$s
      */
-    UNSUPPORTED_SERVICE(OAuthExceptionMessages.UNSUPPORTED_SERVICE_MSG, CATEGORY_ERROR, 7),
+    UNSUPPORTED_SERVICE("Unsupported OAuth service: %1$s", CATEGORY_ERROR, 7, null),
     /**
      * Missing argument: %1$s
      */
-    MISSING_ARGUMENT(OAuthExceptionMessages.MISSING_ARGUMENT_MSG, CATEGORY_USER_INPUT, 8),
+    MISSING_ARGUMENT("Missing argument: %1$s", CATEGORY_USER_INPUT, 8, OAuthExceptionMessages.MISSING_ARGUMENT_MSG),
     /**
      * Your '%1$s' password changed. You have to authorize the server to use your account with the new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
      */
-    TOKEN_EXPIRED(OAuthExceptionMessages.TOKEN_EXPIRED_MSG, CATEGORY_TRY_AGAIN, 9),
+    TOKEN_EXPIRED("Your '%1$s' password changed. You have to authorize the server to use your account with the new password. To do so, "
+        + "go to Configuration -> My Social Configuration -> Accounts. Then try again.", CATEGORY_TRY_AGAIN, 9,
+        OAuthExceptionMessages.TOKEN_EXPIRED_MSG),
     /**
      * An OAuth error occurred: %1$s
      */
-    OAUTH_ERROR(OAuthExceptionMessages.OAUTH_ERROR_MSG, CATEGORY_ERROR, 10),
+    OAUTH_ERROR("An OAuth error occurred: %1$s", CATEGORY_ERROR, 10, null),
     /**
      * "The address %1 is not white-listed as for the %2 OAuth API"
      */
-    NOT_A_WHITELISTED_URL(OAuthExceptionMessages.NOT_A_WHITELISTED_URL_MSG, CATEGORY_PERMISSION_DENIED, 11),
+    NOT_A_WHITELISTED_URL("The address %1$s is not white-listed as for the %2$s OAuth API", CATEGORY_PERMISSION_DENIED, 11,
+        OAuthExceptionMessages.NOT_A_WHITELISTED_URL_MSG),
     /**
      * The request sent was missing its body
      */
-    MISSING_BODY(OAuthExceptionMessages.MISSING_BODY_MSG, CATEGORY_USER_INPUT, 12),
+    MISSING_BODY("The request sent was missing its body", CATEGORY_USER_INPUT, 12, OAuthExceptionMessages.MISSING_BODY_MSG),
     /**
      * The account is invalid, please recreate it.
      */
-    INVALID_ACCOUNT(OAuthExceptionMessages.INVALID_ACCOUNT_MSG, CATEGORY_TRY_AGAIN, 13),
+    INVALID_ACCOUNT("The account is invalid, please recreate it.", CATEGORY_TRY_AGAIN, 13, OAuthExceptionMessages.INVALID_ACCOUNT_MSG),
+    /**
+     * The account "%1$s" (id=%2$s) is invalid, please recreate it.
+     */
+    INVALID_ACCOUNT_EXTENDED("The account \"%1$s\" (id=%2$s) is invalid, please recreate it.", CATEGORY_TRY_AGAIN, 13, OAuthExceptionMessages.INVALID_ACCOUNT_MSG), // Yapp, the same error code
     /**
      * Please provide a display name.
      */
-    MISSING_DISPLAY_NAME(OAuthExceptionMessages.MISSING_DISPLAY_NAME_MSG, CATEGORY_USER_INPUT, 14),
+    MISSING_DISPLAY_NAME("Please provide a display name.", CATEGORY_USER_INPUT, 14, OAuthExceptionMessages.MISSING_DISPLAY_NAME_MSG),
     /**
      * The associated OAuth provider denied the request: %1$s.
      */
-    DENIED_BY_PROVIDER(OAuthExceptionMessages.DENIED_BY_PROVIDER_MSG, CATEGORY_USER_INPUT, 15),
+    DENIED_BY_PROVIDER("The associated OAuth provider denied the request: %1$s.", CATEGORY_USER_INPUT, 15,
+        OAuthExceptionMessages.DENIED_BY_PROVIDER_MSG),
     /**
      * The OAuth authentication process has been canceled.
      */
-    CANCELED_BY_USER(OAuthExceptionMessages.CANCELED_BY_USER_MSG, CATEGORY_USER_INPUT, 16),
+    CANCELED_BY_USER("The OAuth authentication process has been canceled.", CATEGORY_USER_INPUT, 16,
+        OAuthExceptionMessages.CANCELED_BY_USER_MSG),
+    /**
+     * Could not get a valid response from the associated OAuth provider.
+     */
+    NOT_A_VALID_RESPONSE("Could not get a valid response from the associated OAuth provider.", CATEGORY_ERROR, 17, OAuthExceptionMessages.NOT_A_VALID_RESPONSE_MSG)
     ;
 
     private final Category category;
     private final int number;
     private final String message;
+    private String displayMessage;
 
-    private OAuthExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private OAuthExceptionCodes(final String message, final Category category, final int detailNumber, String displayMessage) {
         this.message = message;
         this.number = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -156,6 +173,11 @@ public enum OAuthExceptionCodes implements OXExceptionCode {
     @Override
     public int getNumber() {
         return number;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override

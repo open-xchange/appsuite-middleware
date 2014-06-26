@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -62,7 +62,7 @@ public class FileStorageEventConstants {
     public static final String CREATE_TOPIC = "com/openexchange/groupware/infostore/insert";
 
     public static final String DELETE_TOPIC = "com/openexchange/groupware/infostore/delete";
-    
+
     public static final String ACCESS_TOPIC = "com/openexchange/groupware/infostore/access";
 
     public static final String ALL_TOPICS = "com/openexchange/groupware/infostore/*";
@@ -81,12 +81,30 @@ public class FileStorageEventConstants {
 
     public static final String ACCOUNT_ID = "accountId";
 
+    /**
+     * The folder ID in it's absolute/unique form, i.e. containing the service/account information.
+     */
     public static final String FOLDER_ID = "folderId";
 
+    /**
+     * The parent folder ID in it's absolute/unique form, i.e. containing the service/account information.
+     */
     public static final String PARENT_FOLDER_ID = "parentFolderId";
 
+    /**
+     * The old parent folder ID (in case of moves) in it's absolute/unique form, i.e. containing the service/account information.
+     */
+    public static final String OLD_PARENT_FOLDER_ID = "oldParentFolderId";
+
+    /**
+     * The path to the default folder in an array of folder IDs in their absolute/unique form, i.e. all containing the service/account
+     * information.
+     */
     public static final String FOLDER_PATH = "folderPath";
 
+    /**
+     * The object ID in it's absolute/unique form, i.e. containing the service/account information.
+     */
     public static final String OBJECT_ID = "objectId";
 
     public static final String FILE_NAME = "fileName";
@@ -94,5 +112,7 @@ public class FileStorageEventConstants {
     public static final String VERSIONS = "versions";
 
     public static final String E_TAG = "eTag";
+
+    public static final String HARD_DELETE = "hardDelete";
 
 }

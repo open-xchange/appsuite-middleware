@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -93,6 +93,7 @@ public class UserCopyTask implements CopyUserTaskService {
     /**
      * @see com.openexchange.user.copy.CopyUserTaskService#getAlreadyCopied()
      */
+    @Override
     public String[] getAlreadyCopied() {
         return new String[] {
             ContextLoadTask.class.getName(),
@@ -103,6 +104,7 @@ public class UserCopyTask implements CopyUserTaskService {
     /**
      * @see com.openexchange.user.copy.CopyUserTaskService#getObjectName()
      */
+    @Override
     public String getObjectName() {
         return User.class.getName();
     }
@@ -110,6 +112,7 @@ public class UserCopyTask implements CopyUserTaskService {
     /**
      * @see com.openexchange.user.copy.CopyUserTaskService#copyUser(java.util.Map)
      */
+    @Override
     public UserMapping copyUser(final Map<String, ObjectMapping<?>> copied) throws OXException {
         final CopyTools tools = new CopyTools(copied);
         final Context srcCtx = tools.getSourceContext();
@@ -150,6 +153,7 @@ public class UserCopyTask implements CopyUserTaskService {
     /**
      * @see com.openexchange.user.copy.CopyUserTaskService#done(java.util.Map, boolean)
      */
+    @Override
     public void done(final Map<String, ObjectMapping<?>> copied, final boolean failed) {
         //
     }

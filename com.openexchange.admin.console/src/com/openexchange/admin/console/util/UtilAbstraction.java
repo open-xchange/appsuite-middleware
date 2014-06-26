@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,7 +49,6 @@
 package com.openexchange.admin.console.util;
 
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.ObjectNamingAbstraction;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 
@@ -59,9 +58,6 @@ import com.openexchange.admin.console.AdminParser.NeededQuadState;
  *
  */
 public abstract class UtilAbstraction extends ObjectNamingAbstraction {
-
-    // for all tools
-    protected CLIOption searchOption = null;
 
     //  Setting names for options
     protected final static char OPT_NAME_SEARCH_PATTERN_SHORT = 's';

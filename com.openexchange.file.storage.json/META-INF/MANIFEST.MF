@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange File Storage JSON Bundle
 Bundle-SymbolicName: com.openexchange.file.storage.json
-Bundle-Version: 7.4.2
+Bundle-Version: 7.6.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax,
@@ -12,6 +12,7 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.ajax.requesthandler.osgiservice,
  com.openexchange.ajax.tools,
  com.openexchange.caching,
+ com.openexchange.config,
  com.openexchange.configuration,
  com.openexchange.datatypes.genericonf,
  com.openexchange.datatypes.genericonf.json,

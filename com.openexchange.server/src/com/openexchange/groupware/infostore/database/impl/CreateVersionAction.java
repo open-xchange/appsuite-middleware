@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -73,7 +73,8 @@ public class CreateVersionAction extends AbstractDocumentListAction {
     public void perform() throws OXException {
         assureExistence();
 
-        doUpdates(getQueryCatalog().getVersionInsert(), getQueryCatalog().getWritableVersionFields(), getDocuments());
+        final InfostoreQueryCatalog queryCatalog = getQueryCatalog();
+        doUpdates(queryCatalog.getVersionInsert(), queryCatalog.getWritableVersionFields(), getDocuments());
     }
 
     @Override

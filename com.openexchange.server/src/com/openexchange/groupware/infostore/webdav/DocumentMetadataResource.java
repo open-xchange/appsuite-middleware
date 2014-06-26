@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -72,6 +72,7 @@ import com.openexchange.groupware.infostore.utils.SetSwitch;
 import com.openexchange.groupware.infostore.webdav.URLCache.Type;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.session.SessionHolder;
@@ -835,6 +836,11 @@ public class DocumentMetadataResource extends AbstractResource implements
 			} else if (parent.isRoot()) {
 				throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), HttpServletResponse.SC_UNAUTHORIZED);
 			}
+            EffectivePermission permission = parent.getEffectivePermission();
+            if (null != permission && (false == permission.canCreateObjects() || false == permission.canWriteOwnObjects())) {
+                // require "write own" permissions, too, when creating objects via WebDAV (#29950 / SCR-1997)
+                throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), HttpServletResponse.SC_UNAUTHORIZED);
+            }
 		} catch (final ClassCastException x) {
 			throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(),
 					HttpServletResponse.SC_CONFLICT);
@@ -928,31 +934,23 @@ public class DocumentMetadataResource extends AbstractResource implements
 		dumpMetadataToDB(null, false);
 	}
 
-	private void deleteMetadata() throws WebdavProtocolException {
+	private void deleteMetadata() throws OXException {
+		final ServerSession session = getSession();
+		database.startTransaction();
 		try {
-			final ServerSession session = getSession();
-			database.startTransaction();
-			try {
-				final int[] nd = database.removeDocument(new int[] { id },
-						Long.MAX_VALUE, session);
-				if (nd.length > 0) {
-					database.rollback();
-					throw InfostoreExceptionCodes.DELETE_FAILED
-							.create(I(nd[0]));
-				}
-				database.commit();
-			} catch (final OXException x) {
+			final int[] nd = database.removeDocument(new int[] { id },
+					Long.MAX_VALUE, session);
+			if (nd.length > 0) {
 				database.rollback();
-				throw x;
-			} finally {
-				database.finish();
+				throw InfostoreExceptionCodes.DELETE_FAILED
+						.create(I(nd[0]));
 			}
-		} catch (final OXException e) {
-			if (e instanceof WebdavProtocolException) {
-				throw (WebdavProtocolException) e;
-			}
-			throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(),
-					HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
+			database.commit();
+		} catch (final OXException x) {
+			database.rollback();
+			throw x;
+		} finally {
+			database.finish();
 		}
 	}
 

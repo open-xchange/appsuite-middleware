@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -198,7 +198,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         accessIcal(6, OPT_ACCESS_ICAL, false),
         accessInfostore(7, OPT_ACCESS_INFOSTORE, false),
         accessPinboardWrite(8, OPT_ACCESS_PINBOARD_WRITE, false),
-        accessProjects(9, OPT_ACCESS_PROJECTS, false),
         accessReadCreateSharedFolders(10, OPT_ACCESS_READCREATE_SHARED_FOLDERS, false),
         accessRssBookmarks(11, OPT_ACCESS_RSS_BOOKMARKS, false),
         accessRssPortal(12, OPT_ACCESS_RSS_PORTAL, false),
@@ -439,12 +438,11 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final char OPT_ALIASES_SHORT = 'a';
     protected static final String OPT_ALIASES_LONG = "aliases";
 
-    protected static final String OPT_EXTENDED_LONG = "extendedoptions";
-
     protected static final String OPT_ACCESSRIGHTS_COMBINATION_NAME = "access-combination-name";
 
     protected static final String OPT_CAPABILITIES_TO_ADD = "capabilities-to-add";
     protected static final String OPT_CAPABILITIES_TO_REMOVE = "capabilities-to-remove";
+    protected static final String OPT_CAPABILITIES_TO_DROP = "capabilities-to-drop";
 
     protected static final String OPT_QUOTA_MODULE = "quota-module";
     protected static final String OPT_QUOTA_VALUE = "quota-value";
@@ -457,7 +455,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_ACCESS_ICAL = "access-ical";
     protected static final String OPT_ACCESS_INFOSTORE = "access-infostore";
     protected static final String OPT_ACCESS_PINBOARD_WRITE = "access-pinboard-write";
-    protected static final String OPT_ACCESS_PROJECTS = "access-projects";
     protected static final String OPT_ACCESS_READCREATE_SHARED_FOLDERS = "access-read-create-shared-Folders";
     protected static final String OPT_ACCESS_RSS_BOOKMARKS = "access-rss-bookmarks";
     protected static final String OPT_ACCESS_RSS_PORTAL = "access-rss-portal";
@@ -633,6 +630,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
     protected CLIOption capsToAdd = null;
     protected CLIOption capsToRemove = null;
+    protected CLIOption capsToDrop = null;
 
     protected CLIOption quotaModule = null;
     protected CLIOption quotaValue = null;
@@ -646,7 +644,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected CLIOption accessIcalOption = null;
     protected CLIOption accessInfostoreOption = null;
     protected CLIOption accessPinboardWriteOption = null;
-    protected CLIOption accessProjectsOption = null;
     protected CLIOption accessReadCreateSharedFolderOption = null;
     protected CLIOption accessRssBookmarkOption = null;
     protected CLIOption accessRssPortalOption = null;
@@ -674,9 +671,13 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     // non-generic extended option
     protected CLIOption addGUISettingOption = null;
     protected CLIOption removeGUISettingOption = null;
-
     protected static final String OPT_ADD_GUI_SETTING_LONG = "addguipreferences";
     protected static final String OPT_REMOVE_GUI_SETTING_LONG = "removeguipreferences";
+
+    protected CLIOption configOption = null;
+    protected CLIOption removeConfigOption = null;
+    protected static final String OPT_CONFIG_LONG = "config";
+    protected static final String OPT_REMOVE_CONFIG_LONG = "remove-config";
 
     // For right error output
     protected String username = null;
@@ -786,30 +787,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
     protected HashMap<String, CSVConstants> constantsMap;
 
-//    /**
-//     * This field holds all the options which are displayed by default. So this options can be
-//     * deducted from the other dynamically created options
-//     */
-//    public static final HashSet<String> standardoptions = new HashSet<String>(15);
-//
-//    static {
-//        // Here we define those getter which shouldn't be listed in the extendedoptions
-//        standardoptions.add("id");
-//        standardoptions.add("name");
-//        standardoptions.add("display_name");
-//        standardoptions.add(OPT_PASSWORD_LONG);
-//        standardoptions.add("given_name");
-//        standardoptions.add("sur_name");
-//        standardoptions.add(OPT_LANGUAGE_LONG);
-//        standardoptions.add("primaryemail");
-//        standardoptions.add(OPT_DEPARTMENT_LONG);
-//        standardoptions.add(OPT_COMPANY_LONG);
-//        standardoptions.add(OPT_ALIASES_LONG);
-//        standardoptions.add("gui_spam_filter_capabilities_enabled");
-//        standardoptions.add("gui_spam_filter_enabled");
-//
-//    }
-
     protected static UserModuleAccess getUserModuleAccess(final String[] nextLine, final int[] idarray) {
         final UserModuleAccess moduleaccess = new UserModuleAccess();
         moduleaccess.disableAll();
@@ -895,12 +872,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         if (-1 != p) {
             if (nextLine[p].length() > 0) {
                 moduleaccess.setPinboardWrite(stringToBool(nextLine[p]));
-            }
-        }
-        final int p2 = idarray[AccessCombinations.accessProjects.getIndex()];
-        if (-1 != p2) {
-            if (nextLine[p2].length() > 0) {
-                moduleaccess.setProjects(stringToBool(nextLine[p2]));
             }
         }
         final int q = idarray[AccessCombinations.accessPublication.getIndex()];
@@ -1863,6 +1834,10 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.capsToRemove = setLongOpt(parser,OPT_CAPABILITIES_TO_REMOVE,"The capabilities to remove as a comma-separated string; e.g. \"cap2, cap2\"", true, false,false);
     }
 
+    protected void setCapsToDrop(final AdminParser parser) {
+        this.capsToDrop = setLongOpt(parser,OPT_CAPABILITIES_TO_DROP,"The capabilities to drop (clean from storage) as a comma-separated string; e.g. \"cap2, cap2\"", true, false,false);
+    }
+
     protected void setQuotaModule(final AdminParser parser) {
         this.quotaModule = setLongOpt(parser,OPT_QUOTA_MODULE,"The (comma-separated) list of identifiers for those modules to which to apply the quota value; currently supported values: [task, calendar, contact, infostore]", true, false,false);
     }
@@ -1889,6 +1864,14 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
     protected final void setRemoveGuiSettingOption(final AdminParser admp){
         this.removeGUISettingOption = setLongOpt(admp,OPT_REMOVE_GUI_SETTING_LONG,"Remove a GUI setting", true, false);
+    }
+
+    protected final void setConfigOption(final AdminParser adminParser){
+        this.configOption = setLongOpt(adminParser, OPT_CONFIG_LONG, "Add user/context specific configuration, e. g. '--config/com.openexchange.oauth.facebook=false|true'", false, false);
+    }
+
+    protected final void setRemoveConfigOption(final AdminParser adminParser){
+        this.removeConfigOption = setLongOpt(adminParser, OPT_REMOVE_CONFIG_LONG, "Remove user/context specific configuration, e. g. '--remove-config/com.openexchange.oauth.facebook'", false, false);
     }
 
     /**
@@ -2000,6 +1983,13 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         return parseAndSetCapabilities(capsToRemove, parser);
     }
 
+    public Set<String> parseAndSetCapabilitiesToDrop(final AdminParser parser) {
+        if (null == capsToDrop) {
+            setCapsToDrop(parser);
+        }
+        return parseAndSetCapabilities(capsToDrop, parser);
+    }
+
     private Set<String> parseAndSetCapabilities(final CLIOption cliOption, final AdminParser parser) {
         String s = (String) parser.getOptionValue(cliOption);
         if (isEmpty(s)) {
@@ -2027,8 +2017,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         // Split
         final String[] arr = s.split(" *, *", 0);
         final Set<String> set = new HashSet<String>(arr.length);
-        for (int i = 0; i < arr.length; i++) {
-            final String cap = arr[i];
+        for (String element : arr) {
+            final String cap = element;
             if (!isEmpty(cap)) {
                 set.add(toLowerCase(cap));
             }
@@ -2115,7 +2105,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         access.setIcal(accessOption2BooleanCreate(parser,this.accessIcalOption));
         access.setInfostore(accessOption2BooleanCreate(parser,this.accessInfostoreOption));
         access.setPinboardWrite(accessOption2BooleanCreate(parser,this.accessPinboardWriteOption));
-        access.setProjects(accessOption2BooleanCreate(parser,this.accessProjectsOption));
         access.setReadCreateSharedFolders(accessOption2BooleanCreate(parser,this.accessReadCreateSharedFolderOption));
         access.setRssBookmarks(accessOption2BooleanCreate(parser,this.accessRssBookmarkOption));
         access.setRssPortal(accessOption2BooleanCreate(parser,this.accessRssPortalOption));
@@ -2190,10 +2179,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             access.setPinboardWrite(accessOption2BooleanCreate(parser, this.accessPinboardWriteOption));
             changed = true;
         }
-        if ((String) parser.getOptionValue(this.accessProjectsOption) != null) {
-            access.setProjects(accessOption2BooleanCreate(parser, this.accessProjectsOption));
-            changed = true;
-        }
         if ((String) parser.getOptionValue(this.accessReadCreateSharedFolderOption) != null) {
             access.setReadCreateSharedFolders(accessOption2BooleanCreate(parser, this.accessReadCreateSharedFolderOption));
             changed = true;
@@ -2259,12 +2244,12 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             changed = true;
         }
         if((String) parser.getOptionValue(this.accessActiveSync) != null) {
-        	access.setActiveSync(accessOption2BooleanCreate(parser, this.accessActiveSync));
-        	changed = true;
+            access.setActiveSync(accessOption2BooleanCreate(parser, this.accessActiveSync));
+            changed = true;
         }
         if((String) parser.getOptionValue(this.accessUSM) != null) {
-        	access.setUSM(accessOption2BooleanCreate(parser, this.accessUSM));
-        	changed = true;
+            access.setUSM(accessOption2BooleanCreate(parser, this.accessUSM));
+            changed = true;
         }
         if((String) parser.getOptionValue(this.accessOLOX20) != null) {
             access.setOLOX20(accessOption2BooleanCreate(parser, this.accessOLOX20));
@@ -2347,7 +2332,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.accessIcalOption = setLongOpt(admp, OPT_ACCESS_ICAL,"on/off","Ical module access (Default is off)", true, false,true);
         this.accessInfostoreOption = setLongOpt(admp, OPT_ACCESS_INFOSTORE,"on/off","Infostore module access (Default is off)", true, false,true);
         this.accessPinboardWriteOption = setLongOpt(admp, OPT_ACCESS_PINBOARD_WRITE,"on/off","Pinboard write access (Default is off)", true, false,true);
-        this.accessProjectsOption = setLongOpt(admp, OPT_ACCESS_PROJECTS,"on/off","Project module access (Default is off)", true, false,true);
         this.accessReadCreateSharedFolderOption = setLongOpt(admp, OPT_ACCESS_READCREATE_SHARED_FOLDERS,"on/off","Read create shared folder access (Default is off)", true, false,true);
         this.accessRssBookmarkOption= setLongOpt(admp, OPT_ACCESS_RSS_BOOKMARKS,"on/off","RSS bookmarks access (Default is off)", true, false,true);
         this.accessRssPortalOption = setLongOpt(admp, OPT_ACCESS_RSS_PORTAL,"on/off","RSS portal access (Default is off)", true, false,true);
@@ -2400,9 +2384,13 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
     protected void setExtendedOptions(final AdminParser parser) {
         setAddGuiSettingOption(parser);
+
         if( this.getClass().getName().endsWith("Change") ) {
             setRemoveGuiSettingOption(parser);
         }
+
+        setConfigOption(parser);
+        setRemoveConfigOption(parser);
 
         this.email1Option = setLongOpt(parser, OPT_EMAIL1_LONG, "stringvalue", "Email1", true, false, true);
         this.mailenabledOption = setSettableBooleanLongOpt(parser, OPT_MAILENABLED_LONG, "true / false", "Mailenabled", true, false, true);
@@ -2507,76 +2495,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.defaultsenderaddressOption = setLongOpt(parser, OPT_DEFAULTSENDERADDRESS_LONG, "stringvalue", "DefaultSenderAddress", true, false, true);
         this.foldertreeOption = setIntegerLongOpt(parser, OPT_FOLDERTREE_LONG, "intvalue", "FolderTree", true, false, true);
 
-//        final Method[] methods = User.class.getMethods();
-//        final ArrayList<MethodAndNames> methArrayList = getSetters(methods);
-//
-//        for (final MethodAndNames methodandnames : methArrayList) {
-//            if (!standardoptions.contains(methodandnames.getName().toLowerCase())) {
-//                if (methodandnames.getReturntype().equals(JAVA_LANG_STRING)) {
-//                    optionsandmethods.add(new OptionAndMethod(methodandnames.getMethod(), setLongOpt(parser, methodandnames.getName().toLowerCase(), "stringvalue", methodandnames.getName(), true, false, true), methodandnames.getReturntype()));
-//                    System.err.println("this." + methodandnames.getName().toLowerCase() + "Option = setLongOpt(parser, OPT_" + methodandnames.getName().toUpperCase() + "_LONG, \"stringvalue\", \"" + methodandnames.getName() + "\", true, false, true);");
-////                    System.err.println("protected static final String OPT_" + methodandnames.getName().toUpperCase() + "_LONG = \"" + methodandnames.getName().toLowerCase() + "\";");
-//
-////                    System.err.println("                {");
-////                    System.err.println("                String value = (String)parser.getOptionValue(" + methodandnames.getName().toLowerCase() + "Option);");
-////                    System.err.println("                if (null != value) {");
-////                    System.err.println("                    // On the command line an empty string can be used to clear that specific attribute.");
-////                    System.err.println("                    if (\"\".equals(value)) { value = null; }");
-////                    System.err.println("                    usr." + methodandnames.getMethod().getName() + "(value);");
-////                    System.err.println("                }");
-////                    System.err.println("                }");
-//                } else if (methodandnames.getReturntype().equals(JAVA_LANG_INTEGER)) {
-//                    optionsandmethods.add(new OptionAndMethod(methodandnames.getMethod(), setIntegerLongOpt(parser, methodandnames.getName().toLowerCase(), "intvalue", methodandnames.getName(), true, false, true), methodandnames.getReturntype()));
-//                    System.err.println("this." + methodandnames.getName().toLowerCase() + "Option = setIntegerLongOpt(parser, OPT_" + methodandnames.getName().toUpperCase() + "_LONG, \"intvalue\", \"" + methodandnames.getName() + "\", true, false, true);");
-////                    System.err.println("protected static final String OPT_" + methodandnames.getName().toUpperCase() + "_LONG = \"" + methodandnames.getName().toLowerCase() + "\";");
-//
-////                    System.err.println("                {");
-////                    System.err.println("                final Integer value = (Integer)parser.getOptionValue(" + methodandnames.getName().toLowerCase() + "Option);");
-////                    System.err.println("                if (null != value) {");
-////                    System.err.println("                    usr." + methodandnames.getMethod().getName() + "(value);");
-////                    System.err.println("                }");
-////                    System.err.println("                }");
-//                } else if (methodandnames.getReturntype().equals(JAVA_LANG_BOOLEAN)) {
-//                    optionsandmethods.add(new OptionAndMethod(methodandnames.getMethod(), setSettableBooleanLongOpt(parser, methodandnames.getName().toLowerCase(), "true / false", methodandnames.getName(), true, false, true), methodandnames.getReturntype()));
-//                    System.err.println("this." + methodandnames.getName().toLowerCase() + "Option = setSettableBooleanLongOpt(parser, OPT_" + methodandnames.getName().toUpperCase() + "_LONG, \"true / false\", \"" + methodandnames.getName() + "\", true, false, true)");
-////                    System.err.println("protected static final String OPT_" + methodandnames.getName().toUpperCase() + "_LONG = \"" + methodandnames.getName().toLowerCase() + "\";");
-//
-////                    System.err.println("                {");
-////                    System.err.println("                final Boolean value = (Boolean)parser.getOptionValue(" + methodandnames.getName().toLowerCase() + "Option());");
-////                    System.err.println("                if (null != value) {");
-////                    System.err.println("                    usr." + methodandnames.getMethod().getName() + "(value);");
-////                    System.err.println("                }");
-////                    System.err.println("                }");
-//                } else if (methodandnames.getReturntype().equals(JAVA_UTIL_DATE)) {
-//                    optionsandmethods.add(new OptionAndMethod(methodandnames.getMethod(), setLongOpt(parser, methodandnames.getName().toLowerCase(), "datevalue", methodandnames.getName(), true, false, true), methodandnames.getReturntype()));
-//                    System.err.println("this." + methodandnames.getName().toLowerCase() + "Option = setLongOpt(parser, OPT_" + methodandnames.getName().toUpperCase() + "_LONG, \"datevalue\", \"" + methodandnames.getName() + "\", true, false, true)");
-////                    System.err.println("protected static final String OPT_" + methodandnames.getName().toUpperCase() + "_LONG = \"" + methodandnames.getName().toLowerCase() + "\";");
-//
-////                    System.err.println("                {");
-////                    System.err.println("                final SimpleDateFormat sdf = new SimpleDateFormat(COMMANDLINE_DATEFORMAT);");
-////                    System.err.println("                sdf.setTimeZone(TimeZone.getTimeZone(COMMANDLINE_TIMEZONE));");
-////                    System.err.println("                try {");
-////                    System.err.println("                    final String date = (String)parser.getOptionValue(" + methodandnames.getName().toLowerCase() + "Option);");
-////                    System.err.println("                    if( date != null ) {");
-////                    System.err.println("                        final Date value = sdf.parse(date);");
-////                    System.err.println("                        if (null != value) {");
-////                    System.err.println("                            usr." + methodandnames.getMethod().getName() + "(value);");
-////                    System.err.println("                        }");
-////                    System.err.println("                    }");
-////                    System.err.println("                } catch (final ParseException e) {");
-////                    System.err.println("                    throw new InvalidDataException(\"Wrong dateformat, use \\\"\" + sdf.toPattern() + \"\\\"\");");
-////                    System.err.println("                }");
-////                    System.err.println("                }");
-////                } else if (methodandnames.getReturntype().equals(PASSWORDMECH_CLASS)) {
-////                    optionsandmethods.add(new OptionAndMethod(methodandnames.getMethod(), setLongOpt(parser, methodandnames.getName().toLowerCase(), "CRYPT/SHA", methodandnames.getName(), true, false, true), methodandnames.getReturntype()));
-////                    //System.err.println("this." + methodandnames.getName().toLowerCase() + "Option = setLongOpt(parser, \"" + methodandnames.getName().toLowerCase() + "\", \"CRYPT/SHA\", \"" + methodandnames.getName() + "\", true, false, true)");
-////                    System.err.println("                    final HashSet<?> value = (HashSet<?>)parser.getOptionValue(optionAndMethod.getOption());");
-////                    System.err.println("                    if (null != value) {");
-////                    System.err.println("                        optionAndMethod.getMethod().invoke(usr, value);");
-////                    System.err.println("                    }");
-//                }
-//            }
-//        }
         setGui_Spam_option(parser);
         setModuleAccessOptions(parser);
     }
@@ -3459,45 +3377,45 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             }
         }
 
-//        for (final OptionAndMethod optionAndMethod : optionsandmethods) {
-//            if (optionAndMethod.getReturntype().equals(JAVA_LANG_STRING)) {
-//                String value = (String)parser.getOptionValue(optionAndMethod.getOption());
-//                if (null != value) {
-//                    // On the command line an empty string can be used to clear that specific attribute.
-//                    if ("".equals(value)) { value = null; }
-//                    optionAndMethod.getMethod().invoke(usr, value);
-//                }
-//            } else if (optionAndMethod.getReturntype().equals(JAVA_LANG_INTEGER)) {
-//                final Integer value = (Integer)parser.getOptionValue(optionAndMethod.getOption());
-//                if (null != value) {
-//                    optionAndMethod.getMethod().invoke(usr, value);
-//                }
-//            } else if (optionAndMethod.getReturntype().equals(JAVA_LANG_BOOLEAN)) {
-//                final Boolean value = (Boolean)parser.getOptionValue(optionAndMethod.getOption());
-//                if (null != value) {
-//                    optionAndMethod.getMethod().invoke(usr, value);
-//                }
-//            } else if (optionAndMethod.getReturntype().equals(JAVA_UTIL_DATE)) {
-//                final SimpleDateFormat sdf = new SimpleDateFormat(COMMANDLINE_DATEFORMAT);
-//                sdf.setTimeZone(TimeZone.getTimeZone(COMMANDLINE_TIMEZONE));
-//                try {
-//                    final String date = (String)parser.getOptionValue(optionAndMethod.getOption());
-//                    if( date != null ) {
-//                        final Date value = sdf.parse(date);
-//                        if (null != value) {
-//                            optionAndMethod.getMethod().invoke(usr, value);
-//                        }
-//                    }
-//                } catch (final ParseException e) {
-//                    throw new InvalidDataException("Wrong dateformat, use \"" + sdf.toPattern() + "\"");
-//                }
-//            } else if (optionAndMethod.getReturntype().equals(JAVA_UTIL_HASH_SET)) {
-//                final HashSet<?> value = (HashSet<?>)parser.getOptionValue(optionAndMethod.getOption());
-//                if (null != value) {
-//                    optionAndMethod.getMethod().invoke(usr, value);
-//                }
-//            }
-//        }
+        //        for (final OptionAndMethod optionAndMethod : optionsandmethods) {
+        //            if (optionAndMethod.getReturntype().equals(JAVA_LANG_STRING)) {
+        //                String value = (String)parser.getOptionValue(optionAndMethod.getOption());
+        //                if (null != value) {
+        //                    // On the command line an empty string can be used to clear that specific attribute.
+        //                    if ("".equals(value)) { value = null; }
+        //                    optionAndMethod.getMethod().invoke(usr, value);
+        //                }
+        //            } else if (optionAndMethod.getReturntype().equals(JAVA_LANG_INTEGER)) {
+        //                final Integer value = (Integer)parser.getOptionValue(optionAndMethod.getOption());
+        //                if (null != value) {
+        //                    optionAndMethod.getMethod().invoke(usr, value);
+        //                }
+        //            } else if (optionAndMethod.getReturntype().equals(JAVA_LANG_BOOLEAN)) {
+        //                final Boolean value = (Boolean)parser.getOptionValue(optionAndMethod.getOption());
+        //                if (null != value) {
+        //                    optionAndMethod.getMethod().invoke(usr, value);
+        //                }
+        //            } else if (optionAndMethod.getReturntype().equals(JAVA_UTIL_DATE)) {
+        //                final SimpleDateFormat sdf = new SimpleDateFormat(COMMANDLINE_DATEFORMAT);
+        //                sdf.setTimeZone(TimeZone.getTimeZone(COMMANDLINE_TIMEZONE));
+        //                try {
+        //                    final String date = (String)parser.getOptionValue(optionAndMethod.getOption());
+        //                    if( date != null ) {
+        //                        final Date value = sdf.parse(date);
+        //                        if (null != value) {
+        //                            optionAndMethod.getMethod().invoke(usr, value);
+        //                        }
+        //                    }
+        //                } catch (final ParseException e) {
+        //                    throw new InvalidDataException("Wrong dateformat, use \"" + sdf.toPattern() + "\"");
+        //                }
+        //            } else if (optionAndMethod.getReturntype().equals(JAVA_UTIL_HASH_SET)) {
+        //                final HashSet<?> value = (HashSet<?>)parser.getOptionValue(optionAndMethod.getOption());
+        //                if (null != value) {
+        //                    optionAndMethod.getMethod().invoke(usr, value);
+        //                }
+        //            }
+        //        }
     }
 
     protected void applyDynamicOptionsToUser(final AdminParser parser, final User usr) {

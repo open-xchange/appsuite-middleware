@@ -71,6 +71,7 @@ import com.openexchange.database.internal.ReplicationMonitor;
 public class UpdateFlagTest {
 
     @Test
+    @SuppressWarnings("static-method")
     public void testPreparedStatementExecuteUpdate() throws Exception {
         Connection mockCon = mock(Connection.class);
         PreparedStatement mockStmt = mock(PreparedStatement.class);
@@ -89,6 +90,7 @@ public class UpdateFlagTest {
     }
 
     @Test
+    @SuppressWarnings("static-method")
     public void testPreparedStatementExecute() throws Exception {
         Connection mockCon = mock(Connection.class);
         PreparedStatement mockStmt = mock(PreparedStatement.class);
@@ -107,6 +109,7 @@ public class UpdateFlagTest {
     }
 
     @Test
+    @SuppressWarnings("static-method")
     public void testPreparedStatementExecuteQuery() throws Exception {
         Connection mockCon = mock(Connection.class);
         PreparedStatement mockStmt = mock(PreparedStatement.class);
@@ -125,6 +128,7 @@ public class UpdateFlagTest {
     }
 
     @Test
+    @SuppressWarnings("static-method")
     public void testCreateStatementExecuteUpdate() throws Exception {
         Connection mockCon = mock(Connection.class);
         Statement mockStmt = mock(Statement.class);
@@ -143,6 +147,7 @@ public class UpdateFlagTest {
     }
 
     @Test
+    @SuppressWarnings("static-method")
     public void testCreateStatementExecute() throws Exception {
         Connection mockCon = mock(Connection.class);
         Statement mockStmt = mock(Statement.class);
@@ -161,6 +166,7 @@ public class UpdateFlagTest {
     }
 
     @Test
+    @SuppressWarnings("static-method")
     public void testCreateStatementExecuteQuery() throws Exception {
         Connection mockCon = mock(Connection.class);
         Statement mockStmt = mock(Statement.class);
@@ -184,9 +190,8 @@ public class UpdateFlagTest {
             super(pools, monitor, assign, delegate, noTimeout, write, usedAsRead);
         }
 
-        public void setSchema(String schema) throws SQLException {
+        public void setSchema(String schema) {
             // TODO Auto-generated method stub
-
         }
 
         public String getSchema() throws SQLException {
@@ -196,12 +201,10 @@ public class UpdateFlagTest {
 
         public void abort(Executor executor) throws SQLException {
             // TODO Auto-generated method stub
-
         }
 
         public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
             // TODO Auto-generated method stub
-
         }
 
         public int getNetworkTimeout() throws SQLException {
@@ -212,7 +215,5 @@ public class UpdateFlagTest {
         public ConnectionState getState() {
             return state;
         }
-
     }
-
 }

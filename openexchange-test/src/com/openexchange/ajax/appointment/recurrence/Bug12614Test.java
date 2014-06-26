@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -129,13 +129,15 @@ public final class Bug12614Test extends AbstractAJAXSession {
     }
 
     public void testDeleteException() throws Throwable {
-        final DeleteRequest request = new DeleteRequest(exception.getObjectID(),
-            exception.getParentFolderID(), exception.getLastModified(), false);
+        final DeleteRequest request = new DeleteRequest(
+            exception.getObjectID(),
+            exception.getParentFolderID(),
+            exception.getLastModified(),
+            false);
         final CommonDeleteResponse response = secretary.execute(request);
         final OXException e = response.getException();
         final String cause = e == null ? "" : e.toString();
-        assertFalse("Secretary is not able to delete a change exception in a "
-            + "shared folder: " + cause, response.hasError());
+        assertFalse("Secretary is not able to delete a change exception in a " + "shared folder: " + cause, response.hasError());
     }
 
     private void bossSharesPrivateFolder() throws OXException, IOException,

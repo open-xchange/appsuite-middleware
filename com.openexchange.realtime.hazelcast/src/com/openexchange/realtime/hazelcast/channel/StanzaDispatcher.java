@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,12 +53,15 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.directory.ResourceDirectory;
+import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
-import com.openexchange.realtime.hazelcast.Services;
+import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.hazelcast.Utils;
+import com.openexchange.realtime.hazelcast.osgi.Services;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 
@@ -66,10 +69,12 @@ import com.openexchange.realtime.packet.Stanza;
  * {@link StanzaDispatcher}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class StanzaDispatcher implements Callable<Map<ID, OXException>>, Serializable {
 
     private static final long serialVersionUID = 7824598922472715144L;
+    private static final Logger LOG = LoggerFactory.getLogger(StanzaDispatcher.class);
     private final Stanza stanza;
     private final Set<ID> targets;
 
@@ -103,21 +108,26 @@ public class StanzaDispatcher implements Callable<Map<ID, OXException>>, Seriali
         Map<ID, OXException> exceptions = dispatcher.send(stanza, targets);
         /*
          * The Stanza was delivered to this node because the ResourceDirectory listed this node in the routing info. If the Resource isn't
-         * available anylonger we remove it from the ResourceDirectory and try to send the Stanza again. This will succeed if the Channel
-         * can conjure the Resource.
+         * available anylonger we remove it from the ResourceDirectory and try to send the Stanza again via the GlobalMessageDispatcher
+         * service. This will succeed if the Channel can conjure the Resource.
          */
         if (Utils.shouldResend(exceptions, stanza)) {
-            final ResourceDirectory directory = Services.optService(ResourceDirectory.class);
-            if (null != directory) {
-                directory.remove(stanza.getTo());
-            }
-            final MessageDispatcher messageDispatcher = Services.getService(MessageDispatcher.class);
-            if (null != messageDispatcher) {
+            //Can't resend without incrementing but incrementing will mess up client sequences and further communication, so set to -1
+            stanza.setSequenceNumber(-1);
+            final GlobalRealtimeCleanup cleanup = Services.optService(GlobalRealtimeCleanup.class);
+            final MessageDispatcher messageDispatcher = Services.optService(MessageDispatcher.class);
+            if (cleanup == null || messageDispatcher == null) {
+                LOG.error(
+                    "Error while trying to resend.",
+                    RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(cleanup == null ? GlobalRealtimeCleanup.class : MessageDispatcher.class));
+            } else {
+                cleanup.cleanForId(stanza.getTo());
                 messageDispatcher.send(stanza);
+                // remove the exception that triggered the resend.
+                exceptions.remove(stanza.getTo());
             }
         }
         return exceptions;
-
     }
 
 }

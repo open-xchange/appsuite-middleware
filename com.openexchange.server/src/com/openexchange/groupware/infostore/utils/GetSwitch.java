@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -57,6 +57,11 @@ public class GetSwitch implements MetadataSwitcher {
 
 	public GetSwitch(final DocumentMetadata metadata){
 		this.metadata = metadata;
+	}
+
+	@Override
+	public Object meta() {
+	    return metadata.getMeta();
 	}
 
 	@Override

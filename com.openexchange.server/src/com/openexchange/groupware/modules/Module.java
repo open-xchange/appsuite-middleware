@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -67,7 +67,6 @@ public enum Module {
     CONTACTS("contacts", FolderObject.CONTACT),
     UNBOUND("unbound", FolderObject.UNBOUND),
     MAIL("mail", FolderObject.MAIL),
-    PROJECT("projects", FolderObject.PROJECT),
     INFOSTORE("infostore", FolderObject.INFOSTORE),
     SYSTEM("system", FolderObject.SYSTEM_MODULE);
 
@@ -146,16 +145,11 @@ public enum Module {
         case FolderObject.MAIL:
             moduleStr = MAIL.getName();
             break;
-        case FolderObject.PROJECT:
-            moduleStr = PROJECT.getName();
-            break;
         case FolderObject.INFOSTORE:
             moduleStr = INFOSTORE.getName();
             break;
         case FolderObject.SYSTEM_MODULE:
-            if (folderId == FolderObject.SYSTEM_OX_PROJECT_FOLDER_ID) {
-                moduleStr = PROJECT.getName();
-            } else if (folderId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
+            if (folderId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
                 moduleStr = INFOSTORE.getName();
             } else {
                 moduleStr = SYSTEM.getName();

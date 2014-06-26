@@ -1,0 +1,20 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Hazelcast Serialization
+Bundle-SymbolicName: com.openexchange.hazelcast.serialization
+Bundle-Version: 7.6.0
+Bundle-Activator: com.openexchange.hazelcast.serialization.osgi.HazelcastSerializationActivator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Eclipse-BuddyPolicy: registered
+Import-Package: com.hazelcast.config,
+ com.hazelcast.instance,
+ com.hazelcast.nio.serialization,
+ com.openexchange.log,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ org.osgi.framework,
+ org.osgi.util.tracker,
+ org.slf4j
+Bundle-ClassPath: .
+Export-Package: com.openexchange.hazelcast.serialization

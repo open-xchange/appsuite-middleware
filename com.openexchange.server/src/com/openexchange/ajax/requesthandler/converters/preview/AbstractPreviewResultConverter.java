@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,6 +51,7 @@ package com.openexchange.ajax.requesthandler.converters.preview;
 
 import static com.openexchange.java.Charsets.toAsciiBytes;
 import static com.openexchange.java.Charsets.toAsciiString;
+import static com.openexchange.java.Strings.isEmpty;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -81,8 +82,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
+import com.openexchange.preview.ContentTypeChecker;
 import com.openexchange.preview.PreviewDocument;
 import com.openexchange.preview.PreviewOutput;
 import com.openexchange.preview.PreviewService;
@@ -223,7 +228,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
                 final PreviewService previewService = ServerServiceRegistry.getInstance().getService(PreviewService.class);
 
                 final DataProperties dataProperties = new DataProperties(4);
-                dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, fileHolder.getContentType());
+                dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, getContentType(fileHolder, previewService instanceof ContentTypeChecker ? (ContentTypeChecker) previewService : null));
                 dataProperties.put(DataProperties.PROPERTY_DISPOSITION, fileHolder.getDisposition());
                 dataProperties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
                 dataProperties.put(DataProperties.PROPERTY_SIZE, Long.toString(fileHolder.getLength()));
@@ -337,6 +342,50 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
             return false;
         }
         return BOOLS.contains(value.trim().toLowerCase(Locale.US));
+    }
+
+    private static final Set<String> INVALIDS = MimeTypes.INVALIDS;
+
+    /**
+     * Gets the checked MIME type from given file.
+     *
+     * @param fileHolder The file
+     * @param checker The optional checker
+     * @return The checked MIME type
+     */
+    protected static String getContentType(final IFileHolder fileHolder, final ContentTypeChecker checker) {
+        String contentType = fileHolder.getContentType();
+        if (isEmpty(contentType)) {
+            // Determine Content-Type by file name
+            return MimeType2ExtMap.getContentType(fileHolder.getName());
+        }
+        // Cut to base type & sanitize
+        contentType = sanitizeContentType(getLowerCaseBaseType(contentType));
+        contentType = MimeTypes.checkedMimeType(contentType, fileHolder.getName(), INVALIDS);
+        if (isEmpty(contentType) || INVALIDS.contains(contentType) || (null != checker && !checker.isValid(contentType))) {
+            // Determine Content-Type by file name
+            contentType = MimeType2ExtMap.getContentType(fileHolder.getName());
+        }
+        return contentType == null ? "application/octet-stream" : contentType;
+    }
+
+    private static String sanitizeContentType(final String contentType) {
+        if (null == contentType) {
+            return null;
+        }
+        try {
+            return new ContentType(contentType).getBaseType();
+        } catch (final OXException e) {
+            return contentType;
+        }
+    }
+
+    private static String getLowerCaseBaseType(final String contentType) {
+        if (null == contentType) {
+            return null;
+        }
+        final int pos = contentType.indexOf(';');
+        return Strings.toLowerCase(pos > 0 ? contentType.substring(0, pos) : contentType).trim();
     }
 
     private static final String VIEW_RAW = "raw";
@@ -457,7 +506,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
         if (null == in) {
             return true;
         }
-        final PushbackInputStream pin = new PushbackInputStream(in);
+        final PushbackInputStream pin = Streams.pushbackInputStreamFor(in);
         final int read = pin.read();
         if (read < 0) {
             return true;

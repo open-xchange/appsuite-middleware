@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -71,8 +71,6 @@ public class UserModuleAccess {
     private Boolean infostore = true;
 
     private Boolean PinboardWrite = true;
-
-    private Boolean Projects = true;
 
     private Boolean readCreateSharedFolders = true;
 
@@ -336,20 +334,6 @@ public class UserModuleAccess {
      */
     public void setPinboardWrite(final Boolean val) {
         this.PinboardWrite = val;
-    }
-
-    /**
-     * Currently NOT in use!
-     */
-    public Boolean getProjects() {
-        return Projects;
-    }
-
-    /**
-     * Currently NOT in use!
-     */
-    public void setProjects(final Boolean val) {
-        this.Projects = val;
     }
 
     public Boolean getReadCreateSharedFolders() {

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange IMAP
 Bundle-SymbolicName: com.openexchange.imap
-Bundle-Version: 7.4.2
+Bundle-Version: 7.6.0
 Bundle-Vendor: Open-Xchange Inc.
 Import-Package: com.googlecode.concurrentlinkedhashmap,
  com.javacodegeeks.concurrent,
@@ -16,8 +16,10 @@ Import-Package: com.googlecode.concurrentlinkedhashmap,
  com.openexchange.groupware,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.contexts.impl,
+ com.openexchange.groupware.i18n,
  com.openexchange.groupware.ldap,
  com.openexchange.i18n,
+ com.openexchange.i18n.tools,
  com.openexchange.java,
  com.openexchange.java.util,
  com.openexchange.log,

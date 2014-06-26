@@ -2,9 +2,10 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Password Change Script
 Bundle-SymbolicName: com.openexchange.passwordchange.script
-Bundle-Version: 7.4.2
+Bundle-Version: 7.6.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-Description: The Open-Xchange password-change bundle that utilizes a script (e.g. "/bin/changepwd.sh") to change the password
 Import-Package: com.openexchange.config,
  com.openexchange.configuration,
  com.openexchange.database,

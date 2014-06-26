@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -61,8 +61,6 @@ import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.ConfigLoader;
 import com.hazelcast.config.MapConfig;
@@ -72,12 +70,13 @@ import com.hazelcast.config.QueueConfig;
 import com.hazelcast.config.SemaphoreConfig;
 import com.hazelcast.config.SymmetricEncryptionConfig;
 import com.hazelcast.config.TopicConfig;
-import com.hazelcast.impl.GroupProperties;
+import com.hazelcast.instance.GroupProperties;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.WildcardNamePropertyFilter;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
+import com.openexchange.hazelcast.serialization.DynamicPortableFactory;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.strings.StringParser;
@@ -102,19 +101,13 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
     /** Name of the subdirectory containing the hazelcast data structure properties */
     private static final String DIRECTORY_NAME = "hazelcast";
 
-    /** The bundle context */
-    private final BundleContext context;
-
     private Config config;
 
     /**
      * Initializes a new {@link HazelcastConfigurationServiceImpl}.
-     *
-     * @param configService A reference to the configuration service
      */
-    public HazelcastConfigurationServiceImpl(final BundleContext context) {
+    public HazelcastConfigurationServiceImpl() {
         super();
-        this.context = context;
     }
 
     @Override
@@ -124,13 +117,39 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
 
     @Override
     public synchronized Config getConfig() throws OXException {
-        if (null != this.config) {
-            return this.config;
+        if (null == config) {
+            config = loadConfig();
         }
+        return config;
+    }
+
+    @Override
+    public String dicoverMapName(String namePrefix) throws OXException {
+        Map<String, MapConfig> mapConfigs = getConfig().getMapConfigs();
+        if (null != mapConfigs && 0 < mapConfigs.size()) {
+            for (String mapName : mapConfigs.keySet()) {
+                if (mapName.startsWith(namePrefix)) {
+                    LOG.info("Using distributed map '{}'.", mapName);
+                    return mapName;
+                }
+            }
+        }
+        OXException exception = ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(
+            "No distributed map matching prefix '" + namePrefix + "'  found in hazelcast configuration");
+        LOG.warn("", exception);
+        throw exception;
+    }
+
+    /**
+     * Loads and configures the hazelcast configuration.
+     *
+     * @return The config
+     */
+    private static Config loadConfig() throws OXException {
         /*
          * Load or create default config
          */
-        config = loadXMLConfig();
+        Config config = loadXMLConfig();
         if (null == config) {
             config = new Config();
         }
@@ -151,7 +170,8 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         String groupPassword = configService.getProperty("com.openexchange.hazelcast.group.password");
         if (false == Strings.isEmpty(groupPassword)) {
             if ("wtV6$VQk8#+3ds!a".equalsIgnoreCase(groupPassword)) {
-                LOG.warn("The value 'wtV6$VQk8#+3ds!a' for 'com.openexchange.hazelcast.group.password' has not been changed from it's default. Please do so to restrict access to your cluster.");
+                LOG.warn("The value 'wtV6$VQk8#+3ds!a' for 'com.openexchange.hazelcast.group.password' has not been changed from it's "
+                    + "default. Please do so to restrict access to your cluster.");
             }
             config.getGroupConfig().setPassword(groupPassword);
         }
@@ -172,7 +192,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
                 configService.getProperty("com.openexchange.hazelcast.network.join.static.nodes"));
             if (null != members && 0 < members.length) {
                 for (String member : members) {
-                    if (false == isEmpty(member)) {
+                    if (false == Strings.isEmpty(member)) {
                         try {
                             config.getNetworkConfig().getJoin().getTcpIpConfig().addMember(InetAddress.getByName(member).getHostAddress());
                         } catch (UnknownHostException e) {
@@ -226,7 +246,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         String[] interfaces = Strings.splitByComma(configService.getProperty("com.openexchange.hazelcast.network.interfaces"));
         if (null != interfaces && 0 < interfaces.length) {
             for (String interfaze : interfaces) {
-                if (false == isEmpty(interfaze)) {
+                if (false == Strings.isEmpty(interfaze)) {
                     config.getNetworkConfig().getInterfaces().setEnabled(true).addInterface(interfaze);
                 }
             }
@@ -238,7 +258,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
             configService.getProperty("com.openexchange.hazelcast.network.outboundPortDefinitions"));
         if (null != outboundPortDefinitions && 0 < outboundPortDefinitions.length) {
             for (String portDefintion : outboundPortDefinitions) {
-                if (false == isEmpty(portDefintion)) {
+                if (false == Strings.isEmpty(portDefintion)) {
                     config.getNetworkConfig().addOutboundPortDefinition(portDefintion);
                 }
             }
@@ -262,29 +282,15 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         /*
          * Miscellaneous
          */
-        boolean loggingEnabled = configService.getBoolProperty("com.openexchange.hazelcast.logging.enabled", true);
-        if (loggingEnabled) {
-            // Check if log4j is running
-            boolean hasLog4J = false;
-            final Bundle[] bundles = context.getBundles();
-            for (int i = 0; !hasLog4J && i < bundles.length; i++) {
-                hasLog4J = ("org.apache.commons.logging.log4j".equals(bundles[i].getSymbolicName()));
-            }
-            if (hasLog4J) {
-                System.setProperty(GroupProperties.PROP_LOGGING_TYPE, "log4j");
-                config.setProperty(GroupProperties.PROP_LOGGING_TYPE, "log4j");
-            }
-        } else {
-            System.setProperty(GroupProperties.PROP_LOGGING_TYPE, "none");
-            config.setProperty(GroupProperties.PROP_LOGGING_TYPE, "none");
-        }
-        config.setProperty(GroupProperties.PROP_MAX_OPERATION_TIMEOUT,
+        String loggingType = configService.getBoolProperty("com.openexchange.hazelcast.logging.enabled", true) ? "slf4j" : "none";
+        System.setProperty(GroupProperties.PROP_LOGGING_TYPE, loggingType);
+        config.setProperty(GroupProperties.PROP_LOGGING_TYPE, loggingType);
+        config.setProperty(GroupProperties.PROP_VERSION_CHECK_ENABLED, "false");
+        config.setProperty(GroupProperties.PROP_OPERATION_CALL_TIMEOUT_MILLIS,
             configService.getProperty("com.openexchange.hazelcast.maxOperationTimeout", "5000"));
         config.setProperty(GroupProperties.PROP_ENABLE_JMX, configService.getProperty("com.openexchange.hazelcast.jmx", "true"));
         config.setProperty(GroupProperties.PROP_ENABLE_JMX_DETAILED,
-            configService.getProperty("com.openexchange.hazelcast.jmxDetailed", "false"));
-        config.setProperty(GroupProperties.PROP_REDO_GIVE_UP_THRESHOLD,
-            configService.getProperty("com.openexchange.hazelcast.redo.giveupThreshold", "10"));
+            configService.getProperty("com.openexchange.hazelcast.jmxDetailed", "true"));
         config.setProperty(GroupProperties.PROP_MEMCACHE_ENABLED,
             configService.getProperty("com.openexchange.hazelcast.memcache.enabled", "false"));
         config.setProperty(GroupProperties.PROP_REST_ENABLED,
@@ -305,8 +311,15 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
          * Data structure configs
          */
         applyDataStructures(config, listPropertyFiles());
-
-        return this.config;
+        /*
+         * Register serialization factory
+         */
+        config.getSerializationConfig().addPortableFactory(DynamicPortableFactory.FACTORY_ID,
+            Services.getService(DynamicPortableFactory.class, true));
+        /*
+         * Config ready
+         */
+        return config;
     }
 
     private static void applyDataStructures(Config config, File[] propertyFiles) throws OXException {
@@ -323,7 +336,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
             if (propertyName.startsWith("com.openexchange.hazelcast.configuration.map")) {
                 MapConfig mapConfig = createDataConfig(properties, MapConfig.class);
                 String attributes = properties.getProperty("com.openexchange.hazelcast.configuration.map.indexes.attributes");
-                if (false == isEmpty(attributes)) {
+                if (false == Strings.isEmpty(attributes)) {
                     String[] attrs = attributes.split(" *, *");
                     if (null != attrs && 0 < attrs.length) {
                         for (String attribute : attrs) {
@@ -333,7 +346,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
                 }
                 String orderedAttributes = properties.getProperty(
                     "com.openexchange.hazelcast.configuration.map.indexes.orderedAttributes");
-                if (false == isEmpty(orderedAttributes)) {
+                if (false == Strings.isEmpty(orderedAttributes)) {
                     String[] attrs = orderedAttributes.split(" *, *");
                     if (null != attrs && 0 < attrs.length) {
                         for (String attribute : attrs) {
@@ -425,18 +438,6 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
             Streams.close(in);
         }
         return properties;
-    }
-
-    private static boolean isEmpty(String string) {
-        if (null == string) {
-            return true;
-        }
-        for (int i = 0; i < string.length(); i++) {
-            if (false == Strings.isWhitespace(string.charAt(i))) {
-                return false;
-            }
-        }
-        return true;
     }
 
     /**

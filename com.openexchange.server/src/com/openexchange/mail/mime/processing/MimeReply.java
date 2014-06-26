@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.mime.processing;
 
+import static com.openexchange.java.Strings.asciiLowerCase;
+import static com.openexchange.java.Strings.isEmpty;
 import static com.openexchange.mail.mime.filler.MimeMessageFiller.setReplyHeaders;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.unfold;
@@ -74,6 +76,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.idn.IDNA;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -86,6 +89,7 @@ import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailSessionCache;
@@ -119,6 +123,7 @@ import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.regex.MatcherReplacer;
@@ -130,8 +135,7 @@ import com.openexchange.tools.regex.MatcherReplacer;
  */
 public final class MimeReply {
 
-    private static final org.slf4j.Logger LOG =
-        org.slf4j.LoggerFactory.getLogger(MimeReply.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MimeReply.class);
 
     private static final String PREFIX_RE = "Re: ";
 
@@ -153,7 +157,22 @@ public final class MimeReply {
      * @throws OXException If reply mail cannot be composed
      */
     public static MailMessage getReplyMail(final MailMessage originalMail, final boolean replyAll, final Session session, final int accountId) throws OXException {
-        return getReplyMail(originalMail, replyAll, session, accountId, null);
+        return getReplyMail(originalMail, replyAll, session, accountId, null, false);
+    }
+
+    /**
+     * Composes a reply message from specified original message based on MIME objects from <code>JavaMail</code> API.
+     *
+     * @param originalMail The referenced original mail
+     * @param replyAll <code>true</code> to reply to all; otherwise <code>false</code>
+     * @param session The session containing needed user data
+     * @param accountId The account ID
+     * @param setFrom <code>true</code> to set 'From' header; otherwise <code>false</code> to leave it
+     * @return An instance of {@link MailMessage} representing an user-editable reply mail
+     * @throws OXException If reply mail cannot be composed
+     */
+    public static MailMessage getReplyMail(final MailMessage originalMail, final boolean replyAll, final Session session, final int accountId, final boolean setFrom) throws OXException {
+        return getReplyMail(originalMail, replyAll, session, accountId, null, setFrom);
     }
 
     /**
@@ -168,6 +187,22 @@ public final class MimeReply {
      * @throws OXException If reply mail cannot be composed
      */
     public static MailMessage getReplyMail(final MailMessage originalMail, final boolean replyAll, final Session session, final int accountId, final UserSettingMail usm) throws OXException {
+        return getReplyMail(originalMail, replyAll, session, accountId, usm, false);
+    }
+
+    /**
+     * Composes a reply message from specified original message based on MIME objects from <code>JavaMail</code> API.
+     *
+     * @param originalMail The referenced original mail
+     * @param replyAll <code>true</code> to reply to all; otherwise <code>false</code>
+     * @param session The session containing needed user data
+     * @param accountId The account ID
+     * @param usm The user mail settings to use; leave to <code>null</code> to obtain from specified session
+     * @param setFrom <code>true</code> to set 'From' header; otherwise <code>false</code> to leave it
+     * @return An instance of {@link MailMessage} representing an user-editable reply mail
+     * @throws OXException If reply mail cannot be composed
+     */
+    public static MailMessage getReplyMail(final MailMessage originalMail, final boolean replyAll, final Session session, final int accountId, final UserSettingMail usm, final boolean setFrom) throws OXException {
         boolean preferToAsRecipient = false;
         final String originalMailFolder = originalMail.getFolder();
         MailPath msgref = null;
@@ -204,7 +239,7 @@ public final class MimeReply {
             session,
             accountId,
             MimeDefaultSession.getDefaultSession(),
-            usm);
+            usm, setFrom);
     }
 
     private static final Pattern PAT_META_CT = Pattern.compile("<meta[^>]*?http-equiv=\"?content-type\"?[^>]*?>", Pattern.CASE_INSENSITIVE);
@@ -214,7 +249,7 @@ public final class MimeReply {
         final MatcherReplacer mr = new MatcherReplacer(m, html);
         final StringBuilder replaceBuffer = new StringBuilder(html.length());
         if (m.find()) {
-            replaceBuffer.append("<meta http-equiv=\"Content-Type\" content=\"").append(contentType.getBaseType().toLowerCase(Locale.ENGLISH));
+            replaceBuffer.append("<meta http-equiv=\"Content-Type\" content=\"").append(Strings.toLowerCase(contentType.getBaseType()));
             replaceBuffer.append("; charset=").append(contentType.getCharsetParameter()).append("\" />");
             final String replacement = replaceBuffer.toString();
             replaceBuffer.setLength(0);
@@ -230,21 +265,22 @@ public final class MimeReply {
      * @param originalMsg The referenced original message
      * @param msgref The message reference
      * @param replyAll <code>true</code> to reply to all; otherwise <code>false</code>
-     * @param preferToAsRecipient <code>true</code> to prefer header 'To' as recipient; otherwise <code>false</code>
+     * @param preferToAsRecipient <code>true</code> to prefer header 'To' as recipient; otherwise <code>false</code> to prefer 'Reply-To'
      * @param session The session containing needed user data
      * @param accountId The account ID
      * @param mailSession The mail session
      * @param userSettingMail The user mail settings to use; leave to <code>null</code> to obtain from specified session
+     * @param setFrom <code>true</code> to set 'From' header; otherwise <code>false</code> to leave it
      * @return An instance of {@link MailMessage} representing an user-editable reply mail
      * @throws OXException If reply mail cannot be composed
      */
-    private static MailMessage getReplyMail(final MailMessage originalMsg, final MailPath msgref, final boolean replyAll, final boolean preferToAsRecipient, final Session session, final int accountId, final javax.mail.Session mailSession, final UserSettingMail userSettingMail) throws OXException {
+    private static MailMessage getReplyMail(final MailMessage originalMsg, final MailPath msgref, final boolean replyAll, final boolean preferToAsRecipient, final Session session, final int accountId, final javax.mail.Session mailSession, final UserSettingMail userSettingMail, final boolean setFrom) throws OXException {
         try {
             originalMsg.setAccountId(accountId);
             final MailMessage origMsg;
             {
                 final ContentType contentType = originalMsg.getContentType();
-                if (contentType.startsWith("multipart/related") && ("application/smil".equals(contentType.getParameter(toLowerCase("type"))))) {
+                if (contentType.startsWith("multipart/related") && ("application/smil".equals(asciiLowerCase(contentType.getParameter("type"))))) {
                     origMsg = MimeSmilFixer.getInstance().process(originalMsg);
                 } else {
                     origMsg = ManagedMimeMessage.clone(originalMsg);
@@ -259,18 +295,104 @@ public final class MimeReply {
             /*
              * Set headers of reply message
              */
-            final String subjectPrefix = PREFIX_RE;
-            String subjectHdrValue = MimeMessageUtility.checkNonAscii(origMsg.getHeader(MessageHeaders.HDR_SUBJECT, null));
-            if (subjectHdrValue == null) {
-                subjectHdrValue = "";
-            }
-            final String rawSubject = unfold(subjectHdrValue);
             {
+                final String rawSubject;
+                {
+                    final String subjectHdrValue = MimeMessageUtility.checkNonAscii(origMsg.getHeader(MessageHeaders.HDR_SUBJECT, null));
+                    if (subjectHdrValue == null) {
+                        rawSubject = "";
+                    } else {
+                        rawSubject = unfold(subjectHdrValue);
+                    }
+                }
                 final String decodedSubject = MimeMessageUtility.decodeMultiEncodedHeader(rawSubject);
-                final String newSubject =
-                    decodedSubject.regionMatches(true, 0, subjectPrefix, 0, 4) ? decodedSubject : new StringBuilder().append(subjectPrefix).append(
-                        decodedSubject).toString();
+                final String newSubject;
+                if (decodedSubject.regionMatches(true, 0, PREFIX_RE, 0, 4)) {
+                    newSubject = decodedSubject;
+                } else {
+                    newSubject = new StringBuilder().append(PREFIX_RE).append(decodedSubject).toString();
+                }
                 replyMsg.setSubject(newSubject, MailProperties.getInstance().getDefaultMimeCharset());
+            }
+            /*
+             * Set "From"
+             */
+            if (setFrom) {
+                final Set<InternetAddress> fromCandidates = new HashSet<InternetAddress>(8);
+                if (accountId == MailAccount.DEFAULT_ID) {
+                    addUserAliases(fromCandidates, session, ctx);
+                } else {
+                    // Check for Unified Mail account
+                    ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
+                    UnifiedInboxManagement management = registry.getService(UnifiedInboxManagement.class);
+                    if ((null != management) && (accountId == management.getUnifiedINBOXAccountID(session))) {
+                        int realAccountId = resolveFrom2Account(session, origMsg.getFrom());
+                        if (realAccountId == MailAccount.DEFAULT_ID) {
+                            addUserAliases(fromCandidates, session, ctx);
+                        } else {
+                            final MailAccountStorageService mass = registry.getService(MailAccountStorageService.class);
+                            if (null == mass) {
+                                addUserAliases(fromCandidates, session, ctx);
+                            } else {
+                                fromCandidates.add(new QuotedInternetAddress(mass.getMailAccount(realAccountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
+                            }
+                        }
+                    } else {
+                        final MailAccountStorageService mass = registry.getService(MailAccountStorageService.class);
+                        if (null == mass) {
+                            addUserAliases(fromCandidates, session, ctx);
+                        } else {
+                            fromCandidates.add(new QuotedInternetAddress(mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
+                        }
+                    }
+                }
+                /*
+                 * Check if present anywhere
+                 */
+                InternetAddress from = null;
+                {
+                    String hdrVal = origMsg.getHeader(MessageHeaders.HDR_TO, MessageHeaders.HDR_ADDR_DELIM);
+                    InternetAddress[] toAddrs = null;
+                    if (hdrVal != null) {
+                        toAddrs = parseAddressList(hdrVal, true);
+                        for (final InternetAddress addr : toAddrs) {
+                            if (fromCandidates.contains(addr)) {
+                                from = addr;
+                                break;
+                            }
+                        }
+                    }
+                    if (null == from) {
+                        hdrVal = origMsg.getHeader(MessageHeaders.HDR_CC, MessageHeaders.HDR_ADDR_DELIM);
+                        if (hdrVal != null) {
+                            toAddrs = parseAddressList(unfold(hdrVal), true);
+                            for (final InternetAddress addr : toAddrs) {
+                                if (fromCandidates.contains(addr)) {
+                                    from = addr;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (null == from) {
+                        hdrVal = origMsg.getHeader(MessageHeaders.HDR_BCC, MessageHeaders.HDR_ADDR_DELIM);
+                        if (hdrVal != null) {
+                            toAddrs = parseAddressList(unfold(hdrVal), true);
+                            for (final InternetAddress addr : toAddrs) {
+                                if (fromCandidates.contains(addr)) {
+                                    from = addr;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                /*
+                 * Set if a "From" candidate applies
+                 */
+                if (null != from) {
+                    replyMsg.setFrom(from);
+                }
             }
             /*
              * Set the appropriate recipients. Taken from RFC 822 section 4.4.4: If the "Reply-To" field exists, then the reply should go to
@@ -343,11 +465,28 @@ public final class MimeReply {
                 if (accountId == MailAccount.DEFAULT_ID) {
                     addUserAddresses(filter, mailSession, session, ctx);
                 } else {
-                    final MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
-                    if (null == mass) {
-                        addUserAddresses(filter, mailSession, session, ctx);
+                    // Check for Unified Mail account
+                    ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
+                    UnifiedInboxManagement management = registry.getService(UnifiedInboxManagement.class);
+                    if ((null != management) && (accountId == management.getUnifiedINBOXAccountID(session))) {
+                        int realAccountId = resolveFrom2Account(session, origMsg.getFrom());
+                        if (realAccountId == MailAccount.DEFAULT_ID) {
+                            addUserAddresses(filter, mailSession, session, ctx);
+                        } else {
+                            final MailAccountStorageService mass = registry.getService(MailAccountStorageService.class);
+                            if (null == mass) {
+                                addUserAddresses(filter, mailSession, session, ctx);
+                            } else {
+                                filter.add(new QuotedInternetAddress(mass.getMailAccount(realAccountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
+                            }
+                        }
                     } else {
-                        filter.add(new QuotedInternetAddress(mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
+                        final MailAccountStorageService mass = registry.getService(MailAccountStorageService.class);
+                        if (null == mass) {
+                            addUserAddresses(filter, mailSession, session, ctx);
+                        } else {
+                            filter.add(new QuotedInternetAddress(mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
+                        }
                     }
                 }
                 /*
@@ -582,6 +721,13 @@ public final class MimeReply {
         /*
          * Add user's aliases to filter
          */
+        addUserAliases(filter, session, ctx);
+    }
+
+    private static void addUserAliases(final Set<InternetAddress> set, final Session session, final Context ctx) throws OXException {
+        /*
+         * Add user's aliases to set
+         */
         final String[] userAddrs = UserStorage.getInstance().getUser(session.getUserId(), ctx).getAliases();
         if (userAddrs != null && userAddrs.length > 0) {
             final StringBuilder addrBuilder = new StringBuilder();
@@ -589,7 +735,7 @@ public final class MimeReply {
             for (int i = 1; i < userAddrs.length; i++) {
                 addrBuilder.append(',').append(userAddrs[i]);
             }
-            filter.addAll(Arrays.asList(parseAddressList(addrBuilder.toString(), false)));
+            set.addAll(Arrays.asList(parseAddressList(addrBuilder.toString(), false)));
         }
     }
 
@@ -666,7 +812,7 @@ public final class MimeReply {
      * @throws MessagingException
      * @throws IOException
      */
-    private static boolean generateReplyText(final MailMessage msg, final ContentType retvalContentType, final StringHelper strHelper, final LocaleAndTimeZone ltz, final UserSettingMail usm, final javax.mail.Session mailSession, final Session session, final int accountId, final List<String> replyTexts) throws OXException, MessagingException, IOException {
+    static boolean generateReplyText(final MailMessage msg, final ContentType retvalContentType, final StringHelper strHelper, final LocaleAndTimeZone ltz, final UserSettingMail usm, final javax.mail.Session mailSession, final Session session, final int accountId, final List<String> replyTexts) throws OXException, MessagingException, IOException {
         final StringBuilder textBuilder = new StringBuilder(8192);
         final ContentType contentType = msg.getContentType();
         boolean found = false;
@@ -841,7 +987,7 @@ public final class MimeReply {
          */
         for (int i = count - 1; i >= 0; i--) {
             final MailPart part = multipartPart.getEnclosedMailPart(i);
-            if (!"attachment".equals(toLowerCase(part.getContentDisposition().getDisposition()))) {
+            if (!"attachment".equals(asciiLowerCase(part.getContentDisposition().getDisposition()))) {
                 partContentType.setContentType(part.getContentType());
                 if (partContentType.startsWith(MimeTypes.MIME_MESSAGE_RFC822)) {
                     final MailMessage enclosedMsg = (MailMessage) part.getContent();
@@ -982,7 +1128,9 @@ public final class MimeReply {
                 }
                 found = true;
             } else if (partContentType.startsWith(MULTIPART)) {
-                found |= gatherAllTextContents(part, partContentType, accountId, pc);
+                if (!found || !multipartPart.getContentType().startsWith("multipart/alternative")) {
+                    found |= gatherAllTextContents(part, partContentType, accountId, pc);
+                }
             }
         }
         return found;
@@ -1088,35 +1236,56 @@ public final class MimeReply {
         }
     }
 
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
     private static final Pattern PATTERN_CONTENT = Pattern.compile("(<[a-zA-Z]+[^>]*?>)?\\p{L}+");
 
     private static boolean hasContent(final String html) {
         return PATTERN_CONTENT.matcher(html).find();
     }
 
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
+    /**
+     * Resolves specified "from" address to associated account identifier
+     *
+     * @param session The session
+     * @param from The from addresses
+     * @return The account identifier
+     * @throws OXException If address cannot be resolved
+     */
+    private static int resolveFrom2Account(final Session session, final InternetAddress[] from) throws OXException {
+        if (null == from || from.length == 0) {
+            return MailAccount.DEFAULT_ID;
         }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        return resolveFrom2Account(session, from[0]);
+    }
+
+    /**
+     * Resolves specified "from" address to associated account identifier
+     *
+     * @param session The session
+     * @param from The from address
+     * @return The account identifier
+     * @throws OXException If address cannot be resolved
+     */
+    private static int resolveFrom2Account(final Session session, final InternetAddress from) throws OXException {
+        /*
+         * Resolve "From" to proper mail account to select right transport server
+         */
+        int accountId;
+        if (null == from) {
+            accountId = MailAccount.DEFAULT_ID;
+        } else {
+            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService( MailAccountStorageService.class);
+            final int user = session.getUserId();
+            final int cid = session.getContextId();
+            accountId = storageService.getByPrimaryAddress(from.getAddress(), user, cid);
+            if (accountId != -1) {
+                // Retry with IDN representation
+                accountId = storageService.getByPrimaryAddress(IDNA.toIDN(from.getAddress()), user, cid);
+            }
         }
-        return builder.toString();
+        if (accountId == -1) {
+            accountId = MailAccount.DEFAULT_ID;
+        }
+        return accountId;
     }
 
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,7 +51,6 @@ package com.openexchange.data.conversion.ical.ical4j;
 
 import java.util.List;
 import net.fortuna.ical4j.model.Calendar;
-import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.Comment;
 import net.fortuna.ical4j.model.property.Method;
@@ -60,6 +59,7 @@ import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.SimpleMode;
 import com.openexchange.data.conversion.ical.ZoneInfo;
+import com.openexchange.data.conversion.ical.itip.ITipContainer;
 import com.openexchange.data.conversion.ical.itip.ITipEmitter;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
@@ -85,7 +85,7 @@ public class ICal4JITipEmitter extends ICal4JEmitter implements ITipEmitter {
         VEvent event = null;
         if (message.getAppointment() != null) {
         	appt = message.getAppointment();
-        	event = createEvent(mode, 0, message.getAppointment(), ctx, errors, warnings);
+        	event = createEvent(mode, 0, message.getAppointment(), ctx, errors, warnings, new ITipContainer());
             if (message.getComment() != null && !message.getComment().trim().equals("")) {
                 event.getProperties().add(new Comment(message.getComment()));
                 consumedComment = true;

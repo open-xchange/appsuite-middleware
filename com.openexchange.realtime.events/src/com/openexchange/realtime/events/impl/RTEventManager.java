@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -57,10 +57,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.events.RTEventEmitterService;
 import com.openexchange.realtime.events.RTEventManagerService;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.IDEventHandler;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -71,8 +73,10 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class RTEventManager implements RTEventManagerService {
-    
+public class RTEventManager implements RTEventManagerService, RealtimeJanitor {
+
+    private static final Logger LOG = LoggerFactory.getLogger(RTEventManager.class);
+
     private final ConcurrentHashMap<String, RTEventEmitterService> emitterFactories = new ConcurrentHashMap<String, RTEventEmitterService>(); 
 
     private final ConcurrentHashMap<ID, List<RTEventSubscription>> subscriptions = new ConcurrentHashMap<ID, List<RTEventSubscription>>();
@@ -87,19 +91,26 @@ public class RTEventManager implements RTEventManagerService {
         super();
         this.services = services;
     }
-    
+
+    /**
+     * Add a {@link RTEventEmitterService} with its event namespace to this manager so that clients can subscribe to the events from that namespace. 
+     *
+     * @param factory The {@link RTEventEmitterService} producing events.
+     */
     public void addEmitter(RTEventEmitterService factory) {
         emitterFactories.put(factory.getNamespace(), factory);
     }
-    
+
+    /**
+     * Remove a already registered {@link RTEventEmitterService} from this manager. Clients won't be able to subscribe to the events from
+     * this service anylonger.
+     * 
+     * @param factory The {@link RTEventEmitterService} producing events.
+     */
     public void removeEmitter(RTEventEmitterService service) {
         emitterFactories.remove(service.getNamespace());
     }
 
-    
-    /* (non-Javadoc)
-     * @see com.openexchange.realtime.events.impl.RTEventManagerService#getSupportedEvents()
-     */
     @Override
     public Set<String> getSupportedEvents() {
         HashSet<String> supportedEvents = new HashSet<String>();
@@ -112,10 +123,7 @@ public class RTEventManager implements RTEventManagerService {
         
         return supportedEvents;
     }
-    
-    /* (non-Javadoc)
-     * @see com.openexchange.realtime.events.impl.RTEventManagerService#subscribe(java.lang.String, java.lang.String, com.openexchange.realtime.packet.ID, com.openexchange.session.Session, java.util.Map)
-     */
+
     @Override
     public void subscribe(String event, String selector, ID id, Session session, Map<String, String> parameters) {
         String[] parsedEvent = parse(event);
@@ -150,10 +158,7 @@ public class RTEventManager implements RTEventManagerService {
     private String[] parse(String event) {
         return event.split(":");
     }
-    
-    /* (non-Javadoc)
-     * @see com.openexchange.realtime.events.impl.RTEventManagerService#getSubscriptions(com.openexchange.realtime.packet.ID)
-     */
+
     @Override
     public Set<String> getSubscriptions(ID id) {
         List<RTEventSubscription> list = getSubscriptions(id, false);
@@ -175,22 +180,10 @@ public class RTEventManager implements RTEventManagerService {
             list = new CopyOnWriteArrayList<RTEventSubscription>();
             List<RTEventSubscription> meantime = subscriptions.putIfAbsent(id, list);
             list = (meantime != null) ? meantime : list;
-            if (meantime == null) {
-                id.on("dispose", new IDEventHandler() {
-                    
-                    @Override
-                    public void handle(String event, ID id, Object source, Map<String, Object> properties) {
-                        unsubscribe(id);
-                    }
-                });
-            }
         }
         return list;
     }
-    
-    /* (non-Javadoc)
-     * @see com.openexchange.realtime.events.impl.RTEventManagerService#unsubscribe(com.openexchange.realtime.packet.ID)
-     */
+
     @Override
     public void unsubscribe(ID id) {
         List<RTEventSubscription> list = subscriptions.remove(id);
@@ -206,13 +199,8 @@ public class RTEventManager implements RTEventManagerService {
             }
             emitter.unregister(eventName, subscription);
         }
-        
-        
     }
-    
-    /* (non-Javadoc)
-     * @see com.openexchange.realtime.events.impl.RTEventManagerService#unsubscribe(java.lang.String, com.openexchange.realtime.packet.ID)
-     */
+
     @Override
     public void unsubscribe(String event, ID id) {
         String[] parsedEvent = parse(event);
@@ -243,6 +231,12 @@ public class RTEventManager implements RTEventManagerService {
         }
         
         list.removeAll(toRemove);
+    }
+
+    @Override
+    public void cleanupForId(ID id) {
+        LOG.debug("Cleanup for ID: {}", id);
+        unsubscribe(id);
     }
 
 

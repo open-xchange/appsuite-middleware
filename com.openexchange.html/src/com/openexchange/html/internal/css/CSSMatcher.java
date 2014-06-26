@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,8 +51,10 @@ package com.openexchange.html.internal.css;
 
 import static com.openexchange.java.Strings.isEmpty;
 import static com.openexchange.java.Strings.toLowerCase;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -67,7 +69,6 @@ import com.openexchange.html.internal.RegexUtility;
 import com.openexchange.html.internal.RegexUtility.GroupType;
 import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.java.InterruptibleCharSequence;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.StringBufferStringer;
 import com.openexchange.java.StringBuilderStringer;
 import com.openexchange.java.Stringer;
@@ -233,16 +234,14 @@ public final class CSSMatcher {
      * @return <code>true</code> if value is matched by given allowed values; otherwise <code>false</code>
      */
     public static boolean matches(final String value, final Set<String> allowedValuesSet) {
-        final int size = allowedValuesSet.size();
-        final String[] allowedValues = allowedValuesSet.toArray(new String[size]);
+        final Set<String> allowedValues = new HashSet<String>(allowedValuesSet);
         /*
          * Ensure to check against pattern first
          */
-        final TIntSet patIndices = new TIntHashSet(2);
-        for (int i = 0; i < size; i++) {
-            final String allowedValue = allowedValues[i];
+        for (Iterator<String> it = allowedValues.iterator(); it.hasNext();) {
+            final String allowedValue = it.next();
             if (PATTERN_IS_PATTERN.matcher(allowedValue).matches()) {
-                patIndices.add(i);
+                it.remove();
                 if (allowedValue.indexOf('d') >= 0) {
                     return false;
                 }
@@ -261,13 +260,13 @@ public final class CSSMatcher {
          * Now check against values
          */
         boolean retval = false;
-        for (int i = 0; i < size && !retval; i++) {
-            if (!patIndices.contains(i)) {
-                /*
-                 * Check against non-pattern allowed value
-                 */
-                retval = allowedValues[i].equalsIgnoreCase(value);
-            }
+        int pos = value.indexOf('(');
+        String checkEqualsWith = pos > 0 && value.indexOf(')', pos) > 0 ? value.substring(0, pos) : value;
+        for (Iterator<String> it = allowedValues.iterator(); !retval && it.hasNext();) {
+            /*
+             * Check against non-pattern allowed value
+             */
+            retval = it.next().equalsIgnoreCase(checkEqualsWith);
         }
         return retval;
     }
@@ -351,6 +350,31 @@ public final class CSSMatcher {
     }
 
     /**
+     * Drops comments from given CSS snippet.
+     *
+     * @param cssSnippet The CSS snippet
+     * @return The CSS snippet cleansed by comments
+     */
+    protected static String dropComments(final String cssSnippet) {
+        // Check for comment
+        int cstart = cssSnippet.indexOf("/*");
+        if (cstart < 0) {
+            return cssSnippet;
+        }
+        int cend = cssSnippet.indexOf("*/");
+        if (cend <= 0 || cend <= cstart) {
+            return cssSnippet;
+        }
+        final StringBuilder hlp = new StringBuilder(cssSnippet);
+        do {
+            hlp.delete(cstart, cend + 2);
+            cstart = hlp.indexOf("/*");
+            cend = hlp.indexOf("*/");
+        } while (cstart >= 0 && cend > 0 && cend > cstart);
+        return hlp.toString();
+    }
+
+    /**
      * Checks the CSS provided by given <code>Stringer</code>.
      *
      * @param cssBuilder The CSS content
@@ -375,7 +399,7 @@ public final class CSSMatcher {
                 if (cssBld.indexOf("{") < 0) {
                     return Boolean.valueOf(checkCSSElements(cssBld, styleMap, removeIfAbsent));
                 }
-                final String css = CRLF.matcher(cssBld).replaceAll(" ");
+                final String css = dropComments(CRLF.matcher(cssBld).replaceAll(" "));
                 final int length = css.length();
                 cssBld.setLength(0);
                 final Stringer cssElemsBuffer = new StringBuilderStringer(new StringBuilder(length));
@@ -510,7 +534,7 @@ public final class CSSMatcher {
             return match;
         }
         if (isEmpty(cssPrefix)) {
-            return new StringAllocator(match).append('{').toString();
+            return new StringBuilder(match).append('{').toString();
         }
         final int length = match.length();
         // Cut off trailing '{' character
@@ -897,7 +921,7 @@ public final class CSSMatcher {
                         elemBuilder.append(elementValues);
                         hasValues = true;
                     } else {
-                        final String[] tokens = Strings.splitByWhitespaces(elementValues);
+                        final String[] tokens = splitToTokens(elementValues);
                         for (int j = 0; j < tokens.length; j++) {
                             if (matches(tokens[j], allowedValuesSet)) {
                                 if (j > 0) {
@@ -932,6 +956,50 @@ public final class CSSMatcher {
         }
         mr.appendTail(cssBuilder);
         return modified;
+    }
+
+    private static String[] splitToTokens(final String elementValues) {
+        List<String> l = new LinkedList<String>();
+        int length = elementValues.length();
+        StringBuilder token = new StringBuilder(16);
+        boolean open = false;
+        for (int i = 0; i < length; i++) {
+            char c = elementValues.charAt(i);
+            switch (c) {
+            case '\r': // fall-through
+            case '\f': // fall-through
+            case '\n': // fall-through
+            case '\t': // fall-through
+            case ' ':
+                {
+                    if (open) {
+                        token.append(c);
+                    } else {
+                        if (token.length() > 0) {
+                            l.add(token.toString());
+                            token.setLength(0);
+                        }
+                    }
+                }
+                break;
+            case '(':
+                token.append(c);
+                open = true;
+                break;
+            case ')':
+                token.append(c);
+                open = false;
+                break;
+            default:
+                token.append(c);
+                break;
+            }
+        }
+        if (token.length() > 0) {
+            l.add(token.toString());
+            token.setLength(0);
+        }
+        return l.toArray(new String[l.size()]);
     }
 
     /**

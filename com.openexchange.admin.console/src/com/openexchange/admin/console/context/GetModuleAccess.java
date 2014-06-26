@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -106,7 +106,6 @@ public class GetModuleAccess extends ContextAbstraction {
         datarow.add(String.valueOf(access.getIcal()));
         datarow.add(String.valueOf(access.getInfostore()));
         datarow.add(String.valueOf(access.getPinboardWrite()));
-        datarow.add(String.valueOf(access.getProjects()));
         datarow.add(String.valueOf(access.getReadCreateSharedFolders()));
         datarow.add(String.valueOf(access.getRssBookmarks()));
         datarow.add(String.valueOf(access.getRssPortal()));
@@ -143,7 +142,6 @@ public class GetModuleAccess extends ContextAbstraction {
         columnnames.add(UserAbstraction.OPT_ACCESS_ICAL);
         columnnames.add(UserAbstraction.OPT_ACCESS_INFOSTORE);
         columnnames.add(UserAbstraction.OPT_ACCESS_PINBOARD_WRITE);
-        columnnames.add(UserAbstraction.OPT_ACCESS_PROJECTS);
         columnnames.add(UserAbstraction.OPT_ACCESS_READCREATE_SHARED_FOLDERS);
         columnnames.add(UserAbstraction.OPT_ACCESS_RSS_BOOKMARKS);
         columnnames.add(UserAbstraction.OPT_ACCESS_RSS_PORTAL);

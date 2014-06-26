@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.requesthandler.converters.preview.cache;
 
+import static com.openexchange.ajax.requesthandler.cache.ResourceCacheProperties.QUOTA_AWARE;
 import gnu.trove.ConcurrentTIntObjectHashMap;
 import java.io.IOException;
 import java.io.InputStream;
@@ -58,7 +59,13 @@ import java.sql.DataTruncation;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.RejectedExecutionException;
 import com.openexchange.ajax.requesthandler.cache.AbstractResourceCache;
 import com.openexchange.ajax.requesthandler.cache.CachedResource;
 import com.openexchange.ajax.requesthandler.cache.ResourceCacheMetadata;
@@ -71,6 +78,8 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.java.Streams;
 import com.openexchange.preview.PreviewExceptionCodes;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.timer.TimerService;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.external.FileStorageCodes;
@@ -80,7 +89,9 @@ import com.openexchange.tools.file.external.FileStorageCodes;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FileStoreResourceCacheImpl extends AbstractResourceCache {
+public class FileStoreResourceCacheImpl extends AbstractResourceCache {
+
+    protected static long ALIGNMENT_DELAY = 10000L;
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileStoreResourceCacheImpl.class);
 
@@ -110,23 +121,25 @@ public final class FileStoreResourceCacheImpl extends AbstractResourceCache {
 
     /**
      * Initializes a new {@link FileStoreResourceCacheImpl}.
+     * @throws OXException
      */
-    public FileStoreResourceCacheImpl(final boolean quotaAware) {
-        super();
-        this.quotaAware = quotaAware;
+    public FileStoreResourceCacheImpl(final ServiceLookup serviceLookup) throws OXException {
+        super(serviceLookup);
+        quotaAware = getConfigurationService().getBoolProperty(QUOTA_AWARE, false);
     }
 
     private void batchDeleteFiles(final Collection<String> ids, final FileStorage fileStorage) {
         try {
             fileStorage.deleteFiles(ids.toArray(new String[0]));
         } catch (final Exception e) {
+            LOG.warn("Error while deleting a batch of preview files. Trying one-by-one now...", e);
             // Retry one-by-one
             for (final String id : ids) {
                 if (null != id) {
                     try {
                         fileStorage.deleteFile(id);
                     } catch (final Exception x) {
-                        // Ignore
+                        LOG.warn("Could not remove preview file '{}'. Consider using 'checkconsistency' to clean up the filestore.", id);
                     }
                 }
             }
@@ -150,77 +163,206 @@ public final class FileStoreResourceCacheImpl extends AbstractResourceCache {
         }
     }
 
+    private static final Object SCHEDULED = new Object();
+    private static final Object RUNNING = new Object();
+    private final ConcurrentMap<Integer, Object> alignmentRequests = new ConcurrentHashMap<Integer, Object>();
+
     private boolean save(final String id, final byte[] bytes, final String optName, final String optType, final int userId, final int contextId) throws OXException {
+        LOG.debug("Trying to cache resource {}.", id);
         final ResourceCacheMetadataStore metadataStore = getMetadataStore();
         final FileStorage fileStorage = getFileStorage(contextId, quotaAware);
         final DatabaseService dbService = getDBService();
+        if (fitsQuotas(bytes.length)) {
+            /*
+             * If the resource fits the quotas we store it even if we exceed the quota when storing it.
+             * Removing old cache entries is done asynchronously in the finally block.
+             */
+            final String refId = fileStorage.saveNewFile(Streams.newByteArrayInputStream(bytes));
+            final ResourceCacheMetadata newMetadata = new ResourceCacheMetadata();
+            newMetadata.setContextId(contextId);
+            newMetadata.setUserId(userId);
+            newMetadata.setResourceId(id);
+            newMetadata.setFileName(prepareFileName(optName));
+            newMetadata.setFileType(prepareFileType(optType));
+            newMetadata.setSize(bytes.length);
+            newMetadata.setCreatedAt(System.currentTimeMillis());
+            newMetadata.setRefId(refId);
 
-        final Connection con = dbService.getWritable(contextId);
-        ResourceCacheMetadata existingMetadata = loadExistingEntry(metadataStore, con, contextId, userId, id);
-        long existingSize = existingMetadata == null ? 0L : existingMetadata.getSize();
-        if (!ensureUnexceededContextQuota(con, bytes.length, contextId, existingSize)) {
-            dbService.backWritable(contextId, con);
-            return false;
-        }
+            final Connection con = dbService.getWritable(contextId);
+            ResourceCacheMetadata existingMetadata = null;
+            boolean committed = false;
+            boolean triggerAlignment = false;
+            long start = System.currentTimeMillis();
+            try {
+                /*
+                 * We have to deal with high concurrency here. Selecting an entry with FOR UPDATE leads to
+                 * a gap lock and causes deadlocks between insertion requests. Therefore we use a double-check
+                 * idiom here. Only if an entry exists we lock it with 'FOR UPDATE'. Updates on existing entries
+                 * should happen rarely and are mostly performed asynchronous so performance should not be a
+                 * big problem.
+                 */
+                Databases.startTransaction(con);
+                if (entryExists(metadataStore, con, contextId, userId, id)) {
+                    existingMetadata = loadExistingEntryForUpdate(metadataStore, con, contextId, userId, id);
+                    if (existingMetadata == null) {
+                        metadataStore.store(con, newMetadata);
+                    } else {
+                        metadataStore.update(con, newMetadata);
+                    }
+                } else {
+                    metadataStore.store(con, newMetadata);
+                }
 
-        String refId = null;
-        boolean committed = false;
-        try {
-            Databases.startTransaction(con);
-            refId = fileStorage.saveNewFile(Streams.newByteArrayInputStream(bytes));
-            ResourceCacheMetadata metadata = new ResourceCacheMetadata();
-            metadata.setContextId(contextId);
-            metadata.setUserId(userId);
-            metadata.setResourceId(id);
-            metadata.setFileName(optName);
-            metadata.setFileType(optType);
-            metadata.setSize(bytes.length);
-            metadata.setCreatedAt(System.currentTimeMillis());
-            metadata.setRefId(refId);
-            if (existingMetadata == null) {
-                metadataStore.store(con, metadata);
-            } else {
-                metadataStore.update(con, metadata);
-            }
-            con.commit();
-            committed = true;
-            return true;
-        } catch (final DataTruncation e) {
-            throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
-        } catch (final SQLException e) {
-            throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
-        } finally {
-            if (committed) {
-                Databases.autocommit(con);
-                dbService.backWritable(contextId, con);
-                if (existingMetadata != null) {
+                long globalQuota = getGlobalQuota();
+                if (globalQuota > 0) {
+                    long usedSize = metadataStore.getUsedSize(con, contextId);
+                    if (usedSize > globalQuota) {
+                        triggerAlignment = true;
+                    }
+                }
+
+                con.commit();
+                committed = true;
+                return true;
+            } catch (final DataTruncation e) {
+                throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
+            } catch (final SQLException e) {
+                // duplicate key conflict
+                if (e.getErrorCode() == 1022) {
+                    long transactionDuration = System.currentTimeMillis() - start;
+                    LOG.warn("Caching a resource failed due to a duplicate key conflict, this should happen very rarely otherwise this may indicate a performance problem."
+                        + " The transaction lasted {}ms. Original message: {}.", transactionDuration, e.getMessage());
+                } else {
+                    throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
+                }
+            } finally {
+                if (committed) {
+                    Databases.autocommit(con);
+                    dbService.backWritable(contextId, con);
+                    if (existingMetadata != null) {
+                        try {
+                            if (!fileStorage.deleteFile(existingMetadata.getRefId())) {
+                                LOG.warn("Could not remove stored file '{}' after updating cached resource. Consider using 'checkconsistency' to clean up the filestore.", existingMetadata.getRefId());
+                            }
+                        } catch (OXException e) {
+                            LOG.warn("Could not remove stored file '{}' after updating cached resource. Consider using 'checkconsistency' to clean up the filestore.", existingMetadata.getRefId(), e);
+                        }
+                    }
+
+                    // Storing the resource exceeded the quota. We schedule an alignment task if this wasn't already done.
+                    if (triggerAlignment && alignmentRequests.putIfAbsent(contextId, SCHEDULED) == null && scheduleAlignmentTask(contextId)) {
+                        LOG.debug("Scheduling alignment task for context {}.", contextId);
+                    } else {
+                        LOG.debug("Skipping scheduling of alignment task for context {}.", contextId);
+                    }
+                } else {
+                    if (con != null) {
+                        try {
+                            con.rollback();
+                        } catch (SQLException e) {
+                            LOG.warn("Could not rollback database transaction after failing to cache a resource. Consider using 'checkconsistency' to clean up the database.");
+                        }
+                        Databases.autocommit(con);
+                        dbService.backWritableAfterReading(contextId, con);
+                    }
+
                     try {
-                        if (!fileStorage.deleteFile(existingMetadata.getRefId())) {
-                            LOG.warn("Could not remove stored file '{}' after updating cached resource. Consider using 'checkconsistency' to clean up the filestore.", existingMetadata.getRefId());
+                        if (refId != null && !fileStorage.deleteFile(refId)) {
+                            LOG.warn("Could not remove stored file '{}' during transaction rollback. Consider using 'checkconsistency' to clean up the filestore.", refId);
                         }
                     } catch (OXException e) {
-                        LOG.warn("Could not remove stored file '{}' after updating cached resource. Consider using 'checkconsistency' to clean up the filestore.", existingMetadata.getRefId(), e);
+                        LOG.warn("Could not remove stored file '{}' during transaction rollback. Consider using 'checkconsistency' to clean up the filestore.", refId, e);
                     }
-                }
-            } else {
-                if (con != null) {
-                    try {
-                        con.rollback();
-                    } catch (SQLException e) {
-                        LOG.warn("Could not rollback database transaction after failing to cache a resource. Consider using 'checkconsistency' to clean up the database.");
-                    }
-                    Databases.autocommit(con);
-                    dbService.backWritableAfterReading(contextId, con);
-                }
-
-                try {
-                    if (refId != null && !fileStorage.deleteFile(refId)) {
-                        LOG.warn("Could not remove stored file '{}' during transaction rollback. Consider using 'checkconsistency' to clean up the filestore.", refId);
-                    }
-                } catch (OXException e) {
-                    LOG.warn("Could not remove stored file '{}' during transaction rollback. Consider using 'checkconsistency' to clean up the filestore.", refId, e);
                 }
             }
+        }
+
+        return false;
+    }
+
+    protected boolean scheduleAlignmentTask(final int contextId) {
+        try {
+            TimerService timerService = optTimerService();
+            if (timerService != null) {
+                timerService.schedule(new Runnable() {
+                    @Override
+                    public void run() {
+                        alignToQuota(contextId);
+                    }
+                }, ALIGNMENT_DELAY);
+
+                return true;
+            }
+        } catch (RejectedExecutionException e) {
+            alignmentRequests.remove(contextId);
+            LOG.warn("Could not schedule alignment task for context {}.", contextId, e);
+        }
+
+        return false;
+    }
+
+    protected void alignToQuota(final int contextId) {
+        if (!alignmentRequests.replace(contextId, SCHEDULED, RUNNING)) {
+            return;
+        }
+
+        try {
+            final ResourceCacheMetadataStore metadataStore = getMetadataStore();
+            final DatabaseService dbService = getDBService();
+            final Connection con = dbService.getWritable(contextId);
+            final Set<String> refIds = new HashSet<String>();
+            boolean transactionStarted = false;
+            try {
+                long globalQuota = getGlobalQuota();
+                long usedContextQuota = metadataStore.getUsedSize(con, contextId);
+                if (globalQuota > 0 && usedContextQuota > globalQuota) {
+                    long neededSpace = usedContextQuota - globalQuota;
+                    long collected = 0L;
+
+                    Databases.startTransaction(con);
+                    transactionStarted = true;
+                    List<ResourceCacheMetadata> entries = metadataStore.loadForCleanUp(con, contextId);
+                    Iterator<ResourceCacheMetadata> it = entries.iterator();
+                    while (collected < neededSpace && it.hasNext()) {
+                        ResourceCacheMetadata metadata = it.next();
+                        String refId = metadata.getRefId();
+                        if (refId != null) {
+                            refIds.add(refId);
+                        }
+                        collected += (metadata.getSize() > 0 ? metadata.getSize() : 0);
+                    }
+
+                    if (!refIds.isEmpty()) {
+                        metadataStore.removeByRefIds(con, contextId, refIds);
+                    }
+                    con.commit();
+                }
+            } catch (SQLException s) {
+                if (transactionStarted) {
+                    Databases.rollback(con);
+                }
+                LOG.error("Could not align preview cache for context {} to quota.", contextId, s);
+            } finally {
+                alignmentRequests.remove(contextId);
+                if (transactionStarted) {
+                    Databases.autocommit(con);
+                }
+
+                if (refIds.isEmpty()) {
+                    dbService.backWritableAfterReading(contextId, con);
+                } else {
+                    dbService.backWritable(contextId, con);
+                }
+            }
+
+            if (refIds.isEmpty()) {
+                LOG.debug("No need to align preview cache for context {} to quota.", contextId);
+            } else {
+                LOG.debug("Aligning preview cache for context {} to quota.", contextId);
+                batchDeleteFiles(refIds, getFileStorage(contextId, quotaAware));
+            }
+        } catch (Exception e) {
+            LOG.error("Could not align preview cache for context {} to quota.", contextId, e);
         }
     }
 
@@ -317,69 +459,21 @@ public final class FileStoreResourceCacheImpl extends AbstractResourceCache {
         return true;
     }
 
-    private boolean ensureUnexceededContextQuota(final Connection con, final long desiredSize, final int contextId, final long existingSize) throws OXException {
-        final ResourceCacheMetadataStore metadataStore = getMetadataStore();
-        final long[] qts = getContextQuota(contextId);
-        final long total = qts[0];
-        final long totalPerDocument = qts[1];
-        if (total > 0L || totalPerDocument > 0L) {
-            if (total <= 0L) {
-                return (totalPerDocument <= 0 || desiredSize <= totalPerDocument);
+    private boolean fitsQuotas(final long desiredSize) {
+        final long globalQuota = getGlobalQuota();
+        final long documentQuota = getDocumentQuota();
+        if (globalQuota > 0L || documentQuota > 0L) {
+            if (globalQuota <= 0L) {
+                return (documentQuota <= 0 || desiredSize <= documentQuota);
             }
 
             // Check if document's size fits into quota limits at all
-            if (desiredSize > total || desiredSize > totalPerDocument) {
+            if (desiredSize > globalQuota || desiredSize > documentQuota) {
                 return false;
-            }
-
-            // Try to create space through removing oldest entries
-            // until enough space is available
-            List<ResourceCacheMetadata> toRemove = new ArrayList<ResourceCacheMetadata>();
-            boolean commited = false;
-            try {
-                Databases.startTransaction(con);
-                long usedContextQuota = metadataStore.getUsedSize(con, contextId) - existingSize;
-                while (usedContextQuota + desiredSize > total) {
-                    ResourceCacheMetadata metadata = metadataStore.removeOldest(con, contextId);
-                    if (metadata == null) {
-                        return false;
-                    }
-
-                    toRemove.add(metadata);
-                    usedContextQuota = metadataStore.getUsedSize(con, contextId) - existingSize;
-                    if (usedContextQuota <= 0 && desiredSize > total) {
-                        return false;
-                    }
-                }
-                con.commit();
-                commited = true;
-            } catch (SQLException e) {
-                throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
-            } finally {
-                if (commited) {
-                    deleteResources(contextId, toRemove);
-                } else {
-                    Databases.rollback(con);
-                }
-
-                Databases.autocommit(con);
             }
         }
 
         return true;
-    }
-
-    private void deleteResources(int contextId, List<ResourceCacheMetadata> toRemove) throws OXException {
-        List<String> refIds = new ArrayList<String>(toRemove.size());
-        for (ResourceCacheMetadata metadata : toRemove) {
-            if (metadata.getRefId() != null) {
-                refIds.add(metadata.getRefId());
-            }
-        }
-
-        if (refIds.size() > 0) {
-            batchDeleteFiles(refIds, getFileStorage(contextId, quotaAware));
-        }
     }
 
 }

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -227,13 +227,13 @@ public class Response {
 
 	/*
 	 * An ATOM is any CHAR delimited by :
-	 * SPACE | CTL | '(' | ')' | '{' | '%' | '*' | '"' | '\'
+	 * SPACE | CTL | '(' | ')' | '{' | '%' | '*' | '"' | '\' | ']'
 	 */
 	byte b;
 	int start = index;
 	while (index < size && ((b = buffer[index]) > ' ') &&
 	       b != '(' && b != ')' && b != '%' && b != '*' && 
-	       b != '"' && b != '\\' && b != 0x7f &&
+	       b != '"' && b != '\\'  && b != ']' && b != 0x7f &&
 	       (delim == '\0' || b != delim))
 	    index++;
 

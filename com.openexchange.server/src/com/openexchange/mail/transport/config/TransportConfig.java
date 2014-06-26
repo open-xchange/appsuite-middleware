@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -108,10 +108,10 @@ public abstract class TransportConfig extends MailConfig {
         String serverURL = TransportConfig.getTransportServerURL(mailAccount);
         if (serverURL == null) {
             if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getTransportServerSource())) {
-                throw MailConfigException.create(new com.openexchange.java.StringAllocator(128).append("Property \"").append(
+                throw MailConfigException.create(new StringBuilder(128).append("Property \"").append(
                     "com.openexchange.mail.transportServer").append("\" not set in mail properties").toString());
             }
-            throw MailConfigException.create(new com.openexchange.java.StringAllocator(128).append("Cannot determine transport server URL for user ").append(
+            throw MailConfigException.create(new StringBuilder(128).append("Cannot determine transport server URL for user ").append(
                 session.getUserId()).append(" in context ").append(session.getContextId()).toString());
         }
         {

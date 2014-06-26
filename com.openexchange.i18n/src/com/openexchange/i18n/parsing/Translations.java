@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,7 +53,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import com.openexchange.java.StringAllocator;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -90,7 +89,7 @@ public class Translations {
 
     @Override
     public String toString() {
-        final StringAllocator builder = new StringAllocator(64);
+        final StringBuilder builder = new StringBuilder(64);
         builder.append('{');
         if (locale != null) {
             builder.append("locale=").append(locale).append(", ");

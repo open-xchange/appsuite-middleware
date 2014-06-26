@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,8 +52,6 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.atomic.AtomicBoolean;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
@@ -61,6 +59,7 @@ import org.osgi.service.http.HttpService;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.mailfilter.ajax.actions.MailfilterAction;
@@ -68,32 +67,23 @@ import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterExceptionCode;
 import com.openexchange.mailfilter.internal.MailFilterChecker;
 import com.openexchange.mailfilter.internal.MailFilterPreferencesItem;
 import com.openexchange.mailfilter.internal.MailFilterProperties;
+import com.openexchange.mailfilter.internal.MailFilterReloadable;
 import com.openexchange.mailfilter.internal.MailFilterServletInit;
-import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;
-import com.openexchange.osgi.DeferredActivator;
-import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.mailfilter.services.Services;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 
-public class Activator extends DeferredActivator {
+public class Activator extends HousekeepingActivator {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
-
-    private final AtomicBoolean mstarted;
-
-    private ServiceRegistration<PreferencesItemService> serviceRegistration;
-
-    private ServiceRegistration<EventHandler> handlerRegistration;
-
-    private ServiceRegistration<CapabilityChecker> capabilityRegistration;
 
     /**
      * Initializes a new {@link MailFilterServletActivator}
      */
     public Activator() {
         super();
-        mstarted = new AtomicBoolean();
     }
 
     @Override
@@ -101,46 +91,10 @@ public class Activator extends DeferredActivator {
         return new Class<?>[] { ConfigurationService.class, HttpService.class, SessiondService.class, DispatcherPrefixService.class, CapabilityService.class };
     }
 
-
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        LOG.info("Re-available service: {}", clazz.getName());
-        MailFilterServletServiceRegistry.getServiceRegistry().addService(clazz, getService(clazz));
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        LOG.warn("Absent service: {}", clazz.getName());
-        MailFilterServletServiceRegistry.getServiceRegistry().removeService(clazz);
-    }
-
-    @Override
-    public void startBundle() throws Exception {
+    protected void startBundle() throws Exception {
         try {
-            /*
-             * (Re-)Initialize server service registry with available services
-             */
-            {
-                final ServiceRegistry registry = MailFilterServletServiceRegistry.getServiceRegistry();
-                registry.clearRegistry();
-                final Class<?>[] classes = getNeededServices();
-                for (int i = 0; i < classes.length; i++) {
-                    final Object service = getService(classes[i]);
-                    if (null != service) {
-                        registry.addService(classes[i], service);
-                    }
-                }
-            }
-            if (!mstarted.compareAndSet(false, true)) {
-                /*
-                 * Don't start the server again. A duplicate call to
-                 * startBundle() is probably caused by temporary absent
-                 * service(s) whose re-availability causes to trigger this
-                 * method again.
-                 */
-                LOG.info("A temporary absent service is available again");
-                return;
-            }
+            Services.setServiceLookup(this);
 
             MailFilterServletInit.getInstance().start();
 
@@ -171,15 +125,17 @@ public class Activator extends DeferredActivator {
                 };
                 final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
                 dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-                handlerRegistration = context.registerService(EventHandler.class, eventHandler, dict);
+                registerService(EventHandler.class, eventHandler, dict);
             }
 
-            serviceRegistration = context.registerService(PreferencesItemService.class, new MailFilterPreferencesItem(), null);
+            registerService(PreferencesItemService.class, new MailFilterPreferencesItem(), null);
             getService(CapabilityService.class).declareCapability(MailFilterChecker.CAPABILITY);
 
             final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
             properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, MailFilterChecker.CAPABILITY);
-            capabilityRegistration = context.registerService(CapabilityChecker.class, new MailFilterChecker(), properties);
+            registerService(CapabilityChecker.class, new MailFilterChecker(), properties);
+
+            registerService(Reloadable.class, new MailFilterReloadable(), null);
 
         } catch (final Exception e) {
             LOG.error("", e);
@@ -188,31 +144,14 @@ public class Activator extends DeferredActivator {
     }
 
     @Override
-    public void stopBundle() throws Exception {
+    protected void stopBundle() throws Exception {
         try {
-            if (null != handlerRegistration) {
-                handlerRegistration.unregister();
-                handlerRegistration = null;
-            }
-            if (null != serviceRegistration) {
-                serviceRegistration.unregister();
-                serviceRegistration = null;
-            }
-            if (null != capabilityRegistration) {
-                capabilityRegistration.unregister();
-                capabilityRegistration = null;
-            }
+            super.stopBundle();
             MailFilterServletInit.getInstance().stop();
-
-            /*
-             * Clear service registry
-             */
-            MailFilterServletServiceRegistry.getServiceRegistry().clearRegistry();
+            Services.setServiceLookup(null);
         } catch (final Exception e) {
             LOG.error("", e);
             throw e;
-        } finally {
-            mstarted.set(false);
         }
     }
 
@@ -222,8 +161,8 @@ public class Activator extends DeferredActivator {
      * @throws Exception
      */
     // protected to be able to test this
-    protected static void checkConfigfile() throws Exception {
-        final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+    public static void checkConfigfile() throws Exception {
+        final ConfigurationService config = Services.getService(ConfigurationService.class);
         final Properties file = config.getFile("mailfilter.properties");
         if (file.isEmpty()) {
             throw new Exception("No configfile found for mailfilter bundle");

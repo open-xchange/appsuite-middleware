@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -59,10 +59,6 @@ public class QuartzProperties {
 
     public static final String START_LOCAL_SCHEDULER = "com.openexchange.quartz.startLocalScheduler";
 
-    public static final String START_CLUSTERED_SCHEDULER = "com.openexchange.quartz.startClusteredScheduler";
-
     public static final String LOCAL_THREADS = "com.openexchange.quartz.localThreads";
-
-    public static final String CLUSTERED_THREADS = "com.openexchange.quartz.clusteredThreads";
 
 }

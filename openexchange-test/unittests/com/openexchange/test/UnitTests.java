@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -140,7 +140,6 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.webdav.action.ApacheURLDecoderTest.class);
 
         tests.addTestSuite(com.openexchange.groupware.attach.CopyAttachmentsForChangeExceptionsTest.class);
-        tests.addTestSuite(com.openexchange.groupware.links.CopyLinksForChangeExceptionsTest.class);
 
         tests.addTestSuite(com.openexchange.groupware.container.DataObjectTest.class);
         tests.addTestSuite(com.openexchange.groupware.container.FolderChildObjectTest.class);

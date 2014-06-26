@@ -51,9 +51,9 @@ import com.sun.mail.iap.*;
 public class UID implements Item {
     
     static final char[] name = {'U','I','D'};
-    public int seqnum;
+    public final int seqnum;
 
-    public long uid;
+    public final long uid;
 
     /**
      * Constructor

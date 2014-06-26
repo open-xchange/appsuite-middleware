@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,9 +50,9 @@
 package com.openexchange.data.conversion.ical;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 
@@ -119,87 +119,91 @@ public class ConversionWarning extends OXException {
         return index;
     }
 
-    public static enum Code implements OXExceptionCode {
+    public static enum Code implements DisplayableOXExceptionCode {
         /**
          * Unable to convert task status "%1$s".
          */
-        INVALID_STATUS(ConversionWarningMessage.INVALID_STATUS_MSG, CATEGORY_USER_INPUT, 1),
+        INVALID_STATUS("Unable to convert task status \"%1$s\".", CATEGORY_USER_INPUT, 1, ConversionWarningMessage.INVALID_STATUS_MSG),
         /**
          * Unable to convert task priority %1$d.
          */
-        INVALID_PRIORITY(ConversionWarningMessage.INVALID_PRIORITY_MSG, CATEGORY_USER_INPUT, 2),
+        INVALID_PRIORITY("Unable to convert task priority %d.", CATEGORY_USER_INPUT, 2, ConversionWarningMessage.INVALID_PRIORITY_MSG),
         /**
          * Can not create recurrence rule: %s
          */
-        CANT_CREATE_RRULE(ConversionWarningMessage.CANT_CREATE_RRULE_MSG, CATEGORY_ERROR, 3),
+        CANT_CREATE_RRULE("Can not create recurrence rule: %s", CATEGORY_ERROR, 3, null),
         /**
          * Invalid session given to implementation "%1$s".
          */
-        INVALID_SESSION(ConversionWarningMessage.INVALID_SESSION_MSG, CATEGORY_ERROR, 4),
+        INVALID_SESSION("Invalid session given to implementation \"%1$s\".", CATEGORY_ERROR, 4, null),
         /**
          * Can't generate uid.
          */
-        CANT_GENERATE_UID(ConversionWarningMessage.CANT_GENERATE_UID_MSG, CATEGORY_ERROR, 5),
+        CANT_GENERATE_UID("Can not generate uid.", CATEGORY_ERROR, 5, null),
         /**
          * Problem writing to stream.
          */
-        WRITE_PROBLEM(ConversionWarningMessage.WRITE_PROBLEM_MSG, CATEGORY_CONNECTIVITY, 6),
+        WRITE_PROBLEM("Problem writing to stream.", CATEGORY_CONNECTIVITY, 6, null),
         /**
          * Validation of calendar failed.
          */
-        VALIDATION(ConversionWarningMessage.VALIDATION_MSG, CATEGORY_ERROR, 7),
+        VALIDATION("Validation of calendar failed.", CATEGORY_ERROR, 7, null),
         /**
          * Can not resolve user: %d
          */
-        CANT_RESOLVE_USER(ConversionWarningMessage.CANT_RESOLVE_USER_MSG, CATEGORY_ERROR, 8),
+        CANT_RESOLVE_USER("Can not resolve user: %d", CATEGORY_ERROR, 8, null),
         /**
          * Parsing error parsing ical: %s
          */
-        PARSE_EXCEPTION(ConversionWarningMessage.PARSE_EXCEPTION_MSG, CATEGORY_USER_INPUT, 9),
+        PARSE_EXCEPTION("Parsing error parsing ical: %s", CATEGORY_USER_INPUT, 9, ConversionWarningMessage.PARSE_EXCEPTION_MSG),
         /**
          * Unknown Class: %1$s
          */
-        UNKNOWN_CLASS(ConversionWarningMessage.UNKNOWN_CLASS_MSG, CATEGORY_USER_INPUT, 10),
+        UNKNOWN_CLASS("Unknown Class: %1$s", CATEGORY_USER_INPUT, 10, ConversionWarningMessage.UNKNOWN_CLASS_MSG),
         /**
          * Cowardly refusing to convert confidential classified objects.
          */
-        CLASS_CONFIDENTIAL(ConversionWarningMessage.CLASS_CONFIDENTIAL_MSG, CATEGORY_USER_INPUT, 11),
+        CLASS_CONFIDENTIAL("Cowardly refusing to convert confidential classified objects.", CATEGORY_USER_INPUT, 11,
+            ConversionWarningMessage.CLASS_CONFIDENTIAL_MSG),
         /**
          * Missing DTStart in appointment
          */
-        MISSING_DTSTART(ConversionWarningMessage.MISSING_DTSTART_MSG, CATEGORY_USER_INPUT, 12),
+        MISSING_DTSTART("Missing DTSTART", CATEGORY_USER_INPUT, 12, ConversionWarningMessage.MISSING_DTSTART_MSG),
         /**
          * Can not resolve resource: %d
          */
-        CANT_RESOLVE_RESOURCE(ConversionWarningMessage.CANT_RESOLVE_RESOURCE_MSG, CATEGORY_ERROR, 13),
+        CANT_RESOLVE_RESOURCE("Can not resolve resource: %1$s", CATEGORY_ERROR, 13, null),
         /**
          * Private Appointments can not have attendees. Removing attendees and accepting appointment anyway.
          */
-        PRIVATE_APPOINTMENTS_HAVE_NO_PARTICIPANTS(ConversionWarningMessage.PRIVATE_APPOINTMENTS_HAVE_NO_PARTICIPANTS_MSG, CATEGORY_USER_INPUT, 14),
+        PRIVATE_APPOINTMENTS_HAVE_NO_PARTICIPANTS("Private appointments can not have attendees. Removing attendees and accepting "
+            + "appointment anyway.", CATEGORY_USER_INPUT, 14, ConversionWarningMessage.PRIVATE_APPOINTMENTS_HAVE_NO_PARTICIPANTS_MSG),
         /**
          * Not supported recurrence pattern: BYMONTH
          */
-        BYMONTH_NOT_SUPPORTED(ConversionWarningMessage.BYMONTH_NOT_SUPPORTED_MSG, CATEGORY_USER_INPUT, 15),
+        BYMONTH_NOT_SUPPORTED("Not supported recurrence pattern: BYMONTH", CATEGORY_USER_INPUT, 15,
+            ConversionWarningMessage.BYMONTH_NOT_SUPPORTED_MSG),
         /**
          * This does not look like an iCal file. Please check the file.
          */
-        DOES_NOT_LOOK_LIKE_ICAL_FILE(ConversionWarningMessage.DOES_NOT_LOOK_LIKE_ICAL_FILE_MSG, CATEGORY_USER_INPUT, 16),
+        DOES_NOT_LOOK_LIKE_ICAL_FILE("This does not look like an iCal file. Please check the file.", CATEGORY_USER_INPUT, 16,
+            ConversionWarningMessage.DOES_NOT_LOOK_LIKE_ICAL_FILE_MSG),
         /**
          * Empty "CLASS" element.
          */
-        EMPTY_CLASS(ConversionWarningMessage.EMPTY_CLASS_MSG, CATEGORY_USER_INPUT, 17),
+        EMPTY_CLASS("Empty \"CLASS\" element.", CATEGORY_USER_INPUT, 17, ConversionWarningMessage.EMPTY_CLASS_MSG),
         /**
          * Insufficient information for parsing/writing this element.
          */
-        INSUFFICIENT_INFORMATION(ConversionWarningMessage.INSUFFICIENT_INFORMATION_MSG, CATEGORY_ERROR, 18),
+        INSUFFICIENT_INFORMATION("Insufficient information for parsing/writing this element.", CATEGORY_ERROR, 18, null),
         /**
          * An error occurred: %1$s
          */
-        UNEXPECTED_ERROR(ConversionWarningMessage.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 19),
+        UNEXPECTED_ERROR("An error occurred: %1$s", CATEGORY_ERROR, 19, null),
         /**
          * Element automatically truncated: %s
          */
-        TRUNCATION_WARNING(ConversionWarningMessage.TRUNCATION_WARNING_MSG, CATEGORY_TRUNCATED, 20),
+        TRUNCATION_WARNING("Element truncated: %s", CATEGORY_TRUNCATED, 20, ConversionWarningMessage.TRUNCATION_WARNING_MSG),
 
         ;
 
@@ -218,6 +222,8 @@ public class ConversionWarning extends OXException {
          */
         private final int number;
 
+        private String displayMessage;
+
         /**
          * Default constructor.
          *
@@ -225,10 +231,11 @@ public class ConversionWarning extends OXException {
          * @param category category.
          * @param number detail number.
          */
-        private Code(final String message, final Category category, final int number) {
+        private Code(final String message, final Category category, final int number, String displayMessage) {
             this.message = message;
             this.category = category;
             this.number = number;
+            this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
         }
 
         @Override
@@ -293,6 +300,11 @@ public class ConversionWarning extends OXException {
          */
         public OXException create(final Throwable cause, final Object... args) {
             return OXExceptionFactory.getInstance().create(this, cause, args);
+        }
+
+        @Override
+        public String getDisplayMessage() {
+            return displayMessage;
         }
     }
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -295,7 +295,7 @@ public class FacebookServiceImpl implements FacebookService {
     }
 
     /**
-     * Sets the birthday for the contact based on the facebook information
+     * Sets the birthday for the contact based on the Facebook information
      *
      * @param contact - the {@link Contact} to set the birthday for
      * @param birthday - the string the birthday is included in
@@ -318,9 +318,8 @@ public class FacebookServiceImpl implements FacebookService {
                     cal.set(Calendar.YEAR, year);
                     contact.setBirthday(cal.getTime());
                 }
-            }
-            else {
-                LOG.info(
+            } else {
+                LOG.debug(
                     "Unable to parse birthday string for facebook user '{} {}' because pattern did not match! Tried to parse {}.",
                     contact.getGivenName(),
                     contact.getSurName(),
@@ -330,24 +329,25 @@ public class FacebookServiceImpl implements FacebookService {
     }
 
     /**
-     * Sets the email address for the contact based on the facebook information
+     * Sets the E-Mail address for the contact based on the Facebook information
      *
-     * @param contact - the {@link Contact} to set the birthday for
+     * @param contact - the {@link Contact} to set the E-Mail address for
      * @param email - the string the email is included in
      */
     protected void setEmail(Contact contact, String email) {
-        try {
-            InternetAddress emailAddr = new InternetAddress(email);
-            emailAddr.validate();
-
-            contact.setEmail1(email);
-        } catch (AddressException addressException) {
-            LOG.info(
-                "Email address for facebook user '{} {}' is not valid and cannot be imported! Tried to import {}.",
-                contact.getGivenName(),
-                contact.getSurName(),
-                email,
-                addressException);
+        if (isValid(email)) {
+            try {
+                new InternetAddress(email).validate();
+                contact.setEmail1(email);
+            } catch (AddressException addressException) {
+                LOG.debug(
+                    "Email address for facebook user '{} {}' is not valid and cannot be imported! Tried to import {}.",
+                    contact.getGivenName(),
+                    contact.getSurName(),
+                    email,
+                    addressException);
+            }
         }
     }
+
 }

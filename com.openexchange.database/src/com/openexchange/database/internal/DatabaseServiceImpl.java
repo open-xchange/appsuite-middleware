@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,15 +51,15 @@ package com.openexchange.database.internal;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import com.openexchange.database.Assignment;
-import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.database.internal.wrapping.JDBC4ConnectionReturner;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.LogProperties;
 import com.openexchange.pooling.PoolingException;
 
 /**
@@ -72,27 +72,27 @@ public final class DatabaseServiceImpl implements DatabaseService {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DatabaseServiceImpl.class);
 
     private final Pools pools;
-    private final ConfigDatabaseService configDatabaseService;
-    private final ContextDatabaseAssignmentService assignmentService;
+    private final ConfigDatabaseServiceImpl configDatabaseService;
     private final ReplicationMonitor monitor;
 
-    public DatabaseServiceImpl(Pools pools, ConfigDatabaseService configDatabaseService, ContextDatabaseAssignmentService assignmentService, ReplicationMonitor monitor) {
+    public DatabaseServiceImpl(Pools pools, ConfigDatabaseServiceImpl configDatabaseService, ReplicationMonitor monitor) {
         super();
         this.pools = pools;
         this.configDatabaseService = configDatabaseService;
-        this.assignmentService = assignmentService;
         this.monitor = monitor;
     }
 
     private Connection get(final int contextId, final boolean write, final boolean noTimeout) throws OXException {
-        final AssignmentImpl assign = assignmentService.getAssignment(contextId);
-        LogProperties.putProperty(LogProperties.Name.DATABASE_SCHEMA, assign.getSchema());
+        final AssignmentImpl assign = configDatabaseService.getAssignment(contextId);
+        return get(assign, write, noTimeout);
+    }
+
+    private Connection get(final AssignmentImpl assign, final boolean write, final boolean noTimeout) throws OXException {
         return monitor.checkActualAndFallback(pools, assign, noTimeout, write);
     }
 
     private static void back(final Connection con) {
         if (null == con) {
-            LogProperties.putProperty(LogProperties.Name.DATABASE_SCHEMA, null);
             final OXException e = DBPoolingExceptionCodes.NULL_CONNECTION.create();
             LOG.error("", e);
             return;
@@ -102,14 +102,11 @@ public final class DatabaseServiceImpl implements DatabaseService {
         } catch (final SQLException e) {
             final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             LOG.error("", e1);
-        } finally {
-            LogProperties.putProperty(LogProperties.Name.DATABASE_SCHEMA, null);
         }
     }
 
     private static void backFromReading(Connection con) {
         if (null == con) {
-            LogProperties.putProperty(LogProperties.Name.DATABASE_SCHEMA, null);
             final OXException e = DBPoolingExceptionCodes.NULL_CONNECTION.create();
             LOG.error("", e);
             return;
@@ -123,14 +120,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
         } catch (final SQLException e) {
             final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             LOG.error("", e1);
-        } finally {
-            LogProperties.putProperty(LogProperties.Name.DATABASE_SCHEMA, null);
         }
-    }
-
-    @Override
-    public void invalidate(final int contextId) throws OXException {
-        assignmentService.removeAssignments(contextId);
     }
 
     // Delegate config database service methods.
@@ -168,6 +158,56 @@ public final class DatabaseServiceImpl implements DatabaseService {
     @Override
     public String getServerName() throws OXException {
         return configDatabaseService.getServerName();
+    }
+
+    @Override
+    public int getWritablePool(int contextId) throws OXException {
+        return configDatabaseService.getWritablePool(contextId);
+    }
+
+    @Override
+    public String getSchemaName(int contextId) throws OXException {
+        return configDatabaseService.getSchemaName(contextId);
+    }
+
+    @Override
+    public int[] getContextsInSameSchema(int contextId) throws OXException {
+        return configDatabaseService.getContextsInSameSchema(contextId);
+    }
+
+    @Override
+    public int[] getContextsInSameSchema(Connection con, int contextId) throws OXException {
+        return configDatabaseService.getContextsInSameSchema(con, contextId);
+    }
+
+    @Override
+    public int[] getContextsInSchema(Connection con, int poolId, String schema) throws OXException {
+        return configDatabaseService.getContextsInSchema(con, poolId, schema);
+    }
+
+    @Override
+    public String[] getUnfilledSchemas(Connection con, int poolId, int maxContexts) throws OXException {
+        return configDatabaseService.getUnfilledSchemas(con, poolId, maxContexts);
+    }
+
+    @Override
+    public void invalidate(int contextId) {
+        configDatabaseService.invalidate(contextId);
+    }
+
+    @Override
+    public void writeAssignment(Connection con, Assignment assignment) throws OXException {
+        configDatabaseService.writeAssignment(con, assignment);
+    }
+
+    @Override
+    public void deleteAssignment(Connection con, int contextId) throws OXException {
+        configDatabaseService.deleteAssignment(con, contextId);
+    }
+
+    @Override
+    public void lock(Connection con) throws OXException {
+        configDatabaseService.lock(con);
     }
 
     // Implemented database service methods.
@@ -246,6 +286,26 @@ public final class DatabaseServiceImpl implements DatabaseService {
     }
 
     @Override
+    public Connection getReadOnlyMonitored(int readPoolId, int writePoolId, String schema, int partitionId) throws OXException {
+        return getMonitoredConnection(readPoolId, writePoolId, schema, partitionId, false, false);
+    }
+
+    @Override
+    public Connection getWritableMonitored(int readPoolId, int writePoolId, String schema, int partitionId) throws OXException {
+        return getMonitoredConnection(readPoolId, writePoolId, schema, partitionId, true, false);
+    }
+
+    @Override
+    public Connection getWritableMonitoredForUpdateTask(int readPoolId, int writePoolId, String schema, int partitionId) throws OXException {
+        return getMonitoredConnection(readPoolId, writePoolId, schema, partitionId, true, true);
+    }
+
+    public Connection getMonitoredConnection(int readPoolId, int writePoolId, String schema, int partitionId, boolean write, boolean noTimeout) throws OXException {
+        AssignmentImpl assignment = new AssignmentImpl(partitionId, Server.getServerId(), readPoolId, writePoolId, schema);
+        return get(assignment, write, noTimeout);
+    }
+
+    @Override
     public void backReadOnly(final Context ctx, final Connection con) {
         back(con);
     }
@@ -308,25 +368,76 @@ public final class DatabaseServiceImpl implements DatabaseService {
     }
 
     @Override
-    public int getWritablePool(final int contextId) throws OXException {
-        final Assignment assign = assignmentService.getAssignment(contextId);
-        return assign.getWritePoolId();
+    public void backReadOnlyMonitored(int readPoolId, int writePoolId, String schema, int partitionId, Connection con) {
+        back(con);
     }
 
     @Override
-    public String getSchemaName(final int contextId) throws OXException {
-        return assignmentService.getAssignment(contextId).getSchema();
+    public void backWritableMonitored(int readPoolId, int writePoolId, String schema, int partitionId, Connection con) {
+        back(con);
     }
 
     @Override
-    public int[] getContextsInSameSchema(final int contextId) throws OXException {
-        final Assignment assign = assignmentService.getAssignment(contextId);
-        final ConfigDBStorage configDBStorage = new ConfigDBStorage(configDatabaseService);
-        return configDBStorage.getContextsFromSchema(assign.getSchema(), assign.getWritePoolId());
+    public void backWritableMonitoredForUpdateTask(int readPoolId, int writePoolId, String schema, int partitionId, Connection con) {
+        back(con);
     }
 
     @Override
-    public void writeAssignment(Connection con, Assignment assignment) throws OXException {
-        assignmentService.writeAssignment(con, assignment);
+    public void initMonitoringTables(int writePoolId, String schema) throws OXException {
+        Connection con = get(writePoolId, schema);
+        boolean rollback = false;
+        try {
+            con.setAutoCommit(false);
+            rollback = true;
+            CreateReplicationTable createReplicationTable = new CreateReplicationTable();
+            createReplicationTable.perform(con);
+            con.commit();
+            rollback = false;
+        } catch (SQLException x) {
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(x, x.getMessage());
+        } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            if (con != null) {
+                Databases.autocommit(con);
+                back(writePoolId, con);
+            }
+        }
     }
+
+    @Override
+    public void initPartitions(int writePoolId, String schema, int...partitions) throws OXException {
+        if (null == partitions || partitions.length <= 0) {
+            return;
+        }
+        Connection con = get(writePoolId, schema);
+        PreparedStatement stmt = null;
+        boolean rollback = false;
+        try {
+            con.setAutoCommit(false);
+            rollback = true;
+            stmt = con.prepareStatement("INSERT INTO replicationMonitor (cid, transaction) VALUES (?, ?)");
+            stmt.setInt(2, 0);
+            for (int partition: partitions) {
+                stmt.setInt(1, partition);
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+            con.commit();
+            rollback = false;
+        } catch (SQLException x) {
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(x, x.getMessage());
+        } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            DBUtils.closeSQLStuff(stmt);
+            if (con != null) {
+                Databases.autocommit(con);
+                back(writePoolId, con);
+            }
+        }
+    }
+
 }

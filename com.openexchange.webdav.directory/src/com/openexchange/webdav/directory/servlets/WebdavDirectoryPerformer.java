@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -95,7 +95,7 @@ import com.openexchange.webdav.protocol.helpers.PropertyMixin;
 public class WebdavDirectoryPerformer implements SessionHolder {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebdavDirectoryPerformer.class);
 
-    private static WebdavDirectoryPerformer INSTANCE = null;
+    private static final WebdavDirectoryPerformer INSTANCE = new WebdavDirectoryPerformer();
 
     private final ThreadLocal<ServerSession> session = new ThreadLocal<ServerSession>();
 
@@ -105,9 +105,6 @@ public class WebdavDirectoryPerformer implements SessionHolder {
      * @return The instance of {@link InfostorePerformer}.
      */
     public static WebdavDirectoryPerformer getInstance() {
-        if (INSTANCE == null) {
-            return INSTANCE = new WebdavDirectoryPerformer();
-        }
         return INSTANCE;
     }
 

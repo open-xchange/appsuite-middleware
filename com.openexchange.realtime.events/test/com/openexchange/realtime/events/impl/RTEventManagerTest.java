@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -252,7 +252,7 @@ public class RTEventManagerTest {
 
         assertEquals(2, events.getSubscriptions(id).size());
 
-        id.trigger(ID.Events.DISPOSE, this);
+        events.cleanupForId(id);
 
         Set<String> subscriptions = events.getSubscriptions(id);
         assertTrue(subscriptions.isEmpty());

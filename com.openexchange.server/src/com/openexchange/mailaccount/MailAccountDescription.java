@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,7 +49,6 @@
 
 package com.openexchange.mailaccount;
 
-import static com.openexchange.java.Strings.isWhitespace;
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -74,78 +73,43 @@ public final class MailAccountDescription implements Serializable {
     private static final long serialVersionUID = -2443656355399068302L;
 
     private int id;
-
     private String login;
-
     private String password;
-
     private String transportLogin;
-
     private String transportPassword;
-
     private String name;
-
     private String primaryAddress;
-
     private String personal;
-
     private String replyTo;
-
     private String spamHandler;
-
     private String trash;
-
     private String archive;
-
     private String sent;
-
     private String drafts;
-
     private String spam;
-
     private String confirmedSpam;
-
     private String confirmedHam;
-
     private boolean defaultFlag;
-
     private String mailServer;
-
     private int mailPort;
-
     private String mailProtocol;
-
     private boolean mailSecure;
-
     private String transportServer;
-
     private int transportPort;
-
     private String transportProtocol;
-
     private boolean transportSecure;
-
     private String mailServerUrl;
-
     private String transportUrl;
-
     private boolean unifiedINBOXEnabled;
-
     private String trashFullname;
-
     private String archiveFullname;
-
     private String sentFullname;
-
     private String draftsFullname;
-
     private String spamFullname;
-
     private String confirmedSpamFullname;
-
     private String confirmedHamFullname;
-
     private Map<String, String> properties;
+    private Map<String, String> transportProperties;
 
     /**
      * Initializes a new {@link MailAccountDescription}.
@@ -153,6 +117,7 @@ public final class MailAccountDescription implements Serializable {
     public MailAccountDescription() {
         super();
         properties = new HashMap<String, String>(4);
+        transportProperties = new HashMap<String, String>(4);
         transportPort = 25;
         mailPort = 143;
         transportProtocol = "smtp";
@@ -220,7 +185,7 @@ public final class MailAccountDescription implements Serializable {
      * @return The reply-to address
      */
     public String getReplyTo() {
-        if (isEmpty(replyTo)) {
+        if (com.openexchange.java.Strings.isEmpty(replyTo)) {
             return properties.get("replyto");
         }
         return replyTo;
@@ -421,13 +386,13 @@ public final class MailAccountDescription implements Serializable {
         if (null != mailServerUrl) {
             return mailServerUrl;
         }
-        if (isEmpty(mailServer)) {
+        if (com.openexchange.java.Strings.isEmpty(mailServer)) {
             return null;
         }
         try {
             return mailServerUrl = URITools.generateURI(mailSecure ? mailProtocol + 's' : mailProtocol, IDNA.toASCII(mailServer), mailPort).toString();
         } catch (final URISyntaxException e) {
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(32);
+            final StringBuilder sb = new StringBuilder(32);
             sb.append(mailProtocol);
             if (mailSecure) {
                 sb.append('s');
@@ -556,14 +521,14 @@ public final class MailAccountDescription implements Serializable {
         if (null != transportUrl) {
             return transportUrl;
         }
-        if (isEmpty(transportServer)) {
+        if (com.openexchange.java.Strings.isEmpty(transportServer)) {
             return null;
         }
         final String protocol = transportSecure ? transportProtocol + 's' : transportProtocol;
         try {
             return transportUrl = URITools.generateURI(protocol, IDNA.toASCII(transportServer), transportPort).toString();
         } catch (final URISyntaxException e) {
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(32);
+            final StringBuilder sb = new StringBuilder(32);
             sb.append(transportProtocol);
             if (transportSecure) {
                 sb.append('s');
@@ -608,7 +573,7 @@ public final class MailAccountDescription implements Serializable {
      */
     public void setReplyTo(final String replyTo) {
         this.replyTo = replyTo;
-        if (isEmpty(replyTo)) {
+        if (com.openexchange.java.Strings.isEmpty(replyTo)) {
             properties.remove("replyto");
         } else {
             properties.put("replyto", replyTo);
@@ -991,8 +956,7 @@ public final class MailAccountDescription implements Serializable {
                     break;
                 }
             }
-            this.properties = new HashMap<String, String>(properties.size());
-            this.properties.putAll(properties);
+            this.properties = new HashMap<String, String>(properties);
         }
     }
 
@@ -1012,6 +976,46 @@ public final class MailAccountDescription implements Serializable {
         properties.put(name, value);
     }
 
+    /**
+     * Gets the transport properties
+     *
+     * @return The transport properties
+     */
+    public Map<String, String> getTransportProperties() {
+        if (transportProperties.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        return new HashMap<String, String>(transportProperties);
+    }
+
+    /**
+     * Sets the transport properties
+     *
+     * @param properties The transport properties to set
+     */
+    public void setTransportProperties(final Map<String, String> transportProperties) {
+        if (null == transportProperties) {
+            this.transportProperties = new HashMap<String, String>(4);
+        } else if (transportProperties.isEmpty()) {
+            this.transportProperties = new HashMap<String, String>(4);
+        } else {
+            this.transportProperties = new HashMap<String, String>(transportProperties);
+        }
+    }
+
+    /**
+     * Adds specified name-value-pair to transport properties.
+     *
+     * @param name The transport property name
+     * @param value The transport property value
+     */
+    public void addTransportProperty(final String name, final String value) {
+        if (transportProperties.isEmpty()) {
+            transportProperties = new HashMap<String, String>(4);
+        }
+        transportProperties.put(name, value);
+    }
+
     private static Object[] parseServerAndPort(final String server, final int defaultPort) {
         final int pos = server.indexOf(':');
         if (pos == -1) {
@@ -1026,17 +1030,4 @@ public final class MailAccountDescription implements Serializable {
         }
         return new Object[] { server.subSequence(0, pos), Integer.valueOf(port) };
     }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

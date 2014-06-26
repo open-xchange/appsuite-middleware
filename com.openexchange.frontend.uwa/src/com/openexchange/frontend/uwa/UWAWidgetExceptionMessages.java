@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -59,15 +59,14 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class UWAWidgetExceptionMessages implements LocalizableStrings {
 
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
-    public static final String SQL_ERROR_MSG = "The database returned an error: %1$s";
+    // The uwa widget with the id %1$s could not be found
     public static final String NOT_FOUND_MSG = "The uwa widget with the id %1$s could not be found";
+
+    // The widget with the id %1$s is protected and only positional information can be updated
     public static final String PROTECTED_MSG = "The widget with the id %1$s is protected and only positional information can be updated";
 
     // The string cannot be parsed to a valid URL.
     public static final String INVALID_URL_MSG = "The string cannot be parsed to a valid URL.";
-
 
     /**
      * Initializes a new {@link UWAWidgetExceptionMessages}.

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -91,11 +91,12 @@ import javax.mail.util.ByteArrayDataSource;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
-import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.contact.ContactService;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
+import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
@@ -112,7 +113,6 @@ import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.HTMLDetector;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailExceptionCode;
@@ -183,6 +183,7 @@ public class MimeMessageFiller {
 
     private static final String HDR_ORGANIZATION = MessageHeaders.HDR_ORGANIZATION;
     private static final String HDR_X_MAILER = MessageHeaders.HDR_X_MAILER;
+    private static final String HDR_X_ORIGINATING_CLIENT = MessageHeaders.HDR_X_ORIGINATING_CLIENT;
     private static final String HDR_MIME_VERSION = MessageHeaders.HDR_MIME_VERSION;
 
     private static final String PREFIX_PART = "part";
@@ -324,10 +325,7 @@ public class MimeMessageFiller {
                 final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
                 final String organization = contactService.getOrganization(session);
                 if (null != organization && 0 < organization.length()) {
-                    final String encoded =
-                        MimeUtility.fold(
-                            14,
-                            MimeUtility.encodeText(organization, MailProperties.getInstance().getDefaultMimeCharset(), null));
+                    final String encoded = MimeUtility.fold(14, MimeUtility.encodeText(organization, MailProperties.getInstance().getDefaultMimeCharset(), null));
                     mimeMessage.setHeader(HDR_ORGANIZATION, encoded);
                 }
             } catch (final Exception e) {
@@ -339,6 +337,17 @@ public class MimeMessageFiller {
          */
         if (MailProperties.getInstance().isAddClientIPAddress()) {
             addClientIPAddress(mimeMessage, session);
+        }
+        {
+            String client = session.getClient();
+            if (!Strings.isEmpty(client)) {
+                try {
+                    final String encoded = MimeUtility.fold(20, MimeUtility.encodeText(client, MailProperties.getInstance().getDefaultMimeCharset(), null));
+                    mimeMessage.setHeader(HDR_X_ORIGINATING_CLIENT, encoded);
+                } catch (final Exception e) {
+                    LOG.warn("Header \"X-Originating-Client\" could not be set", e);
+                }
+            }
         }
     }
 
@@ -723,7 +732,7 @@ public class MimeMessageFiller {
          */
         final String pReferences = referencedMail.getFirstHeader(MessageHeaders.HDR_REFERENCES);
         final String pInReplyTo = referencedMail.getFirstHeader(MessageHeaders.HDR_IN_REPLY_TO);
-        final com.openexchange.java.StringAllocator refBuilder = new com.openexchange.java.StringAllocator();
+        final StringBuilder refBuilder = new StringBuilder();
         if (pReferences != null) {
             /*
              * The "References:" field will contain the contents of the parent's "References:" field (if any) followed by the contents of
@@ -1020,7 +1029,7 @@ public class MimeMessageFiller {
                         displayName = UserStorage.getInstance().getUser(session.getUserId(), ctx).getDisplayName();
                     }
                     final String saneDisplayName = Strings.replaceWhitespacesWith(displayName, "");
-                    fileName = MimeUtility.encodeText(new StringAllocator(saneDisplayName).append(".vcf").toString(), charset, "Q");
+                    fileName = MimeUtility.encodeText(new StringBuilder(saneDisplayName).append(".vcf").toString(), charset, "Q");
                 }
                 for (int i = 0; i < size; i++) {
                     final MailPart part = mail.getEnclosedMailPart(i);
@@ -1114,7 +1123,7 @@ public class MimeMessageFiller {
                                     final String wellFormedHTMLContent = htmlService.getConformHTML(content, charset);
                                     text = wellFormedHTMLContent;
                                 } else {
-                                    final StringAllocator sb = new StringAllocator(content.length() + 512);
+                                    final StringBuilder sb = new StringBuilder(content.length() + 512);
                                     sb.append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n");
                                     sb.append("<html xmlns=\"http://www.w3.org/1999/xhtml\">\n");
                                     sb.append("<head>\n");
@@ -1801,7 +1810,7 @@ public class MimeMessageFiller {
                         try {
                             imageProvider = new ImageDataImageProvider(dataSource, imageLocation, session);
                         } catch (final OXException e) {
-                            if (MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.equals(e) || MailExceptionCode.MAIL_NOT_FOUND.equals(e) || MailExceptionCode.ATTACHMENT_NOT_FOUND.equals(e) || isFolderNotFound(e)) {
+                            if (isIgnorableException(e)) {
                                 m.appendLiteralReplacement(sb, blankSrc(imageTag));
                                 continue;
                             }
@@ -1841,9 +1850,16 @@ public class MimeMessageFiller {
         return sb.toString();
     }
 
+    private static boolean isIgnorableException(OXException e) {
+        if (MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.equals(e) || DataExceptionCodes.ERROR.equals(e) || MailExceptionCode.MAIL_NOT_FOUND.equals(e) || MailExceptionCode.ATTACHMENT_NOT_FOUND.equals(e) || isFolderNotFound(e)) {
+            return true;
+        }
+        return false;
+    }
+
     private static String urlDecode(final String s) {
         try {
-            return AJAXServlet.decodeUrl(replaceURLCodePoints(s), "ISO-8859-1");
+            return AJAXUtility.decodeUrl(replaceURLCodePoints(s), "ISO-8859-1");
         } catch (final RuntimeException e) {
             return s;
         }
@@ -1886,7 +1902,7 @@ public class MimeMessageFiller {
              * Generate dummy file name
              */
             final List<String> exts = MimeType2ExtMap.getFileExtensions(imageProvider.getContentType().toLowerCase(Locale.ENGLISH));
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator("image.");
+            final StringBuilder sb = new StringBuilder("image.");
             if (exts == null) {
                 sb.append("dat");
             } else {

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,21 +52,22 @@
 package com.openexchange.custom.parallels.impl;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link ParallelsOpenApiServletExceptionCodes}
  */
-public enum ParallelsOpenApiServletExceptionCodes implements OXExceptionCode {
+public enum ParallelsOpenApiServletExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * A openapi  interface error occurred. action: \"%1$s\" ,response: \"%2$s\"
      */
-    OPENAPI_COMMUNICATION_ERROR("An OpenAPI interface error occurred. Details: \"%1$s\" " , Category.CATEGORY_ERROR, 1),
-    
-    HTTP_COMMUNICATION_ERROR("OpenAPI communication error detected. Details: \"%1$s\"" , Category.CATEGORY_ERROR, 1);
+    OPENAPI_COMMUNICATION_ERROR("An OpenAPI interface error occurred. Details: \"%1$s\" " , Category.CATEGORY_ERROR, 1, null),
+
+    HTTP_COMMUNICATION_ERROR("OpenAPI communication error detected. Details: \"%1$s\"" , Category.CATEGORY_ERROR, 1, null);
 
     private final Category category;
 
@@ -74,10 +75,13 @@ public enum ParallelsOpenApiServletExceptionCodes implements OXExceptionCode {
 
     private final String message;
 
-    private ParallelsOpenApiServletExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private String displayMessage;
+
+    private ParallelsOpenApiServletExceptionCodes(final String message, final Category category, final int detailNumber, String displayMessage) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -96,17 +100,22 @@ public enum ParallelsOpenApiServletExceptionCodes implements OXExceptionCode {
     }
 
     @Override
+    public String getDisplayMessage() {
+        return displayMessage;
+    }
+
+    @Override
     public boolean equals(OXException e) {
         return OXExceptionFactory.getInstance().equals(this, e);
     }
 
     private static final String PREFIX = "PARALLELS_OPENAPI";
-    
+
     @Override
     public String getPrefix() {
         return PREFIX;
     }
-    
+
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      *
@@ -136,5 +145,5 @@ public enum ParallelsOpenApiServletExceptionCodes implements OXExceptionCode {
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
-    
+
 }

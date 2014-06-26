@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,6 +50,7 @@
 package com.openexchange.admin.autocontextid.rmi.impl;
 
 import java.util.List;
+import java.util.Set;
 import com.openexchange.admin.autocontextid.storage.interfaces.OXAutoCIDStorageInterface;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.plugins.PluginException;
@@ -85,6 +86,16 @@ public class OXAutoCIDContextImpl implements OXContextPluginInterface {
 
     @Override
     public void changeModuleAccess(final Context ctx, final String access_combination_name, final Credentials auth) {
+        // Nothing to do.
+    }
+
+    @Override
+    public void changeCapabilities(Context ctx, Set<String> capsToAdd, Set<String> capsToRemove, Set<String> capsToDrop, Credentials auth) throws PluginException {
+        // Nothing to do.
+    }
+
+    @Override
+    public void changeQuota(Context ctx, String module, long quotaValue, Credentials auth) throws PluginException {
         // Nothing to do.
     }
 

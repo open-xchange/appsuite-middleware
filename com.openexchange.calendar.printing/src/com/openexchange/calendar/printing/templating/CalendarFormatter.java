@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -99,7 +99,7 @@ public class CalendarFormatter {
 
 
     public String getDateSpec() {
-        com.openexchange.java.StringAllocator b = new com.openexchange.java.StringAllocator();
+        StringBuilder b = new StringBuilder();
         b.append(formatDate(appointment));
         return b.toString();
     }

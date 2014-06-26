@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -72,24 +72,6 @@ public class ConversionWarningMessage implements LocalizableStrings {
     // Unable to convert task priority %1$d.
     public final static String INVALID_PRIORITY_MSG = "Unable to convert task priority %d.";
 
-    // Can not create recurrence rule: %s
-    public final static String CANT_CREATE_RRULE_MSG = "Can not create recurrence rule: %s";
-
-    // Invalid session given to implementation "%1$s".
-    public final static String INVALID_SESSION_MSG = "Invalid session given to implementation \"%1$s\".";
-
-    // Can't generate uid.
-    public final static String CANT_GENERATE_UID_MSG = "Can not generate uid.";
-
-    // Problem writing to stream.
-    public final static String WRITE_PROBLEM_MSG = "Problem writing to stream.";
-
-    // Validation of calendar failed.
-    public final static String VALIDATION_MSG = "Validation of calendar failed.";
-
-    // Can not resolve user: %d
-    public final static String CANT_RESOLVE_USER_MSG = "Can not resolve user: %d";
-
     // Parsing error parsing ical: %s
     public final static String PARSE_EXCEPTION_MSG = "Parsing error parsing ical: %s";
 
@@ -102,9 +84,6 @@ public class ConversionWarningMessage implements LocalizableStrings {
     // Missing DTStart in appointment
     public final static String MISSING_DTSTART_MSG = "Missing DTSTART";
 
-    // Can not resolve resource: %d
-    public final static String CANT_RESOLVE_RESOURCE_MSG = "Can not resolve resource: %1$s";
-
     // Private Appointments can not have attendees. Removing attendees and accepting appointment anyway.
     public final static String PRIVATE_APPOINTMENTS_HAVE_NO_PARTICIPANTS_MSG = "Private appointments can not have attendees. Removing attendees and accepting appointment anyway.";
 
@@ -116,12 +95,6 @@ public class ConversionWarningMessage implements LocalizableStrings {
 
     // Empty "CLASS" element.
     public final static String EMPTY_CLASS_MSG = "Empty \"CLASS\" element.";
-
-    // Insufficient information for parsing/writing this element.
-    public final static String INSUFFICIENT_INFORMATION_MSG = "Insufficient information for parsing/writing this element.";
-
-    // An error occurred: %1$s
-    public final static String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
 
     public final static String TRUNCATION_WARNING_MSG = "Element truncated: %s";
 

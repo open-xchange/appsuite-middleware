@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -71,91 +71,51 @@ public final class SpamAssassinSpamHandlerActivator extends HousekeepingActivato
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SpamAssassinSpamHandlerActivator.class);
 
-    private static final Class<?>[] NEEDED_SERVICES = { MailService.class, ConfigurationService.class };
-
-    private static Bundle thisBundle = null;
-
-    private final Dictionary<String, String> dictionary;
+    private static volatile Bundle thisBundle;
 
     /**
      * Initializes a new {@link SpamAssassinSpamHandlerActivator}
      */
     public SpamAssassinSpamHandlerActivator() {
         super();
-        dictionary = new Hashtable<String, String>();
-        dictionary.put("name", SpamAssassinSpamHandler.getInstance().getSpamHandlerName());
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        LOG.warn("Absent service: {}", clazz.getName());
-        ServiceRegistry.getInstance().removeService(clazz);
-    }
-
-    @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        LOG.info("Re-available service: {}", clazz.getName());
-        ServiceRegistry.getInstance().addService(clazz, getService(clazz));
+        return new Class<?>[] { MailService.class, ConfigurationService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         try {
-            /*
-             * (Re-)Initialize service registry with available services
-             */
-            {
-                final ServiceRegistry registry = ServiceRegistry.getInstance();
-                registry.clearRegistry();
-                final Class<?>[] classes = getNeededServices();
-                for (int i = 0; i < classes.length; i++) {
-                    final Object service = getService(classes[i]);
-                    if (null != service) {
-                        registry.addService(classes[i], service);
-                    }
-                }
-            }
-            if (!started.compareAndSet(false, true)) {
-                /*
-                 * Don't start the bundle again. A duplicate call to
-                 * startBundle() is probably caused by temporary absent
-                 * service(s) whose re-availability causes to trigger this
-                 * method again.
-                 */
-                LOG.info("A temporary absent service is available again");
-                return;
-            }
+            Services.setServiceLookup(this);
 
             final PropertyHandler instance = PropertyHandler.getInstance();
             instance.loadProperties();
 
-//            MailServiceSupplier.getInstance().setMailService(getService(MailService.class));
+            final Dictionary<String, String> dictionary = new Hashtable<String, String>(2);
+            dictionary.put("name", SpamAssassinSpamHandler.getInstance().getSpamHandlerName());
             registerService(SpamHandler.class, SpamAssassinSpamHandler.getInstance(), dictionary);
-            track(SpamdService.class);
-            openTrackers();
-            thisBundle = context.getBundle();
-        } catch (final Throwable t) {
-            throw t instanceof Exception ? (Exception) t : new Exception(t);
-        }
 
+            trackService(SpamdService.class);
+            openTrackers();
+
+            thisBundle = context.getBundle();
+        } catch (final Exception e) {
+            LOG.error("Problem while starting bundle: SpamHandler Spamassassin", e);
+            throw e;
+        }
     }
 
     @Override
     protected void stopBundle() throws Exception {
         try {
-            cleanUp();
-            /*
-             * Clear service registry
-             */
-            ServiceRegistry.getInstance().clearRegistry();
-        } catch (final Throwable t) {
-            LOG.error("", t);
-            throw t instanceof Exception ? (Exception) t : new Exception(t);
+            super.stopBundle();
+            Services.setServiceLookup(null);
+            thisBundle = null;
+        } catch (final Exception e) {
+            LOG.error("Problem while stopping bundle: SpamHandler Spamassassin", e);
+            throw e;
         }
     }
 

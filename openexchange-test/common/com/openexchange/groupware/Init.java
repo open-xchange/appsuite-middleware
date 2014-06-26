@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -130,8 +130,6 @@ import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.groupware.impl.id.IDGeneratorServiceImpl;
 import com.openexchange.groupware.reminder.internal.TargetRegistry;
-import com.openexchange.groupware.update.FullPrimaryKeySupportService;
-import com.openexchange.groupware.update.internal.FullPrimaryKeySupportImpl;
 import com.openexchange.groupware.update.internal.InternalList;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.internal.HtmlServiceImpl;
@@ -193,6 +191,8 @@ import com.openexchange.tools.file.external.FileStorageFactory;
 import com.openexchange.tools.file.internal.CompositeFileStorageFactory;
 import com.openexchange.tools.file.internal.DBQuotaFileStorageFactory;
 import com.openexchange.user.UserService;
+import com.openexchange.user.UserServiceInterceptor;
+import com.openexchange.user.UserServiceInterceptorRegistry;
 import com.openexchange.user.internal.UserServiceImpl;
 import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.UserPermissionService;
@@ -282,10 +282,6 @@ public final class Init {
          */
         com.openexchange.groupware.contexts.impl.ContextInit.getInstance(),
         /**
-         * Setup of user storage.
-         */
-        com.openexchange.groupware.ldap.UserStorageInit.getInstance(),
-        /**
          * Folder initialization
          */
         new FolderInitialization(), com.openexchange.tools.oxfolder.OXFolderProperties.getInstance(),
@@ -305,7 +301,6 @@ public final class Init {
          * User configuration init
          */
         com.openexchange.groupware.userconfiguration.UserConfigurationStorageInit.getInstance(),
-        com.openexchange.groupware.ldap.UserStorageInit.getInstance(),
         /**
          * Resource storage init
          */
@@ -372,7 +367,6 @@ public final class Init {
         startAndInjectBasicServices();
         startAndInjectHTMLService();
         startAndInjectServerConfiguration();
-        startAndInjectFullPrimaryKeySupportService();
         startAndInjectNotification();
         startAndInjectQuotaService();
         startAndInjectCache();
@@ -428,15 +422,6 @@ public final class Init {
 
         services.put(CapabilityService.class, c);
         TestServiceRegistry.getInstance().addService(CapabilityService.class, c);
-    }
-
-    /**
-     *
-     */
-    private static void startAndInjectFullPrimaryKeySupportService() {
-        FullPrimaryKeySupportImpl s = new FullPrimaryKeySupportImpl(null);
-        services.put(FullPrimaryKeySupportService.class, s);
-        TestServiceRegistry.getInstance().addService(FullPrimaryKeySupportService.class, s);
     }
 
     private static void startVersionBundle() throws Exception {
@@ -638,7 +623,7 @@ public final class Init {
 
     private static void startAndInjectContactServices() {
         if (null == TestServiceRegistry.getInstance().getService(ContactService.class)) {
-            final ContactService contactService = new ContactServiceImpl();
+            final ContactService contactService = new ContactServiceImpl(new UserServiceInterceptorRegistry(null));
             ContactServiceLookup.set(new ServiceLookup() {
                 @Override
                 public <S> S getService(final Class<? extends S> clazz) {
@@ -798,7 +783,12 @@ public final class Init {
 
     private static void startAndInjectUserService() {
         if (null == TestServiceRegistry.getInstance().getService(UserService.class)) {
-            final UserService us = new UserServiceImpl();
+            final UserService us = new UserServiceImpl(new UserServiceInterceptorRegistry(null) {
+                @Override
+                public synchronized List<UserServiceInterceptor> getInterceptors() {
+                    return Collections.emptyList();
+                }
+            });
             services.put(UserService.class, us);
             TestServiceRegistry.getInstance().addService(UserService.class, us);
         }

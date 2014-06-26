@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -56,7 +56,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -236,9 +235,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
             }
 
             if(readCon != null) {
-                if(readCon != null) {
-                    Database.back(false, readCon);
-                }
+                Database.back(false, readCon);
             }
         }
     }

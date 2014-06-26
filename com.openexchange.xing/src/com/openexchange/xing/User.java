@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -97,8 +97,9 @@ public class User {
     private final Map<String, String> instantMessagingAccounts;
     private final Map<String, Object> professionalExperience;
     private final Map<String, Object> educationalBackground;
-    private final Map<String, Object> photoUrls;
+    private final PhotoUrls photoUrls;
     private final Date birthDate;
+    private final JSONObject json;
 
     /**
      * Initializes a new {@link User}.
@@ -108,6 +109,7 @@ public class User {
      */
     public User(final JSONObject accountInfo) throws XingException {
         super();
+        this.json = accountInfo;
         try {
             this.id = accountInfo.optString("id", null);
             this.firstName = accountInfo.optString("first_name", null);
@@ -116,7 +118,13 @@ public class User {
             this.pageName = accountInfo.optString("page_name", null);
             this.permalink = accountInfo.optString("permalink", null);
             this.gender = accountInfo.optString("gender", null);
-            this.activeMail = accountInfo.optString("active_email", null);
+            {
+                String email = accountInfo.optString("active_email", null);
+                if (null == email) {
+                    email = accountInfo.optString("email", null);
+                }
+                this.activeMail = email;
+            }
             if (accountInfo.hasAndNotNull("time_zone")) {
                 final JSONObject tz = accountInfo.optJSONObject("time_zone");
                 this.timeZone = TimeZone.getTimeZone(tz.getString("name"));
@@ -232,11 +240,9 @@ public class User {
                 this.educationalBackground = Collections.emptyMap();
             }
             if (accountInfo.hasAndNotNull("photo_urls")) {
-                @SuppressWarnings("unchecked")
-                final Map<String, Object> map = (Map<String, Object>) coerceToNative(accountInfo.optJSONObject("photo_urls"));
-                this.photoUrls = map;
+                this.photoUrls = new PhotoUrls(accountInfo.getJSONObject("photo_urls"));
             } else {
-                this.photoUrls = Collections.emptyMap();
+                this.photoUrls = new PhotoUrls();
             }
         } catch (final JSONException e) {
             throw new XingException(e);
@@ -455,8 +461,20 @@ public class User {
      *
      * @return The photo URLs
      */
-    public Map<String, Object> getPhotoUrls() {
+    public PhotoUrls getPhotoUrls() {
         return photoUrls;
+    }
+
+    /**
+     * Returns the original JSON object of this user.
+     */
+    public JSONObject toJSON() {
+        return json;
+    }
+
+    @Override
+    public String toString() {
+        return json.toString();
     }
 
 }

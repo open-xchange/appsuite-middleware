@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -77,15 +77,12 @@ import com.openexchange.mailfilter.ajax.json.Rule2JSON2Rule.RedirectActionFields
 import com.openexchange.mailfilter.ajax.json.Rule2JSON2Rule.RejectActionFields;
 import com.openexchange.mailfilter.ajax.json.Rule2JSON2Rule.VacationActionFields;
 import com.openexchange.mailfilter.internal.MailFilterProperties;
-import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;
+import com.openexchange.mailfilter.services.Services;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.sun.mail.imap.protocol.BASE64MailboxDecoder;
 import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
 
 final class ActionCommandMapper implements Mapper<Rule> {
-
-    private static final String ERR_PREFIX_INVALID_ADDRESS = OXMailfilterExceptionCode.ERR_PREFIX_INVALID_ADDRESS;
-    private static final String ERR_PREFIX_REJECTED_ADDRESS = OXMailfilterExceptionCode.ERR_PREFIX_REJECTED_ADDRESS;
 
     @Override
     public String getAttrName() {
@@ -216,13 +213,13 @@ final class ActionCommandMapper implements Mapper<Rule> {
             try {
                 new QuotedInternetAddress(stringparam, true);
             } catch (final AddressException e) {
-                throw new SieveException(ERR_PREFIX_INVALID_ADDRESS);
+                throw OXMailfilterExceptionCode.INVALID_REDIRECT_ADDRESS.create(e, stringparam);
             }
             // And finally check of that forward address is allowed
-            final ConfigurationService service = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+            final ConfigurationService service = Services.getService(ConfigurationService.class);
             final Filter filter;
             if (null != service && (null != (filter = service.getFilterFromProperty("com.openexchange.mail.filter.redirectWhitelist"))) && !filter.accepts(stringparam)) {
-                throw new SieveException(ERR_PREFIX_REJECTED_ADDRESS + stringparam);
+                throw OXMailfilterExceptionCode.REJECTED_REDIRECT_ADDRESS.create(stringparam);
             }
         }
         return new ActionCommand(command, createArrayArray(stringparam));
@@ -234,7 +231,7 @@ final class ActionCommandMapper implements Mapper<Rule> {
             throw new JSONException("The parameter " + parameter + " is missing for action command " + command.getCommandname() + ".");
         }
 
-        final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+        final ConfigurationService config = Services.getService(ConfigurationService.class);
         final String encodingProperty = config.getProperty(MailFilterProperties.Values.USE_UTF7_FOLDER_ENCODING.property);
         final boolean useUTF7Encoding = Boolean.parseBoolean(encodingProperty);
 
@@ -337,7 +334,7 @@ final class ActionCommandMapper implements Mapper<Rule> {
     private void createFileintoJSON(final JSONObject tmp, final ArrayList<Object> arguments, final com.openexchange.jsieve.commands.ActionCommand.Commands command, final String field) throws JSONException {
         tmp.put(GeneralFields.ID, command.getJsonname());
 
-        final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+        final ConfigurationService config = Services.getService(ConfigurationService.class);
         final String encodingProperty = config.getProperty(MailFilterProperties.Values.USE_UTF7_FOLDER_ENCODING.property);
         final boolean useUTF7Encoding = Boolean.parseBoolean(encodingProperty);
 

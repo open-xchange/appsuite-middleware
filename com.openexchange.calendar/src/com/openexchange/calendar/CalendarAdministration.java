@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -56,7 +56,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -80,7 +79,6 @@ import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.downgrade.DowngradeFailedExceptionCode;
 import com.openexchange.groupware.downgrade.DowngradeListener;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
@@ -94,7 +92,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
 
     private static final int[] CALENDAR_MODULE = {FolderObject.CALENDAR};
 
-    private com.openexchange.java.StringAllocator u1;
+    private StringBuilder u1;
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalendarAdministration.class);
 
@@ -222,7 +220,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
         try {
             //TODO: Make it possible to supply a database connection!!!
             final SearchIterator<FolderObject> iter = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfType(userId, userConfig.getGroups(), CALENDAR_MODULE, FolderObject.PRIVATE, CALENDAR_MODULE, ctx );
-            StringAllocator builder = new StringAllocator("SELECT object_id, pfid FROM ").append(CalendarSql.PARTICIPANT_TABLE_NAME).append(" WHERE pfid IN (");
+            StringBuilder builder = new StringBuilder("SELECT object_id, pfid FROM ").append(CalendarSql.PARTICIPANT_TABLE_NAME).append(" WHERE pfid IN (");
 
             while(iter.hasNext()) {
                 builder.append(iter.next().getObjectID()).append(',');
@@ -235,7 +233,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
             statements.add(selectPrivate);
             rs = selectPrivate.executeQuery();
 
-            builder = new StringAllocator(" IN (");
+            builder = new StringBuilder(" IN (");
             boolean found = false;
             while(rs.next()) {
                 found = true;
@@ -305,7 +303,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
         final Set<Integer> usersInRightsTable = new HashSet<Integer>();
 
         try {
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator();
+            final StringBuilder sb = new StringBuilder();
             sb.append("SELECT id, type FROM ");
             sb.append(CalendarSql.VIEW_TABLE_NAME);
             sb.append(" WHERE cid = ? AND object_id = ? AND type in (?, ?)");
@@ -353,7 +351,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
         final Set<Integer> usersInMembersTable = new HashSet<Integer>();
 
         try {
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator();
+            final StringBuilder sb = new StringBuilder();
             sb.append("SELECT member_uid FROM ");
             sb.append(CalendarSql.PARTICIPANT_TABLE_NAME);
             sb.append(" WHERE cid = ? AND object_id = ?");
@@ -394,7 +392,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
             usersToAdd.addAll(getUsers(objectId, deleteEvent.getContext(), readcon));
             usersToAdd.removeAll(resolveMembersOfGroups(objectId, deleteEvent, type, readcon));
 
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator();
+            final StringBuilder sb = new StringBuilder();
             sb.append("INSERT INTO ");
             sb.append(CalendarSql.VIEW_TABLE_NAME);
             sb.append(" (object_id, cid, id, type) ");
@@ -428,7 +426,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
         PreparedStatement pst = null;
         ResultSet rs = null;
         try {
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128);
+            final StringBuilder sb = new StringBuilder(128);
             sb.append("SELECT object_id, cid, id, type from ");
             sb.append(table);
             sb.append(" WHERE cid = ");
@@ -464,7 +462,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
         PreparedStatement dateExternal = null;
 
         try {
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128);
+            final StringBuilder sb = new StringBuilder(128);
             sb.append("SELECT pdr.object_id FROM ");
             sb.append(CalendarSql.VIEW_TABLE_NAME);
             sb.append(" pdr JOIN ");
@@ -568,7 +566,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
 
             removeAppointmentsWithOnlyTheUserAsParticipant(deleteEvent.getSession(), deleteEvent.getContext(), deleteEvent.getId(), writecon);
 
-            final com.openexchange.java.StringAllocator sb2 = new com.openexchange.java.StringAllocator(128);
+            final StringBuilder sb2 = new StringBuilder(128);
             sb2.append("SELECT pdm.object_id FROM ");
             sb2.append(CalendarSql.PARTICIPANT_TABLE_NAME);
             sb2.append(" pdm JOIN ");
@@ -612,7 +610,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
             pst3.addBatch();
             pst3.executeBatch();
 
-            final com.openexchange.java.StringAllocator replace_modified_by = new com.openexchange.java.StringAllocator(128);
+            final StringBuilder replace_modified_by = new StringBuilder(128);
             replace_modified_by.append("UPDATE ");
             replace_modified_by.append(CalendarSql.DATES_TABLE_NAME);
             replace_modified_by.append(" pd SET ");
@@ -633,7 +631,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
             pst4.addBatch();
             pst4.executeBatch();
 
-            final com.openexchange.java.StringAllocator delete_participant_members = new com.openexchange.java.StringAllocator(128);
+            final StringBuilder delete_participant_members = new StringBuilder(128);
             delete_participant_members.append("DELETE FROM prg_dates_members WHERE cid = ");
             delete_participant_members.append(deleteEvent.getContext().getContextId());
             delete_participant_members.append(" AND member_uid = ");
@@ -642,7 +640,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
             pst5.addBatch();
             pst5.executeBatch();
 
-            final com.openexchange.java.StringAllocator delete_participant_rights = new com.openexchange.java.StringAllocator(128);
+            final StringBuilder delete_participant_rights = new StringBuilder(128);
             delete_participant_rights.append("delete from prg_date_rights WHERE cid = ");
             delete_participant_rights.append(deleteEvent.getContext().getContextId());
             delete_participant_rights.append(" AND id = ");
@@ -653,7 +651,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
             pst6.addBatch();
             pst6.executeBatch();
 
-            com.openexchange.java.StringAllocator replaceOrganizerId = new com.openexchange.java.StringAllocator();
+            StringBuilder replaceOrganizerId = new StringBuilder();
             replaceOrganizerId.append("UPDATE ");
             replaceOrganizerId.append(CalendarSql.DATES_TABLE_NAME);
             replaceOrganizerId.append(" pd SET ");
@@ -674,7 +672,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
             pst7.addBatch();
             pst7.executeBatch();
 
-            com.openexchange.java.StringAllocator replacePrincipalId = new com.openexchange.java.StringAllocator();
+            StringBuilder replacePrincipalId = new StringBuilder();
             replacePrincipalId.append("UPDATE ");
             replacePrincipalId.append(CalendarSql.DATES_TABLE_NAME);
             replacePrincipalId.append(" pd SET ");
@@ -744,7 +742,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
     @Override
     public final void initializeUpdateString() {
         final CalendarCollection collection = new CalendarCollection();
-        u1 = new com.openexchange.java.StringAllocator(128);
+        u1 = new StringBuilder(128);
         u1.append("UPDATE prg_dates pd SET ");
         u1.append(collection.getFieldName(DataObject.MODIFIED_BY));
         u1.append(" = ? ,");

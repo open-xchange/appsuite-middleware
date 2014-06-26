@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,18 +49,19 @@
 
 package com.openexchange.realtime.hazelcast.directory.mock;
 
-import java.io.DataInput;
-import java.io.DataOutput;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.util.Map;
 import java.util.UUID;
 import com.hazelcast.core.Member;
+import com.hazelcast.nio.ObjectDataInput;
+import com.hazelcast.nio.ObjectDataOutput;
 
 /**
  * {@link HazelcastMemberMock} - Simple mock to use for testing withoug OSGi environment.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class HazelcastMemberMock implements Member {
@@ -79,11 +80,11 @@ public class HazelcastMemberMock implements Member {
     }
 
     @Override
-    public void writeData(DataOutput out) throws IOException {
+    public void writeData(ObjectDataOutput out) throws IOException {
     }
 
     @Override
-    public void readData(DataInput in) throws IOException {
+    public void readData(ObjectDataInput in) throws IOException {
     }
 
     @Override
@@ -92,31 +93,8 @@ public class HazelcastMemberMock implements Member {
     }
 
     @Override
-    @Deprecated
-    public int getPort() {
-        return localInetSocketAddress.getPort();
-    }
-
-    @Override
-    @Deprecated
-    public InetAddress getInetAddress() {
-        return localInetAddress;
-    }
-
-    @Override
     public InetSocketAddress getInetSocketAddress() {
         return localInetSocketAddress;
-    }
-
-    @Override
-    @Deprecated
-    public boolean isSuperClient() {
-        return false;
-    }
-
-    @Override
-    public boolean isLiteMember() {
-        return false;
     }
 
     @Override
@@ -136,29 +114,133 @@ public class HazelcastMemberMock implements Member {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (!(obj instanceof HazelcastMemberMock))
+        }
+        if (!(obj instanceof HazelcastMemberMock)) {
             return false;
+        }
         HazelcastMemberMock other = (HazelcastMemberMock) obj;
         if (localInetAddress == null) {
-            if (other.localInetAddress != null)
+            if (other.localInetAddress != null) {
                 return false;
-        } else if (!localInetAddress.equals(other.localInetAddress))
+            }
+        } else if (!localInetAddress.equals(other.localInetAddress)) {
             return false;
+        }
         if (localInetSocketAddress == null) {
-            if (other.localInetSocketAddress != null)
+            if (other.localInetSocketAddress != null) {
                 return false;
-        } else if (!localInetSocketAddress.equals(other.localInetSocketAddress))
+            }
+        } else if (!localInetSocketAddress.equals(other.localInetSocketAddress)) {
             return false;
+        }
         if (uuid == null) {
-            if (other.uuid != null)
+            if (other.uuid != null) {
                 return false;
-        } else if (!uuid.equals(other.uuid))
+            }
+        } else if (!uuid.equals(other.uuid)) {
             return false;
+        }
         return true;
+    }
+
+    public InetSocketAddress getSocketAddress() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public Map<String, Object> getAttributes() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public String getStringAttribute(String key) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public void setStringAttribute(String key, String value) {
+        // TODO Auto-generated method stub
+
+    }
+
+    public Boolean getBooleanAttribute(String key) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public void setBooleanAttribute(String key, boolean value) {
+        // TODO Auto-generated method stub
+
+    }
+
+    public Byte getByteAttribute(String key) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public void setByteAttribute(String key, byte value) {
+        // TODO Auto-generated method stub
+
+    }
+
+    public Short getShortAttribute(String key) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public void setShortAttribute(String key, short value) {
+        // TODO Auto-generated method stub
+
+    }
+
+    public Integer getIntAttribute(String key) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public void setIntAttribute(String key, int value) {
+        // TODO Auto-generated method stub
+
+    }
+
+    public Long getLongAttribute(String key) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public void setLongAttribute(String key, long value) {
+        // TODO Auto-generated method stub
+
+    }
+
+    public Float getFloatAttribute(String key) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public void setFloatAttribute(String key, float value) {
+        // TODO Auto-generated method stub
+
+    }
+
+    public Double getDoubleAttribute(String key) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public void setDoubleAttribute(String key, double value) {
+        // TODO Auto-generated method stub
+
+    }
+
+    public void removeAttribute(String key) {
+        // TODO Auto-generated method stub
+
     }
 
 }

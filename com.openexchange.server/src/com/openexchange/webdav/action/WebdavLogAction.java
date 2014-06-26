@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -56,7 +56,6 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
@@ -91,7 +90,7 @@ public class WebdavLogAction extends AbstractAction {
         WebdavResponse webdavResp = resp;
 
         final String lineSeparator = System.getProperty("line.separator");
-        StringAllocator b = new StringAllocator(8192);
+        StringBuilder b = new StringBuilder(8192);
         try {
             b.append("URL: ").append(webdavReq.getUrl()).append(lineSeparator);
             for (final String header : webdavReq.getHeaderNames()) {
@@ -130,7 +129,7 @@ public class WebdavLogAction extends AbstractAction {
             }
 
         } catch (final WebdavProtocolException x) {
-            b = new StringAllocator(2048);
+            b = new StringBuilder(2048);
             b.append("Status: ").append(x.getMessage()).append(' ').append(x.getStatus()).append(lineSeparator);
             b.append("WebdavException: ");
             if (LOG.isDebugEnabled()) {
@@ -150,7 +149,7 @@ public class WebdavLogAction extends AbstractAction {
         try {
             reader = new BufferedReader(new InputStreamReader(req.getBody(), com.openexchange.java.Charsets.UTF_8));
             String line = null;
-            final StringAllocator b = new StringAllocator(65536);
+            final StringBuilder b = new StringBuilder(65536);
             while ((line = reader.readLine()) != null) {
                 b.append(line);
                 b.append(lineSeparator);

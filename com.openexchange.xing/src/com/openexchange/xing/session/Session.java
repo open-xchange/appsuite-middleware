@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -73,6 +73,11 @@ public interface Session {
      * Returns the currently logged in user's access token and secret.
      */
     public AccessTokenPair getAccessTokenPair();
+    
+    /**
+     * Returns the consumer key/secret pair
+     */
+    public ConsumerPair getConsumerPair();
 
     /**
      * Returns the locale to use. Must not return null. Currently, this is used

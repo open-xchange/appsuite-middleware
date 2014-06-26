@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -270,7 +270,7 @@ public final class ContentDisposition extends ParameterizedHeader {
      * @return A RFC2045 style (ASCII-only) string representation of this content disposition
      */
     public String toString(final boolean skipEmptyParams) {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(64);
+        final StringBuilder sb = new StringBuilder(64);
         sb.append(disposition);
         if (null != parameterList) {
             parameterList.appendRFC2045String(sb, skipEmptyParams);

@@ -80,9 +80,11 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
+import com.openexchange.file.storage.TypeAware;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
@@ -91,6 +93,7 @@ import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedIgnorableVersionFileAccess;
 import com.openexchange.file.storage.composition.IDBasedRandomFileAccess;
 import com.openexchange.file.storage.composition.IDBasedSequenceNumberProvider;
+import com.openexchange.file.storage.search.FileNameTerm;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -108,6 +111,8 @@ public class DriveStorage {
 
     private IDBasedFileAccess fileAccess;
     private IDBasedFolderAccess folderAccess;
+    private FileStorageFolder trashFolder;
+    private Boolean hasTrashFolder;
 
     /**
      * Initializes a new {@link DriveStorage}.
@@ -136,14 +141,18 @@ public class DriveStorage {
     public <T> T wrapInTransaction(StorageOperation<T> storageOperation) throws OXException {
         try {
             getFileAccess().startTransaction();
+            getFolderAccess().startTransaction();
             T t = storageOperation.call();
             getFileAccess().commit();
+            getFolderAccess().commit();
             return t;
         } catch (OXException e) {
             getFileAccess().rollback();
+            getFolderAccess().rollback();
             throw e;
         } finally {
             getFileAccess().finish();
+            getFolderAccess().finish();
         }
     }
 
@@ -155,7 +164,7 @@ public class DriveStorage {
      * @throws OXException
      */
     public Quota[] getQuota() throws OXException {
-        return getFolderAccess().getQuotas(rootFolderID.getFolderId(), new Type[] { Type.STORAGE, Type.FILE });
+        return getFolderAccess().getQuotas(rootFolderID.toUniqueID(), new Type[] { Type.STORAGE, Type.FILE });
     }
 
     /**
@@ -224,21 +233,68 @@ public class DriveStorage {
     }
 
     /**
-     * Deletes a file.
+     * Deletes a file, preferring a "soft-delete" if available.
      *
      * @param file The file to delete
      * @return A file representing the deleted file
      * @throws OXException
      */
     public File deleteFile(File file) throws OXException {
+        return deleteFile(file, false);
+    }
+
+    /**
+     * Deletes a file.
+     *
+     * @param file The file to delete
+     * @param hardDelete <code>true</code> to hard-delete the file, <code>false</code>, otherwise
+     * @return A file representing the deleted file
+     * @throws OXException
+     */
+    public File deleteFile(File file, boolean hardDelete) throws OXException {
         if (session.isTraceEnabled()) {
-            session.trace(this.toString() + "rm " + combine(getPath(file.getFolderId()), file.getFileName()));
+            session.trace(this.toString() + "rm " + (hardDelete ? "-rf " : "") + combine(getPath(file.getFolderId()), file.getFileName()));
         }
-        List<String> notRemoved = getFileAccess().removeDocument(Arrays.asList(new String[] { file.getId() }), file.getSequenceNumber());
+        List<String> notRemoved = getFileAccess().removeDocument(
+            Arrays.asList(new String[] { file.getId() }), file.getSequenceNumber(), hardDelete);
         if (null != notRemoved && 0 < notRemoved.size()) {
-            throw DriveExceptionCodes.FILE_NOT_FOUND.create();//TODO: exception for this
+            throw DriveExceptionCodes.FILE_NOT_FOUND.create(file.getFileName(), getPath(file.getFolderId()));//TODO: exception for this
         }
         return file;
+    }
+
+    /**
+     * Deletes multiple files.
+     *
+     * @param files The files to delete
+     * @param hardDelete <code>true</code> to hard-delete the files, <code>false</code>, otherwise
+     * @return The files that could <b>not</b> be deleted due to an edit-delete conflict
+     * @throws OXException
+     */
+    public List<File> deleteFiles(List<File> files, boolean hardDelete) throws OXException {
+        Map<String, File> ids = new HashMap<String, File>(files.size());
+        long sequenceNumber = 0;
+        StringBuilder StringBuilder = session.isTraceEnabled() ? new StringBuilder() : null;
+        for (File file : files) {
+            ids.put(file.getId(), file);
+            sequenceNumber = Math.max(sequenceNumber, file.getSequenceNumber());
+            if (null != StringBuilder) {
+                StringBuilder.append(' ').append(combine(getPath(file.getFolderId()), file.getFileName()));
+            }
+        }
+        if (null != StringBuilder) {
+            session.trace(this.toString() + "rm" + (hardDelete ? " -rf " : "") + StringBuilder.toString());
+        }
+        List<String> notRemoved = getFileAccess().removeDocument(new ArrayList<String>(ids.keySet()), sequenceNumber, hardDelete);
+        if (null == notRemoved || 0 == notRemoved.size()) {
+            return Collections.emptyList();
+        } else {
+            List<File> notRemovedFiles = new ArrayList<File>(notRemoved.size());
+            for (String id : notRemoved) {
+                notRemovedFiles.add(ids.get(id));
+            }
+            return notRemovedFiles;
+        }
     }
 
     /**
@@ -413,13 +469,25 @@ public class DriveStorage {
      * @throws OXException
      */
     public String deleteFolder(String path) throws OXException {
+        return deleteFolder(path, false);
+    }
+
+    /**
+     * Deletes a folder, preferring a "soft-delete" if available.
+     *
+     * @param path The path of the folder to delete
+     * @param hardDelete <code>true</code> to hard-delete the folder, <code>false</code>, otherwise
+     * @return The ID of the deleted folder
+     * @throws OXException
+     */
+    public String deleteFolder(String path, boolean hardDelete) throws OXException {
         if (Strings.isEmpty(path) || ROOT_PATH.equals(path)) {
             throw DriveExceptionCodes.INVALID_PATH.create(path);
         }
         FileStorageFolder folder = getFolder(path);
         knownFolders.forget(path, folder, true);
         if (session.isTraceEnabled()) {
-            session.trace(this.toString() + "rmdir " + path);
+            session.trace(this.toString() + "rmdir " + (hardDelete ? "-rf " : "") + path);
         }
         getFolderAccess().deleteFolder(folder.getId());
         return folder.getId();
@@ -471,10 +539,6 @@ public class DriveStorage {
         return getFileAccess().getFileMetadata(id, version);
     }
 
-//    public List<File> getFiles(String path) throws OXException {
-//        return getFilesInFolder(getFolderID(path));
-//    }
-
     /**
      * Gets all synchronized files present in the folder identified by the supplied ID.
      *
@@ -505,7 +569,7 @@ public class DriveStorage {
         if (null == folder.getOwnPermission() || FileStoragePermission.READ_OWN_OBJECTS > folder.getOwnPermission().getReadPermission()) {
             return Collections.emptyList();
         }
-        SearchIterator<File> filesIterator = getFilesIterator(folderID, pattern, null != fields ? fields : DriveConstants.FILE_FIELDS);
+        SearchIterator<File> filesIterator = searchDocuments(folderID, pattern, null != fields ? fields : DriveConstants.FILE_FIELDS);
         if (all) {
             return Filter.apply(filesIterator, new FileNameFilter() {
 
@@ -532,6 +596,18 @@ public class DriveStorage {
     }
 
     /**
+     * Gets a file with a specific name in a path.
+     *
+     * @param path The path of the directory to look for the file
+     * @param name The name of the file
+     * @return The file, or <code>null</code> if not found.
+     * @throws OXException
+     */
+    public File getFileByName(String path, String name) throws OXException {
+        return getFileByName(path, name, false);
+    }
+
+    /**
      * Finds a file with a specific name in a path.
      *
      * @param path The path of the directory to look for the file
@@ -544,17 +620,54 @@ public class DriveStorage {
         return findFileByName(path, name, DriveConstants.FILE_FIELDS, normalizeFileNames);
     }
 
+    /**
+     * Gets a file with a specific name in a path.
+     *
+     * @param path The path of the directory to look for the file
+     * @param name The name of the file
+     * @param normalizeFileNames <code>true</code> to also consider not-normalized filenames, <code>false</code>, otherwise
+     * @return The file, or <code>null</code> if not found.
+     * @throws OXException
+     */
+    public File getFileByName(String path, final String name, boolean normalizeFileNames) throws OXException {
+        return getFileByName(path, name, DriveConstants.FILE_FIELDS, normalizeFileNames);
+    }
+
     private File findFileByName(String path, final String name, List<Field> fields, final boolean normalizeFileNames) throws OXException {
-        List<File> files = Filter.apply(getFilesIterator(getFolderID(path), name, fields), new FileNameFilter() {
+        List<File> files = Filter.apply(searchDocuments(getFolderID(path), name, fields), new FileNameFilter() {
 
             @Override
             protected boolean accept(String fileName) throws OXException {
                 return name.equals(fileName) || normalizeFileNames && PathNormalizer.equals(name, fileName);
             }
         });
-        if (1 == files.size()) {
+        return selectFile(files, name);
+    }
+
+    private File getFileByName(String path, final String name, List<Field> fields, final boolean normalizeFileNames) throws OXException {
+        List<File> files = Filter.apply(getDocuments(getFolderID(path), name, fields), new FileNameFilter() {
+
+            @Override
+            protected boolean accept(String fileName) throws OXException {
+                return name.equals(fileName) || normalizeFileNames && PathNormalizer.equals(name, fileName);
+            }
+        });
+        return selectFile(files, name);
+    }
+
+    /**
+     * Selects the "best matching" file from the supplied list.
+     *
+     * @param files The possible files
+     * @param name The name to match
+     * @return The best matching file, or <code>null</code> if list was empty
+     */
+    private static File selectFile(List<File> files, String name) {
+        if (null == files || 0 == files.size()) {
+            return null;
+        } else if (1 == files.size()) {
             return files.get(0);
-        } else if (1 < files.size()) {
+        } else {
             File normalizedFile = null;
             for (File file : files) {
                 if (name.equals(file.getFileName())) {
@@ -566,7 +679,6 @@ public class DriveStorage {
             }
             return null != normalizedFile ? normalizedFile : files.get(0);
         }
-        return null;
     }
 
     public String getPath(String folderID) throws OXException {
@@ -589,6 +701,40 @@ public class DriveStorage {
         return getFolder(path, false);
     }
 
+    /**
+     * Gets a value indicating whether a trash folder is available for the synchronized account or not.
+     *
+     * @return <code>true</code> if the folder is available, <code>false</code>, otherwise
+     * @throws OXException
+     */
+    public boolean hasTrashFolder() throws OXException {
+        if (null == hasTrashFolder) {
+            try {
+                hasTrashFolder = Boolean.valueOf(null != getTrashFolder());
+            } catch (OXException e) {
+                if (FileStorageExceptionCodes.NO_SUCH_FOLDER.equals(e)) {
+                    hasTrashFolder = Boolean.FALSE;
+                } else {
+                    throw e;
+                }
+            }
+        }
+        return hasTrashFolder.booleanValue();
+    }
+
+    /**
+     * Gets the trash folder of the synchronized account
+     *
+     * @return The trash folder
+     * @throws OXException If no trash folder is available
+     */
+    public FileStorageFolder getTrashFolder() throws OXException {
+        if (null == trashFolder) {
+            return getFolderAccess().getTrashFolder(rootFolderID.toUniqueID());
+        }
+        return trashFolder;
+    }
+
     public FileStorageFolder getFolder(String path, boolean createIfNeeded) throws OXException {
         FileStorageFolder folder = knownFolders.getFolder(path);
         if (null == folder) {
@@ -605,6 +751,13 @@ public class DriveStorage {
         return folder;
     }
 
+    /**
+     * Gets all folders in the storage recursively. The "temp" folder, as well as the trash folder including all subfolders are ignored
+     * implicitly.
+     *
+     * @return The folders, each one mapped to its corresponsing relative path
+     * @throws OXException
+     */
     public Map<String, FileStorageFolder> getFolders() throws OXException {
         Map<String, FileStorageFolder> folders = new HashMap<String, FileStorageFolder>();
         FileStorageFolder rootFolder = getRootFolder();
@@ -620,16 +773,27 @@ public class DriveStorage {
         return String.format(format, product, device);
     }
 
-    private SearchIterator<File> getFilesIterator(String folderID, String pattern, List<Field> fields) throws OXException {
-        if (null != pattern) {
-            // search
-            return getFileAccess().search(pattern, null != fields ? fields : DriveConstants.FILE_FIELDS, folderID, null,
-                SortDirection.DEFAULT, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
-        } else {
-            // get
-            return getFileAccess().getDocuments(
-                folderID, null != fields ? fields : DriveConstants.FILE_FIELDS, null, SortDirection.DEFAULT).results();
+    private SearchIterator<File> searchDocuments(String folderID, String pattern, List<Field> fields) throws OXException {
+        if (null == pattern) {
+            return getDocuments(folderID, fields);
         }
+        // search
+        return getFileAccess().search(pattern, null != fields ? fields : DriveConstants.FILE_FIELDS, folderID, null,
+            SortDirection.DEFAULT, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
+    }
+
+    private SearchIterator<File> getDocuments(String folderID, String filename, List<Field> fields) throws OXException {
+        if (null == filename) {
+            return getDocuments(folderID, fields);
+        }
+        return getFileAccess().search(Collections.singletonList(folderID), new FileNameTerm(filename, false, false),
+            null != fields ? fields : DriveConstants.FILE_FIELDS, null, SortDirection.DEFAULT,
+            FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
+    }
+
+    private SearchIterator<File> getDocuments(String folderID, List<Field> fields) throws OXException {
+        return getFileAccess().getDocuments(
+            folderID, null != fields ? fields : DriveConstants.FILE_FIELDS, null, SortDirection.DEFAULT).results();
     }
 
     private FileStorageFolder resolveToLeaf(String path, boolean createIfNeeded, boolean throwOnAbsence) throws OXException {
@@ -675,8 +839,8 @@ public class DriveStorage {
             FileStorageFolder folder = getFolderAccess().getFolder(currentFolderID);
             folders.addFirst(folder);
             currentFolderID = folder.getParentId();
-        } while (null != currentFolderID && false == "0".equals(currentFolderID) && false == rootFolderID.getFolderId().equals(currentFolderID));
-        if (0 < folders.size() && rootFolderID.getFolderId().equals(folders.getFirst().getParentId())) {
+        } while (null != currentFolderID && false == "0".equals(currentFolderID) && false == rootFolderID.toUniqueID().equals(currentFolderID));
+        if (0 < folders.size() && rootFolderID.toUniqueID().equals(folders.getFirst().getParentId())) {
             StringBuilder pathBuilder = new StringBuilder();
             for (int i = 0; i < folders.size(); i++) {
                 FileStorageFolder folder = folders.get(i);
@@ -689,16 +853,47 @@ public class DriveStorage {
         }
     }
 
+    /**
+     * Adds all found subfolders of the supplied parent folder recursively. The "temp" folder, as well as the trash folder(s) including
+     * all subfolders are ignored implicitly.
+     *
+     * @param folders The map to add the subfolders
+     * @param parent The parent folder
+     * @param path The path of the parent folder
+     * @throws OXException
+     */
     private void addSubfolders(Map<String, FileStorageFolder> folders, FileStorageFolder parent, String path) throws OXException {
         FileStorageFolder[] subfolders = getFolderAccess().getSubfolders(parent.getId(), false);
         for (FileStorageFolder subfolder : subfolders) {
             String subPath = path + PathNormalizer.normalize(subfolder.getName());
             knownFolders.remember(subPath, subfolder);
-            if (false == TEMP_PATH.equals(subPath)) {
+            if (false == isExcludedSubfolder(subfolder, subPath)) {
                 folders.put(subPath, subfolder);
                 addSubfolders(folders, subfolder, subPath + PATH_SEPARATOR);
             }
         }
+    }
+
+    /**
+     * Gets a value indicating whether the supplied folder is excluded or not, i.e. it is the temp- or a trash-folder.
+     *
+     * @param folder The folder to check
+     * @param path The folder path to check
+     * @return <code>true</code> if the folder is excluded, <code>false</code>, otherwise
+     * @throws OXException
+     */
+    private boolean isExcludedSubfolder(FileStorageFolder folder, String path) throws OXException {
+        if (TEMP_PATH.equals(path)) {
+            return true;
+        }
+        if (TypeAware.class.isInstance(folder) && FileStorageFolderType.TRASH_FOLDER.equals(((TypeAware)folder).getType())) {
+            return true;
+        }
+        String trashFolderID = hasTrashFolder() && null != getTrashFolder() ? getTrashFolder().getId() : null;
+        if (null != trashFolderID && trashFolderID.equals(folder.getId())) {
+            return true;
+        }
+        return false;
     }
 
     private FileStorageFolder getRootFolder() throws OXException {

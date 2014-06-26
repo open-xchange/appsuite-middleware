@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -114,7 +114,7 @@ public final class CustomThread extends Thread implements ThreadRenamer, OXThrea
         if (null == appendix) {
             setName(newPrefix);
         } else {
-            setName(new com.openexchange.java.StringAllocator(16).append(newPrefix).append(appendix).toString());
+            setName(new StringBuilder(16).append(newPrefix).append(appendix).toString());
         }
         changed = true;
     }

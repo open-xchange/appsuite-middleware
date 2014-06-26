@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,8 +52,11 @@ package com.openexchange.realtime.hazelcast.cleanup;
 import java.io.Serializable;
 import java.util.concurrent.Callable;
 import org.apache.commons.lang.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.realtime.cleanup.LocalRealtimeCleanup;
-import com.openexchange.realtime.hazelcast.Services;
+import com.openexchange.realtime.exception.RealtimeExceptionCodes;
+import com.openexchange.realtime.hazelcast.osgi.Services;
 import com.openexchange.realtime.packet.ID;
 
 /**
@@ -63,6 +66,8 @@ import com.openexchange.realtime.packet.ID;
  */
 public class CleanupDispatcher implements Callable<Void>, Serializable {
 
+    private static final Logger LOG = LoggerFactory.getLogger(CleanupDispatcher.class);
+    
     private static final long serialVersionUID = 2669822501149210448L;
 
     private final ID id;
@@ -81,7 +86,14 @@ public class CleanupDispatcher implements Callable<Void>, Serializable {
     @Override
     public Void call() throws Exception {
         LocalRealtimeCleanup localRealtimeCleanup = Services.getService(LocalRealtimeCleanup.class);
-        localRealtimeCleanup.cleanForId(id);
+        if (localRealtimeCleanup != null) {
+            localRealtimeCleanup.cleanForId(id);
+        } else {
+            LOG.error(
+                "Error while trying to cleanup for ResponseChannel ID: {}",
+                id,
+                RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(LocalRealtimeCleanup.class.getName()));
+        }
         return null;
     }
 

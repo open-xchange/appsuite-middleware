@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -58,8 +58,6 @@ import java.sql.Statement;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.contact.ContactMySql;
-import com.openexchange.groupware.contact.ContactSql;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -166,17 +164,23 @@ public class ContactsRepairLinksAttachments implements UpdateTask {
         }
     }
 
-    private void moveContactToAdmin(final Connection con, final Context ctx,
-        final int id) throws SQLException, OXException {
-        Statement tmp = null;
+    private void moveContactToAdmin(final Connection con, final Context ctx, final int id) throws SQLException, OXException {
+        String sql = "UPDATE prg_contacts SET changed_from = ?, created_from = ?, changing_date = ?, fid = ? "
+            + "WHERE intfield01 = ? and cid = ?";
+        int folderId = new OXFolderAccess(con, ctx).getDefaultFolder(ctx.getMailadmin(), FolderObject.CONTACT).getObjectID();
+        PreparedStatement stmt = null;
         try {
             LOG.info("Trying to move contact {} to admin in context {}.", id, ctx.getContextId());
-            final int folderId = new OXFolderAccess(con, ctx).getDefaultFolder(ctx.getMailadmin(), FolderObject.CONTACT).getObjectID();
-            final ContactSql cs = new ContactMySql(ctx, ctx.getMailadmin());
-            tmp = con.createStatement();
-            cs.iFgiveUserContacToAdmin(tmp, id, folderId, ctx);
+            stmt = con.prepareStatement(sql);
+            stmt.setInt(1, ctx.getMailadmin());
+            stmt.setInt(2, ctx.getMailadmin());
+            stmt.setLong(3, System.currentTimeMillis());
+            stmt.setInt(4, folderId);
+            stmt.setInt(5, id);
+            stmt.setInt(6, ctx.getContextId());
+            stmt.execute();
         } finally {
-            closeSQLStuff(null, tmp);
+            closeSQLStuff(null, stmt);
         }
     }
 

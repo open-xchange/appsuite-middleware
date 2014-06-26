@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -56,11 +56,14 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 final class POTokenStream {
+
+    // ---------------------------------------------------------------------------------------------------------------//
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(POTokenStream.class);
 
@@ -112,35 +115,42 @@ final class POTokenStream {
     }
 
     private void initNextToken() throws OXException {
-        byte c = read();
-        while (Character.isWhitespace(c)) {
-            c = read();
-        }
-        switch (c) {
-        case 'm':
-            msgIdOrMsgStr();
-            break;
-        case '"':
-            string();
-            break;
-        case '#':
-            comment();
-            break;
-        case -1:
-            eof();
-            break;
-        default:
-            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            baos.write(c);
-            while ((c = read()) != -1 && c != '\n') {
-                baos.write(c);
+        boolean repeat = true;
+        while (repeat) {
+            repeat = false;
+            byte c = read();
+            while (Character.isWhitespace(c)) {
+                c = read();
             }
-            throw I18NExceptionCode.UNEXPECTED_TOKEN.create(
-                toString(baos.toByteArray()),
-                filename,
-                Integer.valueOf(line - 1),
-                "[msgid, msgctxt, msgstr, string, comment, eof]");
+            switch (c) {
+            case 'm':
+                msgIdOrMsgStr();
+                break;
+            case '"':
+                string();
+                break;
+            case '#':
+                // Discard comment and repeat look-up for next token
+                comment();
+                repeat = true;
+                break;
+            case -1:
+                eof();
+                break;
+            default:
+                final ByteArrayOutputStream baos = Streams.newByteArrayOutputStream();
+                baos.write(c);
+                while ((c = read()) != -1 && c != '\n') {
+                    baos.write(c);
+                }
+                throw I18NExceptionCode.UNEXPECTED_TOKEN.create(
+                    toString(baos.toByteArray()),
+                    filename,
+                    Integer.valueOf(line - 1),
+                    "[msgid, msgctxt, msgstr, string, comment, eof]");
+            }
         }
+
     }
 
     private byte read() throws OXException {
@@ -161,9 +171,11 @@ final class POTokenStream {
          * POToken.COMMENT; element(data.toString());
          */
         // Ignore comments
-        while (read() != '\n') {
+        byte b;
+        while ((b = read()) != '\n' && b != -1) {
+            // Discard
         }
-        initNextToken();
+        //initNextToken();
     }
 
     private String toString(final byte[] b) {

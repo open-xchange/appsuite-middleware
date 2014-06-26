@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -161,50 +161,54 @@ public final class ResponseParser {
             // Check for stack trace
             if (json.hasAndNotNull(ResponseFields.ERROR_STACK)) {
                 final JSONArray jStack = json.getJSONArray(ResponseFields.ERROR_STACK);
-                final int length = jStack.length();
-
-                Throwable t = exception;
-                List<StackTraceElement> stack = new ArrayList<StackTraceElement>(length);
-
-                // Start at second line: i = 1
-                for (int i = 1; i < length; i++) {
-                    final String line = jStack.optString(i, null);
-                    StackTraceElement ste = null;
-                    if (null != line) {
-                        if (line.startsWith("Caused by: ")) {
-                            t.setStackTrace(stack.toArray(new StackTraceElement[0]));
-                            stack = new ArrayList<StackTraceElement>(length);
-                            final Throwable parent = t;
-                            t = new Throwable(line);
-                            parent.initCause(t);
-                        } else {
-                            final int parenthesisStart = line.indexOf('(');
-                            final int methodStart = line.substring(0, parenthesisStart).lastIndexOf('.');
-                            final String className = line.substring(0, methodStart);
-                            final String methodName = line.substring(methodStart+1, parenthesisStart);
-                            if (line.regionMatches(parenthesisStart + 1, "Native Method)", 0, "Native Method)".length())) {
-                                ste = new StackTraceElement(className, methodName, null, -2);
-                            } else if (line.regionMatches(parenthesisStart + 1, "Unknown Source)", 0, "Unknown Source)".length())) {
-                                ste = new StackTraceElement(className, methodName, null, -1);
-                            } else {
-                                final int colonPos = line.indexOf(':', parenthesisStart + 1);
-                                if (colonPos < 0) {
-                                    ste = new StackTraceElement(className, methodName, line.substring(parenthesisStart + 1, line.indexOf(')', parenthesisStart + 1)), -1);
-                                } else {
-                                    final String fileName = line.substring(parenthesisStart + 1, colonPos);
-                                    final int lineNumber = Integer.parseInt(line.substring(colonPos + 1, line.indexOf(')', parenthesisStart + 1)));
-                                    ste = new StackTraceElement(className, methodName, fileName, lineNumber);
-                                }
-                            }
-                        }
-                    }
-                    if (null != ste) {
-                        stack.add(ste);
-                    }
-                }
-                t.setStackTrace(stack.toArray(new StackTraceElement[0]));
+                parseStackTrace(exception, jStack);
             }
         }
+    }
+
+    private static void parseStackTrace(final OXException exception, final JSONArray jStack) {
+        final int length = jStack.length();
+
+        Throwable t = exception;
+        List<StackTraceElement> stack = new ArrayList<StackTraceElement>(length);
+
+        // Start at second line: i = 1
+        for (int i = 1; i < length; i++) {
+            final String line = jStack.optString(i, null);
+            StackTraceElement ste = null;
+            if (null != line) {
+                if (line.startsWith("Caused by: ")) {
+                    t.setStackTrace(stack.toArray(new StackTraceElement[0]));
+                    stack = new ArrayList<StackTraceElement>(length);
+                    final Throwable parent = t;
+                    t = new Throwable(line);
+                    parent.initCause(t);
+                } else {
+                    final int parenthesisStart = line.indexOf('(');
+                    final int methodStart = line.substring(0, parenthesisStart).lastIndexOf('.');
+                    final String className = line.substring(0, methodStart);
+                    final String methodName = line.substring(methodStart+1, parenthesisStart);
+                    if (line.regionMatches(parenthesisStart + 1, "Native Method)", 0, "Native Method)".length())) {
+                        ste = new StackTraceElement(className, methodName, null, -2);
+                    } else if (line.regionMatches(parenthesisStart + 1, "Unknown Source)", 0, "Unknown Source)".length())) {
+                        ste = new StackTraceElement(className, methodName, null, -1);
+                    } else {
+                        final int colonPos = line.indexOf(':', parenthesisStart + 1);
+                        if (colonPos < 0) {
+                            ste = new StackTraceElement(className, methodName, line.substring(parenthesisStart + 1, line.indexOf(')', parenthesisStart + 1)), -1);
+                        } else {
+                            final String fileName = line.substring(parenthesisStart + 1, colonPos);
+                            final int lineNumber = Integer.parseInt(line.substring(colonPos + 1, line.indexOf(')', parenthesisStart + 1)));
+                            ste = new StackTraceElement(className, methodName, fileName, lineNumber);
+                        }
+                    }
+                }
+            }
+            if (null != ste) {
+                stack.add(ste);
+            }
+        }
+        t.setStackTrace(stack.toArray(new StackTraceElement[0]));
     }
 
     /**

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -73,13 +73,13 @@ public class FolderStrings implements LocalizableStrings {
 
     public static final String SYSTEM_OX_FOLDER_NAME = "OX folders";
 
-    public static final String SYSTEM_OX_PROJECT_FOLDER_NAME = "Projects";
-
     public static final String SYSTEM_INFOSTORE_FOLDER_NAME = "Infostore";
 
     public static final String SYSTEM_USER_INFOSTORE_FOLDER_NAME = "Userstore";
 
     public static final String SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME = "Public infostore";
+
+    public static final String SYSTEM_TRASH_INFOSTORE_FOLDER_NAME = "Trash infostore";
 
     public static final String VIRTUAL_LIST_TASK_FOLDER_NAME = "Other task folders";
 
@@ -107,5 +107,8 @@ public class FolderStrings implements LocalizableStrings {
 
     public static final String SYSTEM_PUBLIC_FILES_FOLDER_NAME = "Public files";
 
+    public static final String SYSTEM_TRASH_FILES_FOLDER_NAME = "Deleted files";
+
     public static final String VIRTUAL_LIST_FILES_FOLDER_NAME = "Other files";
+
 }

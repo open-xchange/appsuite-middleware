@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,6 +51,7 @@ package com.openexchange.contact.storage.ldap.internal;
 
 import org.slf4j.Logger;
 import com.openexchange.contact.storage.ldap.id.LdapIDResolver;
+import com.openexchange.contact.storage.ldap.mapping.LdapBooleanMapping;
 import com.openexchange.contact.storage.ldap.mapping.LdapMapper;
 import com.openexchange.contact.storage.ldap.mapping.LdapMapping;
 import com.openexchange.exception.OXException;
@@ -60,6 +61,7 @@ import com.openexchange.search.Operation;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
+import com.openexchange.search.internal.operands.ConstantOperand;
 
 /**
  * {@link SearchAdapter}
@@ -118,6 +120,15 @@ public class SearchTermAdapter {
         Operand<?>[] operands = term.getOperands();
         Object[] formatArgs = new String[operands.length];
         Object[] alternativeFormatArgs = null != ldapMapping.getAlternativeLdapAttributeName(true) ? new String[operands.length] : null;
+
+        // Workaround to negate boolean false filters for ldap
+        if (SingleOperation.EQUALS.equals(term.getOperation()) && LdapBooleanMapping.class.isInstance(ldapMapping) && 2 == operands.length && Boolean.FALSE.equals(operands[1].getValue())) {
+            operands[1] = new ConstantOperand<Boolean>(Boolean.TRUE);
+            term = new SingleSearchTerm(SingleOperation.NOT_EQUALS);
+            term.addOperand(operands[0]);
+            term.addOperand(operands[1]);
+        }
+
         for (int i = 0; i < operands.length; i++) {
             if (Operand.Type.COLUMN.equals(operands[i].getType())) {
                 formatArgs[i] = ldapMapping.getLdapAttributeName(true);
@@ -150,7 +161,7 @@ public class SearchTermAdapter {
 	private String getTerm(CompositeSearchTerm term) throws OXException {
         Operation operation = term.getOperation();
         SearchTerm<?>[] terms = term.getOperands();
-        com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
+        StringBuilder stringBuilder = new StringBuilder();
         for (int i = 0; i < terms.length; i++) {
             String filter = getTerm(terms[i]);
             if (null != filter && 0 < filter.length()) {

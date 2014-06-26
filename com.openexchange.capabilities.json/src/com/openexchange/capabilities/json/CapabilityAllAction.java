@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -56,6 +56,7 @@ import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -83,8 +84,11 @@ public class CapabilityAllAction implements AJAXActionService {
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         // Get capabilities
-        CapabilitySet capabilities = services.getService(CapabilityService.class).getCapabilities(
-            session.getUserId(), session.getContextId(), true);
+        CapabilityService capabilityService = services.getOptionalService(CapabilityService.class);
+        if (null == capabilityService) {
+            throw ServiceExceptionCode.absentService(CapabilityService.class);
+        }
+        CapabilitySet capabilities = capabilityService.getCapabilities(session.getUserId(), session.getContextId(), true, true);
         return null == capabilities ? new AJAXRequestResult() : new AJAXRequestResult(capabilities.asSet(), "capability");
     }
 

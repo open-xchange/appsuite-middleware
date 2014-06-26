@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -58,12 +58,15 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.codec.binary.Base64;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.grizzly.GrizzlyExceptionCode;
 import com.openexchange.http.grizzly.osgi.Services;
 import com.openexchange.http.requestwatcher.osgi.services.RequestRegistryEntry;
 import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 
 /**
@@ -75,15 +78,6 @@ import com.openexchange.log.LogProperties;
 public class RequestReportingFilter implements Filter {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RequestReportingFilter.class);
-
-    // properties of long running eas requests
-    private static final String EAS_URI = "/Microsoft-Server-ActiveSync";
-
-    private static final String EAS_CMD = "Cmd";
-
-    private static final String EAS_PING = "Ping";
-
-    private static final String DRIVE_URI = "/ajax/drive";
 
     private final boolean isFilterEnabled;
 
@@ -108,16 +102,17 @@ public class RequestReportingFilter implements Filter {
     @Override
     public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
         if (isFilterEnabled) {
-            final HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-            final HttpServletResponse httpServletResponse = (HttpServletResponse) response;
-            if (isLongRunning(httpServletRequest)) { // Do not track long running requests
+            final RequestWatcherService requestWatcher = Services.optService(RequestWatcherService.class);
+            // Request watcher is enabled but service is missing, bundle not started etc ..
+            if (requestWatcher == null) {
+                LOG.debug("{} is not available. Unable to watch this request.", RequestWatcherService.class.getSimpleName());
                 chain.doFilter(request, response);
             } else {
-                final RequestWatcherService requestWatcher = Services.optService(RequestWatcherService.class);
-                // Request watcher is enabled but service is missing, bundle not started etc ..
-                if (requestWatcher == null) {
-                    LOG.debug("{} is not available. Unable to watch this request.", RequestWatcherService.class.getSimpleName());
-                    chain.doFilter(httpServletRequest, httpServletResponse);
+                final HttpServletRequest httpServletRequest = (HttpServletRequest) request;
+                final HttpServletResponse httpServletResponse = (HttpServletResponse) response;
+                if (isLongRunning(httpServletRequest)) {
+                    // Do not track long running requests
+                    chain.doFilter(request, response);
                 } else {
                     final RequestRegistryEntry requestRegistryEntry = requestWatcher.registerRequest(httpServletRequest, httpServletResponse, Thread.currentThread(), LogProperties.getPropertyMap());
                     try {
@@ -142,16 +137,62 @@ public class RequestReportingFilter implements Filter {
         // nothing to do here
     }
 
-    private boolean isLongRunning(final HttpServletRequest httpServletRequest) {
-        return isDriveRequest(httpServletRequest) || isEASRequest(httpServletRequest);
+    private boolean isLongRunning(final HttpServletRequest request) {
+        return isDriveRequest(request) || isEASRequest(request);
     }
 
-    private final boolean isDriveRequest(final HttpServletRequest httpServletRequest) {
-        return DRIVE_URI.equals(httpServletRequest.getRequestURI());
+    // -------------------------------------------------------------------------------------------------------------------------------------- //
+
+    private static final String DRIVE_URI = "/ajax/drive";
+
+    private final boolean isDriveRequest(final HttpServletRequest request) {
+        return DRIVE_URI.equals(request.getRequestURI());
     }
 
-    private final boolean isEASRequest(final HttpServletRequest httpServletRequest) {
-        return EAS_URI.equals(httpServletRequest.getRequestURI()) && EAS_PING.equals(httpServletRequest.getParameter(EAS_CMD));
+    // -------------------------------------------------------------------------------------------------------------------------------------- //
+
+    private static final String EAS_URI = "/Microsoft-Server-ActiveSync";
+    private static final String EAS_CMD = "Cmd";
+    private static final String EAS_PING = "Ping";
+    private static final int EAS_COMMAND_CODE_PING = 18;
+
+    private final boolean isEASRequest(final HttpServletRequest request) {
+        if (EAS_URI.equals(request.getRequestURI())) {
+            if (EAS_PING.equals(request.getParameter(EAS_CMD))) {
+                return true;
+            }
+
+            /*-
+             * Check for possibly EAS base64-encoded query string
+             *
+             * Second byte reflects EAS command
+             */
+            final byte[] bytes = getBase64Bytes(request.getQueryString());
+            if (null != bytes && bytes.length > 2 && EAS_COMMAND_CODE_PING == bytes[1]) {
+                return true;
+            }
+        }
+
+        return false;
     }
+
+    private final byte[] getBase64Bytes(final String queryString) {
+        if (Strings.isEmpty(queryString)) {
+            return null;
+        }
+
+        try {
+            final byte[] encodedBytes = Charsets.toAsciiBytes(queryString);
+            if (Base64.isBase64(encodedBytes)) {
+                return Base64.decodeBase64(encodedBytes);
+            }
+        } catch (final Exception e) {
+            LOG.warn("Could not check for EAS base64-encoded query string", e);
+        }
+
+        return null;
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------- //
 
 }

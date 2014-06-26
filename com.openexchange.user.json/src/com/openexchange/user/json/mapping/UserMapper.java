@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -66,7 +66,6 @@ import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapping;
 import com.openexchange.groupware.tools.mappings.json.IntegerMapping;
 import com.openexchange.groupware.tools.mappings.json.JsonMapping;
 import com.openexchange.groupware.tools.mappings.json.StringMapping;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.session.Session;
@@ -395,7 +394,7 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
             return null;
         }
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
@@ -412,7 +411,7 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
             return null;
         }
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
@@ -432,7 +431,7 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
                 // No slash character present
                 return addr.toUnicodeString();
             }
-            final StringAllocator sb = new StringAllocator(32);
+            final StringBuilder sb = new StringBuilder(32);
             final String personal = addr.getPersonal();
             if (null == personal) {
                 sb.append(prepareAddress(sAddress.substring(0, pos)));

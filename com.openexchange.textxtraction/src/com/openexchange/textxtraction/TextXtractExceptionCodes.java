@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,33 +50,35 @@
 package com.openexchange.textxtraction;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * Enumeration about all {@link OXException}s.
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public enum TextXtractExceptionCodes implements OXExceptionCode {
+public enum TextXtractExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    ERROR(TextXtractExceptionMessages.ERROR_MSG, Category.CATEGORY_ERROR, 1),
+    ERROR("An error occurred: %1$s", Category.CATEGORY_ERROR, 1, null),
     /**
      * The following field(s) are too long: %1$s
      */
-    TRUNCATED(TextXtractExceptionMessages.TRUNCATED_MSG, Category.CATEGORY_TRUNCATED, 2),
+    TRUNCATED("The following field(s) are too long: %1$s", Category.CATEGORY_TRUNCATED, 2, TextXtractExceptionMessages.TRUNCATED_MSG),
     /**
      * Unable to change data. (%1$s)
      */
-    UNABLE_TO_CHANGE_DATA(TextXtractExceptionMessages.UNABLE_TO_CHANGE_DATA_MSG, Category.CATEGORY_USER_INPUT, 3),
+    UNABLE_TO_CHANGE_DATA("Unable to change data. (%1$s)", Category.CATEGORY_USER_INPUT, 3,
+        TextXtractExceptionMessages.UNABLE_TO_CHANGE_DATA_MSG),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(TextXtractExceptionMessages.IO_ERROR_MSG, Category.CATEGORY_ERROR, 4),
+    IO_ERROR("An I/O error occurred: %1$s", Category.CATEGORY_ERROR, 4, null),
 
     ;
 
@@ -85,12 +87,15 @@ public enum TextXtractExceptionCodes implements OXExceptionCode {
     private final int number;
 
     private final String message;
+    
+    private String displayMessage;
 
 
-    private TextXtractExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private TextXtractExceptionCodes(final String message, final Category category, final int detailNumber, String displayMessage) {
         this.message = message;
         this.number = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -111,6 +116,11 @@ public enum TextXtractExceptionCodes implements OXExceptionCode {
     @Override
     public int getNumber() {
         return number;
+    }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override

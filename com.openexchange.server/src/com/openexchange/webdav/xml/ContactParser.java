@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -56,7 +56,6 @@ import org.xmlpull.v1.XmlPullParserException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
-import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.session.Session;
 import com.openexchange.tools.encoding.Base64;
 import com.openexchange.webdav.WebdavExceptionCode;
@@ -392,9 +391,6 @@ public class ContactParser extends CommonParser {
         } else if (isTag(parser, ContactFields.DISTRIBUTIONLIST)) {
             parseElementDistributionlists(contactobject, parser);
             return;
-        } else if (isTag(parser, ContactFields.LINKS)) {
-            parseElementLinks(contactobject, parser);
-            return;
         } else {
             parseElementCommon(contactobject, parser);
         }
@@ -450,43 +446,4 @@ public class ContactParser extends CommonParser {
 
     }
 
-    protected void parseElementLinks(final Contact oxobject, final XmlPullParser parser) throws OXException {
-        final ArrayList<LinkEntryObject> links = new ArrayList<LinkEntryObject>();
-
-        try {
-            boolean isLinks = true;
-
-            while (isLinks) {
-                parser.nextTag();
-
-                if (isEnd(parser)) {
-                    throw WebdavExceptionCode.IO_ERROR.create("invalid xml in links!");
-                }
-
-                if (parser.getName().equals(ContactFields.LINKS) && parser.getEventType() == XmlPullParser.END_TAG) {
-                    isLinks = false;
-                    break;
-                }
-
-                final LinkEntryObject link = new LinkEntryObject();
-
-                if (isTag(parser, "link")) {
-                    parseElementLink(parser, link);
-                } else {
-                    throw WebdavExceptionCode.IO_ERROR.create("unknown xml tag in links!");
-                }
-
-                links.add(link);
-            }
-        } catch (final Exception exc) {
-            throw new OXException(exc);
-        }
-
-        oxobject.setLinks(links.toArray(new LinkEntryObject[links.size()]));
-    }
-
-    protected void parseElementLink(final XmlPullParser parser, final LinkEntryObject link) throws Exception {
-        link.setLinkDisplayname(parser.getAttributeValue(XmlServlet.NAMESPACE, ContactFields.DISPLAY_NAME));
-        link.setLinkID(getValueAsInt(parser));
-    }
 }

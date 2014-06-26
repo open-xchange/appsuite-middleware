@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -56,6 +56,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Queue;
 import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.AttributeNotFoundException;
@@ -77,6 +78,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.ExecutedTask;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.SchemaStore;
+import com.openexchange.groupware.update.TaskInfo;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.internal.UpdateProcess;
 
@@ -203,10 +205,23 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 } else {
                     final String sParam = param.toString();
                     final int parsed = parsePositiveInt(sParam);
-                    if (parsed >= 0) {
-                        new UpdateProcess(parsed).run();
-                    } else {
-                        new UpdateProcess(UpdateTaskToolkit.getContextIdBySchema(param.toString())).run();
+
+                    final UpdateProcess updateProcess = parsed >= 0 ? new UpdateProcess(parsed, true) : new UpdateProcess(UpdateTaskToolkit.getContextIdBySchema(param.toString()), true);
+                    updateProcess.run();
+
+                    final Queue<TaskInfo> failures = updateProcess.getFailures();
+                    if (null != failures && !failures.isEmpty()) {
+                        final StringBuilder sb = new StringBuilder("The following update task(s) failed: \\R");
+                        boolean first = true;
+                        for (final TaskInfo taskInfo : failures) {
+                            if (first) {
+                                first = false;
+                            } else {
+                                sb.append("\\R");
+                            }
+                            sb.append(' ').append(taskInfo.getTaskName()).append(" (schema=").append(taskInfo.getSchema()).append(')');
+                        }
+                        return sb.toString();
                     }
                 }
             } catch (final OXException e) {

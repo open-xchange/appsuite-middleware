@@ -30,8 +30,8 @@ import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Field;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -178,7 +178,7 @@ public class JSONObject extends AbstractJSONValue {
      */
     public JSONObject() {
         super();
-        this.myHashMap = new HashMap<String, Object>();
+        this.myHashMap = new LinkedHashMap<String, Object>();
     }
 
     /**
@@ -186,7 +186,7 @@ public class JSONObject extends AbstractJSONValue {
      */
     public JSONObject(final int initialCapacity) {
         super();
-        this.myHashMap = new HashMap<String, Object>(initialCapacity);
+        this.myHashMap = new LinkedHashMap<String, Object>(initialCapacity);
     }
 
     /**
@@ -286,14 +286,14 @@ public class JSONObject extends AbstractJSONValue {
     public JSONObject(final Map<String, ? extends Object> map) {
         super();
         if (null == map || map.isEmpty()) {
-            this.myHashMap = new HashMap<String, Object>();
+            this.myHashMap = new LinkedHashMap<String, Object>();
         } else {
             final int max = MAX_SIZE.get();
             final int size = map.size();
             if (max > 0 && size > max) {
                 throw new IllegalStateException("Max. size (" + max + ") for JSON object exceeded");
             }
-            this.myHashMap = new HashMap<String, Object>(map.size());
+            this.myHashMap = new LinkedHashMap<String, Object>(map.size());
             for (final Map.Entry<String, ? extends Object> entry : map.entrySet()) {
                 final Object value = entry.getValue();
                 if (value instanceof JSONValue) {
@@ -303,6 +303,10 @@ public class JSONObject extends AbstractJSONValue {
                     } else {
                         myHashMap.put(entry.getKey(), new JSONObject(jsonValue.toObject()));
                     }
+                } else if (value instanceof Collection) {
+                    myHashMap.put(entry.getKey(), new JSONArray((Collection<Object>) value));
+                } else if (value instanceof Map) {
+                    myHashMap.put(entry.getKey(), new JSONObject((Map<String, Object>) value));
                 } else {
                     myHashMap.put(entry.getKey(), value);
                 }
@@ -417,7 +421,7 @@ public class JSONObject extends AbstractJSONValue {
      * @return The map
      */
     public Map<String, Object> asMap() {
-        final Map<String, Object> retval = new HashMap<String, Object>(myHashMap.size());
+        final Map<String, Object> retval = new LinkedHashMap<String, Object>(myHashMap.size());
         for (final Map.Entry<String, ? extends Object> entry : myHashMap.entrySet()) {
             final Object value = entry.getValue();
             if (value instanceof JSONValue) {
@@ -1058,7 +1062,7 @@ public class JSONObject extends AbstractJSONValue {
         int i;
         final int len = string.length();
 
-        final org.json.helpers.StringAllocator sb = new org.json.helpers.StringAllocator(len + 4);
+        final StringBuilder sb = new StringBuilder(len + 4);
         String t;
 
         sb.append('"');

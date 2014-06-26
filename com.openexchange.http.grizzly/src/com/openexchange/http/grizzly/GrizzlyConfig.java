@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,11 +49,16 @@
 
 package com.openexchange.http.grizzly;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.grizzly.osgi.Services;
 import com.openexchange.http.grizzly.util.IPTools;
@@ -65,11 +70,15 @@ import com.openexchange.server.Initialization;
  *
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
-public class GrizzlyConfig implements Initialization {
+public class GrizzlyConfig implements Initialization, Reloadable {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GrizzlyConfig.class);
 
     private static final GrizzlyConfig instance = new GrizzlyConfig();
+
+    private static final String CONFIGFILE = "server.properties";
+    private static final String[] PROPERTIES = new String[] {"com.openexchange.server.knownProxies"};
+    private final PropertyChangeSupport changes = new PropertyChangeSupport(this);
 
     public static GrizzlyConfig getInstance() {
         return instance;
@@ -487,6 +496,29 @@ public class GrizzlyConfig implements Initialization {
      */
     public int getMaxNumberOfHttpSessions() {
         return maxNumberOfHttpSessions;
+    }
+
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        String proxies = configService.getProperty("com.openexchange.server.knownProxies");
+        List<String> oldProxies = knownProxies;
+        setKnownProxies(proxies);
+        changes.firePropertyChange("knownProxies", oldProxies, proxies);
+    }
+
+    @Override
+    public Map<String, String[]> getConfigFileNames() {
+        Map<String, String[]> map = new HashMap<String, String[]>(1);
+        map.put(CONFIGFILE, PROPERTIES);
+        return map;
+    }
+
+    public void addPropertyListener(PropertyChangeListener listener) {
+        changes.addPropertyChangeListener(listener);
+    }
+
+    public void removePropertyListener(PropertyChangeListener listener) {
+        changes.removePropertyChangeListener(listener);
     }
 
 }

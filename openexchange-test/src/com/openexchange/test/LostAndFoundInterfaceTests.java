@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -126,8 +126,6 @@ public class LostAndFoundInterfaceTests {
     	tests.addTestSuite(com.openexchange.ajax.task.Bug10941Test.class);
     	tests.addTestSuite(com.openexchange.ajax.task.Bug14450Test.class);
     	tests.addTestSuite(com.openexchange.ajax.task.Bug21026Test.class);
-    	tests.addTestSuite(com.openexchange.ajax.updater.UpdaterDownloadTest.class);
-    	tests.addTestSuite(com.openexchange.ajax.updater.UpdaterXMLTest.class);
     	tests.addTestSuite(com.openexchange.ajax.voipnow.CallReportTest.class);
     	tests.addTestSuite(com.openexchange.ajax.voipnow.ClientDetailsTest.class);
     	tests.addTestSuite(com.openexchange.ajax.voipnow.ExtensionDetailsTest.class);

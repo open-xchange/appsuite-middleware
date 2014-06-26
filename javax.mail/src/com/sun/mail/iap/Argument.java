@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2011 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,16 +40,19 @@
 
 package com.sun.mail.iap;
 
+import java.util.List;
 import java.util.ArrayList;
 import java.io.*;
+import java.nio.charset.Charset;
 import com.sun.mail.util.*;
 
 /**
  * @author  John Mani
+ * @author  Bill Shannon
  */
 
 public class Argument {
-    protected ArrayList<Object> items;
+    protected List<Object> items;
 
     /**
      * Constructor
@@ -59,14 +62,13 @@ public class Argument {
     }
 
     /**
-     * append the given Argument to this Argument. All items
+     * Append the given Argument to this Argument. All items
      * from the source argument are copied into this destination
      * argument.
      */
-    public void append(Argument arg) {
-	items.ensureCapacity(items.size() + arg.items.size());
-	for (int i=0; i < arg.items.size(); i++)
-	    items.add(arg.items.get(i));
+    public Argument append(Argument arg) {
+	items.addAll(arg.items);
+	return this;
     }
 
     /**
@@ -78,44 +80,110 @@ public class Argument {
      *
      * @param s  String to write out
      */
-    public void writeString(String s) {
+    public Argument writeString(String s) {
 	items.add(new AString(ASCIIUtility.getBytes(s)));
+	return this;
     }
 
     /**
      * Convert the given string into bytes in the specified
      * charset, and write the bytes out as an ASTRING
      */
-    public void writeString(String s, String charset)
+    public Argument writeString(String s, String charset)
 		throws UnsupportedEncodingException {
 	if (charset == null) // convenience
 	    writeString(s);
 	else
 	    items.add(new AString(s.getBytes(charset)));
+	return this;
+    }
+
+    /**
+     * Convert the given string into bytes in the specified
+     * charset, and write the bytes out as an ASTRING
+     */
+    public Argument writeString(String s, Charset charset) {
+    if (charset == null) // convenience
+        writeString(s);
+    else
+        items.add(new AString(s.getBytes(charset)));
+    return this;
+    }
+
+    /**
+     * Write out given string as an NSTRING, depending on the type
+     * of the characters inside the string. The string should
+     * contain only ASCII characters. <p>
+     *
+     * @param s  String to write out
+     * @since	JavaMail 1.5.1
+     */
+    public Argument writeNString(String s) {
+	if (s == null)
+	    items.add(new NString(null));
+	else
+	    items.add(new NString(ASCIIUtility.getBytes(s)));
+	return this;
+    }
+
+    /**
+     * Convert the given string into bytes in the specified
+     * charset, and write the bytes out as an NSTRING
+     *
+     * @since	JavaMail 1.5.1
+     */
+    public Argument writeNString(String s, String charset)
+		throws UnsupportedEncodingException {
+	if (s == null)
+	    items.add(new NString(null));
+	else if (charset == null) // convenience
+	    writeString(s);
+	else
+	    items.add(new NString(s.getBytes(charset)));
+	return this;
+    }
+
+    /**
+     * Convert the given string into bytes in the specified
+     * charset, and write the bytes out as an NSTRING
+     *
+     * @since   JavaMail 1.5.1
+     */
+    public Argument writeNString(String s, Charset charset) {
+    if (s == null)
+        items.add(new NString(null));
+    else if (charset == null) // convenience
+        writeString(s);
+    else
+        items.add(new NString(s.getBytes(charset)));
+    return this;
     }
 
     /**
      * Write out given byte[] as a Literal.
      * @param b  byte[] to write out
      */
-    public void writeBytes(byte[] b)  {
+    public Argument writeBytes(byte[] b)  {
 	items.add(b);
+	return this;
     }
 
     /**
      * Write out given ByteArrayOutputStream as a Literal.
      * @param b  ByteArrayOutputStream to be written out.
      */
-    public void writeBytes(ByteArrayOutputStream b)  {
+    public Argument writeBytes(ByteArrayOutputStream b)  {
 	items.add(b);
+	return this;
     }
 
     /**
      * Write out given data as a literal.
      * @param b  Literal representing data to be written out.
      */
-    public void writeBytes(Literal b)  {
+    public Argument writeBytes(Literal b)  {
 	items.add(b);
+	return this;
     }
 
     /**
@@ -124,31 +192,35 @@ public class Argument {
      * in the string.
      * @param s  String
      */
-    public void writeAtom(String s) {
+    public Argument writeAtom(String s) {
 	items.add(new Atom(s));
+	return this;
     }
 
     /**
      * Write out number.
      * @param i number
      */
-    public void writeNumber(int i) {
+    public Argument writeNumber(int i) {
 	items.add(Integer.valueOf(i));
+	return this;
     }
 
     /**
      * Write out number.
      * @param i number
      */
-    public void writeNumber(long i) {
+    public Argument writeNumber(long i) {
 	items.add(Long.valueOf(i));
+	return this;
     }
 
     /**
      * Write out as parenthesised list.
      */
-    public void writeArgument(Argument c) {
+    public Argument writeArgument(Argument c) {
 	items.add(c);
+	return this;
     }
 
     /*
@@ -170,6 +242,8 @@ public class Argument {
 		os.writeBytes(((Number)o).toString());
 	    } else if (o instanceof AString) {
 		astring(((AString)o).bytes, protocol);
+	    } else if (o instanceof NString) {
+		nstring(((NString)o).bytes, protocol);
 	    } else if (o instanceof byte[]) {
 		literal((byte[])o, protocol);
 	    } else if (o instanceof ByteArrayOutputStream) {
@@ -184,27 +258,27 @@ public class Argument {
 	}
     }
 
-    private static final char[] UPPER_NIL = { 'N', 'I', 'L' };
-
-    private static final char[] LOWER_NIL = { 'n', 'i', 'l' };
-
-    private static boolean isNIL(final byte[] bytes) {
-        final int len = bytes.length;
-        if (len != UPPER_NIL.length) {
-            return false;
-        }
-        boolean matches = true;
-        for (int i = 0; matches && i < len; i++) {
-            final byte b = bytes[i];
-            matches = (b == ((byte) UPPER_NIL[i]) || b == ((byte) LOWER_NIL[i]));
-        }
-        return matches;
-    }
-
     /**
      * Write out given String as either an Atom, QuotedString or Literal
      */
     private void astring(byte[] bytes, Protocol protocol) 
+			throws IOException, ProtocolException {
+	nastring(bytes, protocol, false);
+    }
+
+    /**
+     * Write out given String as either NIL, QuotedString, or Literal.
+     */
+    private void nstring(byte[] bytes, Protocol protocol) 
+			throws IOException, ProtocolException {
+	if (bytes == null) {
+	    DataOutputStream os = (DataOutputStream)protocol.getOutputStream();
+	    os.writeBytes("NIL");
+	} else
+	    nastring(bytes, protocol, true);
+    }
+
+    private void nastring(byte[] bytes, Protocol protocol, boolean doQuote) 
 			throws IOException, ProtocolException {
 	DataOutputStream os = (DataOutputStream)protocol.getOutputStream();
 	int len = bytes.length;
@@ -216,13 +290,9 @@ public class Argument {
 	}
 
         // if 0 length, send as quoted-string
-        boolean quote = len == 0 ? true: false;
+        boolean quote = len == 0 ? true : doQuote;
 	boolean escape = false;
-
-	if (isNIL(bytes)) {
-        quote = true;
-    }
-
+ 	
 	byte b;
 	for (int i = 0; i < len; i++) {
 	    b = bytes[i];
@@ -238,6 +308,19 @@ public class Argument {
 		    escape = true;
 	    }
 	}
+
+	/*
+	 * Make sure the (case-independent) string "NIL" is always quoted,
+	 * so as not to be confused with a real NIL (handled above in nstring).
+	 * This is more than is necessary, but it's rare to begin with and
+	 * this makes it safer than doing the test in nstring above in case
+	 * some code calls writeString when it should call writeNString.
+	 */
+	if (!quote && bytes.length == 3 &&
+		(bytes[0] == 'N' || bytes[0] == 'n') &&
+		(bytes[1] == 'I' || bytes[1] == 'i') &&
+		(bytes[2] == 'L' || bytes[2] == 'l'))
+	    quote = true;
 
 	if (quote) // start quote
 	    os.write('"');
@@ -324,6 +407,14 @@ class AString {
     byte[] bytes;
 
     AString(byte[] b) {
+	bytes = b;
+    }
+}
+
+class NString {
+    byte[] bytes;
+
+    NString(byte[] b) {
 	bytes = b;
     }
 }

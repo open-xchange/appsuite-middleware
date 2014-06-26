@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -58,7 +58,7 @@ import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.json.payload.converter.JSONToRealtimeExceptionConverter;
 import com.openexchange.realtime.json.payload.converter.JSONToStackTraceElementConverter;
 import com.openexchange.realtime.json.payload.converter.JSONToThrowableConverter;
-import com.openexchange.realtime.json.payload.converter.sim.SimpleConverterSim;
+import com.openexchange.realtime.payload.converter.sim.SimpleConverterSim;
 
 
 /**

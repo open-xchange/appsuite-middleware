@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,6 +52,7 @@ package com.openexchange.oauth.msn;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
@@ -59,6 +60,8 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.API;
@@ -77,7 +80,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
+public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData implements Reloadable {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OAuthServiceMetaDataMSNImpl.class);
 
@@ -89,6 +92,9 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
 
     private static final String REFRESH_TOKEN_KEY = "refresh_token";
     private static final String REFRESH_TOKEN_KEY_ALT = "authorization_code";
+
+    private final static String[] PROPERTIES = new String[] {"com.openexchange.oauth.msn.apiKey",
+        "com.openexchange.oauth.msn.apiSecret"};
 
     private final DeferringURLService deferrer;
 
@@ -227,5 +233,28 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
 	public API getAPI() {
 		return API.MSN;
 	}
+
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        String apiKey = configService.getProperty(apiKeyName);
+        String secretKey = configService.getProperty(apiSecretName);
+
+        if (apiKey.isEmpty()) {
+            throw new IllegalStateException("Missing following property in configuration: " + apiKeyName);
+        }
+        if (secretKey.isEmpty()) {
+            throw new IllegalStateException("Missing following property in configuration: " + apiSecretName);
+        }
+
+        this.apiKey = apiKey;
+        this.apiSecret = secretKey;
+    }
+
+    @Override
+    public Map<String, String[]> getConfigFileNames() {
+        Map<String, String[]> map = new HashMap<String, String[]>(1);
+        map.put("msnoauth.properties", PROPERTIES);
+        return map;
+    }
 
 }

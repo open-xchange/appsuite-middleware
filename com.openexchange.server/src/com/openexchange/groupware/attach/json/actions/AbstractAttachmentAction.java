@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -114,7 +114,7 @@ public abstract class AbstractAttachmentAction implements AJAXActionService {
      * @param requestData The associated request data
      * @throws OXException If any quota restrictions are exceeded
      */
-    protected void checkSize(final long size, AJAXRequestData requestData) throws OXException {
+    protected void checkSize(final long size, final AJAXRequestData requestData) throws OXException {
         if (maxUploadSize.get() == -2) {
             final long configuredSize = AttachmentConfig.getMaxUploadSize();
             long cur;

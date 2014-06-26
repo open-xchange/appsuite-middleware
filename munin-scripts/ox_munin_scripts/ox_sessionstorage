@@ -32,7 +32,7 @@ open(SHOWRUNTIME,"$showexec |") || die "can not read monitoring output";
 
 while (<SHOWRUNTIME>)
 {
-    if ($_ =~ m/com.hazelcast:type=Map.+?name=sessions-\d+,Size\s*?=\s*?(\d+)/) {
+    if ($_ =~ m/com.hazelcast:instance=.+,type=IMap,name=sessions-\d+,size\s*?=\s*?(\d+)/) {
 	    $val = $1;
 	    print "a.value $val\n";
 	    next;

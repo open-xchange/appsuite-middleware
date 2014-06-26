@@ -91,8 +91,9 @@ public class InfostorePrimaryKeyUpdateTask extends UpdateTaskAdapter {
             }
             if (Tools.hasPrimaryKey(con, INFOSTORE)) {
                 Tools.dropPrimaryKey(con, INFOSTORE);
+                Tools.createPrimaryKey(con, INFOSTORE, new String[] { "cid", "id", "folder_id" });
             }
-            Tools.createPrimaryKey(con, INFOSTORE, new String[] { "cid", "id", "folder_id" });
+
             con.commit();
         } catch (SQLException e) {
             DBUtils.rollback(con);

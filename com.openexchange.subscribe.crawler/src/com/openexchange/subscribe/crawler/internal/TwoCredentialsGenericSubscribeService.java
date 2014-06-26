@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,7 +53,7 @@ import static com.openexchange.subscribe.crawler.internal.FormStrings.FORM_LABEL
 import static com.openexchange.subscribe.crawler.internal.FormStrings.FORM_LABEL_PASSWORD;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
-import com.openexchange.subscribe.crawler.osgi.Activator;
+import com.openexchange.subscribe.crawler.osgi.CrawlersActivator;
 
 
 /**
@@ -63,7 +63,7 @@ import com.openexchange.subscribe.crawler.osgi.Activator;
  */
 public class TwoCredentialsGenericSubscribeService extends GenericSubscribeService{
 
-    public TwoCredentialsGenericSubscribeService(String displayName, String id, int module, String workflowString, int priority, Activator activator, boolean enableJavascript) {
+    public TwoCredentialsGenericSubscribeService(String displayName, String id, int module, String workflowString, int priority, CrawlersActivator activator, boolean enableJavascript) {
         super(displayName, id, module, workflowString, priority, activator, enableJavascript);
     }
 

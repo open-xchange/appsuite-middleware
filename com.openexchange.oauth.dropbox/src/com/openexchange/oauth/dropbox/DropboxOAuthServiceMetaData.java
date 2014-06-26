@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.dropbox;
 
+import java.util.HashMap;
 import java.util.Map;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.DropBoxApi;
@@ -61,8 +62,8 @@ import com.dropbox.client2.session.RequestTokenPair;
 import com.dropbox.client2.session.Session.AccessType;
 import com.dropbox.client2.session.WebAuthSession;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
@@ -80,9 +81,12 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DropboxOAuthServiceMetaData extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware {
+public final class DropboxOAuthServiceMetaData extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware, Reloadable {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DropboxOAuthServiceMetaData.class);
+
+    private static final String[] PROPERTIES = new String[] {"com.openexchange.oauth.dropbox.apiKey",
+        "com.openexchange.oauth.dropbox.apiSecret"};
 
     /**
      * Initializes a new {@link DropboxOAuthServiceMetaData}.
@@ -116,7 +120,7 @@ public final class DropboxOAuthServiceMetaData extends AbstractOAuthServiceMetaD
             final AppKeyPair appKeys = new AppKeyPair(apiKey, apiSecret);
             final DropboxAPI<WebAuthSession> dropboxAPI =
                 new DropboxAPI<WebAuthSession>(new TrustAllWebAuthSession(appKeys, AccessType.DROPBOX));
-            final StringAllocator authUrl = new StringAllocator(dropboxAPI.getSession().getAuthInfo().url);
+            final StringBuilder authUrl = new StringBuilder(dropboxAPI.getSession().getAuthInfo().url);
             if (!isEmpty(callbackUrl)) {
                 authUrl.append('&').append(OAuthConstants.URLPARAM_OAUTH_CALLBACK).append('=').append(urlEncode(callbackUrl)).toString();
             }
@@ -198,6 +202,28 @@ public final class DropboxOAuthServiceMetaData extends AbstractOAuthServiceMetaD
     @Override
     public Class<? extends Api> getScribeService() {
         return DropBoxApi.class;
+    }
+
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        String apiKey = configService.getProperty("com.openexchange.oauth.dropbox.apiKey");
+        if (Strings.isEmpty(apiKey)) {
+            throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.dropbox.apiKey");
+        }
+        this.apiKey = apiKey;
+
+        String apiSecret = configService.getProperty("com.openexchange.oauth.dropbox.apiSecret");
+        if (Strings.isEmpty(apiSecret)) {
+            throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.dropbox.apiSecret");
+        }
+        this.apiSecret = apiSecret;
+    }
+
+    @Override
+    public Map<String, String[]> getConfigFileNames() {
+        Map<String, String[]> map = new HashMap<String, String[]>(1);
+        map.put("dropboxoauth.properties", PROPERTIES);
+        return map;
     }
 
 }

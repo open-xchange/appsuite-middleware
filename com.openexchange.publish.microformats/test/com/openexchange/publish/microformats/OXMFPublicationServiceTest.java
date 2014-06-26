@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,6 +51,7 @@ package com.openexchange.publish.microformats;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.Before;
 import junit.framework.TestCase;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.exception.OXException;
@@ -76,6 +77,7 @@ public class OXMFPublicationServiceTest extends TestCase {
     private final Publication oldPublication = new Publication();
 
     @Override
+    @Before
     public void setUp() throws Exception {
         publicationService = new OXMFPublicationService() {
 
@@ -90,6 +92,18 @@ public class OXMFPublicationServiceTest extends TestCase {
                     final Publication publication = new Publication();
                     publication.setId(23);
                     publication.getConfiguration().put("siteName", "existingSite");
+                    publication.setContext(new SimContext(1337));
+                    return publication;
+                } else if (site.equals("different Site 2")) {
+                    final Publication publication = new Publication();
+                    publication.setId(23);
+                    publication.getConfiguration().put("siteName", "different Site 2");
+                    publication.setContext(new SimContext(1337));
+                    return publication;
+                } else if (site.equals("other/Site3")) {
+                    final Publication publication = new Publication();
+                    publication.setId(23);
+                    publication.getConfiguration().put("siteName", "other/Site3");
                     publication.setContext(new SimContext(1337));
                     return publication;
                 }
@@ -260,18 +274,89 @@ public class OXMFPublicationServiceTest extends TestCase {
         assertEqualPublication(publication, comparePublication);
     }
 
-    public void testResolveUrlShouldFail() throws OXException {
+    public void testResolveUrlWithEncodedSpace() throws OXException {
         final Publication publication = new Publication();
         publication.setId(23);
         publication.setContext(new SimContext(1337));
-        publication.getConfiguration().put("siteName", "existingSite");
+        publication.getConfiguration().put("siteName", "different Site 2");
 
         publicationService.modifyOutgoing(publication);
 
         assertNotNull(publication.getConfiguration().get("url"));
-        assertEquals("/publications/bananas/1337/existingSite", publication.getConfiguration().get("url"));
+        assertEquals("/publications/bananas/1337/different%20Site%202", publication.getConfiguration().get("url"));
 
-        final Publication comparePublication = publicationService.resolveUrl(new SimContext(1337), "/publications/bananas/1337/existingSite2");
+        final Publication comparePublication = publicationService.resolveUrl(new SimContext(1337), "/publications/bananas/1337/different%20Site%202");
+        assertNotNull("Returned publication of resolveUrl is null!", comparePublication);
+
+        publicationService.modifyOutgoing(comparePublication);
+
+        assertNotNull(comparePublication.getConfiguration().get("url"));
+        assertEquals("/publications/bananas/1337/different%20Site%202", comparePublication.getConfiguration().get("url"));
+
+        assertEqualPublication(publication, comparePublication);
+    }
+
+    public void testResolveUrlWithSpace() throws OXException {
+        final Publication publication = new Publication();
+        publication.setId(23);
+        publication.setContext(new SimContext(1337));
+        publication.getConfiguration().put("siteName", "different Site 2");
+
+        publicationService.modifyOutgoing(publication);
+
+        assertNotNull(publication.getConfiguration().get("url"));
+        assertEquals("/publications/bananas/1337/different%20Site%202", publication.getConfiguration().get("url"));
+
+        final Publication comparePublication = publicationService.resolveUrl(new SimContext(1337), "/publications/bananas/1337/different Site 2");
+        assertNotNull("Returned publication of resolveUrl is null!", comparePublication);
+
+        publicationService.modifyOutgoing(comparePublication);
+
+        assertNotNull(comparePublication.getConfiguration().get("url"));
+        assertEquals("/publications/bananas/1337/different%20Site%202", comparePublication.getConfiguration().get("url"));
+
+        assertEqualPublication(publication, comparePublication);
+    }
+
+    public void testResolveUrlWithSlash() throws OXException {
+        final Publication publication = new Publication();
+        publication.setId(23);
+        publication.setContext(new SimContext(1337));
+        publication.getConfiguration().put("siteName", "other/Site3");
+
+        publicationService.modifyOutgoing(publication);
+
+        assertNotNull(publication.getConfiguration().get("url"));
+        assertEquals("/publications/bananas/1337/other/Site3", publication.getConfiguration().get("url"));
+
+        final Publication comparePublication = publicationService.resolveUrl(new SimContext(1337), "/publications/bananas/1337/other/Site3");
+        assertNotNull("Returned publication of resolveUrl is null!", comparePublication);
+
+        publicationService.modifyOutgoing(comparePublication);
+
+        assertNotNull(comparePublication.getConfiguration().get("url"));
+        assertEquals("/publications/bananas/1337/other/Site3", comparePublication.getConfiguration().get("url"));
+
+        assertEqualPublication(publication, comparePublication);
+    }
+
+    public void testResolveUrlShouldFail() throws OXException {
+        final Publication comparePublication = publicationService.resolveUrl(new SimContext(1337), "/publications/bananas/1337/notpresent");
+        assertNull("Returned publication is not null!", comparePublication);
+    }
+
+    public void testResolveUrlShouldFail2() throws OXException {
+        final Publication comparePublication = publicationService.resolveUrl(new SimContext(1337), "/publications/bananas/1337/");
+        assertNull("Returned publication is not null!", comparePublication);
+    }
+
+    public void testResolveUrlShouldFail3() throws OXException {
+        final Publication comparePublication = publicationService.resolveUrl(new SimContext(1337), "/publications/bananas/1337/?secret=thisIsJustATest");
+        assertNull("Returned publication is not null!", comparePublication);
+    }
+
+    public void testResolveUrlShouldFail4() throws OXException {
+        final Publication comparePublication = publicationService.resolveUrl(new SimContext(1337), "");
         assertNull("Returned publication is not null!", comparePublication);
     }
 

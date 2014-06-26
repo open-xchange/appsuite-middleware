@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -46,81 +46,136 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.halo.linkedin;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.mail.internet.AddressException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.HaloContactImageSource;
 import com.openexchange.halo.HaloContactQuery;
 import com.openexchange.halo.Picture;
 import com.openexchange.halo.linkedin.helpers.ContactEMailCompletor;
+import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.linkedin.LinkedInService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
+public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implements HaloContactImageSource {
 
-public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implements HaloContactDataSource, HaloContactImageSource {
+    public LinkedinProfileDataSource(final ServiceLookup serviceLookup) {
+        super(serviceLookup);
+    }
 
-	public LinkedinProfileDataSource(final ServiceLookup serviceLookup) {
-		super(serviceLookup);
-	}
+    @Override
+    public String getId() {
+        return "com.openexchange.halo.linkedIn.fullProfile";
+    }
 
-	@Override
-	public String getId() {
-		return "com.openexchange.halo.linkedIn.fullProfile";
-	}
+    @Override
+    public boolean isAvailable(ServerSession session) throws OXException {
+        return hasAccount(session);
+    }
 
-	@Override
-	public AJAXRequestResult investigate(final HaloContactQuery query, final AJAXRequestData req, final ServerSession session) throws OXException {
-		final int uid = session.getUserId();
-		final int cid = session.getContextId();
-
-		final Contact contact = query.getContact();
-		final ContactService contactService = serviceLookup.getService(ContactService.class);
-		final UserService userService = serviceLookup.getService(UserService.class);
-		final ContactEMailCompletor cc = new ContactEMailCompletor(session, contactService, userService);
-		cc.complete(contact);
-
-		final List<String> email = getEMail(contact);
-		if(email == null || email.isEmpty()) {
-            throw LinkedinHaloExceptionCodes.MISSING_EMAIL_ADDR.create();
+    @Override
+    public AJAXRequestResult investigate(final HaloContactQuery query, final AJAXRequestData req, final ServerSession session) throws OXException {
+        if (hasPlusFeatures(session)) {
+            return investigatePlus(query, req, session);
+        } else {
+            return investigateBasic(query, req, session);
         }
+    }
 
+    private AJAXRequestResult investigateBasic(HaloContactQuery query, AJAXRequestData req, ServerSession session) throws OXException {
+        final int uid = session.getUserId();
+        final int cid = session.getContextId();
 
-		final List<OAuthAccount> accounts = getOauthService().getAccounts(LinkedInService.SERVICE_ID, session, uid, cid);
-		if(accounts.isEmpty()) {
+        final Contact contact = query.getContact();
+        final ContactService contactService = serviceLookup.getService(ContactService.class);
+        final UserService userService = serviceLookup.getService(UserService.class);
+        final ContactEMailCompletor cc = new ContactEMailCompletor(session, contactService, userService);
+        cc.complete(contact);
+
+        final List<OAuthAccount> accounts = getOauthService().getAccounts(LinkedInService.SERVICE_ID, session, uid, cid);
+        if (accounts.size() == 0) {
             throw LinkedinHaloExceptionCodes.NO_ACCOUNT.create();
         }
 
-		final OAuthAccount linkedinAccount = accounts.get(0);
-		final JSONObject json = getLinkedinService().getFullProfileByEMail(email, session, uid, cid, linkedinAccount.getId());
-		final AJAXRequestResult result = new AJAXRequestResult();
-		result.setResultObject(json, "json");
-		return result;
-	}
+        String firstName = contact.getGivenName();
+        String lastName = contact.getSurName();
+        if (firstName == null || lastName == null) {
+            List<String> eMail = getEMail(contact);
+            for (String string : eMail) {
+                if (!Strings.isEmpty(string)) {
+                    try {
+                        final String personal = new QuotedInternetAddress(string, false).getPersonal();
+                        if (!Strings.isEmpty(personal)) {
+                            String[] pSplit = personal.replace(",", " ").split("\\s+");
+                            if (pSplit.length == 2) {
+                                firstName = pSplit[0];
+                                lastName = pSplit[1];
+                                break;
+                            }
+                        }
+                    } catch (final AddressException e) {
+                        // Ignore
+                    }
+                }
+            }
+        }
+        if (firstName == null || lastName == null) {
+            final AJAXRequestResult result = new AJAXRequestResult();
+            result.setResultObject(new JSONObject(), "json");
+            return result;
+        }
+        final OAuthAccount linkedinAccount = accounts.get(0);
+        final JSONObject json = getLinkedinService().getFullProfileByFirstAndLastName(
+            firstName,
+            lastName,
+            session,
+            uid,
+            cid,
+            linkedinAccount.getId());
+        final AJAXRequestResult result = new AJAXRequestResult();
+        result.setResultObject(json, "json");
+        return result;
+    }
 
-	private List<String> getEMail(final Contact queryContact) {
-		final List<String> emails = new ArrayList<String>(3);
-		if(queryContact.containsEmail1()) {
-            emails.add(queryContact.getEmail1());
+    private AJAXRequestResult investigatePlus(HaloContactQuery query, AJAXRequestData req, ServerSession session) throws OXException {
+        final int uid = session.getUserId();
+        final int cid = session.getContextId();
+
+        final Contact contact = query.getContact();
+        final ContactService contactService = serviceLookup.getService(ContactService.class);
+        final UserService userService = serviceLookup.getService(UserService.class);
+        final ContactEMailCompletor cc = new ContactEMailCompletor(session, contactService, userService);
+        cc.complete(contact);
+
+        final List<String> email = getEMail(contact);
+        if (email == null || email.isEmpty()) {
+            throw LinkedinHaloExceptionCodes.MISSING_EMAIL_ADDR.create();
         }
-		if(queryContact.containsEmail2()) {
-            emails.add(queryContact.getEmail2());
+
+        final List<OAuthAccount> accounts = getOauthService().getAccounts(LinkedInService.SERVICE_ID, session, uid, cid);
+        if (accounts.isEmpty()) {
+            throw LinkedinHaloExceptionCodes.NO_ACCOUNT.create();
         }
-		if(queryContact.containsEmail3()) {
-            emails.add(queryContact.getEmail3());
-        }
-		return emails;
-	}
+
+        final OAuthAccount linkedinAccount = accounts.get(0);
+        final JSONObject json = getLinkedinService().getFullProfileByEMail(email, session, uid, cid, linkedinAccount.getId());
+        final AJAXRequestResult result = new AJAXRequestResult();
+        result.setResultObject(json, "json");
+        return result;
+    }
 
     @Override
     public int getPriority() {
@@ -137,4 +192,17 @@ public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implem
         return null;
     }
 
+    private List<String> getEMail(final Contact queryContact) {
+        final List<String> emails = new ArrayList<String>(3);
+        if (queryContact.containsEmail1()) {
+            emails.add(queryContact.getEmail1());
+        }
+        if (queryContact.containsEmail2()) {
+            emails.add(queryContact.getEmail2());
+        }
+        if (queryContact.containsEmail3()) {
+            emails.add(queryContact.getEmail3());
+        }
+        return emails;
+    }
 }

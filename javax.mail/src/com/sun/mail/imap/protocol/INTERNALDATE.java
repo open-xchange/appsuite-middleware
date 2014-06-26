@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -41,6 +41,7 @@
 package com.sun.mail.imap.protocol;
 
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.Locale;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -61,8 +62,8 @@ public class INTERNALDATE implements Item {
 
     static final char[] name =
 	{'I','N','T','E','R','N','A','L','D','A','T','E'};
-    public int msgno;
-    protected Date date;
+    public final int msgno;
+    protected final Date date;
 
     /*
      * Used to parse dates only.  The parse method is thread safe
@@ -123,15 +124,9 @@ public class INTERNALDATE implements Item {
 	}
 
 	// compute timezone offset string
-	// XXX - Yes, I know this is deprecated
-	int rawOffsetInMins = -d.getTimezoneOffset();
-	/*
-	 * XXX - in JavaMail 1.4 / J2SE 1.4, possibly replace above with:
-	 *
 	TimeZone tz = TimeZone.getDefault();
-	int offset = tz.getOffset(d);	// get offset from GMT
+	int offset = tz.getOffset(d.getTime());	// get offset from GMT
 	int rawOffsetInMins = offset / 60 / 1000; // offset from GMT in mins
-	 */
 	if (rawOffsetInMins < 0) {
 	    sb.append('-');
 	    rawOffsetInMins = (-rawOffsetInMins);

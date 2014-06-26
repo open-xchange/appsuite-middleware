@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -142,7 +142,7 @@ public final class RegexUtility {
 
         @Override
         public String toString() {
-            return new com.openexchange.java.StringAllocator(6).append(openingParenthesis).append('X').append(')').toString();
+            return new StringBuilder(6).append(openingParenthesis).append('X').append(')').toString();
         }
     }
 
@@ -202,9 +202,9 @@ public final class RegexUtility {
         final String slashE = "\\E";
         int slashEIndex = s.indexOf(slashE);
         if (slashEIndex == -1) {
-            return new com.openexchange.java.StringAllocator(4 + s.length()).append("\\Q").append(s).append(slashE).toString();
+            return new StringBuilder(4 + s.length()).append("\\Q").append(s).append(slashE).toString();
         }
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(s.length() << 1);
+        final StringBuilder sb = new StringBuilder(s.length() << 1);
         sb.append("\\Q");
         slashEIndex = 0;
         int current = 0;
@@ -230,7 +230,7 @@ public final class RegexUtility {
         for (int i = 0; i < regexes.length; i++) {
             length += regexes[i].length();
         }
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(length).append(regex);
+        final StringBuilder sb = new StringBuilder(length).append(regex);
         for (int i = 0; i < regexes.length; i++) {
             sb.append(regexes[i]);
         }
@@ -249,7 +249,7 @@ public final class RegexUtility {
      * @return The OR-combined regular expression
      */
     public static String OR(final String regex1, final String regex2) {
-        return new com.openexchange.java.StringAllocator(regex1.length() + regex2.length() + 1).append(regex1).append('|').append(regex2).toString();
+        return new StringBuilder(regex1.length() + regex2.length() + 1).append(regex1).append('|').append(regex2).toString();
     }
 
     /**
@@ -295,13 +295,13 @@ public final class RegexUtility {
      */
     public static String optional(final String regex, final QuantifierType qt, final GroupType groupType) {
         if (GroupType.NONE.equals(groupType)) {
-            return new com.openexchange.java.StringAllocator(regex.length() + 2).append(regex).append('?').append(qt.getAppendix()).toString();
+            return new StringBuilder(regex.length() + 2).append(regex).append('?').append(qt.getAppendix()).toString();
         }
         return _optional(regex, qt, groupType);
     }
 
     private static String _optional(final String regex, final QuantifierType qt, final GroupType groupType) {
-        return new com.openexchange.java.StringAllocator(regex.length() + 7).append(groupType.getOpeningParenthesis()).append(regex).append(')').append('?').append(
+        return new StringBuilder(regex.length() + 7).append(groupType.getOpeningParenthesis()).append(regex).append(')').append('?').append(
             qt.getAppendix()).toString();
     }
 
@@ -340,7 +340,7 @@ public final class RegexUtility {
     }
 
     private static String _group(final String regex, final GroupType groupType) {
-        return new com.openexchange.java.StringAllocator(regex.length() + 5).append(groupType.getOpeningParenthesis()).append(regex).append(')').toString();
+        return new StringBuilder(regex.length() + 5).append(groupType.getOpeningParenthesis()).append(regex).append(')').toString();
     }
 
     /**
@@ -386,13 +386,13 @@ public final class RegexUtility {
      */
     public static String oneOrMoreTimes(final String regex, final QuantifierType qt, final GroupType groupType) {
         if (GroupType.NONE.equals(groupType)) {
-            return new com.openexchange.java.StringAllocator(regex.length() + 2).append(regex).append('+').append(qt.getAppendix()).toString();
+            return new StringBuilder(regex.length() + 2).append(regex).append('+').append(qt.getAppendix()).toString();
         }
         return _oneOrMoreTimes(regex, qt, groupType);
     }
 
     private static String _oneOrMoreTimes(final String regex, final QuantifierType qt, final GroupType groupType) {
-        return new com.openexchange.java.StringAllocator(regex.length() + 7).append(groupType.getOpeningParenthesis()).append(regex).append(')').append('+').append(
+        return new StringBuilder(regex.length() + 7).append(groupType.getOpeningParenthesis()).append(regex).append(')').append('+').append(
             qt.getAppendix()).toString();
     }
 
@@ -439,13 +439,13 @@ public final class RegexUtility {
      */
     public static String zeroOrMoreTimes(final String regex, final QuantifierType qt, final GroupType groupType) {
         if (GroupType.NONE.equals(groupType)) {
-            return new com.openexchange.java.StringAllocator(regex.length() + 2).append(regex).append('*').append(qt.getAppendix()).toString();
+            return new StringBuilder(regex.length() + 2).append(regex).append('*').append(qt.getAppendix()).toString();
         }
         return _zeroOrMoreTimes(regex, qt, groupType);
     }
 
     private static String _zeroOrMoreTimes(final String regex, final QuantifierType qt, final GroupType groupType) {
-        return new com.openexchange.java.StringAllocator(regex.length() + 6).append(groupType.getOpeningParenthesis()).append(regex).append(')').append('*').append(
+        return new StringBuilder(regex.length() + 6).append(groupType.getOpeningParenthesis()).append(regex).append(')').append('*').append(
             qt.getAppendix()).toString();
     }
 
@@ -495,13 +495,13 @@ public final class RegexUtility {
      */
     public static String exactlyNTimes(final String regex, final int n, final QuantifierType qt, final GroupType groupType) {
         if (GroupType.NONE.equals(groupType)) {
-            return new com.openexchange.java.StringAllocator(regex.length() + 5).append(regex).append('{').append(n).append('}').append(qt.getAppendix()).toString();
+            return new StringBuilder(regex.length() + 5).append(regex).append('{').append(n).append('}').append(qt.getAppendix()).toString();
         }
         return _exactlyNTimes(regex, n, qt, groupType);
     }
 
     private static String _exactlyNTimes(final String regex, final int n, final QuantifierType qt, final GroupType groupType) {
-        return new com.openexchange.java.StringAllocator(regex.length() + 9).append(groupType.getOpeningParenthesis()).append(regex).append(')').append('{').append(
+        return new StringBuilder(regex.length() + 9).append(groupType.getOpeningParenthesis()).append(regex).append(')').append('{').append(
             n).append('}').append(qt.getAppendix()).toString();
     }
 
@@ -551,14 +551,14 @@ public final class RegexUtility {
      */
     public static String atLeastNTimes(final String regex, final int n, final QuantifierType qt, final GroupType groupType) {
         if (GroupType.NONE.equals(groupType)) {
-            return new com.openexchange.java.StringAllocator(regex.length() + 6).append(regex).append('{').append(n).append(',').append('}').append(
+            return new StringBuilder(regex.length() + 6).append(regex).append('{').append(n).append(',').append('}').append(
                 qt.getAppendix()).toString();
         }
         return _atLeastNTimes(regex, n, qt, groupType);
     }
 
     private static String _atLeastNTimes(final String regex, final int n, final QuantifierType qt, final GroupType groupType) {
-        return new com.openexchange.java.StringAllocator(regex.length() + 10).append(groupType.getOpeningParenthesis()).append(regex).append(')').append('{').append(
+        return new StringBuilder(regex.length() + 10).append(groupType.getOpeningParenthesis()).append(regex).append(')').append('{').append(
             n).append(',').append('}').append(qt.getAppendix()).toString();
     }
 
@@ -611,14 +611,14 @@ public final class RegexUtility {
      */
     public static String atLeastNButNotMoreThanMTimes(final String regex, final int n, final int m, final QuantifierType qt, final GroupType groupType) {
         if (GroupType.NONE.equals(groupType)) {
-            return new com.openexchange.java.StringAllocator(regex.length() + 8).append(regex).append('{').append(n).append(',').append(m).append('}').append(
+            return new StringBuilder(regex.length() + 8).append(regex).append('{').append(n).append(',').append(m).append('}').append(
                 qt.getAppendix()).toString();
         }
         return _atLeastNButNotMoreThanMTimes(regex, n, m, qt, groupType);
     }
 
     private static String _atLeastNButNotMoreThanMTimes(final String regex, final int n, final int m, final QuantifierType qt, final GroupType groupType) {
-        return new com.openexchange.java.StringAllocator(regex.length() + 12).append(groupType.getOpeningParenthesis()).append(regex).append(')').append('{').append(
+        return new StringBuilder(regex.length() + 12).append(groupType.getOpeningParenthesis()).append(regex).append(')').append('{').append(
             n).append(',').append(m).append('}').append(qt.getAppendix()).toString();
     }
 }

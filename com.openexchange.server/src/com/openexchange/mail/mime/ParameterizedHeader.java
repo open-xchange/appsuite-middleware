@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -56,6 +56,7 @@ import java.util.Iterator;
 import java.util.regex.Pattern;
 import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.codec.DecoderException;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 
@@ -144,6 +145,17 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
      */
     public void setParameter(final String key, final String value) {
         parameterList.setParameter(key, value);
+    }
+
+    /**
+     * Sets the given parameter. Existing value is overwritten.
+     *
+     * @param key The parameter name
+     * @param value The parameter value
+     * @throws OXException If parameter name/value is invalid
+     */
+    public void setParameterErrorAware(final String key, final String value) throws OXException {
+        parameterList.setParameterErrorAware(key, value);
     }
 
     /**
@@ -253,22 +265,9 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
      */
     protected static String decodeUrl(final String s) {
         try {
-            return isEmpty(s) ? s : (URL_CODEC.decode(P_ENC.matcher(s).replaceAll("%$1")));
+            return com.openexchange.java.Strings.isEmpty(s) ? s : (URL_CODEC.decode(P_ENC.matcher(s).replaceAll("%$1")));
         } catch (final DecoderException e) {
             return s;
         }
-    }
-
-    /** Check for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 }

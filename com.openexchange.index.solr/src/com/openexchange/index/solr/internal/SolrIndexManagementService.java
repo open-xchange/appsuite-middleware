@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -55,6 +55,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.database.DBPoolingExceptionCodes;
@@ -62,6 +63,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexManagementService;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.solr.SolrIndexEventProperties;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -112,11 +114,13 @@ public class SolrIndexManagementService implements IndexManagementService {
                 ustmt.setString(4, PROPERTY);
                 ustmt.executeUpdate();
             } else {
-                ustmt = con.prepareStatement("INSERT INTO user_attribute (cid, id, name, value) VALUES (?, ?, ?, ?)");
+                ustmt = con.prepareStatement("INSERT INTO user_attribute (cid, id, name, value, uuid) VALUES (?, ?, ?, ?, ?)");
                 ustmt.setInt(1, contextId);
                 ustmt.setInt(2, userId);
                 ustmt.setString(3, PROPERTY);
                 ustmt.setString(4, String.valueOf(module));
+                ustmt.setBytes(5, UUIDs.toByteArray(UUID.randomUUID()));
+
                 ustmt.executeUpdate();
             }
 

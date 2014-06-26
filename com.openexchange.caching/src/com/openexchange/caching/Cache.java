@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -381,10 +381,10 @@ public interface Cache {
      * This is a convenience method that delegates to {@link CacheService#newCacheKey(int, Serializable)}.
      *
      * @param contextId The context ID
-     * @param objs The serializable objects for the key
+     * @param objs The objects for the key
      * @return new instance of {@link CacheKey}
      */
-    public CacheKey newCacheKey(int contextId, Serializable... objs);
+    public CacheKey newCacheKey(int contextId, String... objs);
 
     /**
      * Gets the set of keys of objects currently in the group.

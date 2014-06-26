@@ -50,7 +50,7 @@ import org.apache.cxf.service.model.ServiceModelUtil;
 import org.apache.cxf.staxutils.DepthXMLStreamReader;
 import org.apache.cxf.staxutils.StaxUtils;
 import org.apache.ws.commons.schema.XmlSchemaElement;
-import com.openexchange.java.StringAllocator;
+import org.xml.sax.SAXParseException;
 import com.openexchange.log.Slf4jLogger;
 
 /**
@@ -101,8 +101,8 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
         if (bop == null) {
             QName startQName = xmlReader == null
                 ? new QName("http://cxf.apache.org/jaxws/provider", "invoke")
-                : xmlReader.getName();
-            bop = getBindingOperationInfo(exchange, startQName, client);
+            : xmlReader.getName();
+                bop = getBindingOperationInfo(exchange, startQName, client);
         }
 
         try {
@@ -116,7 +116,7 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
                     QName startQName = xmlReader.getName();
                     if (!msgInfo.getMessageParts().get(0).getConcreteName().equals(startQName)) {
                         throw new Fault("UNEXPECTED_WRAPPER_ELEMENT", LOG, null, startQName,
-                                        msgInfo.getMessageParts().get(0).getConcreteName());
+                            msgInfo.getMessageParts().get(0).getConcreteName());
                     }
                     final MessagePartInfo messagePartInfo = msgInfo.getMessageParts().get(0);
                     try {
@@ -134,13 +134,13 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
                                 final Throwable linkedException = ((javax.xml.bind.UnmarshalException) fault.getCause()).getLinkedException();
                                 if (linkedException != null && linkedException.getClass().getName().indexOf("SAXParseException") >= 0) {
                                     {
-                                        final StringAllocator sb = new StringAllocator(fault.getMessage());
+                                        final StringBuilder sb = new StringBuilder(fault.getMessage());
                                         LOG.log(Level.SEVERE, sb.toString(), fault);
                                     }
                                     final String[] info = extractUnexpectedElement(linkedException.getMessage());
                                     if (null != info) {
                                         final String m ;
-                                        if (isEmpty(info[0])) {
+                                        if (com.openexchange.java.Strings.isEmpty(info[0])) {
                                             m = MessageFormat.format(
                                                 "Unexpected element \"{0}\". Please remove that element from SOAP request.",
                                                 info[1]);
@@ -150,6 +150,10 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
                                                 info[1],
                                                 info[0]);
                                         }
+                                        throw new Fault(m, LOG, fault);
+                                    } else if (linkedException instanceof SAXParseException) {
+                                        final SAXParseException sax = (SAXParseException) linkedException;
+                                        final String m = MessageFormat.format("Invalid value in line {0} in row {1}. Please correct SOAP request.", sax.getLineNumber(), sax.getColumnNumber());
                                         throw new Fault(m, LOG, fault);
                                     }
                                 }
@@ -250,7 +254,7 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
 
                     if (p == null) {
                         throw new Fault(new org.apache.cxf.common.i18n.Message("NO_PART_FOUND", LOG, elName),
-                                        Fault.FAULT_CODE_CLIENT);
+                            Fault.FAULT_CODE_CLIENT);
                     }
 
                     o = dr.read(p, xmlReader);
@@ -288,23 +292,11 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
         return new String[] { m.group(1), m.group(2) };
     }
 
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
     private void getPara(DepthXMLStreamReader xmlReader,
-                         DataReader<XMLStreamReader> dr,
-                         MessageContentsList parameters,
-                         Iterator<MessagePartInfo> itr,
-                         Message message) {
+        DataReader<XMLStreamReader> dr,
+        MessageContentsList parameters,
+        Iterator<MessagePartInfo> itr,
+        Message message) {
 
         boolean hasNext = true;
         while (itr.hasNext()) {
@@ -342,7 +334,7 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
 
 
     private MessageInfo setMessage(Message message, BindingOperationInfo operation,
-                                   boolean requestor, ServiceInfo si) {
+        boolean requestor, ServiceInfo si) {
         MessageInfo msgInfo = getMessageInfo(message, operation, requestor);
         return setMessage(message, operation, requestor, si, msgInfo);
     }
@@ -350,7 +342,7 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
 
     @Override
     protected BindingOperationInfo getBindingOperationInfo(Exchange exchange, QName name,
-                                                           boolean client) {
+        boolean client) {
         BindingOperationInfo bop = ServiceModelUtil.getOperationForWrapperElement(exchange, name, client);
         if (bop == null) {
             bop = super.getBindingOperationInfo(exchange, name, client);
@@ -372,7 +364,7 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
         }
     }
 
-    private static void appendStackTrace(final StackTraceElement[] trace, final com.openexchange.java.StringAllocator sb, final String lineSeparator) {
+    private static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb, final String lineSeparator) {
         if (null == trace) {
             return;
         }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -59,8 +59,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.database.internal.reloadable.GenericReloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.pooling.PoolableLifecycle;
 import com.openexchange.pooling.PooledData;
@@ -144,17 +148,50 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
 
     @Override
     public void destroy(final Connection obj) {
-        try {
-            obj.close();
-        } catch (final SQLException e) {
-            ConnectionPool.LOG.debug("Problem while closing connection.", e);
-        }
+        DBUtils.close(obj);
     }
+
     private static void addTrace(final OXException dbe,
         final PooledData<Connection> data) {
         if (null != data.getTrace()) {
             dbe.setStackTrace(data.getTrace());
         }
+    }
+
+    private static volatile Integer usageThreshold;
+    private static int usageThreshold() {
+        Integer tmp = usageThreshold;
+        if (null == tmp) {
+            synchronized (ConnectionLifecycle.class) {
+                tmp = usageThreshold;
+                if (null == tmp) {
+                    final int defaultValue = 2000;
+                    final ConfigurationService confService = Initialization.getConfigurationService();
+                    if (null == confService) {
+                        return defaultValue;
+                    }
+
+                    tmp = Integer.valueOf(confService.getIntProperty("com.openexchange.database.usageThreshold", defaultValue));
+                    usageThreshold = tmp;
+                }
+            }
+        }
+        return tmp.intValue();
+    }
+
+    static {
+        GenericReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                usageThreshold = null;
+            }
+
+            @Override
+            public Map<String, String[]> getConfigFileNames() {
+                return null;
+            }
+        });
     }
 
     @Override
@@ -187,7 +224,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
                 ConnectionPool.LOG.error("", e);
             }
             // Write warning if using this connection was longer than 2 seconds.
-            if (data.getTimeDiff() > 2000) {
+            if (data.getTimeDiff() > usageThreshold()) {
                 final OXException dbe = DBPoolingExceptionCodes.TOO_LONG.create(L(data.getTimeDiff()));
                 addTrace(dbe, data);
                 ConnectionPool.LOG.warn("", dbe);

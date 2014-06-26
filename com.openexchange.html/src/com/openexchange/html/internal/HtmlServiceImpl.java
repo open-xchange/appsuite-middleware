@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -58,8 +58,12 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.UnsupportedCharsetException;
+import java.text.Normalizer;
+import java.text.Normalizer.Form;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
@@ -100,7 +104,6 @@ import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
 import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Charsets;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.StringBuilderStringer;
 import com.openexchange.java.Stringer;
 import com.openexchange.java.Strings;
@@ -534,8 +537,13 @@ public final class HtmlServiceImpl implements HtmlService {
 
     @Override
     public String sanitize(final String htmlContent, final String optConfigName, final boolean dropExternalImages, final boolean[] modified, final String cssPrefix) {
+        if (isEmpty(htmlContent)) {
+            return htmlContent;
+        }
         try {
             String html = htmlContent;
+            // Normalize the string
+            html = Normalizer.normalize(html, Form.NFKC);
             // Perform one-shot sanitizing
             html = replacePercentTags(html);
             html = replaceHexEntities(html);
@@ -570,6 +578,8 @@ public final class HtmlServiceImpl implements HtmlService {
                 // Start sanitizing round
                 html = SaneScriptTags.saneScriptTags(html, sanitized);
             }
+            // Replace HTML entities
+            html = keepUnicodeForEntities(html);
             return html;
         } catch (final RuntimeException e) {
             LOG.warn("HTML content will be returned un-sanitized. Reason: "+e.getMessage(), e);
@@ -820,12 +830,16 @@ public final class HtmlServiceImpl implements HtmlService {
 
     @Override
     public String htmlFormat(final String plainText, final boolean withQuote, final String commentId) {
-        return PATTERN_CRLF.matcher(escape(plainText, withQuote, commentId)).replaceAll(HTML_BR);
+        String retval = PATTERN_CRLF.matcher(escape(plainText, withQuote, commentId)).replaceAll(HTML_BR);
+        retval = keepUnicodeForEntities(retval);
+        return retval;
     }
 
     @Override
     public String htmlFormat(final String plainText, final boolean withQuote) {
-        return PATTERN_CRLF.matcher(escape(plainText, withQuote, null)).replaceAll(HTML_BR);
+        String retval = PATTERN_CRLF.matcher(escape(plainText, withQuote, null)).replaceAll(HTML_BR);
+        retval = keepUnicodeForEntities(retval);
+        return retval;
     }
 
     private String escape(final String s, final boolean withQuote, final String commentId) {
@@ -1306,7 +1320,7 @@ public final class HtmlServiceImpl implements HtmlService {
             return htmlContent;
         }
         final String lineSeparator = this.lineSeparator;
-        final StringAllocator sb = new StringAllocator(htmlContent.length() + 512);
+        final StringBuilder sb = new StringBuilder(htmlContent.length() + 512);
         if (isEmpty(htmlContent)) {
             sb.append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">").append(lineSeparator);
             sb.append("<html xmlns=\"http://www.w3.org/1999/xhtml\">").append(lineSeparator);
@@ -1399,12 +1413,15 @@ public final class HtmlServiceImpl implements HtmlService {
         /*
          * Check URLs
          */
-        if (!replaceUrls) {
-            return html;
+        if (replaceUrls) {
+            final HTMLURLReplacerHandler handler = new HTMLURLReplacerHandler(this, html.length());
+            HtmlParser.parse(html, handler);
+            html = handler.getHTML();
         }
-        final HTMLURLReplacerHandler handler = new HTMLURLReplacerHandler(this, html.length());
-        HtmlParser.parse(html, handler);
-        return handler.getHTML();
+        /*
+         * Retun...
+         */
+        return html;
     }
 
     private static boolean occursWithin(final String str, final int start, final int end, final boolean ignorecase, final String... searchStrings) {
@@ -1771,8 +1788,37 @@ public final class HtmlServiceImpl implements HtmlService {
 
     private static final String DOCTYPE_DECL = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\r\n\r\n";
 
-    private static final Pattern P_HTMLE_COPY = Pattern.compile("&#169;|&copy;", Pattern.CASE_INSENSITIVE);
-    private static final Pattern P_HTMLE_REG = Pattern.compile("&#174;|&reg;", Pattern.CASE_INSENSITIVE);
+    private static final List<Pattern> P_HTMLE = Collections.unmodifiableList(Arrays.asList(
+        Pattern.compile("&#169;|&copy;", Pattern.CASE_INSENSITIVE),
+        Pattern.compile("&#174;|&reg;", Pattern.CASE_INSENSITIVE),
+        Pattern.compile("&#8482;|&trade;", Pattern.CASE_INSENSITIVE),
+        Pattern.compile("&#9829;|&hearts;", Pattern.CASE_INSENSITIVE),
+        Pattern.compile("&#9824;|&spades;", Pattern.CASE_INSENSITIVE),
+        Pattern.compile("&#9827;|&clubs;", Pattern.CASE_INSENSITIVE),
+        Pattern.compile("&#9830;|&diams;", Pattern.CASE_INSENSITIVE)
+    ));
+
+    private static final List<String> S_HTMLE = Collections.unmodifiableList(Arrays.asList(
+        "\u00a9",
+        "\u00ae",
+        "\u2122",
+        "\u2665",
+        "\u2660",
+        "\u2663",
+        "\u2666"
+    ));
+
+    private static String keepUnicodeForEntities(final String html) {
+        String ret = html;
+
+        final int size = P_HTMLE.size();
+        for (int i = 0; i < size; i++) {
+            ret = P_HTMLE.get(i).matcher(ret).replaceAll(S_HTMLE.get(i));
+        }
+
+        return ret;
+    }
+
 
     protected static String validateWithHtmlCleaner(final String htmlContent) {
         try {
@@ -1797,7 +1843,7 @@ public final class HtmlServiceImpl implements HtmlService {
              */
             final UnsynchronizedStringWriter writer = new UnsynchronizedStringWriter(htmlContent.length());
             newSerializer().write(htmlNode, writer, "UTF-8");
-            final StringAllocator buffer = writer.getBuffer();
+            final StringBuilder buffer = writer.getBuffer();
             /*
              * Insert DOCTYPE if absent
              */
@@ -1807,7 +1853,7 @@ public final class HtmlServiceImpl implements HtmlService {
             /*
              * Keep Unicode representation of 'copy' and 'reg' intact
              */
-            return P_HTMLE_REG.matcher(P_HTMLE_COPY.matcher(buffer.toString()).replaceAll("\u00a9")).replaceAll("\u00ae");
+            return keepUnicodeForEntities(buffer.toString());
         } catch (final UnsupportedEncodingException e) {
             // Cannot occur
             LOG.error("HtmlCleaner library failed to pretty-print HTML content with an unsupported encoding", e);

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -293,7 +293,7 @@ public final class HTML2TextHandler implements HtmlHandler {
 
     @Override
     public void handleError(final String errorMsg) {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128 + (null == errorMsg ? 0 : errorMsg.length()));
+        final StringBuilder sb = new StringBuilder(128 + (null == errorMsg ? 0 : errorMsg.length()));
         sb.append("HTML parsing error occurred: ");
         if (null != errorMsg) {
             sb.append(errorMsg);

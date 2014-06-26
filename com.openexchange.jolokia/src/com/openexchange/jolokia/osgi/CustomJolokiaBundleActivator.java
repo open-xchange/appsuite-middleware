@@ -84,8 +84,17 @@ public class CustomJolokiaBundleActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+
+        // Check service availability
+        final ConfigurationService configService = getService(ConfigurationService.class);
+        if (null == configService) {
+            LOG.info("Shutting down Bundle due to missing configService");
+            stopBundle();
+            return;
+        }
+
         // Check if enabled
-        if (false == getService(ConfigurationService.class).getBoolProperty("com.openexchange.jolokia.start", false)) {
+        if (false == configService.getBoolProperty("com.openexchange.jolokia.start", false)) {
             LOG.info("Shutting down Bundle due to config setting");
             stopBundle();
             return;
@@ -94,7 +103,7 @@ public class CustomJolokiaBundleActivator extends HousekeepingActivator {
         // Check service availability
         final HttpService httpService = getService(HttpService.class);
         if (null == httpService) {
-            LOG.info("Shutting down Bundle due to missing httpService setting");
+            LOG.info("Shutting down Bundle due to missing httpService");
             stopBundle();
             return;
         }
@@ -107,6 +116,13 @@ public class CustomJolokiaBundleActivator extends HousekeepingActivator {
         myConfig = jolokiaConfig;
         jolokiaConfig.start();
 
+        //2nd check, because start can be stopped by missing user / password
+        if (false == jolokiaConfig.getJolokiaStart()) {
+            LOG.info("Shutting down Bundle");
+            stopBundle();
+            return;
+        }
+        
         // Create servlet instance
         JolokiaServlet jolServlet = new JolokiaServlet(context, jolokiaConfig.getRestrictor());
         try {
@@ -155,11 +171,11 @@ public class CustomJolokiaBundleActivator extends HousekeepingActivator {
         if (jolokiaHttpContext == null) {
             final String user = myConfig.getUser();
             final String password = myConfig.getPassword();
-            if (user == null) {
-                jolokiaHttpContext = new JolokiaHttpContext();
-            } else {
-                jolokiaHttpContext = new JolokiaAuthenticatedHttpContext(user, password);
-            }
+            if (user.equalsIgnoreCase("")) {
+                 jolokiaHttpContext = new JolokiaHttpContext();
+             } else {
+                 jolokiaHttpContext = new JolokiaAuthenticatedHttpContext(user, password);
+             }
         }
         return jolokiaHttpContext;
     }

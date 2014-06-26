@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -55,7 +55,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventHelper;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.impl.FolderLockManager;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -77,7 +76,7 @@ public class LockCleaner implements FolderEventInterface, EventHandler {
     public void folderDeleted(final FolderObject folderObj, final Session session) {
 		try {
             final ServerSession sessionObj = ServerSessionAdapter.valueOf(session);
-            folderLockManager.removeAll(folderObj.getObjectID(), sessionObj.getContext(), UserStorage.getInstance().getUser(sessionObj.getUserId(), sessionObj.getContext()));
+            folderLockManager.removeAll(folderObj.getObjectID(), session);
 		} catch (final OXException e) {
 			LOG.error("Couldn't remove folder locks from folder {} in context {}. Run the consistency tool.", folderObj.getObjectID(), session.getContextId());
 		}
@@ -100,7 +99,7 @@ public class LockCleaner implements FolderEventInterface, EventHandler {
             try {
                 int id = Integer.parseInt(FileStorageEventHelper.extractObjectId(event));
                 ServerSession session = ServerSessionAdapter.valueOf(FileStorageEventHelper.extractSession(event));
-                infoLockManager.removeAll(id, session.getContext(), UserStorage.getInstance().getUser(session.getUserId(), session.getContext()));
+                infoLockManager.removeAll(id, session);
             } catch (OXException e) {
                 LOG.error("Couldn't remove locks from infoitem. Run the consistency tool.", e);
             } catch (NumberFormatException e) {

@@ -58,9 +58,6 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class SMSMessagingExceptionMessages implements LocalizableStrings {
 
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
-
     /**
      * Initializes a new {@link SMSMessagingExceptionMessages}.
      */

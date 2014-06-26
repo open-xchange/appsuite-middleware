@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -73,7 +73,6 @@ import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationErrorMessage;
@@ -325,6 +324,10 @@ public class PublicationMultipleHandler implements MultipleHandler {
         final Context context = session.getContext();
         final Publication publication = loadPublication(id, context, target);
 
+        if (null == publication) {
+            throw PublicationErrorMessage.PUBLICATION_NOT_FOUND_EXCEPTION.create();
+        }
+
         String sTimeZone = request.optString("timezone");
         TimeZone tz = null;
         if (sTimeZone != null) {
@@ -347,7 +350,7 @@ public class PublicationMultipleHandler implements MultipleHandler {
             } else {
                 protocol = "http://";
             }
-            serverURL = new StringAllocator(protocol).append(hostname).toString();
+            serverURL = new StringBuilder(protocol).append(hostname).toString();
         } else if (serverURL != null) {
             hostname = serverURL.substring(serverURL.indexOf("://") + 3);
             if (serverURL.startsWith("https")) {
@@ -365,7 +368,7 @@ public class PublicationMultipleHandler implements MultipleHandler {
         }
 
         if (separateSubdomain != null) {
-            return new StringAllocator(protocol).append(separateSubdomain).append('.').append(hostname).toString();
+            return new StringBuilder(protocol).append(separateSubdomain).append('.').append(hostname).toString();
         }
 
         return serverURL;

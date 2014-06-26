@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -57,8 +57,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Map;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
+import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.services.Services;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
@@ -364,7 +367,6 @@ public final class ThresholdInputStreamProvider implements Closeable, InputStrea
     } // End of class TransferringOutStream
 
     private static volatile File uploadDirectory;
-
     private static File uploadDirectory() {
         File tmp = uploadDirectory;
         if (null == tmp) {
@@ -378,6 +380,21 @@ public final class ThresholdInputStreamProvider implements Closeable, InputStrea
             }
         }
         return tmp;
+    }
+
+    static {
+        IMAPReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(final ConfigurationService configService) {
+                uploadDirectory = null;
+            }
+
+            @Override
+            public Map<String, String[]> getConfigFileNames() {
+                return null;
+            }
+        });
     }
 
     /**

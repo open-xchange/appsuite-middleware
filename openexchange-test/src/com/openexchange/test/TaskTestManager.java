@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -392,6 +392,22 @@ public class TaskTestManager implements TestManager{
         UserValues values = getClient().getValues();
         task.setTimezone(values.getTimeZone());
         task.setParentFolderID(values.getPrivateTaskFolder());
+        task.setCreatedBy(values.getUserId());
+        task.setModifiedBy(values.getUserId());
+
+        return task;
+    }
+
+    /**
+     * Constructs a new TestTask with the given title and time zone, parent folder created by and modified by already initialized
+     */
+    public TestTask newTask(String title, int parentFolder) throws OXException, IOException, SAXException, JSONException {
+        TestTask task = new TestTask();
+        task.setTitle(title);
+
+        UserValues values = getClient().getValues();
+        task.setTimezone(values.getTimeZone());
+        task.setParentFolderID(parentFolder);
         task.setCreatedBy(values.getUserId());
         task.setModifiedBy(values.getUserId());
 

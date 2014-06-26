@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,61 +50,62 @@
 package com.openexchange.mail.smal.impl;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link SmalExceptionCodes} - Enumeration about all {@link OXException}s.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum SmalExceptionCodes implements OXExceptionCode {
+public enum SmalExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(SmalExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR("An error occurred: %1$s", CATEGORY_ERROR, 1, null),
     /**
      * Missing property: %1$s
      */
-    MISSING_PROPERTY(SmalExceptionMessages.MISSING_PROPERTY_MSG, CATEGORY_ERROR, 2),
+    MISSING_PROPERTY("Missing property: %1$s", CATEGORY_ERROR, 2, null),
     /**
      * Invalid property value in property "%1$s": %2$s
      */
-    INVALID_PROPERTY(SmalExceptionMessages.INVALID_PROPERTY_MSG, CATEGORY_ERROR, 3),
+    INVALID_PROPERTY("Invalid property value in property \"%1$s\": %2$s", CATEGORY_ERROR, 3, null),
     /**
      * A JSON error occurred: %1$s
      */
-    JSON_ERROR(SmalExceptionMessages.JSON_ERROR_MSG, CATEGORY_CONFIGURATION, 4),
+    JSON_ERROR("A JSON error occurred: %1$s", CATEGORY_CONFIGURATION, 4, null),
     /**
      * HTTP request to server %1$s failed. Status line: %2$s
      */
-    HTTP_REQUEST_FAILED(SmalExceptionMessages.HTTP_REQUEST_FAILED_MSG, CATEGORY_ERROR, 5),
+    HTTP_REQUEST_FAILED("HTTP request to server \"%1$s\" failed. Status line: %2$s", CATEGORY_ERROR, 5, null),
     /**
      * JSON request failed. Error code: %1$s. Error message: %2$s
      */
-    JSON_REQUEST_FAILED(SmalExceptionMessages.JSON_REQUEST_FAILED_MSG, CATEGORY_ERROR, 6),
+    JSON_REQUEST_FAILED("JSON request failed. Error code: %1$s. Error message: %2$s", CATEGORY_ERROR, 6, null),
     /**
      * A remote error occurred: %1$s
      */
-    REMOTE_ERROR(SmalExceptionMessages.REMOTE_ERROR_MSG, CATEGORY_ERROR, 7),
+    REMOTE_ERROR("A remote error occurred: %1$s", CATEGORY_ERROR, 7, null),
     /**
      * An index fault occurred: %1$s
      */
-    INDEX_FAULT(SmalExceptionMessages.INDEX_FAULT_MSG, CATEGORY_ERROR, 8),
+    INDEX_FAULT("An index fault occurred: %1$s", CATEGORY_ERROR, 8, null),
     /**
      * A HTTP error occurred: %1$s
      */
-    HTTP_ERROR(SmalExceptionMessages.HTTP_ERROR_MSG, CATEGORY_ERROR, 9),
+    HTTP_ERROR("A HTTP error occurred: %1$s", CATEGORY_ERROR, 9, null),
     /**
      * Unparseable HTTP response: %1$s
      */
-    UNPARSEABLE_HTTP_RESPONSE(SmalExceptionMessages.UNPARSEABLE_HTTP_RESPONSE_MSG, CATEGORY_ERROR, 10),
+    UNPARSEABLE_HTTP_RESPONSE("Unparseable HTTP response: %1$s", CATEGORY_ERROR, 10, null),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(SmalExceptionMessages.IO_ERROR_MSG, CATEGORY_CONNECTIVITY, 11),
+    IO_ERROR("An I/O error occurred: %1$s", CATEGORY_CONNECTIVITY, 11, null),
 
 
     ;
@@ -115,10 +116,13 @@ public enum SmalExceptionCodes implements OXExceptionCode {
 
     private final String message;
 
-    private SmalExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private String displayMessage;
+
+    private SmalExceptionCodes(final String message, final Category category, final int detailNumber, String displayMessage) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -139,6 +143,11 @@ public enum SmalExceptionCodes implements OXExceptionCode {
     @Override
     public int getNumber() {
         return detailNumber;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override

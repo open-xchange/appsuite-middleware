@@ -129,7 +129,7 @@ public final class LastLoginUpdater implements EventHandler {
     protected void handleSessionTouched(final Session session) throws OXException {
         // Determine client
         String client = session.getClient();
-        if (!isEmpty(client) && acceptedClients.contains(client)) {
+        if (!com.openexchange.java.Strings.isEmpty(client) && acceptedClients.contains(client)) {
             final Context context = contextService.getContext(session.getContextId());
             final User user = userService.getUser(session.getUserId(), context);
             // Check last-accessed time stamp for client
@@ -147,17 +147,5 @@ public final class LastLoginUpdater implements EventHandler {
                 }
             }
         }
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 }

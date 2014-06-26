@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -62,8 +62,6 @@ import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.CharsetDetector;
-import com.openexchange.java.StringAllocator;
-import com.openexchange.java.Strings;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -336,11 +334,11 @@ public final class MimeProcessingUtility {
      * @return A comma-separated list of addresses as a {@link String}
      */
     public static String addrs2String(final InternetAddress[] addrs) {
-        final com.openexchange.java.StringAllocator tmp = new com.openexchange.java.StringAllocator(addrs.length << 4);
+        final StringBuilder tmp = new StringBuilder(addrs.length << 4);
         boolean first = true;
-        for (int i = 0; i < addrs.length; i++) {
-            final String string = addr2String(addrs[i]);
-            if (!isEmpty(string)) {
+        for (InternetAddress addr : addrs) {
+            final String string = addr2String(addr);
+            if (!com.openexchange.java.Strings.isEmpty(string)) {
                 if (first) {
                     first = false;
                 } else {
@@ -368,7 +366,7 @@ public final class MimeProcessingUtility {
             // No slash character present
             return addr.toUnicodeString();
         }
-        final StringAllocator sb = new StringAllocator(32);
+        final StringBuilder sb = new StringBuilder(32);
         final String personal = addr.getPersonal();
         if (null == personal) {
             sb.append(MimeProcessingUtility.prepareAddress(sAddress.substring(0, pos)));
@@ -426,19 +424,4 @@ public final class MimeProcessingUtility {
         }
         return decoded;
     }
-
-    /** Check for an empty string */
-    static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
-
 }

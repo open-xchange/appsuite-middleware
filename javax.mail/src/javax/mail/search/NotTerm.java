@@ -54,7 +54,7 @@ public final class NotTerm extends SearchTerm {
      *
      * @serial
      */
-    protected SearchTerm term;
+    private SearchTerm term;
 
     private static final long serialVersionUID = 7152293214217310216L;
 

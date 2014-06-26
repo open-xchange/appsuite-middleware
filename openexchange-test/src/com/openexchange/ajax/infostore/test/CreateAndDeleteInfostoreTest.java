@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,6 +52,8 @@ package com.openexchange.ajax.infostore.test;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.exception.OXException;
@@ -78,6 +80,9 @@ public class CreateAndDeleteInfostoreTest extends AbstractInfostoreTest {
         expected.setFolderId(folder.getObjectID());
         expected.setTitle("InfostoreCreateDeleteTest Item");
         expected.setLastModified(new Date());
+        final Map<String, Object> meta = new LinkedHashMap<String, Object>(2);
+        meta.put("customField0012", "value0012");
+        expected.setMeta(meta);
 
         infoMgr.newAction(expected);
         assertFalse("Creating an entry should work", infoMgr.getLastResponse().hasError());

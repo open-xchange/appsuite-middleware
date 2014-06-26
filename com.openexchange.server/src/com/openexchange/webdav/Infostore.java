@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -154,14 +154,12 @@ public class Infostore extends OXServlet {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
         }
-        final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(
-            session.getUserId(),
-            session.getContext());
-        if ((uc.hasWebDAV() && uc.hasInfostore())) {
-            InfostorePerformer.getInstance().doIt(req, resp, action, session);
-        } else {
+        final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext());
+        if (!uc.hasWebDAV() || !uc.hasInfostore()) {
             resp.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
+            return;
         }
+        InfostorePerformer.getInstance().doIt(req, resp, action, session);
     }
 
 }

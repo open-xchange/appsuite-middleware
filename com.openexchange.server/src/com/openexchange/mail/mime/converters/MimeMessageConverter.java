@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -70,6 +70,7 @@ import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.activation.DataHandler;
@@ -94,15 +95,16 @@ import org.apache.james.mime4j.parser.ContentHandler;
 import org.apache.james.mime4j.parser.MimeStreamParser;
 import org.apache.james.mime4j.stream.MimeConfig;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailPath;
+import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
@@ -179,7 +181,7 @@ public final class MimeMessageConverter {
             MessageHeaders.HDR_X_OX_NOTIFICATION };
 
         public static final String[] ALREADY_INSERTED_HEADERS = {
-            MessageHeaders.HDR_MESSAGE_ID, MessageHeaders.HDR_REPLY_TO, MessageHeaders.HDR_REFERENCES };
+            MessageHeaders.HDR_MESSAGE_ID, MessageHeaders.HDR_IN_REPLY_TO, MessageHeaders.HDR_REFERENCES };
 
         public static final org.slf4j.Logger LOG1 =
             org.slf4j.LoggerFactory.getLogger(MailMessageFieldFiller.class);
@@ -371,6 +373,7 @@ public final class MimeMessageConverter {
             return convertComposedMailMessage((ComposedMailMessage) mail);
         }
         try {
+            final Date receivedDate = mail.getReceivedDateDirect();
             final int size = (int) mail.getSize();
             final boolean clone = ((behavior & BEHAVIOR_CLONE) > 0);
             final boolean stream2file = ((behavior & BEHAVIOR_STREAM2FILE) > 0);
@@ -382,8 +385,17 @@ public final class MimeMessageConverter {
                 if (!stream2file || (null == (fileManagement = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class)))) {
                     final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(size <= 0 ? DEFAULT_MESSAGE_SIZE : size);
                     mail.writeTo(out);
-                    mimeMessage =
-                        new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(out.toByteArray()));
+                    if (receivedDate == null) {
+                        mimeMessage =
+                            new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(out.toByteArray()));
+                    } else {
+                        mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(out.toByteArray())) {
+                            @Override
+                            public Date getReceivedDate() throws MessagingException {
+                                return receivedDate;
+                            }
+                        };
+                    }
                     mimeMessage.removeHeader(X_ORIGINAL_HEADERS);
                 } else {
                     File file = checkForFile(mail);
@@ -407,7 +419,7 @@ public final class MimeMessageConverter {
                         }
                     }
                     try {
-                        mimeMessage = new ManagedMimeMessage(MimeDefaultSession.getDefaultSession(), file);
+                        mimeMessage = new ManagedMimeMessage(MimeDefaultSession.getDefaultSession(), file, receivedDate);
                         mimeMessage.removeHeader(X_ORIGINAL_HEADERS);
                     } catch (final IOException e) {
                         if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
@@ -1228,7 +1240,7 @@ public final class MimeMessageConverter {
                         for (int j = 1; j < inReplyTo.length; j++) {
                             sb.append(", ").append(inReplyTo[j]);
                         }
-                        mailMessage.addHeader(MessageHeaders.HDR_REPLY_TO, sb.toString());
+                        mailMessage.addHeader(MessageHeaders.HDR_IN_REPLY_TO, sb.toString());
                         sb.setLength(0);
                     }
                 }
@@ -1549,7 +1561,7 @@ public final class MimeMessageConverter {
                         for (int j = 1; j < inReplyTo.length; j++) {
                             sb.append(", ").append(inReplyTo[j]);
                         }
-                        mailMessage.addHeader(MessageHeaders.HDR_REPLY_TO, sb.toString());
+                        mailMessage.addHeader(MessageHeaders.HDR_IN_REPLY_TO, sb.toString());
                         sb.setLength(0);
                     }
                 }
@@ -1621,14 +1633,14 @@ public final class MimeMessageConverter {
                             ct.getSubType())));
                     } catch (final ClassCastException e) {
                         // Cast to javax.mail.Multipart failed
-                        LOG1.debug(new com.openexchange.java.StringAllocator(256).append(
+                        LOG1.debug(new StringBuilder(256).append(
                             "Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but ").append(
                             e.getMessage()).append(
                             ".\nIn case if IMAP it is due to a wrong BODYSTRUCTURE returned by IMAP server.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
                         mailMessage.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
                     } catch (final MessagingException e) {
                         // A messaging error occurred
-                        LOG1.debug(new com.openexchange.java.StringAllocator(256).append(
+                        LOG1.debug(new StringBuilder(256).append(
                             "Parsing message's multipart/* content to check for file attachments caused a messaging error: ").append(
                             e.getMessage()).append(
                             ".\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
@@ -2466,6 +2478,21 @@ public final class MimeMessageConverter {
         return tmp.booleanValue();
     }
 
+    static {
+        MailReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                enableMime4j = null;
+            }
+
+            @Override
+            public Map<String, String[]> getConfigFileNames() {
+                return null;
+            }
+        });
+    }
+
     private static void setHeaders(final Part part, final MailPart mailPart) throws OXException {
         /*
          * HEADERS
@@ -2737,7 +2764,7 @@ public final class MimeMessageConverter {
         }
         final String values;
         if ('\0' != delimiter && valueArr.length > 1) {
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(valueArr[0]);
+            final StringBuilder sb = new StringBuilder(valueArr[0]);
             for (int i = 1; i < valueArr.length; i++) {
                 sb.append(delimiter).append(valueArr[i]);
             }
@@ -2768,7 +2795,7 @@ public final class MimeMessageConverter {
         }
         final String values;
         if ('\0' != delimiter && valueArr.length > 1) {
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(valueArr[0]);
+            final StringBuilder sb = new StringBuilder(valueArr[0]);
             for (int i = 1; i < valueArr.length; i++) {
                 sb.append(delimiter).append(valueArr[i]);
             }
@@ -2797,7 +2824,7 @@ public final class MimeMessageConverter {
         }
         final String addresses;
         if (addressArray.length > 1) {
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(addressArray[0]);
+            final StringBuilder sb = new StringBuilder(addressArray[0]);
             for (int i = 1; i < addressArray.length; i++) {
                 sb.append(',').append(addressArray[i]);
             }
@@ -2829,7 +2856,7 @@ public final class MimeMessageConverter {
         }
         final String addresses;
         if (addressArray.length > 1) {
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(addressArray[0]);
+            final StringBuilder sb = new StringBuilder(addressArray[0]);
             for (int i = 1; i < addressArray.length; i++) {
                 sb.append(',').append(addressArray[i]);
             }
@@ -2976,7 +3003,7 @@ public final class MimeMessageConverter {
             return null;
         }
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);

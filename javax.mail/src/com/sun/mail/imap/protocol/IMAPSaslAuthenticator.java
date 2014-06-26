@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -78,7 +78,7 @@ public class IMAPSaslAuthenticator implements SaslAuthenticator {
 				final String p) throws ProtocolException {
 
 	synchronized (pr) {	// authenticate method should be synchronized
-	Vector v = new Vector();
+	List<Response> v = new ArrayList<Response>();
 	String tag = null;
 	Response r = null;
 	boolean done = false;
@@ -168,6 +168,8 @@ public class IMAPSaslAuthenticator implements SaslAuthenticator {
 	byte[] CRLF = { (byte)'\r', (byte)'\n'};
 
 	// Hack for Novell GroupWise XGWTRUSTEDAPP authentication mechanism
+	// http://www.novell.com/developer/documentation/gwimap/?
+	//   page=/developer/documentation/gwimap/gwimpenu/data/al7te9j.html
 	boolean isXGWTRUSTEDAPP =
 	    sc.getMechanismName().equals("XGWTRUSTEDAPP") &&
 	    PropUtil.getBooleanProperty(props,
@@ -211,7 +213,7 @@ public class IMAPSaslAuthenticator implements SaslAuthenticator {
 		else if (r.isBYE()) // outta here
 		    done = true;
 		else // hmm .. unsolicited response here ?!
-		    v.addElement(r);
+		    v.add(r);
 	    } catch (Exception ioex) {
 		logger.log(Level.FINE, "SASL Exception", ioex);
 		// convert this into a BYE response
@@ -238,8 +240,7 @@ public class IMAPSaslAuthenticator implements SaslAuthenticator {
 	 * connection has been authenticated. So, for now, the below
 	 * code really ends up being just a no-op.
 	 */
-	Response[] responses = new Response[v.size()];
-	v.copyInto(responses);
+	Response[] responses = v.toArray(new Response[v.size()]);
 	pr.notifyResponseHandlers(responses);
 
 	// Handle the final OK, NO, BAD or BYE response
@@ -248,12 +249,12 @@ public class IMAPSaslAuthenticator implements SaslAuthenticator {
 
 	/*
 	 * If we're using the Novell Groupwise XGWTRUSTEDAPP mechanism
-	 * we always have to issue a LOGIN command to select the user
-	 * we want to operate as.
+	 * to run as a specified authorization ID, we have to issue a
+	 * LOGIN command to select the user we want to operate as.
 	 */
-	if (isXGWTRUSTEDAPP) {
+	if (isXGWTRUSTEDAPP && authzid != null) {
 	    Argument args = new Argument();
-	    args.writeString(authzid != null ? authzid : u);
+	    args.writeString(authzid);
 
 	    responses = pr.command("LOGIN", args);
 

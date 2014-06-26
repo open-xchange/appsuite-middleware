@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -68,6 +68,9 @@ public class DeleteRequest extends AbstractFolderRequest<CommonDeleteResponse> {
     private final String[] folderIds;
     private final Date lastModified;
     private final boolean failOnError;
+
+    private Boolean hardDelete;
+    private Boolean failOnErrorParam;
 
     public DeleteRequest(final API api, final String[] folderIds, final Date lastModified, final boolean failOnError) {
         super(api);
@@ -114,6 +117,24 @@ public class DeleteRequest extends AbstractFolderRequest<CommonDeleteResponse> {
         this(api, true, folder);
     }
 
+    public DeleteRequest setHardDelete(Boolean hardDelete) {
+        this.hardDelete = hardDelete;
+        return this;
+    }
+
+    public Boolean isHardDelete() {
+        return hardDelete;
+    }
+
+    public DeleteRequest setFailOnErrorParam(Boolean failOnError) {
+        this.failOnErrorParam = failOnError;
+        return this;
+    }
+
+    public Boolean isFailOnErrorParam() {
+        return failOnErrorParam;
+    }
+
     @Override
     public Object getBody() {
         final JSONArray array = new JSONArray();
@@ -132,6 +153,12 @@ public class DeleteRequest extends AbstractFolderRequest<CommonDeleteResponse> {
     protected void addParameters(final List<Parameter> params) {
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE));
         params.add(new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, lastModified.getTime()));
+        if (null != hardDelete) {
+            params.add(new Parameter("hardDelete", String.valueOf(hardDelete)));
+        }
+        if (null != failOnErrorParam) {
+            params.add(new Parameter("failOnError", String.valueOf(failOnErrorParam)));
+        }
     }
 
     @Override

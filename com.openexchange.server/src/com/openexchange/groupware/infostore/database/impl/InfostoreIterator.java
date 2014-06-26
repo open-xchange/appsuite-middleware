@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,6 +50,7 @@
 package com.openexchange.groupware.infostore.database.impl;
 
 import static com.openexchange.tools.sql.DBUtils.getStatement;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -58,6 +59,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -68,6 +71,8 @@ import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog.
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.utils.SetSwitch;
+import com.openexchange.java.AsciiReader;
+import com.openexchange.java.Streams;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -298,8 +303,24 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
             Statement stmt = null;
             try {
                 stmt = rs.getStatement();
-                set.setValue(process(m, rs.getObject(sb.append(t.getTablename()).append('.').append(colName)
-                        .toString())));
+
+                final String column = sb.append(t.getTablename()).append('.').append(colName).toString();
+                if (m == Metadata.META_LITERAL) {
+                    final InputStream jsonBlobStream = rs.getBinaryStream(column);
+                    if (!rs.wasNull() && null != jsonBlobStream) {
+                        try {
+                            set.setValue(new JSONObject(new AsciiReader(jsonBlobStream)).asMap());
+                        } catch (final JSONException e) {
+                            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+                        } finally {
+                            Streams.close(jsonBlobStream);
+                        }
+                    } else {
+                        set.setValue(null);
+                    }
+                } else {
+                    set.setValue(process(m, rs.getObject(column)));
+                }
                 sb.setLength(0);
             } catch (final SQLException e) {
                 throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));

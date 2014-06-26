@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,7 +50,6 @@
 package com.openexchange.mail.usersetting;
 
 import static com.openexchange.tools.sql.DBUtils.closeResources;
-import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -529,7 +528,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
         if ((displayMsgHeaders == null) || (displayMsgHeaders.length == 0)) {
             return null;
         }
-        final com.openexchange.java.StringAllocator tmp = new com.openexchange.java.StringAllocator(256);
+        final StringBuilder tmp = new StringBuilder(256);
         tmp.append(displayMsgHeaders[0]);
         for (int i = 1; i < displayMsgHeaders.length; i++) {
             tmp.append(',').append(displayMsgHeaders[i]);

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -81,6 +81,28 @@ public class StatisticToolsTest extends AbstractRMITest {
     private int returnCodeDocumentconverter;
 
     private int returnCodeOffice;
+
+    private int returnEventAdmin;
+
+    private int returnCache;
+
+    private int returnAjpthreads;
+
+    private int returnAjptasks;
+
+    private int returnGeneral;
+
+    private int returnMailinterface;
+
+    private int returnPooling;
+
+    private int returnCallMonitor;
+
+    private int returnMisc;
+
+    private int returnOverview;
+
+    private int returnMemoryPool;
 
     @Test
     public void testGetXchangeStats() {
@@ -236,5 +258,148 @@ public class StatisticToolsTest extends AbstractRMITest {
         };
         statisticTools.start(new String[] { "-f", "-H", getRMIHost() }, "showruntimestats");
         assertEquals("Expected 0 as return code!", 0, this.returnCodeOffice);
+    }
+
+    @Test
+    public void testEventAdminStats() {
+        final StatisticTools statisticTools = new StatisticTools() {
+
+            @Override
+            protected void sysexit(int exitCode) {
+                StatisticToolsTest.this.returnEventAdmin = exitCode;
+            }
+        };
+        statisticTools.start(new String[] { "-e", "-H", getRMIHost() }, "showruntimestats");
+        assertEquals("Expected 0 as return code!", 0, this.returnEventAdmin);
+    }
+
+    @Test
+    public void testCachestats() {
+        final StatisticTools statisticTools = new StatisticTools() {
+
+            @Override
+            protected void sysexit(int exitCode) {
+                StatisticToolsTest.this.returnCache = exitCode;
+            }
+        };
+        statisticTools.start(new String[] { "-j", "-H", getRMIHost() }, "showruntimestats");
+        assertEquals("Expected 0 as return code!", 0, this.returnCache);
+    }
+
+    @Test
+    public void testAjpThreadsstats() {
+        final StatisticTools statisticTools = new StatisticTools() {
+
+            @Override
+            protected void sysexit(int exitCode) {
+                StatisticToolsTest.this.returnAjpthreads = exitCode;
+            }
+        };
+        statisticTools.start(new String[] { "--ajpthreadsstats", "-H", getRMIHost() }, "showruntimestats");
+        assertEquals("Expected 0 as return code!", 0, this.returnAjpthreads);
+    }
+
+    @Test
+    public void testAjpTasksstats() {
+        final StatisticTools statisticTools = new StatisticTools() {
+
+            @Override
+            protected void sysexit(int exitCode) {
+                StatisticToolsTest.this.returnAjptasks = exitCode;
+            }
+        };
+        statisticTools.start(new String[] { "--ajptasksstats", "-H", getRMIHost() }, "showruntimestats");
+        assertEquals("Expected 0 as return code!", 0, this.returnAjptasks);
+    }
+
+    @Test
+    public void testGeneralstats() {
+        final StatisticTools statisticTools = new StatisticTools() {
+
+            @Override
+            protected void sysexit(int exitCode) {
+                StatisticToolsTest.this.returnGeneral = exitCode;
+            }
+        };
+        statisticTools.start(new String[] { "--generalstats", "-H", getRMIHost() }, "showruntimestats");
+        assertEquals("Expected 0 as return code!", 0, this.returnGeneral);
+    }
+
+    @Test
+    public void testMailinterfacestats() {
+        final StatisticTools statisticTools = new StatisticTools() {
+
+            @Override
+            protected void sysexit(int exitCode) {
+                StatisticToolsTest.this.returnMailinterface = exitCode;
+            }
+        };
+        statisticTools.start(new String[] { "--mailinterfacestats", "-H", getRMIHost() }, "showruntimestats");
+        assertEquals("Expected 0 as return code!", 0, this.returnMailinterface);
+    }
+
+    @Test
+    public void testPoolingstats() {
+        final StatisticTools statisticTools = new StatisticTools() {
+
+            @Override
+            protected void sysexit(int exitCode) {
+                StatisticToolsTest.this.returnPooling = exitCode;
+            }
+        };
+        statisticTools.start(new String[] { "--poolingstats", "-H", getRMIHost() }, "showruntimestats");
+        assertEquals("Expected 0 as return code!", 0, this.returnPooling);
+    }
+
+    @Test
+    public void testCallMonitorstats() {
+        final StatisticTools statisticTools = new StatisticTools() {
+
+            @Override
+            protected void sysexit(int exitCode) {
+                StatisticToolsTest.this.returnCallMonitor = exitCode;
+            }
+        };
+        statisticTools.start(new String[] { "--callmonitorstats", "-H", getRMIHost() }, "showruntimestats");
+        assertEquals("Expected 0 as return code!", 0, this.returnCallMonitor);
+    }
+
+    @Test
+    public void testMiscstats() {
+        final StatisticTools statisticTools = new StatisticTools() {
+
+            @Override
+            protected void sysexit(int exitCode) {
+                StatisticToolsTest.this.returnMisc = exitCode;
+            }
+        };
+        statisticTools.start(new String[] { "--misc", "-H", getRMIHost() }, "showruntimestats");
+        assertEquals("Expected 0 as return code!", 0, this.returnMisc);
+    }
+
+    @Test
+    public void testOverviewstats() {
+        final StatisticTools statisticTools = new StatisticTools() {
+
+            @Override
+            protected void sysexit(int exitCode) {
+                StatisticToolsTest.this.returnOverview = exitCode;
+            }
+        };
+        statisticTools.start(new String[] { "--overview", "-H", getRMIHost() }, "showruntimestats");
+        assertEquals("Expected 0 as return code!", 0, this.returnOverview);
+    }
+
+    @Test
+    public void testMemoryPoolstats() {
+        final StatisticTools statisticTools = new StatisticTools() {
+
+            @Override
+            protected void sysexit(int exitCode) {
+                StatisticToolsTest.this.returnMemoryPool = exitCode;
+            }
+        };
+        statisticTools.start(new String[] { "--memorypool", "-H", getRMIHost() }, "showruntimestats");
+        assertEquals("Expected 0 as return code!", 0, this.returnMemoryPool);
     }
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -409,7 +409,7 @@ public final class DatabaseFolderConverter {
                 /*
                  * Either located below private folder or parent not visible
                  */
-                databaseFolder.setParentID(new com.openexchange.java.StringAllocator(8).append(FolderObject.SHARED_PREFIX).append(databaseFolder.getCreatedBy()).toString());
+                databaseFolder.setParentID(new StringBuilder(8).append(FolderObject.SHARED_PREFIX).append(databaseFolder.getCreatedBy()).toString());
             } else {
                 /*
                  * Parent is visible

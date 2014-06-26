@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -59,7 +59,8 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.drive.DriveService;
-import com.openexchange.drive.checksum.events.ChecksumEventListener;
+import com.openexchange.drive.checksum.events.DelayedChecksumEventListener;
+import com.openexchange.drive.checksum.rdb.DirectoryChecksumsAddUserAndETagColumnTask;
 import com.openexchange.drive.checksum.rdb.DriveCreateTableService;
 import com.openexchange.drive.checksum.rdb.DriveCreateTableTask;
 import com.openexchange.drive.checksum.rdb.DriveDeleteListener;
@@ -115,20 +116,23 @@ public class DriveActivator extends HousekeepingActivator {
          */
         registerService(DriveService.class, new ThrottlingDriveService(new DriveServiceImpl()));
         registerService(CreateTableService.class, new DriveCreateTableService());
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DriveCreateTableTask()));
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(
+            new DriveCreateTableTask(), new DirectoryChecksumsAddUserAndETagColumnTask()));
         registerService(DeleteListener.class, new DriveDeleteListener());
         /*
          * register event handler
          */
         Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-        serviceProperties.put(EventConstants.EVENT_TOPIC, ChecksumEventListener.getHandledTopics());
-        registerService(EventHandler.class, new ChecksumEventListener(), serviceProperties);
+        serviceProperties.put(EventConstants.EVENT_TOPIC, DelayedChecksumEventListener.getHandledTopics());
+        registerService(EventHandler.class, DelayedChecksumEventListener.getInstance(), serviceProperties);
+        DelayedChecksumEventListener.getInstance().start();
     }
 
     @Override
     protected void stopBundle() throws Exception {
         LOG.info("stopping bundle: \"com.openexchange.drive\"");
         BucketInputStream.setTokenBucket(null);
+        DelayedChecksumEventListener.getInstance().stop();
         DriveConfig.getInstance().stop();
         DriveServiceLookup.set(null);
         super.stopBundle();

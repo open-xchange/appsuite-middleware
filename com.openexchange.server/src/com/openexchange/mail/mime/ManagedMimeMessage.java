@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -56,6 +56,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
+import java.util.Map;
 import java.util.Queue;
 import javax.mail.Flags;
 import javax.mail.MessagingException;
@@ -64,6 +66,7 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.util.SharedByteArrayInputStream;
 import javax.mail.util.SharedFileInputStream;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
@@ -71,6 +74,7 @@ import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -100,6 +104,21 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
             }
         }
         return tmp.booleanValue();
+    }
+
+    static {
+        MailReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                managedCloneEnabled = null;
+            }
+
+            @Override
+            public Map<String, String[]> getConfigFileNames() {
+                return null;
+            }
+        });
     }
 
     /**
@@ -142,7 +161,7 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
             return original;
         }
         try {
-            final ManagedMimeMessage mimeMessage = new ManagedMimeMessage(original);
+            final ManagedMimeMessage mimeMessage = new ManagedMimeMessage(original, original.getReceivedDateDirect());
             // Apply flags to MIME message
             {
                 MimeMessageConverter.parseMimeFlags(original.getFlags(), mimeMessage);
@@ -195,6 +214,8 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
 
     private static final int DEFAULT_BUFFER_SIZE = 131072; // 128KB
 
+    private final Date receivedDate;
+
     private final Queue<Closeable> closeables;
 
     private volatile ManagedFile managedFile;
@@ -206,11 +227,12 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
      *
      * @param session The session
      * @param file The RFC822 source file
+     * @param receivedDate The optional received date
      * @throws MessagingException If a messaging error occurs
      * @throws OXException If a messaging error occurs
      * @throws IOException If an I/O error occurs
      */
-    private ManagedMimeMessage(final MailMessage original) throws MessagingException, OXException, IOException {
+    private ManagedMimeMessage(final MailMessage original, final Date receivedDate) throws MessagingException, OXException, IOException {
         super(MimeDefaultSession.getDefaultSession());
         final File[] files = new File[1];
         final InputStream in = getInputStreamFor(original, files);
@@ -219,6 +241,7 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
         closeables.add(in);
         this.managedFile = null;
         this.file = files[0];
+        this.receivedDate = receivedDate;
     }
 
     /**
@@ -230,15 +253,29 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
      * @throws IOException If an I/O error occurs
      */
     public ManagedMimeMessage(final Session session, final File file) throws MessagingException, IOException {
-        this(session, file, new SharedFileInputStream(file, DEFAULT_BUFFER_SIZE));
+        this(session, file, new SharedFileInputStream(file, DEFAULT_BUFFER_SIZE), null);
     }
 
-    private ManagedMimeMessage(final Session session, final File file, final InputStream in) throws MessagingException {
+    /**
+     * Initializes a new {@link ManagedMimeMessage}.
+     *
+     * @param session The session
+     * @param file The RFC822 source file
+     * @param receivedDate The optional received date
+     * @throws MessagingException If a messaging error occurs
+     * @throws IOException If an I/O error occurs
+     */
+    public ManagedMimeMessage(final Session session, final File file, final Date receivedDate) throws MessagingException, IOException {
+        this(session, file, new SharedFileInputStream(file, DEFAULT_BUFFER_SIZE), receivedDate);
+    }
+
+    private ManagedMimeMessage(final Session session, final File file, final InputStream in, final Date receivedDate) throws MessagingException {
         super(session, in);
         closeables = new Java7ConcurrentLinkedQueue<Closeable>();
         closeables.add(in);
         this.managedFile = null;
         this.file = file;
+        this.receivedDate = receivedDate;
     }
 
     /**
@@ -249,6 +286,15 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
     public File getFile() {
         final File file = this.file;
         return null == file ? managedFile.getFile() : file;
+    }
+
+    @Override
+    public Date getReceivedDate() throws MessagingException {
+        if (receivedDate == null) {
+            return super.getReceivedDate();
+        }
+
+        return receivedDate;
     }
 
     @Override

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -54,6 +54,7 @@ import javax.security.auth.login.LoginException;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.DeferredActivator;
 
@@ -67,6 +68,7 @@ public class AuthLDAPActivator extends DeferredActivator {
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AuthLDAPActivator.class);
 
 	private ServiceRegistration<AuthenticationService> registration;
+	private ServiceRegistration<Reloadable> reloadable;
 
 	public AuthLDAPActivator() {
 	    super();
@@ -100,6 +102,7 @@ public class AuthLDAPActivator extends DeferredActivator {
         if (null == registration) {
             final LDAPAuthentication impl = new LDAPAuthentication(props);
             registration = context.registerService(AuthenticationService.class, impl, null);
+            reloadable = context.registerService(Reloadable.class, impl, null);
         } else {
             LOG.error("Duplicate startup of deferred activator.");
         }
@@ -111,6 +114,10 @@ public class AuthLDAPActivator extends DeferredActivator {
         if (null != registration) {
             registration.unregister();
             registration = null;
+        }
+        if (null != reloadable) {
+            reloadable.unregister();
+            reloadable = null;
         }
     }
 }

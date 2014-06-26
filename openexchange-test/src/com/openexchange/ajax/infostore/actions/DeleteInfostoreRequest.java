@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -67,6 +67,7 @@ public class DeleteInfostoreRequest extends AbstractInfostoreRequest<DeleteInfos
     private List<Integer> ids, folders;
 
     private Date timestamp;
+    private Boolean hardDelete;
 
     public void setIds(List<Integer> ids) {
         this.ids = ids;
@@ -90,6 +91,14 @@ public class DeleteInfostoreRequest extends AbstractInfostoreRequest<DeleteInfos
 
     public Date getTimestamp() {
         return timestamp;
+    }
+
+    public void setHardDelete(Boolean hardDelete) {
+        this.hardDelete = hardDelete;
+    }
+
+    public Boolean isHardDelete() {
+        return hardDelete;
     }
 
     public DeleteInfostoreRequest(List<Integer> ids, List<Integer> folders,Date timestamp) {
@@ -124,11 +133,15 @@ public class DeleteInfostoreRequest extends AbstractInfostoreRequest<DeleteInfos
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
-        return new Params(
+        Params params = new Params(
             AJAXServlet.PARAMETER_ACTION,
             AJAXServlet.ACTION_DELETE,
             AJAXServlet.PARAMETER_TIMESTAMP,
-            String.valueOf(getTimestamp().getTime())).toArray();
+            String.valueOf(getTimestamp().getTime()));
+        if (null != hardDelete) {
+            params.add("hardDelete", String.valueOf(hardDelete));
+        }
+        return params.toArray();
     }
 
     @Override

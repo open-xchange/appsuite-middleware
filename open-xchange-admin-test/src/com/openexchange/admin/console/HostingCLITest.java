@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -60,7 +60,8 @@ import com.openexchange.admin.tools.ShellExecutor.ArrayOutput;
 public class HostingCLITest extends AbstractRMITest {
 
     @After
-    public void teardown() throws IOException, InterruptedException {
+    public void teardown() throws Exception {
+        super.tearDown();
         final ShellExecutor se = new ShellExecutor();
         final ArrayOutput deleteresult = se.executeprocargs(new String[] {
             prefix + "deletecontext", "-c", ctxid, "-A", OXADMINMASTER, "-P",

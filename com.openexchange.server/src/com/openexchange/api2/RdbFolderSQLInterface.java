@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -565,8 +565,6 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
             type = FolderObject.PRIVATE;
         } else if (folderId == FolderObject.SYSTEM_PUBLIC_FOLDER_ID || folderId == FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID || folderId == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID) {
             type = FolderObject.PUBLIC;
-        } else if (folderId == FolderObject.SYSTEM_OX_PROJECT_FOLDER_ID) {
-            type = FolderObject.PROJECT;
         } else {
             type = oxfolderAccess.getFolderType(folderId);
         }

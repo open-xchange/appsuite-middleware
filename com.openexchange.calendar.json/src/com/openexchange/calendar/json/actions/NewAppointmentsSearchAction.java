@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,8 +50,8 @@
 package com.openexchange.calendar.json.actions;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
-import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -66,14 +66,15 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -135,16 +136,23 @@ public final class NewAppointmentsSearchAction extends AppointmentAction {
         Date timestamp = new Date(0);
 
         final AppointmentSearchObject searchObj = new AppointmentSearchObject();
-        searchObj.setRange(new Date[] { start, end });
+        searchObj.setMinimumEndDate(start);
+        searchObj.setMaximumStartDate(end);
+        searchObj.setUserIDs(Collections.singleton(Integer.valueOf(req.getSession().getUserId())));
+        searchObj.setOnlyPrivateAppointments(true);
 
         final LinkedList<Appointment> linkedAppointmentList = new LinkedList<Appointment>();
 
 
         SearchIterator<Appointment> searchIterator = null;
         try {
-            final AppointmentSQLInterface appointmentsql = getService().createAppointmentSql(req.getSession());
+            final AppointmentSqlFactoryService factoryService = getService();
+            if (null == factoryService) {
+                throw ServiceExceptionCode.absentService(AppointmentSqlFactoryService.class);
+            }
+            final AppointmentSQLInterface appointmentsql = factoryService.createAppointmentSql(req.getSession());
             final CalendarCollectionService recColl = getService(CalendarCollectionService.class);
-            searchIterator = appointmentsql.getAppointmentsByExtendedSearch(searchObj, orderBy, orderDir, _appointmentFields);
+            searchIterator = appointmentsql.searchAppointments(searchObj, orderBy, orderDir, _appointmentFields);
 
             final List<Appointment> appointmentList = new ArrayList<Appointment>();
             while (searchIterator.hasNext()) {
@@ -200,8 +208,6 @@ public final class NewAppointmentsSearchAction extends AppointmentAction {
             }
 
             return new AJAXRequestResult(appointmentList, timestamp, "appointment");
-        } catch (final SQLException e) {
-            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);
         } finally {
             if (searchIterator != null) {
                 searchIterator.close();

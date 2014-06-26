@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -61,7 +61,6 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailServletInterface;
@@ -120,11 +119,9 @@ public final class UpdateAction extends AbstractMailAction {
              * Get mail interface
              */
             final MailServletInterface mailInterface = getMailInterface(req);
-            final OXJSONWriter jsonWriter = new OXJSONWriter();
             /*
              * Start response
              */
-            jsonWriter.object();
             final String uid;
             {
                 String tmp = req.getParameter(AJAXServlet.PARAMETER_ID);
@@ -173,10 +170,7 @@ public final class UpdateAction extends AbstractMailAction {
                 mailId = mailInterface.copyMessages(sourceFolder, destFolder, new String[] { uid }, true)[0];
                 folderId = destFolder;
             }
-            jsonWriter.key(FolderChildFields.FOLDER_ID).value(folderId);
-            jsonWriter.key(DataFields.ID).value(mailId);
-            jsonWriter.endObject();
-            return new AJAXRequestResult(jsonWriter.getObject(), "json");
+            return new AJAXRequestResult(new JSONObject(4).put(FolderChildFields.FOLDER_ID, folderId).put(DataFields.ID, mailId), "json");
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {

@@ -60,13 +60,13 @@ import com.openexchange.java.misc.FloatingDecimal;
 
 
 /**
- * {@link AbstractStringAllocator} - A mutable sequence of characters.
+ * {@link AbstractStringBuilder} - A mutable sequence of characters.
  * <p>
  * Copied from <tt>java.lang.AbstractStringBuilder</tt> class.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-abstract class AbstractStringAllocator implements Appendable, CharSequence {
+abstract class AbstractStringBuilder implements Appendable, CharSequence {
 
     /**
      * The <code>getChars(char dst[], int dstBegin)</code> method that copies characters from associated string into <code>dst</code>
@@ -97,16 +97,16 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
     int count;
 
     /**
-     * Initializes a new {@link AbstractStringAllocator}.
+     * Initializes a new {@link AbstractStringBuilder}.
      */
-    protected AbstractStringAllocator() {
+    protected AbstractStringBuilder() {
         super();
     }
 
     /**
-     * Creates an AbstractStringAllocator of the specified capacity.
+     * Creates an AbstractStringBuilder of the specified capacity.
      */
-    protected AbstractStringAllocator(final int capacity) {
+    protected AbstractStringBuilder(final int capacity) {
         super();
         value = new char[capacity];
     }
@@ -438,7 +438,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * @param obj an <code>Object</code>.
      * @return a reference to this object.
      */
-    public AbstractStringAllocator append(final Object obj) {
+    public AbstractStringBuilder append(final Object obj) {
         return append(String.valueOf(obj));
     }
 
@@ -455,7 +455,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * @param str a string.
      * @return a reference to this object.
      */
-    public AbstractStringAllocator append(String str) {
+    public AbstractStringBuilder append(String str) {
         if (str == null) {
             str = "null";
         }
@@ -473,7 +473,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
     }
 
     // Documentation in subclasses because of synchro difference
-    public AbstractStringAllocator append(final StringBuffer sb) {
+    public AbstractStringBuilder append(final StringBuffer sb) {
         if (sb == null) {
             return append("null");
         }
@@ -489,7 +489,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
 
     // Documentation in subclasses because of synchro difference
     @Override
-    public AbstractStringAllocator append(CharSequence s) {
+    public AbstractStringBuilder append(CharSequence s) {
         if (s == null) {
             s = "null";
         }
@@ -524,7 +524,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      *             <code>end</code> or <code>end</code> is greater than <code>s.length()</code>
      */
     @Override
-    public AbstractStringAllocator append(CharSequence s, final int start, final int end) {
+    public AbstractStringBuilder append(CharSequence s, final int start, final int end) {
         if (s == null) {
             s = "null";
         }
@@ -558,7 +558,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * @param str the characters to be appended.
      * @return a reference to this object.
      */
-    public AbstractStringAllocator append(final char str[]) {
+    public AbstractStringBuilder append(final char str[]) {
         final int newCount = count + str.length;
         if (newCount > value.length) {
             expandCapacity(newCount);
@@ -582,7 +582,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * @param len the number of <code>char</code>s to append.
      * @return a reference to this object.
      */
-    public AbstractStringAllocator append(final char str[], final int offset, final int len) {
+    public AbstractStringBuilder append(final char str[], final int offset, final int len) {
         final int newCount = count + len;
         if (newCount > value.length) {
             expandCapacity(newCount);
@@ -601,7 +601,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * @param b a <code>boolean</code>.
      * @return a reference to this object.
      */
-    public AbstractStringAllocator append(final boolean b) {
+    public AbstractStringBuilder append(final boolean b) {
         if (b) {
             final int newCount = count + 4;
             if (newCount > value.length) {
@@ -637,7 +637,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * @return a reference to this object.
      */
     @Override
-    public AbstractStringAllocator append(final char c) {
+    public AbstractStringBuilder append(final char c) {
         final int newCount = count + 1;
         if (newCount > value.length) {
             expandCapacity(newCount);
@@ -655,7 +655,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * @param i an <code>int</code>.
      * @return a reference to this object.
      */
-    public AbstractStringAllocator append(final int i) {
+    public AbstractStringBuilder append(final int i) {
         if (i == Integer.MIN_VALUE) {
             append("-2147483648");
             return this;
@@ -770,7 +770,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * @param l a <code>long</code>.
      * @return a reference to this object.
      */
-    public AbstractStringAllocator append(final long l) {
+    public AbstractStringBuilder append(final long l) {
         if (l == Long.MIN_VALUE) {
             append("-9223372036854775808");
             return this;
@@ -860,7 +860,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * @param f a <code>float</code>.
      * @return a reference to this object.
      */
-    public AbstractStringAllocator append(final float f) {
+    public AbstractStringBuilder append(final float f) {
         new FloatingDecimal(f).appendTo(this);
         return this;
     }
@@ -874,7 +874,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * @param d a <code>double</code>.
      * @return a reference to this object.
      */
-    public AbstractStringAllocator append(final double d) {
+    public AbstractStringBuilder append(final double d) {
         new FloatingDecimal(d).appendTo(this);
         return this;
     }
@@ -890,7 +890,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * @throws StringIndexOutOfBoundsException if <code>start</code> is negative, greater than <code>length()</code>, or greater than
      *             <code>end</code>.
      */
-    public AbstractStringAllocator delete(final int start, int end) {
+    public AbstractStringBuilder delete(final int start, int end) {
         if (start < 0) {
             throw new StringIndexOutOfBoundsException(start);
         }
@@ -921,7 +921,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * @return a reference to this object.
      * @exception IllegalArgumentException if the specified <code>codePoint</code> isn't a valid Unicode code point
      */
-    public AbstractStringAllocator appendCodePoint(final int codePoint) {
+    public AbstractStringBuilder appendCodePoint(final int codePoint) {
         if (!Character.isValidCodePoint(codePoint)) {
             throw new IllegalArgumentException();
         }
@@ -959,7 +959,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * @return This object.
      * @throws StringIndexOutOfBoundsException if the <code>index</code> is negative or greater than or equal to <code>length()</code>.
      */
-    public AbstractStringAllocator deleteCharAt(final int index) {
+    public AbstractStringBuilder deleteCharAt(final int index) {
         if ((index < 0) || (index >= count)) {
             throw new StringIndexOutOfBoundsException(index);
         }
@@ -978,7 +978,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * @return This object.
      * @throws StringIndexOutOfBoundsException if the this sequence is empty
      */
-    public AbstractStringAllocator deleteLastChar() {
+    public AbstractStringBuilder deleteLastChar() {
         return deleteCharAt(count - 1);
     }
 
@@ -995,7 +995,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * @throws StringIndexOutOfBoundsException if <code>start</code> is negative, greater than <code>length()</code>, or greater than
      *             <code>end</code>.
      */
-    public AbstractStringAllocator replace(final int start, int end, final String str) {
+    public AbstractStringBuilder replace(final int start, int end, final String str) {
         if (start < 0) {
             throw new StringIndexOutOfBoundsException(start);
         }
@@ -1110,7 +1110,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      *             <code>offset</code> or <code>len</code> are negative, or <code>(offset+len)</code> is greater than
      *             <code>str.length</code>.
      */
-    public AbstractStringAllocator insert(final int index, final char str[], final int offset, final int len) {
+    public AbstractStringBuilder insert(final int index, final char str[], final int offset, final int len) {
         if ((index < 0) || (index > length())) {
             throw new StringIndexOutOfBoundsException(index);
         }
@@ -1140,7 +1140,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * @return a reference to this object.
      * @throws StringIndexOutOfBoundsException if the offset is invalid.
      */
-    public AbstractStringAllocator insert(final int offset, final Object obj) {
+    public AbstractStringBuilder insert(final int offset, final Object obj) {
         return insert(offset, String.valueOf(obj));
     }
 
@@ -1167,7 +1167,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * @return a reference to this object.
      * @throws StringIndexOutOfBoundsException if the offset is invalid.
      */
-    public AbstractStringAllocator insert(final int offset, String str) {
+    public AbstractStringBuilder insert(final int offset, String str) {
         if ((offset < 0) || (offset > length())) {
             throw new StringIndexOutOfBoundsException(offset);
         }
@@ -1200,7 +1200,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * @return a reference to this object.
      * @throws StringIndexOutOfBoundsException if the offset is invalid.
      */
-    public AbstractStringAllocator insert(final int offset, final char str[]) {
+    public AbstractStringBuilder insert(final int offset, final char str[]) {
         if ((offset < 0) || (offset > length())) {
             throw new StringIndexOutOfBoundsException(offset);
         }
@@ -1231,7 +1231,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * @return a reference to this object.
      * @throws IndexOutOfBoundsException if the offset is invalid.
      */
-    public AbstractStringAllocator insert(final int dstOffset, CharSequence s) {
+    public AbstractStringBuilder insert(final int dstOffset, CharSequence s) {
         if (s == null) {
             s = "null";
         }
@@ -1275,7 +1275,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      *             <code>start</code> or <code>end</code> are negative, or <code>start</code> is greater than <code>end</code> or
      *             <code>end</code> is greater than <code>s.length()</code>
      */
-    public AbstractStringAllocator insert(int dstOffset, CharSequence s, final int start, final int end) {
+    public AbstractStringBuilder insert(int dstOffset, CharSequence s, final int start, final int end) {
         if (s == null) {
             s = "null";
         }
@@ -1314,7 +1314,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * @return a reference to this object.
      * @throws StringIndexOutOfBoundsException if the offset is invalid.
      */
-    public AbstractStringAllocator insert(final int offset, final boolean b) {
+    public AbstractStringBuilder insert(final int offset, final boolean b) {
         return insert(offset, String.valueOf(b));
     }
 
@@ -1335,7 +1335,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * @return a reference to this object.
      * @throws IndexOutOfBoundsException if the offset is invalid.
      */
-    public AbstractStringAllocator insert(final int offset, final char c) {
+    public AbstractStringBuilder insert(final int offset, final char c) {
         final int newCount = count + 1;
         if (newCount > value.length) {
             expandCapacity(newCount);
@@ -1359,7 +1359,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * @return a reference to this object.
      * @throws StringIndexOutOfBoundsException if the offset is invalid.
      */
-    public AbstractStringAllocator insert(final int offset, final int i) {
+    public AbstractStringBuilder insert(final int offset, final int i) {
         return insert(offset, String.valueOf(i));
     }
 
@@ -1376,7 +1376,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * @return a reference to this object.
      * @throws StringIndexOutOfBoundsException if the offset is invalid.
      */
-    public AbstractStringAllocator insert(final int offset, final long l) {
+    public AbstractStringBuilder insert(final int offset, final long l) {
         return insert(offset, String.valueOf(l));
     }
 
@@ -1393,7 +1393,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * @return a reference to this object.
      * @throws StringIndexOutOfBoundsException if the offset is invalid.
      */
-    public AbstractStringAllocator insert(final int offset, final float f) {
+    public AbstractStringBuilder insert(final int offset, final float f) {
         return insert(offset, String.valueOf(f));
     }
 
@@ -1410,7 +1410,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * @return a reference to this object.
      * @throws StringIndexOutOfBoundsException if the offset is invalid.
      */
-    public AbstractStringAllocator insert(final int offset, final double d) {
+    public AbstractStringBuilder insert(final int offset, final double d) {
         return insert(offset, String.valueOf(d));
     }
 
@@ -1608,7 +1608,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      *
      * @return a reference to this object.
      */
-    public AbstractStringAllocator reverse() {
+    public AbstractStringBuilder reverse() {
         boolean hasSurrogate = false;
         final int n = count - 1;
         for (int j = (n - 1) >> 1; j >= 0; --j) {

@@ -70,10 +70,11 @@ import com.openexchange.imap.cache.ListLsubEntry;
 import com.openexchange.imap.cache.MBoxEnabledCache;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.services.Services;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
+import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -112,7 +113,6 @@ public class IMAPDefaultFolderChecker {
     protected final Context ctx;
     protected final IMAPAccess imapAccess;
     protected final IMAPConfig imapConfig;
-    protected boolean retry;
 
     /**
      * Initializes a new {@link IMAPDefaultFolderChecker}.
@@ -125,7 +125,6 @@ public class IMAPDefaultFolderChecker {
      */
     public IMAPDefaultFolderChecker(final int accountId, final Session session, final Context ctx, final IMAPStore imapStore, final IMAPAccess imapAccess) {
         super();
-        retry = true;
         this.accountId = accountId;
         this.session = session;
         this.imapStore = imapStore;
@@ -150,6 +149,40 @@ public class IMAPDefaultFolderChecker {
             }
         }
         return isDefaultFolder;
+    }
+
+    /**
+     * Checks if given full name denotes a default folder.
+     *
+     * @param folderFullName The full name to check
+     * @return A default folder type if given full name denotes a default folder; otherwise <code>DefaultFolderType.NONE</code>
+     * @throws OXException If check for default folder fails
+     */
+    public MailFolder.DefaultFolderType getDefaultFolderType(final String folderFullName) throws OXException {
+        if (folderFullName.equalsIgnoreCase(INBOX)) {
+            return DefaultFolderType.INBOX;
+        }
+        for (int index = 0; (index < 6); index++) {
+            if (folderFullName.equalsIgnoreCase(getDefaultFolder(index))) {
+                switch (index) {
+                case StorageUtility.INDEX_CONFIRMED_HAM:
+                    return DefaultFolderType.CONFIRMED_HAM;
+                case StorageUtility.INDEX_CONFIRMED_SPAM:
+                    return DefaultFolderType.CONFIRMED_SPAM;
+                case StorageUtility.INDEX_DRAFTS:
+                    return DefaultFolderType.DRAFTS;
+                case StorageUtility.INDEX_SENT:
+                    return DefaultFolderType.SENT;
+                case StorageUtility.INDEX_SPAM:
+                    return DefaultFolderType.SPAM;
+                case StorageUtility.INDEX_TRASH:
+                    return DefaultFolderType.TRASH;
+                default:
+                    break;
+                }
+            }
+        }
+        return DefaultFolderType.NONE;
     }
 
     /**
@@ -335,6 +368,8 @@ public class IMAPDefaultFolderChecker {
             if (!indexes.isEmpty()) {
                 clearAccountFullNames(indexes.toArray());
             }
+        } else {
+            LOG.debug("Checking standard folder for account {} (user={}, context={})", Integer.valueOf(accountId), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
         }
         // Check folders
         final AtomicBoolean modified = new AtomicBoolean(false);
@@ -453,7 +488,7 @@ public class IMAPDefaultFolderChecker {
          * Check default folder
          */
         final int prefixLen = prefix.length();
-        String desiredFullName = prefixLen == 0 ? qualifiedName : new StringAllocator(prefix).append(qualifiedName).toString();
+        String desiredFullName = prefixLen == 0 ? qualifiedName : new StringBuilder(prefix).append(qualifiedName).toString();
         {
             final ListLsubEntry entry = modified.get() ? ListLsubCache.getActualLISTEntry(desiredFullName, accountId, imapStore, session) : ListLsubCache.getCachedLISTEntry(desiredFullName, accountId, imapStore, session);
             if (null != entry && entry.exists()) {
@@ -615,9 +650,9 @@ public class IMAPDefaultFolderChecker {
         if (!f.exists()) {
             try {
                 IMAPCommandsCollection.createFolder(f, sep, type, false);
-                LOG.info("Created new standard {} folder (full-name={}, namespace={}) for login {} (account={}) on IMAP server {} (user={}, context={})", getFallbackName(index), f.getFullName(), namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+                LOG.info("Created new standard {} folder (full-name=\"{}\", namespace=\"{}\") for login {} (account={}) on IMAP server {} (user={}, context={})", getFallbackName(index), f.getFullName(), namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
             } catch (final MessagingException e) {
-                LOG.warn("Failed to create new standard {} folder (full-name={}, namespace={}) for login {} (account={}) on IMAP server {} (user={}, context={})", getFallbackName(index), f.getFullName(), namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
+                LOG.warn("Failed to create new standard {} folder (full-name=\"{}\", namespace=\"{}\") for login {} (account={}) on IMAP server {} (user={}, context={})", getFallbackName(index), f.getFullName(), namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
                 throw e;
             }
         }

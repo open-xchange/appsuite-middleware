@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -46,14 +46,17 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.plugins;
 
+import java.util.Set;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 
 public interface OXUserPluginInterface {
+
     public void create(final Context ctx, final User usr, final UserModuleAccess access, final Credentials cred) throws PluginException;
 
     public void delete(final Context ctx, final User[] user, final Credentials cred) throws PluginException;
@@ -63,10 +66,45 @@ public interface OXUserPluginInterface {
     public User[] getData(final Context ctx, final User[] users, final Credentials cred);
 
     /**
-     * This Method is used for each plugin to check if it makes sense to run as admin
+     * This Method is used for each plugin to check if it makes sense to run as administrator.
      *
      * @return
      */
     public boolean canHandleContextAdmin();
+
+    /**
+     * Changes specified user's capabilities.
+     *
+     * @param ctx The context
+     * @param user The user
+     * @param capsToAdd The capabilities to add
+     * @param capsToRemove The capabilities to remove
+     * @param capsToDrop The capabilities to drop; e.g. clean from storage
+     * @param auth The credentials
+     * @throws PluginException If changing capabilities fails
+     */
+    public void changeCapabilities(Context ctx, User user, Set<String> capsToAdd, Set<String> capsToRemove, Set<String> capsToDrop, Credentials auth) throws PluginException;
+
+    /**
+     * Manipulate user module access within the given context.
+     *
+     * @param ctx Context object.
+     * @param user_id int containing the user id.
+     * @param access String containing access combination name.
+     * @param auth Credentials for authenticating against server.
+     * @throws PluginException If change operation fails
+     */
+    public void changeModuleAccess(Context ctx, User user, String access_combination_name, Credentials auth) throws PluginException;
+
+    /**
+     * Manipulate user module access within the given context.
+     *
+     * @param ctx Context object.
+     * @param userId int[] containing the user id.
+     * @param moduleAccess UserModuleAccess containing module access.
+     * @param auth Credentials for authenticating against server.
+     * @throws PluginException If change operation fails
+     */
+    public void changeModuleAccess(Context ctx, User user, UserModuleAccess moduleAccess, Credentials auth) throws PluginException;
 
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -179,17 +179,13 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
                 rollback = true;
                 id = storageService.insertMailAccount(accountDescription, session.getUserId(), session.getContext(), session, wcon);
                 // Check full names after successful creation
-                final MailAccount[] accounts = storageService.getUserMailAccounts(session.getUserId(), cid, wcon);
-                for (final MailAccount mailAccount : accounts) {
-                    if (mailAccount.getId() == id) {
-                        newAccount = mailAccount;
-                        break;
-                    }
+                newAccount = storageService.getMailAccount(id, session.getUserId(), cid, wcon);
+
+                if (null == newAccount) {
+                    throw MailAccountExceptionCodes.NOT_FOUND.create(id, session.getUserId(), session.getContextId());
                 }
 
-                if (null != newAccount) {
-                    newAccount = checkFullNames(newAccount, storageService, session, wcon);
-                }
+                newAccount = checkFullNames(newAccount, storageService, session, wcon);
 
                 wcon.commit();
                 rollback = false;
@@ -214,13 +210,7 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
             }
         }
 
-        final JSONObject jsonAccount;
-        if (null == newAccount) {
-            jsonAccount = MailAccountWriter.write(checkFullNames(storageService.getMailAccount(id, session.getUserId(), session.getContextId()), storageService, session));
-        } else {
-            jsonAccount = MailAccountWriter.write(newAccount);
-        }
-
+        final JSONObject jsonAccount = MailAccountWriter.write(newAccount);
         return new AJAXRequestResult(jsonAccount).addWarnings(warnings);
     }
 

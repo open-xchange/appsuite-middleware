@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -56,6 +56,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.EnumSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -75,16 +76,23 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.jslob.DefaultJSlob;
 import com.openexchange.jslob.JSlobId;
+import com.openexchange.mail.MailSessionCache;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
+import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.Tools;
 import com.openexchange.mailaccount.json.fields.MailAccountFields;
 import com.openexchange.mailaccount.json.parser.MailAccountParser;
 import com.openexchange.mailaccount.json.writer.MailAccountWriter;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -186,6 +194,13 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
             }
         }
 
+        // Check standard folder names against full names
+        if (id != MailAccount.DEFAULT_ID) {
+            fillMailConfig(accountDescription, fieldsToUpdate, toUpdate, session);
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = getMailAccess(accountDescription, session, warnings);
+            Tools.checkNames(accountDescription, fieldsToUpdate, Tools.getSeparator(mailAccess));
+        }
+
         // Update
         MailAccount updatedAccount = null;
         {
@@ -198,14 +213,21 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
                 // Invoke update
                 storageService.updateMailAccount(accountDescription, fieldsToUpdate, session.getUserId(), contextId, session, wcon, false);
 
-                // Reload
-                final MailAccount[] accounts = storageService.getUserMailAccounts(session.getUserId(), contextId, wcon);
-                for (final MailAccount mailAccount : accounts) {
-                    if (mailAccount.getId() == id) {
-                        updatedAccount = mailAccount;
-                        break;
+                // Clear standard folder information from session caches
+                {
+                    boolean standardFolderChanged = false;
+                    for (final Iterator<Attribute> it = fieldsToUpdate.iterator(); !standardFolderChanged && it.hasNext();) {
+                        if (DEFAULT.contains(it.next())) {
+                            standardFolderChanged = true;
+                        }
+                    }
+                    if (standardFolderChanged) {
+                        MailSessionCache.removeDefaultFolderInformationFrom(id, session.getUserId(), contextId);
                     }
                 }
+
+                // Reload
+                updatedAccount = storageService.getMailAccount(id, session.getUserId(), contextId, wcon);
 
                 // Any standard folders changed?
                 if ((null != updatedAccount) && (fieldsToUpdate.removeAll(DEFAULT))) {
@@ -266,4 +288,32 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
         return new AJAXRequestResult(jsonAccount).addWarnings(warnings);
     }
 
+    /**
+     * Fills the provided {@link MailAccountDescription} with already existing data if they are not existing in fieldsToUpdate
+     * 
+     * @param accountDescription
+     * @param fieldsToUpdate
+     * @param toUpdate
+     * @param session
+     * @throws OXException
+     */
+    private void fillMailConfig(MailAccountDescription accountDescription, Set<Attribute> fieldsToUpdate, MailAccount toUpdate, Session session) throws OXException {
+        if (!fieldsToUpdate.contains(Attribute.LOGIN_LITERAL)) {
+            accountDescription.setLogin(toUpdate.getLogin());
+        }
+        if (!fieldsToUpdate.contains(Attribute.PASSWORD_LITERAL)) {
+            String password = toUpdate.getPassword();
+            password = MailPasswordUtil.decrypt(password, session, toUpdate.getId(), toUpdate.getLogin(), toUpdate.getMailServer());
+            accountDescription.setPassword(password);
+        }
+        if (!fieldsToUpdate.contains(Attribute.MAIL_PORT_LITERAL)) {
+            accountDescription.setMailPort(toUpdate.getMailPort());
+        }
+        if (!fieldsToUpdate.contains(Attribute.MAIL_SECURE_LITERAL)) {
+            accountDescription.setMailSecure(toUpdate.isMailSecure());
+        }
+        if (!fieldsToUpdate.contains(Attribute.MAIL_SERVER_LITERAL)) {
+            accountDescription.setMailServer(toUpdate.getMailServer());
+        }
+    }
 }

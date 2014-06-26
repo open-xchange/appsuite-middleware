@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -90,7 +90,7 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
     private SubscriptionSource source;
     private final List<ObjectParser> objectParsers = new LinkedList<ObjectParser>();
 
-    
+
     /**
      * Initializes a new {@link MicroformatSubscribeService}.
      */
@@ -232,7 +232,7 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
                 if (null == allowedHosts) {
                     final ConfigurationService service = Services.getService(ConfigurationService.class);
                     final String sProp = null == service ? "" : service.getProperty("com.openexchange.subscribe.microformats.allowedHosts", "").trim();
-                    if (isEmpty(sProp)) {
+                    if (com.openexchange.java.Strings.isEmpty(sProp)) {
                         tmp = Collections.emptySet();
                     } else {
                         final String[] sPatterns = Strings.splitByComma(sProp);
@@ -259,7 +259,7 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
      * @throws OXException If URL string is invalid
      */
     private static void checkUrl(final String sUrl) throws OXException {
-        if (isEmpty(sUrl)) {
+        if (com.openexchange.java.Strings.isEmpty(sUrl)) {
             // Nothing to check
             return;
         }
@@ -283,19 +283,6 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
         } catch (final MalformedURLException e) {
             throw OXMFSubscriptionErrorMessage.INVALID_URL.create(e, new Object[0]);
         }
-    }
-
-    /** Checks for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     private static final gnu.trove.set.TIntSet SPECIALS = new gnu.trove.set.hash.TIntHashSet(new int[] {

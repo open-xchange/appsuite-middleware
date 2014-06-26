@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -59,26 +59,8 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class OAuthExceptionMessages implements LocalizableStrings {
 
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
-
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
-
-    // A JSON error occurred: %1$s
-    public static final String JSON_ERROR_MSG = "A JSON error occurred: %1$s";
-
-    // Unknown OAuth service meta data: %1$s
-    public static final String UNKNOWN_OAUTH_SERVICE_META_DATA_MSG = "Unknown OAuth service meta data: %1$s";
-
-    // A SQL error occurred: %1$s
-    public static final String SQL_ERROR_MSG = "A SQL error occurred: %1$s";
-
     // Account not found with identifier %1$s for user %2$s in context %3$s.
     public static final String ACCOUNT_NOT_FOUND_MSG = "Account not found with identifier %1$s for user %2$s in context %3$s.";
-
-    // Unsupported OAuth service: %1$s
-    public static final String UNSUPPORTED_SERVICE_MSG = "Unsupported OAuth service: %1$s";
 
     // Missing argument: %1$s
     public static final String MISSING_ARGUMENT_MSG = "Missing argument: %1$s";
@@ -86,14 +68,15 @@ public final class OAuthExceptionMessages implements LocalizableStrings {
     // Your '%1$s' password changed. You have to authorize the server to use your account with the new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
     public static final String TOKEN_EXPIRED_MSG = "Your '%1$s' password changed. You have to authorize the server to use your account with the new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.";
 
-    // An OAuth error occurred: %1$s
-    public static final String OAUTH_ERROR_MSG = "An OAuth error occurred: %1$s";
-
-	public static final String NOT_A_WHITELISTED_URL_MSG = "The address %1$s is not white-listed as for the %2$s OAuth API";
+    public static final String NOT_A_WHITELISTED_URL_MSG = "The address %1$s is not white-listed as for the %2$s OAuth API";
 
 	public static final String MISSING_BODY_MSG = "The request sent was missing its body";
 
+	// The account is invalid, please recreate it.
 	public static final String INVALID_ACCOUNT_MSG = "The account is invalid, please recreate it.";
+
+    // The account "%1$s" is invalid, please recreate it.
+    public static final String INVALID_ACCOUNT_EXTENDED_MSG = "The account \"%1$s\" is invalid, please recreate it.";
 
 	// Please provide a display name.
     public static final String MISSING_DISPLAY_NAME_MSG = "Please provide a display name.";
@@ -103,6 +86,9 @@ public final class OAuthExceptionMessages implements LocalizableStrings {
 
     // The OAuth authentication process has been canceled.
     public static final String CANCELED_BY_USER_MSG = "The OAuth authentication process has been canceled.";
+
+    // Could not get a valid response from the associated OAuth provider.
+    public static final String NOT_A_VALID_RESPONSE_MSG = "Could not get a valid response from the associated OAuth provider.";
 
     /**
      * Initializes a new {@link OAuthExceptionMessages}.

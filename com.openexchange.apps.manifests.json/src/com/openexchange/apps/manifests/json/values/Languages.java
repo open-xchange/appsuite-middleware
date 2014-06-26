@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,16 +49,15 @@
 
 package com.openexchange.apps.manifests.json.values;
 
+import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.Properties;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.apps.manifests.ComputedServerConfigValueService;
 import com.openexchange.config.ConfigurationService;
@@ -73,66 +72,69 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class Languages implements ComputedServerConfigValueService {
 
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Languages.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Languages.class);
 
-	private JSONObject allLanguages;
+    private final JSONArray allLanguages;
 
-	public Languages(ServiceLookup services) {
-		super();
+    /**
+     * Initializes a new {@link Languages}.
+     *
+     * @param services The service look-up
+     */
+    public Languages(ServiceLookup services) {
+        super();
 
-		ConfigurationService config = services.getService(ConfigurationService.class);
-		Properties properties = config.getPropertiesInFolder("languages/appsuite");
-		final Map<String, String> languageMap = new HashMap<String, String>();
+        ConfigurationService config = services.getService(ConfigurationService.class);
+        Properties properties = config.getPropertiesInFolder("languages/appsuite");
 
-		for(Object key: properties.keySet()) {
-			String propName = (String) key;
-			String languageName = properties.getProperty(propName);
+        List<SimpleEntry<String, String>> languages = new ArrayList<SimpleEntry<String,String>>();
+        for (Object key : properties.keySet()) {
+            String propName = (String) key;
+            String languageName = properties.getProperty(propName);
 
-			int index = propName.lastIndexOf('/');
-			if (index > 0) {
-				propName = propName.substring(index + 1);
-			}
-			languageMap.put(propName, languageName);
-		}
+            int index = propName.lastIndexOf('/');
+            if (index > 0) {
+                propName = propName.substring(index + 1);
+            }
+            languages.add(new SimpleEntry<String, String>(propName, languageName));
+        }
 
-		if (languageMap.isEmpty()) {
-			// Assume american english
-			languageMap.put("en_US", "English");
-		}
+        if (languages.isEmpty()) {
+            // Assume american english
+            languages.add(new SimpleEntry<String, String>("en_US", "English"));
+        }
 
-		// Sort it alphabetically
-		SortedSet<String> keys = new TreeSet<String>(new Comparator<String>() {
+        // Sort it alphabetically
+        Collections.sort(languages, new Comparator<SimpleEntry<String, String>>() {
 
-			@Override
-			public int compare(String arg0, String arg1) {
-				arg0 = languageMap.get(arg0);
-				arg1 = languageMap.get(arg1);
-				return arg0.compareTo(arg1);
-			}
+            @Override
+            public int compare(SimpleEntry<String, String> arg0, SimpleEntry<String, String> arg1) {
+                String language1 = arg0.getValue();
+                String language2 = arg1.getValue();
+                if (null == language1) {
+                    return null == language2 ? 0 : 1;
+                }
+                if (null == language2) {
+                    return -1;
+                }
+                return language1.compareToIgnoreCase(language2);
+            }
+        });
 
-		});
+        final JSONArray allLanguages = new JSONArray(languages.size());
+        for (SimpleEntry<String, String> language : languages) {
+            allLanguages.put(new JSONArray(2).put(language.getKey()).put(language.getValue()));
+        }
+        this.allLanguages = allLanguages;
+    }
 
-		keys.addAll(languageMap.keySet());
+    @Override
+    public void addValue(JSONObject serverConfig, AJAXRequestData request, ServerSession session) throws OXException, JSONException {
 
-		allLanguages = new JSONObject();
-		try {
-			for(String key: keys) {
-				allLanguages.put(key, languageMap.get(key));
-			}
-		} catch (JSONException x) {
-			// Doesn't happen
-			LOG.error("", x);
-		}
-	}
-
-	@Override
-	public void addValue(JSONObject serverConfig, AJAXRequestData request,
-			ServerSession session) throws OXException, JSONException {
-
-		Object languages = serverConfig.opt("languages");
-		if (languages == null || languages.equals("all")) {
-			serverConfig.put("languages", allLanguages);
-		}
-	}
+        Object languages = serverConfig.opt("languages");
+        if (languages == null || languages.equals("all")) {
+            serverConfig.put("languages", allLanguages);
+        }
+    }
 
 }

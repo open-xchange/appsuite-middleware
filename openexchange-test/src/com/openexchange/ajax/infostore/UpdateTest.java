@@ -179,7 +179,7 @@ public class UpdateTest extends InfostoreAJAXTest {
         res = get(getWebConversation(), getHostName(), sessionId, id);
 
         JSONObject infoitem = (JSONObject) res.getData();
-        assertEquals("theFile(1).txt", infoitem.get("filename"));
+        assertEquals("theFile (1).txt", infoitem.get("filename"));
     }
 
     public void notestLargeFileUpload() throws Exception{

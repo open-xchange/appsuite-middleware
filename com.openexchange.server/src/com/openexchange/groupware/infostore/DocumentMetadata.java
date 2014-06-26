@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,6 +51,7 @@ package com.openexchange.groupware.infostore;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Map;
 import java.util.Set;
 
 public interface DocumentMetadata extends Serializable {
@@ -164,4 +165,9 @@ public interface DocumentMetadata extends Serializable {
     void setNumberOfVersions(int numberOfVersions);
 
     int getNumberOfVersions();
+
+    Map<String, Object> getMeta();
+
+    void setMeta(Map<String, Object> properties);
+
 }

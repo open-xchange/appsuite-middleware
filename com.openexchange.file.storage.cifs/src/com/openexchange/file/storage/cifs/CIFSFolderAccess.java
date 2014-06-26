@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -222,6 +222,12 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
             }
         }
         /*
+         * Use display name of account for root folder
+         */
+        if (FileStorageFolder.ROOT_FULLNAME.equals(cifsFolder.getId())) {
+            cifsFolder.setName(account.getDisplayName());
+        }
+        /*
          * TODO: Set capabilities
          */
         return cifsFolder;
@@ -332,6 +338,11 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    @Override
+    public FileStorageFolder getTrashFolder() throws OXException {
+        throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
     }
 
     private static final SmbFileFilter DICTIONARY_FILTER = new SmbFileFilter() {
@@ -591,20 +602,6 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
                 throw CIFSExceptionCodes.UPDATE_DENIED.create(fid);
             }
             /*
-             * New URI
-             */
-            final String newUri;
-            {
-                final URI uri = new URI(fid, false);
-                String path = uri.getPath();
-                if (path.endsWith(SLASH)) {
-                    path = path.substring(0, path.length() - 1);
-                }
-                final int pos = path.lastIndexOf('/');
-                uri.setPath(pos > 0 ? new StringBuilder(path.substring(0, pos)).append('/').append(newName).toString() : newName);
-                newUri = checkFolderId(uri.toString());
-            }
-            /*
              * Check validity
              */
             final SmbFile renameMe = getSmbFile(fid);
@@ -614,6 +611,10 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
             if (!renameMe.isDirectory()) {
                 throw CIFSExceptionCodes.NOT_A_FOLDER.create(folderId);
             }
+            /*
+             * New URI
+             */
+            String newUri = checkFolderId(checkFolderId(renameMe.getParent()) + newName);
             final SmbFile dest = getSmbFile(newUri);
             /*
              * Perform rename
@@ -733,12 +734,13 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
     public FileStorageFolder[] getPath2DefaultFolder(final String folderId) throws OXException {
         final List<FileStorageFolder> list = new ArrayList<FileStorageFolder>();
         final String fid = checkFolderId(folderId, rootUrl);
+
         FileStorageFolder f = getFolder(fid);
-        do {
+        while (false == FileStorageFolder.ROOT_FULLNAME.equals(f.getId())) {
             list.add(f);
             f = getFolder(f.getParentId());
-        } while (!FileStorageFolder.ROOT_FULLNAME.equals(f.getParentId()));
-
+        }
+        list.add(f);
         return list.toArray(new FileStorageFolder[list.size()]);
     }
 

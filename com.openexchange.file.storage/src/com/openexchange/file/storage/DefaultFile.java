@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,6 +51,7 @@ package com.openexchange.file.storage;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -104,8 +105,8 @@ public class DefaultFile extends AbstractFile {
     private String versionComment;
 
     private boolean isCurrentVersion;
-    
-    private Map<String, Object> dynamicProperties = new HashMap<String, Object>();
+
+    private Map<String, Object> dynamicProperties;
 
     private static final String DEFAULT_TYPE = "application/octet-stream";
 
@@ -116,6 +117,7 @@ public class DefaultFile extends AbstractFile {
         super();
         fileMIMEType = DEFAULT_TYPE;
         properties = new HashMap<String, String>();
+        dynamicProperties = new LinkedHashMap<String, Object>();
     }
 
     /**
@@ -123,6 +125,7 @@ public class DefaultFile extends AbstractFile {
      */
     public DefaultFile(final File file) {
         super();
+        dynamicProperties = new LinkedHashMap<String, Object>();
         final Set<String> propertyNames = file.getPropertyNames();
         final Map<String, String> properties = new HashMap<String, String>(propertyNames.size());
         for (final String propertyName : propertyNames) {
@@ -377,12 +380,12 @@ public class DefaultFile extends AbstractFile {
     public void setVersionComment(final String string) {
         versionComment = string;
     }
-    
+
     @Override
     public void setMeta(Map<String, Object> properties) {
         this.dynamicProperties = properties;
     }
-    
+
     @Override
     public Map<String, Object> getMeta() {
         return dynamicProperties;

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -46,6 +46,9 @@ import java.io.IOException;
 import javax.mail.*;
 import javax.mail.search.*;
 import com.sun.mail.iap.*;
+import com.sun.mail.imap.OlderTerm;
+import com.sun.mail.imap.YoungerTerm;
+import com.sun.mail.imap.ModifiedSinceTerm;
 
 /**
  * This class traverses a search-tree and generates the 
@@ -108,28 +111,28 @@ public class SearchSequence {
 	    return sentdate((SentDateTerm)term);
 	else if (term instanceof ReceivedDateTerm) // INTERNALDATE
 	    return receiveddate((ReceivedDateTerm)term);
+	else if (term instanceof OlderTerm)	// RFC 5032 OLDER
+	    return older((OlderTerm)term);
+	else if (term instanceof YoungerTerm)	// RFC 5032 YOUNGER
+	    return younger((YoungerTerm)term);
 	else if (term instanceof MessageIDTerm) // MessageID
 	    return messageid((MessageIDTerm)term, charset);
+	else if (term instanceof ModifiedSinceTerm)	// RFC 4551 MODSEQ
+	    return modifiedSince((ModifiedSinceTerm)term);
 	else
 	    throw new SearchException("Search too complex");
     }
 
-    /* *
+    /**
      * Check if the "text" terms in the given SearchTerm contain
      * non US-ASCII characters.
      */
     public static boolean isAscii(SearchTerm term) {
-	if (term instanceof AndTerm || term instanceof OrTerm) {
-	    SearchTerm[] terms;
-	    if (term instanceof AndTerm)
-		terms = ((AndTerm)term).getTerms();
-	    else
-		terms = ((OrTerm)term).getTerms();
-
-	    for (int i = 0; i < terms.length; i++)
-		if (!isAscii(terms[i])) // outta here !
-		    return false;
-	} else if (term instanceof NotTerm)
+	if (term instanceof AndTerm)
+	    return isAscii(((AndTerm)term).getTerms());
+	else if (term instanceof OrTerm)
+	    return isAscii(((OrTerm)term).getTerms());
+	else if (term instanceof NotTerm)
 	    return isAscii(((NotTerm)term).getTerm());
 	else if (term instanceof StringTerm)
 	    return isAscii(((StringTerm)term).getPattern());
@@ -137,6 +140,17 @@ public class SearchSequence {
 	    return isAscii(((AddressTerm)term).getAddress().toString());
 	
 	// Any other term returns true.
+	return true;
+    }
+
+    /**
+     * Check if any of the "text" terms in the given SearchTerms contain
+     * non US-ASCII characters.
+     */
+    public static boolean isAscii(SearchTerm[] terms) {
+	for (int i = 0; i < terms.length; i++)
+	    if (!isAscii(terms[i])) // outta here !
+		return false;
 	return true;
     }
 
@@ -441,6 +455,43 @@ public class SearchSequence {
 	    	throw new SearchException("Cannot handle Date Comparison");
 	}
 
+	return result;
+    }
+
+    /**
+     * Generate argument for OlderTerm.
+     *
+     * @since	JavaMail 1.5.1
+     */
+    protected Argument older(OlderTerm term) throws SearchException {
+	Argument result = new Argument();
+	result.writeAtom("OLDER");
+	result.writeNumber(term.getInterval());
+	return result;
+    }
+
+    /**
+     * Generate argument for YoungerTerm.
+     *
+     * @since	JavaMail 1.5.1
+     */
+    protected Argument younger(YoungerTerm term) throws SearchException {
+	Argument result = new Argument();
+	result.writeAtom("YOUNGER");
+	result.writeNumber(term.getInterval());
+	return result;
+    }
+
+    /**
+     * Generate argument for ModifiedSinceTerm.
+     *
+     * @since	JavaMail 1.5.1
+     */
+    protected Argument modifiedSince(ModifiedSinceTerm term)
+				throws SearchException {
+	Argument result = new Argument();
+	result.writeAtom("MODSEQ");
+	result.writeNumber(term.getModSeq());
 	return result;
     }
 }

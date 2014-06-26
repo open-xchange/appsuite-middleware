@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -65,8 +65,10 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -107,7 +109,11 @@ public final class DeleteAction extends AppointmentAction {
             }
             final ServerSession session = req.getSession();
             appointmentObj.setContext(session.getContext());
-            final AppointmentSQLInterface appointmentsql = getService().createAppointmentSql(session);
+            final AppointmentSqlFactoryService factoryService = getService();
+            if (null == factoryService) {
+                throw ServiceExceptionCode.absentService(AppointmentSqlFactoryService.class);
+            }
+            final AppointmentSQLInterface appointmentsql = factoryService.createAppointmentSql(session);
             try {
                 appointmentsql.deleteAppointmentObject(appointmentObj, inFolder, timestamp);
                 if (appointmentObj.getLastModified() != null) {
@@ -131,7 +137,11 @@ public final class DeleteAction extends AppointmentAction {
                 }
                 final ServerSession session = req.getSession();
                 appointmentObj.setContext(session.getContext());
-                final AppointmentSQLInterface appointmentsql = getService().createAppointmentSql(session);
+                final AppointmentSqlFactoryService factoryService = getService();
+                if (null == factoryService) {
+                    throw ServiceExceptionCode.absentService(AppointmentSqlFactoryService.class);
+                }
+                final AppointmentSQLInterface appointmentsql = factoryService.createAppointmentSql(session);
                 try {
                     appointmentsql.deleteAppointmentObject(appointmentObj, inFolder, timestamp);
                     if (appointmentObj.getLastModified() != null) {

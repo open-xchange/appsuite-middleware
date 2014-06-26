@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2011 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -41,6 +41,7 @@
 package javax.mail.internet;
 
 import javax.mail.MessagingException;
+import javax.mail.EncodingAware;
 import javax.activation.*;
 import java.util.*;
 import java.io.*;
@@ -169,11 +170,14 @@ public class MimeUtility {
 
 
     /**
-     * Get the content-transfer-encoding that should be applied
-     * to the input stream of this datasource, to make it mailsafe. <p>
+     * Get the Content-Transfer-Encoding that should be applied
+     * to the input stream of this DataSource, to make it mail-safe. <p>
      *
      * The algorithm used here is: <br>
      * <ul>
+     * <li>
+     * If the DataSource implements {@link EncodingAware}, ask it
+     * what encoding to use.  If it returns non-null, return that value.
      * <li>
      * If the primary type of this datasource is "text" and if all
      * the bytes in its input stream are US-ASCII, then the encoding
@@ -187,7 +191,7 @@ public class MimeUtility {
      * encoding is "base64".
      * </ul>
      *
-     * @param	ds	DataSource
+     * @param	ds	the DataSource
      * @return		the encoding. This is either "7bit",
      *			"quoted-printable" or "base64"
      */ 
@@ -196,6 +200,11 @@ public class MimeUtility {
 	InputStream is = null;
 	String encoding = null;
 
+	if (ds instanceof EncodingAware) {
+	    encoding = ((EncodingAware)ds).getEncoding();
+	    if (encoding != null)
+		return encoding;
+	}
 	try {
 	    cType = new ContentType(ds.getContentType());
 	    is = ds.getInputStream();
@@ -222,11 +231,10 @@ public class MimeUtility {
 	    return "base64"; // what else ?!
 	} finally {
 	    // Close the input stream
-	    if (null != is) {
-    	    try {
-    		is.close();
-    	    } catch (IOException ioex) { /*Ignore*/ }
-	    }
+	    try {
+		if (is != null)
+		    is.close();
+	    } catch (IOException ioex) { }
 	}
 
 	return encoding;
@@ -254,7 +262,7 @@ public class MimeUtility {
 	    try {
 		byte[] b = "\r\n".getBytes(charset);
 		bool = Boolean.valueOf(
-		    b == null || b.length != 2 || b[0] != 015 || b[1] != 012);
+		    b.length != 2 || b[0] != 015 || b[1] != 012);
 	    } catch (UnsupportedEncodingException uex) {
 		bool = Boolean.FALSE;	// a guess
 	    } catch (RuntimeException ex) {
@@ -769,9 +777,14 @@ public class MimeUtility {
 	if ((len > avail) && ((size = string.length()) > 1)) { 
 	    // If the length is greater than 'avail', split 'string'
 	    // into two and recurse.
-	    doEncode(string.substring(0, size/2), b64, jcharset, 
+	    int splitPos = size/2;
+	    if (splitPos < size && Character.isSurrogatePair(string.charAt(splitPos-1), string.charAt(splitPos))) {
+            splitPos++;
+        }
+	    // Split at detected position
+	    doEncode(string.substring(0, splitPos), b64, jcharset, 
 		     avail, prefix, first, encodingWord, buf);
-	    doEncode(string.substring(size/2, size), b64, jcharset,
+	    doEncode(string.substring(splitPos, size), b64, jcharset,
 		     avail, prefix, false, encodingWord, buf);
 	} else {
 	    // length <= than 'avail'. Encode the given string

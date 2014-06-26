@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -68,8 +68,6 @@ import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.halo.HaloContactQuery;
 import com.openexchange.halo.Picture;
-import com.openexchange.halo.internal.ContactHaloImpl;
-import com.openexchange.search.SearchTerm;
 import com.openexchange.server.MockingServiceLookup;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.session.ServerSession;

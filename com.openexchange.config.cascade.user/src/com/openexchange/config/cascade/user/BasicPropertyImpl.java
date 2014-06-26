@@ -58,7 +58,6 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.UserService;
 
@@ -88,7 +87,7 @@ final class BasicPropertyImpl implements BasicProperty {
         this.userId = userId;
         // Preload value
         final User user = services.getService(UserService.class).getUser(userId, services.getService(ContextService.class).getContext(contextId));
-        final Set<String> set = user.getAttributes().get(new StringAllocator(DYNAMIC_ATTR_PREFIX).append(property).toString());
+        final Set<String> set = user.getAttributes().get(new StringBuilder(DYNAMIC_ATTR_PREFIX).append(property).toString());
         value = set == null || set.isEmpty() ? null : set.iterator().next();
         // Assign rest
         this.property = property;
@@ -113,7 +112,7 @@ final class BasicPropertyImpl implements BasicProperty {
     @Override
     public void set(final String value) throws OXException {
         final Context context = services.getService(ContextService.class).getContext(contextId);
-        services.getService(UserService.class).setAttribute(new StringAllocator(DYNAMIC_ATTR_PREFIX).append(property).toString(), value, userId, context);
+        services.getService(UserService.class).setAttribute(new StringBuilder(DYNAMIC_ATTR_PREFIX).append(property).toString(), value, userId, context);
         this.value = value;
     }
 

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -124,7 +124,7 @@ public class CacheingMessageAccess implements MessagingMessageAccess {
     }
 
     private MessagingField[] addDefaultFields(final MessagingField[] fields) {
-        final Set<MessagingField> allFields = new HashSet<MessagingField>(Arrays.asList(fields));
+        final Set<MessagingField> allFields = null == fields ? new HashSet<MessagingField>(12) : new HashSet<MessagingField>(Arrays.asList(fields));
         allFields.add(MessagingField.FOLDER_ID);
         allFields.add(MessagingField.ID);
         allFields.add(MessagingField.SUBJECT);

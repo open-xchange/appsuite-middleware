@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,9 +49,7 @@
 
 package com.openexchange.admin.mysql;
 
-import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.database.AbstractCreateTableImpl;
-import com.openexchange.groupware.update.FullPrimaryKeySupportService;
 
 /**
  * Creates the tables required for the calendar.
@@ -106,7 +104,8 @@ public class CreateCalendarTables extends AbstractCreateTableImpl {
         + "INDEX (cid, intfield02),"
         + "INDEX (cid, timestampfield01),"
         + "INDEX (cid, timestampfield02),"
-        + "INDEX `uidIndex` (cid, uid(255))"
+        + "INDEX `uidIndex` (cid, uid(255)),"
+        + "INDEX `changingDateIndex` (cid, changing_date)"
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
     /**
@@ -190,28 +189,14 @@ public class CreateCalendarTables extends AbstractCreateTableImpl {
         + "INDEX (cid, intfield02),"
         + "INDEX (cid, timestampfield01),"
         + "INDEX (cid, timestampfield02),"
-        + "INDEX `uidIndex` (cid, uid(255))"
+        + "INDEX `uidIndex` (cid, uid(255)),"
+        + "INDEX `changingDateIndex` (cid, changing_date)"
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
     /**
      * Table name of del_dates_members table
      */
     private static final String TABLE_DEL_DATES_MEMBERS = "del_dates_members";
-
-    /**
-     * SQL statement for del_dates_members table
-     */
-    private static final String CREATE_DEL_DATES_MEMBERS = "CREATE TABLE " + TABLE_DEL_DATES_MEMBERS + " ("
-        + "object_id INT4,"
-        + "member_uid INT4,"
-        + "confirm INT4 UNSIGNED NOT NULL,"
-        + "reason TEXT,"
-        + "pfid INT4 DEFAULT NULL,"
-        + "reminder INT4 UNSIGNED,"
-        + "cid INT4 UNSIGNED NOT NULL,"
-        + "PRIMARY KEY (cid, object_id, member_uid),"
-        + "UNIQUE INDEX member (cid, member_uid, object_id)"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
     /**
      * SQL statement for del_dates_members table
@@ -232,21 +217,6 @@ public class CreateCalendarTables extends AbstractCreateTableImpl {
      * Table name of prg_dates_members table
      */
     private static final String TABLE_PRG_DATES_MEMBERS = "prg_dates_members";
-
-    /**
-     * SQL statement for prg_dates_members table
-     */
-    private static final String CREATE_PRG_DATES_MEMBERS = "CREATE TABLE " + TABLE_PRG_DATES_MEMBERS + " ("
-        + "object_id INT4,"
-        + "member_uid INT4,"
-        + "confirm INT4 UNSIGNED NOT NULL,"
-        + "reason TEXT,"
-        + "pfid INT4 DEFAULT NULL,"
-        + "reminder INT4 UNSIGNED,"
-        + "cid INT4 UNSIGNED NOT NULL,"
-        + "PRIMARY KEY (cid, object_id, member_uid),"
-        + "UNIQUE INDEX member (cid, member_uid, object_id)"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
     /**
      * SQL statement for prg_dates_members table
@@ -278,8 +248,7 @@ public class CreateCalendarTables extends AbstractCreateTableImpl {
         + "displayName VARCHAR(255),"
         + "confirm INT4 UNSIGNED NOT NULL,"
         + "reason TEXT,"
-        + "PRIMARY KEY (cid,objectId,mailAddress),"
-        + "FOREIGN KEY (cid,objectId) REFERENCES prg_dates(cid,intfield01)"
+        + "PRIMARY KEY (cid,objectId,`mailAddress`(255))"
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
     /**
@@ -297,8 +266,7 @@ public class CreateCalendarTables extends AbstractCreateTableImpl {
         + "displayName VARCHAR(255),"
         + "confirm INT4 UNSIGNED NOT NULL,"
         + "reason TEXT,"
-        + "PRIMARY KEY (cid,objectId,mailAddress),"
-        + "FOREIGN KEY (cid,objectId) REFERENCES del_dates(cid,intfield01)"
+        + "PRIMARY KEY (cid,objectId,`mailAddress`(255))"
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
     /**
@@ -329,13 +297,7 @@ public class CreateCalendarTables extends AbstractCreateTableImpl {
      */
     @Override
     protected String[] getCreateStatements() {
-        FullPrimaryKeySupportService fullPrimaryKeySupportService = AdminServiceRegistry.getInstance().getService(FullPrimaryKeySupportService.class);
-        if (fullPrimaryKeySupportService.isFullPrimaryKeySupported()) {
-            return new String[] { CREATE_PRG_DATES, CREATE_PRG_DATE_RIGHTS, CREATE_DEL_DATE_RIGHTS, CREATE_DEL_DATES, CREATE_DEL_DATES_MEMBERS_PRIMARY_KEY,
-                CREATE_PRG_DATES_MEMBERS_PRIMARY_KEY, CREATE_DATE_EXTERNAL, CREATE_DEL_DATE_EXTERNAL };
-        }
-        return new String[] {
-            CREATE_PRG_DATES, CREATE_PRG_DATE_RIGHTS, CREATE_DEL_DATE_RIGHTS, CREATE_DEL_DATES, CREATE_DEL_DATES_MEMBERS,
-            CREATE_PRG_DATES_MEMBERS, CREATE_DATE_EXTERNAL, CREATE_DEL_DATE_EXTERNAL };
+        return new String[] { CREATE_PRG_DATES, CREATE_PRG_DATE_RIGHTS, CREATE_DEL_DATE_RIGHTS, CREATE_DEL_DATES, CREATE_DEL_DATES_MEMBERS_PRIMARY_KEY,
+            CREATE_PRG_DATES_MEMBERS_PRIMARY_KEY, CREATE_DATE_EXTERNAL, CREATE_DEL_DATE_EXTERNAL };
     }
 }

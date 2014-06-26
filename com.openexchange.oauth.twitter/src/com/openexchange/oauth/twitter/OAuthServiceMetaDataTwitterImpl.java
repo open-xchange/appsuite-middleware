@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,6 +49,10 @@
 
 package com.openexchange.oauth.twitter;
 
+import java.util.HashMap;
+import java.util.Map;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
 
@@ -57,7 +61,10 @@ import com.openexchange.oauth.AbstractOAuthServiceMetaData;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OAuthServiceMetaDataTwitterImpl extends AbstractOAuthServiceMetaData {
+public class OAuthServiceMetaDataTwitterImpl extends AbstractOAuthServiceMetaData implements Reloadable {
+
+    private final static String[] PROPERTIES = new String[] {"com.openexchange.twitter.consumerKey",
+        "com.openexchange.twitter.consumerSecret"};
 
     public OAuthServiceMetaDataTwitterImpl() {
         super();
@@ -94,5 +101,18 @@ public class OAuthServiceMetaDataTwitterImpl extends AbstractOAuthServiceMetaDat
 	public API getAPI() {
 		return API.TWITTER;
 	}
+
+    @Override
+    public void reloadConfiguration(final ConfigurationService configService) {
+        // Nothing to do since AbstractOAuthServiceMetaData is initialized with property names;
+        // Values are read on demand
+    }
+
+    @Override
+    public Map<String, String[]> getConfigFileNames() {
+        Map<String, String[]> map = new HashMap<String, String[]>(1);
+        map.put("twitteroauth.properties", PROPERTIES);
+        return map;
+    }
 
 }

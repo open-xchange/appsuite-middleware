@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -92,6 +92,7 @@ import com.openexchange.ajax.requesthandler.responseRenderers.PreviewResponseRen
 import com.openexchange.ajax.requesthandler.responseRenderers.StringResponseRenderer;
 import com.openexchange.ajax.response.IncludeStackTraceService;
 import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.continuation.ContinuationRegistryService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.mail.mime.utils.ImageMatcher;
 import com.openexchange.osgi.SimpleRegistryListener;
@@ -279,6 +280,20 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
             @Override
             public void removed(final ServiceReference<ImageTransformationService> ref, final ImageTransformationService thing) {
                 fileRenderer.setScaler(null);
+            }
+
+        });
+
+        track(ContinuationRegistryService.class, new SimpleRegistryListener<ContinuationRegistryService>() {
+
+            @Override
+            public void added(final ServiceReference<ContinuationRegistryService> ref, final ContinuationRegistryService thing) {
+                ServerServiceRegistry.getInstance().addService(ContinuationRegistryService.class, thing);
+            }
+
+            @Override
+            public void removed(final ServiceReference<ContinuationRegistryService> ref, final ContinuationRegistryService thing) {
+                ServerServiceRegistry.getInstance().removeService(ContinuationRegistryService.class);
             }
 
         });

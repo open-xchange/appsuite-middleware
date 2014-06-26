@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -76,78 +76,43 @@ public abstract class AbstractMailAccount implements MailAccount {
     private static final long serialVersionUID = -641194838598605274L;
 
     protected int id;
-
     protected String login;
-
     protected String password;
-
     protected String transportLogin;
-
     protected String transportPassword;
-
     protected String mailServer;
-
     protected int mailPort;
-
     protected String mailProtocol;
-
     protected boolean mailSecure;
-
     protected String transportServer;
-
     protected int transportPort;
-
     protected String transportProtocol;
-
     protected boolean transportSecure;
-
     protected String name;
-
     protected String primaryAddress;
-
     protected String personal;
-
     protected String replyTo;
-
     protected int userId;
-
     protected String spamHandler;
-
     protected String trash;
-
     protected String archive;
-
     protected String sent;
-
     protected String drafts;
-
     protected String spam;
-
     protected String confirmedSpam;
-
     protected String confirmedHam;
-
     protected String mailServerUrl;
-
     protected String transportServerUrl;
-
     protected boolean unifiedINBOXEnabled;
-
     protected String trashFullname;
-
     protected String archiveFullname;
-
     protected String sentFullname;
-
     protected String draftsFullname;
-
     protected String spamFullname;
-
     protected String confirmedSpamFullname;
-
     protected String confirmedHamFullname;
-
     protected Map<String, String> properties;
+    protected Map<String, String> transportProperties;
 
     /**
      * Initializes a new {@link AbstractMailAccount}.
@@ -155,6 +120,7 @@ public abstract class AbstractMailAccount implements MailAccount {
     protected AbstractMailAccount() {
         super();
         properties = new HashMap<String, String>(4);
+        transportProperties = new HashMap<String, String>(4);
         transportPort = 25;
         mailPort = 143;
         final String transportProvider = TransportProperties.getInstance().getDefaultTransportProvider();
@@ -215,7 +181,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     @Override
     public String getReplyTo() {
-        if (isEmpty(replyTo)) {
+        if (com.openexchange.java.Strings.isEmpty(replyTo)) {
             return properties.get("replyto");
         }
         return replyTo;
@@ -307,7 +273,7 @@ public abstract class AbstractMailAccount implements MailAccount {
      */
     public void setReplyTo(final String replyTo) {
         this.replyTo = replyTo;
-        if (isEmpty(replyTo)) {
+        if (com.openexchange.java.Strings.isEmpty(replyTo)) {
             properties.remove("replyto");
         } else {
             properties.put("replyto", replyTo);
@@ -520,7 +486,7 @@ public abstract class AbstractMailAccount implements MailAccount {
         if (null != mailServerUrl) {
             return mailServerUrl;
         }
-        if (isEmpty(mailServer)) {
+        if (com.openexchange.java.Strings.isEmpty(mailServer)) {
             return null;
         }
         final String protocol = mailSecure ? mailProtocol + 's' : mailProtocol;
@@ -529,7 +495,7 @@ public abstract class AbstractMailAccount implements MailAccount {
         } catch (final URISyntaxException e) {
             LOG.error("", e);
             // Old implementation is not capable of handling IPv6 addresses.
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(32);
+            final StringBuilder sb = new StringBuilder(32);
             sb.append(mailProtocol);
             if (mailSecure) {
                 sb.append('s');
@@ -613,7 +579,7 @@ public abstract class AbstractMailAccount implements MailAccount {
         if (null != transportServerUrl) {
             return transportServerUrl;
         }
-        if (isEmpty(transportServer)) {
+        if (com.openexchange.java.Strings.isEmpty(transportServer)) {
             return null;
         }
         final String protocol = transportSecure ? transportProtocol + 's' : transportProtocol;
@@ -622,7 +588,7 @@ public abstract class AbstractMailAccount implements MailAccount {
         } catch (final URISyntaxException e) {
             LOG.error("", e);
             // Old implementation is not capable of handling IPv6 addresses.
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(32);
+            final StringBuilder sb = new StringBuilder(32);
             sb.append(transportProtocol);
             if (transportSecure) {
                 sb.append('s');
@@ -834,24 +800,42 @@ public abstract class AbstractMailAccount implements MailAccount {
     }
 
     @Override
+    public Map<String, String> getTransportProperties() {
+        if (transportProperties.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        return new HashMap<String, String>(transportProperties);
+    }
+
+    /**
+     * Sets the transport properties
+     *
+     * @param properties The transport properties to set
+     */
+    public void setTransportProperties(final Map<String, String> transportProperties) {
+        if (null == transportProperties) {
+            this.transportProperties = new HashMap<String, String>(4);
+        } else if (transportProperties.isEmpty()) {
+            this.transportProperties = new HashMap<String, String>(4);
+        } else {
+            this.transportProperties = new HashMap<String, String>(transportProperties);
+        }
+    }
+
+    @Override
+    public void addTransportProperty(final String name, final String value) {
+        if (transportProperties.isEmpty()) {
+            transportProperties = new HashMap<String, String>(4);
+        }
+        transportProperties.put(name, value);
+    }
+
+    @Override
     public String toString() {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128);
+        final StringBuilder sb = new StringBuilder(128);
         sb.append(" id=").append(getId()).append(" user=").append(getUserId());
         sb.append("\nname=").append(getName()).append(" primary-address=").append(getPrimaryAddress());
         sb.append("\nmail-server=").append(generateMailServerURL()).append(" transport-server=").append(generateTransportServerURL());
         return sb.toString();
     }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

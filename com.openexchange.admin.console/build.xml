@@ -15,9 +15,9 @@
     </target>
 
     <target name="createLinks">
-        <property name="contextLinks" value="changecontext,deletecontext,disablecontext,disableallcontext,enablecontext,enableallcontext,existscontext,deleteinvisible,movecontextdatabase,movecontextfilestore,listcontext,listcontextsbydatabase,listcontextsbyfilestore,changefilestore,listdatabase,listfilestore,listserver,registerdatabase,registerfilestore,registerserver,unregisterdatabase,unregisterfilestore,unregisterserver,changedatabase,getaccesscombinationnameforcontext,getmoduleaccessforcontext,getadminid,getschemaname" />
+        <property name="contextLinks" value="changecontext,deletecontext,disablecontext,disableallcontext,enablecontext,enableallcontext,existscontext,deleteinvisible,movecontextdatabase,movecontextfilestore,listcontext,listcontextsbydatabase,listcontextsbyfilestore,changefilestore,listdatabase,listfilestore,listserver,registerdatabase,registerfilestore,registerserver,unregisterdatabase,unregisterfilestore,unregisterserver,changedatabase,getaccesscombinationnameforcontext,getmoduleaccessforcontext,getadminid,getcontextcapabilities,getschemaname" />
         <foreach list="${contextLinks}" target="createContextLink" param="linkName" />
-        <property name="userLinks" value="deleteuser,changeuser,listuser,existsuser,creategroup,deletegroup,changegroup,listgroup,createresource,deleteresource,changeresource,listresource,getaccesscombinationnameforuser,changeaccessglobal" />
+        <property name="userLinks" value="deleteuser,changeuser,listuser,existsuser,creategroup,deletegroup,changegroup,listgroup,createresource,deleteresource,changeresource,listresource,getaccesscombinationnameforuser,getusercapabilities,changeaccessglobal" />
         <foreach list="${userLinks}" target="createUserLink" param="linkName" />
     	<property name="publicationLinks" value="deletepublication" />
     	<foreach list="${publicationLinks}" target="getPublicationLink" param="linkName" />

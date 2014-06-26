@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -96,7 +96,10 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
     private boolean peek;		// use BODY.PEEK when fetching content?
 
     // this message's IMAP UID
-    private long uid = -1;
+    private volatile long uid = -1;
+
+    // this message's IMAP MODSEQ - RFC 4551 CONDSTORE
+    private volatile long modseq = -1;
 
     // this message's IMAP sectionId (null for toplevel message, 
     // 	non-null for a nested message)
@@ -121,7 +124,7 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
     private Hashtable loadedHeaders = new Hashtable(1);
 
     // This is our Envelope
-    static String EnvelopeCmd = "ENVELOPE INTERNALDATE RFC822.SIZE";
+    static final String EnvelopeCmd = "ENVELOPE INTERNALDATE RFC822.SIZE";
 
     /**
      * Constructor.
@@ -195,9 +198,11 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
     }
 
     /**
-     * Gets the message's UID.
-     * 
-     * @return The UID
+     * Return the UID for this message.
+     * Returns -1 if not known; use UIDFolder.getUID() in this case.
+     *
+     * @return	the UID
+     * @see	javax.mail.UIDFolder#getUID
      */
     public long getUID() {
 	return uid;
@@ -210,6 +215,43 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
      */
     public void setUID(long uid) {
 	this.uid = uid;
+    }
+
+    /**
+     * Return the modification sequence number (MODSEQ) for this message.
+     * Returns -1 if not known.
+     *
+     * @return	the modification sequence number
+     * @see	"RFC 4551"
+     * @since	JavaMail 1.5.1
+     */
+    public synchronized long getModSeq() throws MessagingException {
+	if (modseq != -1)
+	    return modseq;
+
+	synchronized (getMessageCacheLock()) { // Acquire Lock
+	    try {
+		IMAPProtocol p = getProtocol();
+		checkExpunged(); // insure that message is not expunged
+		MODSEQ ms = p.fetchMODSEQ(getSequenceNumber());
+
+		if (ms != null)
+		    modseq = ms.modseq;
+	    } catch (ConnectionException cex) {
+		throw new FolderClosedException(folder, cex.getMessage());
+	    } catch (ProtocolException pex) {
+		throw new MessagingException(pex.getMessage(), pex);
+	    }
+	}
+	return modseq;
+    }
+
+    long _getModSeq() {
+	return modseq;
+    }
+
+    void setModSeq(long modseq) {
+	this.modseq = modseq;
     }
 
     // expose to MessageCache
@@ -288,7 +330,7 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
     public Address getSender() throws MessagingException {
 	checkExpunged();
 	loadEnvelope();
-	if (envelope.sender != null)
+	if (envelope.sender != null && envelope.sender.length > 0)
 		return (envelope.sender)[0];	// there can be only one sender
 	else 
 		return null;
@@ -635,10 +677,10 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
 	    }
 	}
 
-	if (is == null) {
-        throw new MessagingException("No content");
-    }
-    return is;
+	if (is == null)
+	    throw new MessagingException("No content");
+	else
+	    return is;
     }
 
     /**
@@ -1014,6 +1056,8 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
 		needFlags = true;
 	    if (fp.contains(FetchProfile.Item.CONTENT_INFO))
 		needBodyStructure = true;
+	    if (fp.contains(FetchProfile.Item.SIZE))
+		needSize = true;
 	    if (fp.contains(UIDFolder.FetchProfileItem.UID))
 		needUID = true;
 	    if (fp.contains(IMAPFolder.FetchProfileItem.HEADERS))
@@ -1092,8 +1136,20 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
 	    // add entry into uid table
 	    if (((IMAPFolder)folder).uidTable == null)
 		((IMAPFolder)folder).uidTable = new Hashtable();
-	    ((IMAPFolder)folder).uidTable.put(new Long(u.uid), this);
-	}
+	    ((IMAPFolder)folder).uidTable.put(Long.valueOf(u.uid), this);
+	} else if (item instanceof X_REAL_UID) {
+        X_REAL_UID xRealUid = (X_REAL_UID) item;
+	    if (null == items) {
+            items = new HashMap<String, Object>(3);
+        }
+	    items.put("X-REAL-UID", Long.valueOf(xRealUid.uid));
+	} else if (item instanceof X_MAILBOX) {
+	    X_MAILBOX xMailbox = (X_MAILBOX) item;
+        if (null == items) {
+            items = new HashMap<String, Object>(3);
+        }
+        items.put("X-MAILBOX", xMailbox.mailbox);
+    }
 
 	// Check for header items
 	else if (item instanceof RFC822DATA ||
@@ -1235,6 +1291,18 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
 	if (item == null)
 	    item = fetchItem(fitem);
 	return item;
+    }
+    
+    /**
+     * Return the data associated with the FetchItem.
+     * If the data hasn't been fetched, call the fetchItem
+     * method to fetch it.  Returns null if there is no
+     * data for the FetchItem.
+     *
+     * @since JavaMail 1.4.6
+     */
+    public synchronized Object getItem(String fitemName) {
+    return items == null ? null : items.get(fitemName);
     }
 
     /*

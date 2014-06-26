@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -98,11 +98,12 @@ public final class CIFSFile extends DefaultFile {
      * Parses specified SMB file.
      *
      * @param smbFile The SMB file
+     * @param rootUrl The root URL of the corresponding account
      * @throws OXException If parsing SMB file fails
      * @return This CIFS file
      */
-    public CIFSFile parseSmbFile(final SmbFile smbFile) throws OXException {
-        return parseSmbFile(smbFile, null);
+    public CIFSFile parseSmbFile(final SmbFile smbFile, String rootUrl) throws OXException {
+        return parseSmbFile(smbFile, null, rootUrl);
     }
 
     /**
@@ -110,15 +111,16 @@ public final class CIFSFile extends DefaultFile {
      *
      * @param smbFile The SMB file
      * @param fields The fields to consider
+     * @param rootUrl The root URL of the corresponding account
      * @throws OXException If parsing SMB file fails
      * @return This CIFS file with property set applied
      */
-    public CIFSFile parseSmbFile(final SmbFile smbFile, final List<Field> fields) throws OXException {
+    public CIFSFile parseSmbFile(final SmbFile smbFile, final List<Field> fields, String rootUrl) throws OXException {
         if (null != smbFile) {
             try {
                 {
                     final String p = smbFile.getParent();
-                    if (URL_SPEC.equals(p)) {
+                    if (URL_SPEC.equals(p) || rootUrl.equals(p)) {
                         setFolderId(FileStorageFolder.ROOT_FULLNAME);
                     } else {
                         setFolderId(Utils.checkFolderId(p));

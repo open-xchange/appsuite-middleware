@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -95,7 +95,6 @@ public final class DeleteAction extends AbstractMailAction {
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
         try {
-            //final ServerSession session = req.getSession();
             /*
              * Read in parameters
              */
@@ -141,6 +140,7 @@ public final class DeleteAction extends AbstractMailAction {
                 }
             }
             jsonWriter.endArray();
+
             return new AJAXRequestResult(jsonWriter.getObject(), "json");
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());

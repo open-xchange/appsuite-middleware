@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,8 +49,12 @@
 
 package com.openexchange.oauth.linkedin;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.LinkedInApi;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
@@ -61,9 +65,12 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OAuthServiceMetaDataLinkedInImpl extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware {
+public class OAuthServiceMetaDataLinkedInImpl extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware, Reloadable {
 
     private final ServiceLookup services;
+
+    private final static String[] PROPERTIES = new String[] {"com.openexchange.oauth.linkedin.apiKey",
+        "com.openexchange.oauth.linkedin.apiSecret" };
 
     public OAuthServiceMetaDataLinkedInImpl(ServiceLookup services) {
         super();
@@ -110,6 +117,29 @@ public class OAuthServiceMetaDataLinkedInImpl extends AbstractOAuthServiceMetaDa
     @Override
     public Class<? extends Api> getScribeService() {
         return LinkedInApi.class;
+    }
+
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        String apiKey = configService.getProperty(apiKeyName);
+        String secretKey = configService.getProperty(apiSecretName);
+
+        if (apiKey.isEmpty()) {
+            throw new IllegalStateException("Missing following property in configuration: " + apiKeyName);
+        }
+        if (secretKey.isEmpty()) {
+            throw new IllegalStateException("Missing following property in configuration: " + apiSecretName);
+        }
+
+        this.apiKey = apiKey;
+        this.apiSecret = secretKey;
+    }
+
+    @Override
+    public Map<String, String[]> getConfigFileNames() {
+        Map<String, String[]> map = new HashMap<String, String[]>(1);
+        map.put("linkedin.properties", PROPERTIES);
+        return map;
     }
 
 }

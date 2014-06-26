@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -477,7 +477,7 @@ public class HeaderCollection implements Serializable {
      */
     public boolean containsHeader(final String name) {
         if (isInvalid(name, true)) {
-            throw new IllegalArgumentException(new com.openexchange.java.StringAllocator(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
+            throw new IllegalArgumentException(new StringBuilder(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
         }
         return map.containsKey(HeaderName.valueOf(name));
     }
@@ -491,7 +491,7 @@ public class HeaderCollection implements Serializable {
      */
     public String[] getHeader(final String name) {
         if (isInvalid(name, true)) {
-            throw new IllegalArgumentException(new com.openexchange.java.StringAllocator(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
+            throw new IllegalArgumentException(new StringBuilder(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
         }
         final List<String> values = map.get(HeaderName.valueOf(name));
         if (values == null) {
@@ -510,7 +510,7 @@ public class HeaderCollection implements Serializable {
      */
     public String getHeader(final String name, final String delimiter) {
         if (isInvalid(name, true)) {
-            throw new IllegalArgumentException(new com.openexchange.java.StringAllocator(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
+            throw new IllegalArgumentException(new StringBuilder(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
         }
         final List<String> values = map.get(HeaderName.valueOf(name));
         if (values == null) {
@@ -520,7 +520,7 @@ public class HeaderCollection implements Serializable {
         if (delimiter == null || (size = values.size()) == 1) {
             return values.get(0);
         }
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(values.get(0));
+        final StringBuilder sb = new StringBuilder(values.get(0));
         for (int i = 1; i < size; i++) {
             sb.append(delimiter).append(values.get(i));
         }
@@ -537,7 +537,7 @@ public class HeaderCollection implements Serializable {
      */
     public String getHeader(final String name, final char delimiter) {
         if (isInvalid(name, true)) {
-            throw new IllegalArgumentException(new com.openexchange.java.StringAllocator(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
+            throw new IllegalArgumentException(new StringBuilder(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
         }
         final List<String> values = map.get(HeaderName.valueOf(name));
         if (values == null) {
@@ -547,7 +547,7 @@ public class HeaderCollection implements Serializable {
         if (delimiter == '\0' || (size = values.size()) == 1) {
             return values.get(0);
         }
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(values.get(0));
+        final StringBuilder sb = new StringBuilder(values.get(0));
         for (int i = 1; i < size; i++) {
             sb.append(delimiter).append(values.get(i));
         }
@@ -562,7 +562,7 @@ public class HeaderCollection implements Serializable {
      */
     public HeaderCollection removeHeader(final String name) {
         if (isInvalid(name, true)) {
-            throw new IllegalArgumentException(new com.openexchange.java.StringAllocator(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
+            throw new IllegalArgumentException(new StringBuilder(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
         }
         final List<String> removed = map.remove(HeaderName.valueOf(name));
         if (removed != null) {
@@ -604,8 +604,8 @@ public class HeaderCollection implements Serializable {
      */
     public Iterator<Map.Entry<String, String>> getMatchingHeaders(final String[] matchingHeaders) {
         final Set<HeaderName> set = new HashSet<HeaderName>(matchingHeaders.length);
-        for (int i = 0; i < matchingHeaders.length; i++) {
-            set.add(HeaderName.valueOf(matchingHeaders[i]));
+        for (String matchingHeader : matchingHeaders) {
+            set.add(HeaderName.valueOf(matchingHeader));
         }
         return new HeaderIterator(map.entrySet().iterator(), set, true);
     }
@@ -618,15 +618,15 @@ public class HeaderCollection implements Serializable {
      */
     public Iterator<Map.Entry<String, String>> getNonMatchingHeaders(final String[] nonMatchingHeaders) {
         final Set<HeaderName> set = new HashSet<HeaderName>(nonMatchingHeaders.length);
-        for (int i = 0; i < nonMatchingHeaders.length; i++) {
-            set.add(HeaderName.valueOf(nonMatchingHeaders[i]));
+        for (String nonMatchingHeader : nonMatchingHeaders) {
+            set.add(HeaderName.valueOf(nonMatchingHeader));
         }
         return new HeaderIterator(map.entrySet().iterator(), set, false);
     }
 
     @Override
     public String toString() {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(4096);
+        final StringBuilder sb = new StringBuilder(4096);
         for (final Iterator<Map.Entry<String, String>> iter = getAllHeaders(); iter.hasNext();) {
             final Map.Entry<String, String> e = iter.next();
             sb.append(e.getKey()).append(": ").append(e.getValue()).append(CRLF);
@@ -673,9 +673,9 @@ public class HeaderCollection implements Serializable {
         if (!java.util.Arrays.equals(names, otherNames)) {
             return false;
         }
-        for (int i = 0; i < names.length; i++) {
-            final List<String> list = map.get(names[i]);
-            final List<String> otherList = other.map.get(names[i]);
+        for (HeaderName name : names) {
+            final List<String> list = map.get(name);
+            final List<String> otherList = other.map.get(name);
             if (list == null) {
                 if (otherList != null) {
                     return false;
@@ -694,8 +694,8 @@ public class HeaderCollection implements Serializable {
         final HeaderName[] names = map.keySet().toArray(new HeaderName[map.size()]);
         java.util.Arrays.sort(names);
         result = prime * result + java.util.Arrays.hashCode(names);
-        for (int i = 0; i < names.length; i++) {
-            final List<String> list = map.get(names[i]);
+        for (HeaderName name : names) {
+            final List<String> list = map.get(name);
             result = prime * result + ((list == null) ? 0 : list.hashCode());
         }
         return result;
@@ -789,7 +789,7 @@ public class HeaderCollection implements Serializable {
         public void remove() {
             if (entry == null) {
                 throw new IllegalStateException(
-                    new com.openexchange.java.StringAllocator(64).append("next() method has not yet been called, or the remove()").append(
+                    new StringBuilder(64).append("next() method has not yet been called, or the remove()").append(
                         " method has already been called after the last call to the next() method.").toString());
             }
             entry.getValue().remove(--index);
@@ -899,7 +899,7 @@ public class HeaderCollection implements Serializable {
         /*
          * A header value must not be empty
          */
-        return isEmpty(str);
+        return com.openexchange.java.Strings.isEmpty(str);
     }
 
     /**
@@ -915,24 +915,6 @@ public class HeaderCollection implements Serializable {
             isAscci &= (s.charAt(i) < 128);
         }
         return isAscci;
-    }
-
-    /**
-     * Checks whether the specified string is empty
-     *
-     * @param s The string to check
-     * @return <code>true</code> if string is empty; otherwise <code>false</code>
-     */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     private static String checkValue(final String value) {

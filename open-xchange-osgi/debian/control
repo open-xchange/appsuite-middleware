@@ -8,7 +8,8 @@ Homepage: http://www.open-xchange.com
 
 Package: open-xchange-osgi
 Architecture: all
-Depends: ${misc:Depends}, adduser, ${dist:Depends}
+Depends: ${misc:Depends}, adduser
+Pre-Depends: ${dist:Pre-Depends}
 Replaces: open-xchange-common, open-xchange-activation
 Conflicts: open-xchange-common, open-xchange-activation
 Provides: open-xchange-common, open-xchange-activation

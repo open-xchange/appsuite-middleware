@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -54,7 +54,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
-import com.openexchange.java.StringAllocator;
 
 /**
  * {@link CustomThreadFactory} - A thread factory taking a custom name prefix for created threads.
@@ -83,21 +82,12 @@ public final class CustomThreadFactory implements java.util.concurrent.ThreadFac
 
     @Override
     public CustomThread newThread(Runnable r) {
-        /*
-         * Ensure a positive thread number
-         */
-        int threadNum = threadNumber.incrementAndGet();
-        if (threadNum <= 0) {
-            boolean check = false;
-            do {
-                if (threadNumber.compareAndSet(threadNum, 1)) {
-                    threadNum = 1;
-                } else {
-                    threadNum = threadNumber.get();
-                    check = true;
-                }
-            } while (threadNum <= 0);
-            if (check && 1 == threadNum) {
+        // Ensure a positive thread number
+        int threadNum;
+        while ((threadNum = threadNumber.incrementAndGet()) <= 0) {
+            if (threadNumber.compareAndSet(threadNum, 1)) {
+                threadNum = 1;
+            } else {
                 threadNum = threadNumber.incrementAndGet();
             }
         }
@@ -113,7 +103,7 @@ public final class CustomThreadFactory implements java.util.concurrent.ThreadFac
     }
 
     private static String getThreadName(int threadNumber, String namePrefix) {
-        StringAllocator retval = new StringAllocator(namePrefix.length() + 7);
+        StringBuilder retval = new StringBuilder(namePrefix.length() + 7);
         retval.append(namePrefix);
         for (int i = threadNumber; i < 1000000; i *= 10) {
             retval.append('0');

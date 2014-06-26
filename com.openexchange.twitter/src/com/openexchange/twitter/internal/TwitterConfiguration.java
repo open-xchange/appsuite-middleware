@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,26 +49,51 @@
 
 package com.openexchange.twitter.internal;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 
 /**
  * {@link TwitterConfiguration} - Configuration of twitter bundle.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TwitterConfiguration {
+public final class TwitterConfiguration implements Reloadable {
 
-    private static final AtomicReference<String> CONSUMER_KEY = new AtomicReference<String>();
+    private static final TwitterConfiguration INSTANCE = new TwitterConfiguration();
 
-    private static final AtomicReference<String> CONSUMER_SECRET = new AtomicReference<String>();
+    private static final String[] PROPERTIES = new String[] {"com.openexchange.twitter.consumerKey",
+        "com.openexchange.twitter.consumerSecret"};
+
+    /**
+     * Gets the instance.
+     *
+     * @return The instance
+     */
+    public static TwitterConfiguration getInstance() {
+        return INSTANCE;
+    }
+
+    // ------------------------------------------------------------------------------------------------------ //
+
+    private final AtomicReference<String> consumerKey;
+
+    private final AtomicReference<String> consumerSecret;
 
     /**
      * Initializes a new {@link TwitterConfiguration}.
      */
     private TwitterConfiguration() {
         super();
+        consumerKey = new AtomicReference<String>();
+        consumerSecret = new AtomicReference<String>();
+    }
+
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        configure(configService);
     }
 
     /**
@@ -76,14 +101,14 @@ public final class TwitterConfiguration {
      *
      * @param configurationService The configuration service needed to read properties
      */
-    public static void configure(final ConfigurationService configurationService) {
+    public void configure(final ConfigurationService configurationService) {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TwitterConfiguration.class);
         {
             final String property = configurationService.getProperty("com.openexchange.twitter.consumerKey");
             if (null == property) {
                 log.error("Missing property \"com.openexchange.twitter.consumerKey\"");
             } else {
-                CONSUMER_KEY.set(property);
+                consumerKey.set(property);
             }
         }
         {
@@ -91,7 +116,7 @@ public final class TwitterConfiguration {
             if (null == property) {
                 log.error("Missing property \"com.openexchange.twitter.consumerSecret\"");
             } else {
-                CONSUMER_SECRET.set(property);
+                consumerSecret.set(property);
             }
         }
 
@@ -104,8 +129,8 @@ public final class TwitterConfiguration {
      *
      * @return The consumer key
      */
-    public static String getConsumerKey() {
-        return CONSUMER_KEY.get();
+    public String getConsumerKey() {
+        return consumerKey.get();
     }
 
     /**
@@ -113,8 +138,15 @@ public final class TwitterConfiguration {
      *
      * @return The consumer secret
      */
-    public static String getConsumerSecret() {
-        return CONSUMER_SECRET.get();
+    public String getConsumerSecret() {
+        return consumerSecret.get();
+    }
+
+    @Override
+    public Map<String, String[]> getConfigFileNames() {
+        Map<String, String[]> map = new HashMap<String, String[]>(1);
+        map.put("twitter.properties", PROPERTIES);
+        return map;
     }
 
 }

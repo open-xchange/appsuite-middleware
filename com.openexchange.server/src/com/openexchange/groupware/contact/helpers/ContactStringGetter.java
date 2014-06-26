@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -54,7 +54,6 @@ import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.tools.TimeZoneUtils;
 
 /**
@@ -105,7 +104,7 @@ public class ContactStringGetter implements ContactSwitcher {
         if (null == distList || 0 == distList.length) {
             return "";
         }
-        StringAllocator allocator = new StringAllocator();
+        StringBuilder allocator = new StringBuilder();
         for (DistributionListEntryObject member : distList) {
             if (null != member) {
                 if (null != member.getEmailaddress()) {
@@ -327,11 +326,6 @@ public class ContactStringGetter implements ContactSwitcher {
 	}
 
 	@Override
-    public Object links(final Object... objects) throws OXException {
-		return stringify(delegate.links(objects));
-	}
-
-	@Override
     public Object managername(final Object... objects) throws OXException {
 		return stringify(delegate.managername(objects));
 	}
@@ -379,11 +373,6 @@ public class ContactStringGetter implements ContactSwitcher {
 	@Override
     public Object numberofemployee(final Object... objects) throws OXException {
 		return stringify(delegate.numberofemployee(objects));
-	}
-
-	@Override
-    public Object numberoflinks(final Object... objects) throws OXException {
-		return stringify(delegate.numberoflinks(objects));
 	}
 
 	@Override

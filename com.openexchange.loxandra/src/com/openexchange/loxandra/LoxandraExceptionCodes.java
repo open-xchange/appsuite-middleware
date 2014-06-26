@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,9 +50,10 @@
 package com.openexchange.loxandra;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link LoxandraExceptionCodes} - LOXANDRA error codes.
@@ -60,20 +61,20 @@ import com.openexchange.exception.OXExceptionFactory;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum LoxandraExceptionCodes implements OXExceptionCode {
+public enum LoxandraExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    ERROR(LoxandraExceptionMessages.ERROR_MSG, CATEGORY_ERROR, 1),
+    ERROR("An error occurred: %1$s", CATEGORY_ERROR, 1, null),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(LoxandraExceptionMessages.IO_ERROR_MSG, CATEGORY_ERROR, 2),
+    IO_ERROR("An I/O error occurred: %1$s", CATEGORY_ERROR, 2, null),
     /**
      * A configuration error: %1$s
      */
-    CONFIG_ERROR(LoxandraExceptionMessages.CONFIG_ERROR_MSG, CATEGORY_CONFIGURATION, 2),
+    CONFIG_ERROR("A configuration error: %1$s", CATEGORY_CONFIGURATION, 3, null),
 
     ;
 
@@ -88,10 +89,13 @@ public enum LoxandraExceptionCodes implements OXExceptionCode {
 
     private final String message;
 
-    private LoxandraExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private String displayMessage;
+
+    private LoxandraExceptionCodes(final String message, final Category category, final int detailNumber, String displayMessage) {
         this.message = message;
         number = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -107,6 +111,11 @@ public enum LoxandraExceptionCodes implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override

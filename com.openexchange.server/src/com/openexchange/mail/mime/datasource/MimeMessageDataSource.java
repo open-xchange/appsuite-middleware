@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -92,12 +92,15 @@ import org.apache.james.mime4j.storage.TempFileStorageProvider;
 import org.apache.james.mime4j.storage.ThresholdStorageProvider;
 import org.apache.james.mime4j.stream.RawFieldParser;
 import org.apache.james.mime4j.util.ByteArrayBuffer;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeMailException;
@@ -161,6 +164,22 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
             }
         }
         return tmp;
+    }
+
+    static {
+        MailReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                directory = null;
+                filesToDelete = null;
+            }
+
+            @Override
+            public Map<String, String[]> getConfigFileNames() {
+                return null;
+            }
+        });
     }
 
     /** The mime4j message */

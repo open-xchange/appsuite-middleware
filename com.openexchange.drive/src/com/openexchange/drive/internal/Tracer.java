@@ -51,7 +51,6 @@ package com.openexchange.drive.internal;
 
 import java.util.Date;
 import com.openexchange.drive.DriveConstants;
-import com.openexchange.java.StringAllocator;
 
 /**
  * {@link Tracer}
@@ -63,7 +62,7 @@ public class Tracer {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Tracer.class);
     private static final int MAX_SIZE = 20000;
 
-    private final StringAllocator traceLog;
+    private final StringBuilder traceLog;
 
     /**
      * Initializes a new {@link Tracer}.
@@ -72,7 +71,7 @@ public class Tracer {
      */
     public Tracer(Boolean clientDiagnostics) {
         super();
-        this.traceLog = null != clientDiagnostics && clientDiagnostics.booleanValue() ? new StringAllocator() : null;
+        this.traceLog = null != clientDiagnostics && clientDiagnostics.booleanValue() ? new StringBuilder() : null;
     }
 
     /**

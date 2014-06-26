@@ -197,7 +197,7 @@ public class DirectLinkGenerator {
                     .replaceAll("\\[dispatcherPrefix\\]", getDispatcherPrefix())
                     .replaceAll("\\[folder\\]", file.getFolderId())
                     .replaceAll("\\[object\\]", file.getId())
-                    .replaceAll("\\[version\\]", file.getVersion())
+                    .replaceAll("\\[version\\]", null == file.getVersion() ? "0" : file.getVersion())
                     .replaceAll("\\[width\\]", String.valueOf(width))
                     .replaceAll("\\[height\\]", String.valueOf(height))
                 ;
@@ -209,7 +209,7 @@ public class DirectLinkGenerator {
                     .replaceAll("\\[dispatcherPrefix\\]", getDispatcherPrefix())
                     .replaceAll("\\[folder\\]", file.getFolderId())
                     .replaceAll("\\[object\\]", file.getId())
-                    .replaceAll("\\[version\\]", file.getVersion())
+                    .replaceAll("\\[version\\]", null == file.getVersion() ? "0" : file.getVersion())
                     .replaceAll("\\[width\\]", String.valueOf(width))
                     .replaceAll("\\[height\\]", String.valueOf(height))
                 ;
@@ -223,7 +223,7 @@ public class DirectLinkGenerator {
                     .replaceAll("\\[dispatcherPrefix\\]", getDispatcherPrefix())
                     .replaceAll("\\[folder\\]", file.getFolderId())
                     .replaceAll("\\[object\\]", file.getId())
-                    .replaceAll("\\[version\\]", file.getVersion())
+                    .replaceAll("\\[version\\]", null == file.getVersion() ? "0" : file.getVersion())
                     .replaceAll("\\[width\\]", String.valueOf(width))
                     .replaceAll("\\[height\\]", String.valueOf(height))
                 ;

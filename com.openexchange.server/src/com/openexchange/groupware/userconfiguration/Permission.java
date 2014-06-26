@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.userconfiguration;
 
+import static com.openexchange.java.Strings.toLowerCase;
+import static com.openexchange.java.Strings.toUpperCase;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TIntObjectProcedure;
@@ -69,7 +71,6 @@ public enum Permission {
     CONTACTS(UserConfiguration.CONTACTS, "Contacts"),
     TASKS(UserConfiguration.TASKS, "Tasks"),
     INFOSTORE(UserConfiguration.INFOSTORE, "Infostore"),
-    PROJECTS(UserConfiguration.PROJECTS, "Projects"),
     FORUM(UserConfiguration.FORUM, "Forum"),
     PINBOARD_WRITE_ACCESS(UserConfiguration.PINBOARD_WRITE_ACCESS, "PinboardWriteAccess"),
     WEBDAV_XML(UserConfiguration.WEBDAV_XML, "WebDAVXML"),
@@ -156,6 +157,15 @@ public enum Permission {
     }
 
     /**
+     * Gets the capability name (the lower-case enum constant name).
+     *
+     * @return The capability name
+     */
+    public String getCapabilityName() {
+        return toLowerCase(name());
+    }
+
+    /**
      * Gets the permission associated with given bit.
      *
      * @param bit The bit
@@ -231,20 +241,6 @@ public enum Permission {
             }
         }
         return null;
-    }
-
-    /** ASCII-wise to upper-case */
-    private static String toUpperCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
-        }
-        return builder.toString();
     }
 
 } // End of Permission class

@@ -49,7 +49,6 @@
 
 package com.openexchange.caching;
 
-import java.io.Serializable;
 import com.openexchange.caching.internal.CacheKeyImpl;
 
 
@@ -73,12 +72,12 @@ public class DefaultCacheKeyService implements CacheKeyService {
     }
 
     @Override
-    public CacheKey newCacheKey(final int contextId, final Serializable obj) {
+    public CacheKey newCacheKey(final int contextId, final String obj) {
         return new CacheKeyImpl(contextId, obj);
     }
 
     @Override
-    public CacheKey newCacheKey(final int contextId, final Serializable... objs) {
+    public CacheKey newCacheKey(final int contextId, final String... objs) {
         return new CacheKeyImpl(contextId, objs);
     }
 

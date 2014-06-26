@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -73,7 +73,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.session.Session;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -241,7 +240,7 @@ public final class Tools {
             return null;
         }
         final TIntIterator iter = arr.iterator();
-        final StringAllocator sb = new StringAllocator(length << 2);
+        final StringBuilder sb = new StringBuilder(length << 2);
         sb.append('(');
         sb.append(iter.next());
         for (int a = 1; a < length; a++) {

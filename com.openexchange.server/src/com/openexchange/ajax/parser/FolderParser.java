@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -115,16 +115,12 @@ public class FolderParser {
             return FolderObject.UNBOUND;
         } else if (moduleStr.equalsIgnoreCase(AJAXServlet.MODULE_MAIL)) {
             return FolderObject.MAIL;
-        } else if (moduleStr.equalsIgnoreCase(AJAXServlet.MODULE_PROJECT)) {
-            return FolderObject.PROJECT;
         } else if (moduleStr.equalsIgnoreCase(AJAXServlet.MODULE_INFOSTORE)) {
             return FolderObject.INFOSTORE;
         } else if (moduleStr.equals(AJAXServlet.MODULE_MESSAGING)) {
             return FolderObject.MESSAGING;
         } else if (moduleStr.equalsIgnoreCase(AJAXServlet.MODULE_SYSTEM)) {
-            if (objectId == FolderObject.SYSTEM_OX_PROJECT_FOLDER_ID) {
-                return FolderObject.PROJECT;
-            } else if (objectId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
+            if (objectId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
                 return FolderObject.INFOSTORE;
             } else {
                 return FolderObject.SYSTEM_MODULE;
@@ -135,7 +131,7 @@ public class FolderParser {
     }
 
     protected void parseElementFolder(final FolderObject fo, final JSONObject jsonObj) throws OXException,
-            JSONException {
+    JSONException {
         if (jsonObj.has(DataFields.ID)) {
             if (fo.containsObjectID() && fo.getObjectID() != jsonObj.getInt(DataFields.ID)) {
                 throw OXFolderExceptionCode.PARAMETER_MISMATCH.create(DataFields.ID, DataFields.ID);
@@ -152,7 +148,7 @@ public class FolderParser {
         }
         if (jsonObj.has(FolderFields.MODULE)) {
             fo.setModule(getModuleFromString(jsonObj.getString(FolderFields.MODULE), fo.containsObjectID() ? fo
-                    .getObjectID() : -1));
+                .getObjectID() : -1));
         }
         if (jsonObj.has(FolderFields.TYPE)) {
             fo.setType(jsonObj.getInt(FolderFields.TYPE));
@@ -205,9 +201,9 @@ public class FolderParser {
             }
             final int[] permissionBits = parsePermissionBits(elem.getInt(FolderFields.BITS));
             if (!oclPerm.setAllPermission(permissionBits[0], permissionBits[1], permissionBits[2],
-                    permissionBits[3])) {
+                permissionBits[3])) {
                 throw OXFolderExceptionCode.INVALID_PERMISSION.create(Integer.valueOf(permissionBits[0]), Integer.valueOf(permissionBits[1]),
-                        Integer.valueOf(permissionBits[2]), Integer.valueOf(permissionBits[3]));
+                    Integer.valueOf(permissionBits[2]), Integer.valueOf(permissionBits[3]));
             }
             oclPerm.setFolderAdmin(permissionBits[4] > 0 ? true : false);
             if (!elem.has(FolderFields.GROUP)) {

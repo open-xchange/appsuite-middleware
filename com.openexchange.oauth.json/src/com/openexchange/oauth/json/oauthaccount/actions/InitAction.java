@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,8 +49,11 @@
 
 package com.openexchange.oauth.json.oauthaccount.actions;
 
+import static com.openexchange.java.Strings.isEmpty;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -62,7 +65,7 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.StringAllocator;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthExceptionCodes;
@@ -71,6 +74,7 @@ import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthToken;
 import com.openexchange.oauth.Parameterizable;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
+import com.openexchange.oauth.json.Services;
 import com.openexchange.oauth.json.Tools;
 import com.openexchange.oauth.json.oauthaccount.AccountField;
 import com.openexchange.oauth.json.oauthaccount.AccountWriter;
@@ -144,7 +148,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
          */
         final String callbackUrl;
         {
-            final StringBuilder callbackUrlBuilder = request.constructURL(new StringAllocator(PREFIX.get().getPrefix()).append("oauth/accounts").toString(), true);
+            final StringBuilder callbackUrlBuilder = request.constructURL(new StringBuilder(PREFIX.get().getPrefix()).append("oauth/accounts").toString(), true);
             // Append query string
             callbackUrlBuilder.append("?action=create");
             callbackUrlBuilder.append("&respondWithHTML=true&session=").append(session.getSessionID());
@@ -161,7 +165,8 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
         /*
          * Invoke
          */
-        final OAuthInteraction interaction = oAuthService.initOAuth(serviceId, callbackUrl, session);
+        final String currentHost = determineHost(request, session);
+        final OAuthInteraction interaction = oAuthService.initOAuth(serviceId, callbackUrl, currentHost, session);
         final OAuthToken requestToken = interaction.getRequestToken();
         /*
          * Create a container to set some state information: Request token's secret, call-back URL, whatever
@@ -178,6 +183,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
         }
         oauthState.put(OAuthConstants.ARGUMENT_SECRET, requestToken.getSecret());
         oauthState.put(OAuthConstants.ARGUMENT_CALLBACK, callbackUrl);
+        oauthState.put(OAuthConstants.ARGUMENT_CURRENT_HOST, currentHost);
         session.setParameter(uuid, oauthState);
         session.setParameter(Session.PARAM_TOKEN, oauthSessionToken);
         /*
@@ -208,7 +214,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
         /*
          * Compose call-back URL
          */
-        final StringBuilder callbackUrlBuilder = request.constructURL(new StringAllocator(PREFIX.get().getPrefix()).append("oauth/accounts").toString(), true);
+        final StringBuilder callbackUrlBuilder = request.constructURL(new StringBuilder(PREFIX.get().getPrefix()).append("oauth/accounts").toString(), true);
         callbackUrlBuilder.append("?action=reauthorize");
         callbackUrlBuilder.append("&id=").append(account.getId());
         callbackUrlBuilder.append("&respondWithHTML=true&session=").append(session.getSessionID());
@@ -229,7 +235,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
         /*
          * Invoke
          */
-        final OAuthInteraction interaction = oAuthService.initOAuth(serviceId, callbackUrlBuilder.toString(), session);
+        final OAuthInteraction interaction = oAuthService.initOAuth(serviceId, callbackUrlBuilder.toString(), determineHost(request, session), session);
         final OAuthToken requestToken = interaction.getRequestToken();
         /*
          * Create a container to set some state information: Request token's secret, call-back URL, whatever
@@ -257,17 +263,40 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
         }
     }
 
-    /** Checks for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
+    private static String determineHost(AJAXRequestData requestData, ServerSession session) {
+        String hostName = null;
+        /*
+         * Ask hostname service if available
+         */
+        {
+            final HostnameService hostnameService = Services.getService(HostnameService.class);
+            if (null != hostnameService) {
+                hostName = hostnameService.getHostname(session.getUserId(), session.getContextId());
+            }
         }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
+        /*
+         * Get hostname from request
+         */
+        if (isEmpty(hostName)) {
+            hostName = requestData.getHostname();
         }
-        return isWhitespace;
+        /*
+         * Get hostname from java
+         */
+        if (isEmpty(hostName)) {
+            try {
+                hostName = InetAddress.getLocalHost().getCanonicalHostName();
+            } catch (UnknownHostException e) {
+                // ignore
+            }
+        }
+        /*
+         * Fall back to localhost as last resort
+         */
+        if (isEmpty(hostName)) {
+            hostName = "localhost";
+        }
+        return requestData.getHostname();
     }
 
 }

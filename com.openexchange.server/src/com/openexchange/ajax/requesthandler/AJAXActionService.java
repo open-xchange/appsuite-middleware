@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -65,7 +65,7 @@ public interface AJAXActionService {
      *
      * @param requestData The request to perform
      * @param session The session providing needed user data
-     * @return The result yielded from given request
+     * @return The result yielded for given request
      * @throws OXException If an error occurs
      */
     AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException;

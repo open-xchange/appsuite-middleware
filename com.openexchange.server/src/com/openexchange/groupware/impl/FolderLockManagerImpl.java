@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -61,10 +61,13 @@ import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.webdav.Lock;
 import com.openexchange.groupware.infostore.webdav.LockManagerImpl;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 
 public class FolderLockManagerImpl extends LockManagerImpl<FolderLock> implements
         FolderLockManager {
@@ -80,8 +83,10 @@ public class FolderLockManagerImpl extends LockManagerImpl<FolderLock> implement
     }
 
     @Override
-    public List<Lock> findLocks(final int entity, final Context ctx, final User user) throws OXException {
-        return new ArrayList<Lock>(loadOwnLocks(Arrays.asList(Integer.valueOf(entity)), ctx, user).get(Integer.valueOf(entity)));
+    public List<Lock> findLocks(final int entity, Session session) throws OXException {
+        final Context context = getContextFrom(session);
+        final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
+        return new ArrayList<Lock>(loadOwnLocks(Arrays.asList(Integer.valueOf(entity)), context, user).get(Integer.valueOf(entity)));
     }
 
     @Override
@@ -132,7 +137,9 @@ public class FolderLockManagerImpl extends LockManagerImpl<FolderLock> implement
     }
 
     @Override
-    public void insertLock(final int entity, final Lock lock, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException{
+    public void insertLock(final int entity, final Lock lock, Session session) throws OXException{
+        final Context ctx = getContextFrom(session);
+        final User user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
         createLockForceId(entity, lock.getId(), lock.getTimeout(), lock.getScope(), lock.getType(), lock.getOwnerDescription(),ctx,user,Integer.valueOf(((FolderLock) lock).getDepth()));
     }
 
@@ -142,7 +149,8 @@ public class FolderLockManagerImpl extends LockManagerImpl<FolderLock> implement
     }
 
     @Override
-    public void unlock(final int id, final Context ctx, final User user) throws OXException {
+    public void unlock(final int id, Session session) throws OXException {
+        final Context ctx = getContextFrom(session);
         removeLock(id, ctx);
     }
 
@@ -174,7 +182,12 @@ public class FolderLockManagerImpl extends LockManagerImpl<FolderLock> implement
     }
 
     @Override
-    public void removeAll(final int entity, final Context context, final User userObject) throws OXException {
-        removeAllFromEntity(entity, context);
+    public void removeAll(final int entity, Session session) throws OXException {
+        final Context ctx = getContextFrom(session);
+        removeAllFromEntity(entity, ctx);
+    }
+
+    private Context getContextFrom(Session session) throws OXException {
+        return session instanceof ServerSession ? ((ServerSession) session).getContext() : ContextStorage.getInstance().getContext(session);
     }
 }

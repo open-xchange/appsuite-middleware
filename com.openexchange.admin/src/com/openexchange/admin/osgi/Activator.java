@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,6 +50,8 @@
 package com.openexchange.admin.osgi;
 
 import java.util.Dictionary;
+import java.util.Hashtable;
+import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
@@ -67,21 +69,30 @@ import com.openexchange.admin.mysql.CreateOXFolderTables;
 import com.openexchange.admin.mysql.CreateSequencesTables;
 import com.openexchange.admin.mysql.CreateSettingsTables;
 import com.openexchange.admin.mysql.CreateVirtualFolderTables;
+import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
+import com.openexchange.admin.plugins.OXContextPluginInterface;
+import com.openexchange.admin.plugins.OXGroupPluginInterface;
+import com.openexchange.admin.plugins.OXResourcePluginInterface;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
+import com.openexchange.admin.plugins.UserServiceInterceptorBridge;
 import com.openexchange.admin.services.AdminServiceRegistry;
+import com.openexchange.admin.services.PluginInterfaces;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.auth.Authenticator;
+import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.eventsystem.EventSystemService;
-import com.openexchange.groupware.update.FullPrimaryKeySupportService;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersService;
+import com.openexchange.user.UserServiceInterceptor;
+import com.openexchange.user.UserServiceInterceptorRegistry;
 import com.openexchange.version.Version;
 
 public class Activator extends HousekeepingActivator {
@@ -98,12 +109,38 @@ public class Activator extends HousekeepingActivator {
         track(PublicationTargetDiscoveryService.class, new RegistryServiceTrackerCustomizer<PublicationTargetDiscoveryService>(context, AdminServiceRegistry.getInstance(), PublicationTargetDiscoveryService.class));
         AdminCache.compareAndSetBundleContext(null, context);
         final ConfigurationService configurationService = getService(ConfigurationService.class);
-        final FullPrimaryKeySupportService fullPrimaryKeySupportService = getService(FullPrimaryKeySupportService.class);
         AdminCache.compareAndSetConfigurationService(null, configurationService);
         AdminServiceRegistry.getInstance().addService(ConfigurationService.class, configurationService);
-        AdminServiceRegistry.getInstance().addService(FullPrimaryKeySupportService.class, fullPrimaryKeySupportService);
         track(CreateTableService.class, new CreateTableCustomizer(context));
-        track(EventSystemService.class, new RegistryServiceTrackerCustomizer<EventSystemService>(context, AdminServiceRegistry.getInstance(), EventSystemService.class));
+        track(CacheService.class, new RegistryServiceTrackerCustomizer<CacheService>(context, AdminServiceRegistry.getInstance(), CacheService.class));
+        UserServiceInterceptorRegistry interceptorRegistry = new UserServiceInterceptorRegistry(context);
+        track(UserServiceInterceptor.class, interceptorRegistry);
+
+        // Plugin interfaces
+        {
+            final int defaultRanking = 100;
+
+            final RankingAwareNearRegistryServiceTracker<BasicAuthenticatorPluginInterface> batracker = new RankingAwareNearRegistryServiceTracker<BasicAuthenticatorPluginInterface>(context, BasicAuthenticatorPluginInterface.class, defaultRanking);
+            rememberTracker(batracker);
+
+            final RankingAwareNearRegistryServiceTracker<OXContextPluginInterface> ctracker = new RankingAwareNearRegistryServiceTracker<OXContextPluginInterface>(context, OXContextPluginInterface.class, defaultRanking);
+            rememberTracker(ctracker);
+
+            final RankingAwareNearRegistryServiceTracker<OXUserPluginInterface> utracker = new RankingAwareNearRegistryServiceTracker<OXUserPluginInterface>(context, OXUserPluginInterface.class, defaultRanking);
+            rememberTracker(utracker);
+
+            final RankingAwareNearRegistryServiceTracker<OXGroupPluginInterface> gtracker = new RankingAwareNearRegistryServiceTracker<OXGroupPluginInterface>(context, OXGroupPluginInterface.class, defaultRanking);
+            rememberTracker(gtracker);
+
+            final RankingAwareNearRegistryServiceTracker<OXResourcePluginInterface> rtracker = new RankingAwareNearRegistryServiceTracker<OXResourcePluginInterface>(context, OXResourcePluginInterface.class, defaultRanking);
+            rememberTracker(rtracker);
+
+            final PluginInterfaces.Builder builder = new PluginInterfaces.Builder().basicAuthenticatorPlugins(batracker).contextPlugins(ctracker).groupPlugins(gtracker).resourcePlugins(rtracker).userPlugins(utracker);
+
+            PluginInterfaces.setInstance(builder.build());
+        }
+
+        // Open trackers
         openTrackers();
 
         log.info("Starting Admindaemon...");
@@ -154,6 +191,12 @@ public class Activator extends HousekeepingActivator {
             e.printStackTrace();
         }
 
+        // UserServiceInterceptor Bridge
+        Dictionary<String, String> props = new Hashtable<String, String>(2);
+        props.put("name", "OXUser");
+        props.put(Constants.SERVICE_RANKING, Integer.toString(200));
+        registerService(OXUserPluginInterface.class, new UserServiceInterceptorBridge(interceptorRegistry), props);
+
         //Register CreateTableServices
         registerService(CreateTableService.class, new CreateSequencesTables());
         registerService(CreateTableService.class, new CreateLdap2SqlTables());
@@ -168,7 +211,9 @@ public class Activator extends HousekeepingActivator {
         registerService(CreateTableService.class, new CreateIcalVcardTables());
 
         // Register authenticator
-        registerService(Authenticator.class, new AuthenticatorImpl());
+        AuthenticatorImpl authenticator = new AuthenticatorImpl();
+        registerService(Authenticator.class, authenticator);
+        registerService(Reloadable.class, authenticator);
     }
 
     /**
@@ -177,6 +222,7 @@ public class Activator extends HousekeepingActivator {
     @Override
     public void stopBundle() throws Exception {
         cleanUp();
+        PluginInterfaces.setInstance(null);
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Activator.class);
         log.info("Stopping RMI...");
         final AdminDaemon daemon = this.daemon;
@@ -189,6 +235,6 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, FullPrimaryKeySupportService.class };
+        return new Class<?>[] { ConfigurationService.class };
     }
 }

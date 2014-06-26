@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -415,7 +415,7 @@ public final class AjpMessage {
      */
     public void dump(final String msg) {
         if (log.isDebugEnabled()) {
-            final com.openexchange.java.StringAllocator temp = new com.openexchange.java.StringAllocator(8192).append(msg).append('\n');
+            final StringBuilder temp = new StringBuilder(8192).append(msg).append('\n');
             int max = pos;
             if (len + 4 > pos) {
                 max = len + 4;
@@ -434,7 +434,7 @@ public final class AjpMessage {
 
     // ------------------------------------------------------ Protected Methods
 
-    protected static void hexLine(final byte buf[], final int start, final int len, final com.openexchange.java.StringAllocator sb) {
+    protected static void hexLine(final byte buf[], final int start, final int len, final StringBuilder sb) {
         for (int i = start; i < start + 16; i++) {
             if (i < len + 4) {
                 sb.append(hex(buf[i]) + " ");

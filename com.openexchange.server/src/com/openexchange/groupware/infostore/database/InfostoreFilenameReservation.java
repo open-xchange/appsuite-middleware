@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -55,13 +55,9 @@ package com.openexchange.groupware.infostore.database;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface InfostoreFilenameReservation {
+public interface InfostoreFilenameReservation extends FilenameReservation {
 
     public void destroySilently();
-
-    public String getFilename();
-
-	public boolean wasAdjusted();
 
 	public void setWasAdjusted(boolean b);
 

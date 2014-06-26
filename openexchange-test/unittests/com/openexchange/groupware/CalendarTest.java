@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,13 +50,10 @@
 package com.openexchange.groupware;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
-import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXException.ProblematicAttribute;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.Properties;
 import java.util.TimeZone;
 import junit.framework.TestCase;
@@ -67,9 +64,10 @@ import com.openexchange.calendar.CalendarSqlImp;
 import com.openexchange.calendar.ConflictHandler;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.event.impl.EventConfigImpl;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.Constants;
-import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.Appointment;
@@ -94,8 +92,8 @@ import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
-import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.setuptools.TestConfig;
+import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.test.AjaxInit;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -538,8 +536,8 @@ public class CalendarTest extends TestCase {
 
 
             AppointmentSearchObject searchObj = new AppointmentSearchObject();
-            searchObj.setPattern("test");
-            searchObj.addFolder(folder_id);
+            searchObj.setQueries(Collections.singleton("test"));
+            searchObj.setFolderIDs(Collections.singleton(Integer.valueOf(folder_id)));
             SearchIterator si = csql.searchAppointments(searchObj, 0, Order.ASCENDING, cols);
             boolean gotresults = si.hasNext();
             assertTrue("Got real results by searching \"test\"", gotresults);
@@ -565,8 +563,8 @@ public class CalendarTest extends TestCase {
             assertEquals("Test correct folder id", public_folder_id, test_folder_id);
 
             searchObj = new AppointmentSearchObject();
-            searchObj.setPattern("*");
-            searchObj.addFolder(public_folder_id);
+            searchObj.setQueries(Collections.singleton("*"));
+            searchObj.setFolderIDs(Collections.singleton(Integer.valueOf(public_folder_id)));
 
             si = csql.searchAppointments(searchObj, 0, Order.ASCENDING, cols);
             gotresults = si.hasNext();
@@ -577,7 +575,7 @@ public class CalendarTest extends TestCase {
             }
             si.close();
 
-            searchObj.setPattern("*.*");
+            searchObj.setQueries(Collections.singleton("*.*"));
             si = csql.searchAppointments(searchObj, 0, Order.ASCENDING, cols);
             gotresults = si.hasNext();
             assertTrue("Got some results by searching \"*e*\"", !gotresults);
@@ -1059,7 +1057,7 @@ public class CalendarTest extends TestCase {
         cdao.setShownAs(Appointment.RESERVED);
         cdao.setFullTime(true);
         conflicts = csql.updateAppointmentObject(cdao, fid, new Date());
-        assertTrue("Found conflicts ", conflicts != null);
+        assertNotNull("Did not found conflicts ", conflicts);
         assertEquals("Check correct result size", 1, conflicts.length);
         assertEquals("Check conflict results", conflicts[0].getObjectID(), cdao_conflict.getObjectID());
         cdao.setIgnoreConflicts(true);
@@ -1257,7 +1255,7 @@ public class CalendarTest extends TestCase {
         cdao.setIgnoreConflicts(true);
         cdao.setStartDate(D("01.10.2013 08:00"));
         cdao.setEndDate(D("01.10.2013 09:00"));
-        
+
 
         final CalendarSql csql = new CalendarSql(so);
         csql.insertAppointmentObject(cdao);

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -86,10 +86,10 @@ import com.openexchange.user.json.services.ServiceRegistry;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @Action(method = RequestMethod.PUT, name = "list", description = "Get a list of users.", parameters = {
-		@Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-		@Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for users are defined in Common object data, Detailed contact data and Detailed user data.")
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for users are defined in Common object data, Detailed contact data and Detailed user data.")
 }, requestBody = "An array of numbers. Each number is the ID of requested user. Since v6.18.1, a null value in the array is interpreted as the currently logged in user.",
-responseDescription = "Response with timestamp: An array with user data. Each array element describes one user and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
+    responseDescription = "Response with timestamp: An array with user data. Each array element describes one user and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
 public final class ListAction extends AbstractUserAction {
 
     /**
@@ -163,7 +163,7 @@ public final class ListAction extends AbstractUserAction {
                     lastModified = contactLastModified;
                 }
             }
-		}
+        }
         /*
          * Return appropriate result
          */
@@ -172,7 +172,7 @@ public final class ListAction extends AbstractUserAction {
 
     private User getUserByContact(final ServerSession session, UserService userService, final Contact contact) throws OXException {
         final String email1 = contact.getEmail1();
-        User user = isEmpty(email1) ? null : userService.searchUser(email1, session.getContext());
+        User user = com.openexchange.java.Strings.isEmpty(email1) ? null : userService.searchUser(email1, session.getContext());
         if (null == user) {
             final User[] usrs = userService.searchUserByName(contact.getDisplayName(), session.getContext(), UserService.SEARCH_DISPLAY_NAME);
             if (null != usrs && usrs.length > 0) {
@@ -199,64 +199,51 @@ public final class ListAction extends AbstractUserAction {
         return userIDs;
     }
 
-	private User[] getUsers(final ServerSession session, final int[] userIDs, final List<OXException> warnings) throws OXException {
+    private User[] getUsers(final ServerSession session, final int[] userIDs, final List<OXException> warnings) throws OXException {
         final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
-		try {
-		    return userService.getUser(session.getContext(), userIDs);
-		} catch (final OXException e) {
-		    if (!UserExceptionCode.USER_NOT_FOUND.equals(e)) {
-		        throw e;
-		    }
-		    final Context context = session.getContext();
-		    {
-		        final Object[] excArgs = e.getLogArgs();
-		        if (excArgs != null && excArgs.length >= 2) {
-		            try {
-		                userService.invalidateUser(context, ((Integer) excArgs[0]).intValue());
-		            } catch (final Exception ignore) {
-		                // Ignore
-		            }
-		        } else {
-		            for (final int userId : userIDs) {
-		                try {
-		                    userService.invalidateUser(context, userId);
-		                } catch (final Exception ignore) {
-		                    // Ignore
-		                }
-		            }
-		        }
-		    }
-		    // Load one-by-one
-		    final int length = userIDs.length;
-		    final List<User> list = new ArrayList<User>(length);
-		    for (int i = 0; i < length; i++) {
-		        try {
-		            list.add(userService.getUser(userIDs[i], context));
-		        } catch (final OXException ue) {
-		            if (!UserExceptionCode.USER_NOT_FOUND.equals(ue)) {
-		                throw ue;
-		            }
-		            warnings.add(ue.setCategory(Category.CATEGORY_WARNING));
-		        }
-		    }
-		    if (list.isEmpty()) {
-                // None loaded
-		        throw e;
+        try {
+            return userService.getUser(session.getContext(), userIDs);
+        } catch (final OXException e) {
+            if (!UserExceptionCode.USER_NOT_FOUND.equals(e)) {
+                throw e;
             }
-		    return list.toArray(new User[list.size()]);
-		}
-	}
-
-    private boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
+            final Context context = session.getContext();
+            {
+                final Object[] excArgs = e.getLogArgs();
+                if (excArgs != null && excArgs.length >= 2) {
+                    try {
+                        userService.invalidateUser(context, ((Integer) excArgs[0]).intValue());
+                    } catch (final Exception ignore) {
+                        // Ignore
+                    }
+                } else {
+                    for (final int userId : userIDs) {
+                        try {
+                            userService.invalidateUser(context, userId);
+                        } catch (final Exception ignore) {
+                            // Ignore
+                        }
+                    }
+                }
+            }
+            // Load one-by-one
+            final int length = userIDs.length;
+            final List<User> list = new ArrayList<User>(length);
+            for (int i = 0; i < length; i++) {
+                try {
+                    list.add(userService.getUser(userIDs[i], context));
+                } catch (final OXException ue) {
+                    if (!UserExceptionCode.USER_NOT_FOUND.equals(ue)) {
+                        throw ue;
+                    }
+                    warnings.add(ue.setCategory(Category.CATEGORY_WARNING));
+                }
+            }
+            if (list.isEmpty()) {
+                // None loaded
+                throw e;
+            }
+            return list.toArray(new User[list.size()]);
         }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
-
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -60,18 +60,18 @@ import junit.framework.TestSuite;
  */
 public final class MailFilterTestSuite {
 
-	/**
-	 * Initializes a new {@link MailFilterTestSuite}
-	 */
-	private MailFilterTestSuite() {
-		super();
-	}
+    /**
+     * Initializes a new {@link MailFilterTestSuite}
+     */
+    private MailFilterTestSuite() {
+        super();
+    }
 
-	 /**
+    /**
      * @return a test suite containing smoke tests.
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite();
+        TestSuite suite = new TestSuite("com.openexchange.ajax.mail.filter.MailFilterTestSuite");
         suite.addTestSuite(ConfigTest.class);
         suite.addTestSuite(NewTest.class);
         suite.addTestSuite(UpdateTest.class);

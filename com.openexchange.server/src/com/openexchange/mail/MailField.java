@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -165,7 +165,12 @@ public enum MailField {
      * To fully pre-fill mail incl. headers and peeked body (\Seen flag is left unchanged)<br>
      * <b>[high cost]</b>
      */
-    FULL(null);
+    FULL(null),
+    /**
+     * Special field to signal support for continuation.
+     */
+    SUPPORTS_CONTINUATION(null),
+    ;
 
     private static final EnumMap<MailListField, MailField> LIST_FIELDS_MAP = new EnumMap<MailListField, MailField>(MailListField.class);
 
@@ -249,10 +254,7 @@ public enum MailField {
      * @return The corresponding instances of {@link MailListField}
      */
     public static final MailListField[] toListFields(final Collection<MailField> fields) {
-        if (null == fields) {
-            return null;
-        }
-        return toListFields(fields.toArray(new MailField[fields.size()]));
+        return null == fields ? null : toListFields(fields.toArray(new MailField[fields.size()]));
     }
 
     /**
@@ -279,10 +281,7 @@ public enum MailField {
      * @return The corresponding instance of {@link MailField}
      */
     public static final MailField toField(final MailListField listField) {
-        if (null == listField) {
-            return null;
-        }
-        return LIST_FIELDS_MAP.get(listField);
+        return null == listField ? null : LIST_FIELDS_MAP.get(listField);
     }
 
     private static final MailField[] EMPTY_FIELDS = new MailField[0];
@@ -308,6 +307,31 @@ public enum MailField {
     }
 
     /**
+     * Creates an array of {@link MailField} corresponding to given <code>int</code> values.
+     * <p>
+     * Guarantees not to return any null values.
+     *
+     * @see #getField(int)
+     * @param fields The <code>int</code> values
+     * @return The array of {@link MailField} containing all fields that match a given <code>int</code> value.
+     */
+    public static final MailField[] getMatchingFields(final int[] fields) {
+        if ((fields == null) || (fields.length == 0)) {
+            return EMPTY_FIELDS;
+        }
+
+        List<MailField> rawFields = new ArrayList<MailField>(fields.length);
+        for (int i = 0; i < fields.length; i++) {
+            MailField field = getField(fields[i]);
+            if (field != null) {
+                rawFields.add(field);
+            }
+        }
+
+        return rawFields.toArray(new MailField[rawFields.size()]);
+    }
+
+    /**
      * Maps specified <code>int</code> value to a mail field. A negative <code>int</code> value is mapped to {@link MailField#BODY}.
      * <p>
      * Mail fields which do not hold a corresponding list field are not mappable to an <code>int</code> value; in consequence they are
@@ -317,10 +341,7 @@ public enum MailField {
      * @return The mapped {@link MailField} or <code>null</code> if no corresponding mail field could be found
      */
     public static MailField getField(final int field) {
-        if (field < 0) {
-            return MailField.BODY;
-        }
-        return FIELDS_MAP.get(field);
+        return field < 0 ? MailField.BODY : FIELDS_MAP.get(field);
     }
 
     /**

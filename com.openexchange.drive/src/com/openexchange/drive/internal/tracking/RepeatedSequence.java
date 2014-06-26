@@ -50,7 +50,6 @@
 package com.openexchange.drive.internal.tracking;
 
 import java.util.List;
-import com.openexchange.java.StringAllocator;
 
 
 /**
@@ -95,12 +94,12 @@ public class RepeatedSequence<T> {
 
     @Override
     public String toString() {
-        StringAllocator stringAllocator = new StringAllocator();
-        stringAllocator.append("RepeatedSequence: ").append(repetitions).append("x :\n");
+        StringBuilder StringBuilder = new StringBuilder();
+        StringBuilder.append("RepeatedSequence: ").append(repetitions).append("x :\n");
         for (int i = 0; i < sequence.size(); i++) {
-            stringAllocator.append(" (").append(i + 1).append(") ").append(sequence.get(i)).append('\n');
+            StringBuilder.append(" (").append(i + 1).append(") ").append(sequence.get(i)).append('\n');
         }
-        return stringAllocator.toString();
+        return StringBuilder.toString();
     }
 
 }

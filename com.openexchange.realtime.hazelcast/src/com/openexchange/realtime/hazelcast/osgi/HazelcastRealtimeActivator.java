@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -55,6 +55,7 @@ import org.osgi.framework.ServiceReference;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -66,11 +67,12 @@ import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
+import com.openexchange.realtime.group.DistributedGroupManager;
 import com.openexchange.realtime.handle.StanzaStorage;
-import com.openexchange.realtime.hazelcast.Services;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.hazelcast.cleanup.GlobalRealtimeCleanupImpl;
 import com.openexchange.realtime.hazelcast.directory.HazelcastResourceDirectory;
+import com.openexchange.realtime.hazelcast.group.DistributedGroupManagerImpl;
 import com.openexchange.realtime.hazelcast.impl.GlobalMessageDispatcherImpl;
 import com.openexchange.realtime.hazelcast.impl.HazelcastStanzaStorage;
 import com.openexchange.realtime.hazelcast.management.ManagementHouseKeeper;
@@ -78,13 +80,15 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link HazelcastRealtimeActivator}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class HazelcastRealtimeActivator extends HousekeepingActivator {
 
     private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastRealtimeActivator.class);
+    private HazelcastResourceDirectory directory;
+    private String cleanerRegistrationId;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -96,13 +100,13 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         LOG.info("Starting bundle: {}", getClass().getCanonicalName());
         Services.setServiceLookup(this);
-        
+
         ManagementHouseKeeper managementHouseKeeper = ManagementHouseKeeper.getInstance();
         managementHouseKeeper.initialize(this);
 
         HazelcastInstance hazelcastInstance = getService(HazelcastInstance.class);
         HazelcastAccess.setHazelcastInstance(hazelcastInstance);
-        
+
         // either track Hazelcast for HazelcasAccess or get it via Services each time
         track(HazelcastInstance.class, new SimpleRegistryListener<HazelcastInstance>() {
 
@@ -116,7 +120,7 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
                 HazelcastAccess.setHazelcastInstance(null);
             }
         });
-        
+
         Config config = hazelcastInstance.getConfig();
         String id_map = discoverMapName(config, "rtIDMapping-");
         String resource_map = discoverMapName(config, "rtResourceDirectory-");
@@ -124,12 +128,14 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
             String msg = "Distributed directory maps couldn't be found in hazelcast configuration";
             throw new IllegalStateException(msg, new BundleException(msg, BundleException.ACTIVATOR_ERROR));
         }
-        final HazelcastResourceDirectory directory = new HazelcastResourceDirectory(id_map, resource_map);
+        directory = new HazelcastResourceDirectory(id_map, resource_map);
         managementHouseKeeper.addManagementObject(directory.getManagementObject());
-        
+
         GlobalMessageDispatcherImpl globalDispatcher = new GlobalMessageDispatcherImpl(directory);
-        GlobalRealtimeCleanup globalCleanup = new GlobalRealtimeCleanupImpl(directory);
-        
+
+        GlobalRealtimeCleanupImpl globalCleanup = new GlobalRealtimeCleanupImpl(directory);
+        managementHouseKeeper.addManagementObject(globalCleanup.getManagementObject());
+
         track(Channel.class, new SimpleRegistryListener<Channel>() {
 
             @Override
@@ -142,30 +148,49 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
                 directory.removeChannel(service);
             }
         });
-        
+
         openTrackers();
         registerService(ResourceDirectory.class, directory, null);
         registerService(MessageDispatcher.class, globalDispatcher);
+        addService(MessageDispatcher.class, globalDispatcher);
         registerService(RealtimeJanitor.class, globalDispatcher);
         registerService(StanzaStorage.class, new HazelcastStanzaStorage());
         registerService(Channel.class, globalDispatcher.getChannel());
         registerService(GlobalRealtimeCleanup.class, globalCleanup);
+        addService(GlobalRealtimeCleanup.class, globalCleanup);
         
+
+        String client_map = discoverMapName(config, "rtClientMapping-");
+        String group_map = discoverMapName(config, "rtGroupMapping-");
+        DistributedGroupManagerImpl distributedGroupManager = new DistributedGroupManagerImpl(globalDispatcher, client_map, group_map);
+        cleanerRegistrationId = directory.addResourceMappingEntryListener(distributedGroupManager.getCleaner(), true);
+        registerService(DistributedGroupManager.class, distributedGroupManager);
+        managementHouseKeeper.addManagementObject(distributedGroupManager.getManagementObject());
+
         directory.addChannel(globalDispatcher.getChannel());
-        managementHouseKeeper.exposeManagementObjects();
+        try {
+            managementHouseKeeper.exposeManagementObjects();
+        } catch (OXException oxe) {
+            LOG.error("Failed to expose ManagementObjects", oxe);
+        }
     }
 
     @Override
     public void stopBundle() throws Exception {
         LOG.info("Stopping bundle: {}", getClass().getCanonicalName());
-        super.stopBundle();
-        Services.setServiceLookup(null);
+        try {
+            directory.removeResourceMappingEntryListener(cleanerRegistrationId);
+        } catch (OXException oxe) {
+            LOG.info("Unable to remove ResourceMappingEntryListener.");
+        }
         ManagementHouseKeeper.getInstance().cleanup();
+        Services.setServiceLookup(null);
+        super.stopBundle();
     }
 
     /**
      * Discovers map names in the supplied hazelcast configuration based on the map prefix.
-     * 
+     *
      * @param config The config object
      * @return The prefix of the map name
      */

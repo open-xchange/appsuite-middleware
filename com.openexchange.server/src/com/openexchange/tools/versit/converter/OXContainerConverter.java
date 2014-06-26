@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -88,11 +88,15 @@ import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
+import com.openexchange.contact.internal.mapping.ContactMapper;
+import com.openexchange.contact.internal.mapping.ContactMapping;
+import com.openexchange.contact.internal.mapping.StringMapping;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.contact.ContactConfig;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
@@ -109,7 +113,6 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -121,6 +124,8 @@ import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.tools.images.ScaleType;
 import com.openexchange.tools.images.TransformedImage;
 import com.openexchange.tools.io.IOUtils;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.Parameter;
 import com.openexchange.tools.versit.ParameterValue;
@@ -199,17 +204,12 @@ public class OXContainerConverter {
     }
 
     private final Context ctx;
-
     private final TimeZone timezone;
-
-    private String organizerMailAddress;
-
+    private final String organizerMailAddress;
+    private final Session optSession;
     private boolean sendUTC = true;
-
     private boolean sendFloating;
-
     private boolean addDisplayName4DList;
-
     private boolean skipOxCTypeAttribute;
 
     public OXContainerConverter(final TimeZone timezone, final String organizerMailAddress) {
@@ -217,28 +217,39 @@ public class OXContainerConverter {
         this.timezone = timezone;
         this.organizerMailAddress = organizerMailAddress;
         ctx = null;
+        optSession = null;
     }
 
     public OXContainerConverter(final Session session) throws ConverterException, OXException {
         super();
-        try {
-            ctx = ContextStorage.getStorageContext(session.getContextId());
-        } catch (final OXException e) {
-            throw new ConverterException(e);
+        if (session instanceof ServerSession) {
+            ctx = ((ServerSession) session).getContext();
+        } else {
+            try {
+                ctx = ContextStorage.getStorageContext(session.getContextId());
+            } catch (final OXException e) {
+                throw new ConverterException(e);
+            }
         }
         timezone = TimeZoneUtils.getTimeZone(UserStorage.getInstance().getUser(session.getUserId(), ctx).getTimeZone());
+        this.organizerMailAddress = null;
+        this.optSession = session;
     }
 
     public OXContainerConverter(final Session session, final Context ctx) throws OXException {
         super();
         this.ctx = ctx;
         timezone = TimeZoneUtils.getTimeZone(UserStorage.getInstance().getUser(session.getUserId(), ctx).getTimeZone());
+        this.organizerMailAddress = null;
+        this.optSession = session;
     }
 
     public OXContainerConverter(final Context ctx, final TimeZone tz) {
         super();
         this.ctx = ctx;
         timezone = tz;
+        this.organizerMailAddress = null;
+        this.optSession = null;
     }
 
     public void close() {
@@ -686,32 +697,6 @@ public class OXContainerConverter {
         // TODO CLASS
         // KEY is ignored
 
-        // Multiple properties
-
-        final int WORK = 0;
-        final int HOME = 1;
-        final int CELL = 2;
-        final int CAR = 3;
-        final int ISDN = 4;
-        final int PAGER = 5;
-        final int OTHER = 6;
-
-        final int VOICE = 0;
-        final int FAX = 1;
-
-        final int[][][] phones = {
-            { { Contact.TELEPHONE_BUSINESS1, Contact.TELEPHONE_BUSINESS2 }, { Contact.FAX_BUSINESS } },
-            { { Contact.TELEPHONE_HOME1, Contact.TELEPHONE_HOME2 }, { Contact.FAX_HOME } },
-            { { Contact.CELLULAR_TELEPHONE1, Contact.CELLULAR_TELEPHONE2 }, {} }, { { Contact.TELEPHONE_CAR }, {} },
-            { { Contact.TELEPHONE_ISDN }, {} }, { { Contact.TELEPHONE_PAGER }, {} }, { { Contact.TELEPHONE_OTHER }, { Contact.FAX_OTHER } } };
-
-        final int[][][] index = {
-            { { 0 }, { 0 } }, { { 0 }, { 0 } }, { { 0 }, { 0 } }, { { 0 }, { 0 } }, { { 0 }, { 0 } }, { { 0 }, { 0 } }, { { 0 }, { 0 } } };
-
-        final int[] emails = { Contact.EMAIL1, Contact.EMAIL2, Contact.EMAIL3 };
-
-        final int[] emailIndex = { 0 };
-
         final ArrayList<Object> cats = new ArrayList<Object>();
 
         boolean dlist = false;
@@ -767,50 +752,7 @@ public class OXContainerConverter {
                 }
             }
             // LABEL is ignored
-            // TEL
-            else if (P_TEL.equals(property.name)) {
-                int idx = WORK;
-                boolean isVoice = false;
-                boolean isFax = false;
-                final Parameter type = property.getParameter(P_TYPE);
-                if (type != null) {
-                    for (int j = 0; j < type.getValueCount(); j++) {
-                        final String value = type.getValue(j).getText();
-                        if (idx == WORK || idx == HOME) {
-                            if (value.equalsIgnoreCase(PARAM_WORK)) {
-                                idx = WORK;
-                            } else if (value.equalsIgnoreCase(PARAM_HOME)) {
-                                idx = HOME;
-                            } else if (value.equalsIgnoreCase(PARAM_OTHER)) {
-                                idx = OTHER;
-                            } else if (value.equalsIgnoreCase("car")) {
-                                idx = CAR;
-                            } else if (value.equalsIgnoreCase("isdn")) {
-                                idx = ISDN;
-                            } else if (value.equalsIgnoreCase("cell")) {
-                                idx = CELL;
-                            } else if (value.equalsIgnoreCase("pager")) {
-                                idx = PAGER;
-                            }
-                        }
-                        if (value.equalsIgnoreCase(PARAM_VOICE)) {
-                            isVoice = true;
-                        } else if (value.equalsIgnoreCase("fax")) {
-                            isFax = true;
-                        }
-                    }
-                }
-                if (!isVoice && !isFax) {
-                    isVoice = true;
-                }
-                final Object value = property.getValue();
-                if (isVoice) {
-                    ComplexProperty(contactContainer, phones[idx][VOICE], index[idx][VOICE], value);
-                }
-                if (isFax) {
-                    ComplexProperty(contactContainer, phones[idx][FAX], index[idx][FAX], value);
-                }
-            }
+            // TEL is set later
             // IM
             else if ("IMPP".equals(property.name)) {
                 String value = property.getValue().toString();
@@ -1016,6 +958,9 @@ public class OXContainerConverter {
         }
         ListValue(contactContainer, CommonObject.CATEGORIES, cats, ",");
 
+        // TEL
+        applyTelephoneNumbers(contactContainer, object);
+
         return contactContainer;
     }
 
@@ -1071,21 +1016,21 @@ public class OXContainerConverter {
      */
     private static Parameter getABCropRectangle(TransformedImage transformedImage) {
         Parameter parameter = new Parameter("X-ABCROP-RECTANGLE");
-        StringAllocator stringAllocator = new StringAllocator(64);
-        stringAllocator.append("ABClipRect_1&");
+        StringBuilder StringBuilder = new StringBuilder(64);
+        StringBuilder.append("ABClipRect_1&");
         int width = transformedImage.getWidth();
         int height = transformedImage.getHeight();
         if (width < height) {
-            stringAllocator.append('-').append((height - width) / 2).append("&0&").append(height).append('&').append(height);
+            StringBuilder.append('-').append((height - width) / 2).append("&0&").append(height).append('&').append(height);
         } else if (width > height) {
-            stringAllocator.append("0&-").append((width - height) / 2).append('&').append(width).append('&').append(width);
+            StringBuilder.append("0&-").append((width - height) / 2).append('&').append(width).append('&').append(width);
         } else {
-            stringAllocator.append("0&0&").append(width).append('&').append(height);
+            StringBuilder.append("0&0&").append(width).append('&').append(height);
         }
         if (null != transformedImage.getMD5()) {
-            stringAllocator.append('&').append(Base64.encode(transformedImage.getMD5()));
+            StringBuilder.append('&').append(Base64.encode(transformedImage.getMD5()));
         }
-        parameter.addValue(new ParameterValue(stringAllocator.toString()));
+        parameter.addValue(new ParameterValue(StringBuilder.toString()));
         return parameter;
     }
 
@@ -1093,26 +1038,27 @@ public class OXContainerConverter {
      * Performs a crop operation on the source image as defined by the
      * supplied clipping rectangle.
      *
-     * @param source the source image
+     * @param imageBytes the source image
      * @param clipRect the clip rectangle from an 'X-ABCROP-RECTANGLE' property
      * @param formatName the target image format
      * @return the cropped image
      * @throws IOException
      * @throws OXException
      */
-    private static byte[] doABCrop(byte[] source, Rectangle clipRect, String formatName) throws IOException, OXException {
+    private byte[] doABCrop(byte[] imageBytes, Rectangle clipRect, String formatName) throws IOException, OXException {
     	InputStream inputStream = null;
     	try {
     		/*
     		 * read source image
     		 */
-    		inputStream = new ByteArrayInputStream(source);
+    		inputStream = new ByteArrayInputStream(imageBytes);
         	BufferedImage sourceImage = ImageIO.read(inputStream);
         	/*
         	 * crop the image
         	 */
         	ImageTransformationService imageService = ServerServiceRegistry.getInstance().getService(ImageTransformationService.class, true);
-        	return imageService.transfom(sourceImage).crop(clipRect.x * -1,
+        	Object source = null == optSession ? null : optSession.getSessionID();
+        	return imageService.transfom(sourceImage, source).crop(clipRect.x * -1,
         			clipRect.height + clipRect.y - sourceImage.getHeight(), clipRect.width, clipRect.height).getBytes(formatName);
     	} finally {
     		Streams.close(inputStream);
@@ -1122,7 +1068,7 @@ public class OXContainerConverter {
     /**
      * Scales an image if needed to fit into the supplied rectangular area.
      *
-     * @param source The image data
+     * @param imageBytes The image data
      * @param maxWidth The maximum target width
      * @param maxHeight The maximum target height
      * @param formatName The image format name
@@ -1130,14 +1076,18 @@ public class OXContainerConverter {
      * @throws IOException
      * @throws OXException
      */
-    private static TransformedImage scaleImageIfNeeded(byte[] source, int maxWidth, int maxHeight, String formatName) throws IOException, OXException {
-        ImageTransformationService imageService = ServerServiceRegistry.getInstance().getService(
-            ImageTransformationService.class, true);
+    private TransformedImage scaleImageIfNeeded(byte[] imageBytes, int maxWidth, int maxHeight, String formatName) throws IOException, OXException {
+        ImageTransformationService imageService = ServerServiceRegistry.getInstance().getService(ImageTransformationService.class, true);
+        Object source = null == optSession ? null : optSession.getSessionID();
         if (0 < maxWidth || 0 < maxHeight) {
-            return imageService.transfom(source).scale(maxWidth, maxHeight, ScaleType.CONTAIN).getTransformedImage(formatName);
-        } else {
-            return imageService.transfom(source).getTransformedImage(formatName);
+            try {
+                return imageService.transfom(imageBytes, source).scale(maxWidth, maxHeight, ScaleType.CONTAIN).getTransformedImage(formatName);
+            } catch (final IllegalArgumentException e) {
+                throw AjaxExceptionCodes.BAD_REQUEST_CUSTOM.create(e, e.getMessage());
+            }
         }
+
+        return imageService.transfom(imageBytes, source).getTransformedImage(formatName);
     }
 
     /**
@@ -1149,7 +1099,7 @@ public class OXContainerConverter {
      * @throws IOException
      * @throws OXException
      */
-    private static TransformedImage scaleImageIfNeeded(byte[] source, String formatName) throws IOException, OXException {
+    private TransformedImage scaleImageIfNeeded(byte[] source, String formatName) throws IOException, OXException {
         if (null != source) {
             int maxWidth = -1;
             int maxHeight = -1;
@@ -1236,6 +1186,151 @@ public class OXContainerConverter {
             contact.setImage1(bytes);
             contact.setImageContentType(mimeType);
         }
+    }
+
+    /**
+     * Sets all <code>TEL</code> properties found in the versit object in a contact.
+     *
+     * @param target The contact to set the properties in
+     * @param source The versit object to get the <code>TEL</code> parameters from
+     */
+    private static void applyTelephoneNumbers(Contact target, VersitObject source) {
+        List<Property> properties = source.getProperties(P_TEL);
+        if (null == properties) {
+            return;
+        }
+        for (Property property : properties) {
+            Parameter typeParameter = property.getParameter(P_TYPE);
+            boolean preferred = containsValue("pref", typeParameter);
+            String value = String.valueOf(property.getValue());
+            /*
+             * pager
+             */
+            if (containsValue("pager", typeParameter) &&
+                setProperty(target, value, preferred, ContactField.TELEPHONE_PAGER, ContactField.TELEPHONE_OTHER)) {
+                continue;
+            }
+            /*
+             * textphone
+             */
+            if (containsValue("textphone", typeParameter) &&
+                setProperty(target, value, preferred, ContactField.TELEPHONE_TTYTDD, ContactField.TELEPHONE_OTHER)) {
+                continue;
+            }
+            /*
+             * car
+             */
+            if (containsValue("car", typeParameter) &&
+                setProperty(target, value, preferred, ContactField.TELEPHONE_CAR, ContactField.TELEPHONE_OTHER)) {
+                continue;
+            }
+            /*
+             * isdn
+             */
+            if (containsValue("isdn", typeParameter) &&
+                setProperty(target, value, preferred, ContactField.TELEPHONE_ISDN, ContactField.TELEPHONE_OTHER)) {
+                continue;
+            }
+            /*
+             * cell
+             */
+            if (containsValue("cell", typeParameter) &&
+                setProperty(target, value, preferred, ContactField.CELLULAR_TELEPHONE1, ContactField.CELLULAR_TELEPHONE2,
+                    ContactField.TELEPHONE_OTHER)) {
+                continue;
+            }
+            boolean home = containsValue(PARAM_HOME, typeParameter);
+            boolean business = containsValue(PARAM_WORK, typeParameter);
+            boolean other = containsValue(PARAM_OTHER, typeParameter);
+            /*
+             * voice
+             */
+            if (containsValue("voice", typeParameter)) {
+                if (business && setProperty(target, value, preferred, ContactField.TELEPHONE_BUSINESS1,
+                    ContactField.TELEPHONE_BUSINESS2, ContactField.TELEPHONE_COMPANY, ContactField.TELEPHONE_OTHER)) {
+                    continue;
+                }
+                if (home && setProperty(target, value, preferred, ContactField.TELEPHONE_HOME1, ContactField.TELEPHONE_HOME2,
+                    ContactField.TELEPHONE_OTHER)) {
+                    continue;
+                }
+                if (other && setProperty(target, value, preferred, ContactField.TELEPHONE_OTHER)) {
+                    continue;
+                }
+                if (setProperty(target, value, preferred, ContactField.TELEPHONE_BUSINESS1, ContactField.TELEPHONE_BUSINESS2,
+                    ContactField.TELEPHONE_COMPANY, ContactField.TELEPHONE_HOME1, ContactField.TELEPHONE_HOME2,
+                    ContactField.TELEPHONE_OTHER)) {
+                    continue;
+                }
+            }
+            /*
+             * fax
+             */
+            if (containsValue("fax", typeParameter)) {
+                if (business && setProperty(target, value, preferred, ContactField.FAX_BUSINESS, ContactField.FAX_OTHER)) {
+                    continue;
+                }
+                if (home && setProperty(target, value, preferred, ContactField.FAX_HOME, ContactField.FAX_OTHER)) {
+                    continue;
+                }
+                if (other && setProperty(target, value, preferred, ContactField.FAX_OTHER)) {
+                    continue;
+                }
+                if (setProperty(target, value, preferred, ContactField.FAX_BUSINESS, ContactField.FAX_HOME, ContactField.FAX_OTHER)) {
+                    continue;
+                }
+            }
+        }
+    }
+
+    /**
+     * Sets the provided textual property to the first unassigned field of the supplied possibilities.
+     *
+     * @param target The contact to set the property
+     * @param value The property value
+     * @param preferred <code>true</code> if the property is preferred, i.e. it should be set in favor of an existing value
+     * @param possibleFields The possible contact fields
+     * @return <code>true</code> if a value was set, <code>false</code>, otherwise
+     */
+    private static boolean setProperty(Contact target, String value, boolean preferred, ContactField...possibleFields) {
+        for (int i = 0; i < possibleFields.length; i++) {
+            try {
+                ContactMapping<? extends Object> genericMapping = ContactMapper.getInstance().get(possibleFields[i]);
+                if (null != genericMapping && StringMapping.class.isInstance(genericMapping)) {
+                    StringMapping mapping = ((StringMapping)genericMapping);
+                    if (false == mapping.isSet(target)) {
+                        mapping.set(target, value);
+                        return true;
+                    } else if (preferred) {
+                        String previousValue = mapping.get(target);
+                        mapping.set(target, value);
+                        value = previousValue;
+                    }
+                }
+            } catch (OXException e) {
+                LOG.warn("Error setting {} to {}", possibleFields[i], value);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Gets a value indicating a parameter contains a value or not, ignoring case.
+     *
+     * @param value The value to check
+     * @param parameter The parameter to lookup the value in
+     * @return <code>true</code> if the parameter contains the value, <code>false</code>, otherwise
+     */
+    private static boolean containsValue(String value, Parameter parameter) {
+        if (null != parameter && 0 < parameter.getValueCount()) {
+            for (int i = 0; i < parameter.getValueCount(); i++) {
+                ParameterValue parameterValue = parameter.getValue(i);
+                if (null != parameterValue && value.equalsIgnoreCase(parameterValue.getText())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private static boolean IntegerProperty(final CommonObject containerObj, final VersitObject object, final String VersitName, final int fieldNumber) throws ConverterException {
@@ -1906,20 +2001,21 @@ public class OXContainerConverter {
                 Contact.COUNTRY_OTHER);
             // LABEL is ignored
             // TEL
-            addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_WORK, PARAM_VOICE }, contact.getTelephoneBusiness1());
+            addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_WORK, PARAM_VOICE, "pref" }, contact.getTelephoneBusiness1());
             addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_WORK, PARAM_VOICE }, contact.getTelephoneBusiness2());
             addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_WORK, "fax" }, contact.getFaxBusiness());
             addProperty(object, P_TEL, P_TYPE, new String[] { "car", PARAM_VOICE }, contact.getTelephoneCar());
-            addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_HOME, PARAM_VOICE }, contact.getTelephoneHome1());
+            addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_HOME, PARAM_VOICE, "pref" }, contact.getTelephoneHome1());
             addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_HOME, PARAM_VOICE }, contact.getTelephoneHome2());
             addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_HOME, "fax" }, contact.getFaxHome());
-            addProperty(object, P_TEL, P_TYPE, new String[] { "cell", PARAM_VOICE }, contact.getCellularTelephone1());
+            addProperty(object, P_TEL, P_TYPE, new String[] { "cell", PARAM_VOICE, "pref" }, contact.getCellularTelephone1());
             addProperty(object, P_TEL, P_TYPE, new String[] { "cell", PARAM_VOICE }, contact.getCellularTelephone2());
 
             addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_OTHER, PARAM_VOICE }, contact.getTelephoneOther());
             addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_OTHER, "fax" }, contact.getFaxOther());
             addProperty(object, P_TEL, P_TYPE, new String[] { "isdn" }, contact.getTelephoneISDN());
             addProperty(object, P_TEL, P_TYPE, new String[] { "pager" }, contact.getTelephonePager());
+            addProperty(object, P_TEL, P_TYPE, new String[] { "textphone" }, contact.getTelephoneTTYTTD());
             // EMAIL
             addProperty(object, P_EMAIL, P_TYPE, 1 == contact.getDefaultAddress() ?
                 new String[] { "INTERNET", PARAM_WORK, "pref" } : new String[] { "INTERNET", PARAM_WORK }, contact.getEmail1());

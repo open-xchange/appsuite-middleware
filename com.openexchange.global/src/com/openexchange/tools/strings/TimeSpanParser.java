@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -95,8 +95,8 @@ public class TimeSpanParser  implements StringParser {
         if (span == null) {
             return Long.valueOf(-1);
         }
-        final com.openexchange.java.StringAllocator numberBuilder = new com.openexchange.java.StringAllocator();
-        final com.openexchange.java.StringAllocator unitBuilder = new com.openexchange.java.StringAllocator();
+        final StringBuilder numberBuilder = new StringBuilder();
+        final StringBuilder unitBuilder = new StringBuilder();
         int mode = 0;
         long tally = 0;
 
@@ -114,8 +114,8 @@ public class TimeSpanParser  implements StringParser {
                         throw new IllegalArgumentException("I don't know unit " + unit);
                     }
                     tally += Long.parseLong(numberBuilder.toString()) * factor.longValue();
-                    numberBuilder.reinitTo(0);
-                    unitBuilder.reinitTo(0);
+                    numberBuilder.setLength(0);
+                    unitBuilder.setLength(0);
                     mode = 0;
                     numberBuilder.append(c);
                 }

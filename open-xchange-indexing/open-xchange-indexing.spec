@@ -8,7 +8,7 @@ BuildRequires: open-xchange-core
 BuildRequires: open-xchange-admin
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 26
+%define        ox_release 7
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -58,20 +58,34 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/solr/*
 
 %changelog
+* Mon Jun 23 2014 Steffen Templin <steffen.templin@open-xchange.com>
+Seventh candidate for 7.6.0 release
+* Fri Jun 20 2014 Steffen Templin <steffen.templin@open-xchange.com>
+Sixth release candidate for 7.6.0
+* Fri Jun 13 2014 Steffen Templin <steffen.templin@open-xchange.com>
+Fifth release candidate for 7.6.0
 * Fri Jun 13 2014 Steffen Templin <steffen.templin@open-xchange.com>
 Build for patch 2014-06-23
 * Thu Jun 05 2014 Steffen Templin <steffen.templin@open-xchange.com>
 Build for patch 2014-06-16
+* Fri May 30 2014 Steffen Templin <steffen.templin@open-xchange.com>
+Fourth release candidate for 7.6.0
 * Thu May 22 2014 Steffen Templin <steffen.templin@open-xchange.com>
 Build for patch 2014-05-26
 * Fri May 16 2014 Steffen Templin <steffen.templin@open-xchange.com>
 Build for patch 2014-05-26
+* Fri May 16 2014 Steffen Templin <steffen.templin@open-xchange.com>
+Third release candidate for 7.6.0
 * Wed May 07 2014 Steffen Templin <steffen.templin@open-xchange.com>
 Build for patch 2014-05-05
+* Mon May 05 2014 Steffen Templin <steffen.templin@open-xchange.com>
+Second release candidate for 7.6.0
 * Fri Apr 25 2014 Steffen Templin <steffen.templin@open-xchange.com>
 Build for patch 2014-04-29
 * Tue Apr 15 2014 Steffen Templin <steffen.templin@open-xchange.com>
 Build for patch 2014-04-22
+* Fri Apr 11 2014 Steffen Templin <steffen.templin@open-xchange.com>
+First release candidate for 7.6.0
 * Thu Apr 10 2014 Steffen Templin <steffen.templin@open-xchange.com>
 Build for patch 2014-04-11
 * Thu Apr 03 2014 Steffen Templin <steffen.templin@open-xchange.com>
@@ -98,6 +112,8 @@ Build for patch 2014-02-26
 Build for patch 2014-02-28
 * Fri Feb 21 2014 Steffen Templin <steffen.templin@open-xchange.com>
 Build for patch 2014-02-26
+* Wed Feb 12 2014 Steffen Templin <steffen.templin@open-xchange.com>
+prepare for 7.6.0
 * Fri Feb 07 2014 Steffen Templin <steffen.templin@open-xchange.com>
 Sixth release candidate for 7.4.2
 * Thu Feb 06 2014 Steffen Templin <steffen.templin@open-xchange.com>

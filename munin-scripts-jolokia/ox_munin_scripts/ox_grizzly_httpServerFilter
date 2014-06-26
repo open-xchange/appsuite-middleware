@@ -3,8 +3,9 @@
 #%# capabilities=autoconf
 
 use strict;
-use JMX::Jmx4Perl;
-use JMX::Jmx4Perl::Request;   # Type constants are exported here
+
+use LWP;
+use JSON;
 
 
 if ( $ARGV[0] and $ARGV[0] eq "autoconf")
@@ -24,7 +25,7 @@ if ( $ARGV[0] and $ARGV[0] eq "config") {
     print "graph_category Open Xchange\n";
     print "graph_vlabel Number\n";
     
-    print "current-suspended-request-count.label,current-suspended-request-count \n";
+    print "current-suspended-request-count.label current-suspended-request-count \n";
     print "current-suspended-request-count.draw LINE1\n";
     print "current-suspended-request-count.type DERIVE\n";
     print "current-suspended-request-count.min 0\n";
@@ -51,66 +52,42 @@ if ( $ARGV[0] and $ARGV[0] eq "config") {
     exit 0
 }
 
-### Settings and connection Testing
+my $url = $ENV{oxJolokiaUrl};
+my $username = $ENV{oxJolokiaUser};
+my $password = $ENV{oxJolokiaPassword};
 
-my $jmx = new JMX::Jmx4Perl(url => $ENV{oxJolokiaUrl},
-user => $ENV{oxJolokiaUser},
-password => $ENV{oxJolokiaPassword});
+callUrl("current-suspended-request-count","/read/org.glassfish.grizzly:name=HttpServerFilter,pp=!/gmbal-root!/HttpServer[HttpServer]!/NetworkListener[NetworkListener[http-listener]],type=HttpServerFilter/current-suspended-request-count");
+callUrl("requests-cancelled-count","/read/org.glassfish.grizzly:name=HttpServerFilter,pp=!/gmbal-root!/HttpServer[HttpServer]!/NetworkListener[NetworkListener[http-listener]],type=HttpServerFilter/requests-cancelled-count");
+callUrl("requests-completed-count","/read/org.glassfish.grizzly:name=HttpServerFilter,pp=!/gmbal-root!/HttpServer[HttpServer]!/NetworkListener[NetworkListener[http-listener]],type=HttpServerFilter/requests-completed-count");
+callUrl("requests-received-count","/read/org.glassfish.grizzly:name=HttpServerFilter,pp=!/gmbal-root!/HttpServer[HttpServer]!/NetworkListener[NetworkListener[http-listener]],type=HttpServerFilter/requests-received-count");
+callUrl("requests-timed-out-count","/read/org.glassfish.grizzly:name=HttpServerFilter,pp=!/gmbal-root!/HttpServer[HttpServer]!/NetworkListener[NetworkListener[http-listener]],type=HttpServerFilter/requests-timed-out-count");
 
-### Test if a connection can be made
-my $request = new JMX::Jmx4Perl::Request({type => AGENT_VERSION});
-my $response = $jmx->request($request);
-if ($response->is_error()){
-	my $status = $response->status();
-	if ($status == 404) {
-		die "Link to servlet might not be set correctly, this can be done by altering /etc/munin/plugin-conf.d/ox and setting the correct path to your jolokia servlet";
-	}
-	elsif ($status == 401) {
-		die "Credentials to login might be not set correctly. The credentials are set inside /opt/open-xchange/etc/jolokia.properties on the OX, for munin, those need to be altered at /etc/munin/plugin-conf.d/ox";
+sub callUrl {
+	my $ua = LWP::UserAgent->new();
+	my $req = HTTP::Request->new(GET => "$url$_[1]");
+	$req->authorization_basic($username,$password);
+	
+	$req->header('Accept', => 'text/html');
+	
+	my $response = $ua->request($req);
+	
+	if ($response->is_success) {
+		my $json = decode_json($response->decoded_content);
+		if (defined $json->{value}){
+			print "$_[0].value ";
+			print $json->{value},"\n";
+		}
 	}
 	else {
-		die "Something went wrong ",$status;
+		my $status = $response->status_line;
+		if ($status == 404) {
+			die "Link to servlet might not be set correctly, this can be done by altering /etc/munin/plugin-conf.d/ox and setting the correct path to your jolokia servlet";
+		}
+		elsif ($status == 401) {
+			die "Credentials to login might be not set correctly. The credentials are set inside /opt/open-xchange/etc/jolokia.properties on the OX, for munin, those need to be altered at /etc/munin/plugin-conf.d/ox";
+		}
+		else {
+			die "Something went wrong:\n",$status;
+		}
 	}
-}
-
-###
-
-$request = new JMX::Jmx4Perl::Request(READ,
-	"org.glassfish.grizzly:name=HttpServerFilter,pp=/gmbal-root/HttpServer[HttpServer]/NetworkListener[NetworkListener[http-listener]],type=HttpServerFilter",
-	"current-suspended-request-count");
-$response = $jmx->request($request);
-if ($response->is_ok()){
-	print "current-suspended-request-count.value ",$response->value(),"\n";
-}
-
-$request = new JMX::Jmx4Perl::Request(READ,
-	"org.glassfish.grizzly:name=HttpServerFilter,pp=/gmbal-root/HttpServer[HttpServer]/NetworkListener[NetworkListener[http-listener]],type=HttpServerFilter",
-	"requests-cancelled-count");
-$response = $jmx->request($request);
-if ($response->is_ok()){
-	print "requests-cancelled-count.value ",$response->value(),"\n";
-}
-
-$request = new JMX::Jmx4Perl::Request(READ,
-	"org.glassfish.grizzly:name=HttpServerFilter,pp=/gmbal-root/HttpServer[HttpServer]/NetworkListener[NetworkListener[http-listener]],type=HttpServerFilter",
-	"requests-completed-count");
-$response = $jmx->request($request);
-if ($response->is_ok()){
-	print "requests-completed-count.value ",$response->value(),"\n";
-}
-
-$request = new JMX::Jmx4Perl::Request(READ,
-	"org.glassfish.grizzly:name=HttpServerFilter,pp=/gmbal-root/HttpServer[HttpServer]/NetworkListener[NetworkListener[http-listener]],type=HttpServerFilter",
-	"requests-received-count");
-$response = $jmx->request($request);
-if ($response->is_ok()){
-	print "requests-received-count.value ",$response->value(),"\n";
-}
-
-$request = new JMX::Jmx4Perl::Request(READ,
-	"org.glassfish.grizzly:name=HttpServerFilter,pp=/gmbal-root/HttpServer[HttpServer]/NetworkListener[NetworkListener[http-listener]],type=HttpServerFilter",
-	"requests-timed-out-count");
-$response = $jmx->request($request);
-if ($response->is_ok()){
-	print "requests-timed-out-count.value ",$response->value(),"\n";
 }

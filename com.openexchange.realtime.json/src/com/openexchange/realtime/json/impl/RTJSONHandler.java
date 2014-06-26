@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -55,6 +55,8 @@ import java.util.concurrent.TimeUnit;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
@@ -63,6 +65,7 @@ import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.json.management.ManagementHouseKeeper;
 import com.openexchange.realtime.json.osgi.JSONServiceRegistry;
+import com.openexchange.realtime.json.osgi.RealtimeJanitors;
 import com.openexchange.realtime.json.protocol.RTProtocol;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
@@ -80,7 +83,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class RTJSONHandler implements StanzaSender {
 
-    protected final StateManager stateManager = new StateManager();
+    private static final Logger LOG = LoggerFactory.getLogger(RTJSONHandler.class);
+    protected final StateManager stateManager;
     protected final RTProtocol protocol;
     protected final StanzaSequenceGate gate;
 
@@ -88,6 +92,8 @@ public class RTJSONHandler implements StanzaSender {
 
     public RTJSONHandler() {
         super();
+        stateManager = new StateManager();
+        RealtimeJanitors.getInstance().addJanitor(stateManager);
         protocol = RTProtocolImpl.getInstance();
         gate = new StanzaSequenceGate(RTJSONHandler.class.getSimpleName()) {
 
@@ -97,6 +103,7 @@ public class RTJSONHandler implements StanzaSender {
             }
         };
         ManagementHouseKeeper.getInstance().addManagementObject(gate.getManagementObject());
+        RealtimeJanitors.getInstance().addJanitor(gate);
         protocolHandler = new JSONProtocolHandler(protocol, gate);
         startCleanupTimer();
     }
@@ -148,13 +155,16 @@ public class RTJSONHandler implements StanzaSender {
      */
     private void startCleanupTimer() {
         JSONServiceRegistry.getInstance().getService(TimerService.class).scheduleAtFixedRate(new Runnable() {
-
             @Override
             public void run() {
+                try {
                 stateManager.timeOutStaleStates(System.currentTimeMillis());
+                } catch (Throwable t) {
+                    LOG.error("Error during CleanupTimer run.", t);
+                }
             }
 
-        }, 1, 15, TimeUnit.MINUTES);
+        }, 1, 10, TimeUnit.SECONDS);
     }
 
     /**

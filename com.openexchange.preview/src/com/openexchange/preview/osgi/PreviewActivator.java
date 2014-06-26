@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -151,8 +151,7 @@ public class PreviewActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final TikaPreviewService tikaPreviewService = new TikaPreviewService(this);
-        final DelegationPreviewService delegationPreviewService = new DelegationPreviewService(tikaPreviewService);
+        final DelegationPreviewService delegationPreviewService = new DelegationPreviewService(new TikaPreviewService(this));
         registerService(PreviewService.class, delegationPreviewService);
         /*
          * Trackers

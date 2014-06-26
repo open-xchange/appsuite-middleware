@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -63,10 +63,12 @@ import com.openexchange.messaging.json.GUI;
 import com.openexchange.messaging.json.ManagedFileInputStreamRegistry;
 import com.openexchange.messaging.json.MessagingMessageParser;
 import com.openexchange.messaging.json.MessagingMessageWriter;
+import com.openexchange.messaging.json.Services;
 import com.openexchange.messaging.json.actions.accounts.AccountActionFactory;
 import com.openexchange.messaging.json.actions.messages.MessagingActionFactory;
 import com.openexchange.messaging.json.actions.services.ServicesActionFactory;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
+import com.openexchange.oauth.OAuthService;
 
 /**
  * {@link MessagingJSONActivator} - The messaging JSON activator.
@@ -76,8 +78,6 @@ import com.openexchange.messaging.registry.MessagingServiceRegistry;
 public class MessagingJSONActivator extends AJAXModuleActivator {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MessagingJSONActivator.class);
-
-    private static final Class<?>[] NEEDED_SERVICES = new Class[] { MessagingServiceRegistry.class, HttpService.class, CacheService.class, ConfigViewFactory.class };
 
     private MessagingServiceRegistry registry;
 
@@ -93,7 +93,7 @@ public class MessagingJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+        return new Class[] { MessagingServiceRegistry.class, HttpService.class, CacheService.class, ConfigViewFactory.class, OAuthService.class };
     }
 
     @Override
@@ -119,6 +119,8 @@ public class MessagingJSONActivator extends AJAXModuleActivator {
     @Override
     protected void startBundle() throws Exception {
         try {
+            Services.setServiceLookup(this);
+
             parser = new MessagingMessageParser();
 
             rememberTracker(new ContentParserTracker(context, parser));
@@ -191,7 +193,8 @@ public class MessagingJSONActivator extends AJAXModuleActivator {
                 fileInputStreamRegistry.stop();
                 ManagedFileInputStreamRegistry.dropInstance();
             }
-            cleanUp();
+            Services.setServiceLookup(null);
+            super.stopBundle();
         } catch (final Exception x) {
             LOG.error("", x);
             throw x;

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -134,10 +134,10 @@ public class FormatLocalizedStringReplacement implements TemplateReplacement {
         if (format == null) {
             return replacement;
         }
-        final String result = String.format(getStringHelper().getString(format), replacement);
+        final String result = String.format(getStringHelper().getString(format), getStringHelper().getString(replacement));
         if (changed) {
             return new StringBuilder(result.length() + PREFIX_MODIFIED.length()).append(PREFIX_MODIFIED).append(result)
-                    .toString();
+                .toString();
         }
         return result;
     }

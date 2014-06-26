@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -217,7 +217,7 @@ public final class Databases {
      * @return the ready to use SQL statement.
      */
     public static String getIN(final String sql, final int length) {
-        final com.openexchange.java.StringAllocator retval = new com.openexchange.java.StringAllocator(sql);
+        final StringBuilder retval = new StringBuilder(sql);
         for (int i = 0; i < length; i++) {
             retval.append("?,");
         }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,24 +49,23 @@
 
 package com.openexchange.subscribe.xing.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.subscribe.SubscribeService;
+import com.openexchange.subscribe.SubscriptionExecutionService;
+import com.openexchange.subscribe.crawler.CrawlerBlacklister;
 import com.openexchange.subscribe.xing.Services;
 import com.openexchange.subscribe.xing.XingSubscribeService;
-import com.openexchange.subscribe.xing.session.XingEventHandler;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.xing.access.XingOAuthAccessProvider;
 
 
 /**
@@ -77,6 +76,7 @@ import com.openexchange.subscribe.xing.session.XingEventHandler;
 public final class XingSubscribeActivator extends HousekeepingActivator {
 
     private ServiceRegistration<SubscribeService> serviceRegistration;
+    private ServiceRegistration<CrawlerBlacklister> blacklisterRegistration;
 
     /**
      * Initializes a new {@link XingSubscribeActivator}.
@@ -87,25 +87,21 @@ public final class XingSubscribeActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { OAuthService.class, ContextService.class, SessiondService.class, DatabaseService.class };
+        return new Class[] { OAuthService.class, ContextService.class, SessiondService.class, DatabaseService.class, XingOAuthAccessProvider.class, ThreadPoolService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         Services.setServices(this);
         track(OAuthServiceMetaData.class, new OAuthServiceMetaDataRegisterer(context, this));
+        trackService(SubscriptionExecutionService.class);
+        trackService(FolderUpdaterRegistry.class);
         openTrackers();
         /*
          * Register update task
          */
         final DefaultUpdateTaskProviderService providerService = new DefaultUpdateTaskProviderService(new com.openexchange.subscribe.xing.groupware.XingCrawlerSubscriptionsRemoverTask());
         registerService(UpdateTaskProviderService.class.getName(), providerService);
-        /*
-         * Register event handler
-         */
-        final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-        serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-        registerService(EventHandler.class, new XingEventHandler(), serviceProperties);
     }
 
     @Override
@@ -120,6 +116,14 @@ public final class XingSubscribeActivator extends HousekeepingActivator {
      */
     public synchronized void registerSubscribeService() {
         if (null == serviceRegistration) {
+            final CrawlerBlacklister blacklister = new CrawlerBlacklister() {
+
+                @Override
+                public String getCrawlerId() {
+                    return "com.openexchange.subscribe.xing";
+                }
+            };
+            blacklisterRegistration = context.registerService(CrawlerBlacklister.class, blacklister, null);
             serviceRegistration = context.registerService(SubscribeService.class, new XingSubscribeService(this), null);
             org.slf4j.LoggerFactory.getLogger(XingSubscribeActivator.class).info("XingSubscribeService was started");
         }
@@ -133,8 +137,13 @@ public final class XingSubscribeActivator extends HousekeepingActivator {
         if (null != serviceRegistration) {
             serviceRegistration.unregister();
             this.serviceRegistration = null;
-            org.slf4j.LoggerFactory.getLogger(XingSubscribeActivator.class).info("XingSubscribeService was stopped");
         }
+        final ServiceRegistration<CrawlerBlacklister> blacklisterRegistration = this.blacklisterRegistration;
+        if (null != blacklisterRegistration) {
+            blacklisterRegistration.unregister();
+            this.blacklisterRegistration = null;
+        }
+        org.slf4j.LoggerFactory.getLogger(XingSubscribeActivator.class).info("XingSubscribeService was stopped");
     }
 
     /**

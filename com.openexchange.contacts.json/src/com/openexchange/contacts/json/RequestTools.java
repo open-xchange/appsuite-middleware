@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -64,7 +64,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.contacts.json.actions.ContactAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
@@ -81,31 +80,6 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class RequestTools {
-
-    public static int[] getColumnsAsIntArray(final AJAXRequestData request) throws OXException {
-        final String valueStr = request.getParameter("columns");
-        if (null == valueStr) {
-        	return null;
-        }
-        if (valueStr.equals("all")) {
-            return ContactAction.COLUMNS_ALIAS_ALL;
-        }
-        if (valueStr.equals("list")) {
-            return ContactAction.COLUMNS_ALIAS_LIST;
-        }
-        final String[] valueStrArr = valueStr.split(",");
-
-        final int[] values = new int[valueStrArr.length];
-        for (int i = 0; i < values.length; i++) {
-            try {
-                values[i] = Integer.parseInt(valueStrArr[i].trim());
-            } catch (final NumberFormatException e) {
-                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "columns", valueStr);
-            }
-        }
-
-        return values;
-    }
 
     public static int getNullableIntParameter(final AJAXRequestData request, final String parameter) throws OXException {
         Integer intParam = null;
@@ -307,22 +281,33 @@ public class RequestTools {
                 } else if (null == date2) {
                     return -1;
                 } else {
-                    final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                    Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
                     calendar.setTime(date1);
-                    final int dayOfYear1 = calendar.get(Calendar.DAY_OF_YEAR);
+                    int month1 = calendar.get(Calendar.MONTH);
+                    int dayOfMonth1 = calendar.get(Calendar.DAY_OF_MONTH);
+                    int year1 = calendar.get(Calendar.YEAR);
                     calendar.setTime(date2);
-                    final int dayOfYear2 = calendar.get(Calendar.DAY_OF_YEAR);
+                    int month2 = calendar.get(Calendar.MONTH);
+                    int dayOfMonth2 = calendar.get(Calendar.DAY_OF_MONTH);
+                    int year2 = calendar.get(Calendar.YEAR);
                     calendar.setTime(reference);
-                    final int dayOfYearReference = calendar.get(Calendar.DAY_OF_YEAR);
-                    if (dayOfYear1 == dayOfYear2) {
-                        return 0;
-                    } else if (dayOfYear1 >= dayOfYearReference && dayOfYear2 >= dayOfYearReference) {
+                    int monthReference = calendar.get(Calendar.MONTH);
+                    int dayOfMonthReference = calendar.get(Calendar.DAY_OF_MONTH);
+                    if (month1 == month2 && dayOfMonth1 == dayOfMonth2) {
+                        // same month/date, compare years
+                        return Integer.valueOf(year1).compareTo(Integer.valueOf(year2));
+                    } else if ((month1 >= monthReference || month1 == monthReference && dayOfMonth1 >= dayOfMonthReference) &&
+                        (month2 >= monthReference || month2 == monthReference && dayOfMonth2 >= dayOfMonthReference)) {
                         // both after reference date, use default comparison
-                        return Integer.valueOf(dayOfYear1).compareTo(Integer.valueOf(dayOfYear2));
-                    } else if (dayOfYear1 < dayOfYearReference && dayOfYear2 < dayOfYearReference) {
+                        int monthResult = Integer.valueOf(month1).compareTo(Integer.valueOf(month2));
+                        return 0 != monthResult ? monthResult : Integer.valueOf(dayOfMonth1).compareTo(Integer.valueOf(dayOfMonth2));
+                    } else if ((month1 < monthReference || month1 == monthReference && dayOfMonth1 < dayOfMonthReference) &&
+                        (month2 < monthReference || month2 == monthReference && dayOfMonth2 < dayOfMonthReference)) {
                         // both before reference date, use default comparison
-                        return Integer.valueOf(dayOfYear1).compareTo(Integer.valueOf(dayOfYear2));
-                    } else if (dayOfYear1 >= dayOfYearReference && dayOfYear2 < dayOfYearReference) {
+                        int monthResult = Integer.valueOf(month1).compareTo(Integer.valueOf(month2));
+                        return 0 != monthResult ? monthResult : Integer.valueOf(dayOfMonth1).compareTo(Integer.valueOf(dayOfMonth2));
+                    } else if ((month1 >= monthReference || month1 == monthReference && dayOfMonth1 >= dayOfMonthReference) &&
+                        (month2 < monthReference || month2 == monthReference && dayOfMonth2 < dayOfMonthReference)) {
                         // first is next
                         return -1;
                     } else {

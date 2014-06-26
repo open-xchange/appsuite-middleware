@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,6 +50,7 @@
 package com.openexchange.database.internal;
 
 import static com.openexchange.database.internal.DBUtils.closeSQLStuff;
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -95,7 +96,7 @@ public final class Server {
                 if (-1 == serverId) {
                     throw DBPoolingExceptionCodes.NOT_RESOLVED_SERVER.create(getServerName());
                 }
-                LOG.trace("Got server id: {}", serverId);
+                LOG.trace("Got server id: {}", I(serverId));
             }
         }
         return serverId;

@@ -3,7 +3,7 @@
 #%# capabilities=autoconf suggest
 
 $showruntimestats="/opt/open-xchange/sbin/showruntimestats";
-$showexec="$showruntimestats -x";
+$showexec="$showruntimestats --poolingstats";
 
 if ( $ARGV[0] and $ARGV[0] eq "autoconf")
 {
@@ -50,6 +50,10 @@ if ( $ARGV[0] and $ARGV[0] eq "config")
 	print "c.draw LINE1\n";
 	print "d.label PoolSize\n";
 	print "d.draw LINE1\n";
+	print "e.label NumBrokenConnections per second\n";
+	print "e.draw LINE1\n";
+	print "e.type DERIVE\n";
+	print "e.min 0\n";
 	exit 0;
 }
 
@@ -80,6 +84,12 @@ while (<SHOWRUNTIME>)
 		s/.*\=//; 
 		$val=$_+0;
 		print "d.value $val\n";
+		next;
+	}
+	if ( $_ =~ /DB Pool $Database,NumBrokenConnections/) {
+		s/.*\=//;
+		$val=$_+0;
+		print "e.value $val\n";
 		next;
 	}
 }

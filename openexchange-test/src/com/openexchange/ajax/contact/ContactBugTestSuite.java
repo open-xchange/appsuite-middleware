@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -74,6 +74,9 @@ public final class ContactBugTestSuite extends TestSuite {
         tests.addTestSuite(Bug13915FileAsViaJSON.class);
         tests.addTestSuite(Bug18608Test_SpecialCharsInEmailTest.class);
         tests.addTestSuite(Bug19827Test.class);
+        tests.addTestSuite(Bug25300Test.class);
+        tests.addTestSuite(Bug28185Test.class);
+        tests.addTestSuite(Bug31993Test.class);
         return tests;
     }
 }

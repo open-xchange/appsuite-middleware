@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -78,7 +78,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.attachment.AttachmentToken;
@@ -210,14 +209,14 @@ public class MailAttachment extends AJAXServlet {
                  * Set Content-Type and Content-Disposition header
                  */
                 final String fileName = mailPart.getFileName();
-                final String userAgent = AJAXServlet.sanitizeParam(req.getHeader("user-agent"));
+                final String userAgent = AJAXUtility.sanitizeParam(req.getHeader("user-agent"));
                 final String contentType;
                 if (saveToDisk) {
                     /*
                      * We are supposed to offer attachment for download. Therefore enforce application/octet-stream and attachment
                      * disposition.
                      */
-                    final StringAllocator sb = new StringAllocator(32);
+                    final StringBuilder sb = new StringBuilder(32);
                     sb.append("attachment");
                     DownloadUtility.appendFilenameParameter(fileName, null, userAgent, sb);
                     resp.setHeader("Content-Disposition", sb.toString());
@@ -291,7 +290,7 @@ public class MailAttachment extends AJAXServlet {
                         if (full || ranges.isEmpty()) {
                             // Return full file.
                             final Range r = new Range(0L, length - 1, length);
-                            resp.setHeader("Content-Range", new StringAllocator("bytes ").append(r.start).append('-').append(r.end).append('/').append(r.total).toString());
+                            resp.setHeader("Content-Range", new StringBuilder("bytes ").append(r.start).append('-').append(r.end).append('/').append(r.total).toString());
 
                             // Copy full range.
                             copy(attachmentInputStream, outputStream, r.start, r.length);
@@ -299,7 +298,7 @@ public class MailAttachment extends AJAXServlet {
 
                             // Return single part of file.
                             final Range r = ranges.get(0);
-                            resp.setHeader("Content-Range", new StringAllocator("bytes ").append(r.start).append('-').append(r.end).append('/').append(r.total).toString());
+                            resp.setHeader("Content-Range", new StringBuilder("bytes ").append(r.start).append('-').append(r.end).append('/').append(r.total).toString());
                             resp.setHeader("Content-Length", Long.toString(r.length));
                             resp.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT); // 206.
 
@@ -308,16 +307,16 @@ public class MailAttachment extends AJAXServlet {
                         } else {
                             // Return multiple parts of file.
                             final String boundary = MULTIPART_BOUNDARY;
-                            resp.setContentType(new StringAllocator("multipart/byteranges; boundary=").append(boundary).toString());
+                            resp.setContentType(new StringBuilder("multipart/byteranges; boundary=").append(boundary).toString());
                             resp.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT); // 206.
 
                             // Copy multi part range.
                             for (final Range r : ranges) {
                                 // Add multipart boundary and header fields for every range.
                                 outputStream.println();
-                                outputStream.println(new StringAllocator("--").append(boundary).toString());
-                                outputStream.println(new StringAllocator("Content-Type: ").append(contentType).toString());
-                                outputStream.println(new StringAllocator("Content-Range: bytes ").append(r.start).append('-').append(r.end).append('/').append(r.total).toString());
+                                outputStream.println(new StringBuilder("--").append(boundary).toString());
+                                outputStream.println(new StringBuilder("Content-Type: ").append(contentType).toString());
+                                outputStream.println(new StringBuilder("Content-Range: bytes ").append(r.start).append('-').append(r.end).append('/').append(r.total).toString());
 
                                 // Copy single part range of multi part range.
                                 copy(attachmentInputStream, outputStream, r.start, r.length);
@@ -325,7 +324,7 @@ public class MailAttachment extends AJAXServlet {
 
                             // End with multipart boundary.
                             outputStream.println();
-                            outputStream.println(new StringAllocator("--").append(boundary).append("--").toString());
+                            outputStream.println(new StringBuilder("--").append(boundary).append("--").toString());
                         }
                     } else {
                         final int len = BUFLEN;
@@ -339,9 +338,9 @@ public class MailAttachment extends AJAXServlet {
                     final String lmsg = toLowerCase(e.getMessage());
                     if ("broken pipe".equals(lmsg) || "connection reset".equals(lmsg)) {
                         // Assume client-initiated connection closure
-                        LOG.debug("Underlying (TCP) protocol communication aborted while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
+                        LOG.debug("Underlying (TCP) protocol communication aborted while trying to output file{}", (com.openexchange.java.Strings.isEmpty(fileName) ? "" : " " + fileName), e);
                     } else {
-                        LOG.warn("Lost connection to client while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
+                        LOG.warn("Lost connection to client while trying to output file{}", (com.openexchange.java.Strings.isEmpty(fileName) ? "" : " " + fileName), e);
                     }
                 } catch (final com.sun.mail.util.MessageRemovedIOException e) {
                     resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Message not found.");
@@ -355,9 +354,9 @@ public class MailAttachment extends AJAXServlet {
                          * For the next write attempt by us, the peer's TCP stack will issue an RST,
                          * which results in this exception and message at the sender.
                          */
-                        LOG.debug("Client dropped connection while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
+                        LOG.debug("Client dropped connection while trying to output file{}", (com.openexchange.java.Strings.isEmpty(fileName) ? "" : " " + fileName), e);
                     } else {
-                        LOG.warn("Lost connection to client while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
+                        LOG.warn("Lost connection to client while trying to output file{}", (com.openexchange.java.Strings.isEmpty(fileName) ? "" : " " + fileName), e);
                     }
                 }
             } finally {
@@ -439,26 +438,13 @@ public class MailAttachment extends AJAXServlet {
         res.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
     }
 
-    /** Check for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
     /** ASCII-wise to lower-case */
     private static String toLowerCase(final CharSequence chars) {
         if (null == chars) {
             return null;
         }
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);

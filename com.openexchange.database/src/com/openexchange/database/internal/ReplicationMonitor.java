@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -162,6 +162,10 @@ public class ReplicationMonitor {
                 try {
                     clientTransaction = readTransaction(retval, assign.getContextId());
                 } catch (final OXException e) {
+                    if (DBPoolingExceptionCodes.TRANSACTION_MISSING.equals(e)) {
+                        // No such context exists
+                        throw e;
+                    }
                     LOG.warn("", e);
                     if (10 == tries) {
                         // Do a fall back to the master.
@@ -182,7 +186,7 @@ public class ReplicationMonitor {
             throw createException(assign, write, null);
         }
         if (!write && assign.isTransactionInitialized() && !isUpToDate(assign.getTransaction(), clientTransaction)) {
-            LOG.debug("Slave {} is not actual. Using master {} instead.", assign.getReadPoolId(), assign.getWritePoolId());
+            LOG.debug("Slave {} is not actual. Using master {} instead.", I(assign.getReadPoolId()), I(assign.getWritePoolId()));
             final Connection toReturn = retval;
             try {
                 retval = fetch.get(pools, assign, true, true);
@@ -233,7 +237,7 @@ public class ReplicationMonitor {
                     }
                     // Warn if a master connection was only used for reading.
                     if (checkWriteCons && !state.isUsedAsRead() && !state.isUpdateCommitted()) {
-                        Exception e = new Exception();
+                        Exception e = new Exception("A writable connection was used but no data has been manipulated.");
                         LOG.warn("A writable connection was used but no data has been manipulated.", e);
                     }
                 }
@@ -293,7 +297,7 @@ public class ReplicationMonitor {
         try {
             // Using Mysql specific functions like LAST_INSERT_ID() do not reveal any performance improvement compared to this transaction.
             // UPDATE replicationMonitor SET transaction=LAST_INSERT_ID(transaction+1) WHERE cid=?
-            // There we stick with this simple transaction, UPDATE and SELECT statement for better compatibility.
+            // Therefore we stick with this simple transaction, UPDATE and SELECT statement for better compatibility.
             stmt = con.prepareStatement("UPDATE replicationMonitor SET transaction=transaction+1 WHERE cid=?");
             stmt.setInt(1, contextId);
             stmt.execute();
@@ -304,7 +308,7 @@ public class ReplicationMonitor {
             if (result.next()) {
                 assign.setTransaction(result.getLong(1));
             } else {
-                LOG.error("Updating transaction for replication monitor failed for context {}.", contextId);
+                LOG.error("Updating transaction for replication monitor failed for context {}.", I(contextId));
             }
         } finally {
             closeSQLStuff(result, stmt);
@@ -314,7 +318,7 @@ public class ReplicationMonitor {
     private static void increaseCounterExistingTransaction(AssignmentImpl assign, Connection con) throws SQLException {
         Savepoint save = null;
         try {
-            save = con.setSavepoint("replication monitor");
+            save = con.setSavepoint("replicationMonitor");
             increaseCounter(assign, con);
             con.releaseSavepoint(save);
         } catch (SQLException e) {
@@ -374,7 +378,7 @@ public class ReplicationMonitor {
 
     void increaseTransactionCounter(AssignmentImpl assign, Connection con) {
         try {
-            if (con.isClosed()) {
+            if (!active || con.isClosed()) {
                 return;
             }
         } catch (SQLException e) {

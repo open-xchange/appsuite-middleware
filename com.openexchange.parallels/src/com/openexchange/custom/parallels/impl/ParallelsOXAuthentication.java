@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -62,7 +62,7 @@ import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginInfo;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
-import com.openexchange.custom.parallels.osgi.ParallelsServiceRegistry;
+import com.openexchange.custom.parallels.osgi.Services;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -98,7 +98,7 @@ public class ParallelsOXAuthentication implements AuthenticationService {
     }
 
     public static String getFromConfig(final String key) throws OXException{
-        final ConfigurationService configservice = ParallelsServiceRegistry.getServiceRegistry().getService(ConfigurationService.class,true);
+        final ConfigurationService configservice = Services.getService(ConfigurationService.class);
         return configservice.getProperty(key);
     }
 
@@ -199,9 +199,9 @@ public class ParallelsOXAuthentication implements AuthenticationService {
              *  If successfull return the username and context to the OX groupware
              *  else throw an invalid credentials loginexception
              */
-            final UserService userservice = ParallelsServiceRegistry.getServiceRegistry().getService(UserService.class);
+            final UserService userservice = Services.getService(UserService.class);
 
-            final ContextService contextservice = ParallelsServiceRegistry.getServiceRegistry().getService(ContextService.class);
+            final ContextService contextservice = Services.getService(ContextService.class);
 
             final Context ctx = contextservice.getContext(Integer.parseInt(cid));
             final String real_context_name = gui_loginstring+"||"+oxuser_; // must be given to the groupware , else groupware does not know context if we pass the id of the context
@@ -210,7 +210,7 @@ public class ParallelsOXAuthentication implements AuthenticationService {
                 userId = userservice.getUserId(oxuser_, ctx);
             } catch (final OXException e) {
                 LOG.error("UserID for {} could not be resolved via OX API from database. Not provisioned yet?", oxuser_,e);
-                throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
+                throw LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_USER_MAPPING.create(oxuser_);
             }
             final User user = userservice.getUser(userId, ctx);
             if (!userservice.authenticate(user, gui_password)) {

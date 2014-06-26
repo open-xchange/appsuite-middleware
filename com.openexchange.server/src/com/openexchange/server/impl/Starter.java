@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -116,10 +116,6 @@ public class Starter implements Initialization {
      */
     com.openexchange.groupware.attach.AttachmentConfig.getInstance(),
     /**
-     * User storage init
-     */
-    com.openexchange.groupware.ldap.UserStorageInit.getInstance(),
-    /**
      * Group storage init
      */
     com.openexchange.group.internal.GroupInit.getInstance(),
@@ -155,80 +151,8 @@ public class Starter implements Initialization {
      * Initializes the Attachment Calendar Listener
      */
     new com.openexchange.groupware.attach.AttachmentInit(),
-    /**
-     * Initializes the Link Attachment Listener
-     */
-    new com.openexchange.groupware.links.LinkInit(),
     new com.openexchange.mailaccount.internal.MailAccountStorageInit(),
     new com.openexchange.multiple.internal.MultipleHandlerInit(),
-    new com.openexchange.groupware.impl.id.IDGeneratorInit() };
-
-    /**
-     * This contains the components that must be started if the admin uses APIs of the server.
-     */
-    private final Initialization[] adminInits = new Initialization[] {
-    /**
-     * Reads system.properties.
-     */
-    com.openexchange.configuration.SystemConfig.getInstance(),
-    /**
-     * Cache availability registry start-up
-     */
-    com.openexchange.cache.registry.CacheAvailabilityRegistryInit.getInstance(),
-    /**
-     * Initialization for alias charset provider
-     */
-    new com.openexchange.charset.CustomCharsetProviderInit(),
-    /**
-     * Setup of ContextStorage and LoginInfo.
-     */
-    com.openexchange.groupware.contexts.impl.ContextInit.getInstance(),
-    /**
-     * The Servlet initialization
-     */
-    new com.openexchange.tools.servlet.ServletInitialization(),
-    /**
-     * Folder initialization
-     */
-    com.openexchange.tools.oxfolder.OXFolderProperties.getInstance(),
-    new com.openexchange.folder.internal.FolderInitialization(),
-    /**
-     * User storage init
-     */
-    com.openexchange.groupware.ldap.UserStorageInit.getInstance(),
-    /**
-     * Group storage init
-     */
-    com.openexchange.group.internal.GroupInit.getInstance(),
-    /**
-     * Resource storage init
-     */
-    com.openexchange.resource.internal.ResourceStorageInit.getInstance(),
-    /**
-     * User configuration init
-     */
-    com.openexchange.groupware.userconfiguration.UserConfigurationStorageInit.getInstance(),
-    /**
-     * Notification Configuration
-     */
-    com.openexchange.groupware.notify.NotificationConfig.getInstance(),
-    /**
-     * Sets up the configuration tree.
-     */
-    com.openexchange.groupware.settings.impl.ConfigTreeInit.getInstance(),
-    /**
-     * Responsible for starting and stopping the EventQueue
-     */
-    new com.openexchange.event.impl.EventInit(),
-    /**
-     * Responsible for registering all instances for deleting users and groups.
-     */
-    new com.openexchange.groupware.delete.DeleteRegistryInitialization(),
-    /**
-     * Downgrade registry start-up
-     */
-    com.openexchange.groupware.downgrade.DowngradeRegistryInit.getInstance(),
-    new com.openexchange.mailaccount.internal.MailAccountStorageInit(),
     new com.openexchange.groupware.impl.id.IDGeneratorInit() };
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Starter.class);
@@ -274,31 +198,6 @@ public class Starter implements Initialization {
             LOG.info("SYSTEM IS UP & RUNNING WITH ERRORS...");
         }
 
-    }
-
-    /**
-     * Start in admin mode
-     */
-    public void adminStart() {
-        dumpServerInfos();
-        for (final Initialization init : adminInits) {
-            try {
-                init.start();
-                started.push(init);
-            } catch (final OXException e) {
-                LOG.error("Initialization of {} failed", init.getClass().getName(), e);
-            }
-        }
-        if (started.size() == adminInits.length) {
-            LOG.info("Admin successfully initialized.");
-        } else {
-            LOG.info("Admin initialized with errors.");
-        }
-        if (started.size() == adminInits.length) {
-            LOG.info("SYSTEM IS UP & RUNNING IN ADMIN MODE...");
-        } else {
-            LOG.info("SYSTEM IS UP & RUNNING WITH ERRORS IN ADMIN MODE...");
-        }
     }
 
     /**

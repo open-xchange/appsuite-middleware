@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -133,9 +133,11 @@ public class StanzaWriter {
      * @param stanza The Stanza conaining the PayloadTrees that have to be written as JSON
      * @param jsonStanza The Stanza as JSONObject
      * @throws JSONException If writing the PayloadTrees fails
+     * @throws OXException 
      */
-    private void writePayloadTrees(final Stanza stanza, final JSONObject jsonStanza) throws JSONException {
-        Collection<PayloadTree> payloadTrees = stanza.getPayloads();
+    private void writePayloadTrees(final Stanza stanza, final JSONObject jsonStanza) throws JSONException, OXException {
+        stanza.transformPayloads("json");
+        Collection<PayloadTree> payloadTrees = stanza.getPayloadTrees();
         JSONArray payloadArray = new JSONArray();
         for (PayloadTree payloadTree : payloadTrees) {
             payloadArray.put(writePayloadTreeNode(payloadTree.getRoot()));
@@ -209,7 +211,7 @@ public class StanzaWriter {
 
     private boolean isArrayNode(PayloadTreeNode node) {
         Object data = node.getData();
-        if (data == null && node.hasChildren()) {
+        if ((data == null || JSONObject.NULL.equals(data))&& node.hasChildren()) {
             return true;
         }
         return false;

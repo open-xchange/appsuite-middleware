@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -55,7 +55,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.update.FullPrimaryKeySupportService;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -80,7 +79,7 @@ public class PresenceSubscribeActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             ResourceDirectory.class, DatabaseService.class, ContextService.class, UserService.class, MessageDispatcher.class,
-            ConfigurationService.class, FullPrimaryKeySupportService.class };
+            ConfigurationService.class };
     }
 
     @Override
@@ -90,26 +89,15 @@ public class PresenceSubscribeActivator extends HousekeepingActivator {
         registerService(PresenceSubscriptionService.class, new SubscriptionServiceImpl(this));
         registerService(CreateTableService.class, new PresenceSubscriptionsTable());
 
-        final FullPrimaryKeySupportService fullPrimaryKeySupportService = getService(FullPrimaryKeySupportService.class);
-        if (fullPrimaryKeySupportService.isFullPrimaryKeySupported()) {
-            registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
+        registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
 
-                @Override
-                public Collection<? extends UpdateTask> getUpdateTasks() {
-                    return Arrays.asList(
-                        new CreatePresenceSubscriptionDB(dbService),
-                        new AddUUIDColumnTask(dbService),
-                        new AddPrimaryKeyTask(dbService));
-                }
-            });
-        } else {
-            registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
-
-                @Override
-                public Collection<? extends UpdateTask> getUpdateTasks() {
-                    return Arrays.asList(new CreatePresenceSubscriptionDB(dbService), new AddUUIDColumnTask(dbService));
-                }
-            });
-        }
+            @Override
+            public Collection<? extends UpdateTask> getUpdateTasks() {
+                return Arrays.asList(
+                    new CreatePresenceSubscriptionDB(dbService),
+                    new AddUUIDColumnTask(dbService),
+                    new AddPrimaryKeyTask(dbService));
+            }
+        });
     }
 }

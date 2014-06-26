@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -54,17 +54,26 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.HaloContactQuery;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.linkedin.LinkedInService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
-public class LinkedinInboxDataSource extends AbstractLinkedinDataSource implements HaloContactDataSource {
+public class LinkedinInboxDataSource extends AbstractLinkedinDataSource {
 
     public LinkedinInboxDataSource(final ServiceLookup lookup) {
         super(lookup);
+    }
+
+    @Override
+    public String getId() {
+        return "com.openexchange.halo.linkedIn.inbox";
+    }
+
+    @Override
+    public boolean isAvailable(ServerSession session) throws OXException {
+        return hasAccount(session) && hasPlusFeatures(session);
     }
 
     @Override

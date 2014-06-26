@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -58,9 +58,9 @@ import javax.mail.MessagingException;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.imap.cache.FolderCache;
@@ -95,7 +95,7 @@ public final class IMAPException extends OXException {
     /**
      * The IMAP error code enumeration.
      */
-    public static enum Code implements OXExceptionCode {
+    public static enum Code implements DisplayableOXExceptionCode {
 
         /**
          * Missing parameter in mail connection: %1$s
@@ -162,7 +162,7 @@ public final class IMAPException extends OXException {
          */
         FOLDER_DOES_NOT_HOLD_FOLDERS(IMAPCode.FOLDER_DOES_NOT_HOLD_FOLDERS),
         /**
-         * Invalid folder name: "%1$s"
+         * Invalid folder name: "%1$s". Please avoid the following characters: %2$s
          */
         INVALID_FOLDER_NAME(IMAPCode.INVALID_FOLDER_NAME),
         /**
@@ -170,7 +170,7 @@ public final class IMAPException extends OXException {
          */
         DUPLICATE_FOLDER(IMAPCode.DUPLICATE_FOLDER),
         /**
-         * Mail folder "%1$s" could not be created (maybe due to insufficient CATEGORY_PERMISSION_DENIED on parent folder %2$s or due to an invalid folder
+         * Mail folder "%1$s" could not be created (maybe due to insufficient permission on parent folder %2$s or due to an invalid folder
          * name)
          */
         FOLDER_CREATION_FAILED(IMAPCode.FOLDER_CREATION_FAILED),
@@ -427,6 +427,11 @@ public final class IMAPException extends OXException {
          */
         public OXException create(final Throwable cause, final Object... args) {
             return OXExceptionFactory.getInstance().create(this, cause, args);
+        }
+
+        @Override
+        public String getDisplayMessage() {
+            return imapCode.getDisplayMessage();
         }
 
     }
@@ -726,7 +731,7 @@ public final class IMAPException extends OXException {
          */
         FOLDER_DOES_NOT_HOLD_FOLDERS_EXT(FOLDER_DOES_NOT_HOLD_FOLDERS_EXT_MSG, FOLDER_DOES_NOT_HOLD_FOLDERS),
         /**
-         * Invalid folder name: "%1$s"
+         * Invalid folder name: "%1$s". Please avoid the following characters: %2$s
          */
         INVALID_FOLDER_NAME(MailExceptionCode.INVALID_FOLDER_NAME, null),
         /**

@@ -1,3 +1,51 @@
+open-xchange-push-malpoll (7.6.0-7) stable; urgency=low
+
+  * Seventh candidate for 7.6.0 release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 23 Jun 2014 13:22:53 +0200
+
+open-xchange-push-malpoll (7.6.0-6) stable; urgency=low
+
+  * Sixth release candidate for 7.6.0
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 20 Jun 2014 13:06:14 +0200
+
+open-xchange-push-malpoll (7.6.0-5) stable; urgency=low
+
+  * Fifth release candidate for 7.6.0
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 13 Jun 2014 16:40:18 +0200
+
+open-xchange-push-malpoll (7.6.0-4) stable; urgency=low
+
+  * Fourth release candidate for 7.6.0
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 30 May 2014 13:47:26 +0200
+
+open-xchange-push-malpoll (7.6.0-3) stable; urgency=low
+
+  * Third release candidate for 7.6.0
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 16 May 2014 13:19:43 +0200
+
+open-xchange-push-malpoll (7.6.0-2) stable; urgency=low
+
+  * Second release candidate for 7.6.0
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 05 May 2014 11:26:48 +0200
+
+open-xchange-push-malpoll (7.6.0-1) stable; urgency=low
+
+  * First release candidate for 7.6.0
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 11 Apr 2014 16:22:01 +0200
+
+open-xchange-push-malpoll (7.6.0-0) unstable; urgency=low
+
+  * prepare for 7.6.0
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 12 Feb 2014 09:36:25 +0100
+
 open-xchange-push-malpoll (7.4.2-26) stable; urgency=low
 
   * Build for patch 2014-06-23
@@ -291,6 +339,18 @@ open-xchange-push-malpoll (7.4.1-0) unstable; urgency=low
   * prepare for 7.4.1 release
 
  -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 20 Sep 2013 11:44:38 +0200
+
+open-xchange-push-malpoll (7.4.0-29) stable; urgency=low
+
+  * Build for patch 2014-02-20
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 18 Feb 2014 09:59:37 +0100
+
+open-xchange-push-malpoll (7.4.0-28) stable; urgency=low
+
+  * Build for patch 2014-02-03
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 31 Jan 2014 12:21:01 +0100
 
 open-xchange-push-malpoll (7.4.0-27) stable; urgency=low
 

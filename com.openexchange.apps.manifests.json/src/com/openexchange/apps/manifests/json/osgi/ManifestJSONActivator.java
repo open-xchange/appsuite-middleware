@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -58,6 +58,7 @@ import org.json.JSONArray;
 import org.osgi.framework.BundleContext;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.apps.manifests.ComputedServerConfigValueService;
+import com.openexchange.apps.manifests.ManifestContributor;
 import com.openexchange.apps.manifests.ServerConfigMatcherService;
 import com.openexchange.apps.manifests.json.ManifestActionFactory;
 import com.openexchange.apps.manifests.json.values.UIVersion;
@@ -94,6 +95,12 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
         return new Class<?>[]{ConfigurationService.class, CapabilityService.class, SimpleConverter.class, ConfigViewFactory.class};
     }
 
+    @Override
+    protected void stopBundle() throws Exception {
+        UIVersion.UIVERSION.set("");
+        super.stopBundle();
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -101,7 +108,7 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
     protected void startBundle() throws Exception {
         final BundleContext context = this.context;
 
-        UIVersion.UIVERSION = context.getBundle().getVersion().toString();
+        UIVersion.UIVERSION.set(context.getBundle().getVersion().toString());
 
         // Add tracker to identify if a PasswordChangeService was registered. If so, add to PermissionAvailabilityService
         rememberTracker(new PermissionRelevantServiceAddedTracker<PasswordChangeService>(context, PasswordChangeService.class));
@@ -116,6 +123,12 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
             ComputedServerConfigValueService.class);
         rememberTracker(computedValueTracker);
 
+        final NearRegistryServiceTracker<ManifestContributor> manifestContributorTracker = new NearRegistryServiceTracker<ManifestContributor>(
+            context,
+            ManifestContributor.class
+        );
+        rememberTracker(manifestContributorTracker);
+
         registerModule(new ManifestActionFactory(this, readManifests(), new ServerConfigServicesLookup() {
 
             @Override
@@ -126,6 +139,11 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
             @Override
             public List<ComputedServerConfigValueService> getComputed() {
                 return Collections.unmodifiableList(computedValueTracker.getServiceList());
+            }
+
+            @Override
+            public List<ManifestContributor> getContributors() {
+                return Collections.unmodifiableList(manifestContributorTracker.getServiceList());
             }
         }), "apps/manifests");
 

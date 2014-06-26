@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -268,6 +268,17 @@ public final class IMAPConfig extends MailConfig {
         final boolean imapSearch = IMAPProperties.getInstance().isImapSearch();
         final IMAPCapabilities capabilities = imapCapabilities;
         return (capabilities != null) ? (imapSearch && (capabilities.hasIMAP4rev1() || capabilities.hasIMAP4())) : imapSearch;
+    }
+
+    /**
+     * Checks if IMAP search is configured to be forced and corresponding capability is available.
+     *
+     * @return <code>true</code> if IMAP search is configured to be forced and corresponding capability is available; otherwise <code>false</code>
+     */
+    public boolean forceImapSearch() {
+        final boolean forceImapSearch = IMAPProperties.getInstance().forceImapSearch();
+        final IMAPCapabilities capabilities = imapCapabilities;
+        return (capabilities != null) ? (forceImapSearch && (capabilities.hasIMAP4rev1() || capabilities.hasIMAP4())) : forceImapSearch;
     }
 
     /**

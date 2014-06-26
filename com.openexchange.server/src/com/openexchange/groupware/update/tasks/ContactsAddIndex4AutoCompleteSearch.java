@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -57,8 +57,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.Contacts;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
@@ -93,12 +91,12 @@ public final class ContactsAddIndex4AutoCompleteSearch implements UpdateTask {
         try {
             con.setAutoCommit(false);
             final String[] tables = { "prg_contacts", "del_contacts" };
-            createContactIndex(con, tables, Contact.GIVEN_NAME, "givenname");
-            createContactIndex(con, tables, Contact.SUR_NAME, "surname");
-            createContactIndex(con, tables, Contact.DISPLAY_NAME, "displayname");
-            createContactIndex(con, tables, Contact.EMAIL1, "email1");
-            createContactIndex(con, tables, Contact.EMAIL2, "email2");
-            createContactIndex(con, tables, Contact.EMAIL3, "email3");
+            createContactIndex(con, tables, "field03", "givenname");
+            createContactIndex(con, tables, "field02", "surname");
+            createContactIndex(con, tables, "field01", "displayname");
+            createContactIndex(con, tables, "field65", "email1");
+            createContactIndex(con, tables, "field66", "email2");
+            createContactIndex(con, tables, "field67", "email3");
             con.commit();
         } catch (final SQLException e) {
             rollback(con);
@@ -109,8 +107,7 @@ public final class ContactsAddIndex4AutoCompleteSearch implements UpdateTask {
         }
     }
 
-    private void createContactIndex(final Connection con, final String[] tables, final int field, final String name) {
-        final String fieldName = Contacts.mapping[field].getDBFieldName();
+    private void createContactIndex(final Connection con, final String[] tables, final String fieldName, final String name) {
         final String[] columns = { "cid", fieldName };
         final StringBuilder sb = new StringBuilder(64);
         for (final String table : tables) {

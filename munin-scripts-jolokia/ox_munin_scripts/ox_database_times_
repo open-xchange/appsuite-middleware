@@ -1,0 +1,117 @@
+#!/usr/bin/perl
+#%# family=auto
+#%# capabilities=autoconf suggest
+
+use strict;
+
+use LWP;
+use JSON;
+
+if ( $ARGV[0] and $ARGV[0] eq "autoconf")
+{
+	print "yes\n";
+	exit 0;
+}
+
+my $url = $ENV{oxJolokiaUrl};
+my $username = $ENV{oxJolokiaUser};
+my $password = $ENV{oxJolokiaPassword};
+
+if ( $ARGV[0] and $ARGV[0] eq "suggest")
+{
+	callUrlForDatabase("/search/com.openexchange.pooling:*,name=DB Pool*");
+	exit 0;
+}
+
+my $Database=$0;
+$Database =~ s/.*_([0-9]+)/$1/;
+$Database += 0;
+
+if ( $ARGV[0] and $ARGV[0] eq "config")
+{
+	print "graph_title Database $Database Times\n";
+	print "graph_args --base 1000 -l 0\n";
+	print "graph_category Open Xchange\n";
+	print "graph_vlabel time in ms\n";
+	print "a.label MinUseTime\n";
+	print "a.draw LINE1\n";
+	print "a.max 9223372036854775806\n";
+	print "b.label AvgUseTime\n";
+	print "b.draw LINE1\n";
+	print "c.label MaxUseTime\n";
+	print "c.draw LINE1\n";
+	exit 0;
+}
+
+callUrl("a","/read/com.openexchange.pooling:name=DB Pool $Database/MinUseTime");
+callUrl("b","/read/com.openexchange.pooling:name=DB Pool $Database/AvgUseTime");
+callUrl("c","/read/com.openexchange.pooling:name=DB Pool $Database/MaxUseTime");
+
+sub callUrl {
+	my $ua = LWP::UserAgent->new();
+	my $req = HTTP::Request->new(GET => "$url$_[1]");
+	$req->authorization_basic($username,$password);
+	
+	$req->header('Accept', => 'text/html');
+	
+	my $response = $ua->request($req);
+	
+	if ($response->is_success) {
+		my $json = decode_json($response->decoded_content);
+		if (defined $json->{value}){
+			print "$_[0].value ";
+			print $json->{value},"\n";
+		}
+	}
+	else {
+		my $status = $response->status_line;
+		if ($status == 404) {
+			die "Link to servlet might not be set correctly, this can be done by altering /etc/munin/plugin-conf.d/ox and setting the correct path to your jolokia servlet";
+		}
+		elsif ($status == 401) {
+			die "Credentials to login might be not set correctly. The credentials are set inside /opt/open-xchange/etc/jolokia.properties on the OX, for munin, those need to be altered at /etc/munin/plugin-conf.d/ox";
+		}
+		else {
+			die "Something went wrong:\n",$status;
+		}
+	}
+}
+
+sub callUrlForDatabase {
+	my $ua = LWP::UserAgent->new();
+	my $req = HTTP::Request->new(GET => "$url$_[0]");
+	$req->authorization_basic($username,$password);
+	
+	$req->header('Accept', => 'text/html');
+	
+	my $response = $ua->request($req);
+	
+	if ($response->is_success) {
+		my $json = decode_json($response->decoded_content);
+		my @array = @{$json->{value}};
+		
+		foreach my $entry (@array){
+			my $re1='.*?';	# Non-greedy match on filler
+			my $re2='(DB Pool)';	# Word 1
+			my $re3='.*?';	# Non-greedy match on filler
+			my $re4='(\\d+)';	# Integer Number 1
+			my $re=$re1.$re2.$re3.$re4;
+			if ($entry =~ m/$re/is){
+				my $int1=$2;
+				print "$int1\n";
+			}
+		}
+	}
+	else {
+		my $status = $response->status_line;
+		if ($status == 404) {
+			die "Link to servlet might not be set correctly, this can be done by altering /etc/munin/plugin-conf.d/ox and setting the correct path to your jolokia servlet";
+		}
+		elsif ($status == 401) {
+			die "Credentials to login might be not set correctly. The credentials are set inside /opt/open-xchange/etc/jolokia.properties on the OX, for munin, those need to be altered at /etc/munin/plugin-conf.d/ox";
+		}
+		else {
+			die "Something went wrong:\n",$status;
+		}
+	}
+}

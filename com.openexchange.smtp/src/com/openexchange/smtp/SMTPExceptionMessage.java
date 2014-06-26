@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -66,52 +66,12 @@ public class SMTPExceptionMessage implements LocalizableStrings {
     }
 
     /**
-     * The message part with sequence ID %1$s could not be found in message %2$s in folder %3$s
-     */
-    public final static String PART_NOT_FOUND_MSG = "The message part with sequence ID %1$s could not be found in message %2$s in folder %3$s";
-
-    /**
-     * Html-2-Text conversion failed: %1$s
-     */
-    public final static String HTML2TEXT_CONVERTER_ERROR_MSG = "Html-2-Text conversion failed: %1$s";
-
-    /**
-     * An internal error occurred: %1$s
-     */
-    public final static String INTERNAL_ERROR_MSG = "An internal error occurred: %1$s";
-
-    /**
      * No recipient(s) has been defined for new message
      */
     public final static String MISSING_RECIPIENTS_MSG = "There are no recipient(s) for the new message.";
 
     /**
-     * Receipt acknowledgment cannot be sent: missing header %1$s in message %2$s
+     * The following recipient is not allowed: %1$s. Please remove associated address and try again.
      */
-    public final static String MISSING_NOTIFICATION_HEADER_MSG = "Receipt acknowledgment cannot be sent: missing header %1$s in message %2$s";
-
-    /**
-     * No send address could be found in user configuration
-     */
-    public final static String NO_SEND_ADDRESS_FOUND_MSG = "No send address could be found in user configuration";
-
-    /**
-     * No content available in mail part
-     */
-    public final static String NO_CONTENT_MSG = "No content available in mail part";
-
-    /**
-     * No storage access because mail connection is not connected
-     */
-    public final static String NOT_CONNECTED_MSG = "No storage access because mail connection is not connected";
-
-    // Unable to parse SMTP server URI "%1$s".
-    public final static String URI_PARSE_FAILED_MSG = "Unable to parse SMTP server URI \"%1$s\".";
-
-    // The following recipient is not allowed: %1$s. Please remove associated address and try again.
     public static final String RECIPIENT_NOT_ALLOWED = "The following recipient is not allowed: %1$s. Please remove associated address and try again.";
-
-    // The SMTP server %1$s cannot be accessed using a secure SSL connection for user %2$s. Please change configuration accordingly.
-    public static final String SECURE_CONNECTION_NOT_POSSIBLE = "The SMTP server %1$s cannot be accessed using a secure SSL connection for user %2$s. Please change configuration accordingly.";
-
 }

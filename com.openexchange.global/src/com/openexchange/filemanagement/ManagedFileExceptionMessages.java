@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -62,11 +62,6 @@ public class ManagedFileExceptionMessages implements LocalizableStrings {
      * File not found: %1$s
      */
     public static final String FILE_NOT_FOUND_MSG = "File not found: %1$s";
-
-    /**
-     * I/O error: %1$s
-     */
-    public static final String IO_ERROR_MSG = "I/O error: %1$s";
 
     /**
      * No such managed file associated with ID: %1$s

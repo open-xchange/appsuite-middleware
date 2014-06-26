@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -71,7 +71,6 @@ import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.slf4j.Logger;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.writer.ResponseWriter;
@@ -221,7 +220,7 @@ public final class AJAXFile extends PermissionServlet {
             resp.setContentType(contentType.toString());
             resp.setHeader(
                 "Content-disposition",
-                new com.openexchange.java.StringAllocator(50).append("inline; filename=\"").append(fileName).append('"').toString());
+                new StringBuilder(50).append("inline; filename=\"").append(fileName).append('"').toString());
             /*
              * Write from content's input stream to response output stream
              */

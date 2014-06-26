@@ -1,6 +1,5 @@
 package com.openexchange.ajax.appointment;
 
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.FolderTest;
 import com.openexchange.groupware.container.Appointment;
@@ -8,8 +7,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
 
 public class ConfirmTest extends AppointmentTest {
-
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfirmTest.class);
 
 	public ConfirmTest(final String name) {
 		super(name);
@@ -48,10 +45,10 @@ public class ConfirmTest extends AppointmentTest {
 		boolean found = false;
 
 		final UserParticipant[] users = loadAppointment.getUsers();
-		for (int a = 0; a < users.length; a++) {
-			if (users[a].getIdentifier() == secondUserId) {
+		for (UserParticipant user : users) {
+			if (user.getIdentifier() == secondUserId) {
 				found = true;
-				assertEquals("wrong confirm status", Appointment.ACCEPT, users[a].getConfirm());
+				assertEquals("wrong confirm status", Appointment.ACCEPT, user.getConfirm());
 			}
 		}
 

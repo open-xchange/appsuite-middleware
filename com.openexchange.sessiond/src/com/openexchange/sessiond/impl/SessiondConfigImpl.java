@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -72,7 +72,7 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
     private long randomTokenTimeout = 30000L;
     private long longLifeTime = 7L * 24L * 60L * 60L * 1000L;
     private boolean autoLogin = false;
-    private boolean asyncPutToSessionStorage = false;
+    private boolean asyncPutToSessionStorage = true;
     private String obfuscationKey = "auw948cz,spdfgibcsp9e8ri+<#qawcghgifzign7c6gnrns9oysoeivn";
 
     public SessiondConfigImpl(final ConfigurationService conf) {
@@ -107,7 +107,7 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
         tmp = conf.getProperty(SESSIOND_AUTOLOGIN.getPropertyName(), SESSIOND_AUTOLOGIN.getDefaultValue());
         autoLogin = Boolean.parseBoolean(tmp.trim());
 
-        tmp = conf.getProperty("com.openexchange.sessiond.asyncPutToSessionStorage", "false");
+        tmp = conf.getProperty("com.openexchange.sessiond.asyncPutToSessionStorage", "true");
         asyncPutToSessionStorage = Boolean.parseBoolean(tmp.trim());
 
         obfuscationKey = conf.getProperty("com.openexchange.sessiond.encryptionKey", obfuscationKey);

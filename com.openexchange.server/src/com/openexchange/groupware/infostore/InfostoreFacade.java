@@ -207,6 +207,19 @@ public interface InfostoreFacade extends TransactionAware {
     public int[] removeDocument(int ids[], long date, ServerSession session) throws OXException;
 
     /**
+     * Moves denoted documents to another folder. Colliding filenames in the target folder may be renamed automatically.
+     *
+     * @param session The session
+     * @param ids The identifiers of the documents to remove
+     * @param sequenceNumber The sequence number to catch concurrent modifications, i.e. the client's most recent time stamp
+     * @param targetFolderID The target folder ID.
+     * @param adjustFilenamesAsNeeded <code>true</code> to adjust filenames in target folder automatically, <code>false</code>, otherwise
+     * @return The identifiers of those documents that could <b>not</b> be moved successfully
+     * @throws OXException If remove operation fails
+     */
+    int[] moveDocuments(ServerSession session, int ids[], long sequenceNumber, String targetFolderID, boolean adjustFilenamesAsNeeded) throws OXException;
+
+    /**
      * Removes denoted versions.
      *
      * @param id The document identifier

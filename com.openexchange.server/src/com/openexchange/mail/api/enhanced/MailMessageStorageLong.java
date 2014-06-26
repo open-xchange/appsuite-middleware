@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -68,6 +68,7 @@ import com.openexchange.mail.parser.handlers.MailPartHandler;
 import com.openexchange.mail.search.FlagTerm;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.text.TextFinder;
+import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.spamhandler.SpamHandler;
 
 /**
@@ -587,8 +588,9 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
         if (null == longs) {
             return null;
         }
-        final String[] retval = new String[longs.length];
-        for (int i = 0; i < retval.length; i++) {
+        final int len = longs.length;
+        final String[] retval = new String[len];
+        for (int i = 0; i < len; i++) {
             final long l = longs[i];
             if (-1 == l) {
                 retval[i] = null;
@@ -598,8 +600,6 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
         }
         return retval;
     }
-
-    private static final long DEFAULT = -1L;
 
     /**
      * Parses the string argument as a signed decimal <code>long</code>. The characters in the string must all be decimal digits.
@@ -612,76 +612,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      *         <code>long</code>.
      */
     protected static long parseUnsignedLong(final String s) {
-        if (s == null) {
-            return DEFAULT;
-        }
-        final int max = s.length();
-        if (max <= 0) {
-            return DEFAULT;
-        }
-        if (s.charAt(0) == '-') {
-            return DEFAULT;
-        }
-
-        long result = 0;
-        int i = 0;
-
-        final long limit = -Long.MAX_VALUE;
-        final long multmin = limit / RADIX;
-        int digit;
-
-        if (i < max) {
-            digit = digit(s.charAt(i++));
-            if (digit < 0) {
-                return DEFAULT;
-            }
-            result = -digit;
-        }
-        while (i < max) {
-            /*
-             * Accumulating negatively avoids surprises near MAX_VALUE
-             */
-            digit = digit(s.charAt(i++));
-            if (digit < 0) {
-                return DEFAULT;
-            }
-            if (result < multmin) {
-                return DEFAULT;
-            }
-            result *= RADIX;
-            if (result < limit + digit) {
-                return DEFAULT;
-            }
-            result -= digit;
-        }
-        return -result;
-    }
-
-    private static int digit(final char c) {
-        switch (c) {
-        case '0':
-            return 0;
-        case '1':
-            return 1;
-        case '2':
-            return 2;
-        case '3':
-            return 3;
-        case '4':
-            return 4;
-        case '5':
-            return 5;
-        case '6':
-            return 6;
-        case '7':
-            return 7;
-        case '8':
-            return 8;
-        case '9':
-            return 9;
-        default:
-            return -1;
-        }
+        return StorageUtility.parseUnsignedLong(s);
     }
 
 }

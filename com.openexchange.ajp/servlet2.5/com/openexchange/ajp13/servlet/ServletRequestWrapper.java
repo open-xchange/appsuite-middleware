@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -517,7 +517,7 @@ public class ServletRequestWrapper implements ServletRequest {
              * Determine scheme from protocol (in the form protocol/majorVersion.minorVersion) and isSecure information
              */
             scheme =
-                new com.openexchange.java.StringAllocator(protocol.substring(0, protocol.indexOf('/')).toLowerCase(Locale.ENGLISH)).append(secure ? "s" : "").toString();
+                new StringBuilder(protocol.substring(0, protocol.indexOf('/')).toLowerCase(Locale.ENGLISH)).append(secure ? "s" : "").toString();
         }
         return scheme;
     }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -99,6 +99,8 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     private boolean imapSearch;
 
+    private boolean forceImapSearch;
+
     private boolean fastFetch;
 
     private boolean notifyRecent;
@@ -156,7 +158,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     @Override
     protected void loadProperties0() throws OXException {
-        final com.openexchange.java.StringAllocator logBuilder = new com.openexchange.java.StringAllocator(1024);
+        final StringBuilder logBuilder = new StringBuilder(1024);
         logBuilder.append("\nLoading global IMAP properties...\n");
 
         final ConfigurationService configuration = Services.getService(ConfigurationService.class);
@@ -197,8 +199,9 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
         {
             final String imapSearchStr = configuration.getProperty("com.openexchange.imap.imapSearch", "imap").trim();
-            imapSearch = "imap".equalsIgnoreCase(imapSearchStr);
-            logBuilder.append("\tIMAP-Search: ").append(imapSearch).append('\n');
+            forceImapSearch = "force-imap".equalsIgnoreCase(imapSearchStr);
+            imapSearch = forceImapSearch || "imap".equalsIgnoreCase(imapSearchStr);
+            logBuilder.append("\tIMAP-Search: ").append(imapSearch).append(forceImapSearch ? " (forced)\n" : '\n');
         }
 
         {
@@ -318,7 +321,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                         try {
                             final IMAPProtocol imapProtocol = IMAPProtocol.getInstance();
                             imapProtocol.initExtMaxCountMap();
-                            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128).append("\tMax. Number of External Connections: ");
+                            final StringBuilder sb = new StringBuilder(128).append("\tMax. Number of External Connections: ");
                             boolean first = true;
                             for (final String desc : sa) {
                                 final int pos = desc.indexOf(':');
@@ -404,6 +407,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     protected void resetFields() {
         imapSort = false;
         imapSearch = false;
+        forceImapSearch = false;
         fastFetch = true;
         propagateClientIPAddress = false;
         enableTls = true;
@@ -478,6 +482,11 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     @Override
     public boolean isImapSearch() {
         return imapSearch;
+    }
+
+    @Override
+    public boolean forceImapSearch() {
+        return forceImapSearch;
     }
 
     @Override

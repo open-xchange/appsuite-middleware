@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -119,7 +119,7 @@ public class CompositeFileStorageFactory implements FileStorageFactory, ServiceT
 
             return cStorage;
         } catch (final IllegalArgumentException e) {
-            throw OXException.general("Cannot create file storage for URI: " + uri, e);
+            throw OXException.general("Cannot create file storage for URI: \"" + uri + "\". Wrong or missing FileStorage bundle for scheme " + uri.getScheme() + "?", e);
         }
     }
 

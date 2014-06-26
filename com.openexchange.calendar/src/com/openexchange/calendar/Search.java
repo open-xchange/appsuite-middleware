@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,7 +53,6 @@ import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
-import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.tools.sql.SearchStrings;
 
 /**
@@ -72,15 +71,15 @@ public class Search {
         return ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
     }
 
-    public static void checkPatternLength(AppointmentSearchObject searchData) throws OXException {
-        final int minimumSearchCharacters = getMinimumSearchCharacters();
-        if (0 == minimumSearchCharacters) {
-            return;
-        }
-        for (String pattern : new String[] { searchData.getCatgories(), searchData.getPattern(), searchData.getTitle() }) {
-            checkPatternLength(minimumSearchCharacters, pattern);
-        }
-    }
+//    public static void checkPatternLength(AppointmentSearchObject searchData) throws OXException {
+//        final int minimumSearchCharacters = getMinimumSearchCharacters();
+//        if (0 == minimumSearchCharacters) {
+//            return;
+//        }
+//        for (String pattern : new String[] { searchData.getCatgories(), searchData.getPattern(), searchData.getTitle() }) {
+//            checkPatternLength(minimumSearchCharacters, pattern);
+//        }
+//    }
 
     private static void checkPatternLength(int minimumSearchCharacters, String pattern) throws OXException {
         if (null != pattern && SearchStrings.lengthWithoutWildcards(pattern) < minimumSearchCharacters) {

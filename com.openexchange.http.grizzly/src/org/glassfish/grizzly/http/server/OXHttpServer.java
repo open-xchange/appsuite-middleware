@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -204,7 +204,7 @@ public class OXHttpServer extends HttpServer {
      *  server instance.
      */
     @Override
-    public void addListener(final NetworkListener listener) {
+    public synchronized void addListener(final NetworkListener listener) {
 
         if (!started) {
             listeners.put(listener.getName(), listener);
@@ -292,6 +292,35 @@ public class OXHttpServer extends HttpServer {
 
     /**
      * <p>
+     * Starts the listeners of the <code>HttpServer</code>.
+     * </p>
+     *
+     * @throws IOException if an error occurs while attempting to start the server.
+     * @throws IllegalStateException If HTTP server was not started, yet
+     * @see #start()
+     */
+    public synchronized void startListeners() throws IOException {
+
+        if (!started) {
+            throw new IllegalStateException("Http server not started, yet.");
+        }
+
+        for (final NetworkListener listener : listeners.values()) {
+            try {
+                listener.start();
+            } catch (IOException ioe) {
+                if (LOGGER.isLoggable(Level.FINEST)) {
+                    LOGGER.log(Level.FINEST, "Failed to start listener [{0}] : {1}", new Object[] { listener.toString(), ioe.toString() });
+                    LOGGER.log(Level.FINEST, ioe.toString(), ioe);
+                }
+
+                throw ioe;
+            }
+        }
+    }
+
+    /**
+     * <p>
      * Starts the <code>HttpServer</code>.
      * </p>
      *
@@ -319,6 +348,8 @@ public class OXHttpServer extends HttpServer {
             enableJMX();
         }
 
+        /*-
+         *
         for (final NetworkListener listener : listeners.values()) {
             try {
                 listener.start();
@@ -333,6 +364,7 @@ public class OXHttpServer extends HttpServer {
                 throw ioe;
             }
         }
+        */
 
         setupHttpHandler();
 
@@ -385,7 +417,7 @@ public class OXHttpServer extends HttpServer {
      *  been started.
      */
     @Override
-    public boolean isStarted() {
+    public synchronized boolean isStarted() {
         return started;
     }
 

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -84,7 +84,7 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 	private static String eMailAutomCompleteClause = null;
 	private static ContactField startLetterField = null;
 
-	private final com.openexchange.java.StringAllocator stringBuilder;
+	private final StringBuilder stringBuilder;
 
 	/**
 	 * Initializes a new {@link ContactSearchAdapter}.
@@ -97,7 +97,7 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 	 */
 	public ContactSearchAdapter(ContactSearchObject contactSearch, int contextID, ContactField[] fields, String charset) throws OXException {
 		super(charset);
-		this.stringBuilder = new com.openexchange.java.StringAllocator(256);
+		this.stringBuilder = new StringBuilder(256);
 		if (null != contactSearch.getPattern()) {
 			appendSearch(contactSearch, contextID, fields);
 		} else {
@@ -320,7 +320,7 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 
 	private static String getEMailAutoCompleteClause() throws OXException {
 		if (null == eMailAutomCompleteClause) {
-		    com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
+		    StringBuilder stringBuilder = new StringBuilder();
 			stringBuilder
 				.append(Mappers.CONTACT.get(ContactField.EMAIL1).getColumnLabel()).append("<>'' OR ")
 				.append(Mappers.CONTACT.get(ContactField.EMAIL2).getColumnLabel()).append("<>'' OR ")

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -2413,29 +2413,6 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             @Override
             public void remove(Contact contact) {
                 contact.removeDistributionLists();
-            }
-        });
-
-        mappings.put(ContactField.NUMBER_OF_LINKS, new LdapIntegerMapping() {
-
-            @Override
-            public void set(Contact contact, Integer value) {
-                contact.setNumberOfLinks(value);
-            }
-
-            @Override
-            public boolean isSet(Contact contact) {
-                return contact.containsNumberOfLinks();
-            }
-
-            @Override
-            public Integer get(Contact contact) {
-                return contact.getNumberOfLinks();
-            }
-
-            @Override
-            public void remove(Contact contact) {
-                contact.removeNumberOfLinks();
             }
         });
 

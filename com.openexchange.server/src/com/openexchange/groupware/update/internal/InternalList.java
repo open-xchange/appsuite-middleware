@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,7 +51,6 @@ package com.openexchange.groupware.update.internal;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.groupware.update.FullPrimaryKeySupportService;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
@@ -78,6 +77,7 @@ import com.openexchange.groupware.update.tasks.DelDateExternalDropForeignKeyUpda
 import com.openexchange.groupware.update.tasks.DelDatesMembersPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.DelDatesPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.DelInfostorePrimaryKeyUpdateTask;
+import com.openexchange.groupware.update.tasks.DropDuplicateEntryFromUpdateTaskTable;
 import com.openexchange.groupware.update.tasks.GenconfAttributesBoolsAddPrimaryKey;
 import com.openexchange.groupware.update.tasks.GenconfAttributesBoolsAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.GenconfAttributesStringsAddPrimaryKey;
@@ -104,7 +104,6 @@ import com.openexchange.groupware.update.tasks.UserClearDelTablesTask;
 import com.openexchange.groupware.update.tasks.UserSettingServerAddPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.UserSettingServerAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.VirtualFolderAddSortNumTask;
-import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * Lists all update tasks of the com.openexchange.server bundle.
@@ -629,8 +628,7 @@ public final class InternalList {
         list.add(new RemoveRedundantKeysForBug26913UpdateTask());
 
         // Add synthetic primary keys to tables without natural key if full primary key support is enabled
-        final FullPrimaryKeySupportService fullPrimaryKeySupportService = ServerServiceRegistry.getInstance().getService(FullPrimaryKeySupportService.class);
-        if (fullPrimaryKeySupportService.isFullPrimaryKeySupported()) {
+        {
 
             // Add primary key to genconf_attributes_strings table
             list.add(new GenconfAttributesStringsAddPrimaryKey());
@@ -639,6 +637,7 @@ public final class InternalList {
             list.add(new GenconfAttributesBoolsAddPrimaryKey());
 
             // Add primary key to updateTask table
+            list.add(new DropDuplicateEntryFromUpdateTaskTable());
             list.add(new MakeUUIDPrimaryForUpdateTaskTable());
 
             // Add primary key to user_attribute table
@@ -718,6 +717,23 @@ public final class InternalList {
 
         // Adds/corrects user mail index: INDEX (mail) -> INDEX (cid, mail(255))
         list.add(new com.openexchange.groupware.update.tasks.UserAddMailIndexTask());
+
+        // +++++++++++++++++++++++++++++++++ Version 7.6.0 starts here. +++++++++++++++++++++++++++++++++
+
+        // Extends infostore document tables by "meta" JSON BLOB.
+        list.add(new com.openexchange.groupware.update.tasks.AddMetaForInfostoreDocumentTable());
+
+        // Extends infostore document tables by the (`cid`, `file_md5sum`) index.
+        list.add(new com.openexchange.groupware.update.tasks.AddMD5SumIndexForInfostoreDocumentTable());
+
+        // Adds (cid,changing_date) index to calendar tables if missing
+        list.add(new com.openexchange.groupware.update.tasks.CalendarAddChangingDateIndexTask());
+
+        // Checks and drops obsolete tables possibly created for managing POP3 accounts
+        list.add(new com.openexchange.groupware.update.tasks.POP3CheckAndDropObsoleteTablesTask());
+
+        // Ensures that each folder located below a user's default infostore trash folder is of type 16
+        list.add(new com.openexchange.groupware.update.tasks.FolderInheritTrashFolderTypeTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }

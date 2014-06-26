@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -99,7 +99,7 @@ public interface ConfigurationService {
      * @return The value in this property list with the specified key value or given default value argument.
      */
     public String getProperty(String name, String defaultValue);
-    
+
     /**
      * Searches for the property with the specified name in this property list. If the name is not found in this property list, the default
      * property list, and its defaults, recursively, are then checked. The method returns the default value argument if the property is not
@@ -126,7 +126,7 @@ public interface ConfigurationService {
      * @return The value in this property list with the specified key value or <code>null</code>.
      */
     public String getProperty(String name, PropertyListener listener);
-    
+
     /**
      * Searches for the property with the specified name in this property list. If the name is not found in this property list, the default
      * property list, and its defaults, recursively, are then checked. The method returns the default value argument if the property is not
@@ -305,4 +305,5 @@ public interface ConfigurationService {
      * @return The value in this property list with the specified key value or given default value argument.
      */
     int getIntProperty(String name, int defaultValue, PropertyListener propertyListener);
+
 }

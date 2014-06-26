@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -78,6 +78,9 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * 
+ * This test will not work if started from the MainTestSuite as the folder test-resources is not found
+ * TODO fix this in the future
  */
 public class TestTemplateService extends TestCase {
 
@@ -95,6 +98,7 @@ public class TestTemplateService extends TestCase {
     @Mock
     private User user;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -132,6 +136,7 @@ public class TestTemplateService extends TestCase {
         sessionWithoutInfostore = new ServerSessionAdapter(simSession, context, user, noInfostore, new UserPermissionBits(0, 1, 1));
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         configService = null;

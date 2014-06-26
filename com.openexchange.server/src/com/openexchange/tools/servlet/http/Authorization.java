@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -80,7 +80,7 @@ public final class Authorization {
     }
 
     private static String extractAuthScheme(String authHeader) {
-        if (isEmpty(authHeader)) {
+        if (com.openexchange.java.Strings.isEmpty(authHeader)) {
             return null;
         }
         final int spacePos = authHeader.indexOf(' ');
@@ -101,10 +101,7 @@ public final class Authorization {
         if (null == authScheme) {
             return false;
         }
-        if (!authScheme.equalsIgnoreCase(BASIC_AUTH)) {
-            return false;
-        }
-        return true;
+        return authScheme.equalsIgnoreCase(BASIC_AUTH);
     }
 
     /**
@@ -173,17 +170,5 @@ public final class Authorization {
         // check if the user wants to login without password.
         // ldap bind doesn't fail with empty password. so check it here.
         return (pass != null && !StringCollection.isEmpty(pass));
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 }

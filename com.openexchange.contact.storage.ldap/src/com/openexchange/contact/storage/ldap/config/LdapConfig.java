@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -255,7 +255,7 @@ public class LdapConfig {
 
     @Override
     public String toString() {
-        com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
+        StringBuilder stringBuilder = new StringBuilder();
         stringBuilder
             .append('\t').append("Folder name: ").append(folderName).append('\n')
             .append('\t').append("Folder ID: ").append(folderID).append('\n')

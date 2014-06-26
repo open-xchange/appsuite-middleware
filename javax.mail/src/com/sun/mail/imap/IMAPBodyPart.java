@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -41,12 +41,11 @@
 package com.sun.mail.imap;
 
 import java.io.*;
-
 import java.util.Enumeration;
+import java.util.Locale;
 import javax.mail.*;
 import javax.mail.internet.*;
 import javax.activation.*;
-
 import com.sun.mail.util.*;
 import com.sun.mail.iap.*;
 import com.sun.mail.imap.protocol.*;
@@ -227,12 +226,20 @@ public class IMAPBodyPart extends MimeBodyPart implements ReadableMime {
 		    int seqnum = message.getSequenceNumber();
 		    BODY b = p.peekBody(seqnum, sectionId + ".MIME");
 
-		    if (b == null)
-			throw new MessagingException("Failed to fetch headers");
+		    if (b == null) {
+                if (!checkExists(message, p)) {
+                    throw new MessageRemovedException("Message "+seqnum+" has been removed");
+                }
+                throw new MessagingException("Failed to fetch headers");
+            }
 
 		    ByteArrayInputStream bis = b.getByteArrayInputStream();
-		    if (bis == null)
-			throw new MessagingException("Failed to fetch headers");
+		    if (bis == null) {
+                if (!checkExists(message, p)) {
+                    throw new MessageRemovedException("Message "+seqnum+" has been removed");
+                }
+                throw new MessagingException("Failed to fetch headers");
+            }
 		    return bis;
 
 		} else {
@@ -396,12 +403,22 @@ public class IMAPBodyPart extends MimeBodyPart implements ReadableMime {
 		    int seqnum = message.getSequenceNumber();
 		    BODY b = p.peekBody(seqnum, sectionId + ".MIME");
 
-		    if (b == null)
-			throw new MessagingException("Failed to fetch headers");
+		    if (b == null) {
+                if (!checkExists(message, p)) {
+                    throw new MessageRemovedException("Message "+seqnum+" has been removed");
+                }
+                // Previously: throw new MessagingException("Failed to fetch headers");
+                throw new MessageRemovedException("Message "+seqnum+" has been removed");
+            }
 
 		    ByteArrayInputStream bis = b.getByteArrayInputStream();
-		    if (bis == null)
-			throw new MessagingException("Failed to fetch headers");
+		    if (bis == null) {
+                if (!checkExists(message, p)) {
+                    throw new MessageRemovedException("Message "+seqnum+" has been removed");
+                }
+                // Previously: throw new MessagingException("Failed to fetch headers");
+                throw new MessageRemovedException("Message "+seqnum+" has been removed");
+            }
 
 		    headers.load(bis);
 
@@ -429,10 +446,46 @@ public class IMAPBodyPart extends MimeBodyPart implements ReadableMime {
 	    } catch (ConnectionException cex) {
 		throw new FolderClosedException(
 			    message.getFolder(), cex.getMessage());
+	    } catch (BadCommandException bex) {
+	    throw handleBadCommandException(bex);
 	    } catch (ProtocolException pex) {
 		throw new MessagingException(pex.getMessage(), pex);
 	    }
 	}
 	headersLoaded = true;
+    }
+
+    protected boolean checkExists(IMAPMessage message, IMAPProtocol p) throws ProtocolException, MessagingException {
+        long uid = message.getUID();
+        if (uid < 0) {
+            uid = ((IMAPFolder) message.getFolder()).getUID(message);
+            if (uid < 0) {
+                return false;
+            }
+        }
+        return checkExists(uid, p);
+    }
+
+    protected boolean checkExists(long uid, IMAPProtocol p) throws ProtocolException {
+        final Response[] r = p.fetch(uid, "UID");
+        final int len = r.length - 1;
+        final Response response = r[len];
+        if (response.isOK()) {
+            return (len > 0);
+        }
+        p.handleResult(response);
+        return false;
+    }
+
+    protected MessagingException handleBadCommandException(BadCommandException bex) {
+        String sResponse = bex.getMessage();
+        if (null == sResponse) {
+            return new MessagingException(bex.getMessage(), bex);
+        }
+        sResponse = sResponse.toLowerCase(Locale.US);
+        if (sResponse.indexOf("invalid messageset") >= 0 || sResponse.indexOf("invalid uidset") >= 0) {
+            return new MessageRemovedException("Message "+message.getSequenceNumber()+" has been removed");
+        }
+        return new MessagingException(bex.getMessage(), bex);
     }
 }

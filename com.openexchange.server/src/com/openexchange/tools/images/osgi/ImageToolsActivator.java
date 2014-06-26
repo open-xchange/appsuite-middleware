@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,26 +49,40 @@
 
 package com.openexchange.tools.images.osgi;
 
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.tools.images.impl.JavaImageTransformationService;
+import com.openexchange.tools.images.scheduler.Scheduler;
 
 
 /**
  * {@link ImageToolsActivator}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ImageToolsActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[0];
+        return new Class<?>[] { ConfigurationService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
+        Services.setServiceLookup(this);
+        // Initialize through acquiring instance
+        Scheduler.getInstance();
+        // Register service
         registerService(ImageTransformationService.class, new JavaImageTransformationService());
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        Services.setServiceLookup(null);
+        Scheduler.shutDown();
+        super.stopBundle();
     }
 
 }

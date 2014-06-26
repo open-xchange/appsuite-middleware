@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -59,7 +59,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 import org.xml.sax.helpers.DefaultHandler;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.subscribe.Subscription;
 
 /**
@@ -108,7 +107,7 @@ public abstract class AbstractMicroformatSAXHandler<T> extends DefaultHandler {
     protected String readSubscription(Subscription subscription) throws IOException{ //TODO: refactor to composite pattern
         URL url = new URL(""); //new URL(subscription.getUrl());
         BufferedReader buffy = null;
-        StringAllocator bob = new StringAllocator(2048);
+        StringBuilder bob = new StringBuilder(2048);
 
         try {
             URLConnection connection = url.openConnection();

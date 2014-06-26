@@ -53,8 +53,8 @@ import com.sun.mail.util.ASCIIUtility;
 public class RFC822DATA implements Item {
    
     static final char[] name = {'R','F','C','8','2','2'};
-    public int msgno;
-    public ByteArray data;
+    public final int msgno;
+    public final ByteArray data;
 
     /**
      * Constructor

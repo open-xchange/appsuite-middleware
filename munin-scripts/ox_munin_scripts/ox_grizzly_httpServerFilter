@@ -22,7 +22,7 @@ if ( $ARGV[0] and $ARGV[0] eq "config") {
     print "graph_category Open Xchange\n";
     print "graph_vlabel Number\n";
     
-    print "current-suspended-request-count.label,current-suspended-request-count \n";
+    print "current-suspended-request-count.label current-suspended-request-count \n";
     print "current-suspended-request-count.draw LINE1\n";
     print "current-suspended-request-count.type DERIVE\n";
     print "current-suspended-request-count.min 0\n";

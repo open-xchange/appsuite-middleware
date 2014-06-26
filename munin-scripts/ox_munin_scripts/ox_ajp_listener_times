@@ -1,0 +1,60 @@
+#!/usr/bin/perl -w
+#%# family=auto
+#%# capabilities=autoconf
+
+$showruntimestats="/opt/open-xchange/sbin/showruntimestats";
+$showexec="$showruntimestats --ajptasksstats";
+
+if ( $ARGV[0] and $ARGV[0] eq "autoconf")
+{
+    if (-e "/opt/open-xchange/bundles/com.openexchange.ajp.jar") {
+        print "yes\n";
+        exit 0;
+    } else {
+        print "no\n";
+        exit 0;
+    }
+}
+
+if ( $ARGV[0] and $ARGV[0] eq "config")
+{
+	print "graph_title AJPv13Listener Times\n";
+	print "graph_args --base 1000 -l 0\n";
+	print "graph_category Open Xchange\n";
+	print "graph_vlabel time in ms\n";
+	print "a.label MinUseTime\n";
+	print "a.draw LINE1\n";
+	print "a.max 9223372036854775806\n";
+	print "b.label AvgUseTime\n";
+	print "b.draw LINE1\n";
+	print "c.label MaxUseTime\n";
+	print "c.draw LINE1\n";
+	exit 0
+}
+									
+
+open(SHOWRUNTIME,"$showexec |") || die "can not read monitoring output";   
+
+while (<SHOWRUNTIME>)
+{
+	if ( $_ =~ /AJPv13TaskMonitor,MinUseTime/) {
+		s/.*\=//; 
+		$val=$_+0;
+		print "a.value $val\n";
+		next;
+	}
+	if ( $_ =~ /AJPv13TaskMonitor,AvgUseTime/) {
+		s/.*\=//; 
+		$val=$_+0;
+		print "b.value $val\n";
+		next;
+	}
+	if ( $_ =~ /AJPv13TaskMonitor,MaxUseTime/) {
+		s/.*\=//; 
+		$val=$_+0;
+		print "c.value $val\n";
+		next;
+	}
+}
+
+close (SHOWRUNTIME); 

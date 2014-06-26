@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -80,6 +80,7 @@ public class Metadata {
     public static final int NUMBER_OF_VERSIONS = 711;
     public static final int COLOR_LABEL = 102;
     public static final int LAST_MODIFIED_UTC = 6;
+    public static final int META = 23;
 
 
     public static final Metadata LAST_MODIFIED_LITERAL = new Metadata(LAST_MODIFIED,"last_modified");
@@ -106,6 +107,7 @@ public class Metadata {
     public static final Metadata FILESTORE_LOCATION_LITERAL = new Metadata(FILESTORE_LOCATION,"filestore_location");
     public static final Metadata LAST_MODIFIED_UTC_LITERAL = new Metadata(LAST_MODIFIED_UTC, "last_modified_utc");
     public static final Metadata NUMBER_OF_VERSIONS_LITERAL = new Metadata(NUMBER_OF_VERSIONS, "number_of_versions");
+    public static final Metadata META_LITERAL = new Metadata(META, "meta");
 
 
     public static final Metadata[] VALUES_ARRAY = new Metadata[]{
@@ -132,8 +134,8 @@ public class Metadata {
         COLOR_LABEL_LITERAL,
         FILESTORE_LOCATION_LITERAL,
         LAST_MODIFIED_UTC_LITERAL,
-        NUMBER_OF_VERSIONS_LITERAL
-
+        NUMBER_OF_VERSIONS_LITERAL,
+        META_LITERAL
     };
 
     public static final Metadata[] HTTPAPI_VALUES_ARRAY = new Metadata[]{
@@ -158,7 +160,8 @@ public class Metadata {
         CURRENT_VERSION_LITERAL,
         COLOR_LABEL_LITERAL,
         LAST_MODIFIED_UTC_LITERAL,
-        NUMBER_OF_VERSIONS_LITERAL
+        NUMBER_OF_VERSIONS_LITERAL,
+        META_LITERAL
     };
 
     public static final List<Metadata> VALUES = Collections.unmodifiableList(Arrays.asList(VALUES_ARRAY));
@@ -212,6 +215,7 @@ public class Metadata {
         case FILESTORE_LOCATION : return FILESTORE_LOCATION_LITERAL;
         case LAST_MODIFIED_UTC : return LAST_MODIFIED_UTC_LITERAL;
         case NUMBER_OF_VERSIONS : return NUMBER_OF_VERSIONS_LITERAL;
+        case META : return META_LITERAL;
         default : return null;
         }
     }
@@ -251,6 +255,7 @@ public class Metadata {
         case FILESTORE_LOCATION : return switcher.filestoreLocation();
         case LAST_MODIFIED_UTC : return switcher.lastModifiedUTC();
         case NUMBER_OF_VERSIONS : return switcher.numberOfVersions();
+        case META : return switcher.meta();
         default : return null;
         }
     }

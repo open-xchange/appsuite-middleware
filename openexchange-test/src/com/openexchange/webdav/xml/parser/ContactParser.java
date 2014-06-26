@@ -49,7 +49,6 @@ import java.util.List;
 import org.jdom2.Element;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
-import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.webdav.xml.XmlServlet;
 import com.openexchange.webdav.xml.fields.ContactFields;
 
@@ -454,9 +453,6 @@ public class ContactParser extends CommonParser {
 			parseElementDistributionlists(contactObj, eProp.getChild(ContactFields.DISTRIBUTIONLIST, XmlServlet.NS));
 		}
 
-		if (hasElement(eProp.getChild(ContactFields.LINKS, XmlServlet.NS))) {
-			parseElementLinks(contactObj, eProp.getChild(ContactFields.LINKS, XmlServlet.NS));
-		}
 		parseElementCommon(contactObj, eProp);
 	}
 
@@ -497,28 +493,6 @@ public class ContactParser extends CommonParser {
 		entry.setEmailaddress(getValue(e));
 	}
 
-	protected void parseElementLinks(final Contact contactObj, final Element eLinks) {
-		final ArrayList links = new ArrayList();
-
-		final List elementEntries = eLinks.getChildren("link", XmlServlet.NS);
-
-		for (int a = 0; a < elementEntries.size(); a++) {
-			final Element eLink = (Element)elementEntries.get(a);
-
-			final LinkEntryObject link = new LinkEntryObject();
-
-			parseElementLink(eLink, link);
-
-			links.add(link);
-		}
-
-		contactObj.setLinks((LinkEntryObject[])links.toArray(new LinkEntryObject[links.size()]));
-	}
-
-	protected void parseElementLink(final Element e, final LinkEntryObject link) {
-		link.setLinkDisplayname(e.getAttributeValue(ContactFields.DISPLAY_NAME, XmlServlet.NS));
-		link.setLinkID(getValueAsInt(e));
-	}
 }
 
 

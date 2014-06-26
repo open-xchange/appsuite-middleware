@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,55 +51,59 @@ package com.openexchange.twitter;
 
 import twitter4j.TwitterException;
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link TwitterExceptionCodes} - Enumeration about all {@link TwitterException}s.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum TwitterExceptionCodes implements OXExceptionCode {
+public enum TwitterExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(TwitterExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR("An error occurred: %1$s", Category.CATEGORY_ERROR, 1, null),
     /**
      * Missing property: %1$s
      */
-    MISSING_PROPERTY(TwitterExceptionMessages.MISSING_PROPERTY_MSG, Category.CATEGORY_ERROR, 2),
+    MISSING_PROPERTY("Missing property: %1$s", Category.CATEGORY_ERROR, 2, null),
     /**
      * Invalid property value in property "%1$s": %2$s
      */
-    INVALID_PROPERTY(TwitterExceptionMessages.INVALID_PROPERTY_MSG, Category.CATEGORY_ERROR, 3),
+    INVALID_PROPERTY("Invalid property value in property \"%1$s\": %2$s", Category.CATEGORY_ERROR, 3, null),
     /**
      * The consumer key/consumer secret pair is missing in configuration.
      */
-    MISSING_CONSUMER_KEY_SECRET(TwitterExceptionMessages.MISSING_CONSUMER_KEY_SECRET_MSG, Category.CATEGORY_ERROR, 4),
+    MISSING_CONSUMER_KEY_SECRET("The consumer key/consumer secret pair is missing in configuration.", Category.CATEGORY_ERROR, 4, null),
     /**
      * The access token for twitter user %1$s could not be obtained.
      */
-    ACCESS_TOKEN_FAILED(TwitterExceptionMessages.ACCESS_TOKEN_FAILED_MSG, Category.CATEGORY_ERROR, 5),
+    ACCESS_TOKEN_FAILED("The access token for twitter user %1$s could not be obtained.", Category.CATEGORY_ERROR, 5, null),
     /**
      * The configured consumer key/consumer secret pair is invalid. Please provide a valid consumer key/consumer secret through
      * configuration.
      */
-    INVALID_CONSUMER_KEY_SECRET(TwitterExceptionMessages.INVALID_CONSUMER_KEY_SECRET_MSG, Category.CATEGORY_ERROR, 6),
+    INVALID_CONSUMER_KEY_SECRET("The configured consumer key/consumer secret pair is invalid. Please provide a valid consumer key/consumer"
+        + " secret through configuration.", Category.CATEGORY_ERROR, 6, null),
     /**
      * Please (re-)authorize your Twitter accounts.<br>
      * Twitter responded with: %1$s
      */
-    REAUTHORIZE_ERROR(TwitterExceptionMessages.REAUTHORIZE_ERROR_MSG, CATEGORY_USER_INPUT, 7),
+    REAUTHORIZE_ERROR("Please (re-)authorize your Twitter accounts.\nTwitter responded with: %1$s", CATEGORY_USER_INPUT, 7,
+        TwitterExceptionMessages.REAUTHORIZE_ERROR_MSG),
     /**
      * The request is understood, but it has been refused or access is not allowed: %1$s
      */
-    DENIED_ERROR(TwitterExceptionMessages.DENIED_ERROR_MSG, CATEGORY_USER_INPUT, 8),
+    DENIED_ERROR("The request is understood, but it has been refused or access is not allowed: %1$s", CATEGORY_USER_INPUT, 8,
+        TwitterExceptionMessages.DENIED_ERROR_MSG),
     /**
      * Invalid format in search query.
      */
-    INVALID_QUERY(TwitterExceptionMessages.INVALID_QUERY_MSG, CATEGORY_USER_INPUT, 9),
+    INVALID_QUERY("Invalid format in search query.", CATEGORY_USER_INPUT, 9, TwitterExceptionMessages.INVALID_QUERY_MSG),
 
     ;
 
@@ -108,11 +112,14 @@ public enum TwitterExceptionCodes implements OXExceptionCode {
     private final int detailNumber;
 
     private final String message;
+    
+    private String displayMessage;
 
-    private TwitterExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private TwitterExceptionCodes(final String message, final Category category, final int detailNumber, String displayMessage) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -133,6 +140,11 @@ public enum TwitterExceptionCodes implements OXExceptionCode {
     @Override
     public int getNumber() {
         return detailNumber;
+    }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override

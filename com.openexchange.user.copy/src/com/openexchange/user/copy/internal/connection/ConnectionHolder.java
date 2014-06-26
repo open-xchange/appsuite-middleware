@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -72,10 +72,12 @@ public class ConnectionHolder implements ObjectMapping<Connection> {
         super();
     }
 
+    @Override
     public Connection getSource(final int id) {
         return connections.get(I(id));
     }
 
+    @Override
     public Connection getDestination(final Connection source) {
         final Integer srcCtxId = backMap.get(source);
         if (null == srcCtxId) {
@@ -88,6 +90,7 @@ public class ConnectionHolder implements ObjectMapping<Connection> {
         return connections.get(dstCtxId);
     }
 
+    @Override
     public Set<Integer> getSourceKeys() {
         final Set<Integer> keySet = new HashSet<Integer>(mapping.keySet());
 

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,16 +49,21 @@
 
 package com.openexchange.mailfilter.ajax.exceptions;
 
+import static com.openexchange.mailfilter.ajax.exceptions.MailfilterExceptionMessages.INVALID_REDIRECT_ADDRESS_MSG;
+import static com.openexchange.mailfilter.ajax.exceptions.MailfilterExceptionMessages.INVALID_SIEVE_RULE2_MSG;
+import static com.openexchange.mailfilter.ajax.exceptions.MailfilterExceptionMessages.INVALID_SIEVE_RULE_MSG;
+import static com.openexchange.mailfilter.ajax.exceptions.MailfilterExceptionMessages.REJECTED_REDIRECT_ADDRESS_MSG;
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  *
  * Mail filter error codes.
  */
-public enum OXMailfilterExceptionCode implements OXExceptionCode {
+public enum OXMailfilterExceptionCode implements DisplayableOXExceptionCode {
 
 	/**
 	 * %s
@@ -156,19 +161,51 @@ public enum OXMailfilterExceptionCode implements OXExceptionCode {
      * No active sieve script found
      */
     NO_ACTIVE_SCRIPT("No active sieve script found.", CATEGORY_ERROR, 22),
+    /**
+     * The redirect address \"%1$s\" is not valid.
+     */
+    INVALID_REDIRECT_ADDRESS(INVALID_REDIRECT_ADDRESS_MSG, INVALID_REDIRECT_ADDRESS_MSG, CATEGORY_USER_INPUT, 23),
+    /**
+     * The redirect address \"%1$s\" has been rejected.
+     */
+    REJECTED_REDIRECT_ADDRESS(REJECTED_REDIRECT_ADDRESS_MSG, REJECTED_REDIRECT_ADDRESS_MSG, CATEGORY_USER_INPUT, 24),
+    /**
+     * Invalid SIEVE rule specified. JSON request body contains an empty JSON array: %1$s
+     */
+    INVALID_SIEVE_RULE("Invalid SIEVE rule specified. JSON request body contains an empty JSON array: %1$s", INVALID_SIEVE_RULE_MSG, CATEGORY_USER_INPUT, 25),
+    /**
+     * Invalid SIEVE rule specified. Server response: %1$s
+     */
+    INVALID_SIEVE_RULE2("Invalid SIEVE rule specified. Server response: %1$s", INVALID_SIEVE_RULE2_MSG, CATEGORY_USER_INPUT, 25), // Yapp, the same error code
     ;
 
-	public static final String ERR_PREFIX_INVALID_ADDRESS = "The parameter for redirect must be a valid Internet email address";
-    public static final String ERR_PREFIX_REJECTED_ADDRESS = "The Internet email address used for redirect is not allowed: ";
-
     private final String message;
-
+    private final String displayMessage;
     private final int detailNumber;
-
     private final Category category;
 
+    /**
+     * Initializes a new {@link OXMailfilterExceptionCode}.
+     *
+     * @param message The (technical) error message
+     * @param category The category
+     * @param detailNumber The detail number
+     */
     private OXMailfilterExceptionCode(final String message, final Category category, final int detailNumber) {
+        this(message, OXExceptionStrings.MESSAGE, category, detailNumber);
+    }
+
+    /**
+     * Initializes a new {@link OXMailfilterExceptionCode} containing a display message for the user.
+     *
+     * @param message The (technical) error message
+     * @param displayMessage The display message for the enduser
+     * @param category The category
+     * @param detailNumber The detail number
+     */
+    private OXMailfilterExceptionCode(String message, String displayMessage, Category category, int detailNumber) {
         this.message = message;
+        this.displayMessage = displayMessage;
         this.detailNumber = detailNumber;
         this.category = category;
     }
@@ -191,6 +228,11 @@ public enum OXMailfilterExceptionCode implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override

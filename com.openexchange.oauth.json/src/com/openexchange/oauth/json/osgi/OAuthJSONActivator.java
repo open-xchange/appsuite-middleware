@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,19 +49,18 @@
 
 package com.openexchange.oauth.json.osgi;
 
-import org.osgi.framework.BundleContext;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.oauth.OAuthHTTPClientFactory;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
+import com.openexchange.oauth.json.Services;
 import com.openexchange.oauth.json.oauthaccount.actions.AccountActionFactory;
 import com.openexchange.oauth.json.oauthmeta.actions.MetaDataActionFactory;
 import com.openexchange.oauth.json.proxy.OAuthProxyActionFactory;
-import com.openexchange.oauth.json.service.ServiceRegistry;
-import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 
 /**
@@ -73,8 +72,8 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OAuthJSONActivator.class);
 
-    private OSGiOAuthService oAuthService;
-    private WhiteboardSecretService secretService;
+    private volatile OSGiOAuthService oAuthService;
+    private volatile WhiteboardSecretService secretService;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -82,42 +81,10 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
     }
 
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        LOG.info("Re-available service: {}", clazz.getName());
-        ServiceRegistry.getInstance().addService(clazz, getService(clazz));
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        LOG.warn("Absent service: {}", clazz.getName());
-        ServiceRegistry.getInstance().removeService(clazz);
-    }
-
-    @Override
     public void startBundle() throws Exception {
         try {
-            /*
-             * (Re-)Initialize service registry with available services
-             */
-            final ServiceRegistry registry = ServiceRegistry.getInstance();
-            registry.clearRegistry();
-            final Class<?>[] classes = getNeededServices();
-            for (final Class<?> classe : classes) {
-                final Object service = getService(classe);
-                if (null != service) {
-                    registry.addService(classe, service);
-                }
-            }
+            Services.setServiceLookup(this);
             AbstractOAuthAJAXActionService.PREFIX.set(getService(DispatcherPrefixService.class));
-            /*
-             * Service trackers
-             */
-            final BundleContext context = this.context;
-            track(OAuthService.class, new RegistryServiceTrackerCustomizer<OAuthService>(context, registry, OAuthService.class));
-            /*
-             * Open trackers
-             */
-            openTrackers();
             /*
              * Service registrations
              */
@@ -127,14 +94,18 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
             /*
              * Apply OAuth service to actions
              */
-            oAuthService = new OSGiOAuthService().start(context);
+            final OSGiOAuthService oAuthService = new OSGiOAuthService().start(context);
+            this.oAuthService = oAuthService;
             // registry.addService(OAuthService.class, oAuthService);
             AbstractOAuthAJAXActionService.setOAuthService(oAuthService);
-            secretService = new WhiteboardSecretService(context);
+            final WhiteboardSecretService secretService = new WhiteboardSecretService(context);
+            this.secretService = secretService;
             secretService.open();
             AbstractOAuthAJAXActionService.setSecretService(secretService);
 
             getService(CapabilityService.class).declareCapability("oauth");
+
+            trackService(HostnameService.class);
         } catch (final Exception e) {
             LOG.error("", e);
             throw e;
@@ -144,17 +115,20 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
     @Override
     public void stopBundle() throws Exception {
         try {
+            final WhiteboardSecretService secretService = this.secretService;
             if (secretService != null) {
                 secretService.close();
+                this.secretService = null;
             }
             cleanUp();
+            final OSGiOAuthService oAuthService = this.oAuthService;
             if (null != oAuthService) {
                 oAuthService.stop();
-                oAuthService = null;
+                this.oAuthService = null;
             }
             AbstractOAuthAJAXActionService.setOAuthService(null);
             AbstractOAuthAJAXActionService.PREFIX.set(null);
-            ServiceRegistry.getInstance().clearRegistry();
+            Services.setServiceLookup(null);
         } catch (final Exception e) {
             org.slf4j.LoggerFactory.getLogger(OAuthJSONActivator.class).error("", e);
             throw e;

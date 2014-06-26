@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -90,6 +90,7 @@ public class ReminderCopyTask implements CopyUserTaskService {
         super();
     }
 
+    @Override
     public String[] getAlreadyCopied() {
         return new String[] {
             UserCopyTask.class.getName(),
@@ -102,10 +103,12 @@ public class ReminderCopyTask implements CopyUserTaskService {
         };
     }
 
+    @Override
     public String getObjectName() {
         return com.openexchange.groupware.reminder.ReminderObject.class.getName();
     }
 
+    @Override
     public IntegerMapping copyUser(final Map<String, ObjectMapping<?>> copied) throws OXException {
         final CopyTools copyTools = new CopyTools(copied);
 
@@ -135,6 +138,7 @@ public class ReminderCopyTask implements CopyUserTaskService {
         return mapping;
     }
 
+    @Override
     public void done(final Map<String, ObjectMapping<?>> copied, final boolean failed) {
 
     }

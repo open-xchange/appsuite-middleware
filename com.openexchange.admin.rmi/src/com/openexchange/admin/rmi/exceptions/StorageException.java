@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,6 +49,8 @@
 
 package com.openexchange.admin.rmi.exceptions;
 
+import java.util.Stack;
+
 /**
  * @author d7
  *
@@ -67,5 +69,33 @@ public class StorageException extends Exception {
 
     public StorageException(String message, Throwable cause) {
         super(message, cause);
+    }
+
+    public static StorageException wrapForRMI(Throwable t) {
+        Stack<Throwable> causeHierarchy = new Stack<Throwable>();
+        Throwable cause = t.getCause();
+        while (cause != null) {
+            causeHierarchy.push(cause);
+            cause = cause.getCause();
+        }
+
+        Exception finalCause = null;
+        while (!causeHierarchy.isEmpty()) {
+            cause = causeHierarchy.pop();
+            Exception transformedCause = new Exception(cause.getMessage(), finalCause);
+            StackTraceElement[] stackTrace = cause.getStackTrace();
+            if (stackTrace != null && stackTrace.length > 0) {
+                transformedCause.setStackTrace(stackTrace);
+            }
+            finalCause = transformedCause;
+        }
+
+        StorageException storageException = new StorageException(t.getMessage(), finalCause);
+        StackTraceElement[] stackTrace = t.getStackTrace();
+        if (stackTrace != null && stackTrace.length > 0) {
+            storageException.setStackTrace(stackTrace);
+        }
+
+        return storageException;
     }
 }

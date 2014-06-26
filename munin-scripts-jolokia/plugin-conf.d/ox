@@ -2,6 +2,6 @@
 timeout 15
 env.oxJolokiaUrl http://localhost:8009/monitoring/jolokia
 ### oxJolokiaUser must be the same as com.openexchange.jolokia.user inside jolokia.properties
-env.oxJolokiaUser 
+env.oxJolokiaUser changeMe!Now
 ### oxJolokiaPassword must be the same as com.openexchange.jolokia.password inside jolokia.properties
-env.oxJolokiaPassword 
+env.oxJolokiaPassword s3cr3t!toBeChanged

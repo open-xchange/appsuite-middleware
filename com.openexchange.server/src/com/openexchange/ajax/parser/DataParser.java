@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -139,7 +139,7 @@ public abstract class DataParser {
             return NO_INT;
         }
         final String tmp = json.getString(name);
-        if (isEmpty(tmp)|| json.isNull(name) || "null".equalsIgnoreCase(tmp)) {
+        if (com.openexchange.java.Strings.isEmpty(tmp) || json.isNull(name) || "null".equalsIgnoreCase(tmp)) {
             return 0;
         }
         try {
@@ -166,7 +166,7 @@ public abstract class DataParser {
             return (BigDecimal) obj;
         }
         final String tmp = jsonObj.getString(name);
-        if (isEmpty(tmp)|| jsonObj.isNull(name) || "null".equalsIgnoreCase(tmp)) {
+        if (com.openexchange.java.Strings.isEmpty(tmp) || jsonObj.isNull(name) || "null".equalsIgnoreCase(tmp)) {
             return null;
         }
         try {
@@ -185,7 +185,7 @@ public abstract class DataParser {
         } catch (final JSONException e) {
             return null;
         }
-        if (isEmpty(tmp)|| jsonObj.isNull(name) || "null".equalsIgnoreCase(tmp)) {
+        if (com.openexchange.java.Strings.isEmpty(tmp) || jsonObj.isNull(name) || "null".equalsIgnoreCase(tmp)) {
             return null;
         }
         final Parsing parsing = new Parsing() {
@@ -446,17 +446,4 @@ public abstract class DataParser {
     protected TimeZone getTimeZone() {
         return timeZone;
     }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

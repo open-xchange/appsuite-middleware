@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -54,11 +54,13 @@ import java.util.List;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 
-public class EntityLockManagerImpl extends LockManagerImpl<Lock> implements
-		EntityLockManager {
+public class EntityLockManagerImpl extends LockManagerImpl<Lock> implements EntityLockManager {
 
 	public EntityLockManagerImpl(final String tablename) {
 		super(tablename);
@@ -74,8 +76,8 @@ public class EntityLockManagerImpl extends LockManagerImpl<Lock> implements
 	}
 
 	@Override
-    public List<Lock> findLocks(final int entity, final Context ctx, final User user) throws OXException {
-		return findLocksByEntity(Arrays.asList(Integer.valueOf(entity)), ctx).get(Integer.valueOf(entity));
+    public List<Lock> findLocks(final int entity, final Session session) throws OXException {
+		return findLocksByEntity(Arrays.asList(Integer.valueOf(entity)), getContextFrom(session)).get(Integer.valueOf(entity));
 	}
 
 	@Override
@@ -83,20 +85,19 @@ public class EntityLockManagerImpl extends LockManagerImpl<Lock> implements
 		return existsLockForEntity(Arrays.asList(new Integer[]{Integer.valueOf(entity)}), ctx);
 	}
 
-
 	@Override
     public int lock(final int entity, final long timeout, final Scope scope, final Type type, final String ownerDesc, final Context ctx, final User user) throws OXException {
 		return createLock(entity, timeout, scope, type, ownerDesc, ctx, user);
 	}
 
 	@Override
-    public void unlock(final int id, final Context ctx, final User user) throws OXException {
-		removeLock(id, ctx);
+    public void unlock(final int id, final Session session) throws OXException {
+		removeLock(id, getContextFrom(session));
 	}
 
 	@Override
-    public void removeAll(final int entity, final Context context, final User userObject) throws OXException {
-		removeAllFromEntity(entity,context);
+    public void removeAll(final int entity, final Session session) throws OXException {
+		removeAllFromEntity(entity, getContextFrom(session));
 	}
 
 	@Override
@@ -105,7 +106,9 @@ public class EntityLockManagerImpl extends LockManagerImpl<Lock> implements
 	}
 
 	@Override
-    public void insertLock(final int entity, final Lock lock, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException{
+    public void insertLock(final int entity, final Lock lock, final Session session) throws OXException{
+	    Context ctx = getContextFrom(session);
+	    User user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
 		createLockForceId(entity, lock.getId(), lock.getTimeout(), lock.getScope(), lock.getType(), lock.getOwnerDescription(),ctx,user);
 	}
 
@@ -114,5 +117,8 @@ public class EntityLockManagerImpl extends LockManagerImpl<Lock> implements
 		reassign(ctx, from_user, to_user);
 	}
 
+	private Context getContextFrom(Session session) throws OXException {
+        return session instanceof ServerSession ? ((ServerSession) session).getContext() : ContextStorage.getInstance().getContext(session);
+    }
 
 }

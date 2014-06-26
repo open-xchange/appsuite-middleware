@@ -2,10 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Xing API Bundle
 Bundle-SymbolicName: com.openexchange.xing
-Bundle-Version: 7.4.2
+Bundle-Version: 7.6.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.capabilities,
+Import-Package: com.openexchange.ajax.container,
+ com.openexchange.capabilities,
  com.openexchange.config,
  com.openexchange.exception,
  com.openexchange.groupware.container,
@@ -18,10 +19,19 @@ Import-Package: com.openexchange.capabilities,
  com.openexchange.threadpool,
  com.openexchange.threadpool.behavior,
  com.openexchange.timer,
+ com.openexchange.tools,
  com.openexchange.tools.versit.converter,
+ javax.activation;version="1.1.0",
  javax.crypto,
  javax.crypto.interfaces,
  javax.crypto.spec,
+ javax.imageio,
+ javax.imageio.event,
+ javax.imageio.metadata,
+ javax.imageio.plugins.bmp,
+ javax.imageio.plugins.jpeg,
+ javax.imageio.spi,
+ javax.imageio.stream,
  javax.net,
  javax.net.ssl,
  org.apache.commons.codec,

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -161,7 +161,7 @@ public final class AllFetch {
             @Override
             public void handleItem(final Item item, final MailMessage m, final org.slf4j.Logger logger) throws OXException {
                 final BODYSTRUCTURE bs = (BODYSTRUCTURE) item;
-                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator();
+                final StringBuilder sb = new StringBuilder();
                 sb.append(bs.type).append('/').append(bs.subtype);
                 if (bs.cParams != null) {
                     sb.append(bs.cParams);
@@ -215,7 +215,7 @@ public final class AllFetch {
                 if (null == addrs || addrs.length == 0) {
                     return null;
                 }
-                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(addrs.length * 16);
+                final StringBuilder sb = new StringBuilder(addrs.length * 16);
                 sb.append(addrs[0].toString());
                 for (int i = 1; i < addrs.length; i++) {
                     sb.append(", ").append(addrs[i].toString());
@@ -323,7 +323,7 @@ public final class AllFetch {
                  */
                 final String command;
                 {
-                    final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(64);
+                    final StringBuilder sb = new StringBuilder(64);
                     sb.append("FETCH ").append(1 == messageCount ? "1" : "1:*").append(" (");
                     appendFetchCommand(items, sb);
                     sb.append(')');
@@ -413,7 +413,7 @@ public final class AllFetch {
                 /*
                  * Trace was enabled before, thus write trace to previous output stream to maintain debug logs properly.
                  */
-                final com.openexchange.java.StringAllocator sb = sbout.getTrace();
+                final StringBuilder sb = sbout.getTrace();
                 try {
                     /*
                      * DON'T CLOSE THE WRITER BECAUSE IT CLOSES UNDERLYING STREAM, TOO!!!
@@ -511,14 +511,14 @@ public final class AllFetch {
      */
     private static final class SBOutputStream extends OutputStream {
 
-        private final com.openexchange.java.StringAllocator sb;
+        private final StringBuilder sb;
 
         /**
          * Initializes a new {@link SBOutputStream}.
          */
         public SBOutputStream() {
             super();
-            sb = new com.openexchange.java.StringAllocator(8192);
+            sb = new StringBuilder(8192);
         }
 
         @Override
@@ -547,7 +547,7 @@ public final class AllFetch {
          *
          * @return The trace
          */
-        public com.openexchange.java.StringAllocator getTrace() {
+        public StringBuilder getTrace() {
             return sb;
         }
 
@@ -603,7 +603,7 @@ public final class AllFetch {
      * @return A new protocol exception with appropriate message.
      */
     static ProtocolException missingFetchItem(final String itemName, final IMAPConfig config, final Session session) {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128).append("Missing ").append(itemName).append(" item in FETCH response.");
+        final StringBuilder sb = new StringBuilder(128).append("Missing ").append(itemName).append(" item in FETCH response.");
         sb.append(" Login=").append(config.getLogin()).append(", server=").append(config.getServer());
         sb.append(", user=").append(session.getUserId()).append(", context=").append(session.getContextId());
         return new ProtocolException(sb.toString());
@@ -616,7 +616,7 @@ public final class AllFetch {
      * @return The string representation
      */
     public static String getFetchCommand(final LowCostItem[] items) {
-        final com.openexchange.java.StringAllocator command = new com.openexchange.java.StringAllocator(64);
+        final StringBuilder command = new StringBuilder(64);
         appendFetchCommand(items, command);
         return command.toString();
     }
@@ -627,7 +627,7 @@ public final class AllFetch {
      * @param items The items
      * @return The string representation
      */
-    public static void appendFetchCommand(final LowCostItem[] items, final com.openexchange.java.StringAllocator command) {
+    public static void appendFetchCommand(final LowCostItem[] items, final StringBuilder command) {
         command.append(items[0].getItemString());
         for (int i = 1; i < items.length; i++) {
             command.append(' ').append(items[i].getItemString());

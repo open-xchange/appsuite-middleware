@@ -125,7 +125,7 @@ public class XMLTokener extends JSONTokener {
      * @throws JSONException If missing ';' in XML entity.
      */
     public Object nextEntity(final char a) throws JSONException {
-    	final org.json.helpers.StringAllocator sb = new org.json.helpers.StringAllocator();
+    	final StringBuilder sb = new StringBuilder();
         for (;;) {
         	final char c = next();
             if (Character.isLetterOrDigit(c) || c == '#') {

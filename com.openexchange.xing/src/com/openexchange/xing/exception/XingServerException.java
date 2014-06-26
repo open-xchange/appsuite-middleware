@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -94,10 +94,16 @@ public class XingServerException extends XingException {
         }
     }
 
-    /** The request was successful. This won't ever be thrown in an exception. */
+    /** The request was successful. */
     public static final int _200_OK = 200;
 
-    /** The request was successful for a Range request. This won't ever be thrown in an exception. */
+    /** The request was successful. */
+    public static final int _201_CREATED = 201;
+
+    /** The request was successful, but is not returning any content. */
+    public static final int _204_NO_CONTENT = 204;
+
+    /** The request was successful for a Range request. */
     public static final int _206_PARTIAL_CONTENT = 206;
 
     /** Moved to a new location temporarily. */
@@ -214,7 +220,21 @@ public class XingServerException extends XingException {
 
     @Override
     public String toString() {
-        return "XingServerException (" + server + "): " + error + " " + reason + " (" + body.error + ")";
+        return "XingServerException (" + server + "): " + error + " " + reason + " (" + (body == null ? "" : body.error) + ")";
+    }
+
+    @Override
+    public String getMessage() {
+        return toString();
+    }
+
+    /**
+     * Gets the HTTP error code
+     *
+     * @return The HTTP error code
+     */
+    public int getError() {
+        return error;
     }
 
     /**

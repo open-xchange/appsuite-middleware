@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,41 +50,42 @@
 package com.openexchange.inet.proxy;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * Enumeration about all {@link OXException}s for Inet Porxy module.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum InetProxyExceptionCodes implements OXExceptionCode {
+public enum InetProxyExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    ERROR(InetProxyExceptionMessages.ERROR_MSG, CATEGORY_ERROR),
+    ERROR("An error occurred: %1$s", CATEGORY_ERROR, null),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(InetProxyExceptionMessages.IO_ERROR_MSG, CATEGORY_ERROR),
+    IO_ERROR("An I/O error occurred: %1$s", CATEGORY_ERROR, null),
     /**
      * Method is not supported.
      */
-    UNSUPPORTED_OPERATION(InetProxyExceptionMessages.UNSUPPORTED_OPERATION_MSG, CATEGORY_ERROR),
+    UNSUPPORTED_OPERATION("Method is not supported.", CATEGORY_ERROR, null),
     /**
      * A JSON error occurred: %1$s
      */
-    JSON_ERROR(InetProxyExceptionMessages.JSON_ERROR, CATEGORY_ERROR),
+    JSON_ERROR("A JSON error occurred: %1$s", CATEGORY_ERROR, null),
     /**
      * The Internet proxy is not enabled.
      */
-    NOT_ENABLED(InetProxyExceptionMessages.NOT_ENABLED, CATEGORY_CONFIGURATION),
+    NOT_ENABLED("The Internet proxy is not enabled.", CATEGORY_CONFIGURATION, null),
     /**
      * There is no such Internet proxy for id %1$s.
      */
-    NO_SUCH_PROXY(InetProxyExceptionMessages.NO_SUCH_PROXY, CATEGORY_ERROR),
+    NO_SUCH_PROXY("There is no such Internet proxy for id %1$s.", CATEGORY_ERROR, null),
 
     ;
 
@@ -95,17 +96,21 @@ public enum InetProxyExceptionCodes implements OXExceptionCode {
     private final int number;
 
     private final String message;
+    
+    private String displayMessage;
 
-    private InetProxyExceptionCodes(final String message, final Category category) {
+    private InetProxyExceptionCodes(final String message, final Category category, String displayMessage) {
         this.message = message;
         number = ordinal() + 1;
         this.category = category;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
-    private InetProxyExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private InetProxyExceptionCodes(final String message, final Category category, final int detailNumber, String displayMessage) {
         this.message = message;
         number = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -126,6 +131,11 @@ public enum InetProxyExceptionCodes implements OXExceptionCode {
     @Override
     public int getNumber() {
         return number;
+    }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override

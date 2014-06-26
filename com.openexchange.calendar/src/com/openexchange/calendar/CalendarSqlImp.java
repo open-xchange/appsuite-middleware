@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -139,7 +139,7 @@ public interface CalendarSqlImp {
 
     void deleteAppointmentsInFolder(Session so, Context ctx, ResultSet objects, Connection readcon, Connection writecon, int foldertype, int fid) throws SQLException, OXException;
 
-    Date setUserConfirmation(int oid, int folderId, int uid, int confirm, String confirm_message, Session so, Context ctx) throws OXException;
+    public Date setUserConfirmation(int oid, int folderId, int uid, int confirm, String confirm_message, Session so, Context ctx) throws OXException;
 
     boolean checkIfFolderContainsForeignObjects(int uid, int fid, Context c, Connection readcon, int foldertype) throws SQLException;
 
@@ -157,8 +157,6 @@ public interface CalendarSqlImp {
 
     public PreparedStatement getSearchStatement(final int uid, final AppointmentSearchObject searchObj, final CalendarFolderObject cfo, final OXFolderAccess folderAccess, final String columns, final int orderBy, final Order orderDir, final Context ctx, final Connection readcon) throws SQLException, OXException;
 
-    PreparedStatement getSearchQuery(String select,  int uid, int groups[], UserConfiguration uc, int orderBy, Order orderDir, AppointmentSearchObject searchobject, Context c, Connection readcon, CalendarFolderObject cfo, boolean isShared) throws SQLException, OXException;
-
     PreparedStatement getActiveAppointments(Context c, int uid, Date d1, Date d2, String select, Connection readcon) throws SQLException;
 
     public int resolveUid(Session session, String uid) throws OXException;
@@ -172,5 +170,6 @@ public interface CalendarSqlImp {
     public int countAppointments(Session session) throws OXException;
 
     public int countObjectsInFolder(Session session, int folderId, int folderType, EffectivePermission permission) throws OXException;
+
 
 }

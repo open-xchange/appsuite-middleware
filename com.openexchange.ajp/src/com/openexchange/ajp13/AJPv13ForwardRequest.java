@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -537,7 +537,7 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
             throw new AJPv13Exception(AJPv13Exception.AJPCode.INVALID_COOKIE_HEADER, true, headerValue);
         }
         LOG.debug("{}", new Object() { @Override public String toString() {
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(256).append("Parsed Cookies:\n");
+            final StringBuilder sb = new StringBuilder(256).append("Parsed Cookies:\n");
             for (final Cookie cookie : cookieList) {
                 sb.append('\'').append(cookie.getName()).append("'='").append(cookie.getValue()).append("'\n");
             }
@@ -805,7 +805,7 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
         }
         boolean encoded = false;
         final int strLength = ((firstByte) << 8) + secondByte;
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(strLength);
+        final StringBuilder sb = new StringBuilder(strLength);
         for (int strIndex = 0; strIndex < strLength; strIndex++) {
             final int b = nextByte();
             if (b > ASCII_LIMIT) { // non-ascii character

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -153,7 +153,7 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
         Appointment.UNTIL,
         Appointment.NOTIFICATION,
         Appointment.RECURRENCE_COUNT,
-        Appointment.NUMBER_OF_LINKS,
+//        Appointment.NUMBER_OF_LINKS,
         Appointment.LAST_MODIFIED_UTC));
 
     private static final int[] EXCEPTION_FIELDS = new int[Appointment.ALL_COLUMNS.length - EXEMPT.size()];

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -60,24 +60,6 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class WebDAVFileStorageExceptionMessages implements LocalizableStrings {
 
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
-
-    // A HTTP error occurred: %1$s
-    public static final String HTTP_ERROR_MSG = "A HTTP error occurred: %1$s";
-
-    // A DAV error occurred: %1$s
-    public static final String DAV_ERROR_MSG = "A DAV error occurred: %1$s";
-
-    // The resource is not a directory: %1$s
-    public static final String NOT_A_FOLDER_MSG = "The resource is not a directory: %1$s";
-
-    // Invalid date property: %1$s
-    public static final String INVALID_DATE_PROPERTY_MSG = "Invalid date property: %1$s";
-
-    // Invalid property "%1$s". Should be "%2$s".
-    public static final String INVALID_PROPERTY_MSG = "Invalid property \"%1$s\". Should be \"%2$s\".";
-
     // Directory "%1$s" must not be deleted.
     public static final String DELETE_DENIED_MSG = "Directory \"%1$s\" must not be deleted.";
 
@@ -89,9 +71,6 @@ public final class WebDAVFileStorageExceptionMessages implements LocalizableStri
 
     // The resource is not a file: %1$s
     public static final String NOT_A_FILE_MSG = "The resource is not a file: %1$s";
-
-    // Versioning not supported by WebDAV.
-    public static final String VERSIONING_NOT_SUPPORTED_MSG = "Versioning not supported by WebDAV.";
 
     // Missing file name.
     public static final String MISSING_FILE_NAME_MSG = "Missing file name.";

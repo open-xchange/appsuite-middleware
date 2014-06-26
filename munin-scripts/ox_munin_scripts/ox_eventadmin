@@ -1,0 +1,51 @@
+#!/usr/bin/perl -w
+#%# family=auto
+#%# capabilities=autoconf
+
+
+$showruntimestats="/opt/open-xchange/sbin/showruntimestats";
+$showexec="$showruntimestats -e";
+
+if ( $ARGV[0] and $ARGV[0] eq "autoconf")
+{
+    if (-x $showruntimestats) {
+        print "yes\n";
+        exit 0;
+    }
+    else {
+        print "no\n";
+        exit 0;
+    }
+}
+
+if ( $ARGV[0] and $ARGV[0] eq "config")
+{
+    print "graph_title OSGi EventAdmin\n";
+    print "graph_category Open Xchange\n";
+    print "graph_vlabel number of events\n";
+    print "graph_period minute\n";
+    print "enqueued.label enqueued events\n";
+    print "avg.label events per minute\n";
+    print "avg.draw AREA\n";
+    exit 0
+}
+
+open(SHOWRUNTIME,"$showexec |") || die "can not read monitoring output";
+
+while (<SHOWRUNTIME>)
+{
+    if ( $_ =~ /EventAdminMBean,EnqueuedEvents/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "enqueued.value $val\n";
+        next;
+    }
+    if ( $_ =~ /EventAdminMBean,EventsPerMinute/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "avg.value $val\n";
+        next;
+    }
+}
+
+close (SHOWRUNTIME);

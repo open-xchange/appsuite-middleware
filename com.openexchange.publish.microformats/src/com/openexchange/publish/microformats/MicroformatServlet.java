@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -274,7 +274,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             }
         }
 
-        final String site = Strings.join(decode(normalized.subList(2, normalized.size()), req), "/");
+        final String site = Strings.join(HelperClass.decode(normalized.subList(2, normalized.size()), req,SPLIT2), "/");
         final Map<String, String> args = new HashMap<String, String>();
         args.put(MODULE, normalized.get(0));
         args.put(CONTEXTID, normalized.get(1));

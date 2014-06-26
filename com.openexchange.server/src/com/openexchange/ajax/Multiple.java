@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -83,6 +83,7 @@ import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.ajax.requesthandler.MultipleAdapter;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.mail.MailFolderType;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -112,6 +113,7 @@ public class Multiple extends SessionServlet {
     private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Multiple.class);
 
     private static final String ACTION = PARAMETER_ACTION;
+    private static final String PARENT = "parent";
 
     protected static final String MODULE = "module";
 
@@ -207,32 +209,44 @@ public class Multiple extends SessionServlet {
                 int concurrentTasksCount = 0;
                 // Build-up mapping & schedule for either serial or concurrent execution
                 final ConcurrentTIntObjectHashMap<JsonInOut> mapping = new ConcurrentTIntObjectHashMap<JsonInOut>(length);
-                for (int pos = 0; pos < length; pos++) {
+                if (length > 1) {
+                    for (int pos = 0; pos < length; pos++) {
+                        final JSONObject dataObject = dataArray.getJSONObject(pos);
+                        final JsonInOut jsonInOut = new JsonInOut(pos, dataObject);
+                        mapping.put(pos, jsonInOut);
+                        if (!dataObject.hasAndNotNull(MODULE)) {
+                            throw AjaxExceptionCodes.MISSING_PARAMETER.create(MODULE);
+                        }
+                        // Check if module indicates serial or concurrent execution
+                        final String module = dataObject.getString(MODULE);
+                        if (indicatesSerial(dataObject)) {
+                            if (null == serialTasks) {
+                                serialTasks = new ArrayList<JsonInOut>(length);
+                            }
+                            serialTasks.add(jsonInOut);
+                        } else {
+                            if (null == completionService) {
+                                final int concurrencyLevel = CONCURRENCY_LEVEL;
+                                if (concurrencyLevel <= 0 || length <= concurrencyLevel) {
+                                    completionService = new ThreadPoolCompletionService<Object>(ThreadPools.getThreadPool()).setTrackable(true);
+                                } else {
+                                    completionService = new BoundedCompletionService<Object>(ThreadPools.getThreadPool(), concurrencyLevel).setTrackable(true);
+                                }
+                            }
+                            completionService.submit(new CallableImpl(jsonInOut, session, module, req));
+                            concurrentTasksCount++;
+                        }
+                    }
+                } else {
+                    final int pos = 0;
                     final JSONObject dataObject = dataArray.getJSONObject(pos);
                     final JsonInOut jsonInOut = new JsonInOut(pos, dataObject);
                     mapping.put(pos, jsonInOut);
                     if (!dataObject.hasAndNotNull(MODULE)) {
                         throw AjaxExceptionCodes.MISSING_PARAMETER.create(MODULE);
                     }
-                    // Check if module indicates serial or concurrent execution
-                    final String module = dataObject.getString(MODULE);
-                    if (indicatesSerial(dataObject)) {
-                        if (null == serialTasks) {
-                            serialTasks = new ArrayList<JsonInOut>(length);
-                        }
-                        serialTasks.add(jsonInOut);
-                    } else {
-                        if (null == completionService) {
-                            final int concurrencyLevel = CONCURRENCY_LEVEL;
-                            if (concurrencyLevel <= 0 || length <= concurrencyLevel) {
-                                completionService = new ThreadPoolCompletionService<Object>(ThreadPools.getThreadPool()).setTrackable(true);
-                            } else {
-                                completionService = new BoundedCompletionService<Object>(ThreadPools.getThreadPool(), concurrencyLevel).setTrackable(true);
-                            }
-                        }
-                        completionService.submit(new CallableImpl(jsonInOut, session, module, req));
-                        concurrentTasksCount++;
-                    }
+                    serialTasks = new ArrayList<JsonInOut>(1);
+                    serialTasks.add(jsonInOut);
                 }
                 if (null != serialTasks) {
                     final int size = serialTasks.size();
@@ -262,7 +276,10 @@ public class Multiple extends SessionServlet {
             } finally {
                 close((MailServletInterface) req.getAttribute(ATTRIBUTE_MAIL_INTERFACE));
                 if (state != null) {
-                    getDispatcher().end(state);
+                    final Dispatcher dispatcher = getDispatcher();
+                    if (null != dispatcher) {
+                        dispatcher.end(state);
+                    }
                 }
             }
         }
@@ -280,36 +297,47 @@ public class Multiple extends SessionServlet {
         }
     }
 
+    /** If a module identifier is contained in this set, serial execution is mandatory */
+    private static final Set<String> SERIAL_MODULES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(MODULE_MAIL, "templating")));
+
+    /** If a module identifier is contained in this set, serial execution is mandatory in case action hints to a {@link #MODIFYING_ACTIONS modifying operation} */
     private static final Set<String> SERIAL_ON_MODIFICATION_MODULES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(MODULE_CALENDAR, MODULE_TASK, MODULE_FOLDER, MODULE_FOLDERS, MODULE_CONTACT)));
 
+    /** A set containing those actions that are considered as modifying */
     private static final Set<String> MODIFYING_ACTIONS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(ACTION_DELETE, ACTION_NEW, ACTION_UPDATE)));
 
-    private static boolean indicatesSerial(JSONObject dataObject) throws JSONException {
+    private static boolean indicatesSerial(final JSONObject dataObject) throws JSONException {
+        // Retrieve module identifier
         final String module = Strings.toLowerCase(dataObject.getString(MODULE));
 
-        // Check for mail
-        if (MODULE_MAIL.equals(module)) {
-            return true;
+        if (null != module) {
+            // Check for serial module; mail, templating, ...
+            if (SERIAL_MODULES.contains(module)) {
+                return true;
+            }
+
+            // Check for a folder action
+            if (MODULE_FOLDERS.equals(module)) {
+                // Check for either modifying operation or a mail folder list request
+                final String action = Strings.toLowerCase(dataObject.optString(ACTION, null));
+                if (MODIFYING_ACTIONS.contains(action) || isMailFolderList(action, dataObject.optString(PARENT, null))) {
+                    return true;
+                }
+            } else {
+                // Check for a modifying operation
+                if (SERIAL_ON_MODIFICATION_MODULES.contains(module)) {
+                    final String action = Strings.toLowerCase(dataObject.optString(ACTION, null));
+                    return ((null != action) && MODIFYING_ACTIONS.contains(action));
+                }
+            }
         }
 
-        // Check for a modifying operation
-        if ((null != module) && SERIAL_ON_MODIFICATION_MODULES.contains(module)) {
-            final String action = Strings.toLowerCase(dataObject.optString(ACTION, null));
-            return ((null != action) && MODIFYING_ACTIONS.contains(action));
-        }
-
-        // Check for templating module (causes concurrent lookup of the templating folders)
-        if ("templating".equals(module)) {
-            return true;
-        }
-
-        // Check for templating module (causes concurrent lookup of the templating folders)
-        if ("templating".equals(module)) {
-            return true;
-        }
-
-        // No action that needs serial execution
+        // Does not require serial execution
         return false;
+    }
+
+    private static boolean isMailFolderList(final String action, final String parentId) {
+        return ACTION_LIST.equals(action) && MailFolderType.getInstance().servesParentId(parentId);
     }
 
     protected static final void performActionElement(final JsonInOut jsonInOut, final String module, final ServerSession session, final HttpServletRequest req) {

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -62,7 +62,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.jdom2.Document;
 import org.jdom2.JDOMException;
-import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.exception.Category;
@@ -110,9 +110,9 @@ public abstract class OXServlet extends WebDavServlet {
 
         public LoginRequestImpl(final String login, final String pass, final Interface interfaze, final HttpServletRequest req) {
             super();
-            this.client = AJAXServlet.sanitizeParam(req.getParameter(LoginFields.CLIENT_PARAM));
-            version = AJAXServlet.sanitizeParam(req.getParameter(LoginFields.VERSION_PARAM));
-            userAgent = AJAXServlet.sanitizeParam(req.getParameter("agent"));
+            this.client = AJAXUtility.sanitizeParam(req.getParameter(LoginFields.CLIENT_PARAM));
+            version = AJAXUtility.sanitizeParam(req.getParameter(LoginFields.VERSION_PARAM));
+            userAgent = AJAXUtility.sanitizeParam(req.getParameter("agent"));
             this.login = login;
             this.req = req;
             this.pass = pass;

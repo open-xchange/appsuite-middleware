@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,7 +50,6 @@
 package com.openexchange.webdav.acl.mixins;
 
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.webdav.acl.PrincipalProtocol;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
@@ -75,10 +74,10 @@ public class CalendarUserAddressSet extends SingleXMLPropertyMixin {
 
     @Override
     protected String getValue() {
-        StringAllocator stringAllocator = new StringAllocator();
-        stringAllocator.append("<D:href>mailto:").append(user.getMail()).append("</D:href>");
-        stringAllocator.append("<D:href>/principals/users/" + user.getLoginInfo() + "/</D:href>");
-        return stringAllocator.toString();
+        StringBuilder StringBuilder = new StringBuilder();
+        StringBuilder.append("<D:href>mailto:").append(user.getMail()).append("</D:href>");
+        StringBuilder.append("<D:href>/principals/users/" + user.getLoginInfo() + "/</D:href>");
+        return StringBuilder.toString();
     }
 
 }

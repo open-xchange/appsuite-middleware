@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -69,6 +69,8 @@ import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.apache.jackrabbit.webdav.property.DavPropertySet;
 import org.apache.jackrabbit.webdav.version.report.ReportInfo;
 import org.json.JSONException;
+import com.openexchange.ajax.folder.actions.DeleteRequest;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.dav.Headers;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
@@ -83,6 +85,7 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Charsets;
 import com.openexchange.test.CalendarTestManager;
+import com.openexchange.test.PermissionTools;
 
 /**
  * {@link CalDAVTest} - Common base class for CalDAV tests
@@ -95,6 +98,7 @@ public abstract class CalDAVTest extends WebDAVTest {
 
 	private CalendarTestManager testManager = null;
 	private int folderId;
+	private final List<FolderObject> createdFolders = new ArrayList<FolderObject>();
 
 	public CalDAVTest(final String name) {
 		super(name);
@@ -110,6 +114,9 @@ public abstract class CalDAVTest extends WebDAVTest {
 
     @Override
     protected void tearDown() throws Exception {
+        if (null != createdFolders && 0 < createdFolders.size()) {
+            client.execute(new DeleteRequest(EnumAPI.OX_NEW, createdFolders.toArray(new FolderObject[0])));
+        }
     	if (null != this.getManager()) {
     		this.getManager().cleanUp();
     	}
@@ -260,9 +267,9 @@ public abstract class CalDAVTest extends WebDAVTest {
 		return new URI(null, name, null).toString();
 	}
 
-	protected int putICalUpdate(String resourceName, String iCal, String ifMatchEtag) throws HttpException, IOException, OXException, URISyntaxException {
-		return this.putICalUpdate(getDefaultFolderID(), resourceName, iCal, ifMatchEtag);
-	}
+    protected int putICalUpdate(String resourceName, String iCal, String ifMatchEtag) throws HttpException, IOException, OXException, URISyntaxException {
+        return this.putICalUpdate(getDefaultFolderID(), resourceName, iCal, ifMatchEtag);
+    }
 
 	protected int putICalUpdate(String folderID, String resourceName, String iCal, String ifMatchEtag) throws HttpException, IOException, OXException, URISyntaxException {
         PutMethod put = null;
@@ -419,16 +426,40 @@ public abstract class CalDAVTest extends WebDAVTest {
     	return match;
     }
 
-	protected Appointment create(Appointment appointment) {
-		return create(getDefaultFolderID(), appointment);
-	}
+    protected Appointment create(Appointment appointment) {
+        return create(getDefaultFolderID(), appointment);
+    }
 
     protected Appointment create(String folderID, Appointment appointment) {
-		appointment.setParentFolderID(parse(folderID));
-		appointment.setIgnoreConflicts(true);
-		return getManager().insert(appointment);
+        appointment.setParentFolderID(parse(folderID));
+        appointment.setIgnoreConflicts(true);
+        return getManager().insert(appointment);
+    }
 
-	}
+    protected Appointment update(Appointment appointment) {
+        appointment.setIgnoreConflicts(true);
+        getManager().update(appointment);
+        return appointment;
+    }
+
+    protected FolderObject createPublicFolder() throws OXException, IOException, JSONException  {
+        return createPublicFolder(randomUID());
+    }
+
+    protected FolderObject createPublicFolder(String name) throws OXException, IOException, JSONException  {
+        FolderObject folder = new FolderObject();
+        folder.setModule(FolderObject.CALENDAR);
+        folder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
+        folder.setPermissions(PermissionTools.P(Integer.valueOf(client.getValues().getUserId()), PermissionTools.ADMIN));
+        folder.setFolderName(name);
+        com.openexchange.ajax.folder.actions.InsertRequest request =
+            new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_NEW, folder);
+        com.openexchange.ajax.folder.actions.InsertResponse response = client.execute(request);
+        response.fillObject(folder);
+        folder.setLastModified(new Date());
+        createdFolders.add(folder);
+        return folder;
+    }
 
 
 }

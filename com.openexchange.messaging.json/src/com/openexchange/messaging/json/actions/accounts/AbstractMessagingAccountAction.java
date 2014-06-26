@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,15 +49,22 @@
 
 package com.openexchange.messaging.json.actions.accounts;
 
+import java.util.Map;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
+import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingExceptionCodes;
+import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.json.MessagingAccountParser;
 import com.openexchange.messaging.json.MessagingAccountWriter;
+import com.openexchange.messaging.json.Services;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
+import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthService;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -91,5 +98,57 @@ public abstract class AbstractMessagingAccountAction implements AJAXActionServic
     }
 
     protected abstract AJAXRequestResult doIt(AJAXRequestData request, ServerSession session) throws JSONException, OXException;
+
+    // ----------------------------------------------------------------------------------------------------------------------------- //
+
+    /**
+     * Checks specified account's configuration
+     * @param account The account to check
+     * @param session The associated session
+     *
+     * @throws OXException If configuration is invalid
+     */
+    protected static void checkAccountConfiguration(final MessagingAccount account, final ServerSession session) throws OXException {
+        final MessagingService messagingService = account.getMessagingService();
+        if (null != messagingService) {
+            final Map<String, Object> configuration = account.getConfiguration();
+            if (null != configuration) {
+                final int oauthAccountId = parseUnsignedInt(configuration.get("account"));
+                if (oauthAccountId >= 0) {
+                    final OAuthService oAuthService = Services.getService(OAuthService.class);
+                    if (null != oAuthService) {
+                        final OAuthAccount oAuthAccount = oAuthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
+                        // Check OAuth service identifier against messaging service identifier
+                        if (!equalServiceIdnetifiers(messagingService.getId(), oAuthAccount.getMetaData().getId())) {
+                            throw MessagingExceptionCodes.INVALID_OAUTH_ACCOUNT.create(oAuthAccount.getMetaData().getId(), messagingService.getId());
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private static boolean equalServiceIdnetifiers(final String messagingServiceId, final String oAuthServiceId) {
+        final int pos1 = messagingServiceId.lastIndexOf('.');
+        final int pos2 = oAuthServiceId.lastIndexOf('.');
+        if (pos1 >= 0 && pos2 >= 0) {
+            return Strings.toLowerCase(messagingServiceId.substring(pos1 + 1)).equals(Strings.toLowerCase(oAuthServiceId.substring(pos2 + 1)));
+        }
+        return true;
+    }
+
+    private static int parseUnsignedInt(final Object obj) {
+        if (null == obj) {
+            return -1;
+        }
+        if (obj instanceof Number) {
+            return ((Number) obj).intValue();
+        }
+        try {
+            return Integer.parseInt(obj.toString());
+        } catch (final NumberFormatException e) {
+            return -1;
+        }
+    }
 
 }

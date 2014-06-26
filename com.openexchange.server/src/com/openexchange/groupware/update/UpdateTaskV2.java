@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -61,7 +61,8 @@ public interface UpdateTaskV2 extends UpdateTask {
     static final int NO_VERSION = Schema.NO_VERSION;
 
     /**
-     * Performs the database schema upgrade.
+     * Performs the database schema upgrade. Once this method returns either successful or unsuccessful, this task is written as executed
+     * successful or unsuccessful in the schemas updateTask table. This can not be changed afterwards automatically.
      * @param params Interface carrying some useful parameters for performing the update. This is a parameter interface to be extendable for
      * future requirements without breaking the API.
      * @throws OXException should be thrown if the update fails. Then it can be tried to execute this task again.
@@ -72,6 +73,10 @@ public interface UpdateTaskV2 extends UpdateTask {
      * This method is used to determine the order when executing update tasks. Check VERY carefully what update tasks must be run before
      * your task can run. For all currently existing update task the dependency returns always the previous update task to remain the same
      * order as with the versions.
+     * WARNING: Please check always carefully which tasks did touch the same tables, this task touches. This includes other tables if
+     * foreign key reference these other tables. Please check also all tasks changing these referenced tables. The update tasks framework
+     * executes tasks in a completely random order if no dependencies are defined. Normally there are previous update tasks that already
+     * changed the table you want to change. Mention this task as a dependency!
      * @return a string array containing the update tasks that must be run before running this one. You may return an empty array if you can
      * not discover any dependencies. Never return <code>null</code>.
      */

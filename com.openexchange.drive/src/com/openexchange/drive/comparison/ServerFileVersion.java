@@ -129,7 +129,7 @@ public class ServerFileVersion implements FileVersion {
         if (ServerFileVersion.class.isInstance(fileVersion)) {
             return (ServerFileVersion)fileVersion;
         }
-        File file = session.getStorage().findFileByName(path, fileVersion.getName(), true);
+        File file = session.getStorage().getFileByName(path, fileVersion.getName(), true);
         if (null != file) {
             FileChecksum fileChecksum = ChecksumProvider.getChecksum(session, file);
             if (fileVersion.getChecksum().equals(fileChecksum.getChecksum())) {

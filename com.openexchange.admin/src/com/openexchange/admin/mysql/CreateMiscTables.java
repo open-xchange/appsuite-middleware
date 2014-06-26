@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,9 +49,7 @@
 
 package com.openexchange.admin.mysql;
 
-import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.database.AbstractCreateTableImpl;
-import com.openexchange.groupware.update.FullPrimaryKeySupportService;
 
 
 /**
@@ -60,27 +58,11 @@ import com.openexchange.groupware.update.FullPrimaryKeySupportService;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class CreateMiscTables extends AbstractCreateTableImpl {
-    
+
     private static final String prgLinksTableName = "prg_links";
     private static final String reminderTableName = "reminder";
     private static final String filestoreUsageTableName = "filestore_usage";
-    
-    private static final String createPrgLinksTable = "CREATE TABLE prg_links ("
-        + "firstid INT4 UNSIGNED NOT NULL,"
-        + "firstmodule INT4 UNSIGNED NOT NULL,"
-        + "firstfolder INT4 UNSIGNED NOT NULL,"
-        + "secondid INT4 UNSIGNED NOT NULL,"
-        + "secondmodule INT4 UNSIGNED NOT NULL,"
-        + "secondfolder INT4 UNSIGNED NOT NULL,"
-        + "cid INT4 UNSIGNED NOT NULL,"
-        + "last_modified INT8,"
-        + "created_by INT4 UNSIGNED,"
-        + "uuid BINARY(16) DEFAULT NULL,"
-        + "INDEX (firstid),"
-        + "INDEX (secondid),"
-        + "INDEX (cid)"
-      + ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     private static final String createPrgLinksTablePrimaryKey = "CREATE TABLE prg_links ("
         + "firstid INT4 UNSIGNED NOT NULL,"
         + "firstmodule INT4 UNSIGNED NOT NULL,"
@@ -97,7 +79,7 @@ public class CreateMiscTables extends AbstractCreateTableImpl {
         + "INDEX (secondid),"
         + "INDEX (cid)"
       + ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     private static final String createReminderTable = "CREATE TABLE reminder ("
         + "cid INT4 UNSIGNED NOT NULL,"
         + "object_id INT4 UNSIGNED NOT NULL,"
@@ -114,7 +96,7 @@ public class CreateMiscTables extends AbstractCreateTableImpl {
         + "INDEX (cid,userid,last_modified),"
         + "CONSTRAINT reminder_unique UNIQUE (cid,target_id,module,userid)"
       + ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     private static final String createFilestoreUsageTable = "CREATE TABLE filestore_usage ("
         + "cid INT4 UNSIGNED NOT NULL,"
         + "used INT8 NOT NULL,"
@@ -128,32 +110,19 @@ public class CreateMiscTables extends AbstractCreateTableImpl {
         super();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.database.CreateTableService#requiredTables()
-     */
     @Override
     public String[] requiredTables() {
         return NO_TABLES;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.database.CreateTableService#tablesToCreate()
-     */
     @Override
     public String[] tablesToCreate() {
         return new String[] { prgLinksTableName, reminderTableName, filestoreUsageTableName };
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.database.AbstractCreateTableImpl#getCreateStatements()
-     */
     @Override
     protected String[] getCreateStatements() {
-        FullPrimaryKeySupportService fullPrimaryKeySupportService = AdminServiceRegistry.getInstance().getService(FullPrimaryKeySupportService.class);
-        if (fullPrimaryKeySupportService.isFullPrimaryKeySupported()) {
-            return new String[] { createPrgLinksTablePrimaryKey, createReminderTable, createFilestoreUsageTable };
-        }
-        return new String[] { createPrgLinksTable, createReminderTable, createFilestoreUsageTable };
+        return new String[] { createPrgLinksTablePrimaryKey, createReminderTable, createFilestoreUsageTable };
     }
 
 }

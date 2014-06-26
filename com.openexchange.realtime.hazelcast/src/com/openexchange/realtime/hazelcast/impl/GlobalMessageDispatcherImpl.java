@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,7 +49,6 @@
 
 package com.openexchange.realtime.hazelcast.impl;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -61,12 +60,11 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.FutureTask;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-import com.hazelcast.core.DistributedTask;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IExecutorService;
 import com.hazelcast.core.Member;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
@@ -76,12 +74,11 @@ import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
-import com.openexchange.realtime.hazelcast.Services;
 import com.openexchange.realtime.hazelcast.Utils;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.hazelcast.channel.StanzaDispatcher;
+import com.openexchange.realtime.hazelcast.osgi.Services;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.IDEventHandler;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.IDMap;
 import com.openexchange.threadpool.ThreadPools;
@@ -115,8 +112,11 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
     }
 
     @Override
-    public Map<ID, OXException> send(Stanza stanza) throws OXException {
-        return send(stanza, directory.get(stanza.getTo()));
+    public void send(Stanza stanza) throws OXException {
+        Map<ID, OXException> exceptions = send(stanza, directory.get(stanza.getTo()));
+        if(!exceptions.isEmpty()) {
+            throw exceptions.values().iterator().next();
+        }
     }
 
     public ResponseChannel getChannel() {
@@ -144,7 +144,7 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
         for (Entry<ID, Resource> recipient : recipients.entrySet()) {
             ID id = recipient.getKey();
             Resource resource = recipient.getValue();
-            Serializable routingInfo = resource.getRoutingInfo();
+            Object routingInfo = resource.getRoutingInfo();
             if (routingInfo != null && Member.class.isInstance(routingInfo)) {
                 Member member = (Member) routingInfo;
                 Set<ID> ids = targets.get(member);
@@ -172,25 +172,25 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
             Map<ID, OXException> sent = Services.getService(LocalMessageDispatcher.class).send(stanza, localIds);
             if (Utils.shouldResend(sent, stanza)) {
                 resend(stanza);
+                //return empty map of exceptions when resending
                 return exceptions;
             }
             exceptions.putAll(sent);
         }
         // Sent to remote receivers
-        ExecutorService executorService = hazelcastInstance.getExecutorService();
-        List<FutureTask<Map<ID, OXException>>> futures = new ArrayList<FutureTask<Map<ID, OXException>>>();
+        IExecutorService executorService = hazelcastInstance.getExecutorService("default");
+        List<Future<Map<ID, OXException>>> futures = new ArrayList<Future<Map<ID, OXException>>>();
         for (Member receiver : targets.keySet()) {
             Set<ID> ids = targets.get(receiver);
             LOG.debug("Sending to '{}' @ {}", stanza.getTo(), receiver);
             stanza.trace("Sending to '" + stanza.getTo() + "' @ " + receiver);
             ensureSequence(stanza, receiver);
-            FutureTask<Map<ID, OXException>> task = new DistributedTask<Map<ID, OXException>>(new StanzaDispatcher(stanza, ids) , receiver);
-            executorService.execute(task);
+            Future<Map<ID, OXException>> task = executorService.submitToMember(new StanzaDispatcher(stanza, ids), receiver);
             futures.add(task);
         }
         // Await completion of send requests and extract their exceptions (if any)
 
-        for (FutureTask<Map<ID, OXException>> future : futures) {
+        for (Future<Map<ID, OXException>> future : futures) {
             try {
                 exceptions.putAll(future.get());
             } catch (InterruptedException e) {
@@ -219,25 +219,31 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
         send(stanza);
     }
 
-
-
+    /*
+     * Map which client (sequencePrincipal) should use which sequence when sending to a given recipient node. Nodes are addressed via
+     * InetSocketAddress.
+     */
     private final ConcurrentHashMap<ID, ConcurrentHashMap<String, AtomicLong>> peerMapPerID = new ConcurrentHashMap<ID, ConcurrentHashMap<String, AtomicLong>>();
-
     /**
      *
-     * When delivering a Stanza to a different node, a new sequence number relative to that node is generated, so that stanza streams directed at different nodes still work. Consider:
+     * When delivering a Stanza to a different node, a new sequence number relative to that node is generated, so that stanza streams
+     * directed at different nodes still work.Consider client0 and client1 being connected to node1 and client2 being connected to node2.
+     * client0 wants to chat with client1 and client2 and sends messages with strictly ascending sequence numbers reaching node1 that he is
+     * connected to:
+     * 
      * <pre>
-     * Seq 0 delivered via node 1
-     * Seq 1 delivered via node 1
-     * Seq 2 delivered via node 2
-     * Seq 3 delivered via node 1
-     * Seq 4 delivered via node 2
+     * Seq 0 delivered to client1 via node 1
+     * Seq 1 delivered to client1 via node 1
+     * Seq 2 delivered to client2 via node 2
+     * Seq 3 delivered to client1 via node 1
+     * Seq 4 delivered to client2 via node 2
      * </pre>
      *
-     * Node 2 only sees messages 2 and 4 and would indefinetly wait for messages 0, 1 and 3. Therefore the system recasts sequence numbers:
+     * Node 2 only sees messages 2 and 4 and would indefinetly wait for messages 0, 1 and 3 to form a valid order of sequences. Therefore
+     * the realtime framework on node1 has to recast sequence numbers in a way that node2 sees a valid order.
      * <pre>
-     * Seq 0 is recast as Seq 0 for node 1
-     * Seq 1 is recast as Seq 1 for node 1
+     * Seq 0 remains      Seq 0 for node 1
+     * Seq 1 remains      Seq 1 for node 1
      * Seq 2 is recast as Seq 0 for node 2
      * Seq 3 is recast as Seq 2 for node 1
      * Seq 4 is recast as Seq 1 for node 2
@@ -257,22 +263,8 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
             if (peerMap == null) {
                 peerMap = new ConcurrentHashMap<String, AtomicLong>();
                 ConcurrentHashMap<String, AtomicLong> otherPeerMap = peerMapPerID.putIfAbsent(stanza.getSequencePrincipal(), peerMap);
-                if (otherPeerMap == null) {
-                    stanza.getSequencePrincipal().on(ID.Events.DISPOSE, new IDEventHandler() {
-
-                        @Override
-                        public void handle(String event, ID id, Object source, Map<String, Object> properties) {
-                            if(LOG.isDebugEnabled()) {
-                                LOG.debug("Removing SequencePrincipal from peerMapPerID lookup table: " + id);
-                            }
-                            peerMapPerID.remove(id);
-                        }
-
-                    });
-                } else {
-                    if(LOG.isDebugEnabled()) {
-                        LOG.debug("Found other peerMap for SequencePrincipal: {} with value {}", stanza.getSequencePrincipal(), otherPeerMap);
-                    }
+                if(otherPeerMap != null) {
+                    LOG.debug("Found other peerMap for SequencePrincipal: {} with value {}", stanza.getSequencePrincipal(), otherPeerMap);
                     peerMap = otherPeerMap;
                 }
             }
@@ -305,8 +297,7 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
 
     @Override
     public void cleanupForId(ID id) {
-        LOG.debug("Removing SequencePrincipal {} from peerMapPerID lookup table.", id);
+        LOG.debug("Cleanup for ID: {}. Removing SequencePrincipal from peerMapPerID lookup table.", id);
         peerMapPerID.remove(id);
     }
-
 }

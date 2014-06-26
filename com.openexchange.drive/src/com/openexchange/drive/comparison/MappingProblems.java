@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.internal.PathNormalizer;
-import com.openexchange.java.StringAllocator;
 
 
 /**
@@ -192,19 +191,19 @@ public class MappingProblems<T extends DriveVersion> {
 
     @Override
     public String toString() {
-        StringAllocator stringAllocator = new StringAllocator();
-        appendVersions(stringAllocator, caseConflictingClientVersions, "Case conflicting client versions");
-        appendVersions(stringAllocator, unicodeConflictingClientVersions, "Unicode conflicting client versions");
-        appendVersions(stringAllocator, caseConflictingServerVersions, "Case conflicting server versions");
-        appendVersions(stringAllocator, unicodeConflictingServerVersions, "Unicode conflicting server versions");
-        return stringAllocator.toString();
+        StringBuilder StringBuilder = new StringBuilder();
+        appendVersions(StringBuilder, caseConflictingClientVersions, "Case conflicting client versions");
+        appendVersions(StringBuilder, unicodeConflictingClientVersions, "Unicode conflicting client versions");
+        appendVersions(StringBuilder, caseConflictingServerVersions, "Case conflicting server versions");
+        appendVersions(StringBuilder, unicodeConflictingServerVersions, "Unicode conflicting server versions");
+        return StringBuilder.toString();
     }
 
-    private void appendVersions(StringAllocator stringAllocator, List<T> versions, String header) {
+    private void appendVersions(StringBuilder StringBuilder, List<T> versions, String header) {
         if (null != versions && 0 < versions.size()) {
-            stringAllocator.append('\n').append(header).append(":\n");
+            StringBuilder.append('\n').append(header).append(":\n");
             for (T version : versions) {
-                stringAllocator.append("  ").append(version).append('\n');
+                StringBuilder.append("  ").append(version).append('\n');
             }
         }
     }

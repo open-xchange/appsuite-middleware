@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -61,6 +61,7 @@ import com.openexchange.ajax.mailaccount.actions.MailAccountGetResponse;
 import com.openexchange.ajax.mailaccount.actions.MailAccountListRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountListResponse;
 import com.openexchange.ajax.mailaccount.actions.MailAccountUpdateRequest;
+import com.openexchange.configuration.MailConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccountDescription;
@@ -107,19 +108,11 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
 
     private void updateMailAccount() throws OXException, IOException, JSONException {
         mailAccountDescription.setName("Other Name");
-        mailAccountDescription.setLogin("Other Login");
-        mailAccountDescription.setPassword("New Password");
-        mailAccountDescription.setTransportLogin("Other Login");
-        mailAccountDescription.setTransportPassword("New Password");
-        mailAccountDescription.setMailPort(123);
+        mailAccountDescription.setLogin(MailConfig.getProperty(MailConfig.Property.LOGIN2));
         getClient().execute(
             new MailAccountUpdateRequest(mailAccountDescription, EnumSet.of(
                 Attribute.NAME_LITERAL,
-                Attribute.LOGIN_LITERAL,
-                Attribute.PASSWORD_LITERAL,
-                Attribute.TRANSPORT_LOGIN_LITERAL,
-                Attribute.TRANSPORT_PASSWORD_LITERAL,
-                Attribute.MAIL_PORT_LITERAL)));
+                Attribute.LOGIN_LITERAL)));
         // *shrugs* don't need the response
     }
 
@@ -185,12 +178,37 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
         for (final Attribute attribute : Attribute.values()) {
             if (attribute == Attribute.PASSWORD_LITERAL || attribute == Attribute.TRANSPORT_PASSWORD_LITERAL || attribute == Attribute.ARCHIVE_LITERAL) {
                 continue;
-            }
-            final Object expected = attribute.doSwitch(expectedSwitch);
-            final Object actual = attribute.doSwitch(actualSwitch);
+            } else if (attribute == Attribute.CONFIRMED_HAM_FULLNAME_LITERAL) {
+                compareByEnding(expectedSwitch, actualSwitch, attribute, Attribute.CONFIRMED_HAM_LITERAL);
+            } else if (attribute == Attribute.CONFIRMED_SPAM_FULLNAME_LITERAL) {
+                compareByEnding(expectedSwitch, actualSwitch, attribute, Attribute.CONFIRMED_SPAM_LITERAL);
+            } else if (attribute == Attribute.TRASH_FULLNAME_LITERAL) {
+                compareByEnding(expectedSwitch, actualSwitch, attribute, Attribute.TRASH_LITERAL);
+            } else if (attribute == Attribute.SENT_FULLNAME_LITERAL) {
+                compareByEnding(expectedSwitch, actualSwitch, attribute, Attribute.SENT_LITERAL);
+            } else if (attribute == Attribute.DRAFTS_FULLNAME_LITERAL) {
+                compareByEnding(expectedSwitch, actualSwitch, attribute, Attribute.DRAFTS_LITERAL);
+            } else if (attribute == Attribute.SPAM_FULLNAME_LITERAL) {
+                compareByEnding(expectedSwitch, actualSwitch, attribute, Attribute.SPAM_LITERAL);
+            } else {
+                final Object expected = attribute.doSwitch(expectedSwitch);
+                final Object actual = attribute.doSwitch(actualSwitch);
 
-            assertEquals(attribute.getName() + " differs!", expected, actual);
+                assertEquals(attribute.getName() + " differs!", expected, actual);
+            }
         }
     }
 
+    private void compareByEnding(final GetSwitch expectedSwitch, final GetSwitch actualSwitch, final Attribute attribute, final Attribute compareAttribute) throws OXException {
+        final Object expected = attribute.doSwitch(expectedSwitch);
+        final Object actual = attribute.doSwitch(actualSwitch);
+        if (actual != null && expected == null) {
+            Object confHam = compareAttribute.doSwitch(expectedSwitch);
+            assertNotNull(confHam);
+            final String confHamString = (String) confHam;
+            assertTrue(((String) actual).endsWith(confHamString));
+        } else {
+            assertEquals(attribute.getName() + " differs!", expected, actual);
+        }
+    }
 }

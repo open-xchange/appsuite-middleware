@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -55,12 +55,13 @@ import java.io.InputStream;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.tools.images.ImageTransformations;
-import com.openexchange.tools.images.transformations.ImageTransformationsImpl;
+import com.openexchange.tools.images.transformations.ImageTransformationsTask;
 
 /**
  * {@link JavaImageTransformationService}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class JavaImageTransformationService implements ImageTransformationService {
 
@@ -72,18 +73,33 @@ public class JavaImageTransformationService implements ImageTransformationServic
     }
 
     @Override
-    public ImageTransformations transfom(BufferedImage sourceImage) {
-        return new ImageTransformationsImpl(sourceImage);
+    public ImageTransformations transfom(final BufferedImage sourceImage) {
+        return transfom(sourceImage, null);
     }
 
     @Override
-    public ImageTransformations transfom(InputStream imageStream) throws IOException {
-        return new ImageTransformationsImpl(imageStream);
+    public ImageTransformations transfom(final BufferedImage sourceImage, final Object source) {
+        return new ImageTransformationsTask(sourceImage, source);
     }
 
     @Override
-    public ImageTransformations transfom(byte[] imageData) throws IOException {
-        return transfom(new UnsynchronizedByteArrayInputStream(imageData));
+    public ImageTransformations transfom(final InputStream imageStream) throws IOException {
+        return transfom(imageStream, null);
+    }
+
+    @Override
+    public ImageTransformations transfom(final InputStream imageStream, final Object source) throws IOException {
+        return new ImageTransformationsTask(imageStream, source);
+    }
+
+    @Override
+    public ImageTransformations transfom(final byte[] imageData) throws IOException {
+        return transfom(imageData, null);
+    }
+
+    @Override
+    public ImageTransformations transfom(final byte[] imageData, final Object source) throws IOException {
+        return transfom(new UnsynchronizedByteArrayInputStream(imageData), source);
     }
 
 }

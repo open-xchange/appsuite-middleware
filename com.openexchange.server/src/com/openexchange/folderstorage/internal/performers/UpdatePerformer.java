@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -154,6 +154,9 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                 final String newParentId = folder.getParentID();
                 move = (null != newParentId && !newParentId.equals(oldParentId));
                 if (move) {
+                    if (null == folder.getName()) {
+                        folder.setName(storageFolder.getName());
+                    }
                     if ("infostore".equals(storageFolder.getContentType().toString())) { // Maybe something special to consider as not synchronized with OL
                         checkForDuplicateOnMove(folder, treeId, openedStorages, storageFolder, newParentId);
                     } else {
@@ -167,9 +170,17 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                 rename = (null != newName && !newName.equals(storageFolder.getName()));
                 if (rename) {
                     if ("infostore".equals(storageFolder.getContentType().toString())) { // Maybe something special to consider as not synchronized with OL
-                        checkForDuplicateOnRename(folder, treeId, openedStorages, storageFolder, newName, false);
+                        if (move) {
+                            checkForDuplicateOnMove(folder, treeId, openedStorages, storageFolder, folder.getParentID());
+                        } else {
+                            checkForDuplicateOnRename(folder, treeId, openedStorages, storageFolder, newName, false);
+                        }
                     } else {
-                        checkForDuplicateOnRename(folder, treeId, openedStorages, storageFolder, newName, false);
+                        if (move) {
+                            checkForDuplicateOnMove(folder, treeId, openedStorages, storageFolder, folder.getParentID());
+                        } else {
+                            checkForDuplicateOnRename(folder, treeId, openedStorages, storageFolder, newName, false);
+                        }
                     }
                 }
             }

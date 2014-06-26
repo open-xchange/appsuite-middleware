@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -74,6 +74,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.filestore.FilestoreStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
 
@@ -332,6 +333,24 @@ public final class Tools {
      * @param columns names of the columns the primary key should cover.
      * @throws SQLException if some SQL problem occurs.
      */
+    public static final void createPrimaryKeyIfAbsent(final Connection con, final String table, final String[] columns) throws SQLException {
+        if (!existsPrimaryKey(con, table, columns)) {
+            if (hasPrimaryKey(con, table)) {
+               dropPrimaryKey(con, table);
+            }
+            createPrimaryKey(con, table, columns);
+        }
+    }
+
+    /**
+     * This method creates a new primary key on a table. Beware, this method is vulnerable to SQL injection because table and column names
+     * can not be set through a {@link PreparedStatement}.
+     *
+     * @param con writable database connection.
+     * @param table name of the table that should get a new primary key.
+     * @param columns names of the columns the primary key should cover.
+     * @throws SQLException if some SQL problem occurs.
+     */
     public static final void createPrimaryKey(final Connection con, final String table, final String[] columns) throws SQLException {
         final int[] lengths = new int[columns.length];
         Arrays.fill(lengths, -1);
@@ -397,13 +416,13 @@ public final class Tools {
         createIndex(con, table, null, columns, false);
     }
 
-    public static void createForeignKey(final Connection con, final String primaryTable, final String[] primaryColumns, final String foreignTable, final String[] foreignColumns) throws SQLException {
-        createForeignKey(con, null, primaryTable, primaryColumns, foreignTable, foreignColumns);
+    public static void createForeignKey(final Connection con, final String table, final String[] columns, final String referencedTable, final String[] referencedColumns) throws SQLException {
+        createForeignKey(con, null, table, columns, referencedTable, referencedColumns);
     }
 
-    public static void createForeignKey(final Connection con, final String name, final String primaryTable, final String[] primaryColumns, final String foreignTable, final String[] foreignColumns) throws SQLException {
+    public static void createForeignKey(final Connection con, final String name, final String table, final String[] columns, final String referencedTable, final String[] referencedColumns) throws SQLException {
         final StringBuilder sql = new StringBuilder("ALTER TABLE `");
-        sql.append(primaryTable);
+        sql.append(table);
         sql.append("` ADD FOREIGN KEY ");
         if (null != name) {
             sql.append('`');
@@ -411,15 +430,15 @@ public final class Tools {
             sql.append("` ");
         }
         sql.append("(`");
-        for (final String column : primaryColumns) {
+        for (final String column : columns) {
             sql.append(column);
             sql.append("`,`");
         }
         sql.setLength(sql.length() - 2);
         sql.append(") REFERENCES `");
-        sql.append(foreignTable);
+        sql.append(referencedTable);
         sql.append("`(`");
-        for (final String column : foreignColumns) {
+        for (final String column : referencedColumns) {
             sql.append(column);
             sql.append("`,`");
         }
@@ -645,6 +664,29 @@ public final class Tools {
         }
     }
 
+    /**
+     * Drops specified table.
+     *
+     * @param con The connection to use
+     * @param tableName The table name
+     * @throws SQLException If dropping columns fails
+     */
+    public static boolean dropTable(final Connection con, final String tableName) throws SQLException {
+        if (Strings.isEmpty(tableName)) {
+            return false;
+        }
+
+        final StringBuffer sql = new StringBuffer("DROP TABLE ").append(tableName);
+        Statement stmt = null;
+        try {
+            stmt = con.createStatement();
+            stmt.execute(sql.toString());
+            return true;
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
     public static void addColumns(final Connection con, final String tableName, final Column... cols) throws SQLException {
         final StringBuffer sql = new StringBuffer("ALTER TABLE ");
         sql.append(tableName);
@@ -670,40 +712,26 @@ public final class Tools {
         }
     }
 
-    public static void checkAndAddColumns(final Connection con, final String tableName, final Column... cols) throws SQLException {
-        final List<Column> notExisting = new ArrayList<Column>();
-        for (final Column col : cols) {
-            if (!columnExists(con, tableName, col.getName())) {
-                notExisting.add(col);
-            }
-        }
-        if (!notExisting.isEmpty()) {
-            addColumns(con, tableName, notExisting.toArray(new Column[notExisting.size()]));
-        }
-    }
-
-    public static void modifyColumns(final Connection con, final String tableName, final Collection<Column> columns) throws SQLException {
-        modifyColumns(con, tableName, columns.toArray(new Column[columns.size()]));
-    }
-
-    public static void modifyColumns(final Connection con, final String tableName, final Column... cols) throws SQLException {
-        if (null == cols || cols.length == 0) {
+    /**
+     * Drops specified columns from given table.
+     *
+     * @param con The connection to use
+     * @param tableName The table name
+     * @param cols The columns to drop
+     * @throws SQLException If dropping columns fails
+     */
+    public static void dropColumns(final Connection con, final String tableName, final Column... cols) throws SQLException {
+        if (null == cols || 0 == cols.length) {
             return;
         }
-        final StringBuilder sql = new StringBuilder("ALTER TABLE ");
+
+        final StringBuffer sql = new StringBuffer("ALTER TABLE ");
         sql.append(tableName);
-        for (final Column column : cols) {
-            sql.append(" MODIFY COLUMN ");
-            sql.append(column.getName());
-            sql.append(' ');
-            sql.append(column.getDefinition());
-            sql.append(',');
-        }
-        if (sql.charAt(sql.length() - 1) == ',') {
-            sql.setLength(sql.length() - 1);
-        }
-        if (sql.length() == 12 + tableName.length()) {
-            return;
+        sql.append(" DROP ");
+        sql.append(cols[0].getName());
+        for (int i = 1; i < cols.length; i++) {
+            sql.append(", DROP ");
+            sql.append(cols[i].getName());
         }
         Statement stmt = null;
         try {
@@ -714,6 +742,91 @@ public final class Tools {
         }
     }
 
+    /**
+     * Checks absence of specified columns and adds them to table.
+     *
+     * @param con The connection to use
+     * @param tableName The table name
+     * @param cols The columns to add
+     * @throws SQLException If operation fails
+     */
+    public static void checkAndAddColumns(final Connection con, final String tableName, final Column... cols) throws SQLException {
+        final List<Column> notExisting = new LinkedList<Column>();
+        for (final Column col : cols) {
+            if (!columnExists(con, tableName, col.getName())) {
+                notExisting.add(col);
+            }
+        }
+        if (!notExisting.isEmpty()) {
+            addColumns(con, tableName, notExisting.toArray(new Column[notExisting.size()]));
+        }
+    }
+
+    /**
+     * Checks existence of specified columns and drops them from table.
+     *
+     * @param con The connection to use
+     * @param tableName The table name
+     * @param cols The columns to drop
+     * @throws SQLException If operation fails
+     */
+    public static void checkAndDropColumns(final Connection con, final String tableName, final Column... cols) throws SQLException {
+        final List<Column> existing = new LinkedList<Column>();
+        for (final Column col : cols) {
+            if (columnExists(con, tableName, col.getName())) {
+                existing.add(col);
+            }
+        }
+        if (!existing.isEmpty()) {
+            dropColumns(con, tableName, existing.toArray(new Column[existing.size()]));
+        }
+    }
+
+    public static void modifyColumns(final Connection con, final String tableName, final Collection<Column> columns) throws SQLException {
+        modifyColumns(con, tableName, columns.toArray(new Column[columns.size()]));
+    }
+
+    /**
+     * Modifies specified columns in given table.
+     *
+     * @param con The connection to use
+     * @param tableName The table name
+     * @param cols The new column definitions to change to
+     * @throws SQLException If operation fails
+     */
+    public static void modifyColumns(final Connection con, final String tableName, final Column... cols) throws SQLException {
+        if (null == cols || cols.length == 0) {
+            return;
+        }
+        final StringBuilder sql = new StringBuilder("ALTER TABLE ");
+        sql.append(tableName);
+        sql.append(" MODIFY COLUMN ");
+        sql.append(cols[0].getName());
+        sql.append(' ');
+        sql.append(cols[0].getDefinition());
+        for (int i = 1; i < cols.length; i++) {
+            sql.append(", MODIFY COLUMN ");
+            sql.append(cols[i].getName());
+            sql.append(' ');
+            sql.append(cols[i].getDefinition());
+        }
+        Statement stmt = null;
+        try {
+            stmt = con.createStatement();
+            stmt.execute(sql.toString());
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    /**
+     * Checks existence of specified columns and modifies them in table.
+     *
+     * @param con The connection to use
+     * @param tableName The table name
+     * @param cols The columns to modify
+     * @throws SQLException If operation fails
+     */
     public static void checkAndModifyColumns(final Connection con, final String tableName, final Column... cols) throws SQLException {
         final List<Column> toDo = new ArrayList<Column>();
         for (final Column col : cols) {

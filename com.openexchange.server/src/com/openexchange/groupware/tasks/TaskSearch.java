@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,14 +51,18 @@ package com.openexchange.groupware.tasks;
 
 import java.sql.Connection;
 import java.util.Date;
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.search.Order;
+import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * Interface to different SQL implementations for searching for tasks and its
  * participants.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a> (find method)
  */
 abstract class TaskSearch {
 
@@ -109,5 +113,21 @@ abstract class TaskSearch {
     abstract SearchIterator<Task> listModifiedTasks(Context ctx, int folderId,
         StorageType type, int[] columns, Date since, boolean onlyOwn,
         int userId, boolean noPrivate) throws OXException;
-
+    
+    
+    /**
+     * Search for tasks via the find API
+     * @param context context
+     * @param userID userID
+     * @param searchObject the search object
+     * @param columns columns to select
+     * @param orderBy order by column
+     * @param order asc or desc
+     * @param all a list of folders ids where all tasks can be seen.
+     * @param own a list of folder ids owned by the user
+     * @param shared a list of folder ids where the user has at least read access
+     * @return
+     * @throws OXException
+     */
+    public abstract SearchIterator<Task> find(Context context, int userID, TaskSearchObject searchObject, int[] columns, int orderBy, Order order, List<Integer> all, List<Integer> own, List<Integer> shared) throws OXException;
 }

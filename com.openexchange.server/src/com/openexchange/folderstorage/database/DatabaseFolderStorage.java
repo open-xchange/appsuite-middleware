@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -90,6 +90,7 @@ import com.openexchange.folderstorage.AfterReadAwareFolderStorage;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
@@ -115,6 +116,7 @@ import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.folderstorage.type.SystemType;
+import com.openexchange.folderstorage.type.TrashType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
@@ -466,7 +468,8 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                     /*
                      * Determine folder type by examining parent folder
                      */
-                    createMe.setType(getFolderType(createMe.getParentFolderID(), storageParameters.getContext(), con));
+                    createMe.setType(getFolderType(
+                        createMe.getModule(), createMe.getParentFolderID(), storageParameters.getContext(), con));
                 } else {
                     createMe.setType(getTypeByFolderType(t));
                 }
@@ -575,7 +578,18 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             FolderObject.SYSTEM_PUBLIC_FOLDER_ID, FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,
             FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID };
 
-    private static int getFolderType(final int parentId, final Context ctx, final Connection con) throws OXException, OXException {
+    /**
+     * Determines the target folder type for new folders below a parent folder.
+     *
+     * @param module The module identifier of the new folder
+     * @param parentId The ID of the parent folder
+     * @param ctx The context
+     * @param con A readable database connection
+     * @return The folder type
+     * @throws OXException
+     * @throws OXException
+     */
+    private static int getFolderType(int module, final int parentId, final Context ctx, final Connection con) throws OXException, OXException {
         int type = -1;
         int pid = parentId;
         /*
@@ -588,8 +602,6 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             type = FolderObject.PRIVATE;
         } else if (Arrays.binarySearch(PUBLIC_FOLDER_IDS, pid) >= 0) {
             type = FolderObject.PUBLIC;
-        } else if (pid == FolderObject.SYSTEM_OX_PROJECT_FOLDER_ID) {
-            type = FolderObject.PROJECT;
         } else {
             type = getFolderAccess(ctx, con).getFolderType(pid);
         }
@@ -632,6 +644,9 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
+            FolderServiceDecorator decorator = storageParameters.getDecorator();
+            boolean hardDelete = null != decorator && (
+                Boolean.TRUE.equals(decorator.getProperty("hardDelete")) || decorator.getBoolProperty("hardDelete"));
             final OXFolderManager folderManager = OXFolderManager.getInstance(session, con, con);
             /*-
              * TODO: Perform last-modified check?
@@ -644,7 +659,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             }
              *
              */
-            folderManager.deleteFolder(fo, true, System.currentTimeMillis());
+            folderManager.deleteFolder(fo, true, System.currentTimeMillis(), hardDelete);
 
             final List<OXException> warnings = folderManager.getWarnings();
             if (null != warnings) {
@@ -667,7 +682,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
             final Context context = storageParameters.getContext();
-            final int folderId;
+            int folderId = -1;
             if (TaskContentType.getInstance().equals(contentType)) {
                 folderId = OXFolderSQL.getUserDefaultFolder(session.getUserId(), FolderObject.TASK, con, context);
             } else if (CalendarContentType.getInstance().equals(contentType)) {
@@ -675,9 +690,15 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             } else if (ContactContentType.getInstance().equals(contentType)) {
                 folderId = OXFolderSQL.getUserDefaultFolder(session.getUserId(), FolderObject.CONTACT, con, context);
             } else if (InfostoreContentType.getInstance().equals(contentType)) {
-                folderId = OXFolderSQL.getUserDefaultFolder(session.getUserId(), FolderObject.INFOSTORE, con, context);
-            } else {
-                return null;
+                if (TrashType.getInstance().equals(type)) {
+                    folderId = OXFolderSQL.getUserDefaultFolder(
+                        session.getUserId(), FolderObject.INFOSTORE, getTypeByFolderType(type), con, context);
+                } else {
+                    folderId = OXFolderSQL.getUserDefaultFolder(session.getUserId(), FolderObject.INFOSTORE, con, context);
+                }
+            }
+            if (-1 == folderId) {
+                throw FolderExceptionErrorMessage.NO_DEFAULT_FOLDER.create(contentType, treeId);
             }
             return String.valueOf(folderId);
         } catch (final SQLException e) {
@@ -699,8 +720,6 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             return PrivateType.getInstance();
         } else if (Arrays.binarySearch(PUBLIC_FOLDER_IDS, pid) >= 0) {
             return PublicType.getInstance();
-        } else if (pid == FolderObject.SYSTEM_OX_PROJECT_FOLDER_ID) {
-            return SystemType.getInstance();
         } else {
             final ConnectionProvider provider = getConnection(Mode.READ, storageParameters);
             try {
@@ -710,6 +729,8 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                     return p.getCreatedBy() == user.getId() ? PrivateType.getInstance() : SharedType.getInstance();
                 } else if (FolderObject.PUBLIC == parentType) {
                     return PublicType.getInstance();
+                } else if (FolderObject.TRASH == parentType) {
+                    return TrashType.getInstance();
                 }
             } finally {
                 provider.close();
@@ -1947,6 +1968,9 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         if (PublicType.getInstance().equals(type)) {
             return FolderObject.PUBLIC;
         }
+        if (TrashType.getInstance().equals(type)) {
+            return FolderObject.TRASH;
+        }
         return FolderObject.SYSTEM_TYPE;
     }
 
@@ -1959,6 +1983,9 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         }
         if (SharedType.getInstance().equals(type)) {
             return FolderObject.SHARED;
+        }
+        if (TrashType.getInstance().equals(type)) {
+            return FolderObject.TRASH;
         }
         return FolderObject.SYSTEM_TYPE;
     }

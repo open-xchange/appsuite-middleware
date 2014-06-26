@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -71,7 +71,7 @@ public final class GetRequest extends AbstractMailRequest<GetResponse> {
     private boolean unseen;
     private boolean source;
     private boolean save;
-    private final boolean failOnError;
+    private boolean failOnError = true;
 
     public GetRequest(final String folder, final String id) {
         this(folder, id, null, false, true);
@@ -98,16 +98,24 @@ public final class GetRequest extends AbstractMailRequest<GetResponse> {
         this.failOnError = failOnError;
     }
 
-    public void setUnseen(boolean unseen) {
+    public GetRequest setFailOnError(boolean failOnError) {
+        this.failOnError = failOnError;
+        return this;
+    }
+
+    public GetRequest setUnseen(boolean unseen) {
         this.unseen = unseen;
+        return this;
     }
 
-    public void setSource(boolean source) {
+    public GetRequest setSource(boolean source) {
         this.source = source;
+        return this;
     }
 
-    public void setSave(boolean save) {
+    public GetRequest setSave(boolean save) {
         this.save = save;
+        return this;
     }
 
     @Override
@@ -171,7 +179,8 @@ public final class GetRequest extends AbstractMailRequest<GetResponse> {
     }
 
     public enum View {
-        RAW("raw");
+        RAW("raw"),
+        TEXT("text");
         String value;
         View(String value) {
             this.value = value;

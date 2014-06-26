@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -55,9 +55,9 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
+import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.SessionStorageService;
 
 /**
@@ -348,7 +348,12 @@ public final class SessionImpl implements PutIfAbsent {
         try {
             setLocalIp(localIp, true);
         } catch (final OXException e) {
-            LOG.warn("Failed to distribute change of IP address among remote nodes.", e);
+            if (SessionStorageExceptionCodes.NO_SESSION_FOUND.equals(e)) {
+                // No such session held in session storage
+                LOG.debug("Session {} not available in session storage.", sessionId, e);
+            } else {
+                LOG.warn("Failed to distribute change of IP address among remote nodes.", e);
+            }
         }
     }
 
@@ -486,7 +491,7 @@ public final class SessionImpl implements PutIfAbsent {
 
     @Override
     public String toString() {
-        final StringAllocator builder = new StringAllocator(128);
+        final StringBuilder builder = new StringBuilder(128);
         builder.append('{');
         builder.append("contextId=").append(contextId).append(", userId=").append(userId).append(", ");
         if (sessionId != null) {

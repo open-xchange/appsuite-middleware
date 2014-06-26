@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -58,24 +58,6 @@ import com.openexchange.i18n.LocalizableStrings;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TwitterExceptionMessages implements LocalizableStrings {
-
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
-
-    // Missing property: %1$s
-    public static final String MISSING_PROPERTY_MSG = "Missing property: %1$s";
-
-    // Invalid property value in property \"%1$s\": %2$s
-    public static final String INVALID_PROPERTY_MSG = "Invalid property value in property \"%1$s\": %2$s";
-
-    // The consumer key/consumer secret pair is missing in configuration.
-    public static final String MISSING_CONSUMER_KEY_SECRET_MSG = "The consumer key/consumer secret pair is missing in configuration.";
-
-    // The access token for twitter user %1$s could not be obtained.
-    public static final String ACCESS_TOKEN_FAILED_MSG = "The access token for twitter user %1$s could not be obtained.";
-
-    // The configured consumer key/consumer secret pair is invalid. Please provide a valid consumer key/consumer secret through configuration.
-    public static final String INVALID_CONSUMER_KEY_SECRET_MSG = "The configured consumer key/consumer secret pair is invalid. Please provide a valid consumer key/consumer secret through configuration.";
 
     // Please (re-)authorize your Twitter accounts.
     // Twitter responded with: %1$s

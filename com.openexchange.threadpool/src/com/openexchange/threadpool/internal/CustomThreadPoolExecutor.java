@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -2015,7 +2015,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      *
      * @return The delayed work queue
      */
-    DelayedWorkQueue getDelayedWorkQueue() {
+    public DelayedWorkQueue getDelayedWorkQueue() {
         return delayedWorkQueue;
     }
 
@@ -2419,7 +2419,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
          */
         @Override
         public void rejectedExecution(final Runnable r, final ThreadPoolExecutor e) {
-            throw new RejectedExecutionException();
+            throw new RejectedExecutionException("Thread pool is overloaded!");
         }
     }
 

@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: The XING access bundle
+Bundle-SymbolicName: com.openexchange.xing.access
+Bundle-Version: 7.6.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.exception,
+ com.openexchange.i18n,
+ com.openexchange.oauth,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.sessiond,
+ com.openexchange.xing,
+ com.openexchange.xing.exception,
+ com.openexchange.xing.session,
+ org.osgi.framework,
+ org.osgi.service.event,
+ org.osgi.util.tracker;version="1.5.1",
+ org.slf4j
+Bundle-Activator: com.openexchange.xing.access.osgi.XingOAuthAccessActivator
+Export-Package: com.openexchange.xing.access

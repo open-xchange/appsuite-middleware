@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -61,7 +61,6 @@ import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
-import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
@@ -96,9 +95,6 @@ public class ContactParser extends CommonParser {
         if (jsonobject.has(ContactFields.DISTRIBUTIONLIST)) {
             parseDistributionList(contactobject, jsonobject);
         }
-        if (jsonobject.has(ContactFields.LINKS)) {
-            parseLinks(contactobject, jsonobject);
-        }
         parseElementCommon(contactobject, jsonobject);
     }
 
@@ -129,21 +125,6 @@ public class ContactParser extends CommonParser {
             distributionlist[a].setEmailfield(parseInt(entry, DistributionListFields.MAIL_FIELD));
         }
         oxobject.setDistributionList(distributionlist);
-    }
-
-    protected void parseLinks(final Contact oxobject, final JSONObject jsonobject) throws JSONException, OXException {
-        final JSONArray jlinks = jsonobject.getJSONArray(ContactFields.LINKS);
-        final LinkEntryObject[] links = new LinkEntryObject[jlinks.length()];
-        for (int a = 0; a < links.length; a++) {
-            links[a] = new LinkEntryObject();
-            final JSONObject entry = jlinks.getJSONObject(a);
-            if (entry.has(DataFields.ID)) {
-                links[a].setLinkID(parseInt(entry, DataFields.ID));
-            }
-
-            links[a].setLinkDisplayname(parseString(entry, ContactFields.DISPLAY_NAME));
-        }
-        oxobject.setLinks(links);
     }
 
     private interface JSONAttributeMapper {

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,6 +53,7 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import javax.mail.Flags;
@@ -60,6 +61,7 @@ import javax.mail.Folder;
 import javax.mail.MessagingException;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -69,9 +71,9 @@ import com.openexchange.imap.cache.ListLsubEntry;
 import com.openexchange.imap.cache.ListLsubRuntimeException;
 import com.openexchange.imap.cache.RightsCache;
 import com.openexchange.imap.config.IMAPConfig;
+import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.notify.internal.IMAPNotifierMessageRecentListener;
 import com.openexchange.imap.services.Services;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailMessageStorage;
 import com.openexchange.mail.api.enhanced.MailMessageStorageLong;
@@ -132,6 +134,21 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         return tmp.intValue();
     }
 
+    static {
+        IMAPReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(final ConfigurationService configService) {
+                failFastTimeout = null;
+            }
+
+            @Override
+            public Map<String, String[]> getConfigFileNames() {
+                return null;
+            }
+        });
+    }
+
     /**
      * Checks for possible fail-fast error.
      *
@@ -143,7 +160,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         if (null == imapStore || null == fullName) {
             return;
         }
-        final String key = new StringAllocator(fullName).append('@').append(imapStore.toString()).toString();
+        final String key = new StringBuilder(fullName).append('@').append(imapStore.toString()).toString();
         final FailFastError failFastError = FAIL_FAST.get(key);
         if (null == failFastError) {
             return;
@@ -196,7 +213,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
             imapFolder.open(desiredMode);
         } catch (final MessagingException e) {
             if (toUpperCase(e.getMessage()).indexOf("[INUSE]") >= 0) {
-                FAIL_FAST.put(new StringAllocator(imapFolder.getFullName()).append('@').append(imapStore.toString()).toString(), new FailFastError(e));
+                FAIL_FAST.put(new StringBuilder(imapFolder.getFullName()).append('@').append(imapStore.toString()).toString(), new FailFastError(e));
             }
             throw e;
         }

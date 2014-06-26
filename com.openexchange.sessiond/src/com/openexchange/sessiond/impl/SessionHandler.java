@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,7 +51,6 @@ package com.openexchange.sessiond.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -63,7 +62,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
@@ -76,6 +74,7 @@ import org.osgi.service.event.EventAdmin;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionCounter;
 import com.openexchange.sessiond.SessionExceptionCodes;
@@ -123,7 +122,7 @@ public final class SessionHandler {
     /** Whether there is no limit when adding a new session */
     private static volatile boolean noLimit;
 
-    /** Whether there is no limit when adding a new session */
+    /** Whether to put session s to central session storage asynchronously (default) or synchronously */
     private static volatile boolean asyncPutToSessionStorage;
 
     /** The obfuscator */
@@ -443,12 +442,12 @@ public final class SessionHandler {
         if (null == clientToken) {
             addedSession = sessionData.addSession(session, noLimit).getSession();
             // store session if not marked as transient
-            if (false == session.isTransient()) {
+            if (useSessionStorage(session)) {
                 final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
                 if (sessionStorageService != null) {
                     if (asyncPutToSessionStorage) {
                         // Enforced asynchronous put
-                        storeSessionAsync(addedSession, sessionStorageService, false, null);
+                        storeSessionAsync(addedSession, sessionStorageService, false);
                     } else {
                         storeSessionSync(addedSession, sessionStorageService, false);
                     }
@@ -475,7 +474,7 @@ public final class SessionHandler {
      * @param addIfAbsent <code>true</code> to perform add-if-absent store operation; otherwise <code>false</code> to perform a possibly replacing put
      */
     public static void storeSessionSync(final SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent) {
-        storeSession(session, sessionStorageService, addIfAbsent, false, null);
+        storeSession(session, sessionStorageService, addIfAbsent, false);
     }
 
     /**
@@ -484,10 +483,9 @@ public final class SessionHandler {
      * @param session The session to store
      * @param sessionStorageService The storage service
      * @param addIfAbsent <code>true</code> to perform add-if-absent store operation; otherwise <code>false</code> to perform a possibly replacing put
-     * @param latch The latch needed to signal completion of invocation
      */
-    public static void storeSessionAsync(final SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent, final CountDownLatch latch) {
-        storeSession(session, sessionStorageService, addIfAbsent, true, latch);
+    public static void storeSessionAsync(final SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent) {
+        storeSession(session, sessionStorageService, addIfAbsent, true);
     }
 
     /**
@@ -497,16 +495,15 @@ public final class SessionHandler {
      * @param sessionStorageService The storage service
      * @param addIfAbsent <code>true</code> to perform add-if-absent store operation; otherwise <code>false</code> to perform a possibly replacing put
      * @param async Whether to perform task asynchronously or not
-     * @param latch The latch needed when invoked asynchronously; otherwise simply pass <code>null</code>
      */
-    public static void storeSession(final SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent, final boolean async, final CountDownLatch latch) {
+    public static void storeSession(final SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent, final boolean async) {
         if (null == session || null == sessionStorageService) {
             return;
         }
         if (async) {
-            ThreadPools.getThreadPool().submit(new StoreSessionTask(session, sessionStorageService, addIfAbsent, latch));
+            ThreadPools.getThreadPool().submit(new StoreSessionTask(session, sessionStorageService, addIfAbsent));
         } else {
-            final StoreSessionTask task = new StoreSessionTask(session, sessionStorageService, addIfAbsent, latch);
+            final StoreSessionTask task = new StoreSessionTask(session, sessionStorageService, addIfAbsent);
             final Thread thread = Thread.currentThread();
             boolean ran = false;
             task.beforeExecute(thread);
@@ -539,7 +536,7 @@ public final class SessionHandler {
         }
         if (asyncPutToSessionStorage) {
             for (final SessionImpl session : sessions) {
-                storeSessionAsync(session, sessionStorageService, true, null);
+                storeSessionAsync(session, sessionStorageService, true);
             }
         } else {
             for (final SessionImpl session : sessions) {
@@ -690,7 +687,7 @@ public final class SessionHandler {
         final SessionImpl currentSession = sessionControl.getSession();
         currentSession.setPassword(newPassword);
         final SessionStorageService sessionStorage = getServiceRegistry().getService(SessionStorageService.class);
-        if (null != sessionStorage) {
+        if (null != sessionStorage && useSessionStorage(currentSession)) {
             final Task<Void> c = new AbstractTask<Void>() {
 
                 @Override
@@ -749,17 +746,27 @@ public final class SessionHandler {
         if (null != session) {
             try {
                 session.setLocalIp(localIp, false);
-                final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
-                if (sessionStorageService != null) {
-                    final AbstractTask<Void> c = new AbstractTask<Void>() {
+                if (useSessionStorage(session)) {
+                    final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
+                    if (sessionStorageService != null) {
+                        final AbstractTask<Void> c = new AbstractTask<Void>() {
 
-                        @Override
-                        public Void call() throws Exception {
-                            sessionStorageService.setLocalIp(session.getSessionID(), localIp);
-                            return null;
-                        }
-                    };
-                    submit(c);
+                            @Override
+                            public Void call() throws Exception {
+                                try {
+                                    sessionStorageService.setLocalIp(session.getSessionID(), localIp);
+                                } catch (final OXException e) {
+                                    if (!SessionStorageExceptionCodes.NO_SESSION_FOUND.equals(e)) {
+                                        throw e;
+                                    }
+                                    // No such session held in session storage
+                                    LOG.debug("Session {} not available in session storage.", session.getSessionID(), e);
+                                }
+                                return null;
+                            }
+                        };
+                        submit(c);
+                    }
                 }
             } catch (final RuntimeException e) {
                 throw SessionExceptionCodes.SESSIOND_EXCEPTION.create(e, e.getMessage());
@@ -778,17 +785,19 @@ public final class SessionHandler {
         if (null != session) {
             try {
                 session.setClient(client, false);
-                final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
-                if (sessionStorageService != null) {
-                    final AbstractTask<Void> c = new AbstractTask<Void>() {
+                if (useSessionStorage(session)) {
+                    final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
+                    if (sessionStorageService != null) {
+                        final AbstractTask<Void> c = new AbstractTask<Void>() {
 
-                        @Override
-                        public Void call() throws Exception {
-                            sessionStorageService.setClient(session.getSessionID(), client);
-                            return null;
-                        }
-                    };
-                    submit(c);
+                            @Override
+                            public Void call() throws Exception {
+                                sessionStorageService.setClient(session.getSessionID(), client);
+                                return null;
+                            }
+                        };
+                        submit(c);
+                    }
                 }
             } catch (final RuntimeException e) {
                 throw SessionExceptionCodes.SESSIOND_EXCEPTION.create(e, e.getMessage());
@@ -807,17 +816,19 @@ public final class SessionHandler {
         if (null != session) {
             try {
                 session.setHash(hash, false);
-                final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
-                if (sessionStorageService != null) {
-                    final AbstractTask<Void> c = new AbstractTask<Void>() {
+                if (useSessionStorage(session)) {
+                    final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
+                    if (sessionStorageService != null) {
+                        final AbstractTask<Void> c = new AbstractTask<Void>() {
 
-                        @Override
-                        public Void call() throws Exception {
-                            sessionStorageService.setHash(session.getSessionID(), hash);
-                            return null;
-                        }
-                    };
-                    submit(c);
+                            @Override
+                            public Void call() throws Exception {
+                                sessionStorageService.setHash(session.getSessionID(), hash);
+                                return null;
+                            }
+                        };
+                        submit(c);
+                    }
                 }
             } catch (final RuntimeException e) {
                 throw SessionExceptionCodes.SESSIOND_EXCEPTION.create(e, e.getMessage());
@@ -882,12 +893,14 @@ public final class SessionHandler {
         // Put this session into the normal session container
         final SessionControl sessionControl = sessionData.addSession(activatedSession, noLimit);
         final SessionImpl addedSession = sessionControl.getSession();
-        final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
-        if (sessionStorageService != null) {
-            if (asyncPutToSessionStorage) {
-                storeSessionAsync(addedSession, sessionStorageService, false, null);
-            } else {
-                storeSessionSync(addedSession, sessionStorageService, false);
+        if (useSessionStorage(addedSession)) {
+            final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
+            if (sessionStorageService != null) {
+                if (asyncPutToSessionStorage) {
+                    storeSessionAsync(addedSession, sessionStorageService, false);
+                } else {
+                    storeSessionSync(addedSession, sessionStorageService, false);
+                }
             }
         }
         // Post event for created session
@@ -904,13 +917,25 @@ public final class SessionHandler {
      * @return The session associated with given session ID; otherwise <code>null</code> if expired or none found
      */
     protected static SessionControl getSession(final String sessionId, final boolean considerSessionStorage) {
+        return getSession(sessionId, true, considerSessionStorage);
+    }
+
+    /**
+     * Gets the session associated with given session ID
+     *
+     * @param sessionId The session ID
+     * @param considerLocalStorage <code>true</code> to consider local storage; otherwise <code>false</code>
+     * @param considerSessionStorage <code>true</code> to consider session storage for possible distributed session; otherwise <code>false</code>
+     * @return The session associated with given session ID; otherwise <code>null</code> if expired or none found
+     */
+    protected static SessionControl getSession(final String sessionId, final boolean considerLocalStorage, final boolean considerSessionStorage) {
         LOG.debug("getSession <{}>", sessionId);
         final SessionData sessionData = sessionDataRef.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
             return null;
         }
-        final SessionControl sessionControl = sessionData.getSession(sessionId);
+        final SessionControl sessionControl = considerLocalStorage ? sessionData.getSession(sessionId) : null;
         if (considerSessionStorage && null == sessionControl) {
             final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
             if (storageService != null) {
@@ -1174,7 +1199,7 @@ public final class SessionHandler {
     }
 
     static void postSessionRemoval(final SessionImpl session) {
-        if (false == session.isTransient()) {
+        if (useSessionStorage(session)) {
             // Asynchronous remove from session storage
             final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
             if (sessionStorageService != null) {
@@ -1234,7 +1259,7 @@ public final class SessionHandler {
                         try {
                             for (final SessionControl sessionControl : tSessionControls) {
                                 SessionImpl session = sessionControl.getSession();
-                                if (null != session && false == session.isTransient()) {
+                                if (useSessionStorage(session)) {
                                     try {
                                         sessionStorageService.removeSession(session.getSessionID());
                                     } catch (final OXException e) {
@@ -1418,14 +1443,12 @@ public final class SessionHandler {
         private final SessionStorageService sessionStorageService;
         private final boolean addIfAbsent;
         private final SessionImpl session;
-        private final CountDownLatch optLatch;
 
-        protected StoreSessionTask(final SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent, final CountDownLatch optLatch) {
+        protected StoreSessionTask(final SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent) {
             super();
             this.sessionStorageService = sessionStorageService;
             this.addIfAbsent = addIfAbsent;
             this.session = session;
-            this.optLatch = optLatch;
         }
 
         @Override
@@ -1442,20 +1465,7 @@ public final class SessionHandler {
                     postSessionStored(session);
                 }
             } catch (final Exception e) {
-                final String s =
-                    MessageFormat.format(
-                        "Failed to put session {0} with Auth-Id {1} into session storage (user={2}, context={3}): {4}",
-                        session.getSessionID(),
-                        session.getAuthId(),
-                        Integer.valueOf(session.getUserId()),
-                        Integer.valueOf(session.getContextId()),
-                        e.getMessage());
-                LOG.info(s, e);
-            } finally {
-                final CountDownLatch latch = optLatch;
-                if (null != latch) {
-                    latch.countDown();
-                }
+                LOG.warn("Failed to put session {} with Auth-Id {} into session storage (user={}, context={})",session.getSessionID(),session.getAuthId(),Integer.valueOf(session.getUserId()),Integer.valueOf(session.getContextId()), e);
             }
             return null;
         }
@@ -1555,6 +1565,31 @@ public final class SessionHandler {
         } catch (final CancellationException e) {
             return defaultValue;
         }
+    }
+
+    /**
+     * Gets a value indicating whether a session qualifies for being put in the distributed session storage or not. This includes a check
+     * for the "transient" flag, as well as other relevant session properties.
+     *
+     * @param session The session to check
+     * @return <code>true</code> if session should be put to storage, <code>false</code>, otherwise
+     */
+    private static boolean useSessionStorage(SessionImpl session) {
+        return null != session && false == session.isTransient() && false == isUsmEas(session.getClient());
+    }
+
+    /**
+     * Gets a value indicating whether the supplied client identifier indicates an USM session or not.
+     *
+     * @param clientId the client ID to check
+     * @return <code>true</code> if the client denotes an USM client, <code>false</code>, otherwise
+     */
+    private static boolean isUsmEas(final String clientId) {
+        if (Strings.isEmpty(clientId)) {
+            return false;
+        }
+        final String uc = Strings.toUpperCase(clientId);
+        return uc.startsWith("USM-EAS") || uc.startsWith("USM-JSON");
     }
 
     private static final class UserKey {

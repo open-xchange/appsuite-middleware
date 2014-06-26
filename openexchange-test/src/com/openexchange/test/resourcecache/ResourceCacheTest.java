@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,14 +51,20 @@ package com.openexchange.test.resourcecache;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.test.resourcecache.actions.AbstractResourceCacheRequest;
 import com.openexchange.test.resourcecache.actions.ConfigurationRequest;
 import com.openexchange.test.resourcecache.actions.ConfigurationResponse;
@@ -67,6 +73,7 @@ import com.openexchange.test.resourcecache.actions.DownloadRequest;
 import com.openexchange.test.resourcecache.actions.DownloadResponse;
 import com.openexchange.test.resourcecache.actions.UploadRequest;
 import com.openexchange.test.resourcecache.actions.UploadResponse;
+import com.openexchange.test.resourcecache.actions.UsedRequest;
 
 
 /**
@@ -150,10 +157,6 @@ public class ResourceCacheTest extends AbstractAJAXSession {
         int[] qts = loadQuotas();
         int quota = qts[0];
         int perDocument = qts[1];
-        if (current.equals(DB)) {
-            // data column in table previewData is blob, which allows for max. 65 kb.
-            perDocument = Math.min(perDocument, ((int) Math.pow(2, 16) - 2));
-        }
         int n = quota / perDocument;
         if (quota <= 0 || perDocument <= 0 || n < 1) {
             fail("test system is misconfigured. Set correct quotas in preview.properties!");
@@ -177,7 +180,7 @@ public class ResourceCacheTest extends AbstractAJAXSession {
             assertTrue("download was not equals upload", Arrays.equals(file, reloaded));
         }
 
-        uploadRequest = new UploadRequest();
+        uploadRequest = new UploadRequest(true);
         uploadRequest.addFile("someimage_" + n + ".jpg", "image/jpeg", new ByteArrayInputStream(file));
         uploadResponse = executeTyped(uploadRequest, current);
         assertEquals("newest resource was not added", 1, uploadResponse.getIds().size());
@@ -200,6 +203,48 @@ public class ResourceCacheTest extends AbstractAJAXSession {
         assertEquals("Exactly one old resource should have been deleted", 1, missing);
     }
 
+    public void testPerformance() throws Exception {
+        current = FS;
+        final int[] qts = loadQuotas();
+        final int quota = qts[0];
+        final int perDocument = qts[1];
+        final int n = quota / perDocument;
+        final int tasks = 16;
+        ExecutorService pool = Executors.newFixedThreadPool(4);
+        List<Future<?>> futures = new ArrayList<Future<?>>(tasks);
+        for (int j = 0; j < tasks; j++) {
+            futures.add(pool.submit(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        byte[] file = prepareFile(perDocument);
+                        UploadRequest uploadRequest = new UploadRequest();
+                        for (int i = 0; i < n; i++) {
+                            uploadRequest.addFile("someimage_" + i + ".jpg", "image/jpeg", new ByteArrayInputStream(file));
+                        }
+                        UploadResponse uploadResponse = executeTyped(uploadRequest, current);
+                        List<String> ids = uploadResponse.getIds();
+                        assertEquals("wrong number of ids", n, ids.size());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }));
+        }
+
+        for (Future<?> future : futures) {
+            try {
+                future.get();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        Thread.sleep(2000L);
+        long used = executeTyped(new UsedRequest(), current).getUsed();
+        assertTrue("Quota exceeded", used <= quota);
+    }
+
     public void testResourceExceedsQuota() throws Exception {
         current = FS;
         resourceExceedsQuota();
@@ -213,6 +258,43 @@ public class ResourceCacheTest extends AbstractAJAXSession {
         uploadRequest.addFile("someimage.jpg", "image/jpeg", new ByteArrayInputStream(file));
         UploadResponse uploadResponse = executeTyped(uploadRequest, current);
         assertEquals("resource should not have been cached", 0, uploadResponse.getIds().size());
+    }
+
+    public void testUpdateFS() throws Exception {
+        current = FS;
+        String id = UUIDs.getUnformattedString(UUID.randomUUID());
+        byte file[] = prepareFile(1024);
+        UploadRequest uploadRequest = new UploadRequest();
+        uploadRequest.setResourceId(id);
+        uploadRequest.addFile("someimage.jpg", "image/jpeg", new ByteArrayInputStream(file));
+        UploadResponse uploadResponse = executeTyped(uploadRequest, current);
+        List<String> ids = uploadResponse.getIds();
+        assertEquals("wrong number of ids", 1, ids.size());
+
+        DownloadRequest downloadRequest = new DownloadRequest(ids.get(0));
+        DownloadResponse downloadResponse = executeTyped(downloadRequest, current);
+        byte[] reloaded = downloadResponse.getBytes();
+        assertTrue("download was not equals upload", Arrays.equals(file, reloaded));
+
+        // Now update the file and check it again
+        file = prepareFile(1024);
+        uploadRequest = new UploadRequest();
+        uploadRequest.addFile("someimage.jpg", "image/jpeg", new ByteArrayInputStream(file));
+        uploadRequest.setResourceId(id);
+        uploadResponse = executeTyped(uploadRequest, current);
+        List<String> newIds = uploadResponse.getIds();
+        assertEquals("wrong number of ids", 1, newIds.size());
+        assertEquals("id has changed", ids.get(0), newIds.get(0));
+
+        downloadRequest = new DownloadRequest(ids.get(0));
+        downloadResponse = executeTyped(downloadRequest, current);
+        reloaded = downloadResponse.getBytes();
+        assertTrue("download was not equals upload", Arrays.equals(file, reloaded));
+
+        DeleteRequest deleteRequest = new DeleteRequest(ids.get(0));
+        executeTyped(deleteRequest, current);
+        downloadResponse = executeTyped(downloadRequest, current);
+        assertNull("resource was not deleted", downloadResponse.getBytes());
     }
 
     private int[] loadQuotas() throws Exception {

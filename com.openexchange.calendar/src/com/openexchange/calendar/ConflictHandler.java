@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -105,7 +105,7 @@ public class ConflictHandler {
 
     public CalendarDataObject[] getConflicts() throws OXException {
         final Context ctx = Tools.getContext(so);
-        if (cdao.getShownAs() == Appointment.FREE || !UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx).hasConflictHandling()) {
+        if (isFree() || !UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx).hasConflictHandling()) {
             return NO_CONFLICTS; // According to bug #5267 and modularisation concept
         } else if (!create && !cdao.containsStartDate() && !cdao.containsEndDate() && !cdao.containsParticipants() && !cdao.containsRecurrenceType() && !cdao.containsShownAs()) {
             LOG.debug("Ignoring conflict checks because we detected an update and no start/end time, recurrence type or participants and shown as are changed!");
@@ -114,7 +114,7 @@ public class ConflictHandler {
             return NO_CONFLICTS; // Past single apps should never conflict
         } else if (cdao.isSequence() && recColl.checkMillisInThePast(recColl.getMaxUntilDate(cdao).getTime())) {
             return NO_CONFLICTS; // Past series apps should never conflict
-        } else if (!create && !cdao.containsShownAs() && (cdao.getShownAs() == Appointment.FREE)) {
+        } else if (!create && !cdao.containsShownAs() && isFree()) {
             //if (cdao.getShownAs() == CalendarDataObject.FREE) {
             return NO_CONFLICTS; // According to bug #5267
             //}
@@ -138,6 +138,16 @@ public class ConflictHandler {
             return prepareResolving(true);
         }
         return NO_CONFLICTS;
+    }
+
+    private boolean isFree() {
+        if (cdao.containsShownAs()) {
+            return cdao.getShownAs() == Appointment.FREE;
+        }
+        if (edao != null && edao.getShownAs() == Appointment.FREE) {
+            return true;
+        }
+        return false;
     }
 
     private CalendarDataObject[] prepareResolving(final boolean request_participants) throws OXException {
@@ -207,7 +217,7 @@ public class ConflictHandler {
             readcon = DBPool.pickup(ctx);
             final long whole_day_start = cdao.getFullTime() ? start.getTime() : recColl.getUserTimeUTCDate(start, user.getTimeZone());
             long whole_day_end = cdao.getFullTime() ? end.getTime() : recColl.getUserTimeUTCDate(end, user.getTimeZone());
-            if (!cdao.getFullTime() || whole_day_end <= whole_day_start) {
+            if (whole_day_end <= whole_day_start) {
                 whole_day_end = whole_day_end+Constants.MILLI_DAY;
             }
             prep = calendarsqlimp.getConflicts(ctx, start, end, new Date(whole_day_start), new Date(whole_day_end), readcon, sql_in, true);

@@ -53,10 +53,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DriveAction;
+import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.actions.AbstractAction;
 import com.openexchange.drive.actions.AcknowledgeFileAction;
@@ -64,15 +67,25 @@ import com.openexchange.drive.actions.DownloadFileAction;
 import com.openexchange.drive.checksum.FileChecksum;
 import com.openexchange.drive.comparison.ServerFileVersion;
 import com.openexchange.drive.comparison.VersionMapper;
+import com.openexchange.drive.internal.IDUtil;
 import com.openexchange.drive.internal.SyncSession;
+import com.openexchange.drive.storage.StorageOperation;
 import com.openexchange.drive.sync.IntermediateSyncResult;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
+import com.openexchange.file.storage.search.FileMd5SumTerm;
+import com.openexchange.file.storage.search.OrTerm;
+import com.openexchange.file.storage.search.SearchTerm;
+import com.openexchange.java.Strings;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 
 
 /**
@@ -94,7 +107,7 @@ public class FileCopyOptimizer extends FileActionOptimizer {
          * for client UPLOADs, check if file already known on server
          */
         List<AbstractAction<FileVersion>> uploadActions = new ArrayList<AbstractAction<FileVersion>>();
-        List<String> checksums = new ArrayList<String>();
+        Set<String> checksums = new HashSet<String>();
         for (AbstractAction<FileVersion> clientAction : result.getActionsForClient()) {
             if (Action.UPLOAD == clientAction.getAction()) {
                 checksums.add(clientAction.getNewVersion().getChecksum());
@@ -141,7 +154,7 @@ public class FileCopyOptimizer extends FileActionOptimizer {
         return null;
     }
 
-    private Map<String, ServerFileVersion> findByChecksum(SyncSession session, List<String> checksums) {
+    private Map<String, ServerFileVersion> findByChecksum(SyncSession session, Set<String> checksums) {
         if (null == checksums || 0 == checksums.size()) {
             return Collections.emptyMap();
         }
@@ -168,8 +181,110 @@ public class FileCopyOptimizer extends FileActionOptimizer {
             } catch (OXException e) {
                 LOG.warn("unexpected error during file lookup by checksum", e);
             }
+            checksumsToQuery.removeAll(matchingFileVersions.keySet());
+            /*
+             * query file storage for remaining checksums
+             */
+            if (0 < checksumsToQuery.size()) {
+               try {
+                   matchingFileVersions.putAll(searchMatchingFileVersions(session, checksumsToQuery));
+                } catch (OXException e) {
+                    LOG.warn("unexpected error during file lookup by checksum", e);
+                }
+                checksumsToQuery.removeAll(matchingFileVersions.keySet());
+                /*
+                 * search in trash, too, if available
+                 */
+                if (0 < checksumsToQuery.size()) {
+                    try {
+                        if (session.getStorage().hasTrashFolder() && null != session.getStorage().getTrashFolder()) {
+                            String trashFolderID = session.getStorage().getTrashFolder().getId();
+                            matchingFileVersions.putAll(searchMatchingFileVersions(
+                                session, Collections.singletonList(trashFolderID), checksumsToQuery));
+                        }
+                    } catch (OXException e) {
+                        LOG.warn("unexpected error during file lookup by checksum", e);
+                    }
+                }
+            }
         }
         return matchingFileVersions;
+    }
+
+    /**
+     * Searches for files matching the supplied checksums in the storage.
+     *
+     * @param session The sync session
+     * @param checksums The checksums to lookup
+     * @return The found file versions, each mapped to the matching checksum
+     * @throws OXException
+     */
+    private static Map<String, ServerFileVersion> searchMatchingFileVersions(final SyncSession session, final List<String> checksums) throws OXException {
+        return searchMatchingFileVersions(session, null, checksums);
+    }
+
+    /**
+     * Searches for files matching the supplied checksums in the storage.
+     *
+     * @param session The sync session
+     * @param folderIDs The IDs of the folder to search, or <code>null</code> to search in all visible folders
+     * @param checksums The checksums to lookup
+     * @return The found file versions, each mapped to the matching checksum
+     * @throws OXException
+     */
+    private static Map<String, ServerFileVersion> searchMatchingFileVersions(final SyncSession session, final List<String> folderIDs, final List<String> checksums) throws OXException {
+        Map<String, ServerFileVersion> matchingFileVersions = new HashMap<String, ServerFileVersion>();
+        if (0 < checksums.size()) {
+            List<FileChecksum> checksumsToInsert = new ArrayList<FileChecksum>();
+            SearchIterator<File> searchIterator = null;
+            try {
+                searchIterator = session.getStorage().wrapInTransaction(new StorageOperation<SearchIterator<File>>() {
+
+                    @Override
+                    public SearchIterator<File> call() throws OXException {
+                        return session.getStorage().getFileAccess().search(
+                            folderIDs, getSearchTermForChecksums(checksums), DriveConstants.FILE_FIELDS, null, SortDirection.DEFAULT,
+                            FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
+                    }
+                });
+                while (searchIterator.hasNext()) {
+                    File file = searchIterator.next();
+                    String md5 = file.getFileMD5Sum();
+                    if (false == Strings.isEmpty(md5)) {
+                        FileChecksum fileChecksum = new FileChecksum(
+                            IDUtil.getFileID(file), file.getVersion(), file.getSequenceNumber(), md5);
+                        checksumsToInsert.add(fileChecksum);
+                        matchingFileVersions.put(fileChecksum.getChecksum(), new ServerFileVersion(file, fileChecksum));
+                    }
+                }
+            } finally {
+                SearchIterators.close(searchIterator);
+            }
+            if (0 < checksumsToInsert.size()) {
+                session.getChecksumStore().insertFileChecksums(checksumsToInsert);
+            }
+        }
+        return matchingFileVersions;
+    }
+
+    /**
+     * Constructs a search term to match any files matching the supplied file checksums.
+     *
+     * @param checksumsToQuery The checksums to construct the search term for
+     * @return The search term, or <code>null</code> if supplied checksums were empty
+     */
+    private static SearchTerm<?> getSearchTermForChecksums(List<String> checksumsToQuery) {
+        if (null == checksumsToQuery || 0 == checksumsToQuery.size()) {
+            return null;
+        } else if (1 == checksumsToQuery.size()) {
+            return new FileMd5SumTerm(checksumsToQuery.get(0));
+        } else {
+            List<SearchTerm<?>> md5Terms = new ArrayList<SearchTerm<?>>(checksumsToQuery.size());
+            for (String checksum : checksumsToQuery) {
+                md5Terms.add(new FileMd5SumTerm(checksum));
+            }
+            return new OrTerm(md5Terms);
+        }
     }
 
     private static boolean indicatesInvalidation(OXException e) {

@@ -1,3 +1,9 @@
+open-xchange-chat (7.6.0-0) unstable; urgency=low
+
+  * prepare for 7.6.0
+
+ -- Markus Wagner <markus.wagner@open-xchange.com>  Wed, 12 Feb 2014 09:34:56 +0100
+
 open-xchange-chat (7.4.2-0) unstable; urgency=low
 
   * prepare for 7.4.2

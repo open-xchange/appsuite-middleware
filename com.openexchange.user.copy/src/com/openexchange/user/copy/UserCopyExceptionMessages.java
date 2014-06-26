@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -58,26 +58,7 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class UserCopyExceptionMessages implements LocalizableStrings {
 
-    public static final String UNRESOLVABLE_DEPENDENCIES_MSG = "Unable to determine next copy task to execute. Enqueued: %1$s. To sort: %2$s.";
-
-    public static final String SQL_PROBLEM_MSG = "SQL problem.";
-
-    public static final String UNKNOWN_PROBLEM_MSG = "Unexpected problem occurred.";
-
-    public static final String USER_SERVICE_PROBLEM_MSG = "Problem with UserService.";
-
-    public static final String MISSING_PARENT_FOLDER_MSG = "A private folder (%1$s) without existing parent (%2$s) was found.";
-
-    public static final String DB_POOLING_PROBLEM_MSG = "Database pooling error.";
-
-    public static final String FILE_STORAGE_PROBLEM_MSG = "Problem with FileStorage.";
-
-    public static final String ID_PROBLEM_MSG = "Could not generate a new sequence id for type %1$s.";
-
-    public static final String USER_CONTACT_MISSING_MSG = "Did not find contact for user %1$s in context %2$s.";
-
-    public static final String SAVE_MAIL_SETTINGS_PROBLEM_MSG = "Could not save user's mail settings.";
-
+    // A user named %1$s already exists in destination context %2$s.
     public static final String USER_ALREADY_EXISTS_MSG = "A user named %1$s already exists in destination context %2$s.";
 
 

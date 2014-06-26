@@ -2,12 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Token-login implementation bundle
 Bundle-SymbolicName: com.openexchange.tokenlogin.impl
-Bundle-Version: 7.4.2
+Bundle-Version: 7.6.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.hazelcast.config,
  com.hazelcast.core,
  com.javacodegeeks.concurrent,
+ com.openexchange.concurrent,
  com.openexchange.config,
  com.openexchange.context,
  com.openexchange.exception,

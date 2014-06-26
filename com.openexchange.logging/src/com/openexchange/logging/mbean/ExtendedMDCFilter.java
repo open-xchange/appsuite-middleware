@@ -49,7 +49,9 @@
 
 package com.openexchange.logging.mbean;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import org.slf4j.MDC;
 import org.slf4j.Marker;
@@ -58,17 +60,19 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.turbo.TurboFilter;
 import ch.qos.logback.core.spi.FilterReply;
 
-
 /**
  * {@link ExtendedMDCFilter}
- *
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class ExtendedMDCFilter extends TurboFilter {
 
     private final Set<String> whitelist;
+
     private final Set<Tuple> tuples;
+
+    private final Map<String, Level> levels;
 
     /**
      * Initializes a new {@link ExtendedMDCFilter}.
@@ -77,6 +81,7 @@ public class ExtendedMDCFilter extends TurboFilter {
         super();
         this.whitelist = whitelist;
         tuples = new HashSet<Tuple>();
+        levels = new HashMap<String, Level>();
     }
 
     @Override
@@ -89,8 +94,18 @@ public class ExtendedMDCFilter extends TurboFilter {
             }
         }
 
+        boolean loggerCheck = false;
         if (check) {
-            for(Tuple t : tuples) {
+            for (String s : levels.keySet()) {
+                if (logger.getName().startsWith(s) && levels.get(s).isGreaterOrEqual(level)) {
+                    loggerCheck = true;
+                    break;
+                }
+            }
+        }
+
+        if ((check && levels.isEmpty()) || (check && loggerCheck)) {
+            for (Tuple t : tuples) {
                 String v = MDC.get(t.getKey());
                 if (v == null) {
                     return FilterReply.NEUTRAL;
@@ -107,12 +122,46 @@ public class ExtendedMDCFilter extends TurboFilter {
 
     /**
      * Adds a tuple for this filter
-     *
+     * 
      * @param k The tuple's key to query MDC map
      * @param v The tuple's expected value
      */
     public void addTuple(String k, String v) {
-        tuples.add(new Tuple(k,v));
+        tuples.add(new Tuple(k, v));
+    }
+
+    /**
+     * Add a logger level for this filter
+     * 
+     * @param loggerName
+     * @param level
+     */
+    public void addLogger(String loggerName, Level level) {
+        levels.put(loggerName, level);
+    }
+
+    /**
+     * Remove a logger level from this filter
+     * 
+     * @param loggerName
+     */
+    public void removeLogger(String loggerName) {
+        levels.remove(loggerName);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append(getName()).append(", Loggers: [");
+        for (String key : levels.keySet()) {
+            builder.append("\n\t").append(key).append(" = ").append(levels.get(key));
+        }
+        builder.append("]");
+        return builder.toString();
     }
 
     /**
@@ -121,10 +170,12 @@ public class ExtendedMDCFilter extends TurboFilter {
     private class Tuple {
 
         private final String key;
+
         private final String value;
 
         /**
          * Initializes a new {@link Tuple}.
+         * 
          * @param k
          * @param v
          */
@@ -177,7 +228,7 @@ public class ExtendedMDCFilter extends TurboFilter {
 
         /**
          * Gets the key
-         *
+         * 
          * @return The key
          */
         public String getKey() {
@@ -186,7 +237,7 @@ public class ExtendedMDCFilter extends TurboFilter {
 
         /**
          * Gets the value
-         *
+         * 
          * @return The value
          */
         public String getValue() {
@@ -195,12 +246,11 @@ public class ExtendedMDCFilter extends TurboFilter {
 
         /**
          * Get outer type
+         * 
          * @return
          */
         private ExtendedMDCFilter getOuterType() {
             return ExtendedMDCFilter.this;
         }
-
     }
-
 }

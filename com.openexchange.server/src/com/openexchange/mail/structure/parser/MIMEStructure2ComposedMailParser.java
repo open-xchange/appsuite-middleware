@@ -457,7 +457,7 @@ public final class MIMEStructure2ComposedMailParser {
                     } else if ("disposition-notification-to".equals(name)) {
                         composedMail.setDispositionNotification(list.get(0));
                     } else {
-                        final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(list.size() * 16);
+                        final StringBuilder builder = new StringBuilder(list.size() * 16);
                         final String delim = ", ";
                         for (final InternetAddress addr : list) {
                             builder.insert(0, addr.toString()).insert(0, delim);

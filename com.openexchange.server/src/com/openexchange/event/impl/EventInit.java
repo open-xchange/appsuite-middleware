@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -58,7 +58,6 @@ import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
 import com.openexchange.groupware.infostore.webdav.LockCleaner;
 import com.openexchange.groupware.infostore.webdav.PropertyCleaner;
 import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
-import com.openexchange.groupware.links.LinksEventHandler;
 import com.openexchange.groupware.notify.ParticipantNotify;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -100,14 +99,6 @@ public class EventInit implements Initialization {
         final ParticipantNotify notify = new ParticipantNotify();
 		EventQueue.addModernListener((AppointmentEventInterface) notify);
 		EventQueue.addModernListener((TaskEventInterface) notify);
-
-		if (infoEnabled) {
-			LOG.info("Adding LinkEventHandler");
-		}
-        final LinksEventHandler linkHandler = new LinksEventHandler();
-		EventQueue.addAppointmentEvent(linkHandler);
-		EventQueue.addContactEvent(linkHandler);
-		EventQueue.addTaskEvent(linkHandler);
 
 		if (infoEnabled) {
 			LOG.info("Adding AttachmentCleaner");

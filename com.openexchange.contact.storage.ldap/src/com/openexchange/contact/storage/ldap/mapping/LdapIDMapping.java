@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -108,7 +108,7 @@ public abstract class LdapIDMapping extends LdapMapping<Integer> {
     private static final char[] DIGITS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
 
     private static String encodeHex(byte[] bytes) {
-        com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator(48);
+        StringBuilder stringBuilder = new StringBuilder(48);
         for (int i = 0; i < bytes.length; i++) {
             stringBuilder.append('\\').append(DIGITS[(0xF0 & bytes[i]) >>> 4]).append(DIGITS[0x0F & bytes[i]]);
         }

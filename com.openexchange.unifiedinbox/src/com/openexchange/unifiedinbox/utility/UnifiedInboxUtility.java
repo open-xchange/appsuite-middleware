@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -65,7 +65,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.unifiedinbox.UnifiedInboxAccess;
 import com.openexchange.unifiedinbox.UnifiedInboxException;
 import com.openexchange.unifiedinbox.UnifiedInboxUID;
-import com.openexchange.unifiedinbox.services.UnifiedInboxServiceRegistry;
+import com.openexchange.unifiedinbox.services.Services;
 
 /**
  * {@link UnifiedInboxUtility} - Utility methods for Unified Mail.
@@ -87,7 +87,7 @@ public final class UnifiedInboxUtility {
      * @return The default max. running millis
      */
     public static long getMaxRunningMillis() {
-        final ConfigurationService service = UnifiedInboxServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+        final ConfigurationService service = Services.getService(ConfigurationService.class);
         if (null == service) {
             return 60000L;
         }
@@ -98,7 +98,7 @@ public final class UnifiedInboxUtility {
      * Parses specified Unified Mail mail IDs.
      *
      * @param mailIDs The Unified Mail mail IDs to parse
-     * @return A map grouping referenced accounts and referenced fullnames and IDs.
+     * @return A map grouping referenced accounts and referenced full names and IDs.
      * @throws OXException If parsing mail IDs fails
      */
     public static TIntObjectMap<Map<String, List<String>>> parseMailIDs(final String[] mailIDs) throws OXException {
@@ -127,17 +127,17 @@ public final class UnifiedInboxUtility {
      * Generates a nested folder's full name.
      *
      * @param uiAccountId The Unified Mail's account ID
-     * @param uiFullname The Unified Mail's full name
+     * @param uiFullName The Unified Mail's full name
      * @param nestedAccountId The nested account's ID
-     * @param nestedFullname The nested folder's full name or <code>null</code>
+     * @param nestedFullName The nested folder's full name or <code>null</code>
      * @return The generated nested folder's full name.
      */
-    public static String generateNestedFullname(final int uiAccountId, final String uiFullname, final int nestedAccountId, final String nestedFullname) {
-        if (null == nestedFullname) {
-            return new StringBuilder(16).append(prepareFullname(uiAccountId, uiFullname)).toString();
+    public static String generateNestedFullName(final int uiAccountId, final String uiFullName, final int nestedAccountId, final String nestedFullName) {
+        if (null == nestedFullName) {
+            return new StringBuilder(16).append(prepareFullname(uiAccountId, uiFullName)).toString();
         }
-        return new StringBuilder(32).append(prepareFullname(uiAccountId, uiFullname)).append(SEPERATOR).append(
-            prepareFullname(nestedAccountId, nestedFullname)).toString();
+        return new StringBuilder(32).append(prepareFullname(uiAccountId, uiFullName)).append(SEPERATOR).append(
+            prepareFullname(nestedAccountId, nestedFullName)).toString();
     }
 
     /**
@@ -145,23 +145,23 @@ public final class UnifiedInboxUtility {
      * <p>
      * <code>"INBOX/default3/INBOX"</code> =&gt; <code>"default3/INBOX"</code>
      *
-     * @param nestedFullname The nested full name to parse
+     * @param nestedFullName The nested full name to parse
      * @return The parsed nested full name argument
      * @throws OXException If specified nested full name is invalid
      */
-    public static FullnameArgument parseNestedFullname(final String nestedFullname) throws OXException {
+    public static FullnameArgument parseNestedFullName(final String nestedFullName) throws OXException {
         // INBOX/default0/INBOX
-        if (!startsWithKnownFullname(nestedFullname)) {
-            throw UnifiedInboxException.Code.FOLDER_NOT_FOUND.create(prepareMailFolderParam(nestedFullname).getFullname());
+        if (!startsWithKnownFullname(nestedFullName)) {
+            throw UnifiedInboxException.Code.FOLDER_NOT_FOUND.create(prepareMailFolderParam(nestedFullName).getFullname());
         }
-        // Cut off starting known fullname and its separator character
-        final String fn = nestedFullname.substring(nestedFullname.indexOf(SEPERATOR) + 1);
+        // Cut off starting known full name and its separator character
+        final String fn = nestedFullName.substring(nestedFullName.indexOf(SEPERATOR) + 1);
         return prepareMailFolderParam(fn);
     }
 
-    private static boolean startsWithKnownFullname(final String fullname) {
+    private static boolean startsWithKnownFullname(final String fullName) {
         for (final String knownFullname : UnifiedInboxAccess.KNOWN_FOLDERS) {
-            if (fullname.startsWith(knownFullname)) {
+            if (fullName.startsWith(knownFullname)) {
                 return true;
             }
         }
@@ -169,30 +169,30 @@ public final class UnifiedInboxUtility {
     }
 
     /**
-     * Gets the account's fullname.
+     * Gets the account's full name.
      *
      * @param mailAccess The mail access to desired account
-     * @param fullname The fullname to look-up
-     * @return The account's fullname
-     * @throws OXException If fullname look-up fails
+     * @param fullName The full name to look-up
+     * @return The account's full name
+     * @throws OXException If full name look-up fails
      */
-    public static String determineAccountFullname(final MailAccess<?, ?> mailAccess, final String fullname) throws OXException {
-        if (UnifiedInboxAccess.INBOX.equals(fullname)) {
+    public static String determineAccountFullName(final MailAccess<?, ?> mailAccess, final String fullName) throws OXException {
+        if (UnifiedInboxAccess.INBOX.equals(fullName)) {
             return UnifiedInboxAccess.INBOX;
         }
-        if (UnifiedInboxAccess.DRAFTS.equals(fullname)) {
+        if (UnifiedInboxAccess.DRAFTS.equals(fullName)) {
             return mailAccess.getFolderStorage().getDraftsFolder();
         }
-        if (UnifiedInboxAccess.SENT.equals(fullname)) {
+        if (UnifiedInboxAccess.SENT.equals(fullName)) {
             return mailAccess.getFolderStorage().getSentFolder();
         }
-        if (UnifiedInboxAccess.SPAM.equals(fullname)) {
+        if (UnifiedInboxAccess.SPAM.equals(fullName)) {
             return mailAccess.getFolderStorage().getSpamFolder();
         }
-        if (UnifiedInboxAccess.TRASH.equals(fullname)) {
+        if (UnifiedInboxAccess.TRASH.equals(fullName)) {
             return mailAccess.getFolderStorage().getTrashFolder();
         }
-        throw UnifiedInboxException.Code.UNKNOWN_DEFAULT_FOLDER_INDEX.create(fullname);
+        throw UnifiedInboxException.Code.UNKNOWN_DEFAULT_FOLDER_INDEX.create(fullName);
     }
 
     /**

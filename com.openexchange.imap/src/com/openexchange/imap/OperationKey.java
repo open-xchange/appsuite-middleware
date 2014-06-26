@@ -51,9 +51,12 @@ package com.openexchange.imap;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
+import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.services.Services;
 import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
@@ -159,6 +162,21 @@ public final class OperationKey implements Serializable {
         return tmp.booleanValue();
     }
 
+    static {
+        IMAPReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(final ConfigurationService configService) {
+                synchronizeWriteAccesses = null;
+            }
+
+            @Override
+            public Map<String, String[]> getConfigFileNames() {
+                return null;
+            }
+        });
+    }
+
     private static final String IMAP_OPERATIONS = "__imap-operations".intern();
 
     /**
@@ -203,5 +221,5 @@ public final class OperationKey implements Serializable {
         }
         return 0;
     }
-    
+
 }

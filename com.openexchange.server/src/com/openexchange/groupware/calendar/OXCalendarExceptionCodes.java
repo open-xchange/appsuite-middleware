@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -431,7 +431,7 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Move of recurring appointments is not supported
      */
-    RECURRING_FOLDER_MOVE(OXCalendarExceptionCodes.RECURRING_FOLDER_MOVE_MSG, 93, Category.CATEGORY_USER_INPUT),
+    RECURRING_FOLDER_MOVE(OXCalendarExceptionCodes.RECURRING_FOLDER_MOVE_MSG, OXCalendarExceptionMessage.RECURRING_FOLDER_MOVE_MSG, 93, Category.CATEGORY_USER_INPUT),
     /**
      * In order to accomplish the search, %1$d or more characters are required.
      */
@@ -467,7 +467,7 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Wrong number of rows changed. Expected %1$d but was %2$d.
      */
-    WRONG_ROW_COUNT(OXCalendarExceptionCodes.WRONG_ROW_COUNT_MSG, OXExceptionStrings.SQL_ERROR_MSG, 102, Category.CATEGORY_ERROR),
+    WRONG_ROW_COUNT(OXCalendarExceptionCodes.WRONG_ROW_COUNT_MSG, OXExceptionStrings.SQL_ERROR_MSG, 102, Category.CATEGORY_WARNING),
     /**
      * Unable to find a participant for a specified object.
      */

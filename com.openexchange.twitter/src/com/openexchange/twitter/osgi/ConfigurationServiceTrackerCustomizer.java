@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -87,7 +87,7 @@ public final class ConfigurationServiceTrackerCustomizer implements ServiceTrack
          * ... and configure
          */
         final ConfigurationService configurationService = service;
-        TwitterConfiguration.configure(configurationService);
+        TwitterConfiguration.getInstance().configure(configurationService);
         OXConfigurationBase.getInstance().parseFrom(configurationService);
         return service;
     }

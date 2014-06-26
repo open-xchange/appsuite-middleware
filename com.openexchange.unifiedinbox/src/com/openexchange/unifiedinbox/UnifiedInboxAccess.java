@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -60,7 +60,7 @@ import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.session.Session;
 import com.openexchange.unifiedinbox.config.MailAccountUnifiedINBOXProperties;
 import com.openexchange.unifiedinbox.config.UnifiedInboxConfig;
-import com.openexchange.unifiedinbox.services.UnifiedInboxServiceRegistry;
+import com.openexchange.unifiedinbox.services.Services;
 
 /**
  * {@link UnifiedInboxAccess} - Access to Unified Mail.
@@ -250,9 +250,7 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
     @Override
     protected IMailProperties createNewMailProperties() throws OXException {
         try {
-            final MailAccountStorageService storageService = UnifiedInboxServiceRegistry.getServiceRegistry().getService(
-                MailAccountStorageService.class,
-                true);
+            final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
             return new MailAccountUnifiedINBOXProperties(storageService.getMailAccount(
                 accountId,
                 session.getUserId(),

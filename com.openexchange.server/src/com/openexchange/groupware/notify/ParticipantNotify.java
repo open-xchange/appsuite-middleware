@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -2340,11 +2340,11 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
      * @return <code>true</code>, if it is a status update, <code>false</code>, otherwise
      */
     private static boolean isStatusUpdate(final State state) {
-        return null != state &&
+        return null != state && (
             State.Type.ACCEPTED.equals(state.getType()) ||
             State.Type.DECLINED.equals(state.getType()) ||
             State.Type.TENTATIVELY_ACCEPTED.equals(state.getType()) ||
-            State.Type.NONE_ACCEPTED.equals(state.getType());
+            State.Type.NONE_ACCEPTED.equals(state.getType()));
     }
 
     /**

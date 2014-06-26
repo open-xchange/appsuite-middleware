@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,6 +51,7 @@ package com.openexchange.groupware.infostore;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.infostore.search.SearchTerm;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
@@ -66,6 +67,10 @@ public interface InfostoreSearchEngine extends TransactionAware{
 	public static final int NOT_SET = -11;
 
 	public SearchIterator<DocumentMetadata> search(String query, Metadata[] cols, int folderId, Metadata sortedBy, int dir, int start, int end, Context ctx, User user, UserPermissionBits userPermissions) throws OXException;
+
+	public SearchIterator<DocumentMetadata> search(int[] folderIds, SearchTerm<?> searchTerm, Metadata[] cols, Metadata sortedBy, int dir, int start, int end, Context ctx, User user, UserPermissionBits userPermissions) throws OXException;
+
 	public void index(DocumentMetadata document, Context ctx, User user, UserPermissionBits userPermissions) throws  OXException;
+
 	public void unIndex0r(int id, Context ctx, User user, UserPermissionBits userPermissions) throws OXException;
 }

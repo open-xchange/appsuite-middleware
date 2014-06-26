@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -186,6 +186,29 @@ public class MailFolder implements Serializable, Cloneable {
         defaulFolderType = DefaultFolderType.NONE;
         properties = new ConcurrentHashMap<String, Object>(4);
         liveAccess = true;
+    }
+
+    /**
+     * Gets the {@link MailFolderInfo} view for this folder.
+     *
+     * @return The appropriate {@link MailFolderInfo} instance
+     */
+    public MailFolderInfo asMailFolderInfo(final int accountId) {
+        final MailFolderInfo mfi = new MailFolderInfo();
+        mfi.setAccountId(accountId);
+        mfi.setDefaultFolder(defaultFolder);
+        mfi.setDefaultFolderType(defaulFolderType);
+        mfi.setFullname(fullname);
+        mfi.setHoldsFolders(holdsFolders);
+        mfi.setHoldsMessages(holdsMessages);
+        mfi.setName(name);
+        mfi.setParentFullname(parentFullname);
+        mfi.setRootFolder(rootFolder);
+        mfi.setSeparator(separator);
+        mfi.setSubfolders(hasSubfolders);
+        mfi.setSubscribed(subscribed);
+        mfi.setSubscribedSubfolders(hasSubscribedSubfolders);
+        return mfi;
     }
 
     /**

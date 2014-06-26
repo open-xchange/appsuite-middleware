@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -61,6 +61,7 @@ import java.util.UUID;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
@@ -200,7 +201,12 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
     }
 
     @Override
-    public List<IDTuple> removeDocument(List<IDTuple> ids, long sequenceNumber) throws OXException {
+    public List<IDTuple> removeDocument(final List<IDTuple> ids, final long sequenceNumber) throws OXException {
+        return removeDocument(ids, sequenceNumber, false);
+    }
+
+    @Override
+    public List<IDTuple> removeDocument(final List<IDTuple> ids, final long sequenceNumber, boolean hardDelete) throws OXException {
         List<IDTuple> notRemoved = new ArrayList<IDTuple>();
         for (IDTuple tuple : ids) {
             String folderId = tuple.getFolder();
@@ -392,6 +398,11 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
     @Override
     public Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, Field sort, SortDirection order, boolean ignoreDeleted) throws OXException {
         return new DeltaImpl<File>(getDocuments(folderId, fields, sort, order).results(), SearchIteratorAdapter.<File>emptyIterator(),  SearchIteratorAdapter.<File>emptyIterator(), System.currentTimeMillis());
+    }
+
+    @Override
+    public SearchIterator<File> search(final List<String> folderIds, final SearchTerm<?> searchTerm, final List<Field> fields, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
+        return SearchIteratorAdapter. <File> emptyIterator();
     }
 
     @Override

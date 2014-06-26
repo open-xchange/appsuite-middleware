@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -77,11 +77,13 @@ public class OSGiTestRunner extends Thread {
         if (test == null) {
             System.out.println("No test classes found.");
             exitOsgi();
+            return;
         }
         Class<?>[] testClasses = test.getTestClasses();
         if (testClasses == null) {
             System.out.println("No tests  found.");
             exitOsgi();
+            return;
         }
 
         for (Class<?> clazz : testClasses) {

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -162,10 +162,10 @@ public class ExternalGroupParticipant implements Participant, Comparable<Partici
             return false;
         }
         final ExternalGroupParticipant other = (ExternalGroupParticipant) obj;
-        if (null == emailaddress && null != other.emailaddress) {
-            return false;
+        if (null != emailaddress && null != other.emailaddress) {
+            return emailaddress.equals(other.emailaddress);
         }
-        return emailaddress.equals(other.emailaddress);
+        return false;
     }
 
     /**
@@ -175,10 +175,10 @@ public class ExternalGroupParticipant implements Participant, Comparable<Partici
     public int compareTo(final Participant part) {
         final int retval;
         if (EXTERNAL_GROUP == part.getType()) {
-            if (null == emailaddress && null == part.getEmailAddress()) {
-                retval = 0;
-            } else {
+            if (null != emailaddress && null != part.getEmailAddress()) {
                 retval = emailaddress.compareTo(part.getEmailAddress());
+            } else {
+                retval = 0;
             }
         } else {
             retval = Integer.valueOf(EXTERNAL_GROUP).compareTo(Integer.valueOf(part.getType()));

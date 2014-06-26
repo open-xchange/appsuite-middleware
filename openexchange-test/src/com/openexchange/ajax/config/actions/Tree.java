@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -299,6 +299,9 @@ public enum Tree {
 
     /** the private infostore folder (read-only) */
     PrivateInfostoreFolder("/folder/infostore"),
+
+    /** identifier of the folder with the deleted infostore items */
+    InfostoreTrashFolder("/modules/infostore/folder/trash"),
 
     /** If a search for all users, groups and resources when participant selection dialog is opened. (read-only, added 2008-10-09/SP5) */
     ParticipantAutoSearch("/participants/autoSearch"),

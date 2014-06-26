@@ -11,7 +11,6 @@
 	<classpathentry kind="lib" path="lib/jvyaml.jar"/>
 	<classpathentry kind="lib" path="lib/nekohtml.jar"/>
 	<classpathentry kind="lib" path="lib/xercesImpl.jar" sourcepath="lib/source/xerces-2.9.0-source.zip"/>
-	<classpathentry kind="lib" path="lib/commons-httpclient-3.1.jar"/>
 	<classpathentry kind="lib" path="lib/jackrabbit-webdav-2.3.3.jar" sourcepath="lib/source/jackrabbit-webdav-2.3.3-sources.jar"/>
 	<classpathentry kind="lib" path="lib/cardme-0.4.0.jar" sourcepath="lib/source/cardme-src-0.4.0.jar"/>
 	<classpathentry kind="lib" path="lib/js.jar"/>
@@ -27,11 +26,11 @@
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.servicemix.specs.jaxb-api-2.1-1.3.0.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.servicemix.specs.stax-api-1.0-1.3.0.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.osgi.util_3.2.300.v20130513-1956.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.osgi_3.9.0.v20130529-1710.jar" sourcepath="/com.openexchange.bundles/source/org.eclipse.osgi.source_3.9.0.v20130529-1710.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.osgi_3.9.1.v20140110-1610.jar" sourcepath="/com.openexchange.bundles/source/org.eclipse.osgi.source_3.9.1.v20140110-1610.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.lang_2.6.0.v201205030909.jar" sourcepath="/com.openexchange.bundles/source/org.apache.commons.lang.source_2.6.0.v201205030909.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/slf4j-api-1.7.5.jar"/>
-	<classpathentry kind="lib" path="lib/httpclient-4.2.1.jar" sourcepath="lib/source/httpcomponents-client-4.2.1-src.zip"/>
-	<classpathentry kind="lib" path="lib/httpcore-4.2.1.jar" sourcepath="lib/source/httpcomponents-core-4.2.1-src.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/httpclient-4.2.1.jar" sourcepath="lib/source/httpcomponents-client-4.2.1-src.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/httpcore-4.2.1.jar" sourcepath="lib/source/httpcomponents-core-4.2.1-src.zip"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.calendar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.conversion"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.conversion.engine"/>
@@ -43,15 +42,15 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.spamhandler.default"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.spamhandler.spamassassin"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.sessiond"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.xml"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/com.openexchange.xml"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.control"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.contactcollector"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.groupware.settings.extensions"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.caching"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.common"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.configread"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.global"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.server"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/com.openexchange.global"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/com.openexchange.server"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.charset"/>
 	<classpathentry kind="src" path="/com.openexchange.publish"/>
 	<classpathentry kind="src" path="/com.openexchange.publish.json"/>
@@ -111,5 +110,12 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.contactcollector.impl"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jcl-over-slf4j-1.7.5.jar" sourcepath="/com.openexchange.bundles/source/jcl-over-slf4j-1.7.5-sources.jar"/>
 	<classpathentry kind="lib" path="lib/httpmime-4.2.1.jar" sourcepath="lib/source/httpcomponents-client-4.2.1-src.zip"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.apache.felix.eventadmin"/>
+	<classpathentry exported="true" kind="lib" path="lib/commons-codec-1.3.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.find"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.find.basic"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.search"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.xing"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.control.clt"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

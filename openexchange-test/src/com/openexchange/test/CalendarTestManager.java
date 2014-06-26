@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,7 +53,6 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i2I;
 import static junit.framework.Assert.fail;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,10 +60,10 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
-
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.xml.sax.SAXException;
-
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.ConfirmRequest;
@@ -84,6 +83,8 @@ import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.appointment.action.UpdatesRequest;
 import com.openexchange.ajax.appointment.action.AppointmentUpdatesResponse;
+import com.openexchange.ajax.fields.CalendarFields;
+import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
@@ -91,9 +92,13 @@ import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDs;
+import com.openexchange.ajax.parser.ParticipantParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CommonObject;
+import com.openexchange.groupware.container.Participants;
+import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 
 /**
  * {@link CalendarTestManager}
@@ -257,10 +262,17 @@ public class CalendarTestManager implements TestManager {
     }
 
     public Appointment get(Appointment appointment) throws OXException {
-        GetRequest get = new GetRequest(appointment, getFailOnError());
-        GetResponse response = execute(get);
-        extractInfo(response);
-        return response.getAppointment(timezone);
+        try {
+            GetRequest get = new GetRequest(appointment, getFailOnError());
+            GetResponse response = execute(get);
+            extractInfo(response);
+            return response.getAppointment(timezone);
+        } catch (OXException e) {
+            if (failOnError) {
+                throw e;
+            }
+            return null;
+        }
     }
 
     public Appointment get(int parentFolderID, int objectID, boolean pleaseFailOnError) throws OXException {
@@ -290,9 +302,37 @@ public class CalendarTestManager implements TestManager {
             return null;
         }
     }
+    
+    public void confirm(Appointment app, int status, String message, int occurrence) {
+        ConfirmRequest confirmRequest = new ConfirmRequest(app.getParentFolderID(), app.getObjectID(), occurrence, status, message, 0, app.getLastModified(), getFailOnError());
+        ConfirmResponse resp = execute(confirmRequest);
+        setLastResponse(resp);
+        setLastModification(resp.getTimestamp());
+    }
 
     public void confirm(Appointment app, int status, String message) {
-        ConfirmRequest confirmRequest = new ConfirmRequest(app.getParentFolderID(), app.getObjectID(), status, message, getFailOnError());
+        ConfirmRequest confirmRequest = new ConfirmRequest(app.getParentFolderID(), app.getObjectID(), status, message, app.getLastModified(),  getFailOnError());
+        ConfirmResponse resp = execute(confirmRequest);
+        setLastResponse(resp);
+        setLastModification(resp.getTimestamp());
+    }
+    
+    public void confirm(Appointment app, int user, int status, String message) {
+        ConfirmRequest confirmRequest = new ConfirmRequest(app.getParentFolderID(), app.getObjectID(), status, message, user, app.getLastModified(),  getFailOnError());
+        ConfirmResponse resp = execute(confirmRequest);
+        setLastResponse(resp);
+        setLastModification(resp.getTimestamp());
+    }
+    
+    public void confirmExternal(Appointment app, String mail, int status, String message, int occurrence) {
+        ConfirmRequest confirmRequest = new ConfirmRequest(app.getParentFolderID(), app.getObjectID(), occurrence, status, message, mail, app.getLastModified(),  getFailOnError());
+        ConfirmResponse resp = execute(confirmRequest);
+        setLastResponse(resp);
+        setLastModification(resp.getTimestamp());
+    }
+
+    public void confirmExternal(Appointment app, String mail, int status, String message) {
+        ConfirmRequest confirmRequest = new ConfirmRequest(app.getParentFolderID(), app.getObjectID(), status, message, mail, app.getLastModified(),  getFailOnError());
         ConfirmResponse resp = execute(confirmRequest);
         setLastResponse(resp);
         setLastModification(resp.getTimestamp());
@@ -422,8 +462,8 @@ public class CalendarTestManager implements TestManager {
         return I2i(cols);
     }
 
-    public Appointment[] all(int parentFolderID, Date start, Date end, int[] columns) {
-        AllRequest request = new AllRequest(parentFolderID, columns, start, end, timezone);
+    public Appointment[] all(int parentFolderID, Date start, Date end, int[] columns, boolean recurrenceMaster) {
+        AllRequest request = new AllRequest(parentFolderID, columns, start, end, timezone, recurrenceMaster);
         CommonAllResponse response = execute(request);
         extractInfo(response);
         List<Appointment> appointments = new ArrayList<Appointment>();
@@ -438,21 +478,72 @@ public class CalendarTestManager implements TestManager {
                 }
                 if (actualColumns[i] == Appointment.LAST_MODIFIED_UTC) {
                     continue;
-                }
-                try {
-                    app.set(actualColumns[i], row[i]);
-                } catch (ClassCastException x) {
-                    if (x.getMessage().equals("java.lang.Long")) {
-                        if (!tryDate(app, actualColumns[i], (Long) row[i])) {
-                            tryInteger(app, actualColumns[i], (Long) row[i]);
+                } else if (actualColumns[i] == Appointment.CONFIRMATIONS) {
+                    parseConfirmations((JSONArray) row[i], app);
+                    continue;
+                } else if (actualColumns[i] == Appointment.USERS) {
+                    parseUsers((JSONArray) row[i], app);
+                } else {
+                    try {
+                        app.set(actualColumns[i], row[i]);
+                    } catch (ClassCastException x) {
+                        if (x.getMessage().equals("java.lang.Long")) {
+                            if (!tryDate(app, actualColumns[i], (Long) row[i])) {
+                                tryInteger(app, actualColumns[i], (Long) row[i]);
+                            }
                         }
                     }
                 }
+                
             }
         }
 
         return appointments.toArray(new Appointment[appointments.size()]);
+        
+    }
+    
+    private void parseUsers(JSONArray jUsers, Appointment app) {
+        List<UserParticipant> users = new ArrayList<UserParticipant>();
+        try {
+            for (int i = 0; i < jUsers.length(); i++) {
+                final JSONObject jUser = jUsers.getJSONObject(i);
+                final UserParticipant user = new UserParticipant(jUser.getInt(ParticipantsFields.ID));
+                if (jUser.has(ParticipantsFields.CONFIRMATION)) {
+                    user.setConfirm(jUser.getInt(ParticipantsFields.CONFIRMATION));
+                }
+                if (jUser.has(ParticipantsFields.CONFIRM_MESSAGE)) {
+                    user.setConfirmMessage(jUser.getString(ParticipantsFields.CONFIRM_MESSAGE));
+                }
+    
+                if (jUser.has(CalendarFields.ALARM)) {
+                    user.setAlarmDate(new Date(jUser.getLong(CalendarFields.ALARM)));
+                }
+                users.add(user);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
+        app.setUsers(users);
+    }
+
+    private void parseConfirmations(JSONArray confirmations, Appointment app) {
+        ParticipantParser parser = new ParticipantParser();
+        List<ConfirmableParticipant> confirmableParticipants = new ArrayList<ConfirmableParticipant>();
+        for (int j = 0; j < confirmations.length(); j++) {
+            JSONObject confirmation;
+            try {
+                confirmation = confirmations.getJSONObject(j);
+                confirmableParticipants.add(parser.parseConfirmation(true, confirmation));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        app.setConfirmations(confirmableParticipants);
+    }
+
+    public Appointment[] all(int parentFolderID, Date start, Date end, int[] columns) {
+        return all(parentFolderID, start, end, columns, true);
     }
 
 

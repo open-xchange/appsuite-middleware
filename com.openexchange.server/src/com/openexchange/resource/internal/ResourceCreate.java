@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -170,7 +170,7 @@ public final class ResourceCreate {
         /*
          * Check mandatory fields: identifier, displayName, and mail
          */
-        if (isEmpty(resource.getSimpleName()) || isEmpty(resource.getDisplayName()) || isEmpty(resource.getMail())) {
+        if (com.openexchange.java.Strings.isEmpty(resource.getSimpleName()) || com.openexchange.java.Strings.isEmpty(resource.getDisplayName()) || com.openexchange.java.Strings.isEmpty(resource.getMail())) {
             throw ResourceExceptionCode.MANDATORY_FIELD.create();
         }
         /*
@@ -236,18 +236,6 @@ public final class ResourceCreate {
         } catch (final SQLException e) {
             throw ResourceExceptionCode.SQL_ERROR.create(e);
         }
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     private void sentEvent() {

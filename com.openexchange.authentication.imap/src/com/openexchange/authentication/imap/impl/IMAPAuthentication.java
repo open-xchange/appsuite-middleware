@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,7 +49,8 @@
 
 package com.openexchange.authentication.imap.impl;
 
-import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS;
+import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_CONTEXT_MAPPING;
+import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_USER_MAPPING;
 import static com.openexchange.authentication.LoginExceptionCodes.UNKNOWN;
 import java.io.File;
 import java.io.FileInputStream;
@@ -231,7 +232,7 @@ public class IMAPAuthentication implements AuthenticationService {
 
 	            final int ctxId = contextService.getContextId(splitted[0]);
 	            if (ContextStorage.NOT_FOUND == ctxId) {
-	                throw INVALID_CREDENTIALS.create();
+	                throw INVALID_CREDENTIALS_MISSING_CONTEXT_MAPPING.create(splitted[0]);
 	            }
 	            final Context ctx = contextService.getContext(ctxId);
 
@@ -240,7 +241,7 @@ public class IMAPAuthentication implements AuthenticationService {
 	            try {
 	                userId = userService.getUserId(uid, ctx);
 	            } catch (final OXException e) {
-	                throw INVALID_CREDENTIALS.create();
+	                throw INVALID_CREDENTIALS_MISSING_USER_MAPPING.create(loginInfo.getUsername());
 	            }
 	            // final User user2 = userService.getUser(userId, ctx);
 

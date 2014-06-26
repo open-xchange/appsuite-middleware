@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -177,7 +177,7 @@ public class ContactPictureServlet extends OnlinePublicationServlet {
             }
         }
 
-        final String site = Strings.join(decode(normalized.subList(1, normalized.size()-2), req), "/");
+        final String site = Strings.join(HelperClass.decode(normalized.subList(1, normalized.size()-2), req,SPLIT2), "/");
         final Map<String, String> args = new HashMap<String, String>();
         args.put(CONTEXTID, normalized.get(0));
         args.put(SITE, site);

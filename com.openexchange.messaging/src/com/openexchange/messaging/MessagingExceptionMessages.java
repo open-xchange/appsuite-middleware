@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -60,36 +60,6 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class MessagingExceptionMessages implements LocalizableStrings {
 
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
-
-    // A SQL error occurred: %1$s
-    public static final String SQL_ERROR_MSG = "A SQL error occurred: %1$s";
-
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
-
-    // A JSON error occurred: %1$s
-    public static final String JSON_ERROR_MSG = "A JSON error occurred: %1$s";
-
-    // Messaging account %1$s of service "%2$s" could not be found for user %3$s in context %4$s.
-    public static final String ACCOUNT_NOT_FOUND_MSG = "Messaging account %1$s of service \"%2$s\" could not be found for user %3$s in context %4$s.";
-
-    // The operation is not supported by service %1$s.
-    public static final String OPERATION_NOT_SUPPORTED_MSG = "The operation is not supported by service %1$s.";
-
-    // The folder "%1$s" cannot be found in account %2$s of service "%3$s" of user %4$s in context %5$s.
-    public static final String FOLDER_NOT_FOUND_MSG = "The folder \"%1$s\" cannot be found in account %2$s of service \"%3$s\" of user %4$s in context %5$s.";
-
-    // Invalid message identifier: %1$s
-    public static final String INVALID_MESSAGE_IDENTIFIER_MSG = "Invalid message identifier: %1$s";
-
-    // Invalid header "%1$s": %2$s
-    public static final String INVALID_HEADER_MSG = "Invalid header \"%1$s\": %2$s";
-
-    // Unknown action to perform: %1$s.
-    public static final String UNKNOWN_ACTION_MSG = "Unknown action to perform: %1$s.";
-
     // A messaging error occurred: %1$s
     public static final String MESSAGING_ERROR_MSG = "A messaging error occurred: %1$s";
 
@@ -98,12 +68,6 @@ public final class MessagingExceptionMessages implements LocalizableStrings {
 
     // Unknown messaging content: %1$s.
     public static final String UNKNOWN_MESSAGING_CONTENT_MSG = "Unknown messaging content: %1$s.";
-
-    // Unknown messaging service: %1$s.
-    public static final String UNKNOWN_MESSAGING_SERVICE_MSG = "Unknown messaging service: %1$s.";
-
-    //  Missing parameter: %1$s
-    public static final String MISSING_PARAMETER_MSG = "Missing parameter: %1$s.";
 
     // Invalid parameter: %1$s with value '%2$s'.
     public static final String INVALID_PARAMETER_MSG = "Invalid parameter: %1$s with value '%2$s'.";
@@ -131,6 +95,9 @@ public final class MessagingExceptionMessages implements LocalizableStrings {
 
     // Message %1$s not found in folder %2$s.
     public static final String MESSAGE_NOT_FOUND_MSG = "Message %1$s not found in folder %2$s.";
+
+    // Invalid OAuth account specified.
+    public static final String INVALID_OAUTH_ACCOUNT_MSG = "Invalid OAuth account specified.";
 
     /**
      * Initializes a new {@link MessagingExceptionMessages}.

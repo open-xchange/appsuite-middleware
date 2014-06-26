@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -65,6 +65,7 @@ import org.osgi.framework.BundleListener;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.impl.OXAdminCoreImpl;
@@ -277,7 +278,7 @@ public class AdminDaemon {
         context.addBundleListener(bl);
     }
 
-    public static void initCache(final ConfigurationService service) throws OXGenericException {
+    public synchronized static void initCache(final ConfigurationService service) throws OXGenericException {
         if (cache == null) {
             if (null == service) {
                 throw new OXGenericException("Absent service: " + ConfigurationService.class.getName());
@@ -341,6 +342,13 @@ public class AdminDaemon {
         return prop;
     }
 
+    /**
+     * Gets the list of known bundles.
+     *
+     * @return The bundle list
+     * @deprecated User order look-up through utilizing a {@link ServiceTracker}
+     */
+    @Deprecated
     public static final List<Bundle> getBundlelist() {
         return bundlelist;
     }
@@ -354,7 +362,9 @@ public class AdminDaemon {
      * @param context The bundle context (on which {@link BundleContext#getService(ServiceReference)} is invoked)
      * @param clazz The service's class
      * @return The service if found; otherwise <code>null</code>
+     * @deprecated Do proper service tracking through utilizing a {@link ServiceTracker}
      */
+    @Deprecated
     public static final <S extends Object> S getService(final String bundleSymbolicName, final String serviceName, final BundleContext context, final Class<? extends S> clazz) {
         for (final Bundle bundle : bundlelist) {
             if (bundle.getState() == Bundle.ACTIVE && bundleSymbolicName.equals(bundle.getSymbolicName())) {
@@ -387,7 +397,9 @@ public class AdminDaemon {
      * @param bundleSymbolicName The bundle's symbolic name which offers the service
      * @param serviceName The service's name provided through "<i>name</i>" property
      * @param context The bundle context (on which {@link BundleContext#ungetService(ServiceReference)} is invoked)
+     * @deprecated Do proper service tracking through utilizing a {@link ServiceTracker}
      */
+    @Deprecated
     public static final void ungetService(final String bundleSymbolicName, final String serviceName, final BundleContext context) {
         for (final Bundle bundle : bundlelist) {
             if (bundle.getState() == Bundle.ACTIVE && bundleSymbolicName.equals(bundle.getSymbolicName())) {

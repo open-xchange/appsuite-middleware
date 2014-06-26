@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Index Bundle
 Bundle-SymbolicName: com.openexchange.index.solr
-Bundle-Version: 7.4.2
+Bundle-Version: 7.6.0
 Bundle-Activator: com.openexchange.index.solr.osgi.SolrIndexActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -26,6 +26,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.i18n,
  com.openexchange.index,
  com.openexchange.java,
+ com.openexchange.java.util,
  com.openexchange.log,
  com.openexchange.mail,
  com.openexchange.mail.api,

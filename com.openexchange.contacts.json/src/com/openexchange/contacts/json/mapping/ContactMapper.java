@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -78,7 +78,6 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.groupware.tools.mappings.json.ArrayMapping;
 import com.openexchange.groupware.tools.mappings.json.BooleanMapping;
 import com.openexchange.groupware.tools.mappings.json.DateMapping;
@@ -89,7 +88,6 @@ import com.openexchange.groupware.tools.mappings.json.JsonMapping;
 import com.openexchange.groupware.tools.mappings.json.StringMapping;
 import com.openexchange.groupware.tools.mappings.json.TimeMapping;
 import com.openexchange.image.ImageLocation;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.session.Session;
@@ -137,14 +135,14 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 					setFields.add(ContactField.IMAGE1_URL); // assume virtual IMAGE1_URL is set, too
 				} else if (ContactField.LAST_MODIFIED.equals(field)) {
 					setFields.add(ContactField.LAST_MODIFIED_UTC); // assume virtual LAST_MODIFIED_UTC is set, too
-				}
+                }
 			}
 		}
 		if (null != mandatoryFields) {
 			setFields.addAll(Arrays.asList(mandatoryFields));
 		}
 		return setFields.toArray(newArray(setFields.size()));
-	}
+    }
 
     @Override
 	public Contact newInstance() {
@@ -2277,31 +2275,6 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.NUMBER_OF_LINKS, new IntegerMapping<Contact>(ContactFields.NUMBER_OF_LINKS, Contact.CONTACT_NUMBER_OF_LINKS) {
-
-            @Override
-            @Deprecated
-            public void set(Contact contact, Integer value) {
-            }
-
-            @Override
-            @Deprecated
-            public boolean isSet(Contact contact) {
-                return false;
-            }
-
-            @Override
-            @Deprecated
-            public Integer get(Contact contact) {
-                return 0;
-            }
-
-            @Override
-            @Deprecated
-            public void remove(Contact contact) {
-            }
-        });
-
         mappings.put(ContactField.DISTRIBUTIONLIST, new ArrayMapping<DistributionListEntryObject, Contact>(ContactFields.DISTRIBUTIONLIST, Contact.DISTRIBUTIONLIST) {
 
 			@Override
@@ -2382,43 +2355,6 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 		        return jsonArray;
 			}
 		});
-
-        mappings.put(ContactField.LINKS, new ArrayMapping<LinkEntryObject, Contact>(ContactFields.LINKS, Contact.LINKS) {
-
-            @Override
-            @Deprecated
-            public boolean isSet(Contact contact) {
-                return false;
-            }
-
-            @Override
-            @Deprecated
-            public void remove(Contact contact) {
-            }
-
-			@Override
-            @Deprecated
-			public LinkEntryObject[] newArray(int size) {
-				return new LinkEntryObject[size];
-			}
-
-			@Override
-            @Deprecated
-			public void set(Contact contact, LinkEntryObject[] value) throws OXException {
-			}
-
-			@Override
-            @Deprecated
-			public LinkEntryObject[] get(Contact contact) {
-				return null;
-			}
-
-			@Override
-            @Deprecated
-			protected LinkEntryObject deserialize(JSONArray array, int index) throws JSONException, OXException {
-				return new LinkEntryObject();
-			}
-        });
 
         mappings.put(ContactField.FOLDER_ID, new IntegerMapping<Contact>(FolderChildFields.FOLDER_ID, FolderChildObject.FOLDER_ID) {
 
@@ -2983,7 +2919,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.YOMI_FIRST_NAME, new StringMapping<Contact>(ContactFields.YOMI_FIRST_NAME, 610) {
+        mappings.put(ContactField.YOMI_FIRST_NAME, new StringMapping<Contact>(ContactFields.YOMI_FIRST_NAME, Contact.YOMI_FIRST_NAME) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -3006,7 +2942,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.YOMI_LAST_NAME, new StringMapping<Contact>(ContactFields.YOMI_LAST_NAME, 611) {
+        mappings.put(ContactField.YOMI_LAST_NAME, new StringMapping<Contact>(ContactFields.YOMI_LAST_NAME, Contact.YOMI_LAST_NAME) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -3029,7 +2965,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.YOMI_COMPANY, new StringMapping<Contact>(ContactFields.YOMI_COMPANY, 612) {
+        mappings.put(ContactField.YOMI_COMPANY, new StringMapping<Contact>(ContactFields.YOMI_COMPANY, Contact.YOMI_COMPANY) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -3298,7 +3234,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
                 // No slash character present
                 return addr.toUnicodeString();
             }
-            final StringAllocator sb = new StringAllocator(32);
+            final StringBuilder sb = new StringBuilder(32);
             final String personal = addr.getPersonal();
             if (null == personal) {
                 sb.append(prepareAddress(sAddress.substring(0, pos)));

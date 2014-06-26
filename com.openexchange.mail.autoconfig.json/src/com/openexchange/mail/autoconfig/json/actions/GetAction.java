@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -77,11 +77,6 @@ public class GetAction extends AutoconfigAction {
         super(services);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.requesthandler.AJAXActionService#perform(com.openexchange.ajax.requesthandler.AJAXRequestData,
-     * com.openexchange.tools.session.ServerSession)
-     */
     @Override
     public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
         String mail = request.getParameter(EMAIL, String.class);

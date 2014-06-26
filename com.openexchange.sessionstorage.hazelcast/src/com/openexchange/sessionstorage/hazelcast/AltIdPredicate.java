@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,16 +49,17 @@
 
 package com.openexchange.sessionstorage.hazelcast;
 
-import com.hazelcast.core.MapEntry;
+import java.util.Map.Entry;
 import com.hazelcast.query.Predicate;
 import com.openexchange.session.Session;
+import com.openexchange.sessionstorage.hazelcast.portable.PortableSession;
 
 /**
  * {@link AltIdPredicate}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class AltIdPredicate implements Predicate<String, HazelcastStoredSession> {
+public class AltIdPredicate implements Predicate<String, PortableSession> {
 
     private static final long serialVersionUID = -3741029445819911943L;
 
@@ -82,7 +83,7 @@ public class AltIdPredicate implements Predicate<String, HazelcastStoredSession>
     }
 
     @Override
-    public boolean apply(MapEntry<String, HazelcastStoredSession> mapEntry) {
+    public boolean apply(Entry<String, PortableSession> mapEntry) {
         return null != mapEntry && null != mapEntry.getValue() && null != altId &&
             altId.equals(mapEntry.getValue().getParameter(Session.PARAM_ALTERNATIVE_ID));
     }

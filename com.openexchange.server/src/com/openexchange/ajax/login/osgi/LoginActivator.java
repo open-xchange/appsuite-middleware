@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -58,9 +58,13 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.login.LoginRampUpService;
+import com.openexchange.login.internal.LoginPerformer;
+import com.openexchange.login.internal.format.CompositeLoginFormatter;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.v2.OAuth2ProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.ServiceSet;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tokenlogin.TokenLoginService;
 
@@ -77,7 +81,7 @@ public class LoginActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class<?>[] { ConfigurationService.class };
     }
 
     @Override
@@ -106,9 +110,18 @@ public class LoginActivator extends HousekeepingActivator {
         track(OAuthProviderService.class, new ServerServiceRegistryTracker<OAuthProviderService>());
         track(OAuth2ProviderService.class, new ServerServiceRegistryTracker<OAuth2ProviderService>());
 
+        ServiceSet<LoginRampUpService> rampUp = new ServiceSet<LoginRampUpService>();
+        track(LoginRampUpService.class, rampUp);
+
         final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + HttpService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + DispatcherPrefixService.class.getName() + "))");
-        rememberTracker(new ServiceTracker<Object, Object>(context, filter, new LoginServletRegisterer(context)));
+        rememberTracker(new ServiceTracker<Object, Object>(context, filter, new LoginServletRegisterer(context, rampUp)));
+
         track(TokenLoginService.class, new TokenLoginCustomizer(context));
         openTrackers();
+
+        final ConfigurationService configurationService = getService(ConfigurationService.class);
+        final String loginFormat = configurationService.getProperty("com.openexchange.ajax.login.formatstring.login");
+        final String logoutFormat = configurationService.getProperty("com.openexchange.ajax.login.formatstring.logout");
+        LoginPerformer.setLoginFormatter(new CompositeLoginFormatter(loginFormat, logoutFormat));
     }
 }

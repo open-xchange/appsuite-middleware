@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -196,7 +196,7 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
         return Boolean.parseBoolean(AJAXConfig.getProperty(AJAXConfig.Property.IS_SP3));
     }
 
-    protected static final int[] COLUMNS_DEFAULT_LIST = { 600, 601, 612, 602, 603, 607, 610, 608, 611, 614, 102, 604,
+    public static final int[] COLUMNS_DEFAULT_LIST = { 600, 601, 612, 602, 603, 607, 610, 608, 611, 614, 102, 604,
             609 };
 
     protected static final int[] COLUMNS_FOLDER_ID = new int[] { MailListField.FOLDER_ID.getField(),

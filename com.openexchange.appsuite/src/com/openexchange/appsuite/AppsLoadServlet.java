@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -57,18 +57,25 @@ import java.io.UnsupportedEncodingException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.SessionServlet;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link AppsLoadServlet} - Provides App Suite data for loading applciations.
  * 
  * @author <a href="mailto:viktor.pracht@open-xchange.com">Viktor Pracht</a>
  */
-public class AppsLoadServlet extends HttpServlet {
+public class AppsLoadServlet extends SessionServlet {
+    
+    public static FileContributor contributors = null;
 
     private static final long serialVersionUID = -8909104490806162791L;
 
@@ -178,12 +185,21 @@ public class AppsLoadServlet extends HttpServlet {
             }
             buffer = null;
         }
-
+        
         public void write(byte[] data) throws IOException {
+            write(data, null);
+        }
+
+        public void write(byte[] data, String options) throws IOException {
+            
             if (buffering) {
+                data = new StringBuilder(new String(data, "UTF-8")).append("\n\n/* :oxoptions: " + options + " :/oxoptions: */").toString().getBytes("UTF-8");
                 buffer[count++] = data;
             } else {
                 out.write(data);
+                if (options != null) {
+                    out.write(("\n// :oxoptions: " + options + " :/oxoptions: \n").getBytes("UTF-8"));
+                }
                 out.write(SUFFIX);
                 out.flush();
             }
@@ -208,6 +224,8 @@ public class AppsLoadServlet extends HttpServlet {
 
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        ServerSession session = getSessionObject(req, true);
+        
         final String[] modules = Strings.splitByComma(req.getPathInfo());
         if (null == modules) {
             return; // no actual files requested
@@ -220,7 +238,6 @@ public class AppsLoadServlet extends HttpServlet {
         ErrorWriter ew = new ErrorWriter(resp, length);
         for (int i = 1; i < length; i++) {
             final String module = modules[i].replace(' ', '+');
-
             // Module names may only contain letters, digits, '_', '-', '/' and
             // '.', but not "..".
             final Matcher m = moduleRE.matcher(module);
@@ -270,16 +287,48 @@ public class AppsLoadServlet extends HttpServlet {
             if (data != null) {
                 ew.write(data);
             } else {
-                int len = module.length() - 3;
-                String moduleName = module;
-                if (format == null && len > 0 && ".js".equals(module.substring(len))) {
-                    moduleName = module.substring(0, len);
+                // Try external sources
+                String options = "{}";
+                if (contributors != null) {
+                    try {
+                        FileContribution contribution = contributors.getData(ServerSessionAdapter.valueOf(session), module);
+                        if (contribution != null) {
+                            data = contribution.getData();
+                            JSONObject optionsO = new JSONObject();
+                            try {
+                                optionsO.put("cache", !contribution.isCachingDisabled());
+                                options = optionsO.toString();
+                            } catch (JSONException e) {
+                                // Doesn't happen
+                            }
+                        }
+                    } catch (OXException e) {
+                        int len = module.length() - 3;
+                        String moduleName = module;
+                        if (format == null && len > 0 && ".js".equals(module.substring(len))) {
+                            moduleName = module.substring(0, len);
+                        }
+                        name = escapeName(name);
+                        ew.error(("define('" + escapeName(moduleName) + "', function () {\n" +
+                                  "    if (ox.debug) console.log(\"Could not read '" + name + "': " + e.toString() + "\");\n" +
+                                  "    throw new Error(\"Could not read '" + name + "'\");\n" +
+                                  "});\n").getBytes(Charsets.UTF_8));
+                    }
                 }
-                name = escapeName(name);
-                ew.error(("define('" + escapeName(moduleName) + "', function () {\n" +
-                          "    if (ox.debug) console.log(\"Could not read '" + name + "'\");\n" +
-                          "    throw new Error(\"Could not read '" + name + "'\");\n" +
-                          "});\n").getBytes(Charsets.UTF_8));
+                if (data != null) {
+                    ew.write(data, options);
+                } else {
+                    int len = module.length() - 3;
+                    String moduleName = module;
+                    if (format == null && len > 0 && ".js".equals(module.substring(len))) {
+                        moduleName = module.substring(0, len);
+                    }
+                    name = escapeName(name);
+                    ew.error(("define('" + escapeName(moduleName) + "', function () {\n" +
+                              "    if (ox.debug) console.log(\"Could not read '" + name + "'\");\n" +
+                              "    throw new Error(\"Could not read '" + name + "'\");\n" +
+                              "});\n").getBytes(Charsets.UTF_8));
+                }
             }
         }
         ew.done();

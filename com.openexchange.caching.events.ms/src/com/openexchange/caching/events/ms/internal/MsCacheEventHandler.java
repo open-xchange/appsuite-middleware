@@ -49,8 +49,6 @@
 
 package com.openexchange.caching.events.ms.internal;
 
-import java.io.Serializable;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
@@ -59,6 +57,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.ms.Message;
 import com.openexchange.ms.MessageListener;
 import com.openexchange.ms.MsService;
+import com.openexchange.ms.PortableMsService;
 import com.openexchange.ms.Topic;
 import com.openexchange.server.ServiceExceptionCode;
 
@@ -67,22 +66,22 @@ import com.openexchange.server.ServiceExceptionCode;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class MsCacheEventHandler implements CacheListener, MessageListener<Map<String, Serializable>> {
+public final class MsCacheEventHandler implements CacheListener, MessageListener<PortableCacheEvent> {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MsCacheEventHandler.class);
 
     private static final String TOPIC_NAME = "cacheEvents-0";
-    private static final AtomicReference<MsService> MS_REFERENCE = new AtomicReference<MsService>();
+    private static final AtomicReference<PortableMsService> MS_REFERENCE = new AtomicReference<PortableMsService>();
 
     private final CacheEventService cacheEvents;
     private final String senderId;
 
     /**
-     * Sets the specified {@link MsService}.
+     * Sets the specified {@link PortableMsService}.
      *
-     * @param service The {@link MsService}
+     * @param service The {@link PortableMsService}
      */
-    public static void setMsService(final MsService service) {
+    public static void setMsService(final PortableMsService service) {
         MS_REFERENCE.set(service);
     }
 
@@ -95,7 +94,7 @@ public final class MsCacheEventHandler implements CacheListener, MessageListener
         super();
         this.cacheEvents = cacheEvents;
         cacheEvents.addListener(this);
-        Topic<Map<String, Serializable>> topic = getTopic();
+        Topic<PortableCacheEvent> topic = getTopic();
         this.senderId = topic.getSenderId();
         topic.addMessageListener(this);
     }
@@ -114,15 +113,15 @@ public final class MsCacheEventHandler implements CacheListener, MessageListener
         if (false == fromRemote) {
             LOG.debug("Re-publishing locally received cache event to remote: {} [{}]", cacheEvent, senderId);
             try {
-                getTopic().publish(CacheEventWrapper.wrap(cacheEvent));
+                getTopic().publish(PortableCacheEvent.wrap(cacheEvent));
             } catch (OXException e) {
                 LOG.warn("Error publishing cache event", e);
             }
         }
     }
 
-    private Topic<Map<String, Serializable>> getTopic() throws OXException {
-        MsService msService = MS_REFERENCE.get();
+    private Topic<PortableCacheEvent> getTopic() throws OXException {
+        PortableMsService msService = MS_REFERENCE.get();
         if (null == msService) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MsService.class.getName());
         }
@@ -130,12 +129,12 @@ public final class MsCacheEventHandler implements CacheListener, MessageListener
     }
 
     @Override
-    public void onMessage(Message<Map<String, Serializable>> message) {
+    public void onMessage(Message<PortableCacheEvent> message) {
         if (null != message && message.isRemote()) {
-            Map<String, Serializable> cacheEvent = message.getMessageObject();
+            PortableCacheEvent cacheEvent = message.getMessageObject();
             if (null != cacheEvent) {
                 LOG.debug("Re-publishing remotely received cache event locally: {} [{}]", message.getMessageObject(), message.getSenderId());
-                cacheEvents.notify(this, CacheEventWrapper.unwrap(cacheEvent), true);
+                cacheEvents.notify(this, PortableCacheEvent.unwrap(cacheEvent), true);
             } else {
                 LOG.warn("Discarding empty cache event message.");
             }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,6 +51,7 @@ package com.openexchange.index.solr.internal.infostore;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.Map;
 import java.util.Set;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 
@@ -96,6 +97,8 @@ public class SolrDocumentMetadata implements DocumentMetadata {
     private String filestoreLocation;
 
     private int numberOfVersions;
+
+    private Map<String, Object> meta;
 
 
     @Override
@@ -326,6 +329,16 @@ public class SolrDocumentMetadata implements DocumentMetadata {
     @Override
     public int getNumberOfVersions() {
         return numberOfVersions;
+    }
+
+    @Override
+    public Map<String, Object> getMeta() {
+        return meta;
+    }
+
+    @Override
+    public void setMeta(Map<String, Object> properties) {
+        this.meta = meta;
     }
 
 }

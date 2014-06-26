@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,9 +51,9 @@ package com.openexchange.webdav.protocol;
 
 import org.apache.webdav.lib.WebdavException;
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.groupware.EnumComponent;
@@ -68,7 +68,7 @@ import com.openexchange.groupware.EnumComponent;
  */
 public class WebdavProtocolException extends OXException implements WebdavStatus<Object> {
 
-    public static enum Code implements OXExceptionCode {
+    public static enum Code implements DisplayableOXExceptionCode {
 
         /**
          * A WebDAV error occurred.
@@ -133,10 +133,35 @@ public class WebdavProtocolException extends OXException implements WebdavStatus
 
         private final Category category;
 
+        /**
+         * Message displayed to the user
+         */
+        private String displayMessage;
+
+        /**
+         * Initializes a new {@link Code}.
+         * 
+         * @param message
+         * @param category
+         * @param detailNumber
+         */
         private Code(final String message, final Category category, final int detailNumber) {
+            this(message, category, detailNumber, null);
+        }
+
+        /**
+         * Initializes a new {@link Code}.
+         * 
+         * @param message
+         * @param category
+         * @param detailNumber
+         * @param displayMessage
+         */
+        private Code(final String message, final Category category, final int detailNumber, final String displayMessage) {
             this.message = message;
             this.detailNumber = detailNumber;
             this.category = category;
+            this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
         }
 
         @Override
@@ -157,6 +182,14 @@ public class WebdavProtocolException extends OXException implements WebdavStatus
         @Override
         public String getMessage() {
             return message;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String getDisplayMessage() {
+            return this.displayMessage;
         }
 
         @Override

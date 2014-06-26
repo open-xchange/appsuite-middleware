@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -112,6 +112,7 @@ public class UCSAuthentication implements AuthenticationService {
     public Authenticated handleLoginInfo(final LoginInfo loginInfo) throws OXException {
 
         DirContext ctx = null;
+        NamingEnumeration<SearchResult> result = null;
 
         try {
 
@@ -156,7 +157,7 @@ public class UCSAuthentication implements AuthenticationService {
                 search_pattern = search_pattern.replaceFirst("@USER@", uid);
 
 
-                final NamingEnumeration<SearchResult> result = ctx.search("",search_pattern,sc);
+                result = ctx.search("",search_pattern,sc);
 
                 LOG.debug("Now searching on server {} for DN of User {} with BASE: {} and pattern {}", LDAP_CONFIG.get(Context.PROVIDER_URL), uid, props.get("LDAP_BASE"), search_pattern);
 
@@ -174,7 +175,7 @@ public class UCSAuthentication implements AuthenticationService {
                 if(count!=1){
                     // found more than 1 user or no user , this is not good :)
                     LOG.debug("User {} not found in LDAP", uid);
-                    throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
+                    throw LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_USER_MAPPING.create(uid);
                 }
                 if (null != ctx) {
                     try {
@@ -241,7 +242,7 @@ public class UCSAuthentication implements AuthenticationService {
                 }else{
                     final String[] data  = ((String)emailattrib.get()).split("@");
                     if(data.length!=2){
-                        LOG.error("FATAL! Email address {} could be splitted correctly!!", emailattrib.get());
+                        LOG.error("FATAL! Email address {} could not be splitted correctly!!", emailattrib.get());
                         throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
                     }else{
                         splitted[0] = data[1];
@@ -276,6 +277,13 @@ public class UCSAuthentication implements AuthenticationService {
             LOG.error("Internal error!", e1);
             throw LoginExceptionCodes.COMMUNICATION.create(e1);
         } finally {
+            if (null != result) {
+                try {
+                    result.close();
+                } catch (NamingException e) {
+                    LOG.error("", e);
+                }
+            }
             if (null != ctx) {
                 try {
                     ctx.close();
@@ -305,11 +313,11 @@ public class UCSAuthentication implements AuthenticationService {
 
         // #### custom ssl socket factory if needed ##
         // LDAP_CONFIG.put("java.naming.ldap.factory.socket","com.openexchange.tools.ssl.TrustAllSSLSocketFactory");
-        // LDAP_CONFIG.put(Context.PROVIDER_URL, "ldaps://"+ (String)props.get("LDAP_HOST") + ":"+ (String) props.get("LDAP_PORT") + "/"+(String) props.get("LDAP_BASE") + "");
+        // LDAP_CONFIG.put(Context.PROVIDER_URL, "ldaps://"+ (String)props.get("LDAP_HOST") + ":"+ (String) props.get("LDAP_PORT") + "/"+(String) props.get("LDAP_BASE"));
         // ###########################################
 
         // we choose normal ldap without secure socket,
-        LDAP_CONFIG.put(Context.PROVIDER_URL, "ldap://"+ (String) props.get("LDAP_HOST") + ":"+ (String) props.get("LDAP_PORT") + "/"+ (String) props.get("LDAP_BASE") + "");
+        LDAP_CONFIG.put(Context.PROVIDER_URL, "ldap://"+ (String) props.get("LDAP_HOST") + ":"+ (String) props.get("LDAP_PORT") + "/"+ (String) props.get("LDAP_BASE"));
 
     }
 
@@ -331,7 +339,9 @@ public class UCSAuthentication implements AuthenticationService {
                     throw LoginExceptionCodes.UNKNOWN.create(file.getAbsolutePath());
                 } finally {
                     try {
-                        fis.close();
+                        if (null != fis) {
+                            fis.close();
+                        }
                     } catch (final IOException e) {
                         LOG.error("",e);
                         throw LoginExceptionCodes.UNKNOWN.create("Error closing stream for file:"+file.getAbsolutePath());

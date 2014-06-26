@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -54,6 +54,7 @@ import gnu.trove.iterator.TIntIterator;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
@@ -64,6 +65,7 @@ import javax.mail.internet.idn.IDNA;
 import com.javacodegeeks.concurrent.ConcurrentLinkedHashMap;
 import com.javacodegeeks.concurrent.LRUPolicy;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -71,6 +73,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.partmodifier.DummyPartModifier;
 import com.openexchange.mail.partmodifier.PartModifier;
@@ -289,10 +292,10 @@ public abstract class MailConfig {
         if (serverURL == null) {
             if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource())) {
                 throw MailConfigException.create(
-                    new com.openexchange.java.StringAllocator(64).append("Property \"").append("com.openexchange.mail.mailServer").append(
+                    new StringBuilder(64).append("Property \"").append("com.openexchange.mail.mailServer").append(
                         "\" not set in mail properties").toString());
             }
-            throw MailConfigException.create(new com.openexchange.java.StringAllocator(64).append("Cannot determine mail server URL for user ").append(userId).append(
+            throw MailConfigException.create(new StringBuilder(64).append("Cannot determine mail server URL for user ").append(userId).append(
                 " in context ").append(contextId).toString());
         }
         {
@@ -613,6 +616,21 @@ public abstract class MailConfig {
         return tmp.booleanValue();
     }
 
+    static {
+        MailReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                usePartModifier = null;
+            }
+
+            @Override
+            public Map<String, String[]> getConfigFileNames() {
+                return null;
+            }
+        });
+    }
+
     private final static boolean isValidProtocol(final String protocol) {
         final int len = protocol.length();
         if (len < 1) {
@@ -672,7 +690,7 @@ public abstract class MailConfig {
             if (PasswordSource.GLOBAL.equals(cur)) {
                 final String masterPw = MailProperties.getInstance().getMasterPassword();
                 if (masterPw == null) {
-                    throw MailConfigException.create(new com.openexchange.java.StringAllocator().append("Property \"masterPassword\" not set").toString());
+                    throw MailConfigException.create(new StringBuilder().append("Property \"masterPassword\" not set").toString());
                 }
                 mailConfig.password = masterPw;
             } else {
@@ -862,7 +880,7 @@ public abstract class MailConfig {
 
     @Override
     public String toString() {
-        final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator();
+        final StringBuilder builder = new StringBuilder();
         builder.append("{ MailConfig [accountId=").append(accountId).append(", ");
         if (login != null) {
             builder.append("login=").append(login).append(", ");

@@ -100,9 +100,9 @@ import com.openexchange.drive.sync.optimize.OptimizingFileSynchronizer;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.composition.FolderID;
-import com.openexchange.java.StringAllocator;
 
 /**
  * {@link DriveServiceImpl}
@@ -205,7 +205,8 @@ public class DriveServiceImpl implements DriveService {
              * return actions for client
              */
             if (driveSession.isTraceEnabled()) {
-                driveSession.trace("syncFolders completed after " + (System.currentTimeMillis() - start) + "ms.");
+                driveSession.trace("syncFolders with " + syncResult.length() + " resulting action(s) completed after "
+                    + (System.currentTimeMillis() - start) + "ms.");
             }
             return new DefaultSyncResult<DirectoryVersion>(syncResult.getActionsForClient(), driveSession.getDiagnosticsLog());
         }
@@ -252,7 +253,8 @@ public class DriveServiceImpl implements DriveService {
              * return actions for client
              */
             if (driveSession.isTraceEnabled()) {
-                driveSession.trace("syncFiles completed after " + (System.currentTimeMillis() - start) + "ms.");
+                driveSession.trace("syncFiles with " + syncResult.length() + " resulting action(s) completed after "
+                    + (System.currentTimeMillis() - start) + "ms.");
             }
             return new DefaultSyncResult<FileVersion>(syncResult.getActionsForClient(), driveSession.getDiagnosticsLog());
         }
@@ -302,8 +304,10 @@ public class DriveServiceImpl implements DriveService {
         try {
             createdFile = new UploadHelper(driveSession).perform(path, originalVersion, newVersion, uploadStream, contentType, offset, totalLength, created, modified);
         } catch (OXException e) {
-            LOG.warn("Got exception during upload ({})\nSession: {}, path: {}, original version: {}, new version: {}, offset: {}, total length: {}",e.getMessage(),driveSession,path,originalVersion,newVersion,offset,totalLength);
-            if ("FLS-0024".equals(e.getErrorCode())) {
+            LOG.warn("Got exception during upload ({})\nSession: {}, path: {}, original version: {}, new version: {}, offset: {}, total length: {}",
+                e.getMessage(), driveSession, path, originalVersion, newVersion, offset, totalLength);
+            if ("FLS-0024".equals(e.getErrorCode()) || FileStorageExceptionCodes.QUOTA_REACHED.equals(e) ||
+                "SMARTDRIVEFILE_STORAGE-0008".equals(e.getErrorCode())) {
                 /*
                  * quota reached
                  */
@@ -314,7 +318,7 @@ public class DriveServiceImpl implements DriveService {
                      */
                     String alternativeName = RenameTools.findRandomAlternativeName(originalVersion.getName());
                     FileVersion renamedVersion = new SimpleFileVersion(alternativeName, originalVersion.getChecksum());
-                    syncResult.addActionForClient(new EditFileAction(newVersion, renamedVersion, null, path));
+                    syncResult.addActionForClient(new EditFileAction(newVersion, renamedVersion, null, path, false));
                     syncResult.addActionForClient(new ErrorFileAction(newVersion, renamedVersion, null, path, quotaException, true));
                     /*
                      * ... then download the server version afterwards
@@ -340,8 +344,8 @@ public class DriveServiceImpl implements DriveService {
             /*
              * store checksum, invalidate parent directory checksum
              */
-            FileChecksum fileChecksum = driveSession.getChecksumStore().insertFileChecksum(
-                IDUtil.getFileID(createdFile), createdFile.getVersion(), createdFile.getSequenceNumber(), newVersion.getChecksum());
+            FileChecksum fileChecksum = driveSession.getChecksumStore().insertFileChecksum(new FileChecksum(
+                IDUtil.getFileID(createdFile), createdFile.getVersion(), createdFile.getSequenceNumber(), newVersion.getChecksum()));
             driveSession.getChecksumStore().removeDirectoryChecksum(new FolderID(createdFile.getFolderId()));
             /*
              * check if created file still equals uploaded one
@@ -427,7 +431,7 @@ public class DriveServiceImpl implements DriveService {
          */
         DirectoryVersionMapper mapper = new DirectoryVersionMapper(originalVersions, clientVersions, serverVersions);
         if (session.isTraceEnabled()) {
-            StringAllocator allocator = new StringAllocator("Directory versions mapped to:\n");
+            StringBuilder allocator = new StringBuilder("Directory versions mapped to:\n");
             allocator.append(mapper).append('\n');
             session.trace(allocator);
         }
@@ -449,7 +453,7 @@ public class DriveServiceImpl implements DriveService {
          */
         FileVersionMapper mapper = new FileVersionMapper(originalVersions, clientVersions, serverVersions);
         if (session.isTraceEnabled()) {
-            StringAllocator allocator = new StringAllocator("File versions in directory " + path + " mapped to:\n");
+            StringBuilder allocator = new StringBuilder("File versions in directory " + path + " mapped to:\n");
             allocator.append(mapper).append('\n');
             session.trace(allocator);
         }

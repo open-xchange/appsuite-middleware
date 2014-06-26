@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -64,6 +64,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.login.ConfigurationProperty;
 import com.openexchange.login.LoginResult;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -151,20 +152,43 @@ public final class LoginWriter {
     private static final String PARAMETER_SESSION = AJAXServlet.PARAMETER_SESSION;
     private static final String PARAMETER_LOCALE = "locale";
 
-    private static void write(final Session session, final JSONObject json, final Collection<OXException> warnings, final Locale locale) throws JSONException {
-        boolean isRandomTokenEnabled = false;
-        ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-        if(configurationService == null) {
-            LOG.warn("Unable to get ConfigurationService, refusing to write random.");
-        } else {
-            isRandomTokenEnabled = configurationService.getBoolProperty(ConfigurationProperty.RANDOM_TOKEN.getPropertyName(), false);
+    private static volatile Boolean randomTokenEnabled;
+    private static boolean randomTokenEnabled() {
+        Boolean tmp = randomTokenEnabled;
+        if (null == tmp) {
+            synchronized (LoginWriter.class) {
+                tmp = randomTokenEnabled;
+                if (null == tmp) {
+                    ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (configurationService == null) {
+                        LOG.warn("Unable to get ConfigurationService, refusing to write random.");
+                        return false;
+                    }
+                    tmp = Boolean.valueOf(configurationService.getBoolProperty(ConfigurationProperty.RANDOM_TOKEN.getPropertyName(), false));
+                    randomTokenEnabled = tmp;
+                }
+            }
         }
+        return tmp.booleanValue();
+    }
 
-        json.put(PARAMETER_SESSION, session.getSessionID());
-        if(isRandomTokenEnabled) {
+    /**
+     * Invalidates cached setting for <code>"com.openexchange.ajax.login.randomToken"</code>.
+     *
+     * @see ConfigurationProperty#RANDOM_TOKEN
+     */
+    public static void invalidateRandomTokenEnabled() {
+        randomTokenEnabled = null;
+    }
+
+    private static void write(final Session session, final JSONObject json, final Collection<OXException> warnings, final Locale locale) throws JSONException {
+        // Random token
+        if (randomTokenEnabled()) {
             json.put(RANDOM_PARAM, session.getRandomToken());
         }
-        json.put(PARAMETER_USER, session.getLogin());
+        json.put(PARAMETER_SESSION, session.getSessionID());
+        // Login
+        json.put(PARAMETER_USER, prepareLogin(session.getLogin()));
         json.put(PARAMETER_USER_ID, session.getUserId());
         json.put(PARAMETER_CONTEXT_ID, session.getContextId());
         final Locale loc = locale == null ? resolveLocaleForUser(session, DEFAULT_LOCALE) : locale;
@@ -174,9 +198,21 @@ public final class LoginWriter {
              * Write warnings
              */
             final OXJSONWriter writer = new OXJSONWriter(json);
-            final List<OXException> list =
-                (warnings instanceof List) ? ((List<OXException>) warnings) : new ArrayList<OXException>(warnings);
+            final List<OXException> list = (warnings instanceof List) ? ((List<OXException>) warnings) : new ArrayList<OXException>(
+                warnings);
             ResponseWriter.writeWarnings(list, writer, loc);
+        }
+    }
+
+    private static String prepareLogin(final String login) {
+        if (null == login) {
+            return null;
+        }
+        // Possibly an E-Mail address
+        try {
+            return QuotedInternetAddress.toIDN(login);
+        } catch (final Exception x) {
+            return login;
         }
     }
 

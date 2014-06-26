@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -138,12 +138,12 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
         String toParse = parameterList;
         int len = toParse.length();
         if (len > 0 && ';' != toParse.charAt(0)) {
-            toParse = new com.openexchange.java.StringAllocator(len + 2).append("; ").append(toParse).toString();
+            toParse = new StringBuilder(len + 2).append("; ").append(toParse).toString();
         }
         toParse = PATTERN_PARAM_CORRECT.matcher(toParse).replaceAll("$1$2\"$3\"$4");
         len = toParse.length();
         if (len > 0 && ';' != toParse.charAt(0)) {
-            toParse = new com.openexchange.java.StringAllocator(len + 2).append("; ").append(toParse).toString();
+            toParse = new StringBuilder(len + 2).append("; ").append(toParse).toString();
         }
         return toParse;
     }
@@ -247,7 +247,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
 
     private void parseParameter(final String name, final String value) {
         String val;
-        if (value == null) {
+        if (Strings.isEmpty(value)) {
             val = "";
         } else {
             val =
@@ -320,9 +320,22 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
      */
     public void setParameter(final String name, final String value) {
         if ((null == name) || containsSpecial(name)) {
-            final OXException me = MailExceptionCode.INVALID_PARAMETER.create(name);
-            LOG.error("", me);
+            LOG.warn("", MailExceptionCode.INVALID_PARAMETER.create(name));
             return;
+        }
+        parameters.put(name.toLowerCase(Locale.ENGLISH), new Parameter(name, value));
+    }
+
+    /**
+     * Sets the given parameter. Existing value is overwritten.
+     *
+     * @param name The sole parameter name
+     * @param value The parameter value
+     * @throws OXException If parameter name/value is invalid
+     */
+    public void setParameterErrorAware(final String name, final String value) throws OXException {
+        if ((null == name) || containsSpecial(name)) {
+            throw MailExceptionCode.INVALID_PARAMETER.create(name);
         }
         parameters.put(name.toLowerCase(Locale.ENGLISH), new Parameter(name, value));
     }
@@ -422,9 +435,9 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
      * Appends the RFC2045 style (ASCII-only) string representation of this parameter list including empty parameters.
      *
      * @param sb The string builder to append to
-     * @see #appendRFC2045String(com.openexchange.java.StringAllocator, boolean)
+     * @see #appendRFC2045String(StringBuilder, boolean)
      */
-    public void appendRFC2045String(final com.openexchange.java.StringAllocator sb) {
+    public void appendRFC2045String(final StringBuilder sb) {
         appendRFC2045String(sb, false);
     }
 
@@ -434,7 +447,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
      * @param sb The string builder to append to
      * @param skipEmptyParam <code>true</code> to skip empty parameters; otherwise <code>false</code>
      */
-    public void appendRFC2045String(final com.openexchange.java.StringAllocator sb, final boolean skipEmptyParam) {
+    public void appendRFC2045String(final StringBuilder sb, final boolean skipEmptyParam) {
         final int size = parameters.size();
         final List<String> names = new ArrayList<String>(size);
         names.addAll(parameters.keySet());
@@ -463,7 +476,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
      */
     @Override
     public String toString() {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(64);
+        final StringBuilder sb = new StringBuilder(64);
         final int size = parameters.size();
         final List<String> names = new ArrayList<String>(size);
         names.addAll(parameters.keySet());
@@ -500,14 +513,14 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
 
     static String checkQuotation(final String str) {
         if (containsSpecial(str)) {
-            return new com.openexchange.java.StringAllocator(2 + str.length()).append('"').append(
+            return new StringBuilder(2 + str.length()).append('"').append(
                 PAT_QUOTE.matcher(PAT_BSLASH.matcher(str).replaceAll("\\\\\\\\")).replaceAll("\\\\\\\"")).append('"').toString();
         }
         return str;
     }
 
     private static String unescape(final String escaped) {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(escaped.length());
+        final StringBuilder sb = new StringBuilder(escaped.length());
 
         final int length = escaped.length();
 
@@ -736,7 +749,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
 
         public String getValue() {
             if (null == value) {
-                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(64);
+                final StringBuilder sb = new StringBuilder(64);
                 final int size = contiguousValues.size();
                 for (int i = 0; i < size; i++) {
                     sb.append(contiguousValues.get(i));
@@ -746,7 +759,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
             return value;
         }
 
-        public void appendRFC2045String(final com.openexchange.java.StringAllocator sb) {
+        public void appendRFC2045String(final StringBuilder sb) {
             final int size = contiguousValues.size();
             if (size == 0) {
                 sb.append("; ").append(name);
@@ -821,10 +834,10 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
         public String toUnicodeString() {
             final int size = contiguousValues.size();
             if (size == 0) {
-                return new com.openexchange.java.StringAllocator(name.length() + 2).append("; ").append(name).toString();
+                return new StringBuilder(name.length() + 2).append("; ").append(name).toString();
             }
             if (rfc2231) {
-                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(64);
+                final StringBuilder sb = new StringBuilder(64);
                 if (size == 1) {
                     sb.append("; ").append(name);
                     if (getNextValidPos(0, size) != -1) {
@@ -871,7 +884,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
                 return sb.toString();
             }
             try {
-                return new com.openexchange.java.StringAllocator(64).append("; ").append(name).append('=').append(
+                return new StringBuilder(64).append("; ").append(name).append('=').append(
                     checkQuotation(MimeUtility.encodeText(CHARSET_UTF_8, "Q", getValue()))).toString();
             } catch (final UnsupportedEncodingException e) {
                 /*

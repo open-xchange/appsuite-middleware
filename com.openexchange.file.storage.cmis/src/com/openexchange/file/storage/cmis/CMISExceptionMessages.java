@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -58,9 +58,6 @@ import com.openexchange.i18n.LocalizableStrings;
  * @since Open-Xchange v6.16
  */
 public final class CMISExceptionMessages implements LocalizableStrings {
-
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
 
     // A CMIS error occurred: %1$s
     public static final String CMIS_ERROR_MSG = "A CMIS error occurred: %1$s";

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -88,13 +88,15 @@ public class ApachePutRequestBuilder extends CommonApacheHTTPRequest<HTTPPutRequ
 		return putMethod;
 	}
 
-	public HTTPPutRequestBuilder body(final String body) {
+	@Override
+    public HTTPPutRequestBuilder body(final String body) {
 		clearBody();
 		this.stringBody = body;
 		return this;
 	}
 
-	public HTTPPutRequestBuilder body(final InputStream body) {
+	@Override
+    public HTTPPutRequestBuilder body(final InputStream body) {
 		clearBody();
 		this.isBody = body;
 		return this;
@@ -105,7 +107,8 @@ public class ApachePutRequestBuilder extends CommonApacheHTTPRequest<HTTPPutRequ
 		Streams.close(isBody);
 	}
 
-	public HTTPPutRequestBuilder contentType(final String ctype) {
+	@Override
+    public HTTPPutRequestBuilder contentType(final String ctype) {
 		this.cType = ctype;
 		return this;
 	}

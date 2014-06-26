@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -86,23 +86,37 @@ public interface IDBasedFolderAccess extends TransactionAware {
     FileStorageFolder getFolder(String folderId) throws OXException;
 
     /**
-     * Gets the folder considered as personal folder.
+     * Gets the folder considered as personal folder for the account the supplied folder belongs to.
      * <p>
      * <b>Note</b>: If personal folder is not supported by this file storage, {@link FileStorageExceptionCodes#NO_SUCH_FOLDER
      * NO_SUCH_FOLDER} is thrown.
      *
+     * @param folderId The identifier of a folder in the account to get the trash folder for
      * @return The corresponding instance of {@link FileStorageFolder}
      * @throws OXException If either such a folder does not exist or could not be fetched
      */
-    FileStorageFolder getPersonalFolder() throws OXException;
+    FileStorageFolder getPersonalFolder(String folderId) throws OXException;
 
     /**
-     * Gets the public folders.
+     * Gets the folder considered as trash folder for the account the supplied folder belongs to.
+     * <p>
+     * <b>Note</b>: If trash folder is not supported by this file storage, {@link FileStorageExceptionCodes#NO_SUCH_FOLDER
+     * NO_SUCH_FOLDER} is thrown.
      *
+     * @param folderId The identifier of a folder in the account to get the trash folder for
+     * @return The corresponding instance of {@link FileStorageFolder}
+     * @throws OXException If either such a folder does not exist or could not be fetched
+     */
+    FileStorageFolder getTrashFolder(String folderId) throws OXException;
+
+    /**
+     * Gets the public folders for the account the supplied folder belongs to.
+     *
+     * @param folderId The identifier of a folder in the account to get the trash folder for
      * @return The corresponding instances of {@link FileStorageFolder}
      * @throws OXException If no such folders exist or could not be fetched
      */
-    FileStorageFolder[] getPublicFolders() throws OXException;
+    FileStorageFolder[] getPublicFolders(String folderId) throws OXException;
 
     /**
      * Gets the first level subfolders located below the folder whose identifier matches given parameter <code>parentIdentifier</code>.
@@ -233,8 +247,8 @@ public interface IDBasedFolderAccess extends TransactionAware {
     /**
      * Deletes an existing file storage folder identified through given identifier.
      * <p>
-     * If <code>hardDelete</code> is not set and folder is not located below default trash folder it is backed up (including subfolder tree)
-     * in default trash folder; otherwise it is deleted permanently.
+     * If <code>hardDelete</code> is not set, the storage supports a trash folder, and the folder is not yet located below that trash
+     * folder, it is backed up (including the subfolder tree), otherwise it is deleted permanently.
      * <p>
      * While another backup folder with the same name already exists below default trash folder, an increasing serial number is appended to
      * folder name until its name is unique inside default trash folder's subfolders. E.g.: If folder "DeleteMe" already exists below

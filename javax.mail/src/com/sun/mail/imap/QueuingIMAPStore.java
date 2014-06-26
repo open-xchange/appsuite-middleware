@@ -212,8 +212,8 @@ public class QueuingIMAPStore extends IMAPStore {
                         try {
                             final boolean notInUse = tq.closeElapsed0(minStamp);
                             if (notInUse) {
-                                if (noneCount.incrementAndGet() >= 10 && tqueues.remove(url, tq)) {
-                                    // Atomically removed queue, because seen this queue as "not in use" for 10 times
+                                if (noneCount.incrementAndGet() >= 3 && tqueues.remove(url, tq)) {
+                                    // Atomically removed queue, because seen this queue as "not in use" for 3 times
                                     tq.deprecated = true;
                                     final ScheduledFuture<?> future = futureRef.getAndSet(null);
                                     if (null != future) {
@@ -615,7 +615,7 @@ public class QueuingIMAPStore extends IMAPStore {
                 }
                 // Wait time exceeded
                 if ((nanos <= 0) || (newCount >= max)) {
-                    throw new com.sun.mail.iap.ConnectQuotaExceededException("No connection available and not allowed to open further ones");
+                    throw new com.sun.mail.iap.ConnectQuotaExceededException("No connection available and not allowed to open more than " + max + " connections. Waited " + unit.toSeconds(timeout) + " seconds");
                 }
                 // Increment new count
                 newCount++;

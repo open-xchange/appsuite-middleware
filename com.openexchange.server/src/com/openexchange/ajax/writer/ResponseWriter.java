@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -84,6 +84,7 @@ import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.exception.OXException.Truncated;
 import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.i18n.LocaleTools;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.log.LogProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -250,6 +251,11 @@ public final class ResponseWriter {
         if (null != response.getTimestamp()) {
             json.put(TIMESTAMP, response.getTimestamp().getTime());
         }
+
+        if (null != response.getContinuationUUID()) {
+            json.put(CONTINUATION, UUIDs.getUnformattedString(response.getContinuationUUID()));
+        }
+
         final List<OXException> warnings = response.getWarnings();
         final OXException exception = response.getException();
         if (null == exception) {

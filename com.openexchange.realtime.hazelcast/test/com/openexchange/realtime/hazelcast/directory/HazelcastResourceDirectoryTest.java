@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,7 +49,9 @@
 
 package com.openexchange.realtime.hazelcast.directory;
 
-import java.io.Serializable;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -64,12 +66,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import org.junit.Assert;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.EntryEvent;
 import com.hazelcast.core.EntryListener;
@@ -82,6 +83,7 @@ import com.openexchange.realtime.directory.DefaultResource;
 import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.IDManager;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.PresenceState;
 import com.openexchange.realtime.util.IDMap;
@@ -97,6 +99,16 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
 
     private static final String RESOURCE_MAP_NAME = "RESOURCE_MAP";
 
+    @BeforeClass
+    public static void setUp() {
+        ID.ID_MANAGER_REF.set(new IDManager());
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        ID.ID_MANAGER_REF.set(null);
+    }
+
     public HazelcastResourceDirectoryTest() throws OXException {
         super(ID_MAP_NAME, RESOURCE_MAP_NAME);
     }
@@ -106,7 +118,7 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-        HazelcastInstance hazelcast = Hazelcast.getDefaultInstance();
+        HazelcastInstance hazelcast = Hazelcast.newHazelcastInstance();
         HazelcastAccess.setHazelcastInstance(hazelcast);
         MapConfig config = new MapConfig(RESOURCE_MAP_NAME);
         config.setMaxIdleSeconds(1);
@@ -147,13 +159,13 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
     @Test
     public void testResourceEviction() throws Exception {
         final CyclicBarrier barrier = new CyclicBarrier(2);
-        final EntryListener<String, Map<String,Serializable>> listener = new EntryListener<String, Map<String,Serializable>>() {
+        final EntryListener<String, Map<String,Object>> listener = new EntryListener<String, Map<String,Object>>() {
             @Override
-            public void entryUpdated(EntryEvent<String, Map<String, Serializable>> event) {}
+            public void entryUpdated(EntryEvent<String, Map<String, Object>> event) {}
             @Override
-            public void entryRemoved(EntryEvent<String, Map<String, Serializable>> event) {}
+            public void entryRemoved(EntryEvent<String, Map<String, Object>> event) {}
             @Override
-            public void entryEvicted(EntryEvent<String, Map<String, Serializable>> event) {
+            public void entryEvicted(EntryEvent<String, Map<String, Object>> event) {
                 try {
                     barrier.await();
                 } catch (InterruptedException e) {
@@ -163,10 +175,10 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
                 }
             }
             @Override
-            public void entryAdded(EntryEvent<String, Map<String, Serializable>> event) {}
+            public void entryAdded(EntryEvent<String, Map<String, Object>> event) {}
         };
 
-        getResourceMapping().addEntryListener(listener, false);
+        String listenerID = getResourceMapping().addEntryListener(listener, false);
         try {
             ID concreteId = generateId();
             Resource resource = generateResource(concreteId);
@@ -177,7 +189,7 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
             Assert.assertEquals("Resource directory not empty", 0, getResourceMapping().size());
             Assert.assertEquals("ID map not empty", 0, getIDMapping().size());
         } finally {
-            getResourceMapping().removeEntryListener(listener);
+            getResourceMapping().removeEntryListener(listenerID);
         }
     }
 
@@ -258,7 +270,7 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
         Assert.assertEquals("Wrong size", 2, remove2.size());
 
         MultiMap<String,String> idMapping = getIDMapping();
-        IMap<String, Map<String, Serializable>> resources = getResourceMapping();
+        IMap<String, Map<String, Object>> resources = getResourceMapping();
         Assert.assertEquals("Id mapping not empty", 0, idMapping.size());
         Assert.assertEquals("Resources not empty", 0, resources.size());
     }
@@ -306,7 +318,7 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
         Assert.assertEquals("Wrong size", 1, removed2.size());
 
         MultiMap<String,String> idMapping = getIDMapping();
-        IMap<String, Map<String, Serializable>> resources = getResourceMapping();
+        IMap<String, Map<String, Object>> resources = getResourceMapping();
         Assert.assertEquals("Id mapping not empty", 0, idMapping.size());
         Assert.assertEquals("Resources not empty", 0, resources.size());
     }
@@ -358,10 +370,6 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
         assertEquals(p1.getState(), p2.getState());
         assertEquals(p1.getType(), p2.getType());
         return true;
-    }
-
-    @Override
-    protected void startRefreshTimer() {
     }
 
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -83,8 +83,6 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.html.HtmlService;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
-import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
@@ -196,7 +194,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
         @Override
         public String toString() {
-            final StringAllocator builder = new StringAllocator(256);
+            final StringBuilder builder = new StringBuilder(256);
             builder.append("MultipartInfo [");
             if (mpId != null) {
                 builder.append("mpId=").append(mpId).append(", ");
@@ -394,7 +392,11 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
     private TimeZone getTimeZone() throws OXException {
         if (timeZone == null) {
-            timeZone = TimeZoneUtils.getTimeZone(UserStorage.getInstance().getUser(session.getUserId(), ctx).getTimeZone());
+            if (session instanceof ServerSession) {
+                timeZone = TimeZoneUtils.getTimeZone(((ServerSession) session).getUser().getTimeZone());
+            } else {
+                timeZone = TimeZoneUtils.getTimeZone(UserStorage.getInstance().getUser(session.getUserId(), ctx).getTimeZone());
+            }
         }
         return timeZone;
     }
@@ -432,6 +434,16 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
     @Override
     public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType, final String fileName, final String id) throws OXException {
+        if (isInline && isAlternative && null != altId && id.startsWith(altId) && baseContentType.startsWith("text/xml")) {
+            // Ignore
+            return true;
+        }
+
+        // Handle attachment
+        return handleAttachment0(part, isInline, null, baseContentType, fileName, id);
+    }
+
+    private boolean handleAttachment0(final MailPart part, final boolean isInline, final String disposition, final String baseContentType, final String fileName, final String id) throws OXException {
         try {
             final JSONObject jsonObject = new JSONObject(8);
             /*
@@ -472,7 +484,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
             /*
              * Disposition
              */
-            jsonObject.put(DISPOSITION, Part.ATTACHMENT);
+            jsonObject.put(DISPOSITION, null == disposition ? Part.ATTACHMENT : disposition);
             /*
              * Content-ID
              */
@@ -485,7 +497,12 @@ public final class JsonMessageHandler implements MailMessageHandler {
             /*
              * Content-Type
              */
-            jsonObject.put(CONTENT_TYPE, part.getContentType().toString());
+            {
+                ContentType clone = new ContentType();
+                clone.setContentType(part.getContentType());
+                clone.removeNameParameter();
+                jsonObject.put(CONTENT_TYPE, clone.toString());
+            }
             /*
              * Content
              */
@@ -648,7 +665,8 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
     @Override
     public boolean handleImagePart(final MailPart part, final String imageCID, final String baseContentType, final boolean isInline, final String fileName, final String id) throws OXException {
-        if (isInline && (DisplayMode.RAW.getMode() < displayMode.getMode())) {
+        final boolean considerAsInline = isInline || part.containsHeader("Content-Id");
+        if (considerAsInline && (DisplayMode.MODIFYABLE.getMode() < displayMode.getMode())) {
             final MultipartInfo mpInfo = multiparts.peek();
             if (null != mpInfo && textAppended && id.startsWith(mpInfo.mpId) && mpInfo.isSubType("mixed")) {
                 try {
@@ -661,18 +679,22 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     for (int i = len; b && i-- > 0;) {
                         final JSONObject jAttachment = attachments.getJSONObject(i);
                         if (jAttachment.getString(keyContentType).startsWith("text/plain")) {
-                            final String imageURL;
-                            {
-                                final InlineImageDataSource imgSource = InlineImageDataSource.getInstance();
-                                final ImageLocation imageLocation = new ImageLocation.Builder(fileName).folder(prepareFullname(accountId, mailPath.getFolder())).id(mailPath.getMailID()).build();
-                                imageURL = imgSource.generateUrl(imageLocation, session);
+                            try {
+                                final String imageURL;
+                                {
+                                    final InlineImageDataSource imgSource = InlineImageDataSource.getInstance();
+                                    final ImageLocation imageLocation = new ImageLocation.Builder(fileName).folder(prepareFullname(accountId, mailPath.getFolder())).id(mailPath.getMailID()).build();
+                                    imageURL = imgSource.generateUrl(imageLocation, session);
+                                }
+                                final String imgTag = "<img src=\"" + imageURL + "&scaleType=contain&width=800\" alt=\"\" style=\"display: block\" id=\"" + fileName + "\">";
+                                final String content = jAttachment.getString(keyContent);
+                                final String newContent = content + imgTag;
+                                jAttachment.put(keyContent, newContent);
+                                jAttachment.put(keySize, newContent.length());
+                                b = false;
+                            } catch (final Exception e) {
+                                LOG.error("Error while inlining image part.", e);
                             }
-                            final String imgTag = "<img src=\"" + imageURL + "&scaleType=contain&width=800\" alt=\"\" style=\"display: block\" id=\"" + fileName + "\">";
-                            final String content = jAttachment.getString(keyContent);
-                            final String newContent = content + imgTag;
-                            jAttachment.put(keyContent, newContent);
-                            jAttachment.put(keySize, newContent.length());
-                            b = false;
                         }
                     }
                     if (b) { // No suitable text/plain
@@ -683,17 +705,21 @@ public final class JsonMessageHandler implements MailMessageHandler {
                                 if (jAttachment.optString(CONTENT_TYPE, "").startsWith("text/htm") && mpInfo.mpId.equals(jAttachment.optString(MULTIPART_ID, null))) {
                                     String content = jAttachment.optString(CONTENT, "null");
                                     if (!"null".equals(content)) {
-                                        // Append to first one
-                                        final String imageURL;
-                                        {
-                                            final InlineImageDataSource imgSource = InlineImageDataSource.getInstance();
-                                            final ImageLocation imageLocation = new ImageLocation.Builder(fileName).folder(prepareFullname(accountId, mailPath.getFolder())).id(mailPath.getMailID()).build();
-                                            imageURL = imgSource.generateUrl(imageLocation, session);
+                                        try {
+                                            // Append to first one
+                                            final String imageURL;
+                                            {
+                                                final InlineImageDataSource imgSource = InlineImageDataSource.getInstance();
+                                                final ImageLocation imageLocation = new ImageLocation.Builder(fileName).folder(prepareFullname(accountId, mailPath.getFolder())).id(mailPath.getMailID()).build();
+                                                imageURL = imgSource.generateUrl(imageLocation, session);
+                                            }
+                                            final String imgTag = "<img src=\"" + imageURL + "&scaleType=contain&width=800\" alt=\"\" style=\"display: block\" id=\"" + fileName + "\">";
+                                            content = new StringBuilder(content).append(imgTag).toString();
+                                            jAttachment.put(CONTENT, content);
+                                            b = false;
+                                        } catch (final Exception e) {
+                                            LOG.error("Error while inlining image part.", e);
                                         }
-                                        final String imgTag = "<img src=\"" + imageURL + "&scaleType=contain&width=800\" alt=\"\" style=\"display: block\" id=\"" + fileName + "\">";
-                                        content = new StringAllocator(content).append(imgTag).toString();
-                                        jAttachment.put(CONTENT, content);
-                                        b = false;
                                     }
                                 }
                             }
@@ -701,13 +727,13 @@ public final class JsonMessageHandler implements MailMessageHandler {
                             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                         }
                     }
-                    return handleAttachment(part, false, baseContentType, fileName, id);
+                    return handleAttachment0(part, considerAsInline, considerAsInline ? Part.INLINE : Part.ATTACHMENT, baseContentType, fileName, id);
                 } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         }
-        return handleAttachment(part, isInline, baseContentType, fileName, id);
+        return handleAttachment0(part, considerAsInline, considerAsInline ? Part.INLINE : Part.ATTACHMENT, baseContentType, fileName, id);
     }
 
     @Override
@@ -734,7 +760,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                             }
                         } else {
                             try {
-                                asDisplayText(id, contentType.getBaseType(), htmlContent, fileName, DisplayMode.DISPLAY.equals(displayMode));
+                                asDisplayText(id, contentType.getBaseType(), htmlContent, fileName, false);
                                 getAttachmentsArr().remove(0);
                             } catch (final JSONException e) {
                                 throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
@@ -756,7 +782,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                                 if (!"null".equals(content)) {
                                     // Append to first one
                                     final String moreContent = HtmlProcessing.formatHTMLForDisplay(htmlContent, contentType.getCharsetParameter(), session, mailPath, usm, modified, displayMode, embedded);
-                                    content = new StringAllocator(content).append(moreContent).toString();
+                                    content = new StringBuilder(content).append(moreContent).toString();
                                     jAttachment.put(CONTENT, content);
                                     return true;
                                 }
@@ -800,7 +826,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                             if (!"null".equals(content)) {
                                 // Append to first one
                                 final String moreContent = HtmlProcessing.formatHTMLForDisplay(htmlContent, contentType.getCharsetParameter(), session, mailPath, usm, modified, displayMode, embedded);
-                                content = new StringAllocator(content).append(moreContent).toString();
+                                content = new StringBuilder(content).append(moreContent).toString();
                                 jAttachment.put(CONTENT, content);
                                 return true;
                             }
@@ -823,7 +849,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     /*
                      * Check if HTML is empty or has an empty body section
                      */
-                    if ((isEmpty(htmlContent) || (htmlContent.length() < 1024 && hasNoImage(htmlContent) && isEmpty(html2text(htmlContent)))) && plainText != null) {
+                    if ((com.openexchange.java.Strings.isEmpty(htmlContent) || (htmlContent.length() < 1024 && hasNoImage(htmlContent) && com.openexchange.java.Strings.isEmpty(html2text(htmlContent)))) && plainText != null) {
                         /*
                          * No text present
                          */
@@ -1004,7 +1030,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     }
                 }
             } else {
-                final String content = isEmpty(plainTextContentArg) ? "" : HtmlProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode);
+                final String content = com.openexchange.java.Strings.isEmpty(plainTextContentArg) ? "" : HtmlProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode);
                 final JSONObject textObject = asPlainText(id, contentType.getBaseType(), content);
                 if (includePlainText) {
                     textObject.put("plain_text", plainTextContentArg);
@@ -1058,7 +1084,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
             } catch (final Exception e) {
                 final Throwable t =
                     new Throwable(
-                        new com.openexchange.java.StringAllocator("Unable to fetch content/type for '").append(filename).append("': ").append(e).toString());
+                        new StringBuilder("Unable to fetch content/type for '").append(filename).append("': ").append(e).toString());
                 LOG.warn("", t);
             }
             jsonObject.put(CONTENT_TYPE, contentType);
@@ -1204,7 +1230,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     throw MimeMailException.handleMessagingException(e);
                 }
             } else {
-                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128);
+                final StringBuilder sb = new StringBuilder(128);
                 sb.append("Ignoring nested message.").append(
                     "Cannot handle part's content which should be a RFC822 message according to its content type: ");
                 sb.append((null == content ? "null" : content.getClass().getSimpleName()));
@@ -1317,6 +1343,8 @@ public final class JsonMessageHandler implements MailMessageHandler {
             }
         }
          */
+
+        // Process it
         final ContentType contentType = part.getContentType();
         if (isVCalendar(baseContentType) && !contentType.containsParameter("method")) {
             /*
@@ -1341,7 +1369,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
          * When creating a JSON message object from a message we do not distinguish special parts or image parts from "usual" attachments.
          * Therefore invoke the handleAttachment method. Maybe we need a separate handling in the future for vcards.
          */
-        return handleAttachment(part, false, baseContentType, fileName, id);
+        return handleAttachment0(part, false, null, baseContentType, fileName, id);
     }
 
     private static boolean isVCalendar(final String baseContentType) {
@@ -1568,26 +1596,13 @@ public final class JsonMessageHandler implements MailMessageHandler {
         return null == htmlContent || (toLowerCase(htmlContent).indexOf("<img ") < 0);
     }
 
-    /** Check for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
     /** ASCII-wise to lower-case */
     static String toLowerCase(final CharSequence chars) {
         if (null == chars) {
             return null;
         }
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.reseller.rmi.impl;
 
+import java.util.Set;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
@@ -78,24 +79,31 @@ public class OXResellerUserImpl implements OXUserPluginInterface {
         oxresell = OXResellerStorageInterface.getInstance();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.plugins.OXUserPluginInterface#canHandleContextAdmin()
-     */
     @Override
     public boolean canHandleContextAdmin() {
         return true;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.plugins.OXUserPluginInterface#change(com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.User, com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
     @Override
     public void change(Context ctx, User usrdata, Credentials auth) throws PluginException {
+        // Nothing to do
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.plugins.OXUserPluginInterface#create(com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.User, com.openexchange.admin.rmi.dataobjects.UserModuleAccess, com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
+    @Override
+    public void changeCapabilities(Context ctx, User user, Set<String> capsToAdd, Set<String> capsToRemove, Set<String> capsToDrop, Credentials auth) throws PluginException {
+        // Nothing to do
+    }
+
+    @Override
+    public void changeModuleAccess(Context ctx, User user, String access_combination_name, Credentials auth) throws PluginException {
+        // Nothing to do
+    }
+
+    @Override
+    public void changeModuleAccess(Context ctx, User user, UserModuleAccess moduleAccess, Credentials auth) throws PluginException {
+        // Nothing to do
+    }
+
     @Override
     public void create(Context ctx, User usr, UserModuleAccess access, Credentials cred) throws PluginException {
         try {
@@ -106,7 +114,7 @@ public class OXResellerUserImpl implements OXUserPluginInterface {
                 return;
             }
             //long tstart = System.currentTimeMillis();
-            oxresell.checkPerContextRestrictions(ctx, access,
+            oxresell.checkPerContextRestrictions(ctx, access, false,
                 Restriction.MAX_USER_PER_CONTEXT,
                 Restriction.MAX_OVERALL_USER_PER_SUBADMIN,
                 Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX,
@@ -119,16 +127,11 @@ public class OXResellerUserImpl implements OXUserPluginInterface {
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.plugins.OXUserPluginInterface#delete(com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.User[], com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
     @Override
     public void delete(Context ctx, User[] user, Credentials cred) throws PluginException {
+        // Nothing to do
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.plugins.OXUserPluginInterface#getData(com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.User[], com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
     @Override
     public User[] getData(Context ctx, User[] users, Credentials cred) {
         // pass-through

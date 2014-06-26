@@ -1,6 +1,39 @@
+* 2014-05-08 - martin.schneider@open-xchange.com
+
+ - Fix for bug 32378: Add config cascade parameters to --help and --extendedoptions
+
 * 2014-04-05 - thorben.betten@open-xchange.com
 
  - Fix for bug 31831: Consequently parse user attributes throughout offered SOAP interfaces
+
+* 2014-03-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29976: Robust listing of contexts by database to deal with intermediately deleted contexts
+ - Fix for bug 31021: Avoid needless examinations of all file stores to find a suitable one on context creation attempt
+
+* 2014-03-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31611: Properly re-add capability and added option to clean capabilities from storage
+ - Fix for bug 31633: Properly acquire next identifier using a transaction
+ - Fix for bug 29979: Added appropriate row locks to support concurrent user create operations
+ - Fix for bug 31643: Check validity of passed user/context
+
+* 2014-03-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29983: Acquire row lock prior to performing table modifications
+
+* 2014-03-13 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29983: Perform a single UPDATE statement to change values and added retry mechanism in case of possibly detected deadlock
+ - Fix for bug 31551: Do not perform intermediate ''auto-commit=true'' while processing a transaction
+
+* 2014-03-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28587: Ignore unused flags/permissions on access-combination equality check + Clone access-combination fetched from cache, do not operate on it
+
+* 2014-03-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30434: Keep proper date information on SOAP to Java conversion
 
 * 2014-01-15 - choeger@open-xchange.com
 

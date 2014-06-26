@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,7 +51,6 @@ package com.openexchange.admin.reseller.osgi;
 
 import java.rmi.Remote;
 import java.util.Hashtable;
-import org.slf4j.Logger;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
@@ -88,17 +87,17 @@ public class Activator extends HousekeepingActivator {
             registerService(Remote.class, reseller, null);
             LOG.info("RMI Interface for reseller bundle bound to RMI registry");
 
-            final Hashtable<String, String> props = new Hashtable<String, String>();
+            Hashtable<String, String> props = new Hashtable<String, String>(2);
             props.put("name", "BasicAuthenticator");
             LOG.info(BasicAuthenticatorPluginInterface.class.getName());
             registerService(BasicAuthenticatorPluginInterface.class, new ResellerAuth(), props);
 
-            props.clear();
+            props = new Hashtable<String, String>(2);
             props.put("name", "OXContext");
             LOG.info(OXContextPluginInterface.class.getName());
             registerService(OXContextPluginInterface.class, new OXResellerContextImpl(), props);
 
-            props.clear();
+            props = new Hashtable<String, String>(2);
             props.put("name", "OXUser");
             LOG.info(OXUserPluginInterface.class.getName());
             registerService(OXUserPluginInterface.class, new OXResellerUserImpl(), props);

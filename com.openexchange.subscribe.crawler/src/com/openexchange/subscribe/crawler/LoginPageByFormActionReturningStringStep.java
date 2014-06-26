@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -139,11 +139,12 @@ public class LoginPageByFormActionReturningStringStep extends AbstractStep<Strin
                    if (debuggingEnabled){
                        openPageInBrowser(pageAfterLogin);
                    }
-                   String htmlPage = pageAfterLogin.toString();
                    Pattern p = Pattern.compile(".*\\((.*LoginVerification.*)\\).*");
-                   Matcher m = p.matcher(htmlPage);
+                   Matcher m = p.matcher(pageAfterLogin.toString());
                    if (m.find()) {
-                       throw SubscriptionErrorMessage.NEED_VERIFICATION.create(m.group(1));
+                       // Reached identity verification, not possible to continue crawling
+                       throw SubscriptionErrorMessage.ABORT_IDENTITY_CONFIRMATION.create();
+                       // throw SubscriptionErrorMessage.NEED_VERIFICATION.create(m.group(1));
                    }
                    throw SubscriptionErrorMessage.INVALID_LOGIN.create();
                }

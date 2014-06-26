@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,7 +51,6 @@ package com.openexchange.imap.entity2acl;
 
 import java.util.EnumSet;
 import java.util.Set;
-import com.openexchange.java.StringAllocator;
 
 /**
  * {@link IMAPServer} - Represents an IMAP server with ACL support.
@@ -265,7 +264,7 @@ public enum IMAPServer {
                 return null;
             }
             final int length = str.length();
-            final StringAllocator sb = new StringAllocator(length);
+            final StringBuilder sb = new StringBuilder(length);
             for (int i = 0; i < length; i++) {
                 sb.append(Character.toLowerCase(str.charAt(i)));
             }

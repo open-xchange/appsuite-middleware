@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -167,7 +167,7 @@ public final class SMTPConfig extends TransportConfig {
      * {@inheritDoc}
      */
     @Override
-    protected boolean doCustomParsing(MailAccount account, Session session) throws OXException {
+    protected boolean doCustomParsing(final MailAccount account, final Session session) throws OXException {
         if (!account.isDefaultAccount()) {
             login = account.getTransportLogin();
 

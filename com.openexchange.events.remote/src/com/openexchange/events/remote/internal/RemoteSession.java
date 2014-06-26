@@ -99,10 +99,6 @@ public class RemoteSession implements PutIfAbsent {
         session.userLogin = (String) map.get("__userLogin");
         Boolean booleanObject = (Boolean) map.get("__tranzient");
         session.tranzient = null != booleanObject ? booleanObject.booleanValue() : false;
-        Serializable capabilities = map.get("__paramCapabilities");
-        if (null != capabilities) {
-            session.setParameter(PARAM_CAPABILITIES, capabilities);
-        }
         Serializable alternativeId = map.get("__paramAlternativeId");
         if (null != alternativeId) {
             session.setParameter(PARAM_ALTERNATIVE_ID, alternativeId);
@@ -132,10 +128,6 @@ public class RemoteSession implements PutIfAbsent {
         map.put("__client", session.getClient());
         map.put("__userLogin", session.getUserlogin());
         map.put("__tranzient", Boolean.valueOf(session.isTransient()));
-        Object capabilities = session.getParameter(PARAM_CAPABILITIES);
-        if (null != capabilities && Serializable.class.isInstance(capabilities)) {
-            map.put("__paramCapabilities", (Serializable) capabilities);
-        }
         Object alternativeId = session.getParameter(PARAM_ALTERNATIVE_ID);
         if (null != alternativeId && Serializable.class.isInstance(alternativeId)) {
             map.put("__paramAlternativeId", (Serializable) alternativeId);

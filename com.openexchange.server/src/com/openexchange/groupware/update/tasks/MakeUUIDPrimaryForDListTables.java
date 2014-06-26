@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -66,7 +66,7 @@ import com.openexchange.tools.update.Tools;
 
 /**
  * {@link MakeUUIDPrimaryForDListTables}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class MakeUUIDPrimaryForDListTables extends UpdateTaskAdapter {
@@ -95,9 +95,9 @@ public class MakeUUIDPrimaryForDListTables extends UpdateTaskAdapter {
             AddUUIDForDListTables.fillUUIDs(connection, DEL_TABLE, progress);
 
             Tools.modifyColumns(connection, TABLE, new Column(COLUMN, "BINARY(16) NOT NULL"));
-            Tools.createPrimaryKey(connection, TABLE, new String[] { COLUMN, "cid", "intfield01" });
+            Tools.createPrimaryKeyIfAbsent(connection, TABLE, new String[] { COLUMN, "cid", "intfield01" });
             Tools.modifyColumns(connection, DEL_TABLE, new Column(COLUMN, "BINARY(16) NOT NULL"));
-            Tools.createPrimaryKey(connection, DEL_TABLE, new String[] { COLUMN, "cid", "intfield01" });
+            Tools.createPrimaryKeyIfAbsent(connection, DEL_TABLE, new String[] { COLUMN, "cid", "intfield01" });
             connection.commit();
         } catch (SQLException e) {
             DBUtils.rollback(connection);

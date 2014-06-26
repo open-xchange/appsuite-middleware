@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -67,7 +67,7 @@ import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.crawler.Workflow;
-import com.openexchange.subscribe.crawler.osgi.Activator;
+import com.openexchange.subscribe.crawler.osgi.CrawlersActivator;
 
 /**
  * {@link GenericSubscribeService}
@@ -86,13 +86,13 @@ public class GenericSubscribeService extends AbstractSubscribeService {
 
     private final String workflowString;
 
-    private final Activator activator;
+    private final CrawlersActivator activator;
 
     private final boolean enableJavascript;
 
     private int module = FolderObject.CONTACT;
 
-    public GenericSubscribeService(final String displayName, final String id, final int module, final String workflowString, final int priority, final Activator activator, final boolean enableJavascript) {
+    public GenericSubscribeService(final String displayName, final String id, final int module, final String workflowString, final int priority, final CrawlersActivator activator, final boolean enableJavascript) {
         FORM.add(FormElement.input(LOGIN, FORM_LABEL_LOGIN)).add(FormElement.password("password", FORM_LABEL_PASSWORD));
         addExtraFields(FORM);
         SOURCE.setDisplayName(displayName);

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -54,6 +54,7 @@ import java.util.Hashtable;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
@@ -76,6 +77,7 @@ public final class TransportProviderServiceTracker implements ServiceTrackerCust
 
     private final BundleContext context;
     private ServiceRegistration<CapabilityChecker> capabilityChecker;
+    private ServiceTracker<CapabilityService, CapabilityService> capabilityServiceTracker;
 
     /**
      * Initializes a new {@link TransportProviderServiceTracker}
@@ -113,32 +115,38 @@ public final class TransportProviderServiceTracker implements ServiceTrackerCust
             context.ungetService(reference);
             return null;
         }
-        // Capability stuff
-        if (null == capabilityChecker) {
-            final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
-            final String sCapability = "auto_publish_attachments";
-            properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, sCapability);
-            capabilityChecker = context.registerService(CapabilityChecker.class, new CapabilityChecker() {
 
-                @Override
-                public boolean isEnabled(String capability, Session ses) throws OXException {
-                    if (sCapability.equals(capability)) {
-                        final ServerSession session = ServerSessionAdapter.valueOf(ses);
-                        if (session.isAnonymous()) {
-                            return false;
+        capabilityServiceTracker = new ServiceTracker<CapabilityService, CapabilityService>(context, CapabilityService.class, null) {
+
+            @Override
+            public CapabilityService addingService(ServiceReference<CapabilityService> ref) {
+                final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
+                final String sCapability = "auto_publish_attachments";
+                properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, sCapability);
+                capabilityChecker = context.registerService(CapabilityChecker.class, new CapabilityChecker() {
+
+                    @Override
+                    public boolean isEnabled(String capability, Session ses) throws OXException {
+                        if (sCapability.equals(capability)) {
+                            final ServerSession session = ServerSessionAdapter.valueOf(ses);
+                            if (session.isAnonymous()) {
+                                return false;
+                            }
+
+                            return (TransportProperties.getInstance().isPublishOnExceededQuota() && session.getUserPermissionBits().hasInfostore());
                         }
 
-                        return (TransportProperties.getInstance().isPublishOnExceededQuota() && session.getUserPermissionBits().hasInfostore());
+                        return true;
                     }
+                }, properties);
 
-                    return true;
-                }
-            }, properties);
-            // Obtain capability service
-            ServiceReference<CapabilityService> capabilityRef = context.getServiceReference(CapabilityService.class);
-            context.getService(capabilityRef).declareCapability(sCapability);
-        }
-        // Finally, return transport provider
+                CapabilityService capabilityService = context.getService(ref);
+                capabilityService.declareCapability(sCapability);
+                return capabilityService;
+            }
+        };
+        capabilityServiceTracker.open();
+
         return transportProvider;
     }
 
@@ -167,6 +175,12 @@ public final class TransportProviderServiceTracker implements ServiceTrackerCust
                 if (capabilityChecker != null) {
                     capabilityChecker.unregister();
                     this.capabilityChecker = null;
+
+                    final ServiceTracker<CapabilityService, CapabilityService> capabilityServiceTracker = this.capabilityServiceTracker;
+                    if (capabilityServiceTracker != null) {
+                        capabilityServiceTracker.close();
+                        this.capabilityServiceTracker = null;
+                    }
                 }
             }
         }

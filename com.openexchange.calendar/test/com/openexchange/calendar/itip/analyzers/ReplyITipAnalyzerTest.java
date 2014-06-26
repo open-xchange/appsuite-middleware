@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -677,15 +677,7 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
         ITipAnalysis analysis = new ReplyITipAnalyzer(utility, null).analyze(msg, null, null, session);
 
         List<ITipChange> changes = analysis.getChanges();
-        assertEquals(0, changes.size());
-
-        List<ITipAnnotation> annotations = analysis.getAnnotations();
-        assertEquals(1, annotations.size());
-
-        ITipAnnotation error = annotations.get(0);
-        assertEquals("An attendee wanted to change his/her participant state in an appointment that could not be found. Probably the appointment was already canceled.", error.getMessage());
-
-
+        assertEquals(1, changes.size());
         integrationBuilder.assertAllWereCalled();
     }
 

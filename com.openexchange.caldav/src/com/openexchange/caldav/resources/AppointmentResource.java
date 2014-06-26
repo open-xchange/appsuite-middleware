@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -75,8 +75,10 @@ import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Truncated;
+import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
+import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
@@ -517,13 +519,14 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
          * reset previously set appointment fields
          */
         for (int field : CALDAV_FIELDS) {
+            /*
+             * skip special handlings
+             */
+            if (CalendarObject.ALARM == field || Appointment.SHOWN_AS == field) {
+                continue;
+            }
             if (oldAppointment.contains(field) && false == updatedAppointment.contains(field)) {
-                if (CalendarObject.ALARM == field) {
-                    // -1 resets alarm
-                    updatedAppointment.setAlarm(-1);
-                } else {
-                    updatedAppointment.set(field, updatedAppointment.get(field));
-                }
+                updatedAppointment.set(field, updatedAppointment.get(field));
             }
         }
         /*
@@ -543,6 +546,20 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                         updatedAppointment.set(field, updatedAppointment.get(field));
                     }
                 }
+            }
+        }
+        /*
+         * special handling for "alarm"
+         */
+        Type folderType = parent.getFolder().getType();
+        if (PublicType.getInstance().equals(folderType) || SharedType.getInstance().equals(folderType)) {
+            int oldReminder = ParticipantTools.getReminderMinutes(oldAppointment, factory.getUser().getId());
+            if (-1 != oldReminder && false == updatedAppointment.containsAlarm()) {
+                updatedAppointment.setAlarm(-1);
+            }
+        } else if (PrivateType.getInstance().equals(folderType)) {
+            if (oldAppointment.containsAlarm() && false == updatedAppointment.containsAlarm()) {
+                updatedAppointment.setAlarm(-1);
             }
         }
         /*

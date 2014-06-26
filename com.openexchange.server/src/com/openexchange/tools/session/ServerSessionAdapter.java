@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,6 +50,8 @@
 package com.openexchange.tools.session;
 
 import org.apache.commons.lang.Validate;
+import com.openexchange.annotation.NonNull;
+import com.openexchange.annotation.Nullable;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -147,6 +149,8 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
         return new ServerSessionAdapter(userId, contextId);
     }
 
+    // ---------------------------------------------------------------------------------------------------------------------- //
+
     private final Session session;
     private final ServerSession serverSession;
     private final Context context;
@@ -234,12 +238,11 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
      * @param user The session's user object
      * @throws IllegalArgumentException If session argument is <code>null</code>
      */
-    public ServerSessionAdapter(final Session session, final Context ctx, final User user) {
+    public ServerSessionAdapter(@NonNull final Session session, @NonNull final Context ctx, @Nullable final User user) {
         super();
 
         Validate.notNull(session, "Session is null.");
         Validate.notNull(ctx, "Context is null.");
-        Validate.notNull(user, "User is null.");
 
         context = ctx;
         overwriteUser = user;
@@ -262,13 +265,11 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
      * @param user The session's user object
      * @throws IllegalArgumentException If session argument is <code>null</code>
      */
-    public ServerSessionAdapter(final Session session, final Context ctx, final User user, final UserConfiguration userConfiguration) {
+    public ServerSessionAdapter(@NonNull final Session session, @NonNull final Context ctx, @Nullable final User user, @Nullable final UserConfiguration userConfiguration) {
         super();
 
         Validate.notNull(session, "Session is null.");
         Validate.notNull(ctx, "Context is null.");
-        Validate.notNull(user, "User is null.");
-        Validate.notNull(userConfiguration, "UserConfiguration is null.");
 
         context = ctx;
         overwriteUser = user;
@@ -291,14 +292,11 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
      * @param user The session's user object
      * @throws IllegalArgumentException If session argument is <code>null</code>
      */
-    public ServerSessionAdapter(final Session session, final Context ctx, final User user, final UserConfiguration userConfiguration, final UserPermissionBits permissionBits) {
+    public ServerSessionAdapter(@NonNull final Session session, @NonNull final Context ctx, @Nullable final User user, @Nullable final UserConfiguration userConfiguration, @Nullable final UserPermissionBits permissionBits) {
         super();
 
         Validate.notNull(session, "Session is null.");
         Validate.notNull(ctx, "Context is null.");
-        Validate.notNull(user, "User is null.");
-        Validate.notNull(userConfiguration, "UserConfiguration is null.");
-        Validate.notNull(permissionBits, "UserPermissionBits is null.");
 
         context = ctx;
         overwriteUser = user;
@@ -409,12 +407,12 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
 
     @Override
     public String getClient() {
-        return session.getClient();
+        return session().getClient();
     }
 
     @Override
     public void setClient(final String client) {
-        session.setClient(client);
+        session().setClient(client);
     }
 
     @Override
@@ -512,22 +510,22 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
 
     @Override
     public boolean isAnonymous() {
-        return session.getUserId() <= 0;
+        return session().getUserId() <= 0;
     }
 
     @Override
     public String toString() {
-        return session.toString();
+        return session().toString();
     }
 
     @Override
     public boolean isTransient() {
-        return session.isTransient();
+        return session().isTransient();
     }
 
     @Override
     public int hashCode() {
-        return session.hashCode();
+        return session().hashCode();
     }
 
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -55,12 +55,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.Channel;
+import com.openexchange.realtime.cleanup.LocalRealtimeCleanup;
 import com.openexchange.realtime.directory.DefaultResource;
 import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
+import com.openexchange.realtime.hazelcast.osgi.Services;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.ElementPath;
@@ -72,7 +76,8 @@ import com.openexchange.realtime.util.ElementPath;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class ResponseChannel implements Channel{
+public class ResponseChannel implements Channel {
+    private static final Logger LOG = LoggerFactory.getLogger(ResponseChannel.class);
 
     private final ConcurrentHashMap<ID, Stanza> responses = new ConcurrentHashMap<ID, Stanza>();
     private final ConcurrentHashMap<ID, Condition> condition = new ConcurrentHashMap<ID, Condition>();
@@ -130,6 +135,15 @@ public class ResponseChannel implements Channel{
             condition.remove(id);
             responses.remove(id);
             locks.remove(id).unlock();
+            LocalRealtimeCleanup localRealtimeCleanup = Services.getService(LocalRealtimeCleanup.class);
+            if (localRealtimeCleanup != null) {
+                localRealtimeCleanup.cleanForId(id);
+            } else {
+                LOG.error(
+                    "Error while trying to cleanup for ResponseChannel ID: {}",
+                    id,
+                    RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(LocalRealtimeCleanup.class.getName()));
+            }
         }
 
     }
@@ -140,7 +154,7 @@ public class ResponseChannel implements Channel{
      * @return an channel specific internal ID
      */
     private ID getId(String uuid) {
-        ID id = new ID(getProtocol(), uuid, "internal", "");
+        ID id = new ID(getProtocol(), uuid, ID.INTERNAL_CONTEXT, "");
         return id;
     }
 

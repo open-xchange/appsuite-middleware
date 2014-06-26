@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -67,7 +67,6 @@ import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.HTMLDetector;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
@@ -334,6 +333,12 @@ public final class DownloadUtility {
                     sz = sink.getLength();
                     in = sink.getClosingStream();
                     sink = null; // Set to null to avoid premature closing at the end of try-finally clause
+                } else {
+                    if (null != sink) {
+                        sz = sink.getLength();
+                        in = sink.getClosingStream();
+                        sink = null; // Set to null to avoid premature closing at the end of try-finally clause
+                    }
                 }
             } else if (contentType.startsWith("image/") || fileNameImpliesImage(fileName)) {
                 /*
@@ -461,12 +466,12 @@ public final class DownloadUtility {
             final CheckedDownload retval;
             if (sContentDisposition == null) {
                 // Assume "inline" as default disposition to trigger client's (Browser) internal viewer.
-                final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(32).append("inline");
+                final StringBuilder builder = new StringBuilder(32).append("inline");
                 appendFilenameParameter(fileName, contentType.isBaseType("application", "octet-stream") ? null : contentType.toString(), userAgent, builder);
                 contentType.removeParameter("name");
                 retval = new CheckedDownload(contentType.toString(), builder.toString(), in, sz);
             } else if (sContentDisposition.indexOf(';') < 0) {
-                final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(32).append(sContentDisposition);
+                final StringBuilder builder = new StringBuilder(32).append(sContentDisposition);
                 appendFilenameParameter(fileName, contentType.isBaseType("application", "octet-stream") ? null : contentType.toString(), userAgent, builder);
                 contentType.removeParameter("name");
                 retval = new CheckedDownload(contentType.toString(), builder.toString(), in, sz);
@@ -562,76 +567,6 @@ public final class DownloadUtility {
         appendTo.append("; filename=\"").append(foo).append('"');
     }
 
-    /**
-     * Appends the <tt>"filename"</tt> parameter to specified {@link StringBuilder} instance; e.g.
-     *
-     * <pre>
-     * "attachment; filename="readme.txt"
-     *            ^---------------------^
-     * </pre>
-     *
-     * @param fileName The file name
-     * @param userAgent The user agent identifier
-     * @param appendTo The {@link com.openexchange.java.StringAllocator} instance to append to
-     */
-    public static void appendFilenameParameter(final String fileName, final String userAgent, final com.openexchange.java.StringAllocator appendTo) {
-        appendFilenameParameter(fileName, null, userAgent, appendTo);
-    }
-
-    /**
-     * Appends the <tt>"filename"</tt> parameter to specified {@link StringBuilder} instance; e.g.
-     *
-     * <pre>
-     * "attachment; filename="readme.txt"
-     *            ^---------------------^
-     * </pre>
-     *
-     * @param fileName The file name
-     * @param baseCT The base content type; e.g <tt>"application/octet-stream"</tt> or <tt>"text/plain"</tt>
-     * @param userAgent The user agent identifier
-     * @param appendTo The {@link com.openexchange.java.StringAllocator} instance to append to
-     */
-    public static void appendFilenameParameter(final String fileName, final String baseCT, final String userAgent, final com.openexchange.java.StringAllocator appendTo) {
-        if (null == fileName) {
-            appendTo.append("; filename=\"").append(DEFAULT_FILENAME).append('"');
-            return;
-        }
-        String fn = fileName;
-        if ((null != baseCT) && (null == getFileExtension(fn))) {
-            if (baseCT.regionMatches(true, 0, MIME_TEXT_PLAIN, 0, MIME_TEXT_PLAIN.length())) {
-                fn += ".txt";
-            } else if (baseCT.regionMatches(true, 0, MIME_TEXT_HTML, 0, MIME_TEXT_HTML.length())) {
-                fn += ".html";
-            }
-        }
-        fn = escapeBackslashAndQuote(fn);
-        if (null != userAgent && new BrowserDetector(userAgent).isMSIE()) {
-            // InternetExplorer
-            appendTo.append("; filename=\"").append(Helper.encodeFilenameForIE(fn, Charsets.UTF_8)).append('"');
-            return;
-        }
-        /*-
-         * On socket layer characters are casted to byte values.
-         *
-         * See AJPv13Response.writeString():
-         * sink.write((byte) chars[i]);
-         *
-         * Therefore ensure we have a one-character-per-byte charset, as it is with ISO-8859-1
-         */
-        String foo = new String(fn.getBytes(Charsets.UTF_8), Charsets.ISO_8859_1);
-        final boolean isAndroid = (null != userAgent && toLowerCase(userAgent).indexOf("android") >= 0);
-        if (isAndroid) {
-            // myfile.dat => myfile.DAT
-            final int pos = foo.lastIndexOf('.');
-            if (pos >= 0) {
-                foo = foo.substring(0, pos).replaceAll("\\s+", "_") + toUpperCase(foo.substring(pos));
-            }
-        } else {
-            appendTo.append("; filename*=UTF-8''").append(URLCoder.encode(fn));
-        }
-        appendTo.append("; filename=\"").append(foo).append('"');
-    }
-
     private static final Pattern PAT_BSLASH = Pattern.compile("\\\\");
 
     private static final Pattern PAT_QUOTE = Pattern.compile("\"");
@@ -672,9 +607,9 @@ public final class DownloadUtility {
         }
         final int pos = fileName.indexOf('.');
         if (-1 == pos) {
-            return new com.openexchange.java.StringAllocator(fileName).append('.').append(ext).toString();
+            return new StringBuilder(fileName).append('.').append(ext).toString();
         }
-        return new com.openexchange.java.StringAllocator(fileName.substring(0, pos)).append('.').append(ext).toString();
+        return new StringBuilder(fileName.substring(0, pos)).append('.').append(ext).toString();
     }
 
     private static final String DEFAULT_FILENAME = "file.dat";
@@ -790,7 +725,7 @@ public final class DownloadUtility {
             return null;
         }
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);

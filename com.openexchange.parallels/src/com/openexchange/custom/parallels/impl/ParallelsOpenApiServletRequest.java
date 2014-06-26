@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -65,7 +65,7 @@ import org.json.JSONObject;
 import org.osgi.framework.ServiceException;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.custom.parallels.osgi.ParallelsServiceRegistry;
+import com.openexchange.custom.parallels.osgi.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -105,7 +105,7 @@ public final class ParallelsOpenApiServletRequest  {
         }
 
         // init config
-        this.configservice = ParallelsServiceRegistry.getServiceRegistry().getService(ConfigurationService.class,true);
+        this.configservice = Services.getService(ConfigurationService.class);
     }
 
     public Object action(final String action,final String module, final JSONObject jsonObject) throws OXException, JSONException {

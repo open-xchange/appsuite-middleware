@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,6 +50,7 @@
 package com.openexchange.groupware.attach.impl;
 
 import java.util.List;
+import com.google.common.base.Strings;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 
@@ -123,7 +124,7 @@ public class AttachmentQueryCatalog {
     }
 
     public String getDelete(final String tablename, final List<AttachmentMetadata> attachments) {
-        final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator("DELETE FROM ").append(tablename).append(" WHERE id IN (");
+        final StringBuilder builder = new StringBuilder("DELETE FROM ").append(tablename).append(" WHERE id IN (");
         for(final AttachmentMetadata m : attachments) {
             builder.append(m.getId()).append(',');
         }
@@ -145,8 +146,13 @@ public class AttachmentQueryCatalog {
     }
 
     public void appendColumnList(final StringBuilder select, final AttachmentField[] columns) {
+        appendColumnListWithPrefix(select, columns, null);
+    }
+    
+    public void appendColumnListWithPrefix(final StringBuilder select, final AttachmentField[] columns, String prefix) {
+        prefix = Strings.isNullOrEmpty(prefix) ? "" : prefix + ".";
         for(final AttachmentField field : columns ) {
-            select.append(field.getName());
+            select.append(prefix).append(field);
             select.append(',');
         }
         select.setLength(select.length()-1);

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -60,7 +60,7 @@ import java.lang.reflect.Field;
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  *
  */
-public class UserModuleAccess implements Serializable {
+public class UserModuleAccess implements Serializable, Cloneable {
 
     /**
      * For serialization
@@ -85,8 +85,6 @@ public class UserModuleAccess implements Serializable {
     private boolean infostore = true;
 
     private boolean PinboardWrite = true;
-
-    private boolean Projects = true;
 
     private boolean readCreateSharedFolders = true;
 
@@ -139,6 +137,15 @@ public class UserModuleAccess implements Serializable {
         super();
     }
 
+    @Override
+    public UserModuleAccess clone() {
+        try {
+            return (UserModuleAccess) super.clone();
+        } catch (final CloneNotSupportedException e) {
+            throw new InternalError("CloneNotSupportedException although Colenable is implemented");
+        }
+    }
+
     /**
      * Enable all modules
      */
@@ -151,7 +158,6 @@ public class UserModuleAccess implements Serializable {
         this.ical = true;
         this.infostore = true;
         this.PinboardWrite = true;
-        this.Projects = true;
         this.readCreateSharedFolders = true;
         this.RssBookmarks = true;
         this.RssPortal = true;
@@ -187,7 +193,6 @@ public class UserModuleAccess implements Serializable {
         this.ical = false;
         this.infostore = false;
         this.PinboardWrite = false;
-        this.Projects = false;
         this.readCreateSharedFolders = false;
         this.RssBookmarks = false;
         this.RssPortal = false;
@@ -419,20 +424,6 @@ public class UserModuleAccess implements Serializable {
         this.PinboardWrite = val;
     }
 
-    /**
-     * Currently NOT in use!
-     */
-    public boolean getProjects() {
-        return Projects;
-    }
-
-    /**
-     * Currently NOT in use!
-     */
-    public void setProjects(final boolean val) {
-        this.Projects = val;
-    }
-
     public boolean getReadCreateSharedFolders() {
         return readCreateSharedFolders;
     }
@@ -598,12 +589,14 @@ public class UserModuleAccess implements Serializable {
         result = prime * result + (GlobalAddressBookDisabled ? 1231 : 1237);
         result = prime * result + (MultipleMailAccounts ? 1231 : 1237);
         result = prime * result + (OLOX20 ? 1231 : 1237);
-        result = prime * result + (PinboardWrite ? 1231 : 1237);
-        result = prime * result + (Projects ? 1231 : 1237);
+        // Currently NOT in use!
+        // result = prime * result + (PinboardWrite ? 1231 : 1237);
         result = prime * result + (PublicFolderEditable ? 1231 : 1237);
         result = prime * result + (Publication ? 1231 : 1237);
-        result = prime * result + (RssBookmarks ? 1231 : 1237);
-        result = prime * result + (RssPortal ? 1231 : 1237);
+        // Currently NOT in use!
+        //result = prime * result + (RssBookmarks ? 1231 : 1237);
+        // Currently NOT in use!
+        // result = prime * result + (RssPortal ? 1231 : 1237);
         result = prime * result + (Subscription ? 1231 : 1237);
         result = prime * result + (Syncml ? 1231 : 1237);
         result = prime * result + (Tasks ? 1231 : 1237);
@@ -617,7 +610,8 @@ public class UserModuleAccess implements Serializable {
         result = prime * result + (delegateTask ? 1231 : 1237);
         result = prime * result + (deniedPortal ? 1231 : 1237);
         result = prime * result + (editPublicFolders ? 1231 : 1237);
-        result = prime * result + (forum ? 1231 : 1237);
+        // Currently NOT in use!
+        // result = prime * result + (forum ? 1231 : 1237);
         result = prime * result + (ical ? 1231 : 1237);
         result = prime * result + (infostore ? 1231 : 1237);
         result = prime * result + (readCreateSharedFolders ? 1231 : 1237);
@@ -660,24 +654,33 @@ public class UserModuleAccess implements Serializable {
         if (OLOX20 != other.OLOX20) {
             return false;
         }
+        // Currently NOT in use!
+        /*-
+         *
         if (PinboardWrite != other.PinboardWrite) {
             return false;
         }
-        if (Projects != other.Projects) {
-            return false;
-        }
+        */
         if (PublicFolderEditable != other.PublicFolderEditable) {
             return false;
         }
         if (Publication != other.Publication) {
             return false;
         }
+        // Currently NOT in use!
+        /*-
+         *
         if (RssBookmarks != other.RssBookmarks) {
             return false;
         }
+        */
+        // Currently NOT in use!
+        /*-
+         *
         if (RssPortal != other.RssPortal) {
             return false;
         }
+        */
         if (Subscription != other.Subscription) {
             return false;
         }
@@ -717,9 +720,13 @@ public class UserModuleAccess implements Serializable {
         if (editPublicFolders != other.editPublicFolders) {
             return false;
         }
+        // Currently NOT in use!
+        /*-
+         *
         if (forum != other.forum) {
             return false;
         }
+        */
         if (ical != other.ical) {
             return false;
         }
@@ -839,12 +846,6 @@ public class UserModuleAccess implements Serializable {
             enabled.setPinboardWrite(true);
         } else {
             disabled.setPinboardWrite(true);
-        }
-
-        if (Projects) {
-            enabled.setProjects(true);
-        } else {
-            disabled.setProjects(true);
         }
 
         if (Publication) {

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,7 +50,10 @@
 package com.openexchange.mailaccount.internal;
 
 import static com.openexchange.mail.utils.ProviderUtility.toSocketAddrString;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -108,7 +111,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     static CacheKey newCacheKey(final CacheService cacheService, final int id, final int user, final int cid) {
-        return cacheService.newCacheKey(cid, Integer.valueOf(id), Integer.valueOf(user));
+        return cacheService.newCacheKey(cid, String.valueOf(id), String.valueOf(user));
     }
 
     @Override
@@ -201,6 +204,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         if (cacheService == null) {
             return delegate.getMailAccount(id, user, cid);
         }
+
         final Cache cache = cacheService.getCache(REGION_NAME);
         final CacheKey key = newCacheKey(cacheService, id, user, cid);
         final Object object = cache.get(key);
@@ -222,7 +226,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
                 cache.put(key, mailAccount, false);
                 return mailAccount;
             } finally {
-                Database.back(cid, true, wcon);
+                Database.backAfterReading(cid, wcon);
             }
         }
     }
@@ -247,14 +251,34 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         return accounts;
     }
 
+    @Override
+    public MailAccount getMailAccount(final int id, final int user, final int cid, final Connection con) throws OXException {
+        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (cacheService == null) {
+            return delegate.getMailAccount(id, user, cid, con);
+        }
+
+        final CacheKey key = newCacheKey(cacheService, id, user, cid);
+        final Cache cache = cacheService.getCache(REGION_NAME);
+        final Object object = cache.get(key);
+        if (object instanceof MailAccount) {
+            return (MailAccount) object;
+        }
+
+        final MailAccount mailAccount = delegate.getMailAccount(id, user, cid, con);
+        cache.put(key, mailAccount, false);
+        return mailAccount;
+    }
+
     private MailAccount getMailAccount0(final int id, final int user, final int cid, final Connection con) throws OXException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (cacheService == null) {
-            return delegate.getMailAccount(id, user, cid);
+            return delegate.getMailAccount(id, user, cid, con);
         }
         final CacheKey key = newCacheKey(cacheService, id, user, cid);
         final Cache cache = cacheService.getCache(REGION_NAME);
-        if (cache.get(key) == null) {
+        final Object object = cache.get(key);
+        if (object == null) {
             /*
              * Not contained in cache. Load with specified connection
              */
@@ -264,11 +288,10 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         /*
          * Return mail account
          */
-        final Object object = cache.get(key);
         if (object instanceof MailAccount) {
             return (MailAccount) object;
         }
-        final MailAccount mailAccount = delegate.getMailAccount(id, user, cid);
+        final MailAccount mailAccount = delegate.getMailAccount(id, user, cid, con);
         cache.put(key, mailAccount, false);
         return mailAccount;
     }
@@ -319,20 +342,52 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
 
     @Override
     public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final Session session) throws OXException {
-        delegate.updateMailAccount(mailAccount, attributes, user, cid, session);
-        invalidateMailAccount(mailAccount.getId(), user, cid);
+        final Connection con = Database.get(cid, true);
+        boolean rollback = false;
+        try {
+            con.setAutoCommit(false);
+            rollback = true;
+            updateMailAccount(mailAccount, attributes, user, cid, session, con, false);
+            con.commit();
+            rollback = false;
+        } catch (final SQLException e) {
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                rollback(con);
+            }
+            autocommit(con);
+            Database.back(cid, true, con);
+        }
     }
 
     @Override
     public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final Session session, final Connection con, final boolean changePrimary) throws OXException {
         delegate.updateMailAccount(mailAccount, attributes, user, cid, session, con, changePrimary);
         invalidateMailAccount(mailAccount.getId(), user, cid);
+
+        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (cacheService != null) {
+            final Cache cache = cacheService.getCache(REGION_NAME);
+            final CacheKey key = newCacheKey(cacheService, mailAccount.getId(), user, cid);
+            final MailAccount macc = delegate.getMailAccount(mailAccount.getId(), user, cid, con);
+            cache.put(key, macc, false);
+        }
     }
 
     @Override
     public void updateMailAccount(final MailAccountDescription mailAccount, final int user, final int cid, final Session session) throws OXException {
-        delegate.updateMailAccount(mailAccount, user, cid, session);
+        final MailAccount changedAccount = delegate.updateAndReturnMailAccount(mailAccount, user, cid, session);
         invalidateMailAccount(mailAccount.getId(), user, cid);
+
+        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (cacheService != null) {
+            final Cache cache = cacheService.getCache(REGION_NAME);
+            final CacheKey key = newCacheKey(cacheService, mailAccount.getId(), user, cid);
+            cache.put(key, changedAccount, false);
+        }
     }
 
     @Override

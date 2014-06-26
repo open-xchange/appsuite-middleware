@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,6 +51,8 @@ package com.openexchange.http.grizzly.servletfilter;
 
 import static com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper.HTTPS_SCHEME;
 import static com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper.HTTP_SCHEME;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
@@ -103,7 +105,7 @@ public class WrappingFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) {
-        GrizzlyConfig config = GrizzlyConfig.getInstance();
+        final GrizzlyConfig config = GrizzlyConfig.getInstance();
         this.forHeader = config.getForHeader();
         this.knownProxies = config.getKnownProxies();
         this.protocolHeader = config.getProtocolHeader();
@@ -113,6 +115,15 @@ public class WrappingFilter implements Filter {
         this.isConsiderXForwards = config.isConsiderXForwards();
         this.echoHeader = config.getEchoHeader();
         this.contentSecurityPolicy = config.getContentSecurityPolicy();
+
+        // register listener for changed known proxies configuration
+        config.addPropertyListener(new PropertyChangeListener() {
+
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                knownProxies = config.getKnownProxies();
+            }
+        });
     }
 
     @Override

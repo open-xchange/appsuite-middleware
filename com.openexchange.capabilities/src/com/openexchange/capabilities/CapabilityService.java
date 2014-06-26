@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -64,12 +64,12 @@ public interface CapabilityService {
      *
      * @param userId The user identifier
      * @param contextId The context identifier
-     * @param computeCapabilityFilters boolean to indicate if filters should be computed. Use <code>false</code> to retrieve all available
-     *            capabilities
+     * @param computeCapabilityFilters <code>true</code> to indicate if filters should be computed. Use <code>false</code> (default) to retrieve all available capabilities
+     * @param allowCache <code>true</code> (default) to allow fetching pre-calculated capabilities from cache; otherwise <code>false</code>
      * @return The capabilities
      * @throws OXException If capabilities cannot be determined
      */
-    CapabilitySet getCapabilities(int userId, int contextId, boolean computeCapabilityFilters) throws OXException;
+    CapabilitySet getCapabilities(int userId, int contextId, boolean computeCapabilityFilters, boolean allowCache) throws OXException;
 
     /**
      * Gets the capabilities associated with given session.

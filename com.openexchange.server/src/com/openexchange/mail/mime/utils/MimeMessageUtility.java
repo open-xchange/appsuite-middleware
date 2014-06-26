@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -72,6 +72,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -110,6 +111,7 @@ import org.apache.james.mime4j.util.ByteArrayBuffer;
 import org.apache.james.mime4j.util.CharsetUtil;
 import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
@@ -120,9 +122,9 @@ import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.ExceptionAwarePipedInputStream;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
@@ -325,15 +327,7 @@ public final class MimeMessageUtility {
     }
 
     private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
+        return com.openexchange.java.Strings.isEmpty(string);
     }
 
     private static final Pattern PATTERN_EMBD_IMG = Pattern.compile(
@@ -743,7 +737,7 @@ public final class MimeMessageUtility {
          */
         final String s = checkNonAscii(subject);
         final int length = s.length();
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(length);
+        final StringBuilder sb = new StringBuilder(length);
         int i = 0;
         while (i < length) {
             final char c = s.charAt(i);
@@ -787,7 +781,7 @@ public final class MimeMessageUtility {
          * Passes possibly encoded-word is greater than 75 characters and contains no CR?LF
          */
         if ((length > ENCODED_WORD_LEN) && (value.indexOf('\r') < 0) && (value.indexOf('\n') < 0)) {
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(length).append(value);
+            final StringBuilder sb = new StringBuilder(length).append(value);
             final String pattern = "?= =?";
             int i;
             while ((i = sb.indexOf(pattern)) >= 0) {
@@ -831,7 +825,7 @@ public final class MimeMessageUtility {
         }
         final Matcher m = ENC_PATTERN.matcher(hdrVal);
         if (m.find()) {
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(hdrVal.length());
+            final StringBuilder sb = new StringBuilder(hdrVal.length());
             int lastMatch = 0;
             do {
                 try {
@@ -857,7 +851,7 @@ public final class MimeMessageUtility {
                     } else if (MessageUtility.isShiftJis(charset)) {
                         String encodedWord = m.group();
                         if ("cp932".equalsIgnoreCase(charset)) {
-                            encodedWord = new StringAllocator(encodedWord.length()).append("=?MS932?").append(m.group(2)).append('?').append(m.group(3)).append("?=").toString();
+                            encodedWord = new StringBuilder(encodedWord.length()).append("=?MS932?").append(m.group(2)).append('?').append(m.group(3)).append("?=").toString();
                         }
                         String decodeWord = MimeUtility.decodeWord(encodedWord);
                         if (decodeWord.indexOf(MessageUtility.UNKNOWN) >= 0) {
@@ -979,7 +973,7 @@ public final class MimeMessageUtility {
         final String hdrVal = MimeMessageUtility.unfold(headerValue);
         final Matcher m = ENC_PATTERN.matcher(hdrVal);
         if (m.find()) {
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(hdrVal.length());
+            final StringBuilder sb = new StringBuilder(hdrVal.length());
             StringBuilder tmp = null;
             int lastMatch = 0;
             do {
@@ -1044,7 +1038,7 @@ public final class MimeMessageUtility {
         if (pos == -1) {
             return eword;
         }
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(len);
+        final StringBuilder sb = new StringBuilder(len);
         int prev = 0;
         do {
             final int pos1 = pos + 1;
@@ -1093,11 +1087,11 @@ public final class MimeMessageUtility {
         if (!Charset.isSupported(charset)) {
             return String.valueOf(toEncode);
         }
-        final com.openexchange.java.StringAllocator retval = new com.openexchange.java.StringAllocator(4);
+        final StringBuilder retval = new StringBuilder(4);
         try {
             final byte[] bytes = String.valueOf(toEncode).getBytes(charset);
-            for (int j = 0; j < bytes.length; j++) {
-                retval.append('=').append(Integer.toHexString(bytes[j] & 0xFF).toUpperCase(Locale.ENGLISH));
+            for (byte b : bytes) {
+                retval.append('=').append(Integer.toHexString(b & 0xFF).toUpperCase(Locale.ENGLISH));
             }
         } catch (final java.io.UnsupportedEncodingException e) {
             // Cannot occur
@@ -1238,8 +1232,7 @@ public final class MimeMessageUtility {
             }
         }
         try {
-            for (int i = 0; i < addrs.length; i++) {
-                final InternetAddress addr = addrs[i];
+            for (final InternetAddress addr : addrs) {
                 if (null != addr) {
                     addr.setPersonal(addr.getPersonal(), MailProperties.getInstance().getDefaultMimeCharset());
                 }
@@ -1273,6 +1266,21 @@ public final class MimeMessageUtility {
         return b.booleanValue();
     }
 
+    static {
+        MailReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                checkReplaceWithComma = null;
+            }
+
+            @Override
+            public Map<String, String[]> getConfigFileNames() {
+                return null;
+            }
+        });
+    }
+
     private static final Pattern PATTERN_REPLACE = Pattern.compile("(\\.\\w+>?)(\\s*);(\\s*)");
 
     private static String replaceWithComma(final String addressList) {
@@ -1283,7 +1291,7 @@ public final class MimeMessageUtility {
         if (!m.find()) {
             return addressList;
         }
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(addressList.length());
+        final StringBuilder sb = new StringBuilder(addressList.length());
         int lastMatch = 0;
         do {
             sb.append(addressList.substring(lastMatch, m.start()));
@@ -1308,7 +1316,7 @@ public final class MimeMessageUtility {
             return s;
         }
         final int length = s.length();
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(length << 1);
+        final StringBuilder sb = new StringBuilder(length << 1);
         for (int i = 0; i < length; i++) {
             final char c = s.charAt(i);
             if (c == '\\') {
@@ -1403,7 +1411,7 @@ public final class MimeMessageUtility {
             }
             final String replaced = P_REPL2.matcher(P_REPL1.matcher(phrase).replaceAll("\\\\\\\\")).replaceAll("\\\\\\\"");
             // final String replaced = phrase.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\\\"");
-            return new com.openexchange.java.StringAllocator(len + 2).append('"').append(
+            return new StringBuilder(len + 2).append('"').append(
                 encode ? MimeUtility.encodeWord(replaced) : replaced).append('"').toString();
         } catch (final UnsupportedEncodingException e) {
             LOG.error("Unsupported encoding in a message detected and monitored", e);
@@ -1474,7 +1482,7 @@ public final class MimeMessageUtility {
         /*
          * Fold the string
          */
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(s.length() + 4);
+        final StringBuilder sb = new StringBuilder(s.length() + 4);
         char lastc = 0;
         int usedChars = used;
         while (usedChars + s.length() > 76) {
@@ -1544,7 +1552,7 @@ public final class MimeMessageUtility {
                 return s;
             }
         }
-        com.openexchange.java.StringAllocator sb = null;
+        StringBuilder sb = null;
         do {
             final int start = i;
             final int len = s.length();
@@ -1563,7 +1571,7 @@ public final class MimeMessageUtility {
                         i++;
                     }
                     if (sb == null) {
-                        sb = new com.openexchange.java.StringAllocator(s.length());
+                        sb = new StringBuilder(s.length());
                     }
                     if (start != 0) {
                         sb.append(s.substring(0, start));
@@ -1575,7 +1583,7 @@ public final class MimeMessageUtility {
                      * It's not a continuation line, just leave it in
                      */
                     if (sb == null) {
-                        sb = new com.openexchange.java.StringAllocator(s.length());
+                        sb = new StringBuilder(s.length());
                     }
                     sb.append(s.substring(0, i));
                     s = s.substring(i);
@@ -1585,7 +1593,7 @@ public final class MimeMessageUtility {
                  * There's a backslash at "start - 1", strip it out, but leave in the line break
                  */
                 if (sb == null) {
-                    sb = new com.openexchange.java.StringAllocator(s.length());
+                    sb = new StringBuilder(s.length());
                 }
                 sb.append(s.substring(0, start - 1));
                 sb.append(s.substring(start, i));
@@ -2095,7 +2103,7 @@ public final class MimeMessageUtility {
             return null;
         }
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);

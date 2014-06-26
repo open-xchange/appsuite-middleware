@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -126,6 +126,7 @@ public class SearchInfostoreRequest extends AbstractInfostoreRequest<SearchInfos
         final List<Parameter> params = new ArrayList<Parameter>();
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH));
         params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
+        params.add(new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId));
         if (null != order) {
             params.add(new Parameter(AJAXServlet.PARAMETER_SORT, sort));
             params.add(new Parameter(AJAXServlet.PARAMETER_ORDER, OrderFields.write(order)));

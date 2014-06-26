@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -68,7 +68,7 @@ public final class SearchStrings {
      */
     public static int lengthWithoutWildcards(String pattern) {
         final int length = pattern.length();
-        final StringAllocator sb = new StringAllocator(length);
+        final StringBuilder sb = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char toTest = pattern.charAt(i);
             if (toTest != ' ' && toTest != '*' && toTest != '?') {

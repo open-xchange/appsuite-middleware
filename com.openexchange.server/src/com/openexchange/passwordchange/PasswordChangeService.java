@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -256,7 +256,7 @@ public abstract class PasswordChangeService {
                 jcs.remove(key);
 
                 jcs = cacheService.getCache("MailAccount");
-                jcs.remove(cacheService.newCacheKey(contextId, Integer.valueOf(0), Integer.valueOf(userId)));
+                jcs.remove(cacheService.newCacheKey(contextId, String.valueOf(0), String.valueOf(userId)));
                 jcs.invalidateGroup(Integer.toString(contextId));
             } catch (final OXException e) {
                 // Ignore

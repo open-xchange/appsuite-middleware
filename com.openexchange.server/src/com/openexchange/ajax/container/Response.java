@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -60,6 +60,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
@@ -124,6 +125,12 @@ public final class Response {
     private boolean includeStackTraceOnError;
 
     /**
+     * Signals whether the data provided by this response is not yet finished or final, but rather reflects an intermediate state and the
+     * client is supposed to request again to get full results.
+     */
+    private UUID continuationUuid;
+
+    /**
      * This constructor parses a server response into an object.
      *
      * @param response the response JSON object.
@@ -132,6 +139,7 @@ public final class Response {
         this(DEFAULT_LOCALE);
         this.json = response;
         includeStackTraceOnError = false;
+        continuationUuid = null;
     }
 
     /**
@@ -172,6 +180,7 @@ public final class Response {
         this.json = null;
         this.locale = locale;
         includeStackTraceOnError = false;
+        continuationUuid = null;
     }
 
     /**
@@ -487,6 +496,28 @@ public final class Response {
      */
     public boolean includeStackTraceOnError() {
         return includeStackTraceOnError;
+    }
+
+    /**
+     * Sets whether the data provided by this response is not yet finished or final, but rather reflects an intermediate state and the
+     * client is supposed to request again to get full results.
+     *
+     * @param continuation The UUID to set
+     * @return A reference to this response
+     */
+    public Response setContinuationUUID(final UUID continuationUuid) {
+        this.continuationUuid = continuationUuid;
+        return this;
+    }
+
+    /**
+     * Checks whether the data provided by this response is not yet finished or final, but rather reflects an intermediate state and the
+     * client is supposed to request again to get full results.
+     *
+     * @return The UUID or <code>null</code>
+     */
+    public UUID getContinuationUUID() {
+        return continuationUuid;
     }
 
     private static Locale localeFrom(final Session session) throws OXException {

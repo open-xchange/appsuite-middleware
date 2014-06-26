@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,15 +50,25 @@
 package com.openexchange.http.deferrer.servlet;
 
 import static com.openexchange.ajax.AJAXServlet.encodeUrl;
+import static com.openexchange.java.Strings.isEmpty;
 import java.io.IOException;
+import java.net.URL;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import com.openexchange.ajax.AJAXUtility;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.http.deferrer.CustomRedirectURLDetermination;
+import com.openexchange.http.deferrer.impl.DefaultDeferringURLService;
+import com.openexchange.java.Strings;
 
 /**
  * {@link DeferrerServlet}
@@ -90,29 +100,111 @@ public class DeferrerServlet extends HttpServlet {
             concat = '&';
         }
 
-        final StringBuilder builder = new StringBuilder(encodeUrl(redirectURL, true, false));
+        final Map<String, String> params = parseQueryStringFromUrl(redirectURL);
+        final StringBuilder builder = new StringBuilder(AJAXUtility.encodeUrl(redirectURL, true, false));
         for (final Enumeration<?> parameterNames = req.getParameterNames(); parameterNames.hasMoreElements();) {
             final String name = (String) parameterNames.nextElement();
-            if ("redirect".equals(name)) {
+            if ("redirect".equals(name) || params.containsKey(name)) {
                 continue;
             }
             final String parameter = req.getParameter(name);
             builder.append(concat);
             concat = '&';
-            builder.append(name).append('=').append(encodeUrl(parameter, true, true));
+            builder.append(name).append('=').append(AJAXUtility.encodeUrl(parameter, true, true));
         }
         resp.sendRedirect(builder.toString());
-
     }
 
     private String determineRedirectURL(final HttpServletRequest req) {
         for (final CustomRedirectURLDetermination determination : CUSTOM_HANDLERS) {
             final String url = determination.getURL(req);
             if (url != null) {
-                return url;
+                return prepareCustomRedirectURL(url);
             }
         }
         return req.getParameter("redirect");
+    }
+
+    /**
+     * Checks if custom redirect URL starts with deferrer path.
+     * <p>
+     * E.g. /ajax/defer?redirect=http:%2F%2Fmy.host.com%2Fpath...
+     * <p>
+     * This avoids duplicate redirect as redirect URL would again redirect to <code>DeferrerServlet</code>.
+     *
+     * @param url The redirect URL to check
+     * @return The checked redirect URL
+     */
+    private String prepareCustomRedirectURL(final String url) {
+        try {
+            final URL jUrl = new URL(url);
+            final String path = jUrl.getPath();
+            if (null != path && Strings.toLowerCase(path).startsWith(getDeferrerPath())) {
+                final String query = jUrl.getQuery();
+                if (null != query) {
+                    final Map<String, String> params = parseQueryString(query);
+                    if (1 == params.size() && params.containsKey("redirect")) {
+                        final String redirect = params.get("redirect");
+                        return isEmpty(redirect) ? url : redirect;
+                    }
+                }
+            }
+        } catch (final Exception e) {
+            final Logger logger = org.slf4j.LoggerFactory.getLogger(DeferrerServlet.class);
+            logger.debug("", e);
+        }
+        return url;
+    }
+
+    private String getDeferrerPath() {
+        return new StringBuilder(DefaultDeferringURLService.PREFIX.get().getPrefix()).append("defer").toString();
+    }
+
+    /**
+     * Parses a query string from given URL.
+     *
+     * @param url The URL string to be parsed
+     * @return The parsed parameters
+     */
+    private Map<String, String> parseQueryStringFromUrl(final String url) {
+        try {
+            final URL jUrl = new URL(url);
+            final String query = jUrl.getQuery();
+            if (null != query) {
+                return parseQueryString(query);
+            }
+        } catch (final Exception e) {
+            final Logger logger = org.slf4j.LoggerFactory.getLogger(DeferrerServlet.class);
+            logger.debug("", e);
+        }
+        return Collections.emptyMap();
+    }
+
+    private static final java.util.regex.Pattern PATTERN_SPLIT = java.util.regex.Pattern.compile("&");
+
+    /**
+     * Parses given query string.
+     *
+     * @param queryStr The query string to be parsed
+     * @return The parsed parameters
+     */
+    private Map<String, String> parseQueryString(final String queryStr) {
+        final String[] paramsNVPs = PATTERN_SPLIT.split(queryStr, 0);
+        final String defaultCharEnc = ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding);
+        final Map<String, String> map = new LinkedHashMap<String, String>(4);
+        for (String paramsNVP : paramsNVPs) {
+            paramsNVP = paramsNVP.trim();
+            if (paramsNVP.length() > 0) {
+                // Look-up character '='
+                final int pos = paramsNVP.indexOf('=');
+                if (pos >= 0) {
+                    map.put(paramsNVP.substring(0, pos), Utility.decodeUrl(paramsNVP.substring(pos + 1), defaultCharEnc));
+                } else {
+                    map.put(paramsNVP, "");
+                }
+            }
+        }
+        return map;
     }
 
 }

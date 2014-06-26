@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -241,6 +241,17 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
 
     protected abstract void setFurtherOptions(AdminParser parser);
 
+    protected static String doOperationReturnString(final MBeanServerConnection mbc, final String fullqualifiedoperationname) throws MalformedObjectNameException, NullPointerException, InstanceNotFoundException, MBeanException, ReflectionException, IOException, InvalidDataException {
+            Object opObject = doOperation(mbc, fullqualifiedoperationname);
+            if (null != opObject) {
+                final StringBuilder retval = new StringBuilder();
+                retval.append(fullqualifiedoperationname).append(" = ");
+                return retval.append(opObject).append(LINE_SEPARATOR).toString();
+            } else {
+                return "";
+            }
+    }
+    
     protected static Object doOperation(final MBeanServerConnection mbc, final String fullqualifiedoperationname) throws MalformedObjectNameException, NullPointerException, IOException, InvalidDataException, InstanceNotFoundException, MBeanException, ReflectionException {
         final String[] split = fullqualifiedoperationname.split("!");
         if (2 == split.length) {

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -54,15 +54,21 @@ import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import static com.openexchange.tools.sql.DBUtils.startTransaction;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
+import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
@@ -93,8 +99,20 @@ public class MakeUUIDPrimaryForUserAttributeTable extends UpdateTaskAdapter {
 
             AddUUIDForUserAttributeTable.fillUUIDs(con, progress);
 
+            dropDuplicates(con);
+
+            // Drop foreign key
+            String foreignKey = Tools.existsForeignKey(con, "user", new String[] {"cid", "id"}, "user_attribute", new String[] {"cid", "id"});
+            if (null != foreignKey && !foreignKey.equals("")) {
+                Tools.dropForeignKey(con, "user_attribute", foreignKey);
+            }
+
             Tools.modifyColumns(con, "user_attribute", new Column("uuid", "BINARY(16) NOT NULL"));
-            Tools.createPrimaryKey(con, "user_attribute", new String[] { "cid", "uuid" });
+            Tools.createPrimaryKeyIfAbsent(con, "user_attribute", new String[] { "cid", "uuid" });
+
+            // Re-create foreign key
+            Tools.createForeignKey(con, "user_attribute", new String[] {"cid", "id"}, "user", new String[] {"cid", "id"});
+
             con.commit();
         } catch (SQLException e) {
             rollback(con);
@@ -105,6 +123,80 @@ public class MakeUUIDPrimaryForUserAttributeTable extends UpdateTaskAdapter {
         } finally {
             autocommit(con);
             Database.backNoTimeout(params.getContextId(), true, con);
+        }
+    }
+
+    private void dropDuplicates(final Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT cid, HEX(uuid) FROM user_setting_server GROUP BY cid, uuid HAVING count(*) > 1");
+            rs = stmt.executeQuery();
+
+            if (!rs.next()) {
+                return;
+            }
+
+            class Dup {
+                final UUID uuid;
+                final int cid;
+
+                Dup(int cid, UUID uuid) {
+                    super();
+                    this.cid = cid;
+                    this.uuid = uuid;
+                }
+            }
+
+            final List<Dup> dups = new LinkedList<Dup>();
+            do {
+                dups.add(new Dup(rs.getInt(1), UUIDs.fromUnformattedString(rs.getString(2))));
+            } while (rs.next());
+
+            Databases.closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
+
+            for (final Dup dup : dups) {
+                stmt = con.prepareStatement("SELECT cid, id, name, value FROM user_attribute WHERE cid=? AND ?=HEX(uuid)");
+                stmt.setInt(1, dup.cid);
+                stmt.setString(2, UUIDs.getUnformattedString(dup.uuid));
+                rs = stmt.executeQuery();
+
+                if (rs.next()) {
+                    final int cid = rs.getInt(1);
+                    final int id = rs.getInt(2);
+                    final String name = rs.getString(3);
+                    final String value = rs.getString(4);
+                    Databases.closeSQLStuff(rs, stmt);
+                    rs = null;
+                    stmt = null;
+
+                    stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND ?=HEX(uuid)");
+                    stmt.setInt(1, dup.cid);
+                    stmt.setString(2, UUIDs.getUnformattedString(dup.uuid));
+                    stmt.executeUpdate();
+                    Databases.closeSQLStuff(stmt);
+                    stmt = null;
+
+                    stmt = con.prepareStatement("INSERT INTO user_attribute (cid,id,name,value,uuid) VALUES (?,?,?,?,UNHEX(?))");
+                    stmt.setInt(1, cid);
+                    stmt.setInt(2, id);
+                    stmt.setString(3, name);
+                    stmt.setString(4, value);
+                    stmt.setString(5, UUIDs.getUnformattedString(dup.uuid));
+                    stmt.executeUpdate();
+                    Databases.closeSQLStuff(stmt);
+                    stmt = null;
+                }
+
+                Databases.closeSQLStuff(rs, stmt);
+                rs = null;
+                stmt = null;
+            }
+
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 

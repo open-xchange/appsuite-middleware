@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -63,8 +63,10 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -79,11 +81,13 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "id", description = "Object ID of the appointment to confirm."),
     @Parameter(name = "folder", description = "ID of the folder through which the appointment is accessed."),
+    @Parameter(name = "occurrence", optional=true, description = "The numeric identifier of the occurrence to which the confirmation applies (in case \"id\" denotes a series appointment)."),
     @Parameter(name = "timestamp", description = "Timestamp of the last update of the to confirmed appointment.")
 }, requestBody = "The appointment object to delete. The fields for the object are described in Full identifier for an appointment.",
-responseDescription = "An array of objects identifying the appointments which were modified after the specified timestamp and were therefore not deleted. The fields of each object are described in Full identifier for an appointment.")
+    responseDescription = "An array of objects identifying the appointments which were modified after the specified timestamp and were therefore not deleted. The fields of each object are described in Full identifier for an appointment.")
 public final class ConfirmAction extends AppointmentAction {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfirmAction.class);
     /**
      * Initializes a new {@link ConfirmAction}.
      * @param services
@@ -94,26 +98,49 @@ public final class ConfirmAction extends AppointmentAction {
 
     @Override
     protected AJAXRequestResult perform(final AppointmentAJAXRequest req) throws OXException, JSONException {
+        // Get parameters
         final int objectId = req.checkInt(DataFields.ID);
         final int folderId = req.checkInt(AJAXServlet.PARAMETER_FOLDERID);
+        Date timestamp = null;
+        final int optOccurrenceId = req.optInt(AJAXServlet.PARAMETER_OCCURRENCE);
+
+        // Get request body
         final JSONObject jData = req.getData();
-        //DataParser.checkInt(jData, ParticipantsFields.CONFIRMATION);
 
         final ConfirmableParticipant participant = new ParticipantParser().parseConfirmation(true, jData);
+        final String confirmMessage = participant.getMessage();
+        final int confirmStatus = participant.getConfirm();
 
         final ServerSession session = req.getSession();
         int userId = session.getUserId();
         if (jData.has(AJAXServlet.PARAMETER_ID)) {
             userId = DataParser.checkInt(jData, AJAXServlet.PARAMETER_ID);
         }
-        final String confirmMessage = participant.getMessage();
-        final int confirmStatus = participant.getConfirm();
 
-        final AppointmentSQLInterface appointmentSql = getService().createAppointmentSql(session);
-        Date timestamp = null;
-        if (participant.getType() == Participant.USER || participant.getType() == 0) {
+        final AppointmentSqlFactoryService factoryService = getService();
+        if (null == factoryService) {
+            throw ServiceExceptionCode.absentService(AppointmentSqlFactoryService.class);
+        }
+        final AppointmentSQLInterface appointmentSql = factoryService.createAppointmentSql(session);
+
+        boolean isUser = (participant.getType() == Participant.USER) || (participant.getType() == 0);
+        boolean isExternal = participant.getType() == Participant.EXTERNAL_USER;
+        boolean isOccurrenceChange = (optOccurrenceId != AppointmentAJAXRequest.NOT_FOUND) && (optOccurrenceId > 0);
+
+        if (isOccurrenceChange) {
+            if (isUser) {
+                timestamp = appointmentSql.setUserConfirmation(objectId, folderId, optOccurrenceId, userId, confirmStatus, confirmMessage).getLastModified();
+            } else if (isExternal) {
+                timestamp = appointmentSql.setExternalConfirmation(objectId, folderId, optOccurrenceId, participant.getEmailAddress(), confirmStatus, confirmMessage).getLastModified();
+            } else {
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(AJAXServlet.PARAMETER_TYPE, jData.get(AJAXServlet.PARAMETER_TYPE));
+            }
+            return new AJAXRequestResult(new JSONObject(0), timestamp, "json");
+        }
+
+        if (isUser) {
             timestamp = appointmentSql.setUserConfirmation(objectId, folderId, userId, confirmStatus, confirmMessage);
-        } else if (participant.getType() == Participant.EXTERNAL_USER) {
+        } else if (isExternal) {
             timestamp = appointmentSql.setExternalConfirmation(objectId, folderId, participant.getEmailAddress(), confirmStatus, confirmMessage);
         } else {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( AJAXServlet.PARAMETER_TYPE, jData.get(AJAXServlet.PARAMETER_TYPE));
@@ -121,5 +148,4 @@ public final class ConfirmAction extends AppointmentAction {
 
         return new AJAXRequestResult(new JSONObject(0), timestamp, "json");
     }
-
 }

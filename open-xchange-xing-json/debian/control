@@ -1,0 +1,13 @@
+Source: open-xchange-xing-json
+Section: web
+Priority: optional
+Maintainer: Steffen Templin <steffen.templin@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), default-jdk, open-xchange-oauth (>= @OXVERSION@)
+Standards-Version: 3.8.4
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-xing-json
+Architecture: all
+Pre-Depends: open-xchange-oauth (>= @OXVERSION@)
+Depends: ${misc:Depends}
+Description: This package provides API calls for XING-related actions. With this package you can use XING actions like showing the newsfeed and inviting users to XING inside OX.

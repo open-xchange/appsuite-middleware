@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,26 +49,32 @@
 
 package com.openexchange.realtime.json.impl;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.exception.OXException;
 import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
+import com.openexchange.realtime.cleanup.RealtimeJanitor;
+import com.openexchange.realtime.group.DistributedGroupManager;
+import com.openexchange.realtime.group.GroupManagerService;
 import com.openexchange.realtime.json.osgi.JSONServiceRegistry;
 import com.openexchange.realtime.json.protocol.RTClientState;
 import com.openexchange.realtime.json.protocol.StanzaTransmitter;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.IDEventHandler;
+import com.openexchange.realtime.util.Duration;
 
 /**
  * The {@link StateManager} manages the state of connected clients.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class StateManager {
+public class StateManager implements RealtimeJanitor {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(StateManager.class);
 
-    private final ConcurrentHashMap<ID, RTClientState> states = new ConcurrentHashMap<ID, RTClientState>();
+    protected final ConcurrentHashMap<ID, RTClientState> states = new ConcurrentHashMap<ID, RTClientState>();
 
     private final ConcurrentHashMap<ID, StanzaTransmitter> transmitters = new ConcurrentHashMap<ID, StanzaTransmitter>();
 
@@ -86,16 +92,6 @@ public class StateManager {
             RTClientState meantime = states.putIfAbsent(id, state);
             created = meantime == null;
             state = (created) ? state : meantime;
-            if (created) {
-                id.on(ID.Events.DISPOSE, new IDEventHandler() {
-
-                    @Override
-                    public void handle(String event, ID id, Object source, Map<String, Object> properties) {
-                        states.remove(id);
-                        transmitters.remove(id);
-                    }
-                });
-            }
         }
         StanzaTransmitter transmitter = transmitters.get(id);
 
@@ -129,14 +125,33 @@ public class StateManager {
      * @param timestamp - The timestamp to compare the lastSeen value to
      */
     public void timeOutStaleStates(long timestamp) {
+        GlobalRealtimeCleanup globalRealtimeCleanup = JSONServiceRegistry.getInstance().getService(GlobalRealtimeCleanup.class);
+        DistributedGroupManager groupManager = JSONServiceRegistry.getInstance().getService(DistributedGroupManager.class);
         for (RTClientState state : new ArrayList<RTClientState>(states.values())) {
-            if (state.isTimedOut(timestamp)) {
-                LOG.debug("State for id {} is timed out. Last seen: {}", state.getId(), state.getLastSeen());
-                GlobalRealtimeCleanup globalRealtimeCleanup = JSONServiceRegistry.getInstance().getService(GlobalRealtimeCleanup.class);
-                globalRealtimeCleanup.cleanForId(state.getId());
-                state.getId().dispose(this, null);
+            ID client = state.getId();
+            Duration inactivity = state.getInactivityDuration();
+            LOG.debug("Client {} is inactive since {} seconds", client, inactivity.getValueInS());
+            if(groupManager != null) {
+                try {
+                    groupManager.setInactivity(client, inactivity);
+                } catch(OXException oxe) {
+                    LOG.error("Error while trying to set inactivity of client {}", client, oxe);
+                }
             } else {
-                state.getId().trigger(ID.Events.REFRESH, this);
+                LOG.error("Unable to inform GroupManager about inactivity duration. GroupManagerService is missing!");
+            }
+            if (state.isTimedOut(timestamp)) {
+                /*
+                 * The client timed out: if he'd be still active and was just rerouted to another backend the cleanup would have already
+                 * happened during enrol on the other node. As we reached this code there was no cleanup yet and we still have to do
+                 * it cluster-wide.
+                 */
+                LOG.debug("State for id {} is timed out. Last seen: {}", state.getId(), state.getLastSeen());
+                if(globalRealtimeCleanup != null) {
+                    globalRealtimeCleanup.cleanForId(state.getId());
+                } else {
+                    LOG.error("Unable to cleanup for id {}. GLobalRealtimeCleanupService is missing!", client);
+                }
             }
         }
     }
@@ -149,6 +164,13 @@ public class StateManager {
      */
     public boolean isConnected(ID id) {
         return states.containsKey(id);
+    }
+
+    @Override
+    public void cleanupForId(ID id) {
+        LOG.debug("Cleanup for ID: {}", id);
+        states.remove(id);
+        transmitters.remove(id);
     }
 
 }

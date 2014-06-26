@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -66,14 +66,13 @@ import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.imap.cache.ListLsubEntry;
 import com.openexchange.imap.cache.NamespaceFoldersCache;
 import com.openexchange.imap.cache.RightsCache;
-import com.openexchange.imap.cache.RootSubfolderCache;
+import com.openexchange.imap.cache.RootSubfoldersEnabledCache;
 import com.openexchange.imap.cache.UserFlagsCache;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.dataobjects.IMAPMailFolder;
 import com.openexchange.imap.entity2acl.Entity2ACLArgs;
 import com.openexchange.imap.entity2acl.Entity2ACLExceptionCode;
 import com.openexchange.imap.entity2acl.IMAPServer;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.config.MailProperties;
@@ -172,7 +171,7 @@ public final class IMAPFolderConverter {
         try {
             return new Entity2ACLArgsImpl(
                 imapConfig.getAccountId(),
-                new StringAllocator(36).append(IDNA.toASCII(imapConfig.getServer())).append(':').append(imapConfig.getPort()).toString(),
+                new StringBuilder(36).append(IDNA.toASCII(imapConfig.getServer())).append(':').append(imapConfig.getPort()).toString(),
                 session.getUserId(),
                 imapFolder.getFullName(),
                 ListLsubCache.getSeparator(imapConfig.getAccountId(), imapFolder, session));
@@ -393,7 +392,10 @@ public final class IMAPFolderConverter {
                     /*
                      * Default folder
                      */
-                    if ("INBOX".equals(imapFullName)) {
+                    if (mailFolder.isShared() || mailFolder.isPublic()) {
+                        mailFolder.setDefaultFolder(false);
+                        mailFolder.setDefaultFolderType(DefaultFolderType.NONE);
+                    } else if ("INBOX".equals(imapFullName)) {
                         mailFolder.setDefaultFolder(true);
                         mailFolder.setDefaultFolderType(DefaultFolderType.INBOX);
                     } else if (isDefaultFoldersChecked(session, accountId)) {
@@ -578,7 +580,7 @@ public final class IMAPFolderConverter {
 
             @Override
             public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-                final String pattern = mailFolder.isRootFolder() ? "%" : new com.openexchange.java.StringAllocator().append(fullname).append(separator).append('%').toString();
+                final String pattern = mailFolder.isRootFolder() ? "%" : new StringBuilder().append(fullname).append(separator).append('%').toString();
                 if (checkSubscribed) {
                     return protocol.lsub("", pattern);
                 }
@@ -633,7 +635,7 @@ public final class IMAPFolderConverter {
              * Check if subfolder creation is allowed
              */
             final ACLPermission ownPermission = new ACLPermission();
-            final int fp = RootSubfolderCache.canCreateSubfolders(rootFolder, true, session, imapConfig.getAccountId()).booleanValue() ? OCLPermission.CREATE_SUB_FOLDERS : OCLPermission.READ_FOLDER;
+            final int fp = RootSubfoldersEnabledCache.isRootSubfoldersEnabled(imapConfig, rootFolder) ? OCLPermission.CREATE_SUB_FOLDERS : OCLPermission.READ_FOLDER;
             ownPermission.setEntity(session.getUserId());
             ownPermission.setAllPermission(fp, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
             ownPermission.setFolderAdmin(false);
@@ -701,7 +703,7 @@ public final class IMAPFolderConverter {
             }
             throw MimeMailException.handleMessagingException(e);
         }
-        final Entity2ACLArgs args = new Entity2ACLArgsImpl(imapConfig.getAccountId(), new StringAllocator(36).append(IDNA.toASCII(imapConfig.getServer())).append(':').append(imapConfig.getPort()).toString(), session.getUserId(), imapFolder.getFullName(), listEntry.getSeparator());
+        final Entity2ACLArgs args = new Entity2ACLArgsImpl(imapConfig.getAccountId(), new StringBuilder(36).append(IDNA.toASCII(imapConfig.getServer())).append(':').append(imapConfig.getPort()).toString(), session.getUserId(), imapFolder.getFullName(), listEntry.getSeparator());
         boolean userPermAdded = false;
         for (int j = 0; j < acls.length; j++) {
             final ACLPermission aclPerm = new ACLPermission();

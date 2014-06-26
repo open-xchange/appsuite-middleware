@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -74,7 +74,6 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderEventConstants;
 import com.openexchange.groupware.calendar.CalendarCache;
-import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
@@ -304,7 +303,7 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
                 final long now = System.currentTimeMillis();
                 for (int i = 0; i < duplicateIDs.length; i++) {
                     final int duplicateID = duplicateIDs[i];
-                    if (Contacts.containsAnyObjectInFolder(duplicateID, writeCon, ctx)) {
+                    if (containsAnyObjectInFolder(duplicateID, writeCon, ctx.getContextId())) {
                         moveContacts(duplicateID, contactCollectorID, now, userId, ctx, writeCon);
                     }
                     deleteFolder(duplicateID, parent, now, userId, ctx, writeCon, log);
@@ -326,6 +325,20 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
             sb.append(":\n");
             sb.append(e.getMessage());
             log.error(sb.toString(), e);
+        }
+    }
+
+    private static boolean containsAnyObjectInFolder(int fid, final Connection con, int cid) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT intfield01 FROM prg_contacts WHERE cid = ? AND fid = ? LIMIT 1;");
+            stmt.setInt(1, cid);
+            stmt.setInt(2, fid);
+            rs = stmt.executeQuery();
+            return rs.next();
+        } finally {
+            closeSQLStuff(rs, stmt);
         }
     }
 

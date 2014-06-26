@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -382,18 +382,6 @@ public final class CalendarVolatileCache {
     public CacheKey newCacheKey(final CacheType cacheType, final int int2) {
         final Cache cache = this.cache;
         return null == cache ? null : cache.newCacheKey(cacheType.getNum(), int2);
-    }
-
-    /**
-     * New cache key.
-     *
-     * @param cacheType The cache type
-     * @param objs Arbitrary further keys
-     * @return The cache key or <code>null</code>
-     */
-    public CacheKey newCacheKey(final CacheType cacheType, final Serializable... objs) {
-        final Cache cache = this.cache;
-        return null == cache ? null : cache.newCacheKey(cacheType.getNum(), objs);
     }
 
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -56,7 +56,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
@@ -72,7 +71,7 @@ public class ContentType extends ParameterizedHeader {
 
     private static final long serialVersionUID = -9197784872892324694L;
 
-    private static Boolean contentTypeRegexFallback;
+    private volatile static Boolean contentTypeRegexFallback;
     private static boolean contentTypeRegexFallback() {
         Boolean b = contentTypeRegexFallback;
         if (null == b) {
@@ -471,7 +470,7 @@ public class ContentType extends ParameterizedHeader {
                         subType = st;
                     }
                 }
-                baseType = new com.openexchange.java.StringAllocator(16).append(primaryType).append(DELIMITER).append(subType).toString();
+                baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
                 lcBaseType = toLowerCase(baseType);
                 if (paramList) {
                     if (semicolonPos < 0) {
@@ -545,7 +544,7 @@ public class ContentType extends ParameterizedHeader {
                     subType = DEFAULT_SUBTYPE;
                 }
             }
-            baseType = new com.openexchange.java.StringAllocator(16).append(primaryType).append(DELIMITER).append(subType).toString();
+            baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
             lcBaseType = null;
             if (paramList) {
                 parameterList = new ParameterList(cts.substring(ctMatcher.end()));
@@ -553,7 +552,7 @@ public class ContentType extends ParameterizedHeader {
         } else {
             primaryType = "text";
             subType = "plain";
-            baseType = new com.openexchange.java.StringAllocator(16).append(primaryType).append(DELIMITER).append(subType).toString();
+            baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
             lcBaseType = null;
             if (paramList) {
                 parameterList = new ParameterList(semicolonPos < 0 ? cts : cts.substring(semicolonPos));
@@ -567,7 +566,7 @@ public class ContentType extends ParameterizedHeader {
                         if ((subType == null) || (subType.length() == 0)) {
                             subType = DEFAULT_SUBTYPE;
                         }
-                        baseType = new com.openexchange.java.StringAllocator(16).append(primaryType).append(DELIMITER).append(subType).toString();
+                        baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
                         lcBaseType = null;
                     }
                 }
@@ -594,7 +593,7 @@ public class ContentType extends ParameterizedHeader {
         primaryType = contentType.getPrimaryType();
         subType = contentType.getSubType();
         parameterList = (ParameterList) contentType.parameterList.clone();
-        baseType = new com.openexchange.java.StringAllocator(16).append(primaryType).append(DELIMITER).append(subType).toString();
+        baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
         lcBaseType = null;
     }
 
@@ -693,7 +692,7 @@ public class ContentType extends ParameterizedHeader {
         if (baseType != null) {
             return baseType;
         }
-        return (baseType = new com.openexchange.java.StringAllocator(16).append(primaryType).append(DELIMITER).append(subType).toString());
+        return (baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString());
     }
 
     /**
@@ -876,14 +875,14 @@ public class ContentType extends ParameterizedHeader {
             if ((subType == null) || (subType.length() == 0)) {
                 subType = DEFAULT_SUBTYPE;
             }
-            return new com.openexchange.java.StringAllocator(32).append(m.group(1)).append('/').append(subType).toString();
+            return new StringBuilder(32).append(m.group(1)).append('/').append(subType).toString();
         }
         throw MailExceptionCode.INVALID_CONTENT_TYPE.create(mimeType);
     }
 
     private static String toLowerCase(final String s) {
         final int length = s.length();
-        final StringAllocator sb = new StringAllocator(length);
+        final StringBuilder sb = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             sb.append(Character.toLowerCase(s.charAt(i)));
         }
@@ -906,7 +905,7 @@ public class ContentType extends ParameterizedHeader {
             return Pattern.quote(wildcard);
         }
         // Generate appropriate regex
-        final com.openexchange.java.StringAllocator s = new com.openexchange.java.StringAllocator(wildcard.length());
+        final StringBuilder s = new StringBuilder(wildcard.length());
         s.append('^');
         final int len = wildcard.length();
         for (int i = 0; i < len; i++) {
@@ -938,7 +937,7 @@ public class ContentType extends ParameterizedHeader {
      * @return A RFC2045 style (ASCII-only) string representation of this content type
      */
     public String toString(final boolean skipEmptyParams) {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(64);
+        final StringBuilder sb = new StringBuilder(64);
         sb.append(primaryType).append(DELIMITER).append(subType);
         if (null != parameterList) {
             parameterList.appendRFC2045String(sb, skipEmptyParams);

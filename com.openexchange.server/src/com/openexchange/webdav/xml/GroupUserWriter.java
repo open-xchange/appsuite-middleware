@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -88,8 +88,8 @@ public class GroupUserWriter extends ContactWriter {
 
     protected final static ContactField[] changeFields = {
         // DataObject.OBJECT_ID,
-    	ContactField.CREATED_BY,
-    	ContactField.CREATION_DATE,
+        ContactField.CREATED_BY,
+        ContactField.CREATION_DATE,
         ContactField.LAST_MODIFIED,
         ContactField.MODIFIED_BY,
         ContactField.FOLDER_ID,
@@ -163,8 +163,8 @@ public class GroupUserWriter extends ContactWriter {
 
     public void startWriter(final boolean modified, final boolean deleted, Date lastsync, final OutputStream os) throws Exception {
         final XMLOutputter xo = new XMLOutputter();
-    	final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
-    	final String folderID = Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID);
+        final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
+        final String folderID = Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID);
 
         if (lastsync == null) {
             lastsync = new Date(0);
@@ -176,7 +176,7 @@ public class GroupUserWriter extends ContactWriter {
         if (deleted) {
             SearchIterator<Contact> it = null;
             try {
-            	it = contactService.getDeletedContacts(sessionObj, folderID, lastsync, deleteFields);
+                it = contactService.getDeletedContacts(sessionObj, folderID, lastsync, deleteFields);
                 writeIterator(it, true, xo, os);
             } finally {
                 if (it != null) {
@@ -188,7 +188,7 @@ public class GroupUserWriter extends ContactWriter {
         if (modified) {
             SearchIterator<Contact> it = null;
             try {
-            	it = contactService.getModifiedContacts(sessionObj, folderID, lastsync, changeFields);
+                it = contactService.getModifiedContacts(sessionObj, folderID, lastsync, changeFields);
                 writeIterator(it, false, xo, os);
             } finally {
                 if (it != null) {
@@ -203,26 +203,26 @@ public class GroupUserWriter extends ContactWriter {
         final XMLOutputter xo = new XMLOutputter();
         SearchIterator<Contact> it = null;
         try {
-        	final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
-        	final String preparedPattern = StringCollection.prepareForSearch(searchpattern, false);
-			final ContactField[] searchFields = { ContactField.DISPLAY_NAME, ContactField.GIVEN_NAME, ContactField.SUR_NAME,
-					ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3, ContactField.CATEGORIES };
-			final CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
-        	for (final ContactField field : searchFields) {
-        		final SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
-        		term.addOperand(new ContactFieldOperand(field));
-        		term.addOperand(new ConstantOperand<String>(preparedPattern));
-        		orTerm.addSearchTerm(term);
-        	}
-        	final SingleSearchTerm folderTerm = new SingleSearchTerm(SingleOperation.EQUALS);
-        	folderTerm.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
-        	folderTerm.addOperand(new ConstantOperand<String>(Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID)));
-			final CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);
-			andTerm.addSearchTerm(folderTerm);
-			andTerm.addSearchTerm(orTerm);
+            final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
+            final String preparedPattern = StringCollection.prepareForSearch(searchpattern, false);
+            final ContactField[] searchFields = { ContactField.DISPLAY_NAME, ContactField.GIVEN_NAME, ContactField.SUR_NAME,
+                ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3, ContactField.CATEGORIES };
+            final CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
+            for (final ContactField field : searchFields) {
+                final SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
+                term.addOperand(new ContactFieldOperand(field));
+                term.addOperand(new ConstantOperand<String>(preparedPattern));
+                orTerm.addSearchTerm(term);
+            }
+            final SingleSearchTerm folderTerm = new SingleSearchTerm(SingleOperation.EQUALS);
+            folderTerm.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
+            folderTerm.addOperand(new ConstantOperand<String>(Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID)));
+            final CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);
+            andTerm.addSearchTerm(folderTerm);
+            andTerm.addSearchTerm(orTerm);
 
             it = contactService.searchContacts(sessionObj, andTerm, changeFields,
-            		new SortOptions(ContactField.DISPLAY_NAME, Order.ASCENDING));
+                new SortOptions(ContactField.DISPLAY_NAME, Order.ASCENDING));
             writeIterator(it, false, xo, os);
         } finally {
             if (it != null) {
@@ -315,28 +315,9 @@ public class GroupUserWriter extends ContactWriter {
     }
 
     private static void addIfNotEmpty(final String name, final String value, final Element parent) {
-        if (isEmpty(value)) {
+        if (com.openexchange.java.Strings.isEmpty(value)) {
             return;
         }
         addElement(name, value, parent);
     }
-
-    /**
-     * Tests if specified string is empty; either <code>null</code>, zero length, or only consists of white space characters.
-     *
-     * @param str The string to test
-     * @return <code>true</code> if specified string is empty; otherwise <code>false</code>.
-     */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

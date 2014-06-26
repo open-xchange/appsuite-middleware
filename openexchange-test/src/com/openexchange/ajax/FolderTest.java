@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -908,87 +908,6 @@ public class FolderTest extends AbstractAJAXTest {
                 e.printStackTrace();
             }
         }
-    }
-
-    public void testSharedFolder() throws OXException, OXException, IOException, SAXException, JSONException, OXException {
-        int fuid01 = -1;
-        int fuid02 = -1;
-        String anotherSessionId = null;
-        /*
-         * Create a shared folder with login as creator and define share right for second user
-         */
-        final int userId = getUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
-        final int secId = getUserId(getWebConversation(), getHostName(), getSeconduser(), getPassword());
-        fuid01 = insertFolder(
-            getWebConversation(),
-            getHostName(),
-            getSessionId(),
-            userId,
-            false,
-            FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
-            "SharedFolder01" + System.currentTimeMillis(),
-            "calendar",
-            FolderObject.PRIVATE,
-            secId,
-            true);
-        assertFalse(fuid01 == -1);
-        fuid02 = insertFolder(
-            getWebConversation(),
-            getHostName(),
-            getSessionId(),
-            userId,
-            false,
-            FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
-            "SharedFolder02" + System.currentTimeMillis(),
-            "calendar",
-            FolderObject.PRIVATE,
-            secId,
-            true);
-        assertFalse(fuid02 == -1);
-        /*
-         * Connect with second user and verify that folder is visible beneath system shared folder
-         */
-        anotherSessionId = LoginTest.getSessionId(getSecondWebConversation(), getHostName(), getSeconduser(), getPassword());
-        boolean found01 = false;
-        boolean found02 = false;
-        final List<FolderObject> l = getSubfolders(
-            getSecondWebConversation(),
-            getHostName(),
-            anotherSessionId,
-            "" + FolderObject.SYSTEM_SHARED_FOLDER_ID,
-            true);
-        assertFalse(l == null || l.size() == 0);
-        Next: for (Object element : l) {
-            final FolderObject virtualFO = (FolderObject) element;
-            final List<FolderObject> subList = getSubfolders(
-                getSecondWebConversation(),
-                getHostName(),
-                anotherSessionId,
-                virtualFO.getFullName(),
-                true);
-            for (Object element2 : subList) {
-                final FolderObject sharedFolder = (FolderObject) element2;
-                if (sharedFolder.getObjectID() == fuid01) {
-                    found01 = true;
-                    if (found01 && found02) {
-                        break Next;
-                    }
-                }
-                if (sharedFolder.getObjectID() == fuid02) {
-                    found02 = true;
-                    if (found01 && found02) {
-                        break Next;
-                    }
-                }
-            }
-        }
-        assertTrue(found01);
-        assertTrue(found02);
-        final String sesID = getSessionId();
-
-        deleteFolders(getWebConversation(), getHostName(), sesID, new int[] { fuid01, fuid02 }, System.currentTimeMillis(), false);
-        // deleteTestFolders(getWebConversation(), getHostName(), sesID, new
-        // int[] { fuid01, fuid02 }, false);
     }
 
     public void testGetSubfolder() throws OXException, OXException, IOException, SAXException, JSONException, OXException {

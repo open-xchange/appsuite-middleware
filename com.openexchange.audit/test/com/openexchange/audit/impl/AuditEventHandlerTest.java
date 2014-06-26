@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -61,12 +61,10 @@ import org.osgi.service.event.Event;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.slf4j.Logger;
 import com.openexchange.audit.configuration.AuditConfiguration;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
@@ -85,7 +83,7 @@ import com.openexchange.test.mock.MockUtils;
  * @since 7.4.1
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ Event.class, UserStorage.class, Contacts.class, AuditConfiguration.class, ContextStorage.class })
+@PrepareForTest({ Event.class, UserStorage.class, AuditConfiguration.class, ContextStorage.class })
 public class AuditEventHandlerTest {
 
     /**
@@ -145,9 +143,6 @@ public class AuditEventHandlerTest {
         PowerMockito.when(userStorage.getUser(Matchers.anyInt(), (Context) Matchers.any())).thenReturn(user);
 
         this.contact = PowerMockito.mock(Contact.class);
-        PowerMockito.mockStatic(Contacts.class);
-        PowerMockito.when(Contacts.getContactById(Matchers.anyInt(), (Session) Matchers.any())).thenReturn(this.contact);
-
         this.event = PowerMockito.mock(Event.class);
         this.commonEvent = PowerMockito.mock(CommonEvent.class);
         this.context = PowerMockito.mock(Context.class);

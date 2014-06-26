@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -79,7 +79,7 @@ public class Capabilities implements ComputedServerConfigValueService {
     @Override
     public void addValue(JSONObject serverConfig, AJAXRequestData request, ServerSession session) throws OXException, JSONException {
         CapabilityService capabilityService = services.getService(CapabilityService.class);
-        Set<Capability> capabilities = capabilityService.getCapabilities(session.getUserId(), session.getContextId(), true).asSet();
+        Set<Capability> capabilities = capabilityService.getCapabilities(session.getUserId(), session.getContextId(), true, true).asSet();
         serverConfig.put("capabilities", services.getService(SimpleConverter.class).convert("capability", "json", capabilities, session));
     }
 

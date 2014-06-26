@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -150,7 +150,7 @@ public final class TransportProperties implements ITransportProperties {
     }
 
     private void loadProperties0() {
-        final com.openexchange.java.StringAllocator logBuilder = new com.openexchange.java.StringAllocator(1024);
+        final StringBuilder logBuilder = new StringBuilder(1024);
         logBuilder.append("\nLoading global transport properties...\n");
 
         final ConfigurationService configuration = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -525,7 +525,6 @@ public class UserTest extends AbstractTest {
         srv_response.setIcal(!srv_response.getIcal());
         srv_response.setInfostore(!srv_response.getInfostore());
         srv_response.setPinboardWrite(!srv_response.getPinboardWrite());
-        srv_response.setProjects(!srv_response.getProjects());
         srv_response.setReadCreateSharedFolders(!srv_response.getReadCreateSharedFolders());
         srv_response.setRssBookmarks(!srv_response.getRssBookmarks());
         srv_response.setRssPortal(!srv_response.getRssPortal());
@@ -1629,7 +1628,6 @@ public class UserTest extends AbstractTest {
         assertEquals("access ical not equal", a.getIcal(), b.getIcal());
         assertEquals("access infostore not equal", a.getInfostore(), b.getInfostore());
         assertEquals("access pinboard write not equal", a.getPinboardWrite(), b.getPinboardWrite());
-        assertEquals("access projects not equal", a.getProjects(), b.getProjects());
         assertEquals("access ReadCreateSharedFolders not equal", a.getReadCreateSharedFolders(), b.getReadCreateSharedFolders());
         assertEquals("access rss bookmarks not equal", a.getRssBookmarks(), b.getRssBookmarks());
         assertEquals("access rss portal not equal", a.getRssPortal(), b.getRssPortal());

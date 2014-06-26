@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -63,6 +63,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.exception.RealtimeException;
@@ -70,15 +71,20 @@ import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.realtime.util.ElementPath;
+import org.apache.commons.lang.Validate;
 
 /**
- * {@link Stanza} - Abstract information unit that can be send from one entity to another.
- *
+ * {@link Stanza} - Abstract information unit that can be send from one entity to another. Actual Data is held as leafs of a tree-like
+ * structure identified by an ElementPath leading to that data. A Stanza can carry multiple of those trees, each again identified by an
+ * Elementpath.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public abstract class Stanza implements Serializable {
 
+    public static final String DEFAULT_SELECTOR = "default";
+    
     public static final ElementPath ERROR_PATH = new ElementPath("error");
 
     private static final long serialVersionUID = 1L;
@@ -99,7 +105,7 @@ public abstract class Stanza implements Serializable {
      */
     protected RealtimeException error = null;
 
-    private String selector = "default";
+    private String selector = DEFAULT_SELECTOR;
 
     private long sequenceNumber = -1;
 
@@ -257,7 +263,7 @@ public abstract class Stanza implements Serializable {
      */
     public Collection<ElementPath> getElementPaths() {
         Set<ElementPath> paths = new HashSet<ElementPath>();
-        for (PayloadTree tree : getPayloads()) {
+        for (PayloadTree tree : getPayloadTrees()) {
             paths.addAll(tree.getElementPaths());
         }
         return paths;
@@ -268,7 +274,7 @@ public abstract class Stanza implements Serializable {
      *
      * @return A List of PayloadTrees.
      */
-    public Collection<PayloadTree> getPayloads() {
+    public Collection<PayloadTree> getPayloadTrees() {
         ArrayList<PayloadTree> resultList = new ArrayList<PayloadTree>();
         Collection<List<PayloadTree>> values = payloads.values();
         for (List<PayloadTree> list : values) {
@@ -351,13 +357,13 @@ public abstract class Stanza implements Serializable {
     }
 
     /**
-     * Get a Collection of Payloads that match an ElementPath
+     * Get a Collection of Payloadtrees that match an ElementPath
      *
      * @param elementPath The Elementpath identifying the Payload
      * @return A Collection of PayloadTrees
      */
     @SuppressWarnings("unchecked")
-    public Collection<PayloadTree> getPayloads(final ElementPath elementPath) {
+    public Collection<PayloadTree> getPayloadTrees(final ElementPath elementPath) {
         List<PayloadTree> list = payloads.get(elementPath);
         if (list == null) {
             list = Collections.EMPTY_LIST;
@@ -367,19 +373,118 @@ public abstract class Stanza implements Serializable {
     }
 
     /**
-     * Filter the payloads based on a Predicate.
+     * Filter the payload trees based on a Predicate.
      *
      * @param predicate
      * @return Payloads matching the Predicate or an empty Collection
      */
-    public Collection<PayloadTree> filterPayloads(Predicate<PayloadTree> predicate) {
+    public Collection<PayloadTree> filterPayloadTrees(Predicate<PayloadTree> predicate) {
         Collection<PayloadTree> result = new ArrayList<PayloadTree>();
-        for (PayloadTree element : getPayloads()) {
+        for (PayloadTree element : getPayloadTrees()) {
             if (predicate.apply(element)) {
                 result.add(element);
             }
         }
         return result;
+    }
+
+    /**
+     * 
+     * @param nodePaths
+     * @return
+     */
+    public Collection<PayloadElement> filterPayloadElements(ElementPath... nodePaths) {
+        Validate.notEmpty(nodePaths, "Mandatory parameter nodePath is missing.");
+        return filterPayloadElements(getPayloadTrees(), nodePaths);
+    }
+
+    /**
+     * Filter matching PayloadElements from a PayloadTree 
+     *  
+     * @param treePath The {@link ElementPath} identifying the PayloadTree
+     * @param nodePaths The {@link ElementPath} identifying the matching PayloadElements 
+     * @return
+     */
+    public Collection<PayloadElement> filterPayloadElementsFromTree(ElementPath treePath, ElementPath... nodePaths) {
+        Validate.notNull(treePath, "Mandatory parameter treePath is missing.");
+        Validate.notEmpty(nodePaths, "Mandatory parameter nodePath is missing.");
+        return filterPayloadElements(getPayloadTrees(treePath), nodePaths);
+    }
+
+    /**
+     * Filter matching PayloadElements 
+     * @param trees
+     * @param nodePaths
+     * @return
+     */
+    private Collection<PayloadElement> filterPayloadElements(Collection<PayloadTree> trees, ElementPath... nodePaths) {
+        Set<PayloadElement> matchingElements = new HashSet<PayloadElement>();
+        if(trees.isEmpty() || nodePaths.length == 0) {
+            return matchingElements;
+        }
+        for (PayloadTree tree : trees) {
+            for (ElementPath elementPath : nodePaths) {
+                Collection<PayloadTreeNode> matchingNodes = tree.search(elementPath);
+                //PayloadTreeNodes contain the actual PayloadElements we are interested in plus tree metadata
+                for (PayloadTreeNode payloadTreeNode : matchingNodes) {
+                    matchingElements.add(payloadTreeNode.getPayloadElement());
+                }
+            }
+        }
+        return matchingElements;
+    }
+
+    /**
+     * Filter a single payload from this {@link Stanza} based only on the {@link ElementPath} of the wanted payload. This will search in all
+     * of
+     * this {@link Stanza}'s {@link PayloadTree}s.
+     * 
+     * @param elementPath The {@link ElementPath} of the wanted payload
+     * @param clazz The {@link Class} of the wanted Payload
+     * @return An {@link Optional} containing the single Payload or an empty {@link Optional} if the Stanza did contain exactly one matching
+     *         Payload.
+     */
+    public <T> Optional<T> getSinglePayload(ElementPath elementPath, Class<T> clazz) {
+        return getSinglePayload0(null, elementPath, clazz);
+    }
+
+    /**
+     * Filter a single Payload from this {@link Stanza}'s {@link PayloadTree} based on the {@link ElementPath}s of the wanted Payload and
+     * the {@link PayloadTree} to search.
+     * 
+     * @param treePath The {@link ElementPath} identifying a {@link PayloadTree} within this {@link Stanza} that should be searched
+     * @param elementPath The {@link ElementPath} of the wanted Payload
+     * @param clazz The {@link Class} of the wanted Payload
+     * @return An {@link Optional} containing the single Payload or an empty {@link Optional} if the Stanza did contain exactly one matching
+     *         Payload.
+     */
+    public <T> Optional<T> getSinglePayload(ElementPath treePath, ElementPath elementPath, Class<T> clazz) {
+        return getSinglePayload0(treePath, elementPath, clazz);
+    }
+
+    private <T> Optional<T> getSinglePayload0(ElementPath treePath, ElementPath elementPath, Class<T> clazz) {
+        Optional<T> retval = Optional.absent();
+
+        Collection<PayloadElement> filteredPayloadElements = null;
+        if(treePath == null) {
+            filteredPayloadElements = filterPayloadElements(elementPath);
+        } else {
+            filteredPayloadElements = filterPayloadElements(getPayloadTrees(treePath), elementPath);
+        }
+        int numResults = filteredPayloadElements.size();
+        if (numResults != 1) {
+            LOG.debug("Was expecting a single " + elementPath + " payload but found " + numResults 
+                + " within the Stanza. Returning absent Optional instead.");
+            return retval;
+        }
+        Object data = filteredPayloadElements.iterator().next().getData();
+        if (clazz.isInstance(data)) {
+            retval = Optional.of(clazz.cast(data));
+        } else {
+            LOG.warn("Was expecting a payload  of class " + clazz + " but found " + data == null ? "null" : data.getClass().getName() 
+                + " within the Stanza. Returning absent Optional instead.");
+        }
+        return retval;
     }
 
     /**
@@ -389,7 +494,7 @@ public abstract class Stanza implements Serializable {
      */
     protected Map<ElementPath, List<PayloadTree>> deepCopyPayloads() {
         HashMap<ElementPath, List<PayloadTree>> copiedPayloads = new HashMap<ElementPath, List<PayloadTree>>();
-        for (PayloadTree tree : getPayloads()) {
+        for (PayloadTree tree : getPayloadTrees()) {
             PayloadTree copiedTree = new PayloadTree(tree);
             addPayloadToMap(copiedTree, copiedPayloads);
         }
@@ -478,8 +583,8 @@ public abstract class Stanza implements Serializable {
     }
 
     public void transformPayloads(String format) throws OXException {
-        List<PayloadTree> copy = new ArrayList<PayloadTree>(getPayloads().size());
-        for (PayloadTree tree : getPayloads()) {
+        List<PayloadTree> copy = new ArrayList<PayloadTree>(getPayloadTrees().size());
+        for (PayloadTree tree : getPayloadTrees()) {
             tree = tree.toExternal(format);
             copy.add(tree);
         }
@@ -487,8 +592,8 @@ public abstract class Stanza implements Serializable {
     }
 
     public void transformPayloadsToInternal() throws OXException {
-        List<PayloadTree> copy = new ArrayList<PayloadTree>(getPayloads().size());
-        for (PayloadTree tree : getPayloads()) {
+        List<PayloadTree> copy = new ArrayList<PayloadTree>(getPayloadTrees().size());
+        for (PayloadTree tree : getPayloadTrees()) {
             tree = tree.toInternal();
             copy.add(tree);
         }

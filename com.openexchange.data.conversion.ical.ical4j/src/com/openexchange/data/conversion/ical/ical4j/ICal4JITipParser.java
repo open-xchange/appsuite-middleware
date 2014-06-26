@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,7 +51,6 @@ package com.openexchange.data.conversion.ical.ical4j;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
@@ -79,7 +78,6 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Charsets;
-import com.openexchange.java.StringAllocator;
 
 /**
  * {@link ICal4JITipParser}
@@ -102,17 +100,6 @@ public class ICal4JITipParser extends ICal4JParser implements ITipParser {
 
     @Override
     public List<ITipMessage> parseMessage(InputStream ical, TimeZone defaultTZ, Context ctx, int owner, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
-//        BufferedReader in = new BufferedReader(new InputStreamReader(ical));
-//        String input;
-//        try {
-//            while ((input = in.readLine()) != null) {
-//                System.out.println(input);
-//            }
-//            in.close();
-//        } catch (IOException e1) {
-//            // TODO Auto-generated catch block
-//            e1.printStackTrace();
-//        }
         List<ITipMessage> messages = new ArrayList<ITipMessage>();
         Map<String, ITipMessage> messagesPerUID = new HashMap<String, ITipMessage>();
         BufferedReader reader = null;
@@ -192,7 +179,7 @@ public class ICal4JITipParser extends ICal4JParser implements ITipParser {
             return null;
         }
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);

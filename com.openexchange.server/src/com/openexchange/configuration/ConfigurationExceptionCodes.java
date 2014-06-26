@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -61,7 +61,7 @@ import com.openexchange.exception.OXExceptionStrings;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public enum ConfigurationExceptionCodes implements DisplayableOXExceptionCode {
-    /** Filename for property file is not defined. */
+    /** File name for property file is not defined. */
     NO_FILENAME("File name for property file is not defined.", ConfigurationExceptionCodes.CONFIG_ERROR_DISPLAY, Category.CATEGORY_CONFIGURATION, 1),
     /** File "%1$s" does not exist. */
     FILE_NOT_FOUND("File \"%1$s\" does not exist.", ConfigurationExceptionCodes.CONFIG_ERROR_DISPLAY, Category.CATEGORY_CONFIGURATION, 2),

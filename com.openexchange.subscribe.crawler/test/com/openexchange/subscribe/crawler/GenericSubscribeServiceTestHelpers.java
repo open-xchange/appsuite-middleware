@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,9 +51,9 @@ package com.openexchange.subscribe.crawler;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import junit.framework.TestCase;
 import org.ho.yaml.Yaml;
 import com.openexchange.config.SimConfigurationService;
@@ -62,7 +62,7 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.subscribe.crawler.internal.GenericSubscribeService;
-import com.openexchange.subscribe.crawler.osgi.Activator;
+import com.openexchange.subscribe.crawler.osgi.CrawlersActivator;
 
 /**
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
@@ -75,8 +75,8 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
     public static final String VALID_ADDRESS_PART = "[a-zA-Z0-9\\.\\s\u00e4\u00f6\u00fc\u00df]*";
 
     private HashMap<String, String> map;
-    ArrayList<CrawlerDescription> crawlers;
-    private Activator activator;
+    List<CrawlerDescription> crawlers;
+    private CrawlersActivator activator;
 
     public GenericSubscribeServiceTestHelpers() {
         super();
@@ -107,7 +107,7 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
         config.stringProperties.put("com.openexchange.subscribe.crawler.web.de", Boolean.TRUE.toString());
         config.stringProperties.put("com.openexchange.subscribe.crawler.t-online.de", Boolean.TRUE.toString());
         // config.stringProperties.put("com.openexchange.subscribe.crawler.path", "conf/crawlers/");
-        activator = new Activator();
+        activator = new CrawlersActivator();
         crawlers = activator.getCrawlersFromFilesystem(config);
 
         // insert ical-Parser class (switch for automated tests (Hudson) / local tests)

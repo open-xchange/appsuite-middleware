@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -64,7 +64,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
-import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.exception.OXException;
@@ -94,7 +94,7 @@ public final class LoginTools {
      * Using <code>org.apache.commons.codec.net.URLCodec</code>.
      */
     public static String encodeUrl(final String s, final boolean forAnchor) {
-        return AJAXServlet.encodeUrl(s, forAnchor);
+        return AJAXUtility.encodeUrl(s, forAnchor);
     }
 
     private static final Pattern PATTERN_CRLF = Pattern.compile("\r?\n|(?:%0[aA])?%0[dD]");
@@ -230,18 +230,6 @@ public final class LoginTools {
             req.getServerName(),
             req.getServerPort(),
             httpSessionId);
-    }
-
-    public static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     public static LoginRequestImpl parseLogin(HttpServletRequest req, String loginParamName, boolean strict, String defaultClient, boolean forceHTTPS, boolean disableTrimLogin, boolean requiredAuthId) throws OXException {

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -238,7 +238,7 @@ public final class MIMEMultipartMailPart extends MailPart {
                 }
             }
         } catch (final ArrayIndexOutOfBoundsException e) {
-            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, new com.openexchange.java.StringAllocator(64).append(
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, new StringBuilder(64).append(
                 "Illegal access to multipart data at index ").append(e.getMessage()).append(", but total length is ").append(
                 dataBytes.length).toString());
         }
@@ -248,7 +248,7 @@ public final class MIMEMultipartMailPart extends MailPart {
                  * No starting boundary found
                  */
                 if (LOG.isDebugEnabled()) {
-                    final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(dataBytes.length + 128);
+                    final StringBuilder sb = new StringBuilder(dataBytes.length + 128);
                     sb.append("No boundary found in Multipart-Mail:\n");
                     sb.append(new String(dataBytes, Charsets.ISO_8859_1));
                     LOG.debug(sb.toString());
@@ -272,7 +272,7 @@ public final class MIMEMultipartMailPart extends MailPart {
                  * Take complete length as ending boundary.
                  */
                 if (LOG.isDebugEnabled()) {
-                    final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(dataBytes.length + 128);
+                    final StringBuilder sb = new StringBuilder(dataBytes.length + 128);
                     sb.append("Missing ending boundary in Multipart-Mail:\n");
                     sb.append(new String(dataBytes, Charsets.ISO_8859_1));
                     LOG.debug(sb.toString());
@@ -416,7 +416,7 @@ public final class MIMEMultipartMailPart extends MailPart {
             mbp.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
             mbp.setHeader(
                 MessageHeaders.HDR_CONTENT_TYPE,
-                new com.openexchange.java.StringAllocator("text/plain; charset=\"").append(charset).append('"').toString());
+                new StringBuilder("text/plain; charset=\"").append(charset).append('"').toString());
             return MimeMessageConverter.convertPart(mbp);
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
@@ -471,7 +471,7 @@ public final class MIMEMultipartMailPart extends MailPart {
             throw new IllegalStateException("Missing boundary in multipart content-type");
         }
         return (boundaryBytes =
-            getBytes(new com.openexchange.java.StringAllocator(boundary.length() + 3).append('\n').append(STR_BD_START).append(boundary).toString()));
+            getBytes(new StringBuilder(boundary.length() + 3).append('\n').append(STR_BD_START).append(boundary).toString()));
     }
 
     /**

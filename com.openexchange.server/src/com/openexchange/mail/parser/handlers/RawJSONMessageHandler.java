@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -72,7 +72,6 @@ import org.json.JSONObject;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
@@ -535,7 +534,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
             } catch (final Exception e) {
                 final Throwable t =
                     new Throwable(
-                        new com.openexchange.java.StringAllocator("Unable to fetch content/type for '").append(filename).append("': ").append(e).toString());
+                        new StringBuilder("Unable to fetch content/type for '").append(filename).append("': ").append(e).toString());
                 LOG.warn("", t);
             }
             jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), contentType);
@@ -627,7 +626,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                     throw MimeMailException.handleMessagingException(e);
                 }
             } else {
-                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128);
+                final StringBuilder sb = new StringBuilder(128);
                 sb.append("Ignoring nested message.").append(
                     "Cannot handle part's content which should be a RFC822 message according to its content type: ");
                 sb.append((null == content ? "null" : content.getClass().getSimpleName()));
@@ -850,7 +849,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
 
     private static String toLowerCase(final String s) {
         final int length = s.length();
-        final StringAllocator sb = new StringAllocator(length);
+        final StringBuilder sb = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             sb.append(Character.toLowerCase(s.charAt(i)));
         }

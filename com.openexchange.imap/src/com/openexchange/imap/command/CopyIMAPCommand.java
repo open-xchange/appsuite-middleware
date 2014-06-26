@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -142,7 +142,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
         this.fast = fast;
         this.destFolderName = prepareStringArgument(destFolderName);
         length = uids.length;
-        args = length == 0 ? ARGS_EMPTY : (isSequential ? new String[] { new com.openexchange.java.StringAllocator(64).append(uids[0]).append(':').append(
+        args = length == 0 ? ARGS_EMPTY : (isSequential ? new String[] { new StringBuilder(64).append(uids[0]).append(':').append(
             uids[length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(
             uids,
             false,
@@ -191,7 +191,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 
     @Override
     protected String getCommand(final int argsIndex) {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(args[argsIndex].length() + 64);
+        final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
         if (uid) {
             sb.append("UID ");
         }

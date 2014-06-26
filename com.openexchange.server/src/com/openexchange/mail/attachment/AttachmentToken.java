@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -96,7 +96,7 @@ public final class AttachmentToken implements AttachmentTokenConstants, Closeabl
             throw new IllegalArgumentException("ttlMillis must be positive.");
         }
         this.id =
-            new com.openexchange.java.StringAllocator(75).append(UUIDs.getUnformattedString(UUID.randomUUID())).append('.').append(
+            new StringBuilder(75).append(UUIDs.getUnformattedString(UUID.randomUUID())).append('.').append(
                 UUIDs.getUnformattedString(UUID.randomUUID())).toString();
         this.ttlMillis = ttlMillis;
         timeoutStamp = new AtomicLong(System.currentTimeMillis() + ttlMillis);

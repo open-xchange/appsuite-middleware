@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -58,20 +58,87 @@ import com.openexchange.session.Session;
  */
 public interface TemplateService {
 
-    public OXTemplate loadTemplate(String templateName) throws OXException;
+    /**
+     * Loads the denoted template from default template path w/o an exception handler.
+     *
+     * @param templateName The template name
+     * @return The loaded template
+     * @throws OXException If loading template fails
+     */
+    OXTemplate loadTemplate(String templateName) throws OXException;
 
-    public OXTemplate loadTemplate(String templateName, OXTemplateExceptionHandler exceptionHandler) throws OXException;
+    /**
+     * Loads the denoted template from default template path using given optional exception handler.
+     *
+     * @param templateName The template name
+     * @param exceptionHandler The exception handler or <code>null</code>
+     * @return The loaded template
+     * @throws OXException If loading template fails
+     */
+    OXTemplate loadTemplate(String templateName, OXTemplateExceptionHandler exceptionHandler) throws OXException;
 
-    public OXTemplate loadTemplate(String templateName, String defaultTemplateName, Session session) throws OXException;
+    /**
+     * Loads the denoted template w/o an exception handler.
+     *
+     * @param templateName The template name
+     * @param defaultTemplateName The name of default template
+     * @param session The associated session
+     * @return The loaded template or <code>defaultTemplateName</code> in case <code>templateName</code> is empty or user has no such permission
+     * @throws OXException If loading template fails
+     */
+    OXTemplate loadTemplate(String templateName, String defaultTemplateName, Session session) throws OXException;
 
-    public OXTemplate loadTemplate(String templateName, String defaultTemplateName, Session session, OXTemplateExceptionHandler exceptionHandler) throws OXException;
+    /**
+     * Loads the denoted template using optional exception handler.
+     *
+     * @param templateName The template name
+     * @param defaultTemplateName The name of default template
+     * @param session The associated session
+     * @param exceptionHandler The exception handler or <code>null</code>
+     * @return The loaded template or <code>defaultTemplateName</code> in case <code>templateName</code> is empty or user has no such permission
+     * @throws OXException If loading template fails
+     */
+    OXTemplate loadTemplate(String templateName, String defaultTemplateName, Session session, OXTemplateExceptionHandler exceptionHandler) throws OXException;
 
-    public OXTemplate loadTemplate(String templateName, String defaultTemplateName, Session session, boolean createCopy) throws OXException;
+    /**
+     * Loads the denoted template w/o an exception handler.
+     *
+     * @param templateName The template name
+     * @param defaultTemplateName The template path
+     * @param session The associated session
+     * @param createCopy <code>true</code> to return a copy; otherwise <code>false</code> for a reference
+     * @return The loaded template or <code>defaultTemplateName</code> in case <code>templateName</code> is empty or user has no such permission
+     * @throws OXException If loading template fails
+     */
+    OXTemplate loadTemplate(String templateName, String defaultTemplateName, Session session, boolean createCopy) throws OXException;
 
-    public List<String> getBasicTemplateNames(String... filter) throws OXException;
+    /**
+     * Gets the names of basic templates that match given filters
+     *
+     * @param filter The optional filter tags
+     * @return The matching names
+     * @throws OXException If operation fails
+     */
+    List<String> getBasicTemplateNames(String... filter) throws OXException;
 
-    public List<String> getTemplateNames(Session session, String... filter) throws OXException;
+    /**
+     * Gets the names of the user templates that match given filters
+     *
+     * @param session The associated session
+     * @param filter The optional filter tags
+     * @return The matching names
+     * @throws OXException If operation fails
+     */
+    List<String> getTemplateNames(Session session, String... filter) throws OXException;
 
-    public TemplatingHelper createHelper(Object rootObject, Session session, boolean craeatCopy);
+    /**
+     * Creates a templating helper.
+     *
+     * @param rootObject The root object
+     * @param session The associated session
+     * @param createCopy Whether to create a copy
+     * @return The templating helper
+     */
+    TemplatingHelper createHelper(Object rootObject, Session session, boolean createCopy);
 
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -62,6 +62,16 @@ import com.openexchange.realtime.packet.Stanza;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class Utils {
+
+    /**
+     * Check if an {@link DispatchExceptionCode.RESOURCE_OFFLINE} occurred while trying to reach the exact recipient specified in the stanza
+     * iow. stanza.getTo().isGeneral() == false. This is the case when e.g. addressing synthetic resources like
+     * "synthetic.office://operations@1/28041.219886"
+     * 
+     * @param sendErrors The map of ID -> Exception that was the result when trying to send a {@link Stanza} 
+     * @param stanza The {@link Stanza} you tried to send
+     * @return true if the exact ID was offline, false otherwise
+     */
     public static boolean shouldResend(Map<ID, OXException> sendErrors, Stanza stanza) {
         if (sendErrors.isEmpty()) {
             return false;
@@ -82,4 +92,5 @@ public class Utils {
         }
         return false;
     }
+
 }

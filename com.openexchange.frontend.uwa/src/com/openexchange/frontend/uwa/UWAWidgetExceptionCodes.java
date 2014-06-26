@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,29 +50,35 @@
 package com.openexchange.frontend.uwa;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link UWAWidgetExceptionCodes} - Enumeration of all {@link OXException}s.
  *
  * @author Francisco Laguna <fla@synapps.de>
  */
-public enum UWAWidgetExceptionCodes implements OXExceptionCode {
+public enum UWAWidgetExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(UWAWidgetExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
-    SQLError(UWAWidgetExceptionMessages.SQL_ERROR_MSG, CATEGORY_ERROR, 2),
-    NOT_FOUND(UWAWidgetExceptionMessages.NOT_FOUND_MSG, CATEGORY_USER_INPUT, 3),
-    PROTECTED(UWAWidgetExceptionMessages.PROTECTED_MSG, CATEGORY_USER_INPUT, 4),
-    INVALID_CONFIGURATION("Invalid configuration in widget definition file. Please ensure the file looks like this:\nwidget12:\n  autorefresh: true\n  parameter: \"{someParam: true}\"\n  standalone: true\n  url: http://www.mydomain.invalid/widget1\n  visible: true\n  title:Widget 1\n\nwidget13:\n  autorefresh: true\n  parameter: \"{someParam: true}\"\n  standalone: true\n  url: http://www.mydomain.invalid/widget2\n  visible: true\n  title:Widget 2\n", CATEGORY_CONFIGURATION, 5),
+    UNEXPECTED_ERROR("An error occurred: %1$s", CATEGORY_ERROR, 1, null),
+    SQLError("The database returned an error: %1$s", CATEGORY_ERROR, 2, OXExceptionStrings.SQL_ERROR_MSG),
+    NOT_FOUND("The uwa widget with the id %1$s could not be found", CATEGORY_USER_INPUT, 3, UWAWidgetExceptionMessages.NOT_FOUND_MSG),
+    PROTECTED("The widget with the id %1$s is protected and only positional information can be updated", CATEGORY_USER_INPUT, 4,
+        UWAWidgetExceptionMessages.PROTECTED_MSG),
+    INVALID_CONFIGURATION("Invalid configuration in widget definition file. Please ensure the file looks like this:\nwidget12:"
+        + "\n  autorefresh: true\n  parameter: \"{someParam: true}\"\n  standalone: true\n  url: http://www.mydomain.invalid/widget1"
+        + "\n  visible: true\n  title:Widget 1\n\nwidget13:\n  autorefresh: true\n  parameter: \"{someParam: true}\""
+        + "\n  standalone: true\n  url: http://www.mydomain.invalid/widget2\n  visible: true\n  title:Widget 2\n",
+        CATEGORY_CONFIGURATION, 5, null),
     /**
      * The string cannot be parsed to a valid URL.
      */
-    INVALID_URL(UWAWidgetExceptionMessages.INVALID_URL_MSG, CATEGORY_USER_INPUT, 6),
+    INVALID_URL("The string cannot be parsed to a valid URL.", CATEGORY_USER_INPUT, 6, UWAWidgetExceptionMessages.INVALID_URL_MSG),
     ;
 
     private final Category category;
@@ -80,11 +86,14 @@ public enum UWAWidgetExceptionCodes implements OXExceptionCode {
     private final int detailNumber;
 
     private final String message;
+    
+    private String displayMessage;
 
-    private UWAWidgetExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private UWAWidgetExceptionCodes(final String message, final Category category, final int detailNumber, String displayMessage) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -100,6 +109,11 @@ public enum UWAWidgetExceptionCodes implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override

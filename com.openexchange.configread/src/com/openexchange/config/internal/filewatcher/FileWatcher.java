@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -111,7 +111,17 @@ public final class FileWatcher {
         return fw;
     }
 
-    private static void initTimer() {
+    /**
+     * Gets a file watcher bound to given file.
+     *
+     * @param file The file
+     * @return The file watcher or <code>null</code> id there is no such file watcher
+     */
+    public static FileWatcher optFileWatcher(final File file) {
+        return fileWatchers.get(file);
+    }
+
+    private static Timer initTimer() {
         Timer timer = fileWatcherTimer;
         if (null == timer) {
             synchronized (FileWatcher.class) {
@@ -122,6 +132,7 @@ public final class FileWatcher {
                 }
             }
         }
+        return timer;
     }
 
     /**
@@ -139,6 +150,8 @@ public final class FileWatcher {
             }
         }
     }
+
+    // -------------------------------------------------------------------------------------------------- //
 
     final File file;
 
@@ -169,7 +182,25 @@ public final class FileWatcher {
      * @param listener The listener to add
      */
     public void addFileListener(final FileListener listener) {
+        if (null == listener) {
+            return;
+        }
         listeners.add(listener);
+    }
+
+    /**
+     * Removes specified listener.
+     *
+     * @param listener The listener to remove
+     */
+    public void removeFileListener(final FileListener listener) {
+        if (null == listener) {
+            return;
+        }
+        final boolean removed = listeners.remove(listener);
+        if (removed && listeners.isEmpty()) {
+            stopFileWatcher();
+        }
     }
 
     void notifyListeners(final boolean onDelete) {
@@ -194,7 +225,7 @@ public final class FileWatcher {
             synchronized (this) {
                 if (!started.get()) {
                     timerTask = new FileWatcherTimerTask();
-                    initTimer();
+                    final Timer fileWatcherTimer = initTimer();
                     fileWatcherTimer.schedule(timerTask, 1000, period);
                     started.set(true);
                 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -174,11 +174,18 @@ public enum MailAccountExceptionCodes implements DisplayableOXExceptionCode {
      * Mail account creation denied. The host/server name "%1$s" is covered by specified IP range back-list.
      */
     BLACKLISTED_SERVER(MailAccountExceptionCodes.BLACKLISTED_SERVER_MSG, CATEGORY_WARNING, 25, MailAccountExceptionStrings.BLACKLISTED_SERVER_MSG_DISPLAY),
+    /**
+     * The protocol must not changed from %1$s to %2$s for user %3$s in context %4$s.
+     */
+    PROTOCOL_CHANGE(MailAccountExceptionCodes.PROTOCOL_CHANGE_MSG, CATEGORY_USER_INPUT, 26, MailAccountExceptionStrings.PROTOCOL_CHANGE_MSG_DISPLAY),
+
     ;
 
     private static final String PREFIX = "ACC";
 
     private static final String UNEXPECTED_ERROR_MSG = "Unexpected error: %1$s.";
+
+    private static final String PROTOCOL_CHANGE_MSG = "The protocol must not changed from %1$s to %2$s for user %3$s in context %4$s.";
 
     private static final String NOT_FOUND_MSG = "Cannot find mail account with identifier %1$s for user %2$s in context %3$s.";
 

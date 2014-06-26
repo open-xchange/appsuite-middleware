@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -131,7 +131,7 @@ public abstract class MailServletInterface implements Closeable {
             return subject;
         }
         final int len = subject.length();
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(len);
+        final StringBuilder sb = new StringBuilder(len);
         char prev = '\0';
         for (int i = 0; i < len; i++) {
             final char c = subject.charAt(i);
@@ -236,21 +236,21 @@ public abstract class MailServletInterface implements Closeable {
     /**
      * Returns an instance of <code>SearchIterator</code> containing all messages located in given folder.
      */
-    public abstract SearchIterator<MailMessage> getAllMessages(String folder, int sortCol, int order, int[] fields, int[] fromToIndices) throws OXException;
+    public abstract SearchIterator<MailMessage> getAllMessages(String folder, int sortCol, int order, int[] fields, int[] fromToIndices, boolean supportsContinuation) throws OXException;
 
     /**
      * Returns an instance of <code>SearchIterator</code> containing a selection of messages located in given folder.
      * <code>fromToIndices</code> can define a range of messages that should be returned. Moreover <code>searchCols</code> and
      * <code>searchPatterns</code> defines a search pattern to further confine returned messages.
      */
-    public abstract SearchIterator<MailMessage> getMessages(String folder, int[] fromToIndices, int sortCol, int order, int[] searchCols, String[] searchPatterns, boolean linkSearchTermsWithOR, int[] fields) throws OXException;
+    public abstract SearchIterator<MailMessage> getMessages(String folder, int[] fromToIndices, int sortCol, int order, int[] searchCols, String[] searchPatterns, boolean linkSearchTermsWithOR, int[] fields, boolean supportsContinuation) throws OXException;
 
     /**
      * Returns an instance of <code>SearchIterator</code> containing a selection of messages located in given folder.
      * <code>fromToIndices</code> can define a range of messages that should be returned. Moreover <code>searchCols</code> and
      * <code>searchPatterns</code> defines a search pattern to further confine returned messages.
      */
-    public abstract SearchIterator<MailMessage> getMessages(String folder, int[] fromToIndices, int sortCol, int order, SearchTerm<?> searchTerm, boolean linkSearchTermsWithOR, int[] fields) throws OXException;
+    public abstract SearchIterator<MailMessage> getMessages(String folder, int[] fromToIndices, int sortCol, int order, SearchTerm<?> searchTerm, boolean linkSearchTermsWithOR, int[] fields, boolean supportsContinuation) throws OXException;
 
     /**
      * Returns a thread-view-sorted instance of <code>SearchIterator</code> containing all messages located in given folder.
@@ -260,7 +260,7 @@ public abstract class MailServletInterface implements Closeable {
     /**
      * Returns a thread-view-sorted instance of <code>SearchIterator</code> containing all messages located in given folder.
      */
-    public abstract List<List<MailMessage>> getAllSimpleThreadStructuredMessages(String folder, boolean includeSent, boolean cache, int sortCol, int order, int[] fields, int[] fromToIndices, long max) throws OXException;
+    public abstract List<List<MailMessage>> getAllSimpleThreadStructuredMessages(String folder, boolean includeSent, boolean cache, int sortCol, int order, int[] fields, int[] fromToIndices, long lookAhead) throws OXException;
 
     /**
      * Returns a thread-view-sorted instance of <code>SearchIterator</code> containing a selection of messages located in given folder.
@@ -402,7 +402,7 @@ public abstract class MailServletInterface implements Closeable {
      * <code>replyMsgUID</code>. <code>replyToAll</code> defines whether to reply to all involved entities or just to main sender.
      * <b>NOTE:</b>This method is intended to support Open-Xchange GUI's display onyl and does not really send the reply.
      */
-    public abstract MailMessage getReplyMessageForDisplay(String folder, String replyMsgUID, boolean replyToAll, UserSettingMail usm) throws OXException;
+    public abstract MailMessage getReplyMessageForDisplay(String folder, String replyMsgUID, boolean replyToAll, UserSettingMail usm, boolean setFrom) throws OXException;
 
     /**
      * Creates an instance of <code>JSONMessageObject</code> which contains the initial forward content of the message identifed through

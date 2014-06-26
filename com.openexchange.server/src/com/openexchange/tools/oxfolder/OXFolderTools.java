@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -1528,9 +1528,6 @@ public class OXFolderTools {
                 case FolderObject.CONTACT:
                     ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
                     return false == contactService.containsForeignObjectInFolder(session, String.valueOf(fo.getObjectID()));
-                case FolderObject.PROJECT:
-                    // TODO:
-                    break;
                 case FolderObject.INFOSTORE:
                     final InfostoreFacade db = new InfostoreFacadeImpl(new DBPoolProvider());
                     return !db.hasFolderForeignObjects(
@@ -1554,8 +1551,6 @@ public class OXFolderTools {
                 case FolderObject.CONTACT:
                     ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
                     return contactService.isFolderEmpty(session, String.valueOf(fo.getObjectID()));
-                case FolderObject.PROJECT:
-                    break;
                 case FolderObject.INFOSTORE:
                     final InfostoreFacade db = new InfostoreFacadeImpl(new DBPoolProvider());
                     return db.isFolderEmpty(fo.getObjectID(), ctx);
@@ -1564,7 +1559,6 @@ public class OXFolderTools {
                         Integer.valueOf(ctx.getContextId()));
                 }
             }
-            return false;
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } catch (final Throwable t) {

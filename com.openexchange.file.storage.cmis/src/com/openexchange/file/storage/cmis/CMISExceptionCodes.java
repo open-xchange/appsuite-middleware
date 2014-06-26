@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,9 +50,10 @@
 package com.openexchange.file.storage.cmis;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link CMISExceptionCodes} - Enumeration of all {@link CIFSException}s.
@@ -60,48 +61,48 @@ import com.openexchange.exception.OXExceptionFactory;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
-public enum CMISExceptionCodes implements OXExceptionCode {
+public enum CMISExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(CMISExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR("An error occurred: %1$s", CATEGORY_ERROR, 1, null),
     /**
      * A CMIS error occurred: %1$s
      */
-    CMIS_ERROR(CMISExceptionMessages.CMIS_ERROR_MSG, CATEGORY_USER_INPUT, 2),
+    CMIS_ERROR("A CMIS error occurred: %1$s", CATEGORY_USER_INPUT, 2, CMISExceptionMessages.CMIS_ERROR_MSG),
     /**
      * Invalid CMIS URL: %1$s
      */
-    INVALID_CMIS_URL(CMISExceptionMessages.INVALID_CMIS_URL_MSG, CATEGORY_USER_INPUT, 3),
+    INVALID_CMIS_URL("Invalid CMIS URL: %1$s", CATEGORY_USER_INPUT, 3, CMISExceptionMessages.INVALID_CMIS_URL_MSG),
     /**
      * CMIS URL does not denote a directory: %1$s
      */
-    NOT_A_FOLDER(CMISExceptionMessages.NOT_A_FOLDER_MSG, CATEGORY_USER_INPUT, 4),
+    NOT_A_FOLDER("CMIS URL does not denote a directory: %1$s", CATEGORY_USER_INPUT, 4, CMISExceptionMessages.NOT_A_FOLDER_MSG),
     /**
      * The CMIS resource does not exist: %1$s
      */
-    NOT_FOUND(CMISExceptionMessages.NOT_FOUND_MSG, CATEGORY_USER_INPUT, 5),
+    NOT_FOUND("The CMIS resource does not exist: %1$s", CATEGORY_USER_INPUT, 5, CMISExceptionMessages.NOT_A_FOLDER_MSG),
     /**
      * Update denied for CMIS resource: %1$s
      */
-    UPDATE_DENIED(CMISExceptionMessages.UPDATE_DENIED_MSG, CATEGORY_USER_INPUT, 6),
+    UPDATE_DENIED("Update denied for CMIS resource: %1$s", CATEGORY_USER_INPUT, 6, CMISExceptionMessages.UPDATE_DENIED_MSG),
     /**
      * Delete denied for CMIS resource: %1$s
      */
-    DELETE_DENIED(CMISExceptionMessages.DELETE_DENIED_MSG, CATEGORY_USER_INPUT, 7),
+    DELETE_DENIED("Delete denied for CMIS resource: %1$s", CATEGORY_USER_INPUT, 7, CMISExceptionMessages.DELETE_DENIED_MSG),
     /**
      * CMIS URL does not denote a file: %1$s
      */
-    NOT_A_FILE(CMISExceptionMessages.NOT_A_FILE_MSG, CATEGORY_USER_INPUT, 8),
+    NOT_A_FILE("CMIS URL does not denote a file: %1$s", CATEGORY_USER_INPUT, 8, CMISExceptionMessages.NOT_A_FILE_MSG),
     /**
      * Missing file name.
      */
-    MISSING_FILE_NAME(CMISExceptionMessages.MISSING_FILE_NAME_MSG, CATEGORY_USER_INPUT, 12),
+    MISSING_FILE_NAME("Missing file name.", CATEGORY_USER_INPUT, 12, CMISExceptionMessages.MISSING_FILE_NAME_MSG),
     /**
      * Versioning not supported by CMIS file storage.
      */
-    VERSIONING_NOT_SUPPORTED(CMISExceptionMessages.VERSIONING_NOT_SUPPORTED_MSG, Category.CATEGORY_ERROR, 13),
+    VERSIONING_NOT_SUPPORTED("Versioning not supported by CMIS file storage.", Category.CATEGORY_ERROR, 13, null),
 
     ;
 
@@ -110,11 +111,14 @@ public enum CMISExceptionCodes implements OXExceptionCode {
     private final int detailNumber;
 
     private final String message;
+    
+    private String displayMessage;
 
-    private CMISExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private CMISExceptionCodes(final String message, final Category category, final int detailNumber, String displayMessage) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -130,6 +134,11 @@ public enum CMISExceptionCodes implements OXExceptionCode {
     @Override
     public int getNumber() {
         return detailNumber;
+    }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -79,7 +79,6 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.l10n.SuperCollator;
 import com.openexchange.search.SearchTerm;
 
@@ -111,7 +110,7 @@ public class Executor {
      * @throws OXException
      */
     public long count(Connection connection, Table table, int contextID) throws SQLException, OXException {
-        StringAllocator allocator = new StringAllocator(128);
+        StringBuilder allocator = new StringBuilder(128);
         allocator.append("SELECT COUNT(*) FROM ").append(table).append(" WHERE ")
             .append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=?;");
         PreparedStatement stmt = null;
@@ -138,7 +137,7 @@ public class Executor {
      * @throws OXException
      */
     public int count(Connection connection, Table table, int contextID, int userID, int folderID, boolean canReadAll) throws SQLException, OXException {
-        StringAllocator allocator = new StringAllocator(128);
+        StringBuilder allocator = new StringBuilder(128);
         if (canReadAll) {
             String pflag = Mappers.CONTACT.get(ContactField.PRIVATE_FLAG).getColumnLabel();
             allocator.append("SELECT COUNT(*) FROM ").append(table).append(" WHERE ")
@@ -181,7 +180,7 @@ public class Executor {
      */
     public Contact selectSingle(Connection connection, Table table, int contextID, int objectID, ContactField[] fields)
     		throws SQLException, OXException {
-        com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator(256);
+        StringBuilder stringBuilder = new StringBuilder(256);
         stringBuilder.append("SELECT ").append(Mappers.CONTACT.getColumns(fields)).append(" FROM ").append(table).append(" WHERE ")
             .append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=? AND ")
             .append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel()).append("=?;");
@@ -207,7 +206,7 @@ public class Executor {
      * @throws SQLException
      */
     public Date selectNewestAttachmentDate(final Connection connection, final int contextID, final int objectID) throws SQLException {
-        final com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
+        final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("SELECT MAX(creation_date) FROM prg_attachment WHERE cid=? AND module=? AND attached=?;");
         PreparedStatement stmt = null;
         ResultSet resultSet = null;
@@ -232,7 +231,7 @@ public class Executor {
      * @throws SQLException
      */
     public Map<Integer, Date> selectNewestAttachmentDates(final Connection connection, final int contextID, final int objectIDs[]) throws SQLException {
-        final com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
+        final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("SELECT attached,MAX(creation_date) FROM prg_attachment WHERE cid=? AND module=? AND attached IN (")
         		.append(Tools.toCSV(objectIDs)).append(") GROUP BY attached;");
         PreparedStatement stmt = null;
@@ -274,33 +273,33 @@ public class Executor {
          * construct query string
          */
     	SearchTermAdapter adapter = null != term ? new SearchTermAdapter(term, getCharset(sortOptions)) : null;
-        StringAllocator stringAllocator = new StringAllocator();
-        stringAllocator.append("SELECT ").append(Mappers.CONTACT.getColumns(fields)).append(" FROM ").append(table).append(" WHERE ")
+        StringBuilder StringBuilder = new StringBuilder();
+        StringBuilder.append("SELECT ").append(Mappers.CONTACT.getColumns(fields)).append(" FROM ").append(table).append(" WHERE ")
             .append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=?");
         if (Integer.MIN_VALUE != folderID) {
-        	stringAllocator.append(" AND ").append(Mappers.CONTACT.get(ContactField.FOLDER_ID).getColumnLabel()).append("=?");
+        	StringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.FOLDER_ID).getColumnLabel()).append("=?");
         }
         if (null != objectIDs && 0 < objectIDs.length) {
-        	stringAllocator.append(" AND ").append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel());
+        	StringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel());
         	if (1 == objectIDs.length) {
-        		stringAllocator.append('=').append(objectIDs[0]);
+        		StringBuilder.append('=').append(objectIDs[0]);
         	} else {
-	        	stringAllocator.append(" IN (").append(Tools.toCSV(objectIDs)).append(')');
+	        	StringBuilder.append(" IN (").append(Tools.toCSV(objectIDs)).append(')');
         	}
         }
         if (Long.MIN_VALUE != minLastModified) {
-            stringAllocator.append(" AND ").append(Mappers.CONTACT.get(ContactField.LAST_MODIFIED).getColumnLabel()).append(">?");
+            StringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.LAST_MODIFIED).getColumnLabel()).append(">?");
         }
         if (null != adapter) {
-        	stringAllocator.append(" AND ").append(adapter.getClause());
+        	StringBuilder.append(" AND ").append(adapter.getClause());
         }
         if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
-        	stringAllocator.append(' ').append(Tools.getOrderClause(sortOptions));
+        	StringBuilder.append(' ').append(Tools.getOrderClause(sortOptions));
         	if (0 < sortOptions.getLimit()) {
-            	stringAllocator.append(' ').append(Tools.getLimitClause(sortOptions));
+            	StringBuilder.append(' ').append(Tools.getLimitClause(sortOptions));
         	}
         }
-        stringAllocator.append(';');
+        StringBuilder.append(';');
         /*
          * prepare statement
          */
@@ -308,7 +307,7 @@ public class Executor {
         int parameterIndex = 1;
         ResultSet resultSet = null;
         try {
-            stmt = connection.prepareStatement(stringAllocator.toString());
+            stmt = connection.prepareStatement(StringBuilder.toString());
             stmt.setInt(parameterIndex++, contextID);
             if (Integer.MIN_VALUE != folderID) {
             	stmt.setInt(parameterIndex++, folderID);
@@ -350,7 +349,7 @@ public class Executor {
         /*
          * construct query string
          */
-        com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
+        StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("SELECT ").append(Mappers.CONTACT.getColumns(fields)).append(" FROM ").append(Table.CONTACTS)
             .append(" WHERE ").append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=?");
         if (null != folderIDs && 0 < folderIDs.length) {
@@ -404,7 +403,7 @@ public class Executor {
          * construct query string
          */
         SearchAdapter adapter = new ContactSearchAdapter(contactSearch, contextID, fields, getCharset(sortOptions));
-        com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
+        StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(adapter.getClause());
         if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
             stringBuilder.append(' ').append(Tools.getOrderClause(sortOptions));
@@ -446,7 +445,7 @@ public class Executor {
      */
     public DistListMember[] select(final Connection connection, final Table table, final int contextID, final int objectID,
     		final DistListMemberField[] fields) throws SQLException, OXException {
-        final com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
+        final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("SELECT ").append(Mappers.DISTLIST.getColumns(fields)).append(" FROM ").append(table).append(" WHERE ")
             .append(Mappers.DISTLIST.get(DistListMemberField.CONTEXT_ID).getColumnLabel()).append("=? AND ")
             .append(Mappers.DISTLIST.get(DistListMemberField.PARENT_CONTACT_ID).getColumnLabel()).append("=?;");
@@ -481,7 +480,7 @@ public class Executor {
      */
     public Map<Integer, List<DistListMember>> select(final Connection connection, final Table table, final int contextID,
     		final int[] objectIDs, final DistListMemberField[] fields) throws SQLException, OXException {
-        final com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
+        final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("SELECT ").append(Mappers.DISTLIST.getColumns(fields)).append(" FROM ").append(table).append(" WHERE ")
             .append(Mappers.DISTLIST.get(DistListMemberField.CONTEXT_ID).getColumnLabel()).append("=? AND ")
             .append(Mappers.DISTLIST.get(DistListMemberField.PARENT_CONTACT_ID).getColumnLabel()).append(" IN (")
@@ -523,7 +522,7 @@ public class Executor {
      * @throws OXException
      */
     public List<DistListMember> select(Connection connection, Table table, int contextID, int referencedObjectID, int referencedFolderID, DistListMemberField[] fields) throws SQLException, OXException {
-        com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
+        StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("SELECT ").append(Mappers.DISTLIST.getColumns(fields)).append(" FROM ").append(table).append(" WHERE ")
             .append(Mappers.DISTLIST.get(DistListMemberField.CONTEXT_ID).getColumnLabel()).append("=? AND ")
             .append(Mappers.DISTLIST.get(DistListMemberField.CONTACT_ID).getColumnLabel()).append("=? AND ( ")
@@ -551,7 +550,7 @@ public class Executor {
 
     public int insert(final Connection connection, final Table table, final Contact contact, final ContactField[] fields)
     		throws SQLException, OXException {
-        final com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
+        final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("INSERT INTO ").append(table).append(" (").append(Mappers.CONTACT.getColumns(fields))
             .append(") VALUES (").append(Tools.getParameters(fields.length)).append(");");
         PreparedStatement stmt = null;
@@ -567,7 +566,7 @@ public class Executor {
     public int insert(final Connection connection, final Table table, final DistListMember member, final DistListMemberField[] fields)
     		throws SQLException, OXException {
         member.setUuid(UUID.randomUUID());
-        final com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
+        final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("INSERT INTO ").append(table).append(" (").append(Mappers.DISTLIST.getColumns(fields))
             .append(") VALUES (").append(Tools.getParameters(fields.length)).append(");");
         PreparedStatement stmt = null;
@@ -594,7 +593,7 @@ public class Executor {
     }
 
     public int insertFrom(Connection connection, Table from, Table to, int contextID, int folderID, int[] objectIDs, long maxLastModified) throws SQLException, OXException {
-        com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
+        StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("REPLACE INTO ").append(to).append(" SELECT * FROM ").append(from).append(" WHERE ");
         if (from.isDistListTable()) {
             stringBuilder.append(Mappers.DISTLIST.get(DistListMemberField.CONTEXT_ID).getColumnLabel()).append("=?");
@@ -683,37 +682,37 @@ public class Executor {
         /*
          * build statement
          */
-        StringAllocator stringAllocator = new StringAllocator();
-        stringAllocator.append("REPLACE INTO ").append(Table.DELETED_CONTACTS).append(" (")
+        StringBuilder StringBuilder = new StringBuilder();
+        StringBuilder.append("REPLACE INTO ").append(Table.DELETED_CONTACTS).append(" (")
             .append(Mappers.CONTACT.getColumns(copiedFields)).append(',')
             .append(Mappers.CONTACT.getColumns(updatedFields)).append(") SELECT ");
         for (ContactField copiedField : copiedFields) {
-            stringAllocator.append(Table.CONTACTS).append('.').append(Mappers.CONTACT.get(copiedField).getColumnLabel()).append(',');
+            StringBuilder.append(Table.CONTACTS).append('.').append(Mappers.CONTACT.get(copiedField).getColumnLabel()).append(',');
         }
-        stringAllocator.append(Tools.getParameters(updatedFields.length)).append(" FROM ").append(Table.CONTACTS).append(" WHERE ");
-        stringAllocator.append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=?");
+        StringBuilder.append(Tools.getParameters(updatedFields.length)).append(" FROM ").append(Table.CONTACTS).append(" WHERE ");
+        StringBuilder.append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=?");
         if (Integer.MIN_VALUE != folderID) {
-            stringAllocator.append(" AND ").append(Mappers.CONTACT.get(ContactField.FOLDER_ID).getColumnLabel()).append("=?");
+            StringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.FOLDER_ID).getColumnLabel()).append("=?");
         }
         if (null != objectIDs && 0 < objectIDs.length) {
-            stringAllocator.append(" AND ").append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel());
+            StringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel());
             if (1 == objectIDs.length) {
-                stringAllocator.append('=').append(objectIDs[0]);
+                StringBuilder.append('=').append(objectIDs[0]);
             } else {
-                stringAllocator.append(" IN (").append(Tools.toCSV(objectIDs)).append(')');
+                StringBuilder.append(" IN (").append(Tools.toCSV(objectIDs)).append(')');
             }
         }
         if (Long.MIN_VALUE != maxLastModified) {
-            stringAllocator.append(" AND ").append(Mappers.CONTACT.get(ContactField.LAST_MODIFIED).getColumnLabel()).append("<=?");
+            StringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.LAST_MODIFIED).getColumnLabel()).append("<=?");
         }
-        stringAllocator.append(';');
+        StringBuilder.append(';');
         /*
          * prepare statement
          */
         PreparedStatement stmt = null;
         int parameterIndex = 1;
         try {
-            stmt = connection.prepareStatement(stringAllocator.toString());
+            stmt = connection.prepareStatement(StringBuilder.toString());
             for (ContactField updatedField : updatedFields) {
                 Mappers.CONTACT.get(updatedField).set(stmt, parameterIndex++, update);
             }
@@ -735,7 +734,7 @@ public class Executor {
 
     public int insertFrom(final Connection connection, final Table from, final Table to, final int contextID, final int objectID,
         final long maxLastModified) throws SQLException, OXException {
-    final com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
+    final StringBuilder stringBuilder = new StringBuilder();
     stringBuilder.append("REPLACE INTO ").append(to).append(" SELECT * FROM ").append(from).append(" WHERE ");
     if (from.isDistListTable()) {
         stringBuilder.append(Mappers.DISTLIST.get(DistListMemberField.CONTEXT_ID).getColumnLabel()).append("=? AND ")
@@ -785,17 +784,17 @@ public class Executor {
      */
     public int replace(Connection connection, Table table, int contextID, int objectID, long maxLastModified, Contact contact,
         ContactField[] fields) throws SQLException, OXException {
-        StringAllocator stringAllocator = new StringAllocator();
-        stringAllocator.append("REAPLCE INTO ").append(table).append(" SET ").append(Mappers.CONTACT.getAssignments(fields))
+        StringBuilder StringBuilder = new StringBuilder();
+        StringBuilder.append("REAPLCE INTO ").append(table).append(" SET ").append(Mappers.CONTACT.getAssignments(fields))
             .append(" WHERE ").append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel())
             .append("=? AND ").append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel()).append("=?");
         if (Long.MIN_VALUE != maxLastModified) {
-            stringAllocator.append(" AND ").append(Mappers.CONTACT.get(ContactField.LAST_MODIFIED).getColumnLabel()).append("<=?");
+            StringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.LAST_MODIFIED).getColumnLabel()).append("<=?");
         }
-        stringAllocator.append(';');
+        StringBuilder.append(';');
         PreparedStatement stmt = null;
         try {
-            stmt = connection.prepareStatement(stringAllocator.toString());
+            stmt = connection.prepareStatement(StringBuilder.toString());
             Mappers.CONTACT.setParameters(stmt, contact, fields);
             stmt.setInt(1 + fields.length, contextID);
             stmt.setInt(2 + fields.length, objectID);
@@ -809,7 +808,7 @@ public class Executor {
     }
 
     public int update(Connection connection, Table table, int contextID, int objectID, long maxLastModified, Contact contact, ContactField[] fields) throws SQLException, OXException {
-        com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
+        StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("UPDATE ").append(table).append(" SET ").append(Mappers.CONTACT.getAssignments(fields)).append(" WHERE ")
             .append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=? AND ")
             .append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel()).append("=?");
@@ -834,7 +833,7 @@ public class Executor {
     }
 
     public int update(Connection connection, Table table, int contextID, int folderID, int[] objectIDs, Contact template, ContactField[] fields, long maxLastModified) throws SQLException, OXException {
-        com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
+        StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("UPDATE ").append(table).append(" SET ").append(Mappers.CONTACT.getAssignments(fields)).append(" WHERE ")
             .append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=?");
         if (Integer.MIN_VALUE != folderID) {
@@ -872,7 +871,7 @@ public class Executor {
     }
 
     public int updateMember(Connection connection, Table table, int contextID, DistListMember member, DistListMemberField[] fields) throws SQLException, OXException {
-        final com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
+        final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("UPDATE ").append(table).append(" SET ").append(Mappers.DISTLIST.getAssignments(fields)).append(" WHERE ")
             .append(Mappers.DISTLIST.get(DistListMemberField.CONTEXT_ID).getColumnLabel()).append("=? AND ")
             .append(Mappers.DISTLIST.get(DistListMemberField.CONTACT_ID).getColumnLabel()).append("=?;");
@@ -890,7 +889,7 @@ public class Executor {
 
     public int delete(Connection connection, Table table, int contextID, int folderID, int[] objectIDs, long maxLastModified)
         throws SQLException, OXException {
-        com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
+        StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("DELETE FROM ").append(table).append(" WHERE ")
             .append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=?");
         if (Integer.MIN_VALUE != folderID) {
@@ -933,7 +932,7 @@ public class Executor {
     }
 
     public int deleteSingle(Connection connection, Table table, int contextID, int objectID, long maxLastModified) throws SQLException, OXException {
-        com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
+        StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("DELETE FROM ").append(table).append(" WHERE ")
             .append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=? AND ")
             .append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel()).append("=?");
@@ -975,23 +974,33 @@ public class Executor {
     }
 
     private static ResultSet logExecuteQuery(final PreparedStatement stmt) throws SQLException {
-        if (false == LOG.isDebugEnabled()) {
-            return stmt.executeQuery();
+        try {
+            if (false == LOG.isDebugEnabled()) {
+                return stmt.executeQuery();
+            }
+            long start = System.currentTimeMillis();
+            ResultSet resultSet = stmt.executeQuery();
+            LOG.debug("executeQuery: {} - {} ms elapsed.", stmt.toString(), (System.currentTimeMillis() - start));
+            return resultSet;
+        } catch (SQLException e) {
+            LOG.warn("Error executing \"{}\": {}", stmt, e.getMessage());
+            throw e;
         }
-        long start = System.currentTimeMillis();
-        ResultSet resultSet = stmt.executeQuery();
-        LOG.debug("executeQuery: {} - {} ms elapsed.", stmt.toString(), (System.currentTimeMillis() - start));
-        return resultSet;
     }
 
     private static int logExecuteUpdate(final PreparedStatement stmt) throws SQLException {
-        if (false == LOG.isDebugEnabled()) {
-            return stmt.executeUpdate();
+        try {
+            if (false == LOG.isDebugEnabled()) {
+                return stmt.executeUpdate();
+            }
+            long start = System.currentTimeMillis();
+            final int rowCount = stmt.executeUpdate();
+            LOG.debug("executeUpdate: {} - {} rows affected, {} ms elapsed.", stmt.toString(), rowCount, (System.currentTimeMillis() - start));
+            return rowCount;
+        } catch (SQLException e) {
+            LOG.warn("Error executing \"{}\": {}", stmt, e.getMessage());
+            throw e;
         }
-        long start = System.currentTimeMillis();
-        final int rowCount = stmt.executeUpdate();
-        LOG.debug("executeUpdate: {} - {} rows affected, {} ms elapsed.", stmt.toString(), rowCount, (System.currentTimeMillis() - start));
-        return rowCount;
     }
 
 }

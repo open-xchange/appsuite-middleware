@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -161,7 +161,7 @@ public class DistributedFileManagementImpl implements DistributedFileManagement 
 
     private IMap<String, String> map() throws OXException {
         HazelcastInstance hazelcastInstance = REFERENCE.get();
-        if (hazelcastInstance == null || !hazelcastInstance.getLifecycleService().isRunning()) {
+        if (hazelcastInstance == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName());
         }
         return hazelcastInstance.getMap(mapName);

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -284,7 +284,7 @@ public final class HTMLFilterHandler implements HtmlHandler {
                         BufferedReader reader = null;
                         try {
                             reader = new BufferedReader(new com.openexchange.java.AsciiReader(new FileInputStream(whitelist)));
-                            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator();
+                            final StringBuilder sb = new StringBuilder();
                             String line = null;
                             while ((line = reader.readLine()) != null) {
                                 if (line.length() > 0 && '#' != line.charAt(0)) {

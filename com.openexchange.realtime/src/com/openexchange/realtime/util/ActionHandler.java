@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -91,7 +91,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  *  }
  *  
  *  With "something" being the name of the method to call (or rather the name of the method is handle + the data of the "action" element of the stanza) 
- *  The method may then use the Stanzas payload trees retrieval methods e.g. {@link Stanza#getPayloads(ElementPath)} to retrieve additional data
+ *  The method may then use the Stanzas payload trees retrieval methods e.g. {@link Stanza#getPayloadTrees(ElementPath)} to retrieve additional data
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
@@ -132,7 +132,7 @@ public class ActionHandler {
      * @return true when a method is found and it in turn didn't return true, false if either no matching method was found or the method returned false
      */
     public boolean callMethod(Object handler, Stanza stanza, Map<String, Object> options) throws OXException {
-        Collection<PayloadTree> payloads = stanza.getPayloads(new ElementPath("action"));
+        Collection<PayloadTree> payloads = stanza.getPayloadTrees(new ElementPath("action"));
         for (PayloadTree payloadTree : payloads) {
             String name = payloadTree.getRoot().getData().toString();
             if (options == null) {

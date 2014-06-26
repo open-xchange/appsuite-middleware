@@ -75,12 +75,18 @@ import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedIgnorableVersionFileAccess;
 import com.openexchange.file.storage.composition.IDBasedRandomFileAccess;
+import com.openexchange.file.storage.search.FileNameTerm;
+import com.openexchange.file.storage.search.OrTerm;
+import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Streams;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 
 /**
  * {@link UploadHelper}
@@ -127,7 +133,7 @@ public class UploadHelper {
                 /*
                  * checksum mismatch, clean up & throw error
                  */
-                session.getStorage().deleteFile(uploadFile);
+                session.getStorage().deleteFile(uploadFile, true);
                 throw DriveExceptionCodes.UPLOADED_FILE_CHECKSUM_ERROR.create(checksum, newVersion.getName(), newVersion.getChecksum());
             }
             return uploadFile;
@@ -197,7 +203,7 @@ public class UploadHelper {
                     fields.add(Field.LAST_MODIFIED);
 
                     if (null != originalVersion) {
-                        File originalFile = session.getStorage().findFileByName(path, originalVersion.getName(), true);
+                        File originalFile = session.getStorage().getFileByName(path, originalVersion.getName(), true);
                         if (null != originalFile && ChecksumProvider.matches(session, originalFile, originalVersion.getChecksum())) {
                             /*
                              * move upload file as new version for existing item
@@ -218,7 +224,7 @@ public class UploadHelper {
                             /*
                              * delete upload file
                              */
-                            session.getStorage().deleteFile(uploadFile);
+                            session.getStorage().deleteFile(uploadFile, true);
                             return file;
                         } else {
                             /*
@@ -288,7 +294,10 @@ public class UploadHelper {
         return new AbstractMap.SimpleEntry<File, String>(file, checksum);
     }
 
-    private Entry<File, String> upload(String path, FileVersion newVersion, InputStream uploadStream, String contentType, long offset, long totalLength) throws OXException {
+    /**
+     * Perfom the upload
+     */
+    Entry<File, String> upload(String path, FileVersion newVersion, InputStream uploadStream, String contentType, long offset, long totalLength) throws OXException {
         /*
          * get/create upload file
          */
@@ -377,18 +386,13 @@ public class UploadHelper {
         }
     }
 
-    public long getUploadOffset(String path, FileVersion file) throws OXException {
-        File uploadFile = getUploadFile(path, file.getChecksum(), false);
-        return null == uploadFile ? 0 : uploadFile.getFileSize();
-    }
-
     private File getUploadFile(String path, String checksum, boolean createIfAbsent) throws OXException {
         /*
          * check for existing partial upload
          */
         String uploadFileName = getUploadFilename(checksum);
         String uploadPath = session.hasTempFolder() ? TEMP_PATH : path;
-        File uploadFile = session.getStorage().findFileByName(uploadPath, uploadFileName);;
+        File uploadFile = session.getStorage().getFileByName(uploadPath, uploadFileName);;
         if (null == uploadFile && createIfAbsent) {
             /*
              * create new upload file
@@ -410,6 +414,20 @@ public class UploadHelper {
     }
 
     /**
+     * Gets the expected upload offset for the supplied file version based on its checksum. If no upload file yet exists, an offset
+     * of <code>0</code> is assumed implicitly.
+     *
+     * @param path The path where the file version should be uploaded to
+     * @param fileVersion The file version
+     * @return The offset in bytes of an existing partial upload file, or <code>0</code> if no such file exists
+     * @throws OXException
+     */
+    public long getUploadOffset(String path, FileVersion file) throws OXException {
+        List<Long> offsets = getUploadOffsets(path, Collections.singletonList(file));
+        return null != offsets && 0 < offsets.size() ? offsets.get(0).longValue() : 0L;
+    }
+
+    /**
      * Gets the expected upload offset for the supplied file versions based on their checksums. If no upload file yet exists, an offset
      * of <code>0</code> is assumed implicitly.
      *
@@ -421,15 +439,11 @@ public class UploadHelper {
     public List<Long> getUploadOffsets(String path, List<FileVersion> fileVersions) throws OXException {
         if (null == fileVersions || 0 == fileVersions.size()) {
             return Collections.emptyList();
-        } else if (1 == fileVersions.size()) {
-            return Collections.singletonList(Long.valueOf(getUploadOffset(path, fileVersions.get(0))));
         }
         List<Long> uploadOffsets = new ArrayList<Long>(fileVersions.size());
         String uploadPath = session.hasTempFolder() ? TEMP_PATH : path;
         String folderID = session.getStorage().getFolderID(uploadPath, false);
-        List<Field> fields = Arrays.asList(Field.FILENAME, Field.FILE_SIZE);
-        String pattern = ".????????????????????????????????" + DriveConstants.FILEPART_EXTENSION;
-        List<File> files = session.getStorage().getFilesInFolder(folderID, true, pattern, fields);
+        List<File> files = findUploadFiles(folderID, fileVersions);
         for (FileVersion fileVersion : fileVersions) {
             String fileName = getUploadFilename(fileVersion.getChecksum());
             long offset = 0;
@@ -444,6 +458,68 @@ public class UploadHelper {
         return uploadOffsets;
     }
 
+    /**
+     * Finds all files representing temporary uploads in a folder for any of the supplied file versions.
+     *
+     * @param folderID The folder to search in
+     * @param fileVersions The file versions to match
+     * @return The found files
+     * @throws OXException
+     */
+    private List<File> findUploadFiles(final String folderID, List<FileVersion> fileVersions) throws OXException {
+        List<File> files = new ArrayList<File>();
+        final List<Field> fields = Arrays.asList(Field.FILENAME, Field.FILE_SIZE);
+        final SearchTerm<?> searchTerm = getSearchTermForUploadFiles(fileVersions);
+        SearchIterator<File> searchIterator = null;
+        try {
+            searchIterator = session.getStorage().wrapInTransaction(new StorageOperation<SearchIterator<File>>() {
+
+                @Override
+                public SearchIterator<File> call() throws OXException {
+                    return session.getStorage().getFileAccess().search(Collections.singletonList(folderID), searchTerm, fields, null,
+                        SortDirection.DEFAULT, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
+                }
+            });
+            while (searchIterator.hasNext()) {
+                File file = searchIterator.next();
+                if (null != file && null != file.getFileName()) {
+                    files.add(file);
+                }
+            }
+        } finally {
+            SearchIterators.close(searchIterator);
+        }
+        return files;
+    }
+
+    /**
+     * Constructs a search term to match any partial upload files for the supplied file versions.
+     *
+     * @param filesToUpload The files to construct the search term for
+     * @return The search term, or <code>null</code> if supplied files were empty
+     */
+    private static SearchTerm<?> getSearchTermForUploadFiles(List<FileVersion> filesToUpload) {
+        if (null == filesToUpload || 0 == filesToUpload.size()) {
+            return null;
+        } else if (1 == filesToUpload.size()) {
+            String fileName = getUploadFilename(filesToUpload.get(0).getChecksum());
+            return new FileNameTerm(fileName, false, false);
+        } else {
+            List<SearchTerm<?>> terms = new ArrayList<SearchTerm<?>>();
+            for (FileVersion fileVersion : filesToUpload) {
+                String fileName = getUploadFilename(fileVersion.getChecksum());
+                terms.add(new FileNameTerm(fileName, false, false));
+            }
+            return new OrTerm(terms);
+        }
+    }
+
+    /**
+     * Constructs the filename as used for partial uploads based on the supplied file checksum string.
+     *
+     * @param checksum The file's checksum
+     * @return The name of the corresponding upload file
+     */
     private static String getUploadFilename(String checksum) {
         return '.' + checksum + DriveConstants.FILEPART_EXTENSION;
     }

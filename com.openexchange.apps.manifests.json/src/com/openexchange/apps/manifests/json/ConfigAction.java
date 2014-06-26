@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -69,6 +69,7 @@ import com.openexchange.apps.manifests.ComputedServerConfigValueService;
 import com.openexchange.apps.manifests.ServerConfigMatcherService;
 import com.openexchange.apps.manifests.json.osgi.ServerConfigServicesLookup;
 import com.openexchange.apps.manifests.json.values.Capabilities;
+import com.openexchange.apps.manifests.json.values.ForcedHttpsValue;
 import com.openexchange.apps.manifests.json.values.Hosts;
 import com.openexchange.apps.manifests.json.values.Languages;
 import com.openexchange.apps.manifests.json.values.Manifests;
@@ -105,11 +106,12 @@ public class ConfigAction implements AJAXActionService {
         this.registry = registry;
 
         computedValues = new ComputedServerConfigValueService[] {
-            new Manifests(services, manifests),
+            new Manifests(services, manifests, registry),
             new Capabilities(services),
             new Hosts(),
             new ServerVersion(),
             new Languages(services),
+            new ForcedHttpsValue(services),
             new UIVersion()
         };
     }
@@ -183,6 +185,27 @@ public class ConfigAction implements AJAXActionService {
                     }
                 }
             }
+
+            Map<String, Object> ccValues = new HashMap<String, Object>();
+            ConfigView view = null;
+            if (session.isAnonymous()) {
+                view = services.getService(ConfigViewFactory.class).getView();
+            } else {
+                view = services.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId());
+                
+            }
+            Map<String, ComposedConfigProperty<String>> allProperties = view.all();
+            for(Map.Entry<String, ComposedConfigProperty<String>> entry: allProperties.entrySet()) {
+                String propName = entry.getKey();
+                if (propName.startsWith("com.openexchange.appsuite.serverConfig.")) {
+                    String value = entry.getValue().get();
+                    if (!value.equals("<as-config>")) {
+                        ccValues.put(propName.substring(39), value);
+                    }
+                }
+            }
+            applicableConfigs.add(ccValues);
+            
             if (!empty) {
                 for (Map<String, Object> config : applicableConfigs) {
                     serverConfiguration.putAll(config);

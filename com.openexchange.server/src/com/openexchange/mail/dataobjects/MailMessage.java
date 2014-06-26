@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -77,16 +77,6 @@ import com.openexchange.tools.TimeZoneUtils;
 
 /**
  * {@link MailMessage} - Abstract super class for all {@link MailMessage} subclasses.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- */
-/**
- * {@link MailMessage}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- */
-/**
- * {@link MailMessage}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -265,6 +255,8 @@ public abstract class MailMessage extends MailPart {
     public static int getColorLabelIntValue(final String cl) throws OXException {
         if (!isColorLabel(cl)) {
             throw MailExceptionCode.UNKNOWN_COLOR_LABEL.create(cl);
+        } else if (!isValidColorLabel(cl)) {
+            return COLOR_LABEL_NONE;
         }
         try {
             return Integer.parseInt(cl.substring(cl.charAt(0) == '$' ? COLOR_LABEL_PREFIX.length() : COLOR_LABEL_PREFIX_OLD.length()));
@@ -321,7 +313,7 @@ public abstract class MailMessage extends MailPart {
      * @return The color abel's string representation
      */
     public static String getColorLabelStringValue(final int cl) {
-        return new com.openexchange.java.StringAllocator(COLOR_LABEL_PREFIX).append(cl).toString();
+        return new StringBuilder(COLOR_LABEL_PREFIX).append(cl).toString();
     }
 
     private static final InternetAddress[] EMPTY_ADDRS = new InternetAddress[0];
@@ -1121,8 +1113,8 @@ public abstract class MailMessage extends MailPart {
             this.userFlags = new HashSet<HeaderName>();
             b_userFlags = true;
         }
-        for (int i = 0; i < userFlags.length; i++) {
-            this.userFlags.add(HeaderName.valueOf(userFlags[i]));
+        for (String userFlag : userFlags) {
+            this.userFlags.add(HeaderName.valueOf(userFlag));
         }
     }
 
@@ -1601,6 +1593,20 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
+     * Gets the <i>References</i> in first order, falls back to <i>In-Reply-To</i> value if absent
+     *
+     * @return Either the <i>References</i>/<i>In-Reply-To</i> value or <code>null</code> if none available
+     */
+    public String[] getReferencesOrInReplyTo() {
+        String[] references = getReferences();
+        if (null != references) {
+            return references;
+        }
+        String inReplyTo = getInReplyTo();
+        return null == inReplyTo ? null : new String[] { inReplyTo };
+    }
+
+    /**
      * @return <code>true</code> if <i>References</i> is set; otherwise <code>false</code>
      */
     public boolean containsReferences() {
@@ -1674,17 +1680,4 @@ public abstract class MailMessage extends MailPart {
      * @param unreadMessages The number of unread messages
      */
     public abstract void setUnreadMessages(int unreadMessages);
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

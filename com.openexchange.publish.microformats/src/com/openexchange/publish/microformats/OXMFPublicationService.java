@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,6 +53,7 @@ import static com.openexchange.publish.microformats.FormStrings.FORM_LABEL_LINK;
 import static com.openexchange.publish.microformats.FormStrings.FORM_LABEL_PROTECTED;
 import static com.openexchange.publish.microformats.FormStrings.FORM_LABEL_SITE;
 import static com.openexchange.publish.microformats.FormStrings.FORM_LABEL_TEMPLATE;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -61,7 +62,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.regex.Pattern;
 import org.json.JSONObject;
-import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
@@ -109,6 +110,8 @@ public class OXMFPublicationService extends AbstractPublicationService {
     private String defaultTemplateName;
 
     private FormElement templateChooser;
+
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXMFPublicationService.class);
 
     public OXMFPublicationService() {
         super();
@@ -226,7 +229,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
         if (isEmpty(site)) {
             return site;
         }
-        return AJAXServlet.encodeUrl(site, true, false);
+        return AJAXUtility.encodeUrl(site, true, false);
     }
 
     protected String normalizeSiteName(final String siteName) {
@@ -343,21 +346,39 @@ public class OXMFPublicationService extends AbstractPublicationService {
         if(!URL.contains(tmpRootUrl)){
             return null;
         }
+        final Pattern firstSplit = Pattern.compile(getRootURL());
         final Pattern SPLIT = Pattern.compile("/");
-        final String[] path = SPLIT.split(URL, 0);
-        final String site = getSite(path);
+        //The Url is something like http://localhost/rootURL/[cid]/[siteName(this may contain /)]?secret=[secret]
+        final String[] pathSplitByRootUrl = firstSplit.split(URL, 0);
+        //We want to get everything behind rootUrl/
+        final String[] path = SPLIT.split(pathSplitByRootUrl[1], 0);
+        final List<String> normalized = new ArrayList<String>(path.length);
+        for (int i = 0; i < path.length; i++) {
+            if (!path[i].equals("")) {
+                String tmpPath = path[i];
+                if (tmpPath.contains("?secret")){
+                    tmpPath = tmpPath.split("\\?secret",0)[0];
+                }
+                normalized.add(tmpPath);
+            }
+        }
+        final String site = getSite(normalized);
         if (site == null) {
             return null;
         }
         return getPublication(ctx, site);
     }
 
-    private String getSite(final String[] path) {
-        String tmpPath = path[path.length-1];
-        if (tmpPath.contains("?secret")){
-            return tmpPath.split("\\?secret",0)[0];
+    private String getSite(final List<String> normalized) {
+        Pattern splittern = Pattern.compile("\\+");
+        //We need to decode this path Element here
+        String encoding = "UTF-8";
+        try {
+            return Strings.join(HelperClass.decodeList(normalized.subList(1, normalized.size()),encoding, splittern), "/");
+        } catch (UnsupportedEncodingException e) {
+            LOG.warn("", e);
         }
-        return tmpPath;
+        return null;
     }
 
     @Override

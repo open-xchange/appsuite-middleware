@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -116,12 +116,12 @@ public final class ImageMessageHandler implements MailMessageHandler {
     public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType, final String fileName, final String id) throws OXException {
         if (part.getContentType().startsWith(IMAGE) || part.getContentType().startsWith(MIME_APPL_OCTET)) {
             String cid = part.getContentId();
-            if (isEmpty(cid)) {
+            if (com.openexchange.java.Strings.isEmpty(cid)) {
                 /*
                  * Try to read from headers
                  */
                 cid = part.getFirstHeader(MessageHeaders.HDR_CONTENT_ID);
-                if (isEmpty(cid)) {
+                if (com.openexchange.java.Strings.isEmpty(cid)) {
                     /*
                      * Compare with filename
                      */
@@ -413,18 +413,4 @@ public final class ImageMessageHandler implements MailMessageHandler {
     public boolean handleUserFlags(final String[] userFlags) throws OXException {
         return true;
     }
-
-    /** Check for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

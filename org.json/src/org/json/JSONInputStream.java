@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -55,7 +55,6 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.json.helpers.StringAllocator;
 import org.json.helpers.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -166,7 +165,7 @@ public final class JSONInputStream extends InputStream {
             if (0 == length || isAscii(str, length)) {
                 return replaceSupplementaryCodePoints(str);
             }
-            final StringAllocator sa = new StringAllocator((length * 3) / 2 + 1);
+            final StringBuilder sa = new StringBuilder((length * 3) / 2 + 1);
             for (int i = 0; i < length; i++) {
                 final char c = str.charAt(i);
                 if ((c > 127) || (c < 32) || ('"' == c)) {
@@ -185,7 +184,7 @@ public final class JSONInputStream extends InputStream {
             return replaceSupplementaryCodePoints(sa.toString());
         }
 
-        private void appendAsJsonUnicode(final int ch, final StringAllocator sa) {
+        private void appendAsJsonUnicode(final int ch, final StringBuilder sa) {
             sa.append("\\u");
             final String hex = Integer.toString(ch, 16);
             for (int i = hex.length(); i < 4; i++) {
@@ -213,7 +212,7 @@ public final class JSONInputStream extends InputStream {
                 int codePoint = Integer.parseInt(m.group(1), 16);
                 if (Character.isSupplementaryCodePoint(codePoint)) {
                     final char[] chars = Character.toChars(codePoint);
-                    final StringAllocator tmp = new StringAllocator(32);
+                    final StringBuilder tmp = new StringBuilder(32);
                     for (int j = 0; j < chars.length; j++) {
                         appendAsJsonUnicode(chars[j], tmp);
                     }

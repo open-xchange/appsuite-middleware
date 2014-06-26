@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,9 +50,10 @@
 package com.openexchange.file.storage.webdav;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link WebDAVFileStorageExceptionCodes} - Enumeration of all {@link OXException}s.
@@ -60,56 +61,59 @@ import com.openexchange.exception.OXExceptionFactory;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public enum WebDAVFileStorageExceptionCodes implements OXExceptionCode {
+public enum WebDAVFileStorageExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(WebDAVFileStorageExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR("An error occurred: %1$s", CATEGORY_ERROR, 1, null),
     /**
      * A HTTP error occurred: %1$s
      */
-    HTTP_ERROR(WebDAVFileStorageExceptionMessages.HTTP_ERROR_MSG, CATEGORY_ERROR, 2),
+    HTTP_ERROR("A HTTP error occurred: %1$s", CATEGORY_ERROR, 2, null),
     /**
      * A DAV error occurred: %1$s
      */
-    DAV_ERROR(WebDAVFileStorageExceptionMessages.DAV_ERROR_MSG, CATEGORY_ERROR, 3),
+    DAV_ERROR("A DAV error occurred: %1$s", CATEGORY_ERROR, 3, null),
     /**
      * The resource is not a directory: %1$s
      */
-    NOT_A_FOLDER(WebDAVFileStorageExceptionMessages.NOT_A_FOLDER_MSG, CATEGORY_ERROR, 4),
+    NOT_A_FOLDER("The resource is not a directory: %1$s", CATEGORY_ERROR, 4, null),
     /**
      * Invalid property "%1$s". Should be "%2$s".
      */
-    INVALID_PROPERTY(WebDAVFileStorageExceptionMessages.INVALID_PROPERTY_MSG, CATEGORY_ERROR, 5),
+    INVALID_PROPERTY("Invalid property \"%1$s\". Should be \"%2$s\".", CATEGORY_ERROR, 5, null),
     /**
      * Invalid date property: %1$s
      */
-    INVALID_DATE_PROPERTY(WebDAVFileStorageExceptionMessages.INVALID_DATE_PROPERTY_MSG, CATEGORY_ERROR, 6),
+    INVALID_DATE_PROPERTY("Invalid date property: %1$s", CATEGORY_ERROR, 6, null),
     /**
      * Directory "%1$s" must not be deleted.
      */
-    DELETE_DENIED(WebDAVFileStorageExceptionMessages.DELETE_DENIED_MSG, CATEGORY_ERROR, 7),
+    DELETE_DENIED("Directory \"%1$s\" must not be deleted.", CATEGORY_PERMISSION_DENIED, 7,
+        WebDAVFileStorageExceptionMessages.DELETE_DENIED_MSG),
     /**
      * Directory "%1$s" must not be updated.
      */
-    UPDATE_DENIED(WebDAVFileStorageExceptionMessages.UPDATE_DENIED_MSG, CATEGORY_ERROR, 8),
+    UPDATE_DENIED("Directory \"%1$s\" must not be updated.", CATEGORY_PERMISSION_DENIED, 8,
+        WebDAVFileStorageExceptionMessages.UPDATE_DENIED_MSG),
     /**
      * Invalid or missing credentials to access WebDAV server "%1$s".
      */
-    INVALID_CREDS(WebDAVFileStorageExceptionMessages.INVALID_CREDS_MSG, CATEGORY_ERROR, 9),
+    INVALID_CREDS("Invalid or missing credentials to access WebDAV server \"%1$s\".", CATEGORY_USER_INPUT, 9,
+        WebDAVFileStorageExceptionMessages.INVALID_CREDS_MSG),
     /**
      * The resource is not a file: %1$s
      */
-    NOT_A_FILE(WebDAVFileStorageExceptionMessages.NOT_A_FILE_MSG, CATEGORY_ERROR, 10),
+    NOT_A_FILE("The resource is not a file: %1$s", CATEGORY_USER_INPUT, 10, WebDAVFileStorageExceptionMessages.NOT_A_FILE_MSG),
     /**
      * Versioning not supported by WebDAV.
      */
-    VERSIONING_NOT_SUPPORTED(WebDAVFileStorageExceptionMessages.VERSIONING_NOT_SUPPORTED_MSG, CATEGORY_ERROR, 11),
+    VERSIONING_NOT_SUPPORTED("Versioning not supported by WebDAV.", CATEGORY_ERROR, 11, null),
     /**
      * Missing file name.
      */
-    MISSING_FILE_NAME(WebDAVFileStorageExceptionMessages.MISSING_FILE_NAME_MSG, CATEGORY_ERROR, 12);
+    MISSING_FILE_NAME("Missing file name.", CATEGORY_USER_INPUT, 12, WebDAVFileStorageExceptionMessages.MISSING_FILE_NAME_MSG);
 
 
     private final Category category;
@@ -118,10 +122,13 @@ public enum WebDAVFileStorageExceptionCodes implements OXExceptionCode {
 
     private final String message;
 
-    private WebDAVFileStorageExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private final String displayMessage;
+
+    private WebDAVFileStorageExceptionCodes(final String message, final Category category, final int detailNumber, String displayMessage) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -142,6 +149,11 @@ public enum WebDAVFileStorageExceptionCodes implements OXExceptionCode {
     @Override
     public int getNumber() {
         return detailNumber;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.infostore;
 
 import java.util.Date;
+import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
@@ -313,6 +314,16 @@ public class FileMetadata implements DocumentMetadata {
         this.fileSpool = string;
     }
 
+    @Override
+    public Map<String, Object> getMeta() {
+        return file.getMeta();
+    }
+
+    @Override
+    public void setMeta(final Map<String, Object> properties) {
+        file.setMeta(properties);
+    }
+
     private static boolean isEmpty(final String string) {
         if (null == string) {
             return true;
@@ -331,24 +342,24 @@ public class FileMetadata implements DocumentMetadata {
      * @param file The file to check
      * @throws OXException If validation fails
      */
-    private static void validate(File file) throws OXException {
+    private static void validate(final File file) throws OXException {
         if (null != file) {
             /*
              * check for numerical identifiers if set
              */
-            String id = file.getId();
+            final String id = file.getId();
             if (FileStorageFileAccess.NEW != id) {
                 try {
                     Integer.valueOf(id);
-                } catch (NumberFormatException e) {
+                } catch (final NumberFormatException e) {
                     throw FileStorageExceptionCodes.INVALID_FILE_IDENTIFIER.create(e, id);
                 }
             }
-            String folderID = file.getFolderId();
+            final String folderID = file.getFolderId();
             if (null != folderID) {
                 try {
                     Integer.valueOf(folderID);
-                } catch (NumberFormatException e) {
+                } catch (final NumberFormatException e) {
                     throw FileStorageExceptionCodes.INVALID_FOLDER_IDENTIFIER.create(e, folderID);
                 }
             }
@@ -356,112 +367,112 @@ public class FileMetadata implements DocumentMetadata {
     }
 
     public static DocumentMetadata getMetadata(final File file) {
-        DocumentMetadata metaData = new DocumentMetadata() {
+        final DocumentMetadata metaData = new DocumentMetadata() {
 
             private static final long serialVersionUID = -1476628439761201503L;
 
             @Override
-            public void setVersionComment(String string) {
+            public void setVersionComment(final String string) {
                 // nothing to do
             }
 
             @Override
-            public void setVersion(int version) {
+            public void setVersion(final int version) {
                 // nothing to do
             }
 
             @Override
-            public void setURL(String url) {
+            public void setURL(final String url) {
                 // nothing to do
             }
 
             @Override
-            public void setTitle(String title) {
+            public void setTitle(final String title) {
                 // nothing to do
             }
 
             @Override
-            public void setNumberOfVersions(int numberOfVersions) {
+            public void setNumberOfVersions(final int numberOfVersions) {
                 // nothing to do
             }
 
             @Override
-            public void setModifiedBy(int lastEditor) {
+            public void setModifiedBy(final int lastEditor) {
                 // nothing to do
             }
 
             @Override
-            public void setLockedUntil(Date lockedUntil) {
+            public void setLockedUntil(final Date lockedUntil) {
                 // nothing to do
             }
 
             @Override
-            public void setLastModified(Date now) {
+            public void setLastModified(final Date now) {
                 // nothing to do
             }
 
             @Override
-            public void setIsCurrentVersion(boolean bool) {
+            public void setIsCurrentVersion(final boolean bool) {
                 // nothing to do
             }
 
             @Override
-            public void setId(int id) {
+            public void setId(final int id) {
                 // nothing to do
             }
 
             @Override
-            public void setFolderId(long folderId) {
+            public void setFolderId(final long folderId) {
                 // nothing to do
             }
 
             @Override
-            public void setFilestoreLocation(String string) {
+            public void setFilestoreLocation(final String string) {
                 // nothing to do
             }
 
             @Override
-            public void setFileSize(long length) {
+            public void setFileSize(final long length) {
                 // nothing to do
             }
 
             @Override
-            public void setFileName(String fileName) {
+            public void setFileName(final String fileName) {
                 // nothing to do
             }
 
             @Override
-            public void setFileMIMEType(String type) {
+            public void setFileMIMEType(final String type) {
                 // nothing to do
             }
 
             @Override
-            public void setFileMD5Sum(String sum) {
+            public void setFileMD5Sum(final String sum) {
                 // nothing to do
             }
 
             @Override
-            public void setDescription(String description) {
+            public void setDescription(final String description) {
                 // nothing to do
             }
 
             @Override
-            public void setCreationDate(Date creationDate) {
+            public void setCreationDate(final Date creationDate) {
                 // nothing to do
             }
 
             @Override
-            public void setCreatedBy(int cretor) {
+            public void setCreatedBy(final int cretor) {
                 // nothing to do
             }
 
             @Override
-            public void setColorLabel(int color) {
+            public void setColorLabel(final int color) {
                 // nothing to do
             }
 
             @Override
-            public void setCategories(String categories) {
+            public void setCategories(final String categories) {
                 // nothing to do
             }
 
@@ -501,7 +512,7 @@ public class FileMetadata implements DocumentMetadata {
             }
 
             @Override
-            public String getProperty(String key) {
+            public String getProperty(final String key) {
                 return file.getProperty(key);
             }
 
@@ -589,6 +600,16 @@ public class FileMetadata implements DocumentMetadata {
             @Override
             public String getCategories() {
                 return file.getCategories();
+            }
+
+            @Override
+            public Map<String, Object> getMeta() {
+                return file.getMeta();
+            }
+
+            @Override
+            public void setMeta(Map<String, Object> properties) {
+                // Nothing to do
             }
         };
         return metaData;

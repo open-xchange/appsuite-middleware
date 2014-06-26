@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,10 +50,21 @@
 package com.openexchange.realtime.packet;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.locks.Lock;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import com.openexchange.realtime.exception.RealtimeException;
+import com.openexchange.realtime.packet.ID.Events;
 
 
 /**
@@ -62,6 +73,16 @@ import org.junit.Test;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class IDTest {
+    
+    @BeforeClass
+    public static void setUp() {
+        ID.ID_MANAGER_REF.set(new IDManager());
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        ID.ID_MANAGER_REF.set(null);
+    }
 
     @Test
     public void testIDString() {
@@ -187,6 +208,70 @@ public class IDTest {
         Lock lock1 = id1.getLock("scope");
         Lock lock2 = id2.getLock("scope");
         assertTrue("Locks were not identical", lock1 == lock2);
+    }
+    
+    @Test
+    public void testDisposing() throws RealtimeException {
+        ID id1 = new ID("protocol", "component", "user", "context", "resource");
+        assertTrue(id1.isDisposable());
+
+        IDEventHandler beforedispose = new IDEventHandler() {
+            @Override
+            public void handle(String event, ID id, Object source, Map<String, Object> properties) {
+                properties.put("veto", true);
+            }
+        };
+        
+        id1.on(Events.BEFOREDISPOSE, beforedispose);
+
+        assertFalse(id1.isDisposable());
+
+        id1.off(Events.BEFOREDISPOSE, beforedispose);
+
+    }
+
+    @Test
+    public void testBlockingDisposing() throws Exception {
+        final ExecutorService executor = Executors.newSingleThreadExecutor();
+        final CountDownLatch blockingLatch = new CountDownLatch(1);
+        final CountDownLatch mainLatch = new CountDownLatch(1);
+        final ID id1 = new ID("protocol", "component", "user", "context", "resource");
+
+        Callable<Boolean> disposeCall = new Callable<Boolean>() {
+            @Override
+            public Boolean call() throws Exception {
+                return id1.isDisposable();
+            }
+        };
+
+        /*
+         * Let main thread start but block when calling ID.isDisposable
+         */
+        id1.on(Events.BEFOREDISPOSE, new IDEventHandler() {
+            @Override
+            public void handle(String event, ID id, Object source, Map<String, Object> properties) {
+                mainLatch.countDown();
+                try {
+                    blockingLatch.await();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        Future<Boolean> disposeFuture = executor.submit(disposeCall);
+        
+        /*
+         * Other Thread is currently within ID.isDisposable, so this call can't return successfully
+         */
+        mainLatch.await();
+        assertFalse(id1.isDisposable());
+        blockingLatch.countDown();
+        
+        /*
+         * First call should be able to set id to disposing. 
+         */
+        assertTrue(disposeFuture.get());
     }
 
 }

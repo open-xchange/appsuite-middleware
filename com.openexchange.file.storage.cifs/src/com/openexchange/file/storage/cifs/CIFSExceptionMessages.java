@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -59,17 +59,11 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class CIFSExceptionMessages implements LocalizableStrings {
 
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
+    // A CIFS/SMB error occurred.
+    public static final String SMB_ERROR_MSG = "A CIFS/SMB error occurred.";
 
-    // A CIFS/SMB error occurred: %1$s
-    public static final String SMB_ERROR_MSG = "A CIFS/SMB error occurred: %1$s";
-
-    // A CIFS/SMB error occurred: %1$s (status=%2$s)
-    public static final String SMB_ERROR_WITH_STATUS = "A CIFS/SMB error occurred: %1$s (status=%2$s)";
-
-    // Invalid CIFS/SMB URL: %1$s
-    public static final String INVALID_SMB_URL_MSG = "Invalid CIFS/SMB URL: %1$s";
+    // Invalid CIFS/SMB URL.
+    public static final String INVALID_SMB_URL_MSG = "Invalid CIFS/SMB URL.";
 
     // CIFS/SMB URL does not denote a directory: %1$s
     public static final String NOT_A_FOLDER_MSG = "CIFS/SMB URL does not denote a directory: %1$s";
@@ -188,26 +182,8 @@ public final class CIFSExceptionMessages implements LocalizableStrings {
     // No mapping between account names and security IDs was done.
     public static final String NT_STATUS_NONE_MAPPED = "No mapping between account names and security IDs was done.";
 
-    // The security ID structure is invalid.
-    public static final String NT_STATUS_INVALID_SID = "The security ID structure is invalid.";
-
-    // All pipe instances are busy.
-    public static final String NT_STATUS_INSTANCE_NOT_AVAILABLE = "All pipe instances are busy.";
-
-    // All pipe instances are busy.
-    public static final String NT_STATUS_PIPE_NOT_AVAILABLE = "All pipe instances are busy.";
-
-    // The pipe state is invalid.
-    public static final String NT_STATUS_INVALID_PIPE_STATE = "The pipe state is invalid.";
-
     // All pipe instances are busy.
     public static final String NT_STATUS_PIPE_BUSY = "All pipe instances are busy.";
-
-    // No process is on the other end of the pipe.
-    public static final String NT_STATUS_PIPE_DISCONNECTED = "No process is on the other end of the pipe.";
-
-    // The pipe is being closed.
-    public static final String NT_STATUS_PIPE_CLOSING = "The pipe is being closed.";
 
     // Waiting for a process to open the other end of the pipe.
     public static final String NT_STATUS_PIPE_LISTENING = "Waiting for a process to open the other end of the pipe.";
@@ -245,20 +221,11 @@ public final class CIFSExceptionMessages implements LocalizableStrings {
     // The format of the specified computer name is invalid.
     public static final String NT_STATUS_INVALID_COMPUTER_NAME = "The format of the specified computer name is invalid.";
 
-    // The pipe has been ended.
-    public static final String NT_STATUS_PIPE_BROKEN = "The pipe has been ended.";
-
     // The specified local group does not exist.
     public static final String NT_STATUS_NO_SUCH_ALIAS = "The specified local group does not exist.";
 
     // Logon failure: the user has not been granted the requested logon type at this computer.
     public static final String NT_STATUS_LOGON_TYPE_NOT_GRANTED = "Logon failure: the user has not been granted the requested logon type at this computer.";
-
-    // The SAM database on the Windows NT Server does not have a computer account for this workstation trust relationship.
-    public static final String NT_STATUS_NO_TRUST_SAM_ACCOUNT = "The SAM database on the Windows NT Server does not have a computer account for this workstation trust relationship.";
-
-    // The trust relationship between the primary domain and the trusted domain failed.
-    public static final String NT_STATUS_TRUSTED_DOMAIN_FAILURE = "The trust relationship between the primary domain and the trusted domain failed.";
 
     // The account used is a Computer Account. Use your global user account or local user account to access this server.
     public static final String NT_STATUS_NOLOGON_WORKSTATION_TRUST_ACCOUNT = "The account used is a Computer Account. Use your global user account or local user account to access this server.";
@@ -272,12 +239,6 @@ public final class CIFSExceptionMessages implements LocalizableStrings {
     // Your account has been blocked. This can have various reasons like having mistyped the password several times.
     // Please contact your system administrator or hoster in case you can no longer log in.
     public static final String NT_STATUS_ACCOUNT_LOCKED_OUT = "Your account has been blocked. This can have various reasons like having mistyped the password several times.\nPlease contact your system administrator or hoster in case you can no longer log in.";
-
-    // The remote system is not reachable by the transport.
-    public static final String NT_STATUS_PATH_NOT_COVERED = "The remote system is not reachable by the transport.";
-
-    // I/O request could not be handled.
-    public static final String NT_STATUS_IO_REPARSE_TAG_NOT_HANDLED = "I/O request could not be handled.";
 
     /**
      * Initializes a new {@link CIFSExceptionMessages}.

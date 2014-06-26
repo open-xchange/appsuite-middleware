@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,6 +50,7 @@
 package com.openexchange.realtime.example.chineseRoom;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import javax.annotation.concurrent.NotThreadSafe;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.Asynchronous;
@@ -103,7 +104,7 @@ public @NotThreadSafe class ChineseRoom extends GroupDispatcher implements Compo
         // Retrieve the message from the payloads
         StringBuilder message = new StringBuilder();
         // We're iterating over all messages that are constructed with the china.message element path
-        for(PayloadTree messages: stanza.getPayloads(new ElementPath("china", "message"))){
+        for(PayloadTree messages: stanza.getPayloadTrees(new ElementPath("china", "message"))){
             // Simply append all messages
             message.append(messages.getRoot().getData().toString());
         }
@@ -122,10 +123,17 @@ public @NotThreadSafe class ChineseRoom extends GroupDispatcher implements Compo
     }
     
     @Override
-    protected void onJoin(ID id) {
+    protected void onJoin(ID id, Stanza stanza) {
         System.out.println("JOIN: "+id);
+        if (stanza != null) {
+            Collection<PayloadTree> configs = stanza.getPayloadTrees(new ElementPath("chinese", "config"));
+            for (PayloadTree payloadTree : configs) {
+                Object data = payloadTree.getRoot().getData();
+                System.out.println(data);
+            }
+        }
     }
-    
+
     @Override
     protected void onLeave(ID id) {
         System.out.println("LEAVE: "+id);

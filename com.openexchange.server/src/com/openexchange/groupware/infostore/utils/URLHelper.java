@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,7 +50,6 @@
 package com.openexchange.groupware.infostore.utils;
 
 import java.util.regex.Pattern;
-import com.openexchange.java.StringAllocator;
 
 public class URLHelper {
 
@@ -68,7 +67,7 @@ public class URLHelper {
             return null;
         }
 		if(!hasSchema(url)) {
-			return new StringAllocator(url.length() + 8).append(isMail(url) ? "mailto:" : "http://").append(url).toString();
+			return new StringBuilder(url.length() + 8).append(isMail(url) ? "mailto:" : "http://").append(url).toString();
 		}
 		return url;
 	}

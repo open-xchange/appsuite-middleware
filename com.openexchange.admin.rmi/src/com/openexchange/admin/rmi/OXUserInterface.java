@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -228,12 +228,30 @@ public interface OXUserInterface extends Remote {
     public User getContextAdmin(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, StorageException, InvalidDataException;
 
     /**
-     * Changes specified context's capabilities.
+     * Gets specified user's capabilities.
+     *
+     * @param ctx The context
+     * @param user The user
+     * @param auth The credentials
+     * @return The capabilities
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occurred.
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
+     * @throws DatabaseUpdateException
+     * @throws NoSuchUserException
+     */
+    public Set<String> getCapabilities(Context ctx, User user, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+
+    /**
+     * Changes specified user's capabilities.
      *
      * @param ctx The context
      * @param user The user
      * @param capsToAdd The capabilities to add
      * @param capsToRemove The capabilities to remove
+     * @param capsToDrop The capabilities to drop; e.g. clean from storage
      * @param auth The credentials
      * @throws RemoteException General RMI Exception
      * @throws StorageException When an error in the subsystems occurred.
@@ -243,7 +261,7 @@ public interface OXUserInterface extends Remote {
      * @throws DatabaseUpdateException
      * @throws NoSuchUserException
      */
-    public void changeCapabilities(Context ctx, User user, Set<String> capsToAdd, Set<String> capsToRemove, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+    public void changeCapabilities(Context ctx, User user, Set<String> capsToAdd, Set<String> capsToRemove, Set<String> capsToDrop, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
      * Manipulate user data within the given context.

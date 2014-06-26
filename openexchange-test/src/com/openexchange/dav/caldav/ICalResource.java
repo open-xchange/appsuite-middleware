@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -58,59 +58,60 @@ import com.openexchange.dav.caldav.ical.SimpleICal.SimpleICalException;
 
 /**
  * {@link ICalResource}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ICalResource {
-	
+
     public static final String VFREEBUSY = "VFREEBUSY";
     public static final String VCALENDAR = "VCALENDAR";
     public static final String VEVENT = "VEVENT";
+    public static final String VALARM = "VALARM";
     public static final String VTODO = "VTODO";
     public static final String VTIMEZONE = "VTIMEZONE";
 
     private String eTag;
 	private String href;
     private final Component vCalendar;
-	
+
 	public ICalResource(String iCalString, String href, String eTag) throws IOException, SimpleICalException {
 		super();
 		this.href = href;
 		this.eTag = eTag;
 		this.vCalendar = SimpleICal.parse(iCalString);
 	}
-	
+
 	public ICalResource(String iCalString) throws IOException, com.openexchange.dav.caldav.ical.SimpleICal.SimpleICalException {
 		this(iCalString, null, null);
 	}
-		   
+
     public Component getVEvent() {
         List<Component> components = vCalendar.getComponents(VEVENT);
         return 0 < components.size() ? components.get(0) : null;
     }
-        
+
 	public Component getVFreeBusy() {
 	    List<Component> components = vCalendar.getComponents(VFREEBUSY);
 	    return 0 < components.size() ? components.get(0) : null;
     }
-	
+
 	public List<Component> getVEvents() {
-	    return vCalendar.getComponents(VEVENT);     
+	    return vCalendar.getComponents(VEVENT);
     }
-	    
+
 	public List<Component> getVFreeBusys() {
-	    return vCalendar.getComponents(VFREEBUSY);      
+	    return vCalendar.getComponents(VFREEBUSY);
 	}
 
 	public void addComponent(Component component) {
-	    vCalendar.getComponents().add(component);     
+	    vCalendar.getComponents().add(component);
 	}
 
 	@Override
 	public String toString() {
 	    return ICalUtils.fold(this.vCalendar.toString());
 	}
-		
+
 	/**
 	 * @return the eTag
 	 */
@@ -132,5 +133,5 @@ public class ICalResource {
 	public void setHref(String href) {
 		this.href = href;
 	}
-	
+
 }

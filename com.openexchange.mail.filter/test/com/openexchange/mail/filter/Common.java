@@ -1,10 +1,13 @@
 package com.openexchange.mail.filter;
 
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.SimConfigurationService;
 import com.openexchange.mailfilter.internal.MailFilterProperties;
-import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;
+import com.openexchange.mailfilter.services.Services;
+import com.openexchange.server.ServiceLookup;
 
 
 public class Common {
@@ -12,7 +15,7 @@ public class Common {
     public static SimConfigurationService simConfigurationService;
 
     public static void prepare(String passwordSource, String masterPassword) {
-        simConfigurationService = new SimConfigurationService() {
+        SimConfigurationService simConfigurationService = new SimConfigurationService() {
             @Override
             public Properties getFile(String fileName) {
                 final Properties properties = new Properties();
@@ -20,6 +23,7 @@ public class Common {
                 return properties;
             }
         };
+        Common.simConfigurationService = simConfigurationService;
         simConfigurationService.stringProperties.put(MailFilterProperties.Values.SIEVE_CREDSRC.property, "imapLogin");
         simConfigurationService.stringProperties.put(MailFilterProperties.Values.SIEVE_LOGIN_TYPE.property, "user");
         simConfigurationService.stringProperties.put(MailFilterProperties.Values.SIEVE_SERVER.property, "localhost");
@@ -36,7 +40,21 @@ public class Common {
         if (null != masterPassword) {
             simConfigurationService.stringProperties.put(MailFilterProperties.Values.SIEVE_MASTERPASSWORD.property, masterPassword);
         }
-        MailFilterServletServiceRegistry.getServiceRegistry().addService(ConfigurationService.class, simConfigurationService);
+
+        final ConcurrentMap<Class<?>, Object> services = new ConcurrentHashMap<Class<?>, Object>(2);
+        services.put(ConfigurationService.class, simConfigurationService);
+        Services.setServiceLookup(new ServiceLookup() {
+
+            @Override
+            public <S> S getService(Class<? extends S> clazz) {
+                return (S) services.get(clazz);
+            }
+
+            @Override
+            public <S> S getOptionalService(Class<? extends S> clazz) {
+                return (S) services.get(clazz);
+            }
+        });
     }
 
 }

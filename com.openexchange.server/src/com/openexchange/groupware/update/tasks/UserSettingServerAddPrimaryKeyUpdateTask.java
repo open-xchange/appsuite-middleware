@@ -54,7 +54,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.UUID;
+import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
@@ -80,9 +83,6 @@ public class UserSettingServerAddPrimaryKeyUpdateTask extends UpdateTaskAdapter 
         super();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
-     */
     @Override
     public void perform(PerformParameters params) throws OXException {
         int cid = params.getContextId();
@@ -92,7 +92,20 @@ public class UserSettingServerAddPrimaryKeyUpdateTask extends UpdateTaskAdapter 
             con.setAutoCommit(false);
             setUUID(con);
             Tools.modifyColumns(con, "user_setting_server", column);
-            Tools.createPrimaryKey(con, "user_setting_server", new String[] { "cid", "user", column.name });
+
+            dropDuplicates(con);
+
+            // Drop possible foregin keys
+            String foreignKey = Tools.existsForeignKey(con, "user", new String[] {"cid", "id"}, "user_setting_server", new String[] {"cid", "user"});
+            if (null != foreignKey && !foreignKey.equals("")) {
+                Tools.dropForeignKey(con, "user_setting_server", foreignKey);
+            }
+
+            Tools.createPrimaryKeyIfAbsent(con, "user_setting_server", new String[] { "cid", "user", column.name });
+
+            // Re-create foreign key
+            Tools.createForeignKey(con, "user_setting_server", new String[] {"cid", "user"}, "user", new String[] {"cid", "id"});
+
             con.commit();
         } catch (SQLException e) {
             DBUtils.rollback(con);
@@ -106,14 +119,99 @@ public class UserSettingServerAddPrimaryKeyUpdateTask extends UpdateTaskAdapter 
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
-     */
+    private void dropDuplicates(final Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT cid, user, HEX(uuid) FROM user_setting_server GROUP BY cid, user, uuid HAVING count(*) > 1");
+            rs = stmt.executeQuery();
+
+            if (!rs.next()) {
+                return;
+            }
+
+            class Dup {
+                final UUID uuid;
+                final int cid;
+                final int user;
+
+                Dup(int cid, int user, UUID uuid) {
+                    super();
+                    this.cid = cid;
+                    this.user = user;
+                    this.uuid = uuid;
+                }
+            }
+
+            final List<Dup> dups = new LinkedList<Dup>();
+            do {
+                dups.add(new Dup(rs.getInt(1), rs.getInt(2), UUIDs.fromUnformattedString(rs.getString(3))));
+            } while (rs.next());
+
+            Databases.closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
+
+            for (final Dup dup : dups) {
+                stmt = con.prepareStatement("SELECT cid, user, contact_collect_folder, contact_collect_enabled, defaultStatusPrivate, defaultStatusPublic, contactCollectOnMailAccess, contactCollectOnMailTransport, folderTree FROM user_setting_server WHERE cid=? AND user=? AND ?=HEX(uuid)");
+                stmt.setInt(1, dup.cid);
+                stmt.setInt(2, dup.user);
+                stmt.setString(3, UUIDs.getUnformattedString(dup.uuid));
+                rs = stmt.executeQuery();
+
+                if (rs.next()) {
+                    final int cid = rs.getInt(1);
+                    final int user = rs.getInt(2);
+                    final int contact_collect_folder = rs.getInt(3);
+                    final int contact_collect_enabled = rs.getInt(4);
+                    final int defaultStatusPrivate = rs.getInt(5);
+                    final int defaultStatusPublic = rs.getInt(6);
+                    final int contactCollectOnMailAccess = rs.getInt(7);
+                    final int contactCollectOnMailTransport = rs.getInt(8);
+                    final int folderTree = rs.getInt(9);
+                    Databases.closeSQLStuff(rs, stmt);
+                    rs = null;
+                    stmt = null;
+
+                    stmt = con.prepareStatement("DELETE FROM user_setting_server WHERE cid=? AND user=? AND ?=HEX(uuid)");
+                    stmt.setInt(1, dup.cid);
+                    stmt.setInt(2, dup.user);
+                    stmt.setString(3, UUIDs.getUnformattedString(dup.uuid));
+                    stmt.executeUpdate();
+                    Databases.closeSQLStuff(stmt);
+                    stmt = null;
+
+                    stmt = con.prepareStatement("INSERT INTO user_setting_server (cid,user,contact_collect_folder,contact_collect_enabled,defaultStatusPrivate,defaultStatusPublic,contactCollectOnMailAccess,contactCollectOnMailTransport,folderTree,uuid) VALUES (?,?,?,?,?,?,?,?,?,UNHEX(?))");
+                    stmt.setInt(1, cid);
+                    stmt.setInt(2, user);
+                    stmt.setInt(3, contact_collect_folder);
+                    stmt.setInt(4, contact_collect_enabled);
+                    stmt.setInt(5, defaultStatusPrivate);
+                    stmt.setInt(6, defaultStatusPublic);
+                    stmt.setInt(7, contactCollectOnMailAccess);
+                    stmt.setInt(8, contactCollectOnMailTransport);
+                    stmt.setInt(9, folderTree);
+                    stmt.setString(10, UUIDs.getUnformattedString(dup.uuid));
+                    stmt.executeUpdate();
+                    Databases.closeSQLStuff(stmt);
+                    stmt = null;
+                }
+
+                Databases.closeSQLStuff(rs, stmt);
+                rs = null;
+                stmt = null;
+            }
+
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
     @Override
     public String[] getDependencies() {
-        return new String[] { "com.openexchange.groupware.update.tasks.UserSettingServerAddUuidUpdateTask" };
+        return new String[] { UserSettingServerAddUuidUpdateTask.class.getName() };
     }
-    
+
     private void setUUID(Connection con) throws SQLException {
         PreparedStatement stmt = null;
         int oldPos, newPos;

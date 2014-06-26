@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -97,8 +97,14 @@ public abstract class HousekeepingActivator extends DeferredActivator {
         @Override
         public S addingService(final ServiceReference<S> reference) {
             final S service = context.getService(reference);
-            activator.addService(clazz, service);
-            return service;
+            if (activator.addService(clazz, service)) {
+                return service;
+            }
+
+            // Such a service already available
+            LOG.error("Duplicate service instance for singleton service \"{}\" detected. Please review active/started bundles.", clazz.getName());
+            context.ungetService(reference);
+            return null;
         }
 
         @Override
@@ -108,8 +114,10 @@ public abstract class HousekeepingActivator extends DeferredActivator {
 
         @Override
         public void removedService(final ServiceReference<S> reference, final S service) {
-            activator.removeService(clazz);
-            context.ungetService(reference);
+            if (null != service) {
+                activator.removeService(clazz);
+                context.ungetService(reference);
+            }
         }
     }
 

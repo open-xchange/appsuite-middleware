@@ -94,8 +94,8 @@ public class DelDatesPrimaryKeyUpdateTask extends UpdateTaskAdapter {
             }
             if (Tools.hasPrimaryKey(con, DEL_DATES)) {
                 Tools.dropPrimaryKey(con, DEL_DATES);
+                Tools.createPrimaryKey(con, DEL_DATES, new String[] { "cid", "intfield01", "fid" });
             }
-            Tools.createPrimaryKey(con, DEL_DATES, new String[] { "cid", "intfield01", "fid" });
             con.commit();
         } catch (SQLException e) {
             DBUtils.rollback(con);

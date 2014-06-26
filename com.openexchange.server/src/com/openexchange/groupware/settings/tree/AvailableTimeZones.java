@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -56,6 +56,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -74,6 +75,9 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class AvailableTimeZones implements PreferencesItemService {
+
+    /** The logger */
+    static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AvailableTimeZones.class);
 
     private static final String NAME = "availableTimeZones";
 
@@ -103,20 +107,30 @@ public class AvailableTimeZones implements PreferencesItemService {
                     final JSONObject json = new JSONObject();
                     final I18nServices i18nServices = I18nServices.getInstance();
                     Object[][] timezones = new Object[TimeZone.getAvailableIDs().length][3];
-                    
+
                     int i = 0;
                     long now = System.currentTimeMillis();
                     for (final String timeZoneID : TimeZone.getAvailableIDs()) {
                         final int len = timeZoneID.length();
                         if (len >= 4 || SPECIAL.contains(toUpperCase(timeZoneID))) {
-                            int offset = TimeZone.getTimeZone(timeZoneID).getOffset(now);
-                            timezones[i][0] = offset;
-                            timezones[i][1] = timeZoneID;
-                            timezones[i][2] = prefix(offset, i18nServices.translate(user.getLocale(), timeZoneID.replace('_', ' '), false));
+                            if (timeZoneID.startsWith("Etc")) {
+                                /*
+                                 * The special area of "Etc" is used for some administrative zones, particularly for "Etc/UTC" which
+                                 * represents Coordinated Universal Time. In order to conform with the POSIX style, those zone names
+                                 * beginning with "Etc/GMT" have their sign reversed from what most people expect. Therefore discard them to
+                                 * avoid further confusion
+                                 */
+                                LOGGER.debug("Ignoring time zone {}", timeZoneID);
+                            } else {
+                                int offset = TimeZone.getTimeZone(timeZoneID).getOffset(now);
+                                timezones[i][0] = Integer.valueOf(offset);
+                                timezones[i][1] = timeZoneID;
+                                timezones[i][2] = prefix(offset, i18nServices.translate(user.getLocale(), timeZoneID.replace('_', ' '), false));
+                            }
                         }
                         i++;
                     }
-                    
+
                     for(i = 0; i < timezones.length; i++) {
                         Object[] entry = timezones[i];
                         if (entry == null || entry[1] == null || entry[2] == null) {
@@ -124,9 +138,9 @@ public class AvailableTimeZones implements PreferencesItemService {
                         }
                         json.put((String) entry[1], (String) entry[2]);
                     }
-                    
+
                     setting.setSingleValue(json);
-                
+
                 } catch (final JSONException e) {
                     throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
                 }
@@ -134,17 +148,17 @@ public class AvailableTimeZones implements PreferencesItemService {
 
             private String prefix(int offset, String translate) {
                 int seconds = offset / 1000;
-                
+
                 int hours = seconds / 3600;
-                int extraMinutes = (seconds % 3600) / 60;  
+                int extraMinutes = (seconds % 3600) / 60;
                 if (offset > 0) {
                     return String.format("(GMT+%02d:%02d) %s", hours, extraMinutes, translate);
                 } else {
                     return String.format("(GMT-%02d:%02d) %s", Math.abs(hours), Math.abs(extraMinutes), translate);
                 }
             }
-            
-            
+
+
             /** ASCII-wise to upper-case */
             private String toUpperCase(final CharSequence chars) {
                 if (null == chars) {

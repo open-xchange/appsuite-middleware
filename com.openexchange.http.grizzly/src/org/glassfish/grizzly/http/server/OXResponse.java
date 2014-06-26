@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -260,7 +260,7 @@ public class OXResponse extends Response {
                 cc.append(name, 0, name.length());
                 if ((scheme.equals("http") && port != 80) || (scheme.equals("https") && port != 443)) {
                     cc.append(':');
-                    String portS = port + "";
+                    String portS = Integer.toString(port);
                     cc.append(portS, 0, portS.length());
                 }
                 if (!leadingSlash) {

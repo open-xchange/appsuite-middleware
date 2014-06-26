@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -113,7 +113,7 @@ public class DovecotEntity2ACL extends Entity2ACL {
             return null;
         }
         final String quotedDelim = Pattern.quote(String.valueOf(delim));
-        final String abstractPattern = new com.openexchange.java.StringAllocator().append(SHARED_PREFIX).append(quotedDelim).append("([\\p{L}&&[^").append(
+        final String abstractPattern = new StringBuilder().append(SHARED_PREFIX).append(quotedDelim).append("([\\p{L}&&[^").append(
             quotedDelim).append("]]+)").append(quotedDelim).append("\\p{L}+").toString();
         final Matcher m = Pattern.compile(abstractPattern, Pattern.CASE_INSENSITIVE).matcher(sharedFolderName);
         if (m.matches()) {

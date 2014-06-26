@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -232,6 +232,8 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     private int code;
 
+    private boolean lightWeight;
+
     /**
      * List of problematic attributes.
      */
@@ -263,6 +265,7 @@ public class OXException extends Exception implements OXExceptionConstants {
         logMessage = null;
         displayArgs = MESSAGE_ARGS_EMPTY;
         problematics = new LinkedList<ProblematicAttribute>();
+        lightWeight = false;
     }
 
     /**
@@ -281,6 +284,7 @@ public class OXException extends Exception implements OXExceptionConstants {
         logMessage = null;
         displayArgs = MESSAGE_ARGS_EMPTY;
         problematics = new LinkedList<ProblematicAttribute>();
+        lightWeight = false;
     }
 
     /**
@@ -304,6 +308,7 @@ public class OXException extends Exception implements OXExceptionConstants {
             null == cloneMe.problematics ? new LinkedList<ProblematicAttribute>() : new ArrayList<ProblematicAttribute>(
                 cloneMe.problematics);
         this.properties = null == cloneMe.properties ? new HashMap<String, String>(8) : new HashMap<String, String>(cloneMe.properties);
+        this.lightWeight = cloneMe.lightWeight;
     }
 
     /**
@@ -321,6 +326,7 @@ public class OXException extends Exception implements OXExceptionConstants {
         this.displayMessage = OXExceptionStrings.MESSAGE;
         this.displayArgs = MESSAGE_ARGS_EMPTY;
         problematics = new LinkedList<ProblematicAttribute>();
+        lightWeight = false;
     }
 
     /**
@@ -340,6 +346,7 @@ public class OXException extends Exception implements OXExceptionConstants {
         this.displayMessage = null == displayMessage ? OXExceptionStrings.MESSAGE : displayMessage;
         this.displayArgs = null == displayArgs ? MESSAGE_ARGS_EMPTY : displayArgs;
         problematics = new LinkedList<ProblematicAttribute>();
+        lightWeight = false;
     }
 
     /**
@@ -360,6 +367,7 @@ public class OXException extends Exception implements OXExceptionConstants {
         this.displayMessage = null == displayMessage ? OXExceptionStrings.MESSAGE : displayMessage;
         this.displayArgs = displayArgs;
         problematics = new ArrayList<ProblematicAttribute>(1);
+        lightWeight = false;
     }
 
     /**
@@ -383,6 +391,11 @@ public class OXException extends Exception implements OXExceptionConstants {
         }
         this.properties.clear();
         this.properties.putAll(e.properties);
+    }
+
+    @Override
+    public synchronized Throwable fillInStackTrace() {
+        return lightWeight ? this : super.fillInStackTrace();
     }
 
     /**
@@ -447,6 +460,21 @@ public class OXException extends Exception implements OXExceptionConstants {
      */
     public boolean isConflict() {
         return Generic.CONFLICT.equals(generic);
+    }
+
+    /**
+     * Marks this {@link OXException} as light-weight.
+     * <p>
+     * Light-weight in terms of {@link #fillInStackTrace()} is implemented in a lazy way.
+     * <pre>
+     *   public synchronized Throwable fillInStackTrace() {
+     *      return this;
+     *   }
+     * </pre>
+     */
+    public OXException markLightWeight() {
+        this.lightWeight = true;
+        return this;
     }
 
     /**
@@ -588,7 +616,7 @@ public class OXException extends Exception implements OXExceptionConstants {
         /*
          * Log details
          */
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(256).append(getErrorCode());
+        final StringBuilder sb = new StringBuilder(256).append(getErrorCode());
         /*
          * Iterate categories
          */
@@ -642,7 +670,7 @@ public class OXException extends Exception implements OXExceptionConstants {
         /*
          * Log details
          */
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(256);
+        final StringBuilder sb = new StringBuilder(256);
         /*
          * Append message
          */
@@ -797,7 +825,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      */
     public String getExceptionId() {
         if (exceptionId == null) {
-            exceptionId = new com.openexchange.java.StringAllocator(16).append(SERVER_ID).append('-').append(count).toString();
+            exceptionId = new StringBuilder(16).append(SERVER_ID).append('-').append(count).toString();
         }
         return exceptionId;
     }
@@ -853,7 +881,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @return The compound error code
      */
     public final String getErrorCode() {
-        return new com.openexchange.java.StringAllocator(getPrefix()).append('-').append(String.format("%04d", Integer.valueOf(code))).toString();
+        return new StringBuilder(getPrefix()).append('-').append(String.format("%04d", Integer.valueOf(code))).toString();
     }
 
     /**

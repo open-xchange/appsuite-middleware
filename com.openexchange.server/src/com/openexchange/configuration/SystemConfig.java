@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,6 +50,10 @@
 package com.openexchange.configuration;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
 import com.openexchange.tools.conf.AbstractConfig;
@@ -60,7 +64,7 @@ import com.openexchange.tools.conf.AbstractConfig;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class SystemConfig extends AbstractConfig implements Initialization {
+public final class SystemConfig extends AbstractConfig implements Initialization, Reloadable {
 
     /**
      * Singleton instance.
@@ -79,11 +83,9 @@ public final class SystemConfig extends AbstractConfig implements Initialization
     private static final String KEY = "openexchange.propdir";
 
     /**
-     * Prevent instantiation.
+     * All reloadable properties
      */
-    private SystemConfig() {
-        super();
-    }
+    private static final String[] PROPERTIES = new String[] {"all properties in file"};
 
     /**
      * Returns the value of the property with the specified key. This method
@@ -134,6 +136,26 @@ public final class SystemConfig extends AbstractConfig implements Initialization
      */
     public static SystemConfig getInstance() {
         return singleton;
+    }
+
+    /**
+     * Prevent instantiation.
+     */
+    private SystemConfig() {
+        super();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void reloadConfiguration(final ConfigurationService configService) {
+        try {
+            stop();
+            start();
+        } catch (final OXException e) {
+            LOG.warn("Could not reload system configuration.", e);
+        }
     }
 
     /**
@@ -214,5 +236,12 @@ public final class SystemConfig extends AbstractConfig implements Initialization
         public String getPropertyName() {
             return propertyName;
         }
+    }
+
+    @Override
+    public Map<String, String[]> getConfigFileNames() {
+        Map<String, String[]> map = new HashMap<String, String[]>(1);
+        map.put("system.properties", PROPERTIES);
+        return map;
     }
 }

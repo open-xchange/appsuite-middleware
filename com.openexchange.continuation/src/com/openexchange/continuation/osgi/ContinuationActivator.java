@@ -1,0 +1,179 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.continuation.osgi;
+
+import java.io.ByteArrayInputStream;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.Map;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
+import org.slf4j.Logger;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheService;
+import com.openexchange.continuation.ContinuationRegistryService;
+import com.openexchange.continuation.internal.ContinuationRegistryServiceImpl;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.sessiond.SessiondService;
+
+
+/**
+ * {@link ContinuationActivator}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.6.0
+ */
+public final class ContinuationActivator extends HousekeepingActivator {
+
+    /**
+     * Initializes a new {@link ContinuationActivator}.
+     */
+    public ContinuationActivator() {
+        super();
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { CacheService.class, SessiondService.class };
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        final Logger logger = org.slf4j.LoggerFactory.getLogger(ContinuationActivator.class);
+        try {
+            final String regionName = "Continuation";
+            final byte[] ccf = ("jcs.region."+regionName+"=\n" +
+                "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
+                "jcs.region."+regionName+".cacheattributes.MaxObjects=20000\n" +
+                "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
+                "jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" +
+                "jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds=300\n" +
+                "jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds=60\n" +
+                "jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
+                "jcs.region."+regionName+".elementattributes.IsEternal=false\n" +
+                "jcs.region."+regionName+".elementattributes.MaxLifeSeconds=-1\n" +
+                "jcs.region."+regionName+".elementattributes.IdleTime=300\n" +
+                "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
+                "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
+                "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
+            getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf), true);
+
+            {
+                final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+                serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+                final EventHandler eventHandler = new EventHandler() {
+
+                    @Override
+                    public void handleEvent(final Event event) {
+                        final String topic = event.getTopic();
+                        if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic)) {
+                            @SuppressWarnings("unchecked") final Map<String, Session> container =
+                                (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
+                            for (final Session session : container.values()) {
+                                if (!session.isTransient()) {
+                                    handleSession(session);
+                                }
+                            }
+                        } else if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
+                            final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
+                            if (!session.isTransient()) {
+                                handleSession(session);
+                            }
+                        } else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
+                            @SuppressWarnings("unchecked") final Map<String, Session> container =
+                                (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
+                            for (final Session session : container.values()) {
+                                if (!session.isTransient()) {
+                                    handleSession(session);
+                                }
+                            }
+                        }
+                    }
+
+                    private void handleSession(final Session session) {
+                        try {
+                            final SessiondService service = getService(SessiondService.class);
+                            final CacheService cacheService = getService(CacheService.class);
+                            if (null != service && null != cacheService && service.getAnyActiveSessionForUser(session.getUserId(), session.getContextId()) == null) {
+                                final Cache cache = cacheService.getCache(regionName);
+                                cache.remove(new StringBuilder(16).append(session.getUserId()).append('@').append(session.getContextId()).toString());
+                            }
+                        } catch (final Exception e) {
+                            // Failed handling session
+                        }
+                    }
+
+                };
+                registerService(EventHandler.class, eventHandler, serviceProperties);
+            }
+
+            registerService(ContinuationRegistryService.class, new ContinuationRegistryServiceImpl(regionName, this));
+
+            logger.info("Bundle \"com.openexchange.continuation\" successfully started");
+        } catch (final Exception e) {
+            logger.error("Error while starting bundle \"com.openexchange.continuation\"", e);
+            throw e;
+        }
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        final CacheService cacheService = getService(CacheService.class);
+        if (null != cacheService) {
+            cacheService.freeCache("Continuation");
+        }
+        super.stopBundle();
+        org.slf4j.LoggerFactory.getLogger(ContinuationActivator.class).info("Bundle \"com.openexchange.continuation\" successfully stopped");
+    }
+
+}

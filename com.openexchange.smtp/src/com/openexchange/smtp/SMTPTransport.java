@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -99,7 +99,6 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.MsisdnCheck;
 import com.openexchange.log.LogProperties;
@@ -334,6 +333,10 @@ public final class SMTPTransport extends MailTransport {
     }
 
     private javax.mail.Session getSMTPSession() throws OXException {
+        return getSMTPSession(accountId > 0 && MailProperties.getInstance().isEnforceSecureConnection());
+    }
+
+    private javax.mail.Session getSMTPSession(final boolean forceSecure) throws OXException {
         if (null == smtpSession) {
             synchronized (this) {
                 if (null == smtpSession) {
@@ -429,6 +432,9 @@ public final class SMTPTransport extends MailTransport {
                             final Map<String, String> capabilities = SMTPCapabilityCache.getCapabilities(address, smtpConfig.isSecure(), smtpProperties, hostName);
                             if (capabilities.containsKey("STARTTLS")) {
                                 smtpProps.put("mail.smtp.starttls.enable", "true");
+                            } else if (forceSecure) {
+                                // No SSL demanded and SMTP server seems not to support TLS
+                                throw MailExceptionCode.NON_SECURE_DENIED.create(smtpConfig.getServer());
                             }
                         } catch (final IOException e) {
                             smtpProps.put("mail.smtp.starttls.enable", "true");
@@ -589,9 +595,9 @@ public final class SMTPTransport extends MailTransport {
                     strHelper.getString(MailStrings.ACK_NOTIFICATION_TEXT).replaceFirst(
                         "#DATE#",
                         sentDate == null ? "" : quoteReplacement(DateFormat.getDateInstance(DateFormat.LONG, locale).format(sentDate))).replaceFirst(
-                        "#RECIPIENT#",
-                        quoteReplacement(from)).replaceFirst("#SUBJECT#", quoteReplacement(srcMail.getSubject())),
-                    usm.getAutoLinebreak());
+                            "#RECIPIENT#",
+                            quoteReplacement(from)).replaceFirst("#SUBJECT#", quoteReplacement(srcMail.getSubject())),
+                            usm.getAutoLinebreak());
                 MessageUtility.setText(txt, defaultMimeCS, text);
                 // text.setText(txt,defaultMimeCS);
                 text.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
@@ -839,8 +845,8 @@ public final class SMTPTransport extends MailTransport {
             throw SMTPExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
         //finally {
-            // Restore the ClassLoader
-            // Thread.currentThread().setContextClassLoader(tcl);
+        // Restore the ClassLoader
+        // Thread.currentThread().setContextClassLoader(tcl);
         //}
     }
 
@@ -857,10 +863,11 @@ public final class SMTPTransport extends MailTransport {
                         handlePrivilegedActionException(e);
                     }
                 } else {
-                    transport.connect(server, port, smtpConfig.getLogin(), encodedPassword);
+                    final String login = smtpConfig.getLogin();
+                    transport.connect(server, port, null == login ? "" : login, null == encodedPassword ? "" : encodedPassword);
                 }
             } else {
-                transport.connect(server, port, null, null);
+                transport.connect(server, port, "", "");
             }
         } catch (final MessagingException e) {
             if (e.getNextException() instanceof javax.net.ssl.SSLHandshakeException) {
@@ -970,7 +977,7 @@ public final class SMTPTransport extends MailTransport {
     private static void processAddressHeader(final MimeMessage mimeMessage) throws OXException, MessagingException {
         {
             final String str = mimeMessage.getHeader("From", null);
-            if (!isEmpty(str)) {
+            if (!com.openexchange.java.Strings.isEmpty(str)) {
                 final InternetAddress[] addresses = QuotedInternetAddress.parse(str, false);
                 checkRecipients(addresses);
                 mimeMessage.setFrom(addresses[0]);
@@ -978,7 +985,7 @@ public final class SMTPTransport extends MailTransport {
         }
         {
             final String str = mimeMessage.getHeader("Sender", null);
-            if (!isEmpty(str)) {
+            if (!com.openexchange.java.Strings.isEmpty(str)) {
                 final InternetAddress[] addresses = QuotedInternetAddress.parse(str, false);
                 checkRecipients(addresses);
                 mimeMessage.setSender(addresses[0]);
@@ -986,7 +993,7 @@ public final class SMTPTransport extends MailTransport {
         }
         {
             final String str = mimeMessage.getHeader("To", null);
-            if (!isEmpty(str)) {
+            if (!com.openexchange.java.Strings.isEmpty(str)) {
                 final InternetAddress[] addresses = QuotedInternetAddress.parse(str, false);
                 checkRecipients(addresses);
                 mimeMessage.setRecipients(RecipientType.TO, addresses);
@@ -994,7 +1001,7 @@ public final class SMTPTransport extends MailTransport {
         }
         {
             final String str = mimeMessage.getHeader("Cc", null);
-            if (!isEmpty(str)) {
+            if (!com.openexchange.java.Strings.isEmpty(str)) {
                 final InternetAddress[] addresses = QuotedInternetAddress.parse(str, false);
                 checkRecipients(addresses);
                 mimeMessage.setRecipients(RecipientType.CC, addresses);
@@ -1002,7 +1009,7 @@ public final class SMTPTransport extends MailTransport {
         }
         {
             final String str = mimeMessage.getHeader("Bcc", null);
-            if (!isEmpty(str)) {
+            if (!com.openexchange.java.Strings.isEmpty(str)) {
                 final InternetAddress[] addresses = QuotedInternetAddress.parse(str, false);
                 checkRecipients(addresses);
                 mimeMessage.setRecipients(RecipientType.BCC, addresses);
@@ -1010,7 +1017,7 @@ public final class SMTPTransport extends MailTransport {
         }
         {
             final String str = mimeMessage.getHeader("Reply-To", null);
-            if (!isEmpty(str)) {
+            if (!com.openexchange.java.Strings.isEmpty(str)) {
                 final InternetAddress[] addresses = QuotedInternetAddress.parse(str, false);
                 checkRecipients(addresses);
                 mimeMessage.setReplyTo(addresses);
@@ -1018,7 +1025,7 @@ public final class SMTPTransport extends MailTransport {
         }
         {
             final String str = mimeMessage.getHeader("Disposition-Notification-To", null);
-            if (!isEmpty(str)) {
+            if (!com.openexchange.java.Strings.isEmpty(str)) {
                 final InternetAddress[] addresses = QuotedInternetAddress.parse(str, false);
                 checkRecipients(addresses);
                 mimeMessage.setHeader("Disposition-Notification-To", addresses[0].toString());
@@ -1105,7 +1112,7 @@ public final class SMTPTransport extends MailTransport {
         // Connect to SMTP server
         final Transport transport;
         try {
-            transport = getSMTPSession().getTransport(SMTP);
+            transport = getSMTPSession(MailProperties.getInstance().isEnforceSecureConnection()).getTransport(SMTP);
         } catch (final NoSuchProviderException e) {
             throw MimeMailException.handleMessagingException(e);
         }
@@ -1225,7 +1232,7 @@ public final class SMTPTransport extends MailTransport {
     }
 
     private static String quoteReplacement(final String str) {
-        return isEmpty(str) ? "" : quoteReplacement0(str);
+        return com.openexchange.java.Strings.isEmpty(str) ? "" : quoteReplacement0(str);
     }
 
     private static String quoteReplacement0(final String s) {
@@ -1233,7 +1240,7 @@ public final class SMTPTransport extends MailTransport {
             return s;
         }
         final int length = s.length();
-        final StringAllocator sb = new StringAllocator(length << 1);
+        final StringBuilder sb = new StringBuilder(length << 1);
         for (int i = 0; i < length; i++) {
             final char c = s.charAt(i);
             if (c == '\\') {
@@ -1255,24 +1262,11 @@ public final class SMTPTransport extends MailTransport {
             return null;
         }
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
         }
         return builder.toString();
     }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

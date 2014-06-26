@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -128,11 +128,13 @@ public class DeleteRequest extends AbstractMailRequest<DeleteResponse> {
         return array;
     }
 
-    public void ignoreError() {
+    public DeleteRequest ignoreError() {
         failOnError = false;
+        return this;
     }
 
-    public void failOnError() {
+    public DeleteRequest failOnError() {
         failOnError = true;
+        return this;
     }
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,18 +49,27 @@
 
 package com.openexchange.contact.storage.ldap.osgi;
 
+import java.io.File;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import org.slf4j.Logger;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.contact.storage.ContactStorage;
 import com.openexchange.contact.storage.ldap.config.LdapContactStorageFactory;
 import com.openexchange.contact.storage.ldap.database.LdapCreateTableService;
 import com.openexchange.contact.storage.ldap.database.LdapCreateTableTask;
 import com.openexchange.contact.storage.ldap.database.LdapDeleteListener;
 import com.openexchange.contact.storage.ldap.internal.LdapServiceLookup;
+import com.openexchange.contact.storage.ldap.internal.Tools;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
@@ -73,9 +82,11 @@ import com.openexchange.user.UserService;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class LdapContactStorageActivator extends HousekeepingActivator {
+public class LdapContactStorageActivator extends HousekeepingActivator implements Reloadable {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(LdapContactStorageActivator.class);
+    private static final String[] PROPERTIES = new String[] {"all properties in file"};
+    private static File[] oldProperties;
 
     /**
      * Initializes a new {@link LdapContactStorageActivator}.
@@ -107,6 +118,9 @@ public class LdapContactStorageActivator extends HousekeepingActivator {
             for (ContactStorage storage : LdapContactStorageFactory.createAll()) {
                 registerService(ContactStorage.class, storage);
             }
+
+            // register reloadable service
+            registerService(Reloadable.class, this);
         } catch (Exception e) {
             LOG.error("error starting \"com.openexchange.contact.storage.ldap\"", e);
             throw e;
@@ -118,6 +132,62 @@ public class LdapContactStorageActivator extends HousekeepingActivator {
         LOG.info("stopping bundle: com.openexchange.contact.storage.ldap");
         LdapServiceLookup.set(null);
         super.stopBundle();
+    }
+
+    private void reinit() {
+        LOG.info("Stopping bundle com.openexchange.contact.storage.ldap for reinitialisation.");
+        try {
+            stopBundle();
+        } catch (Exception e) {
+            LOG.error("Bundle com.openexchange.contact.storage.ldap could not be stopped.", e);
+        }
+        try {
+            LOG.info("Restarting bundle: com.openexchange.contact.storage.ldap");
+            LdapServiceLookup.set(this);
+            /*
+             * register update task, create table job and delete listener
+             */
+            registerService(CreateTableService.class, new LdapCreateTableService());
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new LdapCreateTableTask()));
+            registerService(DeleteListener.class, new LdapDeleteListener());
+            /*
+             * register configured storages
+             */
+            for (ContactStorage storage : LdapContactStorageFactory.createAll()) {
+                registerService(ContactStorage.class, storage);
+            }
+
+            // register reloadable service
+            registerService(Reloadable.class, this);
+        } catch (Exception e) {
+            LOG.error("error restarting \"com.openexchange.contact.storage.ldap\"", e);
+        }
+    }
+
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        reinit();
+    }
+
+    @Override
+    public Map<String, String[]> getConfigFileNames() {
+        Map<String, String[]> map = new HashMap<String, String[]>();
+        try {
+            File[] newProperties = Tools.listPropertyFiles();
+            Set<File> files = new HashSet<File>(Arrays.asList(newProperties));
+            if (null != oldProperties && oldProperties.length > newProperties.length) {
+                files.addAll(Arrays.asList(oldProperties));
+            }
+            oldProperties = Arrays.copyOf(newProperties, newProperties.length);
+            for (File propertyFile : files) {
+                if (null != map.put(propertyFile.getName(), PROPERTIES)) {
+                    LOG.warn("Duplicate entry in map: {}", propertyFile.getName());
+                }
+            }
+        } catch (OXException e) {
+            LOG.error("error reloading config file: {}", e);
+        }
+        return map;
     }
 
 }

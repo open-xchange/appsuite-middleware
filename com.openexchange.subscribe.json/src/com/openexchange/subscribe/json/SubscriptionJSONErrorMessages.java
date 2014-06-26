@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,46 +50,83 @@
 package com.openexchange.subscribe.json;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link SubscriptionJSONErrorMessages}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public enum SubscriptionJSONErrorMessages implements OXExceptionCode {
+public enum SubscriptionJSONErrorMessages implements DisplayableOXExceptionCode {
 
-    MISSING_PARAMETER(SubscriptionSourceMultipleHandler.CLASS_ID * 100 + 1, SubscriptionJSONExceptionMessage.MISSING_PARAMETER_MSG, SubscriptionJSONExceptionMessage.MISSING_PARAMETER_HELP, CATEGORY_ERROR),
-    UNKNOWN_ACTION(SubscriptionSourceMultipleHandler.CLASS_ID * 100 + 2, SubscriptionJSONExceptionMessage.UNKNOWN_ACTION_MSG, SubscriptionJSONExceptionMessage.UNKNOWN_ACTION_HELP, CATEGORY_ERROR),
-    UNKNOWN_SUBSCRIPTION(SubscriptionSourceMultipleHandler.CLASS_ID * 100 + 2, SubscriptionJSONExceptionMessage.UNKNOWN_SUBSCRIPTION, "", CATEGORY_USER_INPUT),
+    MISSING_PARAMETER(101, SubscriptionJSONErrorMessages.MISSING_PARAMETER_MSG, CATEGORY_ERROR),
+    UNKNOWN_ACTION(102, SubscriptionJSONErrorMessages.UNKNOWN_ACTION_MSG, CATEGORY_ERROR),
+    UNKNOWN_SUBSCRIPTION(102, SubscriptionJSONErrorMessages.UNKNOWN_SUBSCRIPTION_MSG, CATEGORY_USER_INPUT, SubscriptionJSONExceptionMessage.UNKNOWN_SUBSCRIPTION_DISPLAY),
 
-    JSONEXCEPTION(SubscriptionSourceJSONWriter.CLASS_ID * 100 + 1, SubscriptionJSONExceptionMessage.JSONEXCEPTION_MSG, SubscriptionJSONExceptionMessage.JSONEXCEPTION_HELP, CATEGORY_ERROR),
-    MISSING_FIELD(SubscriptionSourceJSONWriter.CLASS_ID * 100 + 2, SubscriptionJSONExceptionMessage.MISSING_FIELD_MSG, SubscriptionJSONExceptionMessage.MISSING_FIELD_HELP, CATEGORY_ERROR),
-    MISSING_FORM_FIELD(SubscriptionSourceJSONWriter.CLASS_ID * 100 + 3, SubscriptionJSONExceptionMessage.MISSING_FORM_FIELD_MSG, SubscriptionJSONExceptionMessage.MISSING_FORM_FIELD_HELP, CATEGORY_ERROR),
+    JSONEXCEPTION(201, SubscriptionJSONErrorMessages.JSONEXCEPTION_MSG, CATEGORY_ERROR),
+    MISSING_FIELD(202, SubscriptionJSONErrorMessages.MISSING_FIELD_MSG, CATEGORY_ERROR),
+    MISSING_FORM_FIELD(203, SubscriptionJSONErrorMessages.MISSING_FORM_FIELD_MSG, CATEGORY_ERROR),
 
-    THROWABLE(SubscriptionSourceMultipleHandler.CLASS_ID * 100 + 3, SubscriptionJSONExceptionMessage.THROWABLE_MSG, SubscriptionJSONExceptionMessage.THROWABLE_HELP, CATEGORY_ERROR),
-    UNKNOWN_COLUMN(SubscriptionJSONWriter.CLASS_ID * 100 + 1, SubscriptionJSONExceptionMessage.UNKNOWN_COLUMN_MSG, SubscriptionJSONExceptionMessage.UNKNOWN_COLUMN_HELP, CATEGORY_USER_INPUT),
+    THROWABLE(103, SubscriptionJSONErrorMessages.THROWABLE_MSG, CATEGORY_ERROR),
+    UNKNOWN_COLUMN(201, SubscriptionJSONErrorMessages.UNKNOWN_COLUMN_MSG, CATEGORY_USER_INPUT),
     ;
 
     private Category category;
-
-    private String help;
 
     private String message;
 
     private int errorCode;
 
     /**
-     * Initializes a new {@link SubscriptionJSONErrorMessages}.
+     * Message displayed to the user
      */
-    private SubscriptionJSONErrorMessages(final int errorCode, final String message, final String help, final Category category) {
+    private String displayMessage;
+
+    private final static String MISSING_PARAMETER_MSG = "Missing parameter %s";
+
+    private final static String UNKNOWN_ACTION_MSG = "The requested action %s is not known.";
+
+    private static final String UNKNOWN_SUBSCRIPTION_MSG = "The requested subscription is not known";
+
+    private final static String JSONEXCEPTION_MSG = "A JSON error occurred";
+
+    private final static String MISSING_FIELD_MSG = "Missing field(s): %s";
+
+    private final static String MISSING_FORM_FIELD_MSG = "Missing form field(s): %s";
+
+    private final static String THROWABLE_MSG = "An unexpected error occurred: %s";
+
+    private final static String UNKNOWN_COLUMN_MSG = "Unknown column: %s";
+
+    /**
+     * Initializes a new {@link SubscriptionJSONErrorMessages}.
+     * 
+     * @param errorCode
+     * @param message
+     * @param category
+     */
+    private SubscriptionJSONErrorMessages(final int errorCode, final String message, final Category category) {
+        this(errorCode, message, category, null);
+    }
+
+    /**
+     * Initializes a new {@link SubscriptionJSONErrorMessages}.
+     * 
+     * @param errorCode
+     * @param message
+     * @param category
+     * @param displayMessage
+     */
+    private SubscriptionJSONErrorMessages(final int errorCode, final String message, final Category category, final String displayMessage) {
         this.category = category;
-        this.help = help;
         this.message = message;
         this.errorCode = errorCode;
+        this.displayMessage = displayMessage == null ? OXExceptionStrings.MESSAGE : displayMessage;
     }
+
 
     @Override
     public String getPrefix() {
@@ -106,10 +143,6 @@ public enum SubscriptionJSONErrorMessages implements OXExceptionCode {
         return message;
     }
 
-    public String getHelp() {
-        return help;
-    }
-
     @Override
     public Category getCategory() {
         return category;
@@ -118,6 +151,14 @@ public enum SubscriptionJSONErrorMessages implements OXExceptionCode {
     @Override
     public boolean equals(final OXException e) {
         return OXExceptionFactory.getInstance().equals(this, e);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getDisplayMessage() {
+        return this.displayMessage;
     }
 
     /**

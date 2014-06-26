@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -56,7 +56,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
-import com.openexchange.groupware.container.LinkEntryObject;
 
 /**
  * This switcher enables us to set the values of a contact object. As convention, the first argument of a method represents a ContactObject,
@@ -1344,20 +1343,6 @@ public class ContactSetter implements ContactSwitcher {
     }
 
     @Override
-    public Object numberoflinks(final Object... objects) throws OXException {
-        if (objects.length < 2) {
-            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("NumberOfLinks");
-        }
-        final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
-            return conObj;
-        }
-        final int value = toInt(objects[1]);
-        conObj.setNumberOfLinks(value);
-        return conObj;
-    }
-
-    @Override
     public Object distributionlist(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("DistributionList");
@@ -1383,20 +1368,6 @@ public class ContactSetter implements ContactSwitcher {
             value = (DistributionListEntryObject[]) objects[1];
         }
         conObj.setDistributionList(value);
-        return conObj;
-    }
-
-    @Override
-    public Object links(final Object... objects) throws OXException {
-        if (objects.length < 2) {
-            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Links");
-        }
-        final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
-            return conObj;
-        }
-        final LinkEntryObject[] value = (LinkEntryObject[]) objects[1];
-        conObj.setLinks(value);
         return conObj;
     }
 

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -76,7 +76,6 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailExceptionCode;
@@ -247,7 +246,7 @@ public final class GetAction extends AbstractMailAction {
                     if (null != directOutputStream) {
                         if (saveToDisk) {
                             if (requestData.setResponseHeader("Content-Type", "application/octet-stream")) {
-                                final StringAllocator sb = new StringAllocator(64).append("attachment");
+                                final StringBuilder sb = new StringBuilder(64).append("attachment");
                                 {
                                     final String subject = mail.getSubject();
                                     final String fileName = isEmpty(subject) ? "mail.eml" : saneForFileName(subject) + ".eml";
@@ -344,7 +343,7 @@ public final class GetAction extends AbstractMailAction {
                         final OutputStream directOutputStream = requestData.optOutputStream();
                         if (null != directOutputStream) {
                             // Direct output
-                            final StringAllocator sb = new StringAllocator(64).append("attachment");
+                            final StringBuilder sb = new StringBuilder(64).append("attachment");
                             {
                                 final String subject = mail.getSubject();
                                 final String fileName = isEmpty(subject) ? "mail.eml" : saneForFileName(subject) + ".eml";
@@ -372,7 +371,7 @@ public final class GetAction extends AbstractMailAction {
                     fileHolder.setDelivery("download");
                     // Set file name
                     final String subject = mail.getSubject();
-                    fileHolder.setName(new com.openexchange.java.StringAllocator(isEmpty(subject) ? "mail" : saneForFileName(subject)).append(".eml").toString());
+                    fileHolder.setName(new StringBuilder(isEmpty(subject) ? "mail" : saneForFileName(subject)).append(".eml").toString());
                     return new AJAXRequestResult(fileHolder, "file");
                 }
                 final ContentType ct = mail.getContentType();
@@ -489,7 +488,7 @@ public final class GetAction extends AbstractMailAction {
     }
 
     private static final String formatMessageHeaders(final Iterator<Map.Entry<String, String>> iter) {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(1024);
+        final StringBuilder sb = new StringBuilder(1024);
         final String delim = ": ";
         final String crlf = "\r\n";
         while (iter.hasNext()) {
@@ -504,7 +503,7 @@ public final class GetAction extends AbstractMailAction {
             return fileName;
         }
         final int len = fileName.length();
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(len);
+        final StringBuilder sb = new StringBuilder(len);
         char prev = '\0';
         for (int i = 0; i < len; i++) {
             final char c = fileName.charAt(i);
@@ -537,7 +536,7 @@ public final class GetAction extends AbstractMailAction {
             return null;
         }
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);

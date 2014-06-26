@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,51 +49,65 @@
 
 package com.openexchange.kerberos;
 
-import static com.openexchange.kerberos.KerberosExceptionMessages.*;
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link KerberosExceptionCodes}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public enum KerberosExceptionCodes implements OXExceptionCode {
+public enum KerberosExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * Verification of client ticket failed: %1$s
      */
-    TICKET_WRONG(TICKET_WRONG_MSG, Category.CATEGORY_PERMISSION_DENIED, 1),
+    TICKET_WRONG("Verification of client ticket failed: %1$s", Category.CATEGORY_PERMISSION_DENIED, 1,
+        KerberosExceptionMessages.TICKET_WRONG_MSG),
+
     /**
      * Unknown problem: "%1$s".
      */
-    UNKNOWN(UNKNOWN_MSG, Category.CATEGORY_ERROR, 2),
+    UNKNOWN("Unknown problem: \"%1$s\".", Category.CATEGORY_ERROR, 2, null),
+
     /**
      * Failed to get a delegate ticket for %1$s.
      */
-    DELEGATE_FAILED(DELEGATE_FAILED_MSG, Category.CATEGORY_PERMISSION_DENIED, 3),
+    DELEGATE_FAILED("Failed to get a delegate ticket for %1$s.", Category.CATEGORY_PERMISSION_DENIED, 3,
+        KerberosExceptionMessages.DELEGATE_FAILED_MSG),
+
     /**
      * Communication to Kerberos server failed: %1$s
      */
-    COMM_FAILED(COMM_FAILED_MSG, Category.CATEGORY_CONFIGURATION, 4),
+    COMM_FAILED("Communication to Kerberos server failed: %1$s", Category.CATEGORY_CONFIGURATION, 4,
+        KerberosExceptionMessages.COMM_FAILED_MSG),
+
     /**
      * Authentication this service failed: %1$s
      */
-    LOGIN_FAILED(LOGIN_FAILED_MSG, Category.CATEGORY_CONFIGURATION, 5),
+    LOGIN_FAILED("Authenticating this service against the Kerberos server failed: %1$s", Category.CATEGORY_CONFIGURATION, 5,
+        KerberosExceptionMessages.LOGIN_FAILED_MSG),
+
     /**
      * Problem while terminating service ticket: %1$s
      */
-    LOGOUT_FAILED(LOGOUT_FAILED_MSG, Category.CATEGORY_SERVICE_DOWN, 6),
+    LOGOUT_FAILED("Problem while terminating service ticket: %1$s", Category.CATEGORY_SERVICE_DOWN, 6,
+        KerberosExceptionMessages.LOGOUT_FAILED_MSG),
+
     /**
      * Can not find credentials in subject %1$s that need a renewal.
      */
-    NO_CREDENTIALS(NO_CREDENTIALS_MSG, Category.CATEGORY_ERROR, 7),
+    NO_CREDENTIALS("Can not find credentials in subject %1$s that need a renewal.", Category.CATEGORY_ERROR, 7,
+        KerberosExceptionMessages.NO_CREDENTIALS_MSG),
+
     /**
      * No Kerberos delegation ticket found in session %1$s.
      */
-    TICKET_MISSING(TICKET_MISSING_MSG, Category.CATEGORY_ERROR, 8);
+    TICKET_MISSING("No Kerberos delegation ticket found in session %1$s.", Category.CATEGORY_ERROR, 8,
+        KerberosExceptionMessages.TICKET_MISSING_MSG);
 
     final String message;
 
@@ -101,10 +115,13 @@ public enum KerberosExceptionCodes implements OXExceptionCode {
 
     final int number;
 
-    private KerberosExceptionCodes(String message, Category category, int detailNumber) {
+    final String displayMessage;
+
+    private KerberosExceptionCodes(String message, Category category, int detailNumber, String displayMessage) {
         this.message = message;
         this.category = category;
         number = detailNumber;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -120,6 +137,11 @@ public enum KerberosExceptionCodes implements OXExceptionCode {
     @Override
     public int getNumber() {
         return number;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -55,7 +55,6 @@ import java.util.Map;
 import java.util.TimeZone;
 import com.openexchange.calendar.itip.Messages;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.java.StringAllocator;
 
 /**
  * {@link CalendarFormatter}
@@ -111,7 +110,7 @@ public class TimeSpanFormatter extends DateFormatter {
 	}
 
 	public String getDateSpec() {
-		StringAllocator b = new StringAllocator();
+		StringBuilder b = new StringBuilder();
 		b.append(formatDate(timespanThingy));
 		return b.toString();
 	}

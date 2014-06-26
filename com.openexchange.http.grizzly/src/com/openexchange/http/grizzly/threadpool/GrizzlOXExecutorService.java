@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -54,7 +54,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.glassfish.grizzly.threadpool.GrizzlyExecutorService;
 import org.glassfish.grizzly.threadpool.ThreadPoolConfig;
-import com.openexchange.http.grizzly.GrizzlyExceptionMessage;
 import com.openexchange.http.grizzly.osgi.Services;
 import com.openexchange.threadpool.ThreadPoolService;
 
@@ -78,7 +77,7 @@ public class GrizzlOXExecutorService extends GrizzlyExecutorService {
         super(config);
         ThreadPoolService threadPoolService = Services.optService(ThreadPoolService.class);
         if (threadPoolService == null) {
-            throw new IllegalStateException(String.format(GrizzlyExceptionMessage.NEEDED_SERVICE_MISSING_MSG, ThreadPoolService.class.getSimpleName()));
+            throw new IllegalStateException(String.format("The following needed service is missing: \"%1$s\"", ThreadPoolService.class.getSimpleName()));
         }
         this.executorService = threadPoolService.getExecutor();
     }

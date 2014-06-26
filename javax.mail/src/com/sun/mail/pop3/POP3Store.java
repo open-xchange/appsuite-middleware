@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -53,6 +53,8 @@ import java.util.Collections;
 import java.util.Map;
 import com.sun.mail.util.PropUtil;
 import com.sun.mail.util.MailLogger;
+import com.sun.mail.util.SocketConnectException;
+import com.sun.mail.util.MailConnectException;
 
 /**
  * A POP3 Message Store.  Contains only one folder, "INBOX".
@@ -203,6 +205,8 @@ public class POP3Store extends Store {
 	    port = getPort(null);
 	} catch (EOFException eex) { 
 		throw new AuthenticationFailedException(eex.getMessage());
+	} catch (SocketConnectException scex) {
+	    throw new MailConnectException(scex);
 	} catch (IOException ioex) { 
 	    throw new MessagingException("Connect failed", ioex);
 	}
@@ -404,7 +408,8 @@ public class POP3Store extends Store {
      * @return  Reinitialized Map of capabilities
      */
     public synchronized Map<String, String> reinitCapabilities() throws MessagingException {
-    if (port == null) {
+    final Protocol port = this.port;
+    if (null == port) {
         return capabilities();
     }
     try {
@@ -423,7 +428,7 @@ public class POP3Store extends Store {
      * @return	true if using SSL
      * @since	JavaMail 1.4.6
      */
-    public boolean isSSL() {
+    public synchronized boolean isSSL() {
 	return usingSSL;
     }
 

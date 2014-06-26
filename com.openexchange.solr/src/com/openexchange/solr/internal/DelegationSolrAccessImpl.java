@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -59,14 +59,13 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.FutureTask;
+import java.util.concurrent.Future;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
-import com.hazelcast.core.DistributedTask;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IExecutorService;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.LifecycleService;
 import com.hazelcast.core.Member;
@@ -86,6 +85,8 @@ import com.openexchange.solr.rmi.RMISolrException;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class DelegationSolrAccessImpl implements SolrAccessService {
+
+    private static final String HZ_EXECUTOR = "com.openexchange.solr";
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DelegationSolrAccessImpl.class);
 
@@ -463,9 +464,8 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
 
     private SolrAccessServiceRmiWrapper startRemoteCore(IMap<String, String> solrCores, HazelcastInstance hazelcast, SolrCoreIdentifier identifier) throws OXException {
         Member elected = electCoreOwner(hazelcast, identifier);
-        FutureTask<String> task = new DistributedTask<String>(new StartCoreCallable(identifier, SolrCoreTools.resolveSocketAddress(elected.getInetSocketAddress())), elected);
-        ExecutorService executorService = hazelcast.getExecutorService();
-        executorService.execute(task);
+        IExecutorService executorService = hazelcast.getExecutorService(HZ_EXECUTOR);
+        Future<String> task = executorService.submitToMember(new StartCoreCallable(identifier, SolrCoreTools.resolveSocketAddress(elected.getInetSocketAddress())), elected);
         try {
             String electedAddress = SolrCoreTools.resolveSocketAddress(elected.getInetSocketAddress());
             task.get();

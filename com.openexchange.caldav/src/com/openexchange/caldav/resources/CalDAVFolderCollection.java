@@ -93,7 +93,6 @@ import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -393,22 +392,22 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
 
     @Override
     public String getResourceType() throws WebdavProtocolException {
-        StringAllocator stringAllocator = new StringAllocator(super.getResourceType());
-        stringAllocator.append('<').append(CaldavProtocol.CAL_NS.getPrefix()).append(":calendar/>");
+        StringBuilder StringBuilder = new StringBuilder(super.getResourceType());
+        StringBuilder.append('<').append(CaldavProtocol.CAL_NS.getPrefix()).append(":calendar/>");
         if (null != this.folder) {
             if (SharedType.getInstance().equals(folder.getType())) {
                 // used to indicate that the calendar is owned by another user and is being shared to the current user.
-                stringAllocator.append('<').append(CaldavProtocol.CALENDARSERVER_NS.getPrefix()).append(":shared/>");
+                StringBuilder.append('<').append(CaldavProtocol.CALENDARSERVER_NS.getPrefix()).append(":shared/>");
             } else if (PrivateType.getInstance().equals(folder.getType())) {
                 // used to indicate that the calendar is owned by the current user and is being shared by them.
-                stringAllocator.append('<').append(CaldavProtocol.CALENDARSERVER_NS.getPrefix()).append(":shared-owner/>");
+                StringBuilder.append('<').append(CaldavProtocol.CALENDARSERVER_NS.getPrefix()).append(":shared-owner/>");
             } else if (PublicType.getInstance().equals(folder.getType())) {
                 // evaluate own permission if folder shares can be edited or not
-                stringAllocator.append('<').append(CaldavProtocol.CALENDARSERVER_NS.getPrefix())
+                StringBuilder.append('<').append(CaldavProtocol.CALENDARSERVER_NS.getPrefix())
                     .append(folder.getOwnPermission().isAdmin() ? ":shared-owner/>" : ":shared/>");
             }
         }
-        return stringAllocator.toString();
+        return StringBuilder.toString();
     }
 
     @Override
@@ -446,7 +445,7 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
         } else {
             try {
                 factory.getFolderService().deleteFolder(factory.getState().getTreeID(), this.folder.getID(),
-                    this.folder.getLastModifiedUTC(), factory.getSession());
+                    this.folder.getLastModifiedUTC(), factory.getSession(), null);
             } catch (OXException e) {
                 throw protocolException(HttpServletResponse.SC_FORBIDDEN);
             }

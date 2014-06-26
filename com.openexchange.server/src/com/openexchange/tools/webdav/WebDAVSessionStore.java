@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -58,7 +58,6 @@ import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.session.Session;
@@ -153,7 +152,7 @@ public class WebDAVSessionStore {
 
     private static String getKey(LoginRequest loginRequest) {
         int clientHash = (loginRequest.getInterface() + loginRequest.getUserAgent() + loginRequest.getClientIP()).hashCode();
-        return Base64.encode(new StringAllocator().append(loginRequest.getLogin()).append(loginRequest.getPassword()).append(clientHash).toString());
+        return Base64.encode(new StringBuilder().append(loginRequest.getLogin()).append(loginRequest.getPassword()).append(clientHash).toString());
     }
 
 }

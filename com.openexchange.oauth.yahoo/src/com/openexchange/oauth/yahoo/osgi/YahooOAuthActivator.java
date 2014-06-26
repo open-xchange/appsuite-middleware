@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,6 +50,7 @@
 package com.openexchange.oauth.yahoo.osgi;
 
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
@@ -102,6 +103,7 @@ public class YahooOAuthActivator extends HousekeepingActivator {
         oauthService = getService(OAuthService.class);
         oAuthMetaData = new OAuthServiceMetaDataYahooImpl(getService(DeferringURLService.class));
         registerService(OAuthServiceMetaData.class, oAuthMetaData);
+        registerService(Reloadable.class, oAuthMetaData);
         LOG.info("OAuthServiceMetaData for Yahoo was started");
 
         final YahooService yahooService = new YahooServiceImpl(this);

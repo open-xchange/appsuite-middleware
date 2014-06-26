@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -57,7 +57,6 @@ import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.java.StringAllocator;
 
 /**
  * {@link UserConfiguration} - Represents a user configuration.
@@ -408,15 +407,6 @@ public class UserConfiguration implements Serializable, Cloneable {
     }
 
     /**
-     * Detects if user configuration allows project access.
-     *
-     * @return <code>true</code> if enabled; otherwise <code>false</code>
-     */
-    public boolean hasProject() {
-        return hasPermission(PROJECTS);
-    }
-
-    /**
      * Detects if user configuration allows forum access.
      *
      * @return <code>true</code> if enabled; otherwise <code>false</code>
@@ -566,8 +556,8 @@ public class UserConfiguration implements Serializable, Cloneable {
      * holds module access to a certain module (or invoke <code>{@link UserConfiguration#hasModuleAccess(int)}</code>).
      * <p>
      * The <code>int</code> values matches the constants <code>{@link FolderObject#TASK}</code>, <code>{@link FolderObject#CALENDAR}</code>,
-     * <code>{@link FolderObject#CONTACT}</code>, <code>{@link FolderObject#UNBOUND}</code>, <code>{@link FolderObject#SYSTEM_MODULE}</code>, <code>{@link FolderObject#PROJECT}</code>, <code>{@link FolderObject#MAIL}</code>, <code>{@link FolderObject#INFOSTORE}</code>
-     *
+     * <code>{@link FolderObject#CONTACT}</code>, <code>{@link FolderObject#UNBOUND}</code>, <code>{@link FolderObject#SYSTEM_MODULE}</code>, <code>{@link FolderObject#MAIL}</code>, <code>{@link FolderObject#INFOSTORE}</code>
+     * 
      * @return A sorted array of <code>int</code> carrying accessible module integer constants
      */
     public int[] getAccessibleModules() {
@@ -583,9 +573,6 @@ public class UserConfiguration implements Serializable, Cloneable {
         }
         array.add(FolderObject.UNBOUND); // 4
         array.add(FolderObject.SYSTEM_MODULE); // 5
-        if (hasProject()) {
-            array.add(FolderObject.PROJECT); // 6
-        }
         if (hasWebMail()) {
             array.add(FolderObject.MAIL); // 7
         }
@@ -612,7 +599,6 @@ public class UserConfiguration implements Serializable, Cloneable {
      *            {@link FolderObject#UNBOUND}</code>, <code>
      *            {@link FolderObject#SYSTEM_MODULE}</code>
      *            , <code>
-     *            {@link FolderObject#PROJECT}</code>, <code>
      *            {@link FolderObject#MAIL}</code> , <code>
      *            {@link FolderObject#INFOSTORE}</code>
      * @return <code>true</code> if user configuration permits access to given module; otherwise <code>false</code>
@@ -883,7 +869,7 @@ public class UserConfiguration implements Serializable, Cloneable {
     /** ASCII-wise lower-case */
     static String toLowerCase(final CharSequence chars) {
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);

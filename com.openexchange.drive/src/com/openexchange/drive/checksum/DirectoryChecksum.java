@@ -59,7 +59,9 @@ import com.openexchange.file.storage.composition.FolderID;
  */
 public class DirectoryChecksum extends StoredChecksum {
 
-    protected FolderID folderID;
+    private FolderID folderID;
+    private int userID;
+    private String eTag;
 
     /**
      * Initializes a new {@link DirectoryChecksum}.
@@ -68,9 +70,44 @@ public class DirectoryChecksum extends StoredChecksum {
         super();
     }
 
-    public DirectoryChecksum(FolderID folderID, long sequenceNumber, String checksum) {
+    /**
+     * Initializes a new {@link DirectoryChecksum}.
+     *
+     * @param userID The user ID
+     * @param folderID The folder ID
+     * @param sequenceNumber The sequence number
+     * @param checksum The checksum
+     */
+    public DirectoryChecksum(int userID, FolderID folderID, long sequenceNumber, String checksum) {
+        this(userID, folderID, sequenceNumber, null, checksum);
+    }
+
+    /**
+     * Initializes a new {@link DirectoryChecksum}.
+     *
+     * @param userID The user ID
+     * @param folderID The folder ID
+     * @param eTag The E-Tag
+     * @param checksum The checksum
+     */
+    public DirectoryChecksum(int userID, FolderID folderID, String eTag, String checksum) {
+        this(userID, folderID, 0, eTag, checksum);
+    }
+
+    /**
+     * Initializes a new {@link DirectoryChecksum}.
+     *
+     * @param userID The user ID
+     * @param folderID The folder ID
+     * @param sequenceNumber The sequence number
+     * @param eTag The E-Tag
+     * @param checksum The checksum
+     */
+    private DirectoryChecksum(int userID, FolderID folderID, long sequenceNumber, String eTag, String checksum) {
         super();
+        this.userID = userID;
         this.folderID = folderID;
+        this.eTag = eTag;
         this.sequenceNumber = sequenceNumber;
         this.checksum = checksum;
     }
@@ -93,9 +130,45 @@ public class DirectoryChecksum extends StoredChecksum {
         this.folderID = folderID;
     }
 
+    /**
+     * Gets the userID
+     *
+     * @return The userID
+     */
+    public int getUserID() {
+        return userID;
+    }
+
+    /**
+     * Sets the userID
+     *
+     * @param userID The userID to set
+     */
+    public void setUserID(int userID) {
+        this.userID = userID;
+    }
+
+    /**
+     * Gets the E-Tag
+     *
+     * @return The E-Tag
+     */
+    public String getETag() {
+        return eTag;
+    }
+
+    /**
+     * Sets the E-Tag
+     *
+     * @param eTag The E-Tag to set
+     */
+    public void setETag(String eTag) {
+        this.eTag = eTag;
+    }
+
     @Override
     public String toString() {
-        return getFolderID() + " | " + getChecksum() + " | " + getSequenceNumber();
+        return folderID + " | " + checksum + " | " + (null != eTag ? eTag : String.valueOf(sequenceNumber));
     }
 
 }

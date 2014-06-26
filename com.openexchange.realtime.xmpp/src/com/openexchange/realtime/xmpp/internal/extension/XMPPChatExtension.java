@@ -129,7 +129,7 @@ public class XMPPChatExtension implements XMPPExtension {
 
         XMPPPayloadTreeTransformer treeTransformer = new XMPPPayloadTreeTransformer();
         Collection<PayloadTree> payloads = new HashSet<PayloadTree>();
-        for (PayloadTree payload : message.getPayloads()) {
+        for (PayloadTree payload : message.getPayloadTrees()) {
             PayloadTree transformedTree = treeTransformer.outgoing(payload);
             payloads.add(transformedTree);
         }

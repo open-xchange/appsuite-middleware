@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -58,7 +58,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.contacts.json.RequestTools;
+import com.openexchange.contacts.json.mapping.ColumnParser;
 import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -119,9 +119,9 @@ public class ContactJSONResultConverter implements ResultConverter {
             /*
              * get requested column IDs
              */
-            int[] columnIDs = RequestTools.getColumnsAsIntArray(requestData);
-            ContactField[] fields = null != columnIDs ? ContactMapper.getInstance().getFields(columnIDs) :
-            	ContactMapper.getInstance().getAllFields();
+            String columns = requestData.getParameter("columns");
+            ContactField[] fields = null != columns ?
+                ContactMapper.getInstance().getFields(ColumnParser.parseColumns(columns)) : ContactMapper.getInstance().getAllFields();
             /*
              * Convert list of contacts
              */

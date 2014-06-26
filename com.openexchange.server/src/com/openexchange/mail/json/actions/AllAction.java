@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -54,10 +54,10 @@ import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONValue;
-import org.slf4j.Logger;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -93,8 +93,6 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "order", optional=true, description = "\"asc\" if the response entires should be sorted in the ascending order, \"desc\" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified.")
 }, responseDescription = "Response (not IMAP: with timestamp): An array with mail data. Each array element describes one mail and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
 public final class AllAction extends AbstractMailAction implements MailRequestSha1Calculator {
-
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AllAction.class);
 
     /**
      * Initializes a new {@link AllAction}.
@@ -249,9 +247,9 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                     fromToIndices = new int[] {start,end};
                 }
             }
-            final boolean unseen = req.optBool("unseen");
+            final boolean ignoreSeen = req.optBool("unseen");
             final boolean ignoreDeleted = !req.optBool("deleted", true);
-            final boolean filterApplied = (unseen || ignoreDeleted);
+            final boolean filterApplied = (ignoreSeen || ignoreDeleted);
             if (filterApplied) {
                 // Ensure flags is contained in provided columns
                 final int fieldFlags = MailListField.FLAGS.getField();
@@ -300,7 +298,7 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                     final int size = it.size();
                     for (int i = 0; i < size; i++) {
                         final MailMessage mm = it.next();
-                        if (null != mm && (!unseen || !mm.isSeen()) && (!ignoreDeleted || !mm.isDeleted())) {
+                        if (!discardMail(mm, ignoreSeen, ignoreDeleted)) {
                             if (!mm.containsAccountId()) {
                                 mm.setAccountId(mailInterface.getAccountID());
                             }
@@ -312,11 +310,11 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                     /*
                      * Get iterator
                      */
-                    it = mailInterface.getAllMessages(folderId, sortCol, orderDir, columns, filterApplied ? null : fromToIndices);
+                    it = mailInterface.getAllMessages(folderId, sortCol, orderDir, columns, filterApplied ? null : fromToIndices, AJAXRequestDataTools.parseBoolParameter("continuation", req.getRequest()));
                     final int size = it.size();
                     for (int i = 0; i < size; i++) {
                         final MailMessage mm = it.next();
-                        if (null != mm && (!unseen || !mm.isSeen()) && (!ignoreDeleted || !mm.isDeleted())) {
+                        if (!discardMail(mm, ignoreSeen, ignoreDeleted)) {
                             if (!mm.containsAccountId()) {
                                 mm.setAccountId(mailInterface.getAccountID());
                             }

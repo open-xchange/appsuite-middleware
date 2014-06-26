@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -66,6 +66,7 @@ import com.openexchange.folderstorage.database.contentType.UnboundContentType;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SystemType;
+import com.openexchange.folderstorage.type.TrashType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -183,6 +184,8 @@ public class DatabaseFolder extends AbstractFolder {
             return PrivateType.getInstance();
         case FolderObject.PUBLIC:
             return PublicType.getInstance();
+        case FolderObject.TRASH:
+            return TrashType.getInstance();
         default:
             return null;
         }

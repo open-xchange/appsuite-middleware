@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Infostore File Storage Adapater
 Bundle-SymbolicName: com.openexchange.file.storage.infostore
-Bundle-Version: 7.4.2
+Bundle-Version: 7.6.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.api2,
@@ -10,7 +10,9 @@ Import-Package: com.openexchange.api2,
  com.openexchange.exception,
  com.openexchange.file.storage,
  com.openexchange.file.storage.meta,
+ com.openexchange.file.storage.search,
  com.openexchange.folderstorage,
+ com.openexchange.folderstorage.database.contentType,
  com.openexchange.folderstorage.type,
  com.openexchange.groupware,
  com.openexchange.groupware.container,
@@ -18,6 +20,7 @@ Import-Package: com.openexchange.api2,
  com.openexchange.groupware.contexts.impl,
  com.openexchange.groupware.infostore,
  com.openexchange.groupware.infostore.database.impl,
+ com.openexchange.groupware.infostore.search,
  com.openexchange.groupware.infostore.utils,
  com.openexchange.groupware.ldap,
  com.openexchange.groupware.results,
@@ -32,6 +35,8 @@ Import-Package: com.openexchange.api2,
  com.openexchange.tools.iterator,
  com.openexchange.tools.session,
  com.openexchange.tx,
+ gnu.trove.list,
+ gnu.trove.list.array,
  org.osgi.framework
 Bundle-Activator: com.openexchange.file.storage.infostore.osgi.InfostoreFileStorageActivator
 Export-Package: com.openexchange.file.storage.infostore

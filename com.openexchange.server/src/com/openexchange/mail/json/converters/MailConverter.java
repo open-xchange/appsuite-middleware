@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -207,7 +207,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         final int[] columns = requestData.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
         final String[] headers = requestData.getParameterValues(Mail.PARAMETER_HEADERS);
         String tmp = requestData.getParameter(Mail.PARAMETER_TIMEZONE);
-        final TimeZone timeZone = isEmpty(tmp) ? TimeZoneUtils.getTimeZone(session.getUser().getTimeZone()) : TimeZoneUtils.getTimeZone(tmp.trim());
+        final TimeZone timeZone = com.openexchange.java.Strings.isEmpty(tmp) ? TimeZoneUtils.getTimeZone(session.getUser().getTimeZone()) : TimeZoneUtils.getTimeZone(tmp.trim());
         tmp = null;
         /*
          * Pre-Select field writers
@@ -287,12 +287,12 @@ public final class MailConverter implements ResultConverter, MailActionConstants
     private void writeThreadSortedMail(final List<MailMessage> mails, final JSONObject jMail, final MailFieldWriter[] writers, final MailFieldWriter[] headerWriters, final boolean containsMultipleFolders, final boolean writeThreadAsObjects, final int userId, final int contextId, final TimeZone optTimeZone) throws OXException, JSONException {
         final MailMessage rootMessage = mails.get(0);
         int accountID = rootMessage.getAccountId();
-        for (int j = 0; j < writers.length; j++) {
-            writers[j].writeField(jMail, rootMessage, 0, true, accountID, userId, contextId, optTimeZone);
+        for (MailFieldWriter writer : writers) {
+            writer.writeField(jMail, rootMessage, 0, true, accountID, userId, contextId, optTimeZone);
         }
         if (null != headerWriters) {
-            for (int j = 0; j < headerWriters.length; j++) {
-                headerWriters[j].writeField(jMail, rootMessage, 0, true, accountID, userId, contextId, optTimeZone);
+            for (MailFieldWriter headerWriter : headerWriters) {
+                headerWriter.writeField(jMail, rootMessage, 0, true, accountID, userId, contextId, optTimeZone);
             }
         }
         int unreadCount = 0;
@@ -302,12 +302,12 @@ public final class MailConverter implements ResultConverter, MailActionConstants
             for (final MailMessage child : mails) {
                 final JSONObject jChild = new JSONObject(writers.length);
                 accountID = child.getAccountId();
-                for (int j = 0; j < writers.length; j++) {
-                    writers[j].writeField(jChild, child, 0, true, accountID, userId, contextId, optTimeZone);
+                for (MailFieldWriter writer : writers) {
+                    writer.writeField(jChild, child, 0, true, accountID, userId, contextId, optTimeZone);
                 }
                 if (null != headerWriters) {
-                    for (int j = 0; j < headerWriters.length; j++) {
-                        headerWriters[j].writeField(jChild, child, 0, true, accountID, userId, contextId, optTimeZone);
+                    for (MailFieldWriter headerWriter : headerWriters) {
+                        headerWriter.writeField(jChild, child, 0, true, accountID, userId, contextId, optTimeZone);
                     }
                 }
                 /*-
@@ -362,7 +362,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         final int[] columns = requestData.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
         final String[] headers = requestData.getParameterValues(Mail.PARAMETER_HEADERS);
         String tmp = requestData.getParameter(Mail.PARAMETER_TIMEZONE);
-        final TimeZone timeZone = isEmpty(tmp) ? TimeZoneUtils.getTimeZone(session.getUser().getTimeZone()) : TimeZoneUtils.getTimeZone(tmp.trim());
+        final TimeZone timeZone = com.openexchange.java.Strings.isEmpty(tmp) ? TimeZoneUtils.getTimeZone(session.getUser().getTimeZone()) : TimeZoneUtils.getTimeZone(tmp.trim());
         tmp = null;
         /*
          * Pre-Select field writers
@@ -384,12 +384,12 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                 if (mail != null) {
                     final JSONArray ja = new JSONArray(writers.length);
                     final int accountID = mail.getAccountId();
-                    for (int j = 0; j < writers.length; j++) {
-                        writers[j].writeField(ja, mail, 0, false, accountID, userId, contextId, timeZone);
+                    for (MailFieldWriter writer : writers) {
+                        writer.writeField(ja, mail, 0, false, accountID, userId, contextId, timeZone);
                     }
                     if (null != headerWriters) {
-                        for (int j = 0; j < headerWriters.length; j++) {
-                            headerWriters[j].writeField(ja, mail, 0, false, accountID, userId, contextId, timeZone);
+                        for (MailFieldWriter headerWriter : headerWriters) {
+                            headerWriter.writeField(ja, mail, 0, false, accountID, userId, contextId, timeZone);
                         }
                     }
                     jsonWriter.value(ja);
@@ -405,12 +405,9 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         final int[] columns = requestData.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
         final String sort = requestData.getParameter(AJAXServlet.PARAMETER_SORT);
         String tmp = requestData.getParameter(Mail.PARAMETER_TIMEZONE);
-        final TimeZone timeZone = isEmpty(tmp) ? TimeZoneUtils.getTimeZone(session.getUser().getTimeZone()) : TimeZoneUtils.getTimeZone(tmp.trim());
+        final TimeZone timeZone = com.openexchange.java.Strings.isEmpty(tmp) ? TimeZoneUtils.getTimeZone(session.getUser().getTimeZone()) : TimeZoneUtils.getTimeZone(tmp.trim());
         tmp = null;
-        /*
-         * Get mail interface
-         */
-        final MailServletInterface mailInterface = getMailInterface(requestData, session);
+        getMailInterface(requestData, session);
         /*
          * Pre-Select field writers
          */
@@ -492,7 +489,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         tmp = requestData.getParameter(Mail.PARAMETER_UNSEEN);
         final boolean unseen = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
         tmp = requestData.getParameter(Mail.PARAMETER_TIMEZONE);
-        final TimeZone timeZone = isEmpty(tmp) ? TimeZoneUtils.getTimeZone(session.getUser().getTimeZone()) : TimeZoneUtils.getTimeZone(tmp.trim());
+        final TimeZone timeZone = com.openexchange.java.Strings.isEmpty(tmp) ? TimeZoneUtils.getTimeZone(session.getUser().getTimeZone()) : TimeZoneUtils.getTimeZone(tmp.trim());
         tmp = requestData.getParameter("token");
         final boolean token = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
         tmp = requestData.getParameter("ttlMillis");
@@ -506,7 +503,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         final boolean embedded = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
         tmp = requestData.getParameter("ignorable");
         final MimeFilter mimeFilter;
-        if (isEmpty(tmp)) {
+        if (com.openexchange.java.Strings.isEmpty(tmp)) {
             mimeFilter = null;
         } else {
             final String[] strings = SPLIT.split(tmp, 0);
@@ -656,17 +653,4 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         }
         return mailInterface;
     }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

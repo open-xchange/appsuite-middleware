@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -144,6 +144,6 @@ public class SyncCollection extends WebdavPropfindAction {
     }
 
     private String getSyncToken(WebdavRequest req, Document requestBody) throws WebdavProtocolException {
-    	return requestBody.getRootElement().getChildText("sync-token", DAV_NS);
+    	return null == requestBody ? null : requestBody.getRootElement().getChildText("sync-token", DAV_NS);
     }
 }

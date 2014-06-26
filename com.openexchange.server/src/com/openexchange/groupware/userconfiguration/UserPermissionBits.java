@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -393,16 +393,7 @@ public class UserPermissionBits implements Serializable, Cloneable {
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasProject() {
-        return hasPermission(PROJECTS);
-    }
-
-    /**
-     * Enables/Disables project access in user configuration.
-     *
-     * @param enableProject
-     */
-    public void setProject(final boolean enableProject) {
-        setPermission(enableProject, PROJECTS);
+        return false;
     }
 
     /**
@@ -660,9 +651,6 @@ public class UserPermissionBits implements Serializable, Cloneable {
         }
         array.add(FolderObject.UNBOUND); // 4
         array.add(FolderObject.SYSTEM_MODULE); // 5
-        if (hasProject()) {
-            array.add(FolderObject.PROJECT); // 6
-        }
         if (hasWebMail()) {
             array.add(FolderObject.MAIL); // 7
         }

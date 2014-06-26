@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-Name: Open-Xchange Mobilenotifier Mail Bundle
+Bundle-SymbolicName: com.openexchange.mobilenotifier.mail
+Bundle-Version: 7.6.0
+Bundle-Activator: com.openexchange.mobilenotifier.mail.osgi.MobileNotifierMailActivator
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.config,
+ com.openexchange.exception,
+ com.openexchange.groupware.ldap,
+ com.openexchange.mail,
+ com.openexchange.mail.api,
+ com.openexchange.mail.dataobjects,
+ com.openexchange.mail.service,
+ com.openexchange.mailaccount,
+ com.openexchange.mobilenotifier,
+ com.openexchange.mobilenotifier.utility,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.session,
+ javax.mail.internet,
+ org.osgi.framework

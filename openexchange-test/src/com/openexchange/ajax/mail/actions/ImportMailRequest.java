@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -74,9 +74,15 @@ public class ImportMailRequest extends AbstractMailRequest<ImportMailResponse> {
     private final InputStream[] rfc822;
     private final int flags;
     private final boolean failOnError;
+    private final boolean preserveReceivedDate;
 
     public ImportMailRequest(String folder, int flags, boolean failOnError, InputStream... rfc822) {
+        this(folder, flags, failOnError, false, rfc822);
+    }
+
+    public ImportMailRequest(String folder, int flags, boolean failOnError, boolean preserveReceivedDate, InputStream... rfc822) {
         super();
+        this.preserveReceivedDate = preserveReceivedDate;
         this.folder = folder;
         this.rfc822 = rfc822;
         this.flags = flags;
@@ -111,6 +117,7 @@ public class ImportMailRequest extends AbstractMailRequest<ImportMailResponse> {
         list.add(new URLParameter(Mail.PARAMETER_ACTION, Mail.ACTION_IMPORT));
         list.add(new URLParameter(Mail.PARAMETER_FOLDERID, folder));
         list.add(new URLParameter("force", "true"));
+        list.add(new URLParameter("preserveReceivedDate", preserveReceivedDate));
         if (flags >= 0) {
             list.add(new URLParameter(Mail.PARAMETER_FLAGS, flags));
         }

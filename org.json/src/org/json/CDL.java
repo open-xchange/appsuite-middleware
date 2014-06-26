@@ -189,8 +189,12 @@ public class CDL {
      * @return A string ending in NEWLINE.
      */
     public static String rowToString(final JSONArray ja) {
-    	final org.json.helpers.StringAllocator sb = new org.json.helpers.StringAllocator();
-        for (int i = 0; i < ja.length(); i += 1) {
+        if (null == ja) {
+            return null;
+        }
+        final int length = ja.length();
+    	final StringBuilder sb = new StringBuilder(length << 4);
+        for (int i = 0; i < length; i += 1) {
             if (i > 0) {
                 sb.append(',');
             }
@@ -250,7 +254,7 @@ public class CDL {
         if (names == null || names.length() == 0) {
             return null;
         }
-        final org.json.helpers.StringAllocator sb = new org.json.helpers.StringAllocator();
+        final StringBuilder sb = new StringBuilder();
         for (int i = 0; i < ja.length(); i += 1) {
         	final JSONObject jo = ja.optJSONObject(i);
             if (jo != null) {

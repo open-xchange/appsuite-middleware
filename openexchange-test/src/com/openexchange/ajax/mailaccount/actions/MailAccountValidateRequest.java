@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -91,6 +91,7 @@ public class MailAccountValidateRequest implements AJAXRequest<MailAccountValida
     public Object getBody() throws JSONException {
         final JSONObject json = MailAccountWriter.write(wrap(account));
         json.put("password", account.getPassword());
+        json.put("transport_password", account.getTransportPassword());
         return json;
     }
 
@@ -326,6 +327,16 @@ public class MailAccountValidateRequest implements AJAXRequest<MailAccountValida
             @Override
             public Map<String, String> getProperties() {
                 return acc.getProperties();
+            }
+
+            @Override
+            public Map<String, String> getTransportProperties() {
+                return acc.getTransportProperties();
+            }
+
+            @Override
+            public void addTransportProperty(final String name, final String value) {
+                acc.addTransportProperty(name, value);
             }
         };
     }

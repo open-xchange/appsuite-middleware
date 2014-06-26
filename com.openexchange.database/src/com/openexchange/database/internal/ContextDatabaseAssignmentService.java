@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -72,12 +72,43 @@ interface ContextDatabaseAssignmentService {
 
     /**
      * Invalidates an assignment for a context in the cache.
-     *
+     * @param con writable connection to the config database in a transaction.
      * @param contextId The unique identifier of the context.
      * @throws OXException If getting the server identifier fails.
      */
-    void removeAssignments(int contextId) throws OXException;
+    void invalidateAssignment(int contextId) throws OXException;
 
+    /**
+     * Writes a database assignment for a context into the database. Normally this is done within a transaction on the config database.
+     * Therefore a connection to the config database must be given. This connections needs to be to the write host and in a transaction.
+     * This method can overwrite existing assignments.
+     * @param con writable database connection to the config database.
+     * @param assignment database assignment for a context that should be written.
+     * @throws OXException if writing to the persistent storage fails.
+     */
     void writeAssignment(Connection con, Assignment assignment) throws OXException;
 
+    /**
+     * Deletes a database assignment for the given context. This should be done within a transaction on the config database.
+     * @param con writable database connection to the config database. This connection should be in a transaction.
+     * @param contextId identifier of the context that database assignment should be deleted.
+     * @throws OXException if deleting in the persistent storage fails.
+     */
+    void deleteAssignment(Connection con, int contextId) throws OXException;
+
+    /**
+     * Determines all context IDs which reside in given schema.
+     * @param con a connection to the config database
+     * @param schema the database schema
+     * @param writePoolId corresponding write pool ID (master database)
+     * @return an array of <code>int</code> representing all retrieved context identifier
+     * @throws OXException if there is no connection to the config database slave is available or reading from the database fails.
+     */
+    int[] getContextsFromSchema(Connection con, int writePoolId, String schema) throws OXException;
+
+    int[] getContextsInDatabase(int poolId) throws OXException;
+
+    String[] getUnfilledSchemas(Connection con, int poolId, int maxContexts) throws OXException;
+
+    void lock(Connection con) throws OXException;
 }

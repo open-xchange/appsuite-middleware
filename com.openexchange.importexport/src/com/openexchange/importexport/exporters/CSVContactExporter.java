@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,20 +53,17 @@ import static com.openexchange.importexport.formats.csv.CSVLibrary.CELL_DELIMITE
 import static com.openexchange.importexport.formats.csv.CSVLibrary.ROW_DELIMITER;
 import static com.openexchange.importexport.formats.csv.CSVLibrary.getFolderId;
 import static com.openexchange.importexport.formats.csv.CSVLibrary.getFolderObject;
-import static com.openexchange.importexport.formats.csv.CSVLibrary.transformIntArrayToSet;
-import static com.openexchange.importexport.formats.csv.CSVLibrary.transformSetToIntArray;
 import java.io.ByteArrayInputStream;
+import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactGetter;
 import com.openexchange.groupware.contact.helpers.ContactStringGetter;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
@@ -84,75 +81,51 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class CSVContactExporter implements Exporter {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CSVContactExporter.class);
+
     public static final String PARAMETER_EXPORT_DLISTS = "export_dlists";
 
-    protected final static int[] POSSIBLE_FIELDS = {
-        DataObject.OBJECT_ID,
-        DataObject.CREATED_BY,
-        DataObject.CREATION_DATE,
-        DataObject.LAST_MODIFIED,
-        DataObject.MODIFIED_BY,
-        // CommonObject.PRIVATE_FLAG,
-        // CommonObject.CATEGORIES,
-        Contact.SUR_NAME,
-        Contact.ANNIVERSARY,
-        Contact.ASSISTANT_NAME,
-        Contact.BIRTHDAY,
-        Contact.BRANCHES,
-        Contact.BUSINESS_CATEGORY,
-        Contact.CATEGORIES,
-        Contact.CELLULAR_TELEPHONE1,
-        Contact.CELLULAR_TELEPHONE2,
-        Contact.CITY_BUSINESS,
-        Contact.CITY_HOME,
-        Contact.CITY_OTHER,
-        Contact.COMMERCIAL_REGISTER,
-        Contact.COMPANY,
-        Contact.COUNTRY_BUSINESS,
-        Contact.COUNTRY_HOME,
-        Contact.COUNTRY_OTHER,
-        Contact.DEPARTMENT,
-        Contact.DISPLAY_NAME,
-        Contact.DISTRIBUTIONLIST,
-        Contact.EMAIL1,
-        Contact.EMAIL2,
-        Contact.EMAIL3,
-        Contact.EMPLOYEE_TYPE,
-        Contact.FAX_BUSINESS,
-        Contact.FAX_HOME,
-        Contact.FAX_OTHER,
-        // ContactObject.FILE_AS,
-        Contact.FOLDER_ID,
-        Contact.GIVEN_NAME,
-        // ContactObject.IMAGE1,
-        // ContactObject.IMAGE1_CONTENT_TYPE,
-        Contact.INFO,
-        Contact.INSTANT_MESSENGER1,
-        Contact.INSTANT_MESSENGER2,
-        // ContactObject.LINKS,
-        Contact.MANAGER_NAME, Contact.MARITAL_STATUS,
-        Contact.MIDDLE_NAME,
-        Contact.NICKNAME,
-        Contact.NOTE,
-        Contact.NUMBER_OF_CHILDREN,
-        Contact.NUMBER_OF_EMPLOYEE,
-        Contact.POSITION,
-        Contact.POSTAL_CODE_BUSINESS,
-        Contact.POSTAL_CODE_HOME,
-        Contact.POSTAL_CODE_OTHER,
-        // ContactObject.PRIVATE_FLAG,
-        Contact.PROFESSION, Contact.ROOM_NUMBER, Contact.SALES_VOLUME, Contact.SPOUSE_NAME, Contact.STATE_BUSINESS, Contact.STATE_HOME,
-        Contact.STATE_OTHER, Contact.STREET_BUSINESS, Contact.STREET_HOME, Contact.STREET_OTHER, Contact.SUFFIX, Contact.TAX_ID,
-        Contact.TELEPHONE_ASSISTANT, Contact.TELEPHONE_BUSINESS1, Contact.TELEPHONE_BUSINESS2, Contact.TELEPHONE_CALLBACK,
-        Contact.TELEPHONE_CAR, Contact.TELEPHONE_COMPANY, Contact.TELEPHONE_HOME1, Contact.TELEPHONE_HOME2, Contact.TELEPHONE_IP,
-        Contact.TELEPHONE_ISDN, Contact.TELEPHONE_OTHER, Contact.TELEPHONE_PAGER, Contact.TELEPHONE_PRIMARY, Contact.TELEPHONE_RADIO,
-        Contact.TELEPHONE_TELEX, Contact.TELEPHONE_TTYTDD, Contact.TITLE, Contact.URL, Contact.USERFIELD01, Contact.USERFIELD02,
-        Contact.USERFIELD03, Contact.USERFIELD04, Contact.USERFIELD05, Contact.USERFIELD06, Contact.USERFIELD07, Contact.USERFIELD08,
-        Contact.USERFIELD09, Contact.USERFIELD10, Contact.USERFIELD11, Contact.USERFIELD12, Contact.USERFIELD13, Contact.USERFIELD14,
-        Contact.USERFIELD15, Contact.USERFIELD16, Contact.USERFIELD17, Contact.USERFIELD18, Contact.USERFIELD19, Contact.USERFIELD20,
-        Contact.DEFAULT_ADDRESS };
+    /**
+     * All possible contact fields as used by the CSV contact exporter
+     */
+    protected static final EnumSet<ContactField> POSSIBLE_FIELDS = EnumSet.of(
+        ContactField.OBJECT_ID, ContactField.CREATED_BY, ContactField.CREATION_DATE, ContactField.LAST_MODIFIED, ContactField.MODIFIED_BY,
+        // CommonObject.PRIVATE_FLAG, // CommonObject.CATEGORIES,
+        ContactField.CATEGORIES,
+        ContactField.SUR_NAME, ContactField.ANNIVERSARY, ContactField.ASSISTANT_NAME, ContactField.BIRTHDAY, ContactField.BRANCHES,
+        ContactField.BUSINESS_CATEGORY, ContactField.CATEGORIES, ContactField.CELLULAR_TELEPHONE1, ContactField.CELLULAR_TELEPHONE2,
+        ContactField.CITY_BUSINESS, ContactField.CITY_HOME, ContactField.CITY_OTHER, ContactField.COMMERCIAL_REGISTER,
+        ContactField.COMPANY, ContactField.COUNTRY_BUSINESS, ContactField.COUNTRY_HOME, ContactField.COUNTRY_OTHER,
+        ContactField.DEPARTMENT, ContactField.DISPLAY_NAME, ContactField.DISTRIBUTIONLIST, ContactField.EMAIL1, ContactField.EMAIL2,
+        ContactField.EMAIL3, ContactField.EMPLOYEE_TYPE, ContactField.FAX_BUSINESS, ContactField.FAX_HOME, ContactField.FAX_OTHER,
+        // ContactFieldObject.FILE_AS,
+        ContactField.FOLDER_ID, ContactField.GIVEN_NAME,
+        // ContactFieldObject.IMAGE1, // ContactFieldObject.IMAGE1_CONTENT_TYPE,
+        ContactField.INFO, ContactField.INSTANT_MESSENGER1, ContactField.INSTANT_MESSENGER2,
+        // ContactFieldObject.LINKS,
+        ContactField.MANAGER_NAME, ContactField.MARITAL_STATUS, ContactField.MIDDLE_NAME, ContactField.NICKNAME, ContactField.NOTE,
+        ContactField.NUMBER_OF_CHILDREN, ContactField.NUMBER_OF_EMPLOYEE, ContactField.POSITION, ContactField.POSTAL_CODE_BUSINESS,
+        ContactField.POSTAL_CODE_HOME, ContactField.POSTAL_CODE_OTHER,
+        // ContactFieldObject.PRIVATE_FLAG,
+        ContactField.PROFESSION, ContactField.ROOM_NUMBER, ContactField.SALES_VOLUME, ContactField.SPOUSE_NAME,
+        ContactField.STATE_BUSINESS,  ContactField.STATE_HOME, ContactField.STATE_OTHER, ContactField.STREET_BUSINESS,
+        ContactField.STREET_HOME, ContactField.STREET_OTHER, ContactField.SUFFIX, ContactField.TAX_ID, ContactField.TELEPHONE_ASSISTANT,
+        ContactField.TELEPHONE_BUSINESS1, ContactField.TELEPHONE_BUSINESS2, ContactField.TELEPHONE_CALLBACK, ContactField.TELEPHONE_CAR,
+        ContactField.TELEPHONE_COMPANY, ContactField.TELEPHONE_HOME1, ContactField.TELEPHONE_HOME2, ContactField.TELEPHONE_IP,
+        ContactField.TELEPHONE_ISDN, ContactField.TELEPHONE_OTHER, ContactField.TELEPHONE_PAGER, ContactField.TELEPHONE_PRIMARY,
+        ContactField.TELEPHONE_RADIO, ContactField.TELEPHONE_TELEX, ContactField.TELEPHONE_TTYTDD, ContactField.TITLE, ContactField.URL,
+        ContactField.USERFIELD01, ContactField.USERFIELD02, ContactField.USERFIELD03, ContactField.USERFIELD04, ContactField.USERFIELD05,
+        ContactField.USERFIELD06, ContactField.USERFIELD07, ContactField.USERFIELD08, ContactField.USERFIELD09, ContactField.USERFIELD10,
+        ContactField.USERFIELD11, ContactField.USERFIELD12, ContactField.USERFIELD13, ContactField.USERFIELD14, ContactField.USERFIELD15,
+        ContactField.USERFIELD16, ContactField.USERFIELD17, ContactField.USERFIELD18, ContactField.USERFIELD19, ContactField.USERFIELD20,
+        ContactField.DEFAULT_ADDRESS
+    );
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CSVContactExporter.class);
+    /**
+     * The possible contact fields as array
+     */
+    protected static final ContactField[] POSSIBLE_FIELDS_ARRAY = POSSIBLE_FIELDS.toArray(new ContactField[POSSIBLE_FIELDS.size()]);
+
 
     @Override
     public boolean canExport(final ServerSession sessObj, final Format format, final String folder, final Map<String, Object> optionalParams) {
@@ -187,17 +160,14 @@ public class CSVContactExporter implements Exporter {
             throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folder, format);
         }
         final int folderId = getFolderId(folder);
-        // final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj, sessObj.getContext());
-        int[] cols = null;
+
+        ContactField[] fields;
         if (fieldsToBeExported == null || fieldsToBeExported.length == 0) {
-            cols = POSSIBLE_FIELDS;
+            fields = POSSIBLE_FIELDS_ARRAY;
         } else {
-            final Set<Integer> s1 = transformIntArrayToSet(fieldsToBeExported);
-            final Set<Integer> s2 = transformIntArrayToSet(POSSIBLE_FIELDS);
-            s1.retainAll(s2);
-            cols = transformSetToIntArray(s1);
+            EnumSet<ContactField> illegalFields = EnumSet.complementOf(POSSIBLE_FIELDS);
+            fields = ContactMapper.getInstance().getFields(fieldsToBeExported, illegalFields, (ContactField[])null);
         }
-        ContactField[] fields = ContactMapper.getInstance().getFields(cols, null, (ContactField[])null);
         SearchIterator<Contact> conIter;
         try {
             conIter = ImportExportServices.getContactService().getAllContacts(sessObj, Integer.toString(folderId), fields);
@@ -205,7 +175,7 @@ public class CSVContactExporter implements Exporter {
             throw ImportExportExceptionCodes.LOADING_CONTACTS_FAILED.create(e);
         }
         final StringBuilder ret = new StringBuilder();
-        ret.append(convertToLine(com.openexchange.importexport.formats.csv.CSVLibrary.convertToList(cols)));
+        ret.append(convertToLine(com.openexchange.importexport.formats.csv.CSVLibrary.convertToList(fields)));
 
         final boolean exportDlists;
         if (optionalParams == null) {
@@ -221,7 +191,7 @@ public class CSVContactExporter implements Exporter {
                     if (!exportDlists && current.containsDistributionLists()) {
                     	continue;
                     }
-                    ret.append(convertToLine(convertToList(current, cols)));
+                    ret.append(convertToLine(convertToList(current, fields)));
                 } catch (final SearchIteratorException e) {
                     LOG.error("Could not retrieve contact from folder {} using a FolderIterator, exception was: ", folder, e);
                 } catch (final OXException e) {
@@ -242,14 +212,13 @@ public class CSVContactExporter implements Exporter {
             throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folder, format);
         }
         final int folderId = getFolderId(folder);
-        // final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj, sessObj.getContext());
-        int[] cols;
+        ContactField[] fields;
         if (fieldsToBeExported == null || fieldsToBeExported.length == 0) {
-            cols = POSSIBLE_FIELDS;
+            fields = POSSIBLE_FIELDS_ARRAY;
         } else {
-            cols = fieldsToBeExported;
+            EnumSet<ContactField> illegalFields = EnumSet.complementOf(POSSIBLE_FIELDS);
+            fields = ContactMapper.getInstance().getFields(fieldsToBeExported, illegalFields, (ContactField[])null);
         }
-        ContactField[] fields = ContactMapper.getInstance().getFields(cols, null, (ContactField[])null);
         final Contact conObj;
         try {
             conObj = ImportExportServices.getContactService().getContact(sessObj, Integer.toString(folderId), Integer.toString(objectId), fields);
@@ -258,24 +227,22 @@ public class CSVContactExporter implements Exporter {
         }
 
         final StringBuilder ret = new StringBuilder();
-        ret.append(convertToLine(com.openexchange.importexport.formats.csv.CSVLibrary.convertToList(cols)));
+        ret.append(convertToLine(com.openexchange.importexport.formats.csv.CSVLibrary.convertToList(fields)));
         if (conObj.containsDistributionLists()) {
-        	ret.append(convertToLine(convertToList(conObj, cols)));
+        	ret.append(convertToLine(convertToList(conObj, fields)));
         }
 
         final byte[] bytes = Charsets.getBytes(ret.toString(), Charsets.UTF_8);
         return new SizedInputStream(new ByteArrayInputStream(bytes), bytes.length, Format.CSV);
     }
 
-    protected List<String> convertToList(final Contact conObj, final int[] cols) {
+    protected List<String> convertToList(final Contact conObj, final ContactField[] fields) {
         final List<String> l = new LinkedList<String>();
         final ContactStringGetter getter = new ContactStringGetter();
         getter.setDelegate(new ContactGetter());
-        ContactField tempField;
-        for (final int col : cols) {
-            tempField = ContactField.getByValue(col);
+        for (final ContactField field : fields) {
             try {
-                l.add((String) tempField.doSwitch(getter, conObj));
+                l.add((String) field.doSwitch(getter, conObj));
             } catch (final OXException e) {
                 l.add("");
             }

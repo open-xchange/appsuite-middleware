@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -54,7 +54,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Resource;
@@ -228,7 +227,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             final String displayName = res.getDisplayname();
 
             int available;
-            if (null != res && null != res.getAvailable()) {
+            if (null != res.getAvailable()) {
                 if (res.getAvailable()) {
                     available = 1;
                 } else {
@@ -461,7 +460,6 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             throw new StorageException(e.toString());
         } catch (final PoolException e) {
             log.error("Pool Error", e);
-            dorollback(con);
             throw new StorageException(e);
         } catch (final CloneNotSupportedException e) {
             log.error("", e);

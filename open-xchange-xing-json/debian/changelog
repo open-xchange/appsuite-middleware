@@ -1,0 +1,47 @@
+open-xchange-xing-json (7.6.0-7) stable; urgency=low
+
+  * Seventh candidate for 7.6.0 release
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Mon, 23 Jun 2014 13:23:25 +0200
+
+open-xchange-xing-json (7.6.0-6) stable; urgency=low
+
+  * Sixth release candidate for 7.6.0
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Fri, 20 Jun 2014 13:06:47 +0200
+
+open-xchange-xing-json (7.6.0-5) stable; urgency=low
+
+  * Fifth release candidate for 7.6.0
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Fri, 13 Jun 2014 16:40:51 +0200
+
+open-xchange-xing-json (7.6.0-4) stable; urgency=low
+
+  * Fourth release candidate for 7.6.0
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Fri, 30 May 2014 13:47:58 +0200
+
+open-xchange-xing-json (7.6.0-3) stable; urgency=low
+
+  * Third release candidate for 7.6.0
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Fri, 16 May 2014 13:20:16 +0200
+
+open-xchange-xing-json (7.6.0-2) stable; urgency=low
+
+  * Second release candidate for 7.6.0
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Mon, 05 May 2014 11:27:21 +0200
+
+open-xchange-xing-json (7.6.0-1) stable; urgency=low
+
+  * First release candidate for 7.6.0
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Fri, 11 Apr 2014 16:22:36 +0200
+
+open-xchange-xing-json (7.6.0-0) unstable; urgency=low
+
+  * Initial release
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Mon, 31 Mar 2014 15:26:56 +0200

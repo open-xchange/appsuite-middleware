@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,14 +52,16 @@
 package com.openexchange.ajax.writer;
 
 import java.util.Date;
+import java.util.Map;
 import java.util.TimeZone;
-import com.openexchange.java.Strings;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.json.JSONWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.utils.MetadataSwitcher;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
 
 public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
@@ -140,6 +142,21 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
 			} catch (final JSONException e) {
 				LOG.error("",e);
 			}
+		}
+
+		@Override
+		public Object meta() {
+		    final Map<String, Object> meta = dm.getMeta();
+		    if (null != meta && !meta.isEmpty()) {
+		        try {
+                    writer.value(new JSONObject(meta));
+                } catch (final JSONException e) {
+                    LOG.error("",e);
+                }
+            } else {
+                writeNull();
+            }
+		    return null;
 		}
 
 		@Override

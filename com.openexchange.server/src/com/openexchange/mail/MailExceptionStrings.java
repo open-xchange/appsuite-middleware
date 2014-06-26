@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -117,7 +117,7 @@ public final class MailExceptionStrings implements LocalizableStrings {
 
     public final static String INVALID_FOLDER_NAME_EMPTY_MSG = "Mail folder cannot be created/renamed. Empty folder name.";
 
-    public final static String INVALID_FOLDER_NAME_MSG = "Invalid folder name.";
+    public final static String INVALID_FOLDER_NAME_MSG = "Invalid folder name. Please avoid the following characters: %2$s";
 
     public final static String DUPLICATE_FOLDER_MSG = "A folder named \"%1$s\" already exists.";
 
@@ -170,5 +170,13 @@ public final class MailExceptionStrings implements LocalizableStrings {
     public static final String MAX_MESSAGE_SIZE_EXCEEDED_MSG = "Maximum message size is exceeded. Max. is %1$s.";
 
     public static final String RESEND_DENIED_MSG = "Re-sending message denied because message is not located in \"%1$s\" folder.";
+
+    public static final String PING_FAILED_MSG = "Validation of server %1$s failed with reason: %3$s";
+
+    public static final String PING_FAILED_AUTH_MSG = "Validation of server %1$s failed due to invalid credentials";
+
+    public static final String NON_SECURE_DENIED_MSG = "Server %1$s does not support being accessed using a secure connection.";
+
+    public static final String ACCOUNT_DOES_NOT_EXIST_MSG = "Mail access is disabled for context administrator.";
 
 }

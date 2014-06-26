@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -115,6 +115,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 	protected AJAXRequestData data;
 
     public AJAXInfostoreRequest(final AJAXRequestData requestData, final ServerSession session) {
+        super();
         this.data = requestData;
         this.session = session;
     }
@@ -138,7 +139,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     public int getAttachment() {
         return getInt(Param.ATTACHMENT);
     }
-    
+
 
     @Override
     public AttachmentBase getAttachmentBase() {

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange admin reseller plugin rmi bundle
 Bundle-SymbolicName: com.openexchange.admin.reseller.rmi
-Bundle-Version: 7.4.2
+Bundle-Version: 7.6.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: com.openexchange.admin.reseller.rmi,
@@ -12,7 +12,9 @@ Export-Package: com.openexchange.admin.reseller.rmi,
 Import-Package: com.openexchange.admin.rmi.dataobjects,
  com.openexchange.admin.rmi.exceptions,
  com.openexchange.admin.rmi.extensions
-Require-Bundle: com.openexchange.admin.plugin.hosting;resolution:=optional
+Require-Bundle: com.openexchange.admin.plugin.hosting;resolution:=optional,
+ com.openexchange.admin;resolution:=optional
 Eclipse-RegisterBuddy: com.openexchange.admin.plugin.hosting,
- com.openexchange.admin.rmi
+ com.openexchange.admin.rmi,
+ com.openexchange.admin
 Bundle-ClassPath: .

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,6 +52,7 @@ package com.openexchange.admin.rmi.dataobjects;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -60,10 +61,11 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import org.slf4j.Logger;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 import com.openexchange.admin.rmi.extensions.OXUserExtensionInterface;
+import com.openexchange.tools.net.URIDefaults;
+import com.openexchange.tools.net.URIParser;
 
 /**
  * Class representing a user.
@@ -77,8 +79,6 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * For serialization
      */
     private static final long serialVersionUID = -4492376747507390066L;
-
-    private static final Pattern URL_PATTERN = Pattern.compile("^(.*?://)?(.*?)(:(.*?))?$");
 
     private boolean contextadmin = false;
 
@@ -2171,13 +2171,11 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     @Deprecated
     final public int getImapPort() {
         if (this.imapServer != null) {
-            final Matcher matcher = URL_PATTERN.matcher(this.imapServer);
-            if (matcher.matches() && null != matcher.group(4)) {
-                try {
-                    return Integer.parseInt(matcher.group(4));
-                } catch (final NumberFormatException e) {
-                    return 143;
-                }
+            try {
+                return URIParser.parse(imapServer, URIDefaults.IMAP).getPort();
+            } catch (final URISyntaxException e) {
+                final Logger logger = org.slf4j.LoggerFactory.getLogger(User.class);
+                logger.warn("Invalid URI: {}", imapServer, e);
             }
         }
         return 143;
@@ -2192,9 +2190,11 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     @Deprecated
     final public String getImapServer() {
         if (this.imapServer != null) {
-            final Matcher matcher = URL_PATTERN.matcher(this.imapServer);
-            if (matcher.matches() && null != matcher.group(2)) {
-                return matcher.group(2);
+            try {
+                return URIParser.parse(imapServer, URIDefaults.IMAP).getHost();
+            } catch (final URISyntaxException e) {
+                final Logger logger = org.slf4j.LoggerFactory.getLogger(User.class);
+                logger.warn("Invalid URI: {}", imapServer, e);
             }
         }
         return null;
@@ -2219,9 +2219,12 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     @Deprecated
     final public String getImapSchema() {
         if (this.imapServer != null) {
-            final Matcher matcher = URL_PATTERN.matcher(this.imapServer);
-            if (matcher.matches() && null != matcher.group(1)) {
-                return matcher.group(1);
+            try {
+                final String scheme = URIParser.parse(imapServer, URIDefaults.IMAP).getScheme();
+                return null == scheme ? "imap://" : scheme + "://";
+            } catch (final URISyntaxException e) {
+                final Logger logger = org.slf4j.LoggerFactory.getLogger(User.class);
+                logger.warn("Invalid URI: {}", imapServer, e);
             }
         }
         return "imap://";
@@ -2274,9 +2277,11 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     @Deprecated
     final public String getSmtpServer() {
         if (this.smtpServer != null) {
-            final Matcher matcher = URL_PATTERN.matcher(this.smtpServer);
-            if (matcher.matches() && null != matcher.group(2)) {
-                return matcher.group(2);
+            try {
+                return URIParser.parse(smtpServer, URIDefaults.SMTP).getHost();
+            } catch (final URISyntaxException e) {
+                final Logger logger = org.slf4j.LoggerFactory.getLogger(User.class);
+                logger.warn("Invalid URI: {}", smtpServer, e);
             }
         }
         return null;
@@ -2291,9 +2296,12 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     @Deprecated
     final public String getSmtpSchema() {
         if (this.smtpServer != null) {
-            final Matcher matcher = URL_PATTERN.matcher(this.smtpServer);
-            if (matcher.matches() && null != matcher.group(1)) {
-                return matcher.group(1);
+            try {
+                final String scheme = URIParser.parse(smtpServer, URIDefaults.SMTP).getScheme();
+                return null == scheme ? "smtp://" : scheme + "://";
+            } catch (final URISyntaxException e) {
+                final Logger logger = org.slf4j.LoggerFactory.getLogger(User.class);
+                logger.warn("Invalid URI: {}", smtpServer, e);
             }
         }
         return "smtp://";
@@ -2335,13 +2343,11 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     @Deprecated
     final public int getSmtpPort() {
         if (this.smtpServer != null) {
-            final Matcher matcher = URL_PATTERN.matcher(this.smtpServer);
-            if (matcher.matches() && null != matcher.group(4)) {
-                try {
-                    return Integer.parseInt(matcher.group(4));
-                } catch (final NumberFormatException e) {
-                    return 25;
-                }
+            try {
+                return URIParser.parse(smtpServer, URIDefaults.SMTP).getPort();
+            } catch (final URISyntaxException e) {
+                final Logger logger = org.slf4j.LoggerFactory.getLogger(User.class);
+                logger.warn("Invalid URI: {}", smtpServer, e);
             }
         }
         return 25;

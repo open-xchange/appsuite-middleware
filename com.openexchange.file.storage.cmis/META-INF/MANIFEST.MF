@@ -2,13 +2,14 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange File Storage CMIS Bundle
 Bundle-SymbolicName: com.openexchange.file.storage.cmis
-Bundle-Version: 7.4.2
+Bundle-Version: 7.6.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.context,
  com.openexchange.datatypes.genericonf,
  com.openexchange.exception,
  com.openexchange.file.storage,
+ com.openexchange.file.storage.search,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.ldap,
  com.openexchange.groupware.results,

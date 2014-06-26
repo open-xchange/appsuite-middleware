@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -101,6 +101,17 @@ public class InfostoreTemplateUtilsTest extends TestCase {
 
 
     private final DocumentMetadata document = new DocumentMetadata(){
+
+        @Override
+        public java.util.Map<String,Object> getMeta() {
+            // Nothing to do
+            return null;
+        }
+
+        @Override
+        public void setMeta(java.util.Map<String,Object> properties) {
+            // Nothing to do
+        }
 
         @Override
         public String getCategories() {

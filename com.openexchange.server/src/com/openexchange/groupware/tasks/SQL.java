@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -226,9 +226,26 @@ public final class SQL {
      * using in SELECT and INSERT statements.
      * @throws OXException if a mapping for a column isn't implemented.
      */
-    static String getFields(final int[] columns, final boolean folder)
-        throws OXException {
-        final StringBuilder sql = new StringBuilder();
+    static String getFields(final int[] columns, final boolean folder) throws OXException {
+        return getFields(columns, folder, null);
+    }
+    
+    /**
+     * @param columns attributes of a task that should be selected.
+     * @param folder <code>true</code> if the folder must be selected in
+     * searches.
+     * @param prefix reference table prefix for column names
+     * @return all fields that are specified in the columns colon seperated for
+     * using in SELECT and INSERT statements.
+     * @throws OXException if a mapping for a column isn't implemented.
+     */
+    static String getFields(final int[] columns, final boolean folder, String prefix) throws OXException {
+        if (prefix == null)
+            prefix = "";
+        else
+            prefix += ".";
+        
+        final StringBuilder builder = new StringBuilder();
         for (final int i : columns) {
             final Mapper<?> mapper = Mapping.getMapping(i);
             if (null == mapper) {
@@ -240,19 +257,20 @@ public final class SQL {
                     break;
                 case FolderChildObject.FOLDER_ID:
                     if (folder) {
-                        sql.append("folder,");
+                        builder.append("folder,");
                     }
                     break;
                 default:
                     throw TaskExceptionCode.UNKNOWN_ATTRIBUTE.create(I(i));
                 }
             } else {
-                sql.append(mapper.getDBColumnName());
-                sql.append(',');
+                builder.append(prefix);
+                builder.append(mapper.getDBColumnName());
+                builder.append(',');
             }
         }
-        sql.setLength(sql.length() - 1);
-        return sql.toString();
+        builder.setLength(builder.length() - 1);
+        return builder.toString();
     }
 
     /**

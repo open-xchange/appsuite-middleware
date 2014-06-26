@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -85,7 +85,7 @@ public class CapabilityGetAction implements AJAXActionService {
         // Get capability
         String id = requestData.checkParameter("id");
         CapabilitySet capabilities = services.getService(CapabilityService.class).getCapabilities(
-            session.getUserId(), session.getContextId(), true);
+            session.getUserId(), session.getContextId(), true, true);
         Capability capability = null != capabilities ? capabilities.get(id) : null;
         return null == capability ? new AJAXRequestResult() : new AJAXRequestResult(capability, "capability");
     }

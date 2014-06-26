@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -61,6 +61,7 @@ import com.openexchange.halo.ContactHalo;
 import com.openexchange.halo.Picture;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -90,7 +91,7 @@ public class GetPictureAction implements ETagAwareAJAXActionService {
         }
         AJAXRequestResult result = new AJAXRequestResult(picture.getFileHolder(), "file");
 
-        setETag(picture.getEtag(), 1000, result);
+        setETag(picture.getEtag(), Tools.getDefaultImageExpiry(), result);
 
         return result;
     }
@@ -102,7 +103,6 @@ public class GetPictureAction implements ETagAwareAJAXActionService {
             return false;
         }
         if (pictureETag.equals(clientETag)) {
-            request.setExpires(1000);
             return true;
         }
         return false;

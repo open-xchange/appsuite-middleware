@@ -1,0 +1,124 @@
+#!/usr/bin/perl
+#%# family=auto
+#%# capabilities=autoconf
+
+use strict;
+
+use LWP;
+use JSON;
+
+if ( $ARGV[0] and $ARGV[0] eq "autoconf")
+{
+	print "yes\n";
+	exit 0;
+}
+
+my $url = $ENV{oxJolokiaUrl};
+my $username = $ENV{oxJolokiaUser};
+my $password = $ENV{oxJolokiaPassword};
+
+if ( $ARGV[0] and $ARGV[0] eq "config")
+{
+	print "graph_title JVM GC duration\n";
+	print "graph_args --base 1000 -l 0\n";
+	print "graph_category Open Xchange\n";
+	print "graph_vlabel time in ms per s \n";
+	
+	my @confArray = ("label Copy","draw LINE1","type Derive","min 0");
+	callUrlForConfig("a",\@confArray,"/search/java.lang:name=Copy,type=GarbageCollector/CollectionTime");
+	
+	my @confArray = ("label MarkSweepCompact","draw LINE1","type Derive","min 0");
+	callUrlForConfig("b",\@confArray,"/search/java.lang:name=MarkSweepCompact,type=GarbageCollector/CollectionTime");
+	
+	my @confArray = ("label  PS MarkSweep","draw LINE1","type Derive","min 0");
+	callUrlForConfig("c",\@confArray,"/search/java.lang:name=PS MarkSweep,type=GarbageCollector/CollectionTime");
+	
+	my @confArray = ("label PS Scavenge","draw LINE1","type Derive","min 0");
+	callUrlForConfig("d",\@confArray,"/search/java.lang:name=PS Scavenge,type=GarbageCollector/CollectionTime");
+	
+	my @confArray = ("label ConcurrentMarkSweep","draw LINE1","type Derive","min 0");
+	callUrlForConfig("e",\@confArray,"/search/java.lang:name=ConcurrentMarkSweep,type=GarbageCollector/CollectionTime");
+	
+	my @confArray = ("label ParNew","draw LINE1","type Derive","min 0");
+	callUrlForConfig("f",\@confArray,"/search/java.lang:name=ParNew,type=GarbageCollector/CollectionTime");
+	
+	my @confArray = ("label G1 Young Generation","draw LINE1","type Derive","min 0");
+	callUrlForConfig("g",\@confArray,"/search/java.lang:name=G1 Old Generation,type=GarbageCollector/CollectionTime");
+	
+	my @confArray = ("label Old Young Generation","draw LINE1","type Derive","min 0");
+	callUrlForConfig("h",\@confArray,"/search/java.lang:name=G1 Young Generation,type=GarbageCollector/CollectionTime");
+
+	exit 0
+}
+
+callUrl("a","/read/java.lang:name=Copy,type=GarbageCollector/CollectionTime");
+callUrl("b","/read/java.lang:name=MarkSweepCompact,type=GarbageCollector/CollectionTime");
+callUrl("c","/read/java.lang:name=PS MarkSweep,type=GarbageCollector/CollectionTime");
+callUrl("d","/read/java.lang:name=PS Scavenge,type=GarbageCollector/CollectionTime");
+callUrl("e","/read/java.lang:name=ConcurrentMarkSweep,type=GarbageCollector/CollectionTime");
+callUrl("f","/read/java.lang:name=ParNew,type=GarbageCollector/CollectionTime");
+callUrl("g","/read/java.lang:name=G1 Old Generation,type=GarbageCollector/CollectionTime");
+callUrl("h","/read/java.lang:name=G1 Young Generation,type=GarbageCollector/CollectionTime");
+
+sub callUrl {
+	my $ua = LWP::UserAgent->new();
+	my $req = HTTP::Request->new(GET => "$url$_[1]");
+	$req->authorization_basic($username,$password);
+	
+	$req->header('Accept', => 'text/html');
+	
+	my $response = $ua->request($req);
+	
+	if ($response->is_success) {
+		my $json = decode_json($response->decoded_content);
+		if (defined $json->{value}){
+			print "$_[0].value ";
+			print $json->{value},"\n";
+		}
+	}
+	else {
+		my $status = $response->status_line;
+		if ($status == 404) {
+			die "Link to servlet might not be set correctly, this can be done by altering /etc/munin/plugin-conf.d/ox and setting the correct path to your jolokia servlet";
+		}
+		elsif ($status == 401) {
+			die "Credentials to login might be not set correctly. The credentials are set inside /opt/open-xchange/etc/jolokia.properties on the OX, for munin, those need to be altered at /etc/munin/plugin-conf.d/ox";
+		}
+		else {
+			die "Something went wrong:\n",$status;
+		}
+	}
+}
+
+sub callUrlForConfig {
+	my $ua = LWP::UserAgent->new();
+	my $req = HTTP::Request->new(GET => "$url$_[2]");
+	$req->authorization_basic($username,$password);
+	
+	$req->header('Accept', => 'text/html');
+	
+	my $response = $ua->request($req);
+	
+	if ($response->is_success) {
+		my $json = decode_json($response->decoded_content);
+		if (defined $json->{value}->[0]){
+			foreach (@{$_[1]}){
+				print "$_[0].$_\n";
+			}
+		}
+	}
+	else {
+		my $status = $response->status_line;
+		if ($status == 404) {
+			die "Link to servlet might not be set correctly, this can be done by altering /etc/munin/plugin-conf.d/ox and setting the correct path to your jolokia servlet";
+		}
+		elsif ($status == 401) {
+			die "Credentials to login might be not set correctly. The credentials are set inside /opt/open-xchange/etc/jolokia.properties on the OX, for munin, those need to be altered at /etc/munin/plugin-conf.d/ox";
+		}
+		else {
+			die "Something went wrong:\n",$status;
+		}
+
+		print STDERR $response->status_line, "\n";
+	}
+}

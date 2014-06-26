@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -60,11 +60,13 @@ import org.osgi.service.event.EventHandler;
 import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.audit.configuration.AuditConfiguration;
+import com.openexchange.audit.services.Services;
+import com.openexchange.contact.ContactService;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.contact.Contacts;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
@@ -321,10 +323,32 @@ public class AuditEventHandler implements EventHandler {
         appendUserInformation(commonEvent.getUserId(), commonEvent.getContextId(), log);
         log.append("CONTEXT ID: ").append(commonEvent.getContextId()).append("; ");
         log.append("OBJECT ID: ").append(appointment.getObjectID()).append("; ");
-        log.append("CREATED BY: ").append(UserStorage.getInstance().getUser(appointment.getCreatedBy(), context).getDisplayName()).append(
-            "; ");
-        log.append("MODIFIED BY: ").append(UserStorage.getInstance().getUser(appointment.getModifiedBy(), context).getDisplayName()).append(
-            "; ");
+        {
+            int createdBy = appointment.getCreatedBy();
+            if (createdBy > 0) {
+                try {
+                    log.append("CREATED BY: ").append(UserStorage.getInstance().getUser(createdBy, context).getDisplayName()).append("; ");
+                } catch (OXException e) {
+                    LOG.debug("Failed to load user {} in context {}", createdBy, context.getContextId(), e);
+                    log.append("CREATED BY: <unknown>; ");
+                }
+            } else {
+                log.append("CREATED BY: <unknown>; ");
+            }
+        }
+        {
+            int modifiedBy = appointment.getModifiedBy();
+            if (modifiedBy > 0) {
+                try {
+                    log.append("MODIFIED BY: ").append(UserStorage.getInstance().getUser(modifiedBy, context).getDisplayName()).append("; ");
+                } catch (OXException e) {
+                    LOG.debug("Failed to load user {} in context {}", modifiedBy, context.getContextId(), e);
+                    log.append("MODIFIED BY: <unknown>; ");
+                }
+            } else {
+                log.append("MODIFIED BY: <unknown>; ");
+            }
+        }
         log.append("TITLE: ").append(appointment.getTitle()).append("; ");
         log.append("START DATE: ").append(appointment.getStartDate()).append("; ");
         log.append("END DATE: ").append(appointment.getEndDate()).append("; ");
@@ -349,13 +373,7 @@ public class AuditEventHandler implements EventHandler {
     protected void handleContactCommonEvent(CommonEvent commonEvent, Context context, StringBuilder log) throws OXException {
         Validate.notNull(commonEvent, "CommonEvent mustn't be null.");
         Validate.notNull(log, "StringBuilder to write to mustn't be null.");
-
-        Contact contact = (Contact) commonEvent.getActionObj();
-
-        if (CommonEvent.DELETE != commonEvent.getAction() && (null == contact || false == contact.containsDisplayName() || false == contact.containsCreatedBy() || false == contact.containsModifiedBy() || false == contact.containsObjectID() || false == contact.containsParentFolderID())) {
-            contact = Contacts.getContactById(((Contact) commonEvent.getActionObj()).getObjectID(), commonEvent.getSession());
-        }
-
+        Contact contact = extractContact(commonEvent);
         log.append("OBJECT TYPE: CONTACT; ");
         appendUserInformation(commonEvent.getUserId(), commonEvent.getContextId(), log);
         log.append("CONTEXT ID: ").append(commonEvent.getContextId()).append("; ");
@@ -372,6 +390,33 @@ public class AuditEventHandler implements EventHandler {
             log.append("CONTACT FULLNAME: ").append(contact.getDisplayName()).append(';');
             log.append("FOLDER: ").append(getPathToRoot(contact.getParentFolderID(), commonEvent.getSession())).append(';');
         }
+    }
+
+    /**
+     * Extracts the contact from the supplied common event.
+     *
+     * @param commonEvent The common event
+     * @return The extracted contact, either as supplied by the event itself, or re-fetched from the contact service
+     * @throws OXException
+     */
+    private Contact extractContact(CommonEvent commonEvent) throws OXException {
+        Contact contact = (Contact) commonEvent.getActionObj();
+        if (CommonEvent.DELETE != commonEvent.getAction() && null != commonEvent.getSession() && (
+            null == contact || false == contact.containsDisplayName() || false == contact.containsCreatedBy() ||
+            false == contact.containsModifiedBy() || false == contact.containsObjectID() || false == contact.containsParentFolderID())) {
+            /*
+             * try and get more details
+             */
+            ContactService contactService = Services.getService(ContactService.class);
+            if (null != contactService) {
+                ContactField[] requestedFields = {
+                    ContactField.DISPLAY_NAME, ContactField.FOLDER_ID, ContactField.CREATED_BY, ContactField.MODIFIED_BY
+                };
+                return contactService.getContact(commonEvent.getSession(), String.valueOf(contact.getParentFolderID()),
+                    String.valueOf(contact.getObjectID()), requestedFields );
+            }
+        }
+        return contact;
     }
 
     /**

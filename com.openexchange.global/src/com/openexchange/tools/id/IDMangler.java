@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -84,7 +84,7 @@ public class IDMangler {
      * @return The mangled/composite identifier
      */
     public static String mangle(final String... components) {
-        final com.openexchange.java.StringAllocator id = new com.openexchange.java.StringAllocator(50);
+        final StringBuilder id = new StringBuilder(50);
         boolean first = true;
         for (String component : components) {
             component = escape(component);
@@ -93,7 +93,7 @@ public class IDMangler {
             id.append(delim);
             first = false;
         }
-        id.setNewLength(id.length()-1);
+        id.setLength(id.length()-1);
         return id.toString();
     }
 
@@ -104,20 +104,6 @@ public class IDMangler {
         return encodeQP(string);
     }
 
-    private static enum ParserState {
-        APPEND, APPEND_PREFIX, PRIMARY_DELIM1, PRIMARY_DELIM2, ESCAPED;
-    }
-
-    /**
-     * Parses specified mangled identifier into its String components.
-     *
-     * @param mangled The mangled identifier
-     * @return The identifier's components
-     */
-    public static List<String> unmangle(final String mangled) {
-        return unmangle(mangled, false);
-    }
-
     /**
      * Parses specified mangled identifier into its String components.
      *
@@ -125,99 +111,34 @@ public class IDMangler {
      * @param stateMachine <code>true</code> for state machine based parsing; otherwise <code>false</code>
      * @return The identifier's components
      */
-    public static List<String> unmangle(String mangled, final boolean stateMachine) {
+    public static List<String> unmangle(String mangled) {
+        if (null == mangled) {
+            return null;
+        }
         final List<String> list = new ArrayList<String>(5);
-        if (stateMachine) {
-            final com.openexchange.java.StringAllocator buffer = new com.openexchange.java.StringAllocator(50);
-            ParserState state = ParserState.APPEND_PREFIX;
-            ParserState unescapedState = null;
-
-            final int length = mangled.length();
-            for (int i = 0; i < length; i++) {
-                final char c = mangled.charAt(i);
-                switch (c) {
-                case '[': {
-                    if (state == ParserState.ESCAPED) {
-                        buffer.append(c);
-                    } else {
-                        unescapedState = state;
-                        state = ParserState.ESCAPED;
-                    }
-                    break;
-                }
-                case ']': {
-                    if (state == ParserState.ESCAPED) {
-                        state = unescapedState;
-                    } else {
-                        buffer.append(c);
-                    }
-                    break;
-                }
-                case ':': {
-                    switch (state) {
-                    case APPEND:
-                    case ESCAPED:
-                        buffer.append(c);
-                        break;
-                    case APPEND_PREFIX:
-                        state = ParserState.PRIMARY_DELIM1;
-                        break;
-                    }
-                    break;
-                }
-                case '/': {
-                    switch (state) {
-                    case APPEND:
-                        list.add(buffer.toString());
-                        buffer.reinitTo(0);
-                        break;
-                    case APPEND_PREFIX:
-                    case ESCAPED:
-                        buffer.append(c);
-                        break;
-                    case PRIMARY_DELIM1:
-                        state = ParserState.PRIMARY_DELIM2;
-                        break;
-                    case PRIMARY_DELIM2:
-                        list.add(buffer.toString());
-                        buffer.reinitTo(0);
-                        state = ParserState.APPEND;
-                        break;
-                    }
-                    break;
-                }
-                default: {
-                    switch(state) {
-                    case PRIMARY_DELIM1: buffer.append(':'); state = ParserState.APPEND_PREFIX; break;
-                    case PRIMARY_DELIM2: buffer.append(":/"); state = ParserState.APPEND_PREFIX; break;
-                    }
-                    buffer.append(c);
-                    break;
-                }
-                }
+        // Find first delimiter
+        int prev = 0;
+        int pos = mangled.indexOf(PRIMARY_DELIM, prev);
+        if (pos < 0) {
+            pos = mangled.indexOf(CHAR_SECONDARY_DELIM, prev);
+            if (pos <= 0) {
+                list.add(mangled);
+            } else {
+                list.add(decodeQP(mangled.substring(prev, pos)));
+                list.add(decodeQP(mangled.substring(pos + 1)));
             }
-            if (buffer.length() != 0) {
-                list.add(buffer.toString());
-            }
-        } else {
-            // Find first delimiter
-            int prev = 0;
-            int pos = mangled.indexOf(PRIMARY_DELIM, prev);
-            if (pos == -1) {
-            	list.add(mangled);
-            	return list;
-            }
-            list.add(decodeQP(mangled.substring(prev, pos)));
-            prev = pos + PRIMARY_DELIM.length();
-            while (prev > 0) {
-                pos = mangled.indexOf(CHAR_SECONDARY_DELIM, prev);
-                if (pos > 0) {
-                    list.add(decodeQP(mangled.substring(prev, pos)));
-                    prev = pos + 1;
-                } else {
-                    list.add(decodeQP(mangled.substring(prev)));
-                    prev = -1;
-                }
+        	return list;
+        }
+        list.add(decodeQP(mangled.substring(prev, pos)));
+        prev = pos + PRIMARY_DELIM.length();
+        while (prev > 0) {
+            pos = mangled.indexOf(CHAR_SECONDARY_DELIM, prev);
+            if (pos > 0) {
+                list.add(decodeQP(mangled.substring(prev, pos)));
+                prev = pos + 1;
+            } else {
+                list.add(decodeQP(mangled.substring(prev)));
+                prev = -1;
             }
         }
         return list;

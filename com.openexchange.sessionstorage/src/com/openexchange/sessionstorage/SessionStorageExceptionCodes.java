@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -66,57 +66,53 @@ public enum SessionStorageExceptionCodes implements DisplayableOXExceptionCode {
      * An error occurred: %1$s
      */
     UNEXPECTED_ERROR("An error occurred: %1$s", 1, CATEGORY_ERROR),
-    
     /**
      * No session found for identifier: %1$s
      */
     NO_SESSION_FOUND("No session found for identifier: %1$s", SessionStorageExceptionMessages.NO_SESSION_FOUND, 2, CATEGORY_USER_INPUT),
-    
     /**
      * Saving session with session identifier %1$s failed.
      */
     SAVE_FAILED("Saving session with session identifier %1$s failed.", 3, Category.CATEGORY_ERROR),
-    
     /**
      * Lookup for session with session identifier %1$s failed.
      */
     LOOKUP_FAILED("Lookup for session with session identifier %1$s failed.", 4, Category.CATEGORY_ERROR),
-    
     /**
      * Removing session with session identifier %1$s failed.
      */
     REMOVE_FAILED("Removing session with session identifier %1$s failed.", 5, Category.CATEGORY_ERROR),
-    
     /**
      * Authentication identifier duplicate found. Existing session login: %1$s. Current denied login request: %2$s.
      */
     DUPLICATE_AUTHID("Authentication identifier duplicate found. Existing session login: %1$s. Current denied login request: %2$s.", 6,
         Category.CATEGORY_ERROR),
-        
     /**
      * Operation %1$s not supported.
      */
     UNSUPPORTED_OPERATION("Operation %1$s not supported.", 7, Category.CATEGORY_ERROR),
-    
     /**
      * Lookup for session with alternative identifier %1$s failed.
      */
     ALTID_NOT_FOUND("Lookup for session with alternative identifier %1$s failed.", 8, Category.CATEGORY_ERROR),
-    
     /**
      * No sessions found for user %1$s in context %2$s.
      */
     NO_USERSESSIONS("No sessions found for user %1$s in context %2$s.", 9, Category.CATEGORY_ERROR),
-    
     /**
      * No sessions found for context %1$s.
      */
     NO_CONTEXTESSIONS("No sessions found for context %1$s.", 10, Category.CATEGORY_ERROR),
-    
     /**
      * No sessions found by random token %1$s,
      */
-    RANDOM_NOT_FOUND("No sessions found by random token %1$s.", 11, Category.CATEGORY_ERROR);
+    RANDOM_NOT_FOUND("No sessions found by random token %1$s.", 11, Category.CATEGORY_ERROR),
+    /**
+     * The session storage service %1$s is down.
+     */
+    SESSION_STORAGE_DOWN("The session storage service %1$s is down.", 12, Category.CATEGORY_ERROR),
+
+    ;
 
     private static String PREFIX = "SST";
 
@@ -124,7 +120,7 @@ public enum SessionStorageExceptionCodes implements DisplayableOXExceptionCode {
      * Message of the exception.
      */
     private String message;
-    
+
     /**
      * Display message of the exception.
      */
@@ -149,7 +145,7 @@ public enum SessionStorageExceptionCodes implements DisplayableOXExceptionCode {
         this.detailNumber = detailNumber;
         this.category = category;
     }
-    
+
     private SessionStorageExceptionCodes(String message, int detailNumber, Category category) {
         this(message, null, detailNumber, category);
     }
@@ -178,7 +174,7 @@ public enum SessionStorageExceptionCodes implements DisplayableOXExceptionCode {
     public String getMessage() {
         return message;
     }
-    
+
     @Override
     public String getDisplayMessage() {
         return displayMessage;

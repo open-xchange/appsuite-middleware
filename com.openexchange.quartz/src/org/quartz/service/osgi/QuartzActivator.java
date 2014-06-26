@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,12 +49,9 @@
 
 package org.quartz.service.osgi;
 
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.quartz.service.QuartzService;
 import org.quartz.service.internal.QuartzServiceImpl;
-import org.quartz.service.internal.Services;
-import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 
@@ -73,17 +70,16 @@ public class QuartzActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HazelcastInstance.class, ConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(QuartzActivator.class);
         log.info("Starting bundle: org.quartz");
         try {
             System.setProperty("org.terracotta.quartz.skipUpdateCheck", "true");
-            quartzServiceImpl = new QuartzServiceImpl();
+            quartzServiceImpl = new QuartzServiceImpl(getService(ConfigurationService.class));
             quartzServiceRegistration = context.registerService(QuartzService.class, quartzServiceImpl, null);
             log.info("Bundle successfully started: org.quartz");
         } catch (final Exception e) {

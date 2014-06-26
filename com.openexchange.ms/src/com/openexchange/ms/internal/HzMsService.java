@@ -49,14 +49,12 @@
 
 package com.openexchange.ms.internal;
 
-import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentMap;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
-import com.hazelcast.core.DistributedTask;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.openexchange.ms.Member;
 import com.openexchange.ms.Message;
 import com.openexchange.ms.MessageInbox;
@@ -66,10 +64,10 @@ import com.openexchange.ms.Topic;
 
 /**
  * {@link HzMsService}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class HzMsService implements MsService {
+public final class HzMsService extends AbstractHzResource implements MsService {
 
     private final HazelcastInstance hz;
     private final ConcurrentMap<String, Queue<?>> queues;
@@ -119,7 +117,11 @@ public final class HzMsService implements MsService {
             // No such member
             return;
         }
-        hz.getExecutorService().submit(new DistributedTask<Void>(new MessageAppender(message), hzMember));
+        try {
+            hz.getExecutorService("default").submitToMember(new MessageAppender(message), hzMember);
+        } catch (HazelcastInstanceNotActiveException e) {
+            throw handleNotActiveException(e);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -127,10 +129,14 @@ public final class HzMsService implements MsService {
     public <E> Queue<E> getQueue(final String name) {
         Queue<E> queue = (Queue<E>) queues.get(name);
         if (null == queue) {
-            final HzQueue<E> hzQueue = new HzQueue<E>(name, hz);
-            queue = (Queue<E>) queues.putIfAbsent(name, hzQueue);
-            if (null == queue) {
-                queue = hzQueue;
+            try {
+                final HzQueue<E> hzQueue = new HzQueue<E>(name, hz);
+                queue = (Queue<E>) queues.putIfAbsent(name, hzQueue);
+                if (null == queue) {
+                    queue = hzQueue;
+                }
+            } catch (HazelcastInstanceNotActiveException e) {
+                throw handleNotActiveException(e);
             }
         }
         return queue;
@@ -141,51 +147,17 @@ public final class HzMsService implements MsService {
     public <E> Topic<E> getTopic(final String name) {
         Topic<E> topic = (Topic<E>) topics.get(name);
         if (null == topic) {
-            final HzTopic<E> hzTopic = new HzTopic<E>(name, hz);
-            topic = (Topic<E>) topics.putIfAbsent(name, hzTopic);
-            if (null == topic) {
-                topic = hzTopic;
+            try {
+                final HzTopic<E> hzTopic = new HzTopic<E>(name, hz);
+                topic = (Topic<E>) topics.putIfAbsent(name, hzTopic);
+                if (null == topic) {
+                    topic = hzTopic;
+                }
+            } catch (HazelcastInstanceNotActiveException e) {
+                throw handleNotActiveException(e);
             }
         }
         return topic;
-    }
-
-    // ---------------------------------------------------------------------------------------- //
-
-    private static final class MessageAppender implements Callable<Void> {
-
-        private final Message<?> message;
-
-        MessageAppender(final Message<?> message) {
-            super();
-            this.message = message;
-        }
-
-        @Override
-        public Void call() throws Exception {
-            MessageInboxImpl.getInstance().offer(message);
-            return null;
-        }
-    }
-
-    private static final class HzMember implements Member {
-
-        private final com.hazelcast.core.Member hzMember;
-
-        HzMember(final com.hazelcast.core.Member hzMember) {
-            super();
-            this.hzMember = hzMember;
-        }
-
-        @Override
-        public String getUuid() {
-            return hzMember.getUuid();
-        }
-
-        @Override
-        public InetSocketAddress getInetSocketAddress() {
-            return hzMember.getInetSocketAddress();
-        }
     }
 
 }

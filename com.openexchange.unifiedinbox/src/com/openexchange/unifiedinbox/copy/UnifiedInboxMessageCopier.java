@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -160,7 +160,7 @@ public final class UnifiedInboxMessageCopier {
          * A copy/move from an account's default folder to a specific folder
          */
         // Parse destination folder
-        final FullnameArgument destFullnameArgument = UnifiedInboxUtility.parseNestedFullname(destFolder);
+        final FullnameArgument destFullnameArgument = UnifiedInboxUtility.parseNestedFullName(destFolder);
         final UnifiedInboxUID tmp = new UnifiedInboxUID();
         // Check for possible conflict on move
         final String destFullname = destFullnameArgument.getFullname();
@@ -214,12 +214,12 @@ public final class UnifiedInboxMessageCopier {
          */
         final String[] retval;
         // Parse source folder
-        final FullnameArgument sourceFullnameArgument = UnifiedInboxUtility.parseNestedFullname(sourceFolder);
+        final FullnameArgument sourceFullnameArgument = UnifiedInboxUtility.parseNestedFullName(sourceFolder);
         MailAccess<?, ?> mailAccess = null;
         try {
             mailAccess = MailAccess.getInstance(session, sourceFullnameArgument.getAccountId());
             mailAccess.connect();
-            final String realDest = UnifiedInboxUtility.determineAccountFullname(mailAccess, destFolder);
+            final String realDest = UnifiedInboxUtility.determineAccountFullName(mailAccess, destFolder);
             final String sourceFullname = sourceFullnameArgument.getFullname();
             if (move && sourceFullname.equals(realDest)) {
                 throw UnifiedInboxException.Code.NO_EQUAL_MOVE.create();
@@ -243,9 +243,9 @@ public final class UnifiedInboxMessageCopier {
          * A copy/move from a specific folder to an account's specific folder
          */
         // Parse source folder
-        final FullnameArgument sourceFullnameArgument = UnifiedInboxUtility.parseNestedFullname(sourceFolder);
+        final FullnameArgument sourceFullnameArgument = UnifiedInboxUtility.parseNestedFullName(sourceFolder);
         // Parse destination folder
-        final FullnameArgument destFullnameArgument = UnifiedInboxUtility.parseNestedFullname(destFolder);
+        final FullnameArgument destFullnameArgument = UnifiedInboxUtility.parseNestedFullName(destFolder);
         // Check for equal mail account
         final String sourceFullname = sourceFullnameArgument.getFullname();
         final String destFullname = destFullnameArgument.getFullname();

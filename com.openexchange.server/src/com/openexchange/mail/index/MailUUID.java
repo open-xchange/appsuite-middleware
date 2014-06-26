@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -89,7 +89,7 @@ public class MailUUID {
         this.accountId = accountId;
         this.fullName = fullName;
         this.mailId = mailId;
-        final com.openexchange.java.StringAllocator tmp = new com.openexchange.java.StringAllocator(64);
+        final StringBuilder tmp = new StringBuilder(64);
         tmp.append("mail/").append(contextId).append(MailPath.SEPERATOR).append(userId).append(MailPath.SEPERATOR);
         tmp.append(MailPath.getMailPath(accountId, fullName, mailId));
         mailUUID = tmp.toString();

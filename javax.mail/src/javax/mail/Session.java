@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -232,7 +232,7 @@ public final class Session {
 	loadAddressMap(cl);
     }
 
-    private final void initLogger() {
+    private final synchronized void initLogger() {
 	logger = new MailLogger(this.getClass(), "DEBUG", debug, getDebugOut());
     }
 
@@ -301,8 +301,12 @@ public final class Session {
      * <code>getInstance</code> method to get a new Session object every
      * time the method is called. <p>
      *
-     * In JDK 1.2, additional security Permission objects may be used to
-     * control access to the default session.
+     * Additional security Permission objects may be used to
+     * control access to the default session. <p>
+     *
+     * In the current implementation, if a SecurityManager is set, the
+     * caller must have the <code>RuntimePermission("setFactory")</code>
+     * permission.
      *
      * @param	props	Properties object. Used only if a new Session
      *			object is created.<br>
@@ -321,20 +325,22 @@ public final class Session {
     public static synchronized Session getDefaultInstance(Properties props,
 					Authenticator authenticator) {
 	if (defaultSession == null) {
-        defaultSession = new Session(props, authenticator);
-    } else {
+	    SecurityManager security = System.getSecurityManager();
+	    if (security != null)
+		security.checkSetFactory();
+	    defaultSession = new Session(props, authenticator);
+	} else {
 	    // have to check whether caller is allowed to see default session
-	    if (defaultSession.authenticator == authenticator) {
-            ;	// either same object or both null, either way OK
-        } else if (defaultSession.authenticator != null &&
+	    if (defaultSession.authenticator == authenticator)
+		;	// either same object or both null, either way OK
+	    else if (defaultSession.authenticator != null &&
 		    authenticator != null &&
 		    defaultSession.authenticator.getClass().getClassLoader() ==
-			authenticator.getClass().getClassLoader()) {
-            ;	// both objects came from the same class loader, OK
-        } else {
-            // anything else is not allowed
-            throw new SecurityException("Access to default session denied");
-        }
+			authenticator.getClass().getClassLoader())
+		;	// both objects came from the same class loader, OK
+	    else
+		// anything else is not allowed
+		throw new SecurityException("Access to default session denied");
 	}
 
 	return defaultSession;
@@ -384,7 +390,7 @@ public final class Session {
 	this.debug = debug;
 	initLogger();
 	logger.log(Level.CONFIG, "setDebug: JavaMail version {0}",
-				    "1.4.7");
+				    "1.5.1");
     }
 
     /**
@@ -642,7 +648,14 @@ public final class Session {
      * @exception	NoSuchProviderException If the provider is not found.
      */
     public Transport getTransport() throws NoSuchProviderException {
-        return getTransport(getProperty("mail.transport.protocol"));
+	String prot = getProperty("mail.transport.protocol");
+	if (prot != null)
+	    return getTransport(prot);
+	// if the property isn't set, use the protocol for "rfc822"
+	prot = (String)addressMap.get("rfc822");
+	if (prot != null)
+	    return getTransport(prot);
+	return getTransport("smtp");	// if all else fails
     }
 
     /**
@@ -934,22 +947,22 @@ public final class Session {
 	    // failed to load any providers, initialize with our defaults
 	    addProvider(new Provider(Provider.Type.STORE,
 			"imap", "com.sun.mail.imap.IMAPStore",
-			"Sun Microsystems, Inc.", "1.4.7"));
+			"Oracle", "1.5.1"));
 	    addProvider(new Provider(Provider.Type.STORE,
 			"imaps", "com.sun.mail.imap.IMAPSSLStore",
-			"Sun Microsystems, Inc.", "1.4.7"));
+			"Oracle", "1.5.1"));
 	    addProvider(new Provider(Provider.Type.STORE,
 			"pop3", "com.sun.mail.pop3.POP3Store",
-			"Sun Microsystems, Inc.", "1.4.7"));
+			"Oracle", "1.5.1"));
 	    addProvider(new Provider(Provider.Type.STORE,
 			"pop3s", "com.sun.mail.pop3.POP3SSLStore",
-			"Sun Microsystems, Inc.", "1.4.7"));
+			"Oracle", "1.5.1"));
 	    addProvider(new Provider(Provider.Type.TRANSPORT,
 			"smtp", "com.sun.mail.smtp.SMTPTransport",
-			"Sun Microsystems, Inc.", "1.4.7"));
+			"Oracle", "1.5.1"));
 	    addProvider(new Provider(Provider.Type.TRANSPORT,
 			"smtps", "com.sun.mail.smtp.SMTPSSLTransport",
-			"Sun Microsystems, Inc.", "1.4.7"));
+			"Oracle", "1.5.1"));
 	}
 
 	if (logger.isLoggable(Level.CONFIG)) {

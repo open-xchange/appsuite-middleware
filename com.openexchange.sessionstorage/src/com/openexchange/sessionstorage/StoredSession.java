@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -129,10 +129,6 @@ public class StoredSession implements PutIfAbsent, Serializable {
             if (null != parameter) {
                 this.parameters.put(Session.PARAM_ALTERNATIVE_ID, parameter);
             }
-            parameter = parameters.get(Session.PARAM_CAPABILITIES);
-            if (null != parameter) {
-                this.parameters.put(Session.PARAM_CAPABILITIES, parameter);
-            }
         }
     }
 
@@ -163,10 +159,6 @@ public class StoredSession implements PutIfAbsent, Serializable {
             parameter = session.getParameter(Session.PARAM_ALTERNATIVE_ID);
             if (null != parameter) {
                 this.parameters.put(Session.PARAM_ALTERNATIVE_ID, parameter);
-            }
-            parameter = session.getParameter(Session.PARAM_CAPABILITIES);
-            if (null != parameter) {
-                this.parameters.put(Session.PARAM_CAPABILITIES, parameter);
             }
         }
         this.password = session.getPassword();

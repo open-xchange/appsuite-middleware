@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -103,7 +103,7 @@ final class KF2AFEqualCallable implements Task<Object> {
         try {
             mailAccess = MailAccess.getInstance(session, accountId);
             mailAccess.connect();
-            final String realSource = UnifiedInboxUtility.determineAccountFullname(mailAccess, sourceFolder);
+            final String realSource = UnifiedInboxUtility.determineAccountFullName(mailAccess, sourceFolder);
             final String[] results;
             if (move) {
                 results =

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -62,13 +62,13 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import org.osgi.framework.BundleContext;
-import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXGroupSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
@@ -454,8 +454,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                 final String NAME_OXCACHE = "oxcache";
                 final BundleContext context = AdminCache.getBundleContext();
                 if (null != context) {
-                    final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
-                        CacheService.class);
+                    final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);;
                     if (null != cacheService) {
                         try {
                             final int contextId = ctx.getId().intValue();
@@ -472,8 +471,6 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                             }
                         } catch (final OXException e) {
                             log.error("", e);
-                        } finally {
-                            AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
                         }
                     }
                 }

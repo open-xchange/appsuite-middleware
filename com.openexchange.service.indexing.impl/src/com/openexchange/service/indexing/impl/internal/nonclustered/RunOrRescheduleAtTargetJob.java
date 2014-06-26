@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,15 +50,13 @@
 package com.openexchange.service.indexing.impl.internal.nonclustered;
 
 import java.util.Date;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.FutureTask;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import com.hazelcast.core.DistributedTask;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IExecutorService;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.Member;
 import com.openexchange.config.cascade.ConfigView;
@@ -171,12 +169,8 @@ public class RunOrRescheduleAtTargetJob implements Job {
                     }
 
                     LOG.debug("Rescheduling job {} at member {}.", jobInfo, owner);
-                    FutureTask<Object> task = new DistributedTask<Object>(
-                        new ScheduleJobCallable(jobInfo, new Date(), interval, priority),
-                        executor);
-                    ExecutorService executorService = hazelcast.getExecutorService();
-                    executorService.submit(task);
-
+                    IExecutorService executorService = hazelcast.getExecutorService(JobConstants.HZ_EXECUTOR);
+                    executorService.executeOnMember(new ScheduleJobRunnable(jobInfo, new Date(), interval, priority), executor);
                     context.getScheduler().unscheduleJob(context.getTrigger().getKey());
                 }
             }

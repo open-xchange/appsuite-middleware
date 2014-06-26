@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,6 +53,7 @@ import org.osgi.service.event.EventAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.json.FileConverter;
 import com.openexchange.file.storage.json.FileMetadataParser;
@@ -75,7 +76,8 @@ public class FileStorageJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { FileStorageServiceRegistry.class, IDBasedFileAccessFactory.class, AttachmentBase.class, FolderService.class, EventAdmin.class };
+        return new Class[] { FileStorageServiceRegistry.class, IDBasedFileAccessFactory.class, AttachmentBase.class, FolderService.class,
+            EventAdmin.class, ConfigurationService.class };
     }
 
     @Override

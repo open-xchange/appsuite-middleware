@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,6 +49,7 @@
 package com.openexchange.admin.plugins;
 
 import java.util.List;
+import java.util.Set;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
@@ -70,6 +71,29 @@ public interface OXContextPluginInterface {
      * @throws PluginException
      */
     public void change(final Context ctx, final Credentials auth) throws PluginException;
+
+    /**
+     * Changes specified context's capabilities.
+     *
+     * @param ctx The context
+     * @param capsToAdd The capabilities to add
+     * @param capsToRemove The capabilities to remove
+     * @param capsToDrop The capabilities to drop; e.g. clean from storage
+     * @param auth The credentials
+     * @throws PluginException If change operation fails
+     */
+    public void changeCapabilities(Context ctx, Set<String> capsToAdd, Set<String> capsToRemove, Set<String> capsToDrop, Credentials auth) throws PluginException;
+
+    /**
+     * Changes specified context's capabilities.
+     *
+     * @param ctx The context
+     * @param module The module to apply quota to
+     * @param quotaValue The quota value to set
+     * @param auth The credentials
+     * @throws PluginException If change operation fails
+     */
+    public void changeQuota(Context ctx, String module, long quotaValue, Credentials auth) throws PluginException;
 
     /**
      * Define the operations which should be done before the real context creation process.

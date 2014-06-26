@@ -58,10 +58,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import net.oauth.OAuthServiceProvider;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -77,7 +80,9 @@ import com.openexchange.tools.sql.DBUtils;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractOAuthProviderService implements OAuthProviderConstants {
+public abstract class AbstractOAuthProviderService implements OAuthProviderConstants, Reloadable {
+
+    private final static String[] PROPERTIES = new String[] {"com.openexchange.oauth.provider.secret"};
 
     /**
      * The dummy object.
@@ -97,7 +102,7 @@ public abstract class AbstractOAuthProviderService implements OAuthProviderConst
     /**
      * The secret string.
      */
-    private final String secret;
+    private String secret;
 
     /**
      * The secret property names.
@@ -326,6 +331,18 @@ public abstract class AbstractOAuthProviderService implements OAuthProviderConst
             throw new IllegalStateException("Missing service: " + CryptoService.class);
         }
         return service.decrypt(toDecrypt, secret);
+    }
+
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        secret = configService.getProperty("com.openexchange.oauth.provider.secret");
+    }
+
+    @Override
+    public Map<String, String[]> getConfigFileNames() {
+        Map<String, String[]> map = new HashMap<String, String[]>(1);
+        map.put("oauth-provider.properties", PROPERTIES);
+        return map;
     }
 
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -54,6 +54,8 @@ import java.util.SortedMap;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.realtime.packet.ID;
 
 /**
@@ -63,6 +65,8 @@ import com.openexchange.realtime.packet.ID;
  */
 public class LocalRealtimeCleanupImpl extends ServiceTracker<RealtimeJanitor, RealtimeJanitor> implements LocalRealtimeCleanup {
 
+    private static final Logger LOG = LoggerFactory.getLogger(LocalRealtimeCleanupImpl.class);
+    
     public LocalRealtimeCleanupImpl(BundleContext bundleContext) {
         super(bundleContext, RealtimeJanitor.class, null);
     }
@@ -79,6 +83,7 @@ public class LocalRealtimeCleanupImpl extends ServiceTracker<RealtimeJanitor, Re
 
     @Override
     public void cleanForId(ID id) {
+        LOG.debug("Starting local realtime cleanup for ID: {}", id);
         Collection<RealtimeJanitor> janitors = getJanitors();
         for (RealtimeJanitor realtimeJanitor : janitors) {
             realtimeJanitor.cleanupForId(id);

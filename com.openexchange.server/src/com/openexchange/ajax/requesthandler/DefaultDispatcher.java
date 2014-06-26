@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -57,13 +57,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.continuation.Continuation;
+import com.openexchange.continuation.ContinuationException;
+import com.openexchange.continuation.ContinuationExceptionCodes;
+import com.openexchange.continuation.ContinuationRegistryService;
+import com.openexchange.continuation.ContinuationResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogProperties;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -77,6 +84,7 @@ public class DefaultDispatcher implements Dispatcher {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultDispatcher.class);
 
     private final ConcurrentMap<StrPair, Boolean> fallbackSessionActionsCache;
+    private final ConcurrentMap<StrPair, Boolean> publicSessionAuthCache;
     private final ConcurrentMap<StrPair, Boolean> omitSessionActionsCache;
     private final ConcurrentMap<StrPair, Boolean> noSecretCallbackCache;
 
@@ -89,6 +97,7 @@ public class DefaultDispatcher implements Dispatcher {
     public DefaultDispatcher() {
         super();
         fallbackSessionActionsCache = new ConcurrentHashMap<StrPair, Boolean>(128);
+        publicSessionAuthCache = new ConcurrentHashMap<StrPair, Boolean>(128);
         omitSessionActionsCache = new ConcurrentHashMap<StrPair, Boolean>(128);
         noSecretCallbackCache = new ConcurrentHashMap<StrPair, Boolean>(128);
 
@@ -214,6 +223,8 @@ public class DefaultDispatcher implements Dispatcher {
                     throw (OXException) cause;
                 }
                 throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } catch (final ContinuationException e) {
+                result = handleContinuationException(e, session);
             } finally {
                 modifiedRequestData.cleanUploads();
             }
@@ -247,8 +258,51 @@ public class DefaultDispatcher implements Dispatcher {
             }
             return result;
         } catch (final RuntimeException e) {
+            if ("org.mozilla.javascript.WrappedException".equals(e.getClass().getName())) {
+                // Handle special Rhino wrapper error
+                final Throwable wrapped = e.getCause();
+                if (wrapped instanceof OXException) {
+                    throw (OXException) wrapped;
+                }
+            }
+
+            // Wrap unchecked exception
             addLogProperties(requestData, true);
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Handles specified <code>ContinuationException</code> instance.
+     *
+     * @param e The exception to handle
+     * @param session The associated session
+     * @return The AJAX result
+     * @throws OXException If <code>ContinuationException</code> does not signal special error code <code>CONTINUATION-0003</code>
+     *             (Scheduled for continuation: &lt;uuid&gt;)
+     */
+    private AJAXRequestResult handleContinuationException(final ContinuationException e, final ServerSession session) throws OXException {
+        if (!ContinuationExceptionCodes.SCHEDULED_FOR_CONTINUATION.equals(e)) {
+            throw e;
+        }
+        final UUID uuid = e.getUuid();
+        if (null == uuid) {
+            throw e;
+        }
+        final ContinuationRegistryService continuationRegistry = ServerServiceRegistry.getInstance().getService(ContinuationRegistryService.class);
+        if (null == continuationRegistry) {
+            throw e;
+        }
+        final Continuation<Object> continuation = continuationRegistry.getContinuation(uuid, session);
+        if (null == continuation) {
+            throw e;
+        }
+        try {
+            final ContinuationResponse<Object> cr = continuation.getNextResponse(1000, TimeUnit.NANOSECONDS);
+            return new AJAXRequestResult(cr.getValue(), cr.getTimeStamp(), cr.getFormat()).setContinuationUuid(cr.isCompleted() ? null : uuid);
+        } catch (final InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(ie, ie.getMessage());
         }
     }
 
@@ -260,7 +314,7 @@ public class DefaultDispatcher implements Dispatcher {
             if (withQueryString) {
                 final Map<String, String> parameters = requestData.getParameters();
                 if (null != parameters) {
-                    final StringAllocator sb = new StringAllocator(256);
+                    final StringBuilder sb = new StringBuilder(256);
                     sb.append('"');
                     boolean first = true;
                     for (final Entry<String, String> entry : parameters.entrySet()) {
@@ -314,7 +368,7 @@ public class DefaultDispatcher implements Dispatcher {
                     current = actionFactories.get(module);
                     final Module moduleAnnotation = current.getClass().getAnnotation(Module.class);
                     if (null == moduleAnnotation) {
-                        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(512).append("There is already a factory associated with module \"");
+                        final StringBuilder sb = new StringBuilder(512).append("There is already a factory associated with module \"");
                         sb.append(module).append("\": ").append(current.getClass().getName());
                         sb.append(". Therefore registration is denied for factory \"").append(factory.getClass().getName());
                         sb.append("\". Unless these two factories provide the \"").append(Module.class.getName()).append(
@@ -381,14 +435,29 @@ public class DefaultDispatcher implements Dispatcher {
 	    if (null == ret) {
 	        final AJAXActionServiceFactory factory = lookupFactory(module);
 	        if (factory == null) {
-	            ret = Boolean.FALSE;
-	        } else {
-    	        final DispatcherNotes actionMetadata = getActionMetadata(getActionServiceSafe(action, factory));
-    	        ret = actionMetadata == null ? Boolean.FALSE : Boolean.valueOf(actionMetadata.allowPublicSession());
+	            return false;
 	        }
+            final DispatcherNotes actionMetadata = getActionMetadata(getActionServiceSafe(action, factory));
+            ret = actionMetadata == null ? Boolean.FALSE : Boolean.valueOf(actionMetadata.allowPublicSession());
 	        fallbackSessionActionsCache.put(key, ret);
         }
 	    return ret.booleanValue();
+	}
+
+	@Override
+	public boolean mayPerformPublicSessionAuth(final String module, final String action) throws OXException {
+	    final StrPair key = new StrPair(module, action);
+        Boolean ret = publicSessionAuthCache.get(key);
+        if (null == ret) {
+            final AJAXActionServiceFactory factory = lookupFactory(module);
+            if (factory == null) {
+                return false;
+            }
+            final DispatcherNotes actionMetadata = getActionMetadata(getActionServiceSafe(action, factory));
+            ret = actionMetadata == null ? Boolean.FALSE : Boolean.valueOf(actionMetadata.publicSessionAuth());
+            publicSessionAuthCache.put(key, ret);
+        }
+        return ret.booleanValue();
 	}
 
 	@Override
@@ -398,11 +467,10 @@ public class DefaultDispatcher implements Dispatcher {
         if (null == ret) {
             final AJAXActionServiceFactory factory = lookupFactory(module);
             if (factory == null) {
-                return Boolean.FALSE;
-            } else {
-                final DispatcherNotes actionMetadata = getActionMetadata(getActionServiceSafe(action, factory));
-                ret = actionMetadata == null ? Boolean.FALSE : Boolean.valueOf(actionMetadata.noSession());
+                return false;
             }
+            final DispatcherNotes actionMetadata = getActionMetadata(getActionServiceSafe(action, factory));
+            ret = actionMetadata == null ? Boolean.FALSE : Boolean.valueOf(actionMetadata.noSession());
             omitSessionActionsCache.put(key, ret);
         }
         return ret.booleanValue();

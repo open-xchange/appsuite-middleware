@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -110,8 +110,9 @@ public class Change extends ChangeCore {
 
         final Set<String> capabilitiesToAdd = parseAndSetCapabilitiesToAdd(parser);
         final Set<String> capabilitiesToRemove = parseAndSetCapabilitiesToRemove(parser);
-        if ((null != capabilitiesToAdd && !capabilitiesToAdd.isEmpty()) || (null != capabilitiesToRemove && !capabilitiesToRemove.isEmpty())) {
-            oxctx.changeCapabilities(ctx, capabilitiesToAdd, capabilitiesToRemove, auth);
+        final Set<String> capabilitiesToDrop = parseAndSetCapabilitiesToDrop(parser);
+        if ((null != capabilitiesToAdd && !capabilitiesToAdd.isEmpty()) || (null != capabilitiesToRemove && !capabilitiesToRemove.isEmpty()) || (null != capabilitiesToDrop && !capabilitiesToDrop.isEmpty())) {
+            oxctx.changeCapabilities(ctx, capabilitiesToAdd, capabilitiesToRemove, capabilitiesToDrop, auth);
         }
 
         final String module = parseAndSetQuotaModule(parser);
@@ -131,13 +132,16 @@ public class Change extends ChangeCore {
 
     @Override
     protected void setFurtherOptions(final AdminParser parser) {
-    	parser.setExtendedOptions();
+        parser.setExtendedOptions();
         ctxabs.setAddMappingOption(parser, false);
         ctxabs.setRemoveMappingOption(parser, false);
+        setConfigOption(parser);
+        setRemoveConfigOption(parser);
         setAddAccessRightCombinationNameOption(parser);
         setModuleAccessOptions(parser);
         setCapsToAdd(parser);
         setCapsToRemove(parser);
+        setCapsToDrop(parser);
         setQuotaModule(parser);
         setQuotaValue(parser);
     }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -150,7 +150,7 @@ public class ConfirmOthers extends AbstractAJAXSession {
     }
 
     public void testConfirmOthersAllowed() throws Exception {
-        clientB.execute(new ConfirmRequest(folder.getObjectID(), appointment.getObjectID(), Appointment.ACCEPT, "yap!", userIdA, true));
+        clientB.execute(new ConfirmRequest(folder.getObjectID(), appointment.getObjectID(), Appointment.ACCEPT, "yap!", userIdA, appointment.getLastModified(), true));
         GetResponse getResponse = clientA.execute(new GetRequest(folder.getObjectID(), appointment.getObjectID()));
         Appointment loadedAppointment = getResponse.getAppointment(clientA.getValues().getTimeZone());
         appointment.setLastModified(getResponse.getTimestamp());
@@ -163,7 +163,7 @@ public class ConfirmOthers extends AbstractAJAXSession {
     }
 
     public void testConfirmOthersNotAllowed() throws Exception {
-        clientC.execute(new ConfirmRequest(folder.getObjectID(), appointment.getObjectID(), Appointment.ACCEPT, "yap!", userIdA, false));
+        clientC.execute(new ConfirmRequest(folder.getObjectID(), appointment.getObjectID(), Appointment.ACCEPT, "yap!", userIdA, appointment.getLastModified(), false));
         GetResponse getResponse = clientA.execute(new GetRequest(folder.getObjectID(), appointment.getObjectID()));
         Appointment loadedAppointment = getResponse.getAppointment(clientA.getValues().getTimeZone());
         appointment.setLastModified(getResponse.getTimestamp());
@@ -176,7 +176,7 @@ public class ConfirmOthers extends AbstractAJAXSession {
     }
 
     public void testConfirmExternal() throws Exception {
-        clientC.execute(new ConfirmRequest(clientC.getValues().getPrivateAppointmentFolder(), appointment.getObjectID(), Appointment.TENTATIVE, "maybe", "test@example.invalid", false));
+        clientC.execute(new ConfirmRequest(clientC.getValues().getPrivateAppointmentFolder(), appointment.getObjectID(), Appointment.TENTATIVE, "maybe", "test@example.invalid", appointment.getLastModified(), false));
         GetResponse getResponse = clientC.execute(new GetRequest(clientC.getValues().getPrivateAppointmentFolder(), appointment.getObjectID()));
         Appointment loadedAppointment = getResponse.getAppointment(clientA.getValues().getTimeZone());
         appointment.setLastModified(getResponse.getTimestamp());

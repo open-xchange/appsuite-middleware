@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2011 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,48 +40,27 @@
 
 package com.sun.mail.imap.protocol;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InterruptedIOException;
-import java.io.OutputStream;
-import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.io.*;
+import java.util.*;
+import java.text.*;
+import java.lang.reflect.*;
 import java.util.logging.Level;
-import javax.mail.Flags;
-import javax.mail.Folder;
-import javax.mail.Quota;
-import javax.mail.UIDFolder;
-import javax.mail.internet.MimeUtility;
-import javax.mail.search.SearchException;
-import javax.mail.search.SearchTerm;
+
+import javax.mail.*;
+import javax.mail.internet.*;
+import javax.mail.search.*;
+
+import com.sun.mail.util.*;
+import com.sun.mail.iap.*;
 import com.sun.mail.auth.Ntlm;
-import com.sun.mail.iap.Argument;
-import com.sun.mail.iap.BadCommandException;
-import com.sun.mail.iap.ByteArray;
-import com.sun.mail.iap.CommandFailedException;
-import com.sun.mail.iap.ConnectionException;
-import com.sun.mail.iap.Literal;
-import com.sun.mail.iap.LiteralException;
-import com.sun.mail.iap.ParsingException;
-import com.sun.mail.iap.Protocol;
-import com.sun.mail.iap.ProtocolException;
-import com.sun.mail.iap.Response;
+
 import com.sun.mail.imap.ACL;
-import com.sun.mail.imap.AppendUID;
 import com.sun.mail.imap.Rights;
+import com.sun.mail.imap.AppendUID;
+import com.sun.mail.imap.CopyUID;
 import com.sun.mail.imap.SortTerm;
-import com.sun.mail.util.ASCIIUtility;
-import com.sun.mail.util.BASE64EncoderStream;
-import com.sun.mail.util.MailLogger;
-import com.sun.mail.util.PropUtil;
+import com.sun.mail.imap.ResyncData;
+import com.sun.mail.imap.Utility;
 
 /**
  * This class extends the iap.Protocol object and implements IMAP
@@ -117,8 +96,11 @@ public class IMAPProtocol extends Protocol {
     protected SearchSequence searchSequence;
     protected String[] searchCharsets; 	// array of search charsets
 
+    protected Set<String> enabled;	// enabled capabilities - RFC 5161
+
     private String name;
     private SaslAuthenticator saslAuthenticator;	// if SASL is being used
+    private String proxyAuthUser;	// user name used with PROXYAUTH
 
     private ByteArray ba;		// a buffer for fetchBody
 
@@ -276,15 +258,15 @@ public class IMAPProtocol extends Protocol {
     /**
      * Check the greeting when first connecting; look for PREAUTH response.
      */
-    @Override
-    protected synchronized void processGreeting(final Response r) throws ProtocolException {
+    protected void processGreeting(Response r) throws ProtocolException {
 	super.processGreeting(r);	// check if it's BAD
 	if (r.isOK()) {			// check if it's OK
 	    setCapabilities(r);
 	    return;
 	}
 	// only other choice is PREAUTH
-	final IMAPResponse ir = (IMAPResponse)r;
+	assert r instanceof IMAPResponse;
+	IMAPResponse ir = (IMAPResponse)r;
 	if (ir.keyEquals("PREAUTH")) {
 	    authenticatedStatusChanging0(true, "PREAUTH", null);
 	    authenticated = true;
@@ -887,28 +869,44 @@ public class IMAPProtocol extends Protocol {
 	args.writeString(u);
 
 	simpleCommand("PROXYAUTH", args);
+	proxyAuthUser = u;
+    }
+
+    /**
+     * Get the user name used with the PROXYAUTH command.
+     * Returns null if PROXYAUTH was not used.
+     *
+     * @since	JavaMail 1.5.1
+     */
+    public String getProxyAuthUser() {
+	return proxyAuthUser;
+    }
+
+    /**
+     * UNAUTHENTICATE Command.
+     * 
+     * @see "Netscape/iPlanet/SunONE Messaging Server extension"
+     * @since	JavaMail 1.5.1
+     */
+    public void unauthenticate() throws ProtocolException {
+	if (!hasCapability("X-UNAUTHENTICATE"))
+	    throw new BadCommandException("UNAUTHENTICATE not supported");
+	simpleCommand("UNAUTHENTICATE", null);
+	authenticated = false;
     }
 
     /**
      * ID Command, for Yahoo! Mail IMAP server.
      *
-     * See <A HREF="http://en.wikipedia.org/wiki/Yahoo%21_Mail#Free_IMAP_and_SMTPs_access">
-     * http://en.wikipedia.org/wiki/Yahoo%21_Mail#Free_IMAP_and_SMTPs_access</A>
-     *
+     * @deprecated As of JavaMail 1.5.1, replaced by
+     *		{@link #id(Map<String,String>)}
      * @since JavaMail 1.4.4
      */
-    public void id(final String guid) throws ProtocolException {
-	/*
-	 * XXX - need to be able to write a string instead
-	 * of an astring for the following to work.
-	Argument garg = new Argument();
-	garg.writeString("GUID");
-	garg.writeString(guid);
-	Argument args = new Argument();
-	args.writeArgument(garg);
-	simpleCommand("ID", args);
-	 */
-	simpleCommand("ID (\"GUID\" \"" + guid + "\")", null);
+    public void id(String guid) throws ProtocolException {
+	// support this for now, but remove it soon
+	Map<String,String> gmap = new HashMap<String,String>();
+	gmap.put("GUID", guid);
+	id(gmap);
     }
 
     /**
@@ -935,18 +933,41 @@ public class IMAPProtocol extends Protocol {
 	    throw new ProtocolException("STARTTLS failure", ex);
 	}
     }
-
+    
     /**
      * SELECT Command.
      *
      * @see "RFC2060, section 6.3.1"
      */
     public MailboxInfo select(String mbox) throws ProtocolException {
+	return select(mbox, null);
+    }
+
+    /**
+     * SELECT Command with QRESYNC data.
+     *
+     * @see "RFC2060, section 6.3.1"
+     * @see "RFC5162, section 3.1"
+     * @since	JavaMail 1.5.1
+     */
+    public MailboxInfo select(String mbox, ResyncData rd) throws ProtocolException {
 	// encode the mbox as per RFC2060
 	mbox = BASE64MailboxEncoder.encode(mbox);
 
 	final Argument args = new Argument();	
 	args.writeString(mbox);
+
+	if (rd != null) {
+	    if (rd == ResyncData.CONDSTORE) {
+		if (!hasCapability("CONDSTORE"))
+		    throw new BadCommandException("CONDSTORE not supported");
+		args.writeArgument(new Argument().writeAtom("CONDSTORE"));
+	    } else {
+		if (!hasCapability("QRESYNC")) 
+		    throw new BadCommandException("QRESYNC not supported");
+		args.writeArgument(resyncArgs(rd));
+	    }
+	}
 
 	final Response[] r = command("SELECT", args);
 
@@ -976,12 +997,35 @@ public class IMAPProtocol extends Protocol {
      *
      * @see "RFC2060, section 6.3.2"
      */
-    public MailboxInfo examine(String mbox1) throws ProtocolException {
+    public MailboxInfo examine(String mbox) throws ProtocolException {
+	return examine(mbox, null);
+    }
+
+    /**
+     * EXAMINE Command with QRESYNC data.
+     *
+     * @see "RFC2060, section 6.3.2"
+     * @see "RFC5162, section 3.1"
+     * @since	JavaMail 1.5.1
+     */
+    public MailboxInfo examine(String mbox1, ResyncData rd) throws ProtocolException {
 	// encode the mbox as per RFC2060
 	String mbox = BASE64MailboxEncoder.encode(mbox1);
 
 	final Argument args = new Argument();	
 	args.writeString(mbox);
+	
+	if (rd != null) {
+	    if (rd == ResyncData.CONDSTORE) {
+		if (!hasCapability("CONDSTORE"))
+		    throw new BadCommandException("CONDSTORE not supported");
+		args.writeArgument(new Argument().writeAtom("CONDSTORE"));
+	    } else {
+		if (!hasCapability("QRESYNC")) 
+		    throw new BadCommandException("QRESYNC not supported");
+		args.writeArgument(resyncArgs(rd));
+	    }
+	}
 
 	final Response[] r = command("EXAMINE", args);
 
@@ -995,6 +1039,52 @@ public class IMAPProtocol extends Protocol {
 
 	handleResult(r[r.length-1]);
 	return minfo;
+    }
+
+	/**
+     * Generate a QRESYNC argument list based on the ResyncData.
+     */
+    private static Argument resyncArgs(ResyncData rd) {
+	Argument cmd = new Argument();
+	cmd.writeAtom("QRESYNC");
+	Argument args = new Argument();
+	args.writeNumber(rd.getUIDValidity());
+	args.writeNumber(rd.getModSeq());
+	UIDSet[] uids = Utility.getResyncUIDSet(rd);
+	if (uids != null)
+	    args.writeString(UIDSet.toString(uids));
+	cmd.writeArgument(args);
+	return cmd;
+    }
+
+    /**
+     * ENABLE Command.
+     *
+     * @see "RFC 5161"
+     * @since	JavaMail 1.5.1
+     */
+    public void enable(String cap) throws ProtocolException {
+	if (!hasCapability("ENABLE")) 
+	    throw new BadCommandException("ENABLE not supported");
+	Argument args = new Argument();
+	args.writeAtom(cap);
+	simpleCommand("ENABLE", args);
+	if (enabled == null)
+	    enabled = new HashSet<String>();
+	enabled.add(cap.toUpperCase(Locale.ENGLISH));
+    }
+
+    /**
+     * Is the capability/extension enabled?
+     *
+     * @see "RFC 5161"
+     * @since	JavaMail 1.5.1
+     */
+    public boolean isEnabled(String cap) {
+	if (enabled == null)
+	    return false;
+	else
+	    return enabled.contains(cap.toUpperCase(Locale.ENGLISH));
     }
 
     /**
@@ -1056,7 +1146,7 @@ public class IMAPProtocol extends Protocol {
 		if (ir.keyEquals("STATUS")) {
 		    if (status == null) {
                 status = new Status(ir);
-            } else {
+            } else { // collect 'em all
                 Status.add(status, new Status(ir));
             }
 		    r[i] = null;
@@ -1257,7 +1347,7 @@ public class IMAPProtocol extends Protocol {
 	     */
 	    args.writeAtom(createFlagList(f));
 	}
-	if (d != null) {
+	if (d != null) { // set INTERNALDATE in appended message
         args.writeString(INTERNALDATE.format(d));
     }
 
@@ -1353,7 +1443,7 @@ public class IMAPProtocol extends Protocol {
 
 	final Response response = r[r.length-1];
 	if (response.isOK()) {
-        return (BODYSTRUCTURE)FetchResponse.getItem(r, msgno, 
+        return FetchResponse.getItem(r, msgno, 
 					BODYSTRUCTURE.class);
     } else if (response.isNO()) {
         return null;
@@ -1373,7 +1463,7 @@ public class IMAPProtocol extends Protocol {
 
     final Response response = r[r.length-1];
     if (response.isOK()) {
-        return (BODYSTRUCTURE)FetchResponse.getItem(r, BODYSTRUCTURE.class);
+        return FetchResponse.getItem(r, BODYSTRUCTURE.class);
     } else if (response.isNO()) {
         return null;
     } else {
@@ -1432,7 +1522,7 @@ public class IMAPProtocol extends Protocol {
 
 	final Response response = r[r.length-1];
 	if (response.isOK()) {
-        return (BODY)FetchResponse.getItem(r, msgno, BODY.class);
+        return FetchResponse.getItem(r, msgno, BODY.class);
     } else if (response.isNO()) {
         if (failOnNOFetch) {
             throw new CommandFailedException(response);
@@ -1460,7 +1550,7 @@ public class IMAPProtocol extends Protocol {
     
     final Response response = r[r.length-1];
     if (response.isOK()) {
-        return (BODY)FetchResponse.getItem(r, BODY.class);
+        return FetchResponse.getItem(r, BODY.class);
     } else if (response.isNO()) {
         if (failOnNOFetch) {
             throw new CommandFailedException(response);
@@ -1534,7 +1624,7 @@ public class IMAPProtocol extends Protocol {
     
     	final Response response = r[r.length-1];
     	if (response.isOK()) {
-            return (BODY)FetchResponse.getItem(r, msgno, BODY.class);
+            return FetchResponse.getItem(r, msgno, BODY.class);
         } else if (response.isNO()) {
             return null;
         } else {
@@ -1557,7 +1647,7 @@ public class IMAPProtocol extends Protocol {
         
         final Response response = r[r.length-1];
         if (response.isOK()) {
-            return (BODY)FetchResponse.getItem(r, BODY.class);
+            return FetchResponse.getItem(r, BODY.class);
         } else if (response.isNO()) {
             return null;
         } else {
@@ -1594,7 +1684,7 @@ public class IMAPProtocol extends Protocol {
 
 	final Response response = r[r.length-1]; 
 	if (response.isOK()) {
-        return (RFC822DATA)FetchResponse.getItem(r, msgno, 
+        return FetchResponse.getItem(r, msgno, 
 					RFC822DATA.class);
     } else if (response.isNO()) {
         return null;
@@ -1620,7 +1710,7 @@ public class IMAPProtocol extends Protocol {
         }		
 	    
 	    final FetchResponse fr = (FetchResponse)r[i];
-	    if ((flags = (Flags)fr.getItem(Flags.class)) != null) {
+	    if ((flags = fr.getItem(FLAGS.class)) != null) {
 		r[i] = null; // remove this response
 		break;
 	    }
@@ -1646,7 +1736,7 @@ public class IMAPProtocol extends Protocol {
         }       
         
         final FetchResponse fr = (FetchResponse)r[i];
-        if ((flags = (Flags)fr.getItem(Flags.class)) != null) {
+        if ((flags = fr.getItem(FLAGS.class)) != null) {
         r[i] = null; // remove this response
         break;
         }
@@ -1656,6 +1746,28 @@ public class IMAPProtocol extends Protocol {
     notifyResponseHandlers(r);
     handleResult(r[r.length-1]);
     return flags;
+    }
+    
+    /**
+     * Fetch the IMAP MODSEQ for the given message.
+     *
+     * @since	JavaMail 1.5.1
+     */
+    public MODSEQ fetchMODSEQ(int msgno) throws ProtocolException {
+	Response[] r = fetch(msgno, "MODSEQ");
+
+	// dispatch untagged responses
+	notifyResponseHandlers(r);
+
+	Response response = r[r.length-1]; 
+	if (response.isOK())
+	    return FetchResponse.getItem(r, msgno, MODSEQ.class);
+	else if (response.isNO()) // XXX: Issue NOOP ?
+	    return null;
+	else {
+	    handleResult(response);
+	    return null; // NOTREACHED
+	}
     }
 
     /**
@@ -1669,7 +1781,7 @@ public class IMAPProtocol extends Protocol {
 
 	final Response response = r[r.length-1]; 
 	if (response.isOK()) {
-        return (UID)FetchResponse.getItem(r, msgno, UID.class);
+        return FetchResponse.getItem(r, msgno, UID.class);
     } else if (response.isNO()) {
         return null;
     } else {
@@ -1693,7 +1805,7 @@ public class IMAPProtocol extends Protocol {
         }
 	    
 	    final FetchResponse fr = (FetchResponse)r[i];
-	    if ((u = (UID)fr.getItem(UID.class)) != null) {
+	    if ((u = fr.getItem(UID.class)) != null) {
 		if (u.uid == uid) {
             break;
         } else {
@@ -1727,7 +1839,7 @@ public class IMAPProtocol extends Protocol {
         }
 	    
 	    final FetchResponse fr = (FetchResponse)r[i];
-	    if ((u = (UID)fr.getItem(UID.class)) != null) {
+	    if ((u = fr.getItem(UID.class)) != null) {
             v.add(u);
         }
 	}
@@ -1739,7 +1851,7 @@ public class IMAPProtocol extends Protocol {
     }
 
     /**
-     * Get the sequence numbers for UIDs ranging from start till end.
+     * Get the sequence numbers for UIDs specified in the array.
      * UID objects that contain the sequence numbers are returned.
      * If no UIDs in the given range are found, an empty array is returned.
      */
@@ -1762,7 +1874,7 @@ public class IMAPProtocol extends Protocol {
         }
 	    
 	    final FetchResponse fr = (FetchResponse)r[i];
-	    if ((u = (UID)fr.getItem(UID.class)) != null) {
+	    if ((u = fr.getItem(UID.class)) != null) {
             v.add(u);
         }
 	}
@@ -1771,6 +1883,42 @@ public class IMAPProtocol extends Protocol {
 	handleResult(r[r.length-1]);
 
 	return v.toArray(new UID[v.size()]);
+    }
+
+    /**
+     * Get the sequence numbers for messages changed since the given
+     * modseq and with UIDs ranging from start till end.
+     * Also, prefetch the flags for the returned messages.
+     *
+     * @see	"RFC 4551"
+     * @since	JavaMail 1.5.1
+     */
+    public int[] uidfetchChangedSince(long start, long end, long modseq)
+			throws ProtocolException {
+	String msgSequence = String.valueOf(start) + ":" + 
+				(end == UIDFolder.LASTUID ? "*" : 
+				String.valueOf(end));
+	Response[] r = command("UID FETCH " + msgSequence +
+		" (FLAGS) (CHANGEDSINCE " + String.valueOf(modseq) + ")", null);
+
+	List v = new ArrayList();
+	for (int i = 0, len = r.length; i < len; i++) {
+	    if (r[i] == null || !(r[i] instanceof FetchResponse))
+		continue;
+ 
+	    FetchResponse fr = (FetchResponse)r[i];
+	    v.add(Integer.valueOf(fr.getNumber()));
+	}
+		
+	notifyResponseHandlers(r);
+	handleResult(r[r.length-1]);
+
+	// Copy the list into 'matches'
+	int vsize = v.size();
+	int[] matches = new int[vsize];
+	for (int i = 0; i < vsize; i++)
+	    matches[i] = ((Integer)v.get(i)).intValue();
+	return matches;
     }
 
     public Response[] fetch(final MessageSet[] msgsets, final String what)
@@ -1808,13 +1956,76 @@ public class IMAPProtocol extends Protocol {
      */
     public void copy(final MessageSet[] msgsets, final String mbox)
 			throws ProtocolException {
-	copy(MessageSet.toString(msgsets), mbox);
+	copyuid(MessageSet.toString(msgsets), mbox, false);
     }
 
     public void copy(final int start, final int end, final String mbox)
 			throws ProtocolException {
-	copy(String.valueOf(start) + ":" + String.valueOf(end),
-		    mbox);
+	copyuid(String.valueOf(start) + ":" + String.valueOf(end),
+		    mbox, false);
+    }
+
+    /**
+     * COPY Command, return uid from COPYUID response code.
+     *
+     * @see "RFC2359, section 4.3"
+     */
+    public CopyUID copyuid(MessageSet[] msgsets, String mbox)
+			throws ProtocolException {
+	return copyuid(MessageSet.toString(msgsets), mbox, true);
+    }
+
+    public CopyUID copyuid(int start, int end, String mbox)
+			throws ProtocolException {
+	return copyuid(String.valueOf(start) + ":" + String.valueOf(end),
+		    mbox, true);
+    }
+    
+    public CopyUID copyuid(String msgSequence, String mbox, boolean uid)
+				throws ProtocolException {
+	// encode the mbox as per RFC2060
+	mbox = BASE64MailboxEncoder.encode(mbox);
+
+	Argument args = new Argument();	
+	args.writeAtom(msgSequence);
+	args.writeString(mbox);
+
+	Response[] r = command("COPY", args);
+
+	// dispatch untagged responses
+	notifyResponseHandlers(r);
+
+	// Handle result of this command
+	handleResult(r[r.length-1]);
+
+	if (uid)
+	    return getCopyUID(r[r.length-1]);
+	else
+	    return null;
+    }
+
+    /**
+     * If the response contains a COPYUID response code, extract
+     * it and return a CopyUID object with the information.
+     */
+    private CopyUID getCopyUID(Response r) {
+	if (!r.isOK())
+	    return null;
+	byte b;
+	while ((b = r.readByte()) > 0 && b != (byte)'[')
+	    ;
+	if (b == 0)
+	    return null;
+	String s;
+	s = r.readAtom();
+	if (!s.equalsIgnoreCase("COPYUID"))
+	    return null;
+
+	long uidvalidity = r.readLong();
+	String src = r.readAtom();
+	String dst = r.readAtom();
+	return new CopyUID(uidvalidity,
+			    UIDSet.parseUIDSets(src), UIDSet.parseUIDSets(dst));
     }
 
     private void copy(final String msgSequence, String mbox1)
@@ -1949,7 +2160,7 @@ public class IMAPProtocol extends Protocol {
     private int[] search(final String msgSequence, final SearchTerm term)
 			throws ProtocolException, SearchException {
 	// Check if the search "text" terms contain only ASCII chars
-	if (SearchSequence.isAscii(term)) {
+	if (getSearchSequence().isAscii(term)) {
 	    try {
 		return issueSearch(msgSequence, term, null);
 	    } catch (final IOException ioex) { /* will not happen */ }
@@ -2012,7 +2223,7 @@ public class IMAPProtocol extends Protocol {
 
 	Response[] r;
 
-	if (charset == null) {
+	if (charset == null) { // text is all US-ASCII
         r = command("SEARCH", args);
     } else {
         r = command("SEARCH CHARSET " + charset, args);
@@ -2228,15 +2439,22 @@ public class IMAPProtocol extends Protocol {
 		    ir.readAtomString();
 		    // for each quotaroot add a placeholder quota
 		    String root = null;
-		    while ((root = ir.readAtomString()) != null) {
-                tab.put(root, new Quota(root));
-            }
+		    while ((root = ir.readAtomString()) != null &&
+			    root.length() > 0)
+			tab.put(root, new Quota(root));
 		    r[i] = null;
 		} else if (ir.keyEquals("QUOTA")) {
-		    final Quota quota = parseQuota(ir);
-		    final Quota q = tab.get(quota.quotaRoot);
+		    Quota quota = parseQuota(ir);
+		    Quota q = tab.get(quota.quotaRoot);
 		    if (q != null && q.resources != null) {
-			// XXX - should merge resources
+			// merge resources
+			int newl = q.resources.length + quota.resources.length;
+			Quota.Resource[] newr = new Quota.Resource[newl];
+			System.arraycopy(q.resources, 0, newr, 0,
+							q.resources.length);
+			System.arraycopy(quota.resources, 0,
+			    newr, q.resources.length, quota.resources.length);
+			quota.resources = newr;
 		    }
 		    tab.put(quota.quotaRoot, quota);
 		    r[i] = null;
@@ -2248,11 +2466,10 @@ public class IMAPProtocol extends Protocol {
 	notifyResponseHandlers(r);
 	handleResult(response);
 
-	final Quota[] qa = new Quota[tab.size()];
-	final Enumeration<Quota> e = tab.elements();
-	for (int i = 0; e.hasMoreElements(); i++) {
-        qa[i] = e.nextElement();
-    }
+	Quota[] qa = new Quota[tab.size()];
+	Enumeration e = tab.elements();
+	for (int i = 0; e.hasMoreElements(); i++)
+	    qa[i] = (Quota)e.nextElement();
 	return qa;
     }
 
@@ -2332,7 +2549,7 @@ public class IMAPProtocol extends Protocol {
 
 	/*
 	Quota quota = null;
-	Vector v = new Vector();
+	List<Quota> v = new ArrayList<Quota>();
 
 	// Grab all QUOTA responses
 	if (response.isOK()) { // command succesful 
@@ -2343,7 +2560,7 @@ public class IMAPProtocol extends Protocol {
 		IMAPResponse ir = (IMAPResponse)r[i];
 		if (ir.keyEquals("QUOTA")) {
 		    quota = parseQuota(ir);
-		    v.addElement(quota);
+		    v.add(quota);
 		    r[i] = null;
 		}
 	    }
@@ -2354,9 +2571,7 @@ public class IMAPProtocol extends Protocol {
 	notifyResponseHandlers(r);
 	handleResult(response);
 	/*
-	Quota[] qa = new Quota[v.size()];
-	v.copyInto(qa);
-	return qa;
+	return v.toArray(new Quota[v.size()]);
 	*/
     }
 
@@ -2763,6 +2978,43 @@ public class IMAPProtocol extends Protocol {
 	} catch (final IOException ex) {
 	    // nothing to do, hope to detect it again later
 	}
+    }
+
+    /**
+     * ID Command.
+     *
+     * @see "RFC 2971"
+     * @since	JavaMail 1.5.1
+     */
+    public Map<String, String> id(Map<String, String> clientParams)
+				throws ProtocolException {
+	if (!hasCapability("ID")) 
+	    throw new BadCommandException("ID not supported");
+
+	Response[] r = command("ID", ID.getArgumentList(clientParams));
+
+	ID id = null;
+	Response response = r[r.length-1];
+
+	// Grab ID response
+	if (response.isOK()) { // command succesful 
+	    for (int i = 0, len = r.length; i < len; i++) {
+		if (!(r[i] instanceof IMAPResponse))
+		    continue;
+
+		IMAPResponse ir = (IMAPResponse)r[i];
+		if (ir.keyEquals("ID")) {
+		    if (id == null)
+			id = new ID(ir);
+		    r[i] = null;
+		}
+	    }
+	}
+
+	// dispatch remaining untagged responses
+	notifyResponseHandlers(r);
+	handleResult(response);
+	return id == null ? null : id.getServerParams();
     }
 
     private final synchronized void authenticatedStatusChanging0(final boolean authenticate, final String u, final String p) throws ProtocolException {

@@ -2,16 +2,19 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange ConfigRead
 Bundle-SymbolicName: com.openexchange.configread
-Bundle-Version: 7.4.2
+Bundle-Version: 7.6.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.config.cascade,
+Import-Package: com.openexchange.annotation,
+ com.openexchange.config.cascade,
  com.openexchange.exception,
  com.openexchange.java,
  com.openexchange.log,
+ com.openexchange.management,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.tools.strings,
+ javax.management,
  org.apache.commons.logging,
  org.ho.yaml,
  org.osgi.framework,

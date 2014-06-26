@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -78,7 +78,6 @@ import java.util.Locale;
 import com.davekoelle.AlphanumComparator;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
-import com.openexchange.java.Strings;
 
 /**
  * {@link SpecialAlphanumSortContactComparator} - Sorts with respect to {@link Contact#SPECIAL_SORTING}. Considering given names, too, if
@@ -102,12 +101,7 @@ public class SpecialAlphanumSortContactComparator implements Comparator<Contact>
      * Initializes a new {@link SpecialAlphanumSortContactComparator}.
      */
     public SpecialAlphanumSortContactComparator() {
-        super();
-        /*
-         * The glorious alphanum comparator used to compare non-null strings.
-         */
-        stringComparator = new AlphanumComparator();
-        inverse = 1;
+        this(new AlphanumComparator(), Order.ASCENDING);
     }
 
     /**
@@ -116,12 +110,7 @@ public class SpecialAlphanumSortContactComparator implements Comparator<Contact>
      * @param locale The locale
      */
     public SpecialAlphanumSortContactComparator(final Locale locale) {
-        super();
-        /*
-         * The glorious alphanum comparator used to compare non-null strings.
-         */
-        stringComparator = new AlphanumComparator(locale);
-        inverse = 1;
+        this(new AlphanumComparator(locale), Order.ASCENDING);
     }
 
     /**
@@ -138,91 +127,8 @@ public class SpecialAlphanumSortContactComparator implements Comparator<Contact>
 
     @Override
     public int compare(final Contact contact1, final Contact contact2) {
-//        final int nonNullField1 = detectFirstNonEmptyField(contact1);
-//        final int nonNullField2 = detectFirstNonEmptyField(contact2);
-//        final int compared =
-//            stringComparator.compare(
-//                0 == nonNullField1 ? "" : contact1.get(nonNullField1).toString(),
-//                0 == nonNullField2 ? "" : contact2.get(nonNullField2).toString());
-//        if (0 == compared && isLastName(nonNullField1) && isLastName(nonNullField2)) {
-//            /*
-//             * Both last names are equal. Consider first name, too (if non-null)
-//             */
-//            return inverse * compareGivenName(contact1, contact2);
-//        }
         int compared = stringComparator.compare(contact1.getSortName(), contact2.getSortName());
         return inverse * compared;
-    }
-
-    /**
-     * Checks if specified field is either YOMI last name or surname.
-     *
-     * @param field The field to check
-     * @return <code>true</code> if specified field is either YOMI last name or surname; otherwise <code>false</code>
-     */
-    private static boolean isLastName(final int field) {
-        return Contact.YOMI_LAST_NAME == field || Contact.SUR_NAME == field;
-    }
-
-    /**
-     * Compares the given names of specified contacts; preferring YOMI first names.
-     *
-     * @param contact1 The first contact
-     * @param contact2 The second contact
-     * @return The comparison result
-     */
-    private int compareGivenName(final Contact contact1, final Contact contact2) {
-        final String givenName1 =
-            contact1.containsYomiFirstName() ? contact1.getYomiFirstName() : (contact1.containsGivenName() ? contact1.getGivenName() : "");
-        final String givenName2 =
-            contact2.containsYomiFirstName() ? contact2.getYomiFirstName() : (contact2.containsGivenName() ? contact2.getGivenName() : "");
-        return stringComparator.compare(givenName1, givenName2);
-    }
-
-    /**
-     * Gets the field number for the first non-<code>null</code>, non-empty value in specified contact following this order:
-     * <ol>
-     * <li>YOMI last name</li>
-     * <li>surname</li>
-     * <li>display name</li>
-     * <li>YOMI company</li>
-     * <li>company</li>
-     * <li>email1</li>
-     * <li>email2</li>
-     * </ol>
-     *
-     * @param contact The contact
-     * @return The field number for first non-<code>null</code>, non-empty field or <code>0</code> if each value of the sequence was empty
-     */
-    private static int detectFirstNonEmptyField(Contact contact) {
-        if (isNotEmpty(contact.getYomiLastName())) {
-            return Contact.YOMI_LAST_NAME;
-        } else if (isNotEmpty(contact.getSurName())) {
-            return Contact.SUR_NAME;
-        } else if (isNotEmpty(contact.getDisplayName())) {
-            return Contact.DISPLAY_NAME;
-        } else if (isNotEmpty(contact.getYomiCompany())) {
-            return Contact.YOMI_COMPANY;
-        } else if (isNotEmpty(contact.getCompany())) {
-            return Contact.COMPANY;
-        } else if (isNotEmpty(contact.getEmail1())) {
-            return Contact.EMAIL1;
-        } else if (isNotEmpty(contact.getEmail2())) {
-            return Contact.EMAIL2;
-        } else {
-            return 0; // Neutral
-        }
-    }
-
-    private static boolean isNotEmpty(final String string) {
-        if (null != string) {
-            for (int i = 0; i < string.length(); i++) {
-                if (false == Strings.isWhitespace(string.charAt(i))) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
 }

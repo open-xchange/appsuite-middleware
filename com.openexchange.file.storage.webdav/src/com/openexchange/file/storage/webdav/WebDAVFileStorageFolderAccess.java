@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -265,6 +265,11 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
 
     @Override
     public FileStorageFolder getPersonalFolder() throws OXException {
+        throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
+    }
+
+    @Override
+    public FileStorageFolder getTrashFolder() throws OXException {
         throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
     }
 

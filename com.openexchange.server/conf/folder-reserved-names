@@ -2,7 +2,7 @@
 # Language specific names of standard folders for:
 #   "Calendar", "Collected addresses", "Confirmed ham", "Confirmed spam", "Contacts", "Drafts", "E-Mail attachments", "Global address book",
 #   "Inbox", "Infostore", "OX folders", "Other calendar folders", "Other contact folders", "Other infostore folders", "Other task folders",
-#   "Private folders", "Projects", "Public folders", "Public infostore", "Sent Items", "Sent objects", "Shared address book",
+#   "Private folders", "Public folders", "Public infostore", "Sent Items", "Sent objects", "Shared address book",
 #   "Shared folders", "Spam", "System", "Tasks", "Trash", "Userstore", "confirmed-ham", "confirmed-spam"
 #
 # Both separated by lines or by comma supported; e.g.

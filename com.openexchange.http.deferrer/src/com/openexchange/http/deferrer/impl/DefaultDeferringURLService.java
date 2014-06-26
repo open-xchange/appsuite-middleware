@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,7 +49,7 @@
 
 package com.openexchange.http.deferrer.impl;
 
-import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.java.Strings;
@@ -86,7 +86,7 @@ public abstract class DefaultDeferringURLService implements DeferringURLService 
             return url;
         }
         // Return deferred URL
-        return new StringBuilder(deferrerURL).append(path).append("?redirect=").append(AJAXServlet.encodeUrl(url, false, false)).toString();
+        return new StringBuilder(deferrerURL).append(path).append("?redirect=").append(AJAXUtility.encodeUrl(url, false, false)).toString();
     }
 
     @Override

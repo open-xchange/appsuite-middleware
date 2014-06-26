@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -88,6 +88,7 @@ import com.openexchange.ajax.login.LoginRequestHandler;
 import com.openexchange.ajax.login.LoginRequestImpl;
 import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.ajax.login.OAuthLogin;
+import com.openexchange.ajax.login.RampUp;
 import com.openexchange.ajax.login.RedeemToken;
 import com.openexchange.ajax.login.TokenLogin;
 import com.openexchange.ajax.login.Tokens;
@@ -107,12 +108,12 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogProperties;
 import com.openexchange.login.ConfigurationProperty;
 import com.openexchange.login.Interface;
+import com.openexchange.login.LoginRampUpService;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
@@ -193,6 +194,18 @@ public class LoginServlet extends AJAXServlet {
         SESSION, SECRET;
     }
 
+    /** The ramp-up services reference */
+    private static final AtomicReference<Set<LoginRampUpService>> RAMP_UP_REF = new AtomicReference<Set<LoginRampUpService>>();
+
+    /**
+     * Sets the ramp-up services.
+     *
+     * @param services The ramp-up services or <code>null</code> to clear
+     */
+    public static void setRampUpServices(final Set<LoginRampUpService> services) {
+        RAMP_UP_REF.set(services);
+    }
+
     /** The login configuration reference */
     static final AtomicReference<LoginConfiguration> confReference = new AtomicReference<LoginConfiguration>();
 
@@ -215,7 +228,7 @@ public class LoginServlet extends AJAXServlet {
      * @return The name of the public session cookie
      */
     public static String getPublicSessionCookieName(final HttpServletRequest req) {
-        return new StringAllocator(PUBLIC_SESSION_PREFIX).append(HashCalculator.getInstance().getUserAgentHash(req)).toString();
+        return new StringBuilder(PUBLIC_SESSION_PREFIX).append(HashCalculator.getInstance().getUserAgentHash(req)).toString();
     }
 
     // --------------------------------------------------------------------------------------- //
@@ -305,6 +318,8 @@ public class LoginServlet extends AJAXServlet {
                     randomToken = req.getParameter(LoginFields.RANDOM_PARAM);
                 }
                 if (randomToken == null) {
+                    final String msg = "Random token is disable (as per default since considered as insecure). See \"com.openexchange.ajax.login.randomToken\" in 'login.properties' file.";
+                    LOG.warn(msg, new Throwable(msg));
                     resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
                     return;
                 }
@@ -466,6 +481,8 @@ public class LoginServlet extends AJAXServlet {
                     randomToken = req.getParameter(LoginFields.RANDOM_PARAM);
                 }
                 if (randomToken == null) {
+                    final String msg = "Random token is disable (as per default since considered as insecure). See \"com.openexchange.ajax.login.randomToken\" in 'login.properties' file.";
+                    LOG.warn(msg, new Throwable(msg));
                     resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
                     return;
                 }
@@ -626,9 +643,11 @@ public class LoginServlet extends AJAXServlet {
         handlerMap.put(ACTION_TOKENLOGIN, new TokenLogin(conf));
         handlerMap.put(ACTION_TOKENS, new Tokens(conf));
         handlerMap.put(ACTION_REDEEM_TOKEN, new RedeemToken(conf));
-        handlerMap.put(ACTION_AUTOLOGIN, new AutoLogin(conf));
-        handlerMap.put(ACTION_OAUTH, new OAuthLogin(conf));
-        handlerMap.put(ACTION_LOGIN, new Login(conf));
+        final Set<LoginRampUpService> rampUpServices = RAMP_UP_REF.get();
+        handlerMap.put(ACTION_AUTOLOGIN, new AutoLogin(conf, rampUpServices));
+        handlerMap.put(ACTION_OAUTH, new OAuthLogin(conf, rampUpServices));
+        handlerMap.put(ACTION_LOGIN, new Login(conf, rampUpServices));
+        handlerMap.put(ACTION_RAMPUP, new RampUp(rampUpServices));
     }
 
     @Override
@@ -898,12 +917,7 @@ public class LoginServlet extends AJAXServlet {
         configureCookie(cookie, secure, serverName, conf);
         resp.addCookie(cookie);
 
-        final String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
-        if (null != altId) {
-            cookie = new Cookie(getPublicSessionCookieName(req), altId);
-            configureCookie(cookie, secure, serverName, conf);
-            resp.addCookie(cookie);
-        }
+        writePublicSessionCookie(req, resp, session, secure, serverName, conf);
     }
 
     /**
@@ -914,17 +928,20 @@ public class LoginServlet extends AJAXServlet {
      * @param session The session providing the public session cookie identifier
      * @param secure <code>true</code> to set cookie's secure flag; otherwise <code>false</code>
      * @param serverName The HTTP request's server name
+     * @return <code>true</code> if successfully added to HTTP servlet response; otherwise <code>false</code>
      */
-    public static void writePublicSessionCookie(final HttpServletRequest req, final HttpServletResponse resp, final Session session, final boolean secure, final String serverName, final LoginConfiguration conf) {
+    public static boolean writePublicSessionCookie(final HttpServletRequest req, final HttpServletResponse resp, final Session session, final boolean secure, final String serverName, final LoginConfiguration conf) {
         final String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
         if (null != altId) {
             final Cookie cookie = new Cookie(getPublicSessionCookieName(req), altId);
-            LoginServlet.configureCookie(cookie, secure, serverName, conf);
+            configureCookie(cookie, secure, serverName, conf);
             resp.addCookie(cookie);
+            return true;
         }
+        return false;
     }
 
-    public static void configureCookie(final Cookie cookie, final boolean secure, final String serverName, LoginConfiguration conf) {
+    public static void configureCookie(final Cookie cookie, final boolean secure, final String serverName, final LoginConfiguration conf) {
         cookie.setPath("/");
         if (secure || (conf.isCookieForceHTTPS() && !Cookies.isLocalLan(serverName))) {
             cookie.setSecure(true);
@@ -936,10 +953,15 @@ public class LoginServlet extends AJAXServlet {
              */
             cookie.setMaxAge(conf.getCookieExpiry());
         }
-        final String domain = getDomainValue(null == serverName ? LogProperties.getLogProperty(LogProperties.Name.AJP_SERVER_NAME) : serverName);
+        final String domain = getDomainValue(null == serverName ? determineServerNameByLogProperty() : serverName);
         if (null != domain) {
             cookie.setDomain(domain);
         }
+    }
+
+    private static String determineServerNameByLogProperty() {
+        final String serverName = LogProperties.getLogProperty(LogProperties.Name.GRIZZLY_SERVER_NAME);
+        return null == serverName ? LogProperties.getLogProperty(LogProperties.Name.AJP_SERVER_NAME) : serverName;
     }
 
     private static final String ERROR_PAGE_TEMPLATE = "<html>\n" + "<script type=\"text/javascript\">\n" + "// Display normal HTML for 5 seconds, then redirect via referrer.\n" + "setTimeout(redirect,5000);\n" + "function redirect(){\n" + " var referrer=document.referrer;\n" + " var redirect_url;\n" + " // If referrer already contains failed parameter, we don't add a 2nd one.\n" + " if(referrer.indexOf(\"login=failed\")>=0){\n" + "  redirect_url=referrer;\n" + " }else{\n" + "  // Check if referrer contains multiple parameter\n" + "  if(referrer.indexOf(\"?\")<0){\n" + "   redirect_url=referrer+\"?login=failed\";\n" + "  }else{\n" + "   redirect_url=referrer+\"&login=failed\";\n" + "  }\n" + " }\n" + " // Redirect to referrer\n" + " window.location.href=redirect_url;\n" + "}\n" + "</script>\n" + "<body>\n" + "<h1>ERROR_MESSAGE</h1>\n" + "</body>\n" + "</html>\n";

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -112,7 +112,7 @@ public class SyntheticChannelRunLoop extends RunLoop<MessageDispatch> {
 
     private boolean isDestinedForID(ID destination, MessageDispatch messageDispatch) {
         ComponentHandle handle = messageDispatch.getHandle();
-        ID currentID = handle.getID();
+        ID currentID = handle.getId();
         return currentID.equals(destination);
     }
 

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,53 +50,56 @@
 package com.openexchange.realtime.json;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link JSONExceptionCode}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public enum JSONExceptionCode implements OXExceptionCode {
+public enum JSONExceptionCode implements DisplayableOXExceptionCode {
 
     /** The session information didn't match any ServerSession. */
-    SESSIONINFO_DIDNT_MATCH_SERVERSESSION(JSONExceptionMessage.SESSIONINFO_DIDNT_MATCH_SERVERSESSION_MSG, CATEGORY_ERROR, 1),
+    SESSIONINFO_DIDNT_MATCH_SERVERSESSION("The session information didn't match any ServerSession", CATEGORY_ERROR, 1, null),
     /** Missing key \"%1$s\" in: \"%2$s\" */
-    MISSING_KEY(JSONExceptionMessage.MISSING_KEY_MSG, CATEGORY_ERROR, 2),
+    MISSING_KEY("Obligatory key \"%1$s\" is missing from the Stanza", CATEGORY_ERROR, 2, null),
     /** Could not find a builder for the specified element: . \"%1$s\" */
-    MISSING_BUILDER_FOR_ELEMENT(JSONExceptionMessage.MISSING_BUILDER_FOR_ELEMENT_MSG, CATEGORY_ERROR, 3),
+    MISSING_BUILDER_FOR_ELEMENT("Could not find a builder for the given element: . \"%1$s\"", CATEGORY_ERROR, 3, null),
     /** Error while building Stanza: \"%1$s\" */
-    ERROR_WHILE_BUILDING(JSONExceptionMessage.ERROR_WHILE_BUILDING_MSG, CATEGORY_ERROR, 4),
+    ERROR_WHILE_BUILDING("Error while building Stanza: \"%1$s\"", CATEGORY_ERROR, 4, null),
     /** Could not find a transformer for the PayloadElement: \"%1$s\" */
-    MISSING_TRANSFORMER_FOR_PAYLOADELEMENT(JSONExceptionMessage.MISSING_TRANSFORMER_FOR_PAYLOADELEMENT_MSG, CATEGORY_ERROR, 5),
+    MISSING_TRANSFORMER_FOR_PAYLOADELEMENT("Could not find a transformer for the PayloadElement: \"%1$s\"", CATEGORY_ERROR, 5, null),
     /** Could not find an initializer for the specified stanza: . \"%1$s\" */
-    MISSING_INITIALIZER_FOR_STANZA(JSONExceptionMessage.MISSING_INITIALIZER_FOR_STANZA_MSG, CATEGORY_ERROR, 6),
+    MISSING_INITIALIZER_FOR_STANZA("Could not find an initializer for the given stanza: . \"%1$s\"", CATEGORY_ERROR, 6, null),
     /** Error while transforming a PayloadElement: \"%1$s, %2$s\" */
-    ERROR_WHILE_TRANSFORMING(JSONExceptionMessage.ERROR_WHILE_TRANSFORMING_MSG, CATEGORY_ERROR, 7),
+    ERROR_WHILE_TRANSFORMING("Error while transforming a PayloadElement: \"%1$s, %2$s\"", CATEGORY_ERROR, 7, null),
     /** Error while converting PayloadElement data: \"%1$s\" */
-    ERROR_WHILE_CONVERTING(JSONExceptionMessage.ERROR_WHILE_CONVERTING_MSG, CATEGORY_ERROR, 8),
+    ERROR_WHILE_CONVERTING("Error while converting PayloadElement data: \"%1$s\"", CATEGORY_ERROR, 8, null),
     /** The following obligatory element is missing: \"%1$s\" */
-    OBLIGATORY_ELEMENT_MISSING(JSONExceptionMessage.OBLIGATORY_ELEMENT_MISSING_MSG, CATEGORY_ERROR, 9),
+    OBLIGATORY_ELEMENT_MISSING("The following obligatory element is missing: \"%1$s\"", CATEGORY_ERROR, 9, null),
     /** Malformed Presence Data */
-    PRESENCE_DATA_MALFORMED(JSONExceptionMessage.PRESENCE_DATA_MALFORMED_MSG, CATEGORY_ERROR, 10),
+    PRESENCE_DATA_MALFORMED("Malformed Presence Data", CATEGORY_ERROR, 10, null),
     /** Malformed Presence Element: \"%1$s\" */
-    PRESENCE_DATA_ELEMENT_MALFORMED(JSONExceptionMessage.PRESENCE_DATA_ELEMENT_MALFORMED_MSG, CATEGORY_ERROR, 11),
+    PRESENCE_DATA_ELEMENT_MALFORMED("Malformed Presence Element: \"%1$s\"", CATEGORY_ERROR, 11, null),
     /** Illegal value \"%1$s\" for key \"%2$s\" in: \"%3$s\" */
-    ILLEGAL_VALUE(JSONExceptionMessage.ILLEGAL_VALUE_MSG, CATEGORY_ERROR, 12),
+    ILLEGAL_VALUE("Illegal value \"%1$s\" for key \"%1$s\" in: \"%3$s\"", CATEGORY_ERROR, 12, null),
     /** Malformed POST Data \"%1$s\" */
-    POST_DATA_MALFORMED(JSONExceptionMessage.POST_DATA_MALFORMED_MSG, CATEGORY_ERROR, 13),
+    POST_DATA_MALFORMED("Malformed POST Data", CATEGORY_ERROR, 13, null),
     ;
 
     private final String message;
     private final int number;
     private final Category category;
+    private String displayMessage;
 
-    private JSONExceptionCode(final String message, final Category category, final int detailNumber) {
+    private JSONExceptionCode(final String message, final Category category, final int detailNumber, String displayMessage) {
         this.message = message;
         number = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -115,8 +118,13 @@ public enum JSONExceptionCode implements OXExceptionCode {
     }
 
     @Override
+    public String getDisplayMessage() {
+        return displayMessage;
+    }
+
+    @Override
     public String getPrefix() {
-        return "ATMOSPHERE";
+        return "RT_JSON";
     }
 
     @Override

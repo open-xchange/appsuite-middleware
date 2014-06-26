@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -56,10 +56,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.API;
@@ -87,6 +85,7 @@ public class OAuthProxyRequest {
 		put(API.YAHOO, 	Arrays.asList(Pattern.compile("^https?:\\/\\/(.*?\\.)?yahoo(apis)?\\.com")));
 		put(API.TUMBLR, Arrays.asList(Pattern.compile("^https?:\\/\\/.*?\\.tumblr\\.com")));
 		put(API.FLICKR, Arrays.asList(Pattern.compile("^https?:\\/\\/.*?\\.flickr\\.com")));
+		put(API.XING, Arrays.asList(Pattern.compile("^https:\\/\\/api\\.xing\\.com")));
 	}};
 
 	public static enum HTTPMethod {

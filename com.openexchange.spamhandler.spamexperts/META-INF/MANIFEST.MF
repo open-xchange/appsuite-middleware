@@ -2,8 +2,8 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Spamexperts Integration Plugin
 Bundle-SymbolicName: com.openexchange.spamhandler.spamexperts
-Bundle-Version: 7.4.2
-Bundle-Activator: com.openexchange.spamhandler.spamexperts.osgi.MyActivator
+Bundle-Version: 7.6.0
+Bundle-Activator: com.openexchange.spamhandler.spamexperts.osgi.SpamExpertsActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax,
@@ -26,11 +26,15 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.i18n,
  com.openexchange.log,
  com.openexchange.mail,
+ com.openexchange.mail.api,
+ com.openexchange.mail.dataobjects,
+ com.openexchange.mail.service,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.sessiond,
  com.openexchange.sessiond.event,
+ com.openexchange.spamhandler,
  com.openexchange.tools.oxfolder,
  com.openexchange.tools.service,
  com.openexchange.tools.servlet,
@@ -39,6 +43,7 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.tools.ssl,
  com.openexchange.tools.stream,
  com.openexchange.user,
+ com.sun.mail.imap,
  javax.activation;version="1.1.0",
  javax.mail,
  javax.mail.internet,

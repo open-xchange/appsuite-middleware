@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -146,7 +146,7 @@ public enum DBPoolingExceptionCodes {
      */
     TRANSACTION_MISSING(TRANSACTION_MISSING_MSG, Category.CATEGORY_CONFIGURATION, 21),
     /**
-     * Inserting database assignment for context %1$d and server %2$d failed!
+     * Inserting or updating database assignment for context %1$d and server %2$d failed!
      */
     INSERT_FAILED(INSERT_FAILED_MSG, Category.CATEGORY_ERROR, 22);
 

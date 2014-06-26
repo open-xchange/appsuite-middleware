@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: The generic Open-Xchange search API
+Bundle-SymbolicName: com.openexchange.search
+Bundle-Version: 7.6.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.exception,
+ com.openexchange.i18n,
+ org.osgi.framework,
+ org.slf4j
+Export-Package: com.openexchange.search,
+ com.openexchange.search.internal.operands
+Bundle-Activator: com.openexchange.search.osgi.SearchActivator

@@ -1,0 +1,69 @@
+#!/usr/bin/perl -w
+#%# family=auto
+#%# capabilities=autoconf
+
+$showruntimestats="/opt/open-xchange/sbin/showruntimestats";
+$showexec="$showruntimestats --ajpthreadsstats";
+
+if ( $ARGV[0] and $ARGV[0] eq "autoconf")
+{
+    if (-e "/opt/open-xchange/bundles/com.openexchange.ajp.jar") {
+        print "yes\n";
+        exit 0;
+    } else {
+        print "no\n";
+        exit 0;
+    }
+}
+
+if ( $ARGV[0] and $ARGV[0] eq "config")
+{
+	print "graph_title AJPv13Server\n";
+	print "graph_args --base 1000 -l 0\n";
+	print "graph_category Open Xchange\n";
+	print "graph_vlabel Number\n";
+	print "a.label NumActive\n";
+	print "a.draw AREA\n";
+	print "b.label NumIdle\n";
+	print "b.draw STACK\n";
+	print "c.label PoolSize\n";
+	print "c.draw LINE1\n";
+	print "d.label NumBrokenConnections per second\n";
+	print "d.draw LINE1\n";
+	print "d.type DERIVE\n";
+	print "d.min 0\n";
+	exit 0
+}
+									
+
+open(SHOWRUNTIME,"$showexec |") || die "can not read monitoring output";   
+
+while (<SHOWRUNTIME>)
+{
+	if ( $_ =~ /AJPv13ServerThreadsMonitor,NumActive/) {
+		s/.*\=//; 
+		$val=$_+0;
+		print "a.value $val\n";
+		next;
+	}
+	if ( $_ =~ /AJPv13ServerThreadsMonitor,NumIdle/) {
+		s/.*\=//; 
+		$val=$_+0;
+		print "b.value $val\n";
+		next;
+	}
+	if ( $_ =~ /AJPv13ServerThreadsMonitor,PoolSize/) {
+		s/.*\=//; 
+		$val=$_+0;
+		print "c.value $val\n";
+		next;
+	}
+	if ( $_ =~ /AJPv13ServerThreadsMonitor,NumBrokenConnections/) {
+		s/.*\=//;
+		$val=$_+0;
+		print "d.value $val\n";
+		next;
+	}
+}
+
+

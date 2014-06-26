@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -66,11 +66,8 @@ import com.openexchange.mail.MailPath;
 public final class UnifiedInboxUID {
 
     private int accountId;
-
-    private String fullname;
-
+    private String fullName;
     private String id;
-
     private String uidl;
 
     /**
@@ -84,12 +81,12 @@ public final class UnifiedInboxUID {
      * Initializes a new {@link UnifiedInboxUID}.
      *
      * @param accountId The account ID
-     * @param fullname The folder fullname
+     * @param fullName The folder full name
      * @param id The mail ID
      */
-    public UnifiedInboxUID(final int accountId, final String fullname, final String id) {
+    public UnifiedInboxUID(final int accountId, final String fullName, final String id) {
         super();
-        setUID(accountId, fullname, id);
+        setUID(accountId, fullName, id);
     }
 
     /**
@@ -107,15 +104,15 @@ public final class UnifiedInboxUID {
      * Sets the UID of this {@link UnifiedInboxUID}.
      *
      * @param accountId The account ID
-     * @param fullname The folder fullname
+     * @param fullName The folder full name
      * @param id The mail ID
      * @return This {@link UnifiedInboxUID} with new UID applied.
      */
-    public UnifiedInboxUID setUID(final int accountId, final String fullname, final String id) {
+    public UnifiedInboxUID setUID(final int accountId, final String fullName, final String id) {
         this.accountId = accountId;
-        this.fullname = fullname;
+        this.fullName = fullName;
         this.id = id;
-        final String mailPath = MailPath.getMailPath(accountId, fullname, id);
+        final String mailPath = MailPath.getMailPath(accountId, fullName, id);
         uidl = encodeQP(mailPath);
         return this;
     }
@@ -131,7 +128,7 @@ public final class UnifiedInboxUID {
         final String decoded = decodeQP(unifiedINBOXUID);
         final MailPath mailPath = new MailPath(decoded);
         accountId = mailPath.getAccountId();
-        fullname = mailPath.getFolder();
+        fullName = mailPath.getFolder();
         id = mailPath.getMailID();
         uidl = decoded;
         return this;
@@ -152,7 +149,7 @@ public final class UnifiedInboxUID {
      * @return The folder full name
      */
     public String getFullName() {
-        return fullname;
+        return fullName;
     }
 
     /**

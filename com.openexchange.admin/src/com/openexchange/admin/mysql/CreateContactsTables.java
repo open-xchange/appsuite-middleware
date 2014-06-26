@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,13 +49,11 @@
 
 package com.openexchange.admin.mysql;
 
-import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.database.AbstractCreateTableImpl;
-import com.openexchange.groupware.update.FullPrimaryKeySupportService;
 
 /**
  * Creates the tables required for contacts.
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
@@ -65,24 +63,6 @@ public class CreateContactsTables extends AbstractCreateTableImpl {
      * Table name of prg_dlist table
      */
     private static final String TABLE_PRG_DLIST = "prg_dlist";
-
-    /**
-     * SQL statement for prg_dlist table
-     */
-    private static final String CREATE_PRG_DLIST = "CREATE TABLE " + TABLE_PRG_DLIST + " ("
-        + "intfield01 INT4 NOT NULL,"
-        + "intfield02 INT4,"
-        + "intfield03 INT4,"
-        + "intfield04 INT4,"
-        + "field01 VARCHAR(320),"
-        + "field02 VARCHAR(128),"
-        + "field03 VARCHAR(128),"
-        + "field04 VARCHAR(128),"
-        + "cid INT4,"
-        + "uuid binary(16) DEFAULT NULL,"
-        + "INDEX (intfield01, cid),"
-        + "INDEX (intfield01, intfield02, intfield03, cid)"
-        + ") ENGINE  = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
     /**
      * SQL statement for prg_dlist table
@@ -111,24 +91,6 @@ public class CreateContactsTables extends AbstractCreateTableImpl {
     /**
      * SQL statement for del_dlist table
      */
-    private static final String CREATE_DEL_DLIST = "CREATE TABLE " + TABLE_DEL_DLIST + " ("
-        + "intfield01 INT4 NOT NULL,"
-        + "intfield02 INT4,"
-        + "intfield03 INT4,"
-        + "intfield04 INT4,"
-        + "field01 VARCHAR(320),"
-        + "field02 VARCHAR(128),"
-        + "field03 VARCHAR(128),"
-        + "field04 VARCHAR(128),"
-        + "cid INT4 NOT NULL,"
-        + "uuid binary(16) DEFAULT NULL,"
-        + "INDEX (intfield01, cid),"
-        + "INDEX (intfield01, intfield02, intfield03, cid)"
-        + ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-
-    /**
-     * SQL statement for del_dlist table
-     */
     private static final String CREATE_DEL_DLIST_PRIMARY_KEY = "CREATE TABLE " + TABLE_DEL_DLIST + " ("
         + "intfield01 INT4 NOT NULL,"
         + "intfield02 INT4,"
@@ -149,20 +111,6 @@ public class CreateContactsTables extends AbstractCreateTableImpl {
      * Table name of prg_contacts_linkage table
      */
     private static final String TABLE_PRG_CONTACTS_LINKAGE = "prg_contacts_linkage";
-
-    /**
-     * SQL statement for prg_contacts_linkage table
-     */
-    private static final String CREATE_PRG_CONTACTS_LINKAGE = "CREATE TABLE " + TABLE_PRG_CONTACTS_LINKAGE + " ("
-        + "intfield01 INT4 NOT NULL,"
-        + "intfield02 INT4 NOT NULL,"
-        + "field01 VARCHAR(320),"
-        + "field02 VARCHAR(320),"
-        + "cid INT4 NOT NULL,"
-        + "uuid binary(16) DEFAULT NULL,"
-        + "INDEX (intfield01, intfield02, cid),"
-        + "INDEX (cid)"
-        + ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
     /**
      * SQL statement for prg_contacts_linkage table
@@ -521,14 +469,8 @@ public class CreateContactsTables extends AbstractCreateTableImpl {
      */
     @Override
     protected String[] getCreateStatements() {
-        FullPrimaryKeySupportService fullPrimaryKeySupportService = AdminServiceRegistry.getInstance().getService(FullPrimaryKeySupportService.class);
-        if (fullPrimaryKeySupportService.isFullPrimaryKeySupported()) {
-            return new String[] { CREATE_PRG_DLIST_PRIMARY_KEY, CREATE_DEL_DLIST_PRIMARY_KEY, CREATE_PRG_CONTACTS_LINKAGE_PRIMARY_KEY, CREATE_PRG_CONTACTS_IMAGE,
-                CREATE_DEL_CONTACTS_IMAGE, CREATE_DEL_CONTACTS, CREATE_PRG_CONTACTS };
-        }
-        return new String[] {
-            CREATE_PRG_DLIST, CREATE_DEL_DLIST, CREATE_PRG_CONTACTS_LINKAGE, CREATE_PRG_CONTACTS_IMAGE, CREATE_DEL_CONTACTS_IMAGE,
-            CREATE_DEL_CONTACTS, CREATE_PRG_CONTACTS };
+        return new String[] { CREATE_PRG_DLIST_PRIMARY_KEY, CREATE_DEL_DLIST_PRIMARY_KEY, CREATE_PRG_CONTACTS_LINKAGE_PRIMARY_KEY, CREATE_PRG_CONTACTS_IMAGE,
+            CREATE_DEL_CONTACTS_IMAGE, CREATE_DEL_CONTACTS, CREATE_PRG_CONTACTS };
     }
 
 }

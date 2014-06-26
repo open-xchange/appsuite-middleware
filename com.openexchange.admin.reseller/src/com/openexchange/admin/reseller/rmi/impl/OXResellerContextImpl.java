@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
@@ -95,11 +96,6 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         oxresell = OXResellerStorageInterface.getInstance();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.admin.plugins.OXContextPluginInterface#change(com.openexchange.admin.rmi.dataobjects.Context,
-     * com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
     @Override
     public void change(final Context ctx, final Credentials auth) throws PluginException {
         if (!cache.isMasterAdmin(auth)) {
@@ -127,11 +123,6 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.admin.plugins.OXContextPluginInterface#changeModuleAccess(com.openexchange.admin.rmi.dataobjects.Context,
-     * com.openexchange.admin.rmi.dataobjects.UserModuleAccess, com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
     @Override
     public void changeModuleAccess(final Context ctx, final UserModuleAccess access, final Credentials auth) throws PluginException {
         if (cache.isMasterAdmin(auth)) {
@@ -145,11 +136,6 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         checkOwnerShipAndSetSid(ctx, auth);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.admin.plugins.OXContextPluginInterface#changeModuleAccess(com.openexchange.admin.rmi.dataobjects.Context,
-     * java.lang.String, com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
     @Override
     public void changeModuleAccess(final Context ctx, final String access_combination_name, final Credentials auth) throws PluginException {
         if (cache.isMasterAdmin(auth)) {
@@ -163,11 +149,32 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         checkOwnerShipAndSetSid(ctx, auth);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.admin.plugins.OXContextPluginInterface#create(com.openexchange.admin.rmi.dataobjects.Context,
-     * com.openexchange.admin.rmi.dataobjects.User, java.lang.String, com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
+    @Override
+    public void changeCapabilities(Context ctx, Set<String> capsToAdd, Set<String> capsToRemove, Set<String> capsToDrop, Credentials auth) throws PluginException {
+        if (cache.isMasterAdmin(auth)) {
+            return;
+        }
+        try {
+            oxresell.updateModifyTimestamp(ctx);
+        } catch (StorageException e) {
+            throw new PluginException(e);
+        }
+        checkOwnerShipAndSetSid(ctx, auth);
+    }
+
+    @Override
+    public void changeQuota(Context ctx, String module, long quotaValue, Credentials auth) throws PluginException {
+        if (cache.isMasterAdmin(auth)) {
+            return;
+        }
+        try {
+            oxresell.updateModifyTimestamp(ctx);
+        } catch (StorageException e) {
+            throw new PluginException(e);
+        }
+        checkOwnerShipAndSetSid(ctx, auth);
+    }
+
     @Override
     public Context postCreate(final Context ctx, final User admin_user, final UserModuleAccess access, final Credentials auth) throws PluginException {
         try {
@@ -188,6 +195,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
             oxresell.checkPerSubadminRestrictions(
                 auth,
                 access,
+                true,
                 Restriction.MAX_CONTEXT_PER_SUBADMIN,
                 Restriction.MAX_OVERALL_CONTEXT_QUOTA_PER_SUBADMIN,
                 Restriction.MAX_OVERALL_USER_PER_SUBADMIN,
@@ -208,11 +216,6 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         return ctx;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.admin.plugins.OXContextPluginInterface#create(com.openexchange.admin.rmi.dataobjects.Context,
-     * com.openexchange.admin.rmi.dataobjects.User, java.lang.String, com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
     @Override
     public Context preCreate(final Context ctx, final User admin_user, final Credentials auth) throws PluginException {
         final OXContextExtensionImpl firstExtensionByName = (OXContextExtensionImpl) ctx.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
@@ -231,11 +234,6 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         return ctx;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.admin.plugins.OXContextPluginInterface#delete(com.openexchange.admin.rmi.dataobjects.Context,
-     * com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
     @Override
     public void delete(final Context ctx, final Credentials auth) throws PluginException {
         final boolean ismasteradmin = cache.isMasterAdmin(auth);
@@ -265,11 +263,6 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.admin.plugins.OXContextPluginInterface#disable(com.openexchange.admin.rmi.dataobjects.Context,
-     * com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
     @Override
     public void disable(final Context ctx, final Credentials auth) throws PluginException {
         if (cache.isMasterAdmin(auth)) {
@@ -278,10 +271,6 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         checkOwnerShipAndSetSid(ctx, auth);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.admin.plugins.OXContextPluginInterface#disableAll(com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
     @Override
     public void disableAll(final Credentials auth) throws PluginException {
         if (cache.isMasterAdmin(auth)) {
@@ -298,11 +287,6 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.admin.plugins.OXContextPluginInterface#downgrade(com.openexchange.admin.rmi.dataobjects.Context,
-     * com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
     @Override
     public void downgrade(final Context ctx, final Credentials auth) throws PluginException {
         if (cache.isMasterAdmin(auth)) {
@@ -311,11 +295,6 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         checkOwnerShipAndSetSid(ctx, auth);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.admin.plugins.OXContextPluginInterface#enable(com.openexchange.admin.rmi.dataobjects.Context,
-     * com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
     @Override
     public void enable(final Context ctx, final Credentials auth) throws PluginException {
         if (cache.isMasterAdmin(auth)) {
@@ -324,10 +303,6 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         checkOwnerShipAndSetSid(ctx, auth);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.admin.plugins.OXContextPluginInterface#enableAll(com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
     @Override
     public void enableAll(final Credentials auth) throws PluginException {
         if (cache.isMasterAdmin(auth)) {
@@ -342,11 +317,6 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.admin.plugins.OXContextPluginInterface#getAccessCombinationName(com.openexchange.admin.rmi.dataobjects.Context,
-     * com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
     @Override
     public String getAccessCombinationName(final Context ctx, final Credentials auth) throws PluginException {
         if (cache.isMasterAdmin(auth)) {
@@ -356,11 +326,6 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.admin.plugins.OXContextPluginInterface#getData(com.openexchange.admin.rmi.dataobjects.Context,
-     * com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
     @Override
     public List<OXCommonExtension> getData(final List<Context> ctxs, final Credentials auth) throws PluginException {
         final ArrayList<OXCommonExtension> retval = new ArrayList<OXCommonExtension>();
@@ -391,11 +356,6 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         return retval;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.admin.plugins.OXContextPluginInterface#getModuleAccess(com.openexchange.admin.rmi.dataobjects.Context,
-     * com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
     @Override
     public UserModuleAccess getModuleAccess(final Context ctx, final Credentials auth) throws PluginException {
         if (cache.isMasterAdmin(auth)) {

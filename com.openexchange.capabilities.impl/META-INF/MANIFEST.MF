@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The Implementation Bundle for Capabilities Service
 Bundle-SymbolicName: com.openexchange.capabilities.impl
-Bundle-Version: 7.4.2
+Bundle-Version: 7.6.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.caching,
@@ -34,7 +34,6 @@ Import-Package: com.openexchange.caching,
  gnu.trove.iterator,
  gnu.trove.list,
  gnu.trove.list.linked,
- org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.service.event;version="1.3.0",
  org.osgi.util.tracker,

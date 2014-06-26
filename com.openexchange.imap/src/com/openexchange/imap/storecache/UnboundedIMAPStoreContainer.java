@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -176,9 +176,6 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.imap.storecache.IMAPStoreContainer#hasElapsed(long)
-     */
     @Override
     public boolean hasElapsed(long millis) {
         return availableQueue.hasElapsed(millis);

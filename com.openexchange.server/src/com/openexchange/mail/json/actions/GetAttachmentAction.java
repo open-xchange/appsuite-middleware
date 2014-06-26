@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,6 +50,7 @@
 package com.openexchange.mail.json.actions;
 
 import static com.openexchange.java.Strings.toLowerCase;
+import static com.openexchange.mail.mime.MimeTypes.equalPrimaryTypes;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
@@ -60,6 +61,7 @@ import java.util.regex.Pattern;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
@@ -81,7 +83,6 @@ import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
@@ -250,7 +251,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
              */
             final MailServletInterface mailInterface = getMailInterface(req);
             if (sequenceId == null && imageContentId == null) {
-                throw MailExceptionCode.MISSING_PARAM.create(new com.openexchange.java.StringAllocator().append(PARAMETER_MAILATTCHMENT).append(" | ").append(PARAMETER_MAILCID).toString());
+                throw MailExceptionCode.MISSING_PARAM.create(new StringBuilder().append(PARAMETER_MAILATTCHMENT).append(" | ").append(PARAMETER_MAILCID).toString());
             }
             long size = -1L; /* mail system does not provide exact size */
             final MailPart mailPart;
@@ -317,7 +318,8 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 fileHolder.setDelivery("download");
                 req.getRequest().putParameter(PARAMETER_DELIVERY, "download");
             } else {
-                fileHolder = new FileHolder(isClosure, size, mailPart.getContentType().getBaseType(), getFileName(fileNameFromRequest, mailPart.getFileName(), mailPart.getContentType().getBaseType()));
+                final String baseType = mailPart.getContentType().getBaseType();
+                fileHolder = new FileHolder(isClosure, size, baseType, getFileName(fileNameFromRequest, mailPart.getFileName(), baseType));
             }
             final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
             /*
@@ -347,13 +349,13 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
 
     private String getFileName(final String fileNameFromRequest, final String mailPartFileName, final String baseType) {
         if (!isEmpty(fileNameFromRequest)) {
-            return AJAXServlet.encodeUrl(fileNameFromRequest, true);
+            return AJAXUtility.encodeUrl(fileNameFromRequest, true);
         }
         if (!isEmpty(mailPartFileName)) {
             return mailPartFileName;
         }
         final String fileExtension = isEmpty(baseType) ? "dat" : MimeType2ExtMap.getFileExtension(baseType);
-        return new StringAllocator("file.").append(fileExtension).toString();
+        return new StringBuilder("file.").append(fileExtension).toString();
     }
 
     private AJAXRequestResult performPUT(final MailRequest req, final JSONObject bodyObject) throws OXException {
@@ -459,22 +461,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
     }
 
     private String getHash(final String folderPath, final String uid, final String sequenceId) {
-        return HashUtility.getHash(new StringAllocator(32).append(folderPath).append('/').append(uid).append('/').append(sequenceId).toString(), "md5", "hex");
-    }
-
-    private String getPrimaryType(final String contentType) {
-        if (isEmpty(contentType)) {
-            return contentType;
-        }
-        final int pos = contentType.indexOf('/');
-        return pos > 0 ? contentType.substring(0, pos) : contentType;
-    }
-
-    private boolean equalPrimaryTypes(final String contentType1, final String contentType2) {
-        if (null == contentType1 || null == contentType2) {
-            return false;
-        }
-        return toLowerCase(getPrimaryType(contentType1)).startsWith(toLowerCase(getPrimaryType(contentType2)));
+        return HashUtility.getHash(new StringBuilder(32).append(folderPath).append('/').append(uid).append('/').append(sequenceId).toString(), "md5", "hex");
     }
 
 }

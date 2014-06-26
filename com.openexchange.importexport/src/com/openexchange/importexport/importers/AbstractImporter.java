@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -60,9 +60,9 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  */
 public abstract class AbstractImporter implements Importer {
-    
+
     private static final String CONTACT_LIMIT = "com.openexchange.import.contacts.limit".intern();
-    
+
     protected ServiceLookup services;
 
     protected AbstractImporter(ServiceLookup services) {
@@ -70,10 +70,6 @@ public abstract class AbstractImporter implements Importer {
         this.services = services;
     }
 
-    protected abstract String getNameForFieldInTruncationError(int id, OXException dataTruncation);
-    
-    
-    
     protected int getLimit(Session session) throws OXException {
         if (services == null) {
             return 0;

@@ -55,10 +55,12 @@ import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import gnu.trove.procedure.TIntProcedure;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -80,12 +82,15 @@ import javax.mail.search.FlagTerm;
 import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.imap.OperationKey.Type;
 import com.openexchange.imap.acl.ACLExtension;
 import com.openexchange.imap.cache.FolderCache;
@@ -95,11 +100,12 @@ import com.openexchange.imap.cache.ListLsubRuntimeException;
 import com.openexchange.imap.cache.MBoxEnabledCache;
 import com.openexchange.imap.cache.NamespaceFoldersCache;
 import com.openexchange.imap.cache.RightsCache;
-import com.openexchange.imap.cache.RootSubfolderCache;
+import com.openexchange.imap.cache.RootSubfoldersEnabledCache;
 import com.openexchange.imap.cache.UserFlagsCache;
 import com.openexchange.imap.command.CopyIMAPCommand;
 import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.imap.config.IMAPConfig;
+import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.converters.IMAPFolderConverter;
 import com.openexchange.imap.dataobjects.IMAPMailFolder;
 import com.openexchange.imap.entity2acl.Entity2ACL;
@@ -112,11 +118,13 @@ import com.openexchange.imap.util.IMAPSessionStorageAccess;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced2;
+import com.openexchange.mail.api.IMailFolderStorageInfoSupport;
 import com.openexchange.mail.api.MailFolderStorage;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
+import com.openexchange.mail.dataobjects.MailFolderInfo;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.permission.DefaultMailPermission;
@@ -140,7 +148,7 @@ import com.sun.mail.imap.Rights;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IMAPFolderStorage extends MailFolderStorage implements IMailFolderStorageEnhanced2 {
+public final class IMAPFolderStorage extends MailFolderStorage implements IMailFolderStorageEnhanced2, IMailFolderStorageInfoSupport {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPFolderStorage.class);
 
@@ -161,6 +169,22 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
         }
         return tmp.intValue();
+    }
+
+    static {
+        IMAPReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(final ConfigurationService configService) {
+                maxMailboxNameLength = null;
+                invalidChars = null;
+            }
+
+            @Override
+            public Map<String, String[]> getConfigFileNames() {
+                return null;
+            }
+        });
     }
 
     private static final String STR_INBOX = "INBOX";
@@ -331,6 +355,177 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             separator = Character.valueOf(imapStore.getDefaultFolder().getSeparator());
         }
         return separator.charValue();
+    }
+
+    @Override
+    public boolean isInfoSupported() throws OXException {
+        return true;
+    }
+
+    @Override
+    public MailFolderInfo getFolderInfo(final String fullName) throws OXException {
+        try {
+            final String fn = (DEFAULT_FOLDER_ID.equals(fullName) ? "" : fullName);
+            final ListLsubEntry entry = ListLsubCache.getCachedLISTEntry(fn, accountId, imapStore, session);
+            if (entry.exists()) {
+                return toFolderInfo(entry);
+            }
+
+            // Retrieve folder...
+            IMAPFolder f;
+            if (0 == fn.length()) {
+                f = (IMAPFolder) imapStore.getDefaultFolder();
+            } else {
+                f = (IMAPFolder) imapStore.getFolder(fullName);
+            }
+            // ... and check existence
+            if (!f.exists()) {
+                f = checkForNamespaceFolder(fn);
+                if (null == f) {
+                    throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                }
+            }
+
+            return IMAPFolderConverter.convertFolder(f, session, imapAccess, ctx).asMailFolderInfo(accountId);
+        } catch (final MessagingException e) {
+            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, new HashMap<String, Object>(0));
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
+        }
+    }
+
+    @Override
+    public List<MailFolderInfo> getAllFolderInfos(final boolean subscribedOnly) throws OXException {
+        return getFolderInfos(null, subscribedOnly);
+    }
+
+    @Override
+    public List<MailFolderInfo> getFolderInfos(final String optParentFullName, final boolean subscribedOnly) throws OXException {
+        try {
+            final String pfn = null == optParentFullName ? null : (DEFAULT_FOLDER_ID.equals(optParentFullName) ? "" : optParentFullName);
+            final List<ListLsubEntry> allEntries = ListLsubCache.getAllEntries(pfn, accountId, subscribedOnly, imapStore, session);
+
+            // User's locale
+            final Locale locale = (session instanceof ServerSession ? ((ServerSession) session).getUser() : UserStorage.getInstance().getUser(session.getUserId(), session.getContextId())).getLocale();
+
+            // Check whether to consider standard folders
+            if (!considerStandardFolders(pfn)) {
+                final List<MailFolderInfo> retval = new ArrayList<MailFolderInfo>(allEntries.size());
+
+                // Fill list
+                for (final ListLsubEntry entry : allEntries) {
+                    final MailFolderInfo mfi = toFolderInfo(entry);
+                    retval.add(mfi);
+                }
+
+                // Sort & return
+                Collections.sort(retval, new FullDisplayNameComparator(locale));
+                return retval;
+            }
+
+            // ------------------------------------------------------------------------------------------------------ //
+            // Fill map
+            final int size = allEntries.size();
+            final Map<String, MailFolderInfo> map = new HashMap<String, MailFolderInfo>(size);
+            for (final ListLsubEntry entry : allEntries) {
+                final MailFolderInfo mfi = toFolderInfo(entry);
+                map.put(mfi.getFullname(), mfi);
+            }
+
+            // Determine standard folders
+            {
+                final StringHelper stringHelper = StringHelper.valueOf(locale);
+                for (int index = 0; index < 7; index++) {
+                    final String fn = getChecker().getDefaultFolder(index);
+                    if (null != fn) {
+                        final MailFolderInfo mfi = map.get(fn);
+                        if (null != mfi) {
+                            mfi.setDefaultFolder(true);
+                            switch (index) {
+                            case StorageUtility.INDEX_CONFIRMED_HAM:
+                                mfi.setDefaultFolderType(DefaultFolderType.CONFIRMED_HAM);
+                                mfi.setDisplayName(stringHelper.getString(MailStrings.CONFIRMED_HAM));
+                                break;
+                            case StorageUtility.INDEX_CONFIRMED_SPAM:
+                                mfi.setDefaultFolderType(DefaultFolderType.CONFIRMED_SPAM);
+                                mfi.setDisplayName(stringHelper.getString(MailStrings.CONFIRMED_SPAM));
+                                break;
+                            case StorageUtility.INDEX_DRAFTS:
+                                mfi.setDefaultFolderType(DefaultFolderType.DRAFTS);
+                                mfi.setDisplayName(stringHelper.getString(MailStrings.DRAFTS));
+                                break;
+                            case StorageUtility.INDEX_SENT:
+                                mfi.setDefaultFolderType(DefaultFolderType.SENT);
+                                mfi.setDisplayName(stringHelper.getString(MailStrings.SENT));
+                                break;
+                            case StorageUtility.INDEX_SPAM:
+                                mfi.setDefaultFolderType(DefaultFolderType.SPAM);
+                                mfi.setDisplayName(stringHelper.getString(MailStrings.SPAM));
+                                break;
+                            case StorageUtility.INDEX_TRASH:
+                                mfi.setDefaultFolderType(DefaultFolderType.TRASH);
+                                mfi.setDisplayName(stringHelper.getString(MailStrings.TRASH));
+                                break;
+                            case StorageUtility.INDEX_INBOX:
+                                mfi.setDefaultFolderType(DefaultFolderType.INBOX);
+                                mfi.setDisplayName(stringHelper.getString(MailStrings.INBOX));
+                                break;
+                            default:
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Sort & return
+            final List<MailFolderInfo> retval = new ArrayList<MailFolderInfo>(map.values());
+            Collections.sort(retval, new FullDisplayNameComparator(locale));
+            return retval;
+        } catch (final MessagingException e) {
+            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, new HashMap<String, Object>(0));
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
+        }
+    }
+
+    private boolean considerStandardFolders(final String parentFullName) throws OXException {
+        final boolean considerStandardFolders;
+        if (null == parentFullName) {
+            considerStandardFolders = true;
+        } else {
+            final String prefix = getDefaultFolderPrefix();
+            final int pLength = prefix.length();
+            considerStandardFolders = 0 == pLength ? 0 == parentFullName.length() : (parentFullName.equals(prefix.substring(0, pLength - 1)));
+        }
+        return considerStandardFolders;
+    }
+
+    private MailFolderInfo toFolderInfo(final ListLsubEntry entry) {
+        final MailFolderInfo mfi = new MailFolderInfo();
+        mfi.setAccountId(accountId);
+        mfi.setSeparator(entry.getSeparator());
+        final String fullName = entry.getFullName();
+
+        mfi.setName(entry.getName());
+        mfi.setHoldsFolders(entry.hasInferiors());
+        mfi.setHoldsMessages(entry.canOpen());
+        mfi.setSubscribed(true);
+        mfi.setSubfolders(entry.hasChildren());
+        mfi.setSubscribedSubfolders(entry.hasChildren());
+
+        if (0 == fullName.length()) {
+            mfi.setRootFolder(true);
+            mfi.setParentFullname(null);
+            mfi.setFullname(DEFAULT_FOLDER_ID);
+        } else {
+            mfi.setDefaultFolder(false);
+            mfi.setDefaultFolderType(DefaultFolderType.NONE);
+            mfi.setParentFullname(entry.getParent().getFullName());
+            mfi.setFullname(fullName);
+        }
+
+        return mfi;
     }
 
     @Override
@@ -869,7 +1064,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 if (imapConfig.isSupportsACLs()) {
                     try {
                         if (isParentDefault) {
-                            if (!(RootSubfolderCache.canCreateSubfolders((DefaultFolder) parent, true, session, accountId).booleanValue())) {
+                            if (!(RootSubfoldersEnabledCache.isRootSubfoldersEnabled(imapConfig, (DefaultFolder) parent))) {
                                 throw IMAPException.create(IMAPException.Code.NO_CREATE_ACCESS, imapConfig, session, DEFAULT_FOLDER_ID);
                             }
                         } else {
@@ -1366,7 +1561,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         if (imapConfig.isSupportsACLs() && ((destFolder.getType() & Folder.HOLDS_MESSAGES) > 0)) {
                             try {
                                 if (isDestRoot) {
-                                    if (!(RootSubfolderCache.canCreateSubfolders((DefaultFolder) destFolder, true, session, accountId).booleanValue())) {
+                                    if (!(RootSubfoldersEnabledCache.isRootSubfoldersEnabled(imapConfig, (DefaultFolder) destFolder))) {
                                         throw IMAPException.create(IMAPException.Code.NO_CREATE_ACCESS, imapConfig, session, DEFAULT_FOLDER_ID);
                                     }
                                 } else {
@@ -2139,30 +2334,23 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 }
             }
             // Try NAMESPACE command
-            final char[] sep = new char[1];
-            final String prefixByInferiors = prefixByInferiors(sep);
-            final String prefix;
+            String prefix = null;
             try {
                 final String[] namespaces = NamespaceFoldersCache.getPersonalNamespaces(imapStore, true, session, accountId);
                 if (null == namespaces || 0 == namespaces.length) {
                     // No namespaces available
+                    String prefixByInferiors = prefixByInferiors();
                     LOG.info("IMAP server {} does not provide a personal namespace for login {}. Using fall-back \"by inferiors\" detection: \"{}\" (user={}, context={})", imapConfig.getServer(), imapConfig.getLogin(), prefixByInferiors, session.getUserId(), session.getContextId());
                     return prefixByInferiors;
                 }
                 prefix = namespaces[0];
             } catch (final MessagingException e) {
-                LOG.error("NAMESPACE command failed for any reason", e);
+                String prefixByInferiors = prefixByInferiors();
+                LOG.info("NAMESPACE command failed for any reason on IMAP server {} for login {}. Using fall-back \"by inferiors\" detection: \"{}\" (user={}, context={})", imapConfig.getServer(), imapConfig.getLogin(), prefixByInferiors, session.getUserId(), session.getContextId(), e);
                 return prefixByInferiors;
             }
-            final boolean isEmpty = prefix.length() == 0;
-            if (isEmpty && RootSubfolderCache.canCreateSubfolders((DefaultFolder) imapStore.getDefaultFolder(), true, session, accountId).booleanValue()) {
-                return prefix;
-            }
-            final String retvalPrefix = new StringBuilder(isEmpty ? STR_INBOX : prefix).append(sep[0]).toString();
-            if (!retvalPrefix.equals(prefixByInferiors)) {
-                LOG.info("The personal namespace indicated by NAMESPACE command (\"{}\") does not match to root folder's capability: \"{}\" IS NOT \"{}\"", retvalPrefix, retvalPrefix, prefixByInferiors);
-            }
-            return retvalPrefix;
+            // Return prefix as indicated by NAMESPACE command
+            return prefix.length() == 0 ? prefix : new StringBuilder(prefix).append(((DefaultFolder) imapStore.getDefaultFolder()).getSeparator()).toString();
         } catch (final MessagingException e) {
             throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, null);
         } catch (final RuntimeException e) {
@@ -2170,13 +2358,11 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
     }
 
-    private String prefixByInferiors(final char[] sep) throws OXException {
+    private String prefixByInferiors() throws OXException {
         try {
             final DefaultFolder defaultFolder = (DefaultFolder) imapStore.getDefaultFolder();
-            final char separator = defaultFolder.getSeparator();
-            sep[0] = separator;
-            if (!RootSubfolderCache.canCreateSubfolders(defaultFolder, true, session, accountId).booleanValue() || MailProperties.getInstance().isAllowNestedDefaultFolderOnAltNamespace()) {
-                return new StringBuilder(STR_INBOX).append(separator).toString();
+            if (!RootSubfoldersEnabledCache.isRootSubfoldersEnabled(imapConfig, defaultFolder) || MailProperties.getInstance().isAllowNestedDefaultFolderOnAltNamespace()) {
+                return new StringBuilder(STR_INBOX).append(defaultFolder.getSeparator()).toString();
             }
             return "";
         } catch (final MessagingException e) {
@@ -3010,8 +3196,48 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         return ListLsubCache.getCachedLSUBEntry(fullName, accountId, imapFolder, session);
     }
 
-    private char getSeparator(final IMAPFolder imapFolder) throws OXException, MessagingException {
-        return getLISTEntry(STR_INBOX, imapFolder).getSeparator();
+    /**
+     * Gets the separator character.
+     *
+     * @param imapStore The IMAP store
+     * @return The separator character
+     * @throws OXException If an error occurs
+     */
+    public char getSeparator(final IMAPStore imapStore) throws OXException {
+        try {
+            return getLISTEntry(STR_INBOX, (IMAPFolder) imapStore.getDefaultFolder()).getSeparator();
+        } catch (final MessagingException e) {
+            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, null);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
+        }
+    }
+
+    /**
+     * Gets the separator character.
+     *
+     * @param imapFolder The IMAP folder
+     * @return The separator character
+     * @throws OXException If an error occurs
+     */
+    public char getSeparator(final IMAPFolder imapFolder) throws OXException {
+        try {
+            return getLISTEntry(STR_INBOX, imapFolder).getSeparator();
+        } catch (final MessagingException e) {
+            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", imapFolder.getFullName()));
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
+        }
+    }
+
+    /**
+     * Handles specified {@link MessagingException} instance.
+     *
+     * @param e The {@link MessagingException} instance
+     * @return The appropriate {@link OXException} instance
+     */
+    public OXException handleMessagingException(final MessagingException e) {
+        return IMAPException.handleMessagingException(e, imapConfig, session, accountId, null);
     }
 
     private String getNameOf(final IMAPFolder imapFolder) throws OXException, MessagingException {
@@ -3071,6 +3297,26 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     private static boolean isEmpty(final String string) {
         return Strings.isEmpty(string);
     }
+
+    private static final class FullDisplayNameComparator implements Comparator<MailFolderInfo> {
+
+        private final Collator collator;
+
+        FullDisplayNameComparator(final Locale locale) {
+            super();
+            collator = Collator.getInstance(locale);
+            collator.setStrength(Collator.SECONDARY);
+        }
+
+        @Override
+        public int compare(final MailFolderInfo o1, final MailFolderInfo o2) {
+            /*
+             * Compare by full name
+             */
+            return collator.compare(o1.getFullDisplayName(), o2.getFullDisplayName());
+        }
+
+    } // End of FullNameComparator
 
     private static String urlName(final String prefix, final String host, final int port, final String username, final String pw) {
         // Start with "protocol:"

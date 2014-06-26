@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -58,6 +58,8 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
+import com.openexchange.apps.manifests.ManifestContributor;
+import com.openexchange.apps.manifests.json.osgi.ServerConfigServicesLookup;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
@@ -76,20 +78,41 @@ public class AllAction implements AJAXActionService {
 
     private final JSONArray manifests;
     private final ServiceLookup services;
+    private final ServerConfigServicesLookup registry;
 
-    public AllAction(ServiceLookup services, JSONArray manifests) {
+    public AllAction(ServiceLookup services, JSONArray manifests, ServerConfigServicesLookup registry) {
         super();
         this.manifests = manifests;
         this.services = services;
+        this.registry = registry;
     }
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        return new AJAXRequestResult(getManifests(session, manifests, services), "json");
+        return new AJAXRequestResult(getManifests(session, manifests, services, registry), "json");
     }
 
-    public static JSONArray getManifests(ServerSession session, JSONArray manifests, ServiceLookup services) throws OXException {
+    public static JSONArray getManifests(ServerSession session, JSONArray manifests, ServiceLookup services, ServerConfigServicesLookup registry) throws OXException {
+        manifests = new JSONArray(manifests);
+
         JSONArray result = new JSONArray();
+        for(ManifestContributor contributors: registry.getContributors()) {
+            try {
+                JSONArray additionalManifests = contributors.getAdditionalManifests(session);
+                if (additionalManifests != null) {
+                    for(int i = 0, size = additionalManifests.length(); i < size; i++) {
+                        manifests.put(additionalManifests.get(i));
+                    }
+                }
+            } catch (OXException x) {
+                // TODO: Logging
+                x.printStackTrace();
+            } catch (JSONException x) {
+                // TODO: Logging
+                x.printStackTrace();
+            }
+        }
+
         try {
             if (session.isAnonymous()) {
                 // Deliver no apps and only plugins with the namespace 'signin'
@@ -100,10 +123,7 @@ public class AllAction implements AJAXActionService {
                 }
 
             } else {
-                CapabilitySet capabilities = services.getService(CapabilityService.class).getCapabilities(
-                    session.getUserId(),
-                    session.getContextId(),
-                    true);
+                CapabilitySet capabilities = services.getService(CapabilityService.class).getCapabilities(session.getUserId(), session.getContextId(), true, true);
 
                 Map<String, Capability> capMap = new HashMap<String, Capability>(capabilities.size());
                 for (Capability capability : capabilities) {

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -68,7 +68,7 @@ import com.openexchange.sessiond.SessionExceptionCodes;
 
 /**
  * Tests the action tokenLogin of the login servlet.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class TokenLoginTest extends AbstractAJAXSession {
@@ -139,7 +139,7 @@ public class TokenLoginTest extends AbstractAJAXSession {
                 false));
             assertTrue("Tokened session should be expired.", response2.hasError());
             // Check for correct exception
-            OXException expected = OXExceptionFactory.getInstance().create(SessionExceptionCodes.NO_SESSION_FOR_SERVER_TOKEN);
+            OXException expected = OXExceptionFactory.getInstance().create(SessionExceptionCodes.NO_SESSION_FOR_SERVER_TOKEN, "a", "b");
             OXException actual = response2.getException();
             assertTrue("Wrong exception", actual.similarTo(expected));
         } finally {

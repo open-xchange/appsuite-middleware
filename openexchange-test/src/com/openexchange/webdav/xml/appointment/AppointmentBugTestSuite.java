@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,7 +51,6 @@ package com.openexchange.webdav.xml.appointment;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import com.openexchange.ajax.appointment.bugtests.Bug12377Test;
 
 public class AppointmentBugTestSuite {
 
@@ -65,7 +64,6 @@ public class AppointmentBugTestSuite {
 		tests.addTestSuite(Bug8196Test.class);
 		tests.addTestSuite(Bug8453Test.class);
 		tests.addTestSuite(Bug6455Test.class);
-        tests.addTestSuite(Bug12377Test.class);
         tests.addTestSuite(Bug12494Test.class);
         tests.addTestSuite(Bug12553Test.class);
         tests.addTestSuite(Bug11835Test.class);

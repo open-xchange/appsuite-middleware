@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -140,7 +140,7 @@ public interface FolderService {
     FolderResponse<UserizedFolder[]> getAllVisibleFolders(String treeId, FolderFilter filter, Session session, FolderServiceDecorator decorator) throws OXException;
 
     /**
-     * Gets this storage's default folder for specified user.
+     * Gets this storage's default folder (private type) for specified user.
      *
      * @param user The user whose default folder shall be returned
      * @param treeId The tree identifier
@@ -154,7 +154,22 @@ public interface FolderService {
     UserizedFolder getDefaultFolder(User user, String treeId, ContentType contentType, User ruser, Context context, FolderServiceDecorator decorator) throws OXException;
 
     /**
-     * Gets this storage's default folder for specified user.
+     * Gets this storage's default folder for specified user and type.
+     *
+     * @param user The user whose default folder shall be returned
+     * @param treeId The tree identifier
+     * @param contentType The content type or the default folder
+     * @param type The type of the folder
+     * @param ruser The requesting user
+     * @param context The context
+     * @param decorator The optional folder service decorator
+     * @return The default folder for specified user
+     * @throws OXException If the default folder cannot be returned
+     */
+    UserizedFolder getDefaultFolder(User user, String treeId, ContentType contentType, Type type, User ruser, Context context, FolderServiceDecorator decorator) throws OXException;
+
+    /**
+     * Gets this storage's default folder (private type) for specified user.
      *
      * @param user The user whose default folder shall be returned
      * @param treeId The tree identifier
@@ -165,6 +180,20 @@ public interface FolderService {
      * @throws OXException If the default folder cannot be returned
      */
     UserizedFolder getDefaultFolder(User user, String treeId, ContentType contentType, Session session, FolderServiceDecorator decorator) throws OXException;
+
+    /**
+     * Gets this storage's default folder for specified user.
+     *
+     * @param user The user whose default folder shall be returned
+     * @param treeId The tree identifier
+     * @param contentType The content type or the default folder
+     * @param type The type of the folder
+     * @param session The session
+     * @param decorator The optional folder service decorator
+     * @return The default folder for specified user
+     * @throws OXException If the default folder cannot be returned
+     */
+    UserizedFolder getDefaultFolder(User user, String treeId, ContentType contentType, Type type, Session session, FolderServiceDecorator decorator) throws OXException;
 
     /**
      * Subscribes an existing folder from specified source tree to specified (virtual) target tree below given parent.
@@ -345,9 +374,10 @@ public interface FolderService {
      * @param timeStamp The requestor's last-modified time stamp
      * @param user The user
      * @param context The context
+     * @param decorator The folder service decorator or <code>null</code>
      * @throws OXException If folder cannot be deleted
      */
-    FolderResponse<Void> deleteFolder(String treeId, String folderId, Date timeStamp, User user, Context context) throws OXException;
+    FolderResponse<Void> deleteFolder(String treeId, String folderId, Date timeStamp, User user, Context context, FolderServiceDecorator decorator) throws OXException;
 
     /**
      * Deletes the specified folder in given tree.
@@ -358,9 +388,10 @@ public interface FolderService {
      * @param folderId The folder identifier
      * @param timeStamp The requestor's last-modified time stamp
      * @param session The session
+     * @param decorator The folder service decorator or <code>null</code>
      * @throws OXException If folder cannot be deleted
      */
-    FolderResponse<Void> deleteFolder(String treeId, String folderId, Date timeStamp, Session session) throws OXException;
+    FolderResponse<Void> deleteFolder(String treeId, String folderId, Date timeStamp, Session session, FolderServiceDecorator decorator) throws OXException;
 
     /**
      * Clears the content of specified folder in given tree.

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,6 +51,7 @@ package com.openexchange.mail.utils;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
@@ -79,6 +80,16 @@ public final class MailFolderUtility {
      */
     private MailFolderUtility() {
         super();
+    }
+
+    /**
+     * Checks for an empty string.
+     *
+     * @param string The string
+     * @return <code>true</code> if input is null or empty; else <code>false</code>
+     */
+    public static boolean isEmpty(final String string) {
+        return Strings.isEmpty(string);
     }
 
     /**
@@ -185,7 +196,7 @@ public final class MailFolderUtility {
         }
         final int length = fullname.length();
         if (DEFAULT_FOLDER_ID.equals(fullname) || (0 == length)) {
-            return new com.openexchange.java.StringAllocator(length + 4).append(fullname).append(accountId).toString();
+            return new StringBuilder(length + 4).append(fullname).append(accountId).toString();
         }
         if (fullname.startsWith(DEFAULT_FOLDER_ID)) {
             /*
@@ -193,31 +204,13 @@ public final class MailFolderUtility {
              */
             final String tmpFullname = prepareMailFolderParam(fullname).getFullname();
             if (DEFAULT_FOLDER_ID.equals(tmpFullname)) {
-                return new com.openexchange.java.StringAllocator(length + 4).append(fullname).append(tmpFullname).toString();
+                return new StringBuilder(length + 4).append(fullname).append(tmpFullname).toString();
             }
-            return new com.openexchange.java.StringAllocator(LEN + length + 4).append(DEFAULT_FOLDER_ID).append(accountId).append(
+            return new StringBuilder(LEN + length + 4).append(DEFAULT_FOLDER_ID).append(accountId).append(
                 MailProperties.getInstance().getDefaultSeparator()).append(tmpFullname).toString();
         }
-        return new com.openexchange.java.StringAllocator(LEN + length + 4).append(DEFAULT_FOLDER_ID).append(accountId).append(
+        return new StringBuilder(LEN + length + 4).append(DEFAULT_FOLDER_ID).append(accountId).append(
             MailProperties.getInstance().getDefaultSeparator()).append(fullname).toString();
-    }
-
-    /**
-     * Tests if specified string is empty; either <code>null</code>, zero length, or only consists of white space characters.
-     *
-     * @param str The string to test
-     * @return <code>true</code> if specified string is empty; otherwise <code>false</code>.
-     */
-    public static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     private static final Pattern P_FOLDER;
@@ -249,7 +242,7 @@ public final class MailFolderUtility {
      *     ==&gt;
      *   "actual/folder/path"
      * </pre>
-     * 
+     *
      * @param fullName The full name
      * @return The possibly sanitized full name
      */

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -86,32 +86,36 @@ public class DefaultPayloadTreeConverter implements PayloadTreeConverter {
 
     @Override
     public PayloadTreeNode incoming(PayloadTreeNode node) throws OXException {
-        ElementPath elementPath = node.getElementPath();
-        String format = preferredFormats.get(elementPath);
-        if (format == null) {
-            format = "json";
-        }
-
+        PayloadTreeNode resultNode = null;
+        
         PayloadElement payloadElement = node.getPayloadElement();
 
-        SimpleConverter service = services.getService(SimpleConverter.class);
-        if (null == service) {
-            throw ServiceExceptionCode.serviceUnavailable(SimpleConverter.class);
+        if (payloadElement != null) {
+            //This tree node transports data and maybe children
+            ElementPath elementPath = node.getElementPath();
+            String format = preferredFormats.get(elementPath);
+            if (format == null) {
+                format = "json";
+            }
+
+            SimpleConverter service = services.getService(SimpleConverter.class);
+            if (null == service) {
+                throw ServiceExceptionCode.serviceUnavailable(SimpleConverter.class);
+            }
+
+            Object transformed = service.convert(payloadElement.getFormat(), format, payloadElement.getData(), null);
+
+            PayloadElement transformedPayload = new PayloadElement(
+                transformed,
+                format,
+                payloadElement.getNamespace(),
+                payloadElement.getElementName());
+
+            resultNode = new PayloadTreeNode(transformedPayload);
+        } else {
+            //this tree node doesn't transport data but may represent a collection containing children
+            resultNode = new PayloadTreeNode(node.getElementPath());
         }
-
-        Object transformed = service.convert(
-            payloadElement.getFormat(),
-            format,
-            payloadElement.getData(),
-            null);
-
-        PayloadElement transformedPayload = new PayloadElement(
-            transformed,
-            format,
-            payloadElement.getNamespace(),
-            payloadElement.getElementName());
-
-        PayloadTreeNode resultNode = new PayloadTreeNode(transformedPayload);
 
         if (node.hasChildren()) {
             for (PayloadTreeNode child : node.getChildren()) {

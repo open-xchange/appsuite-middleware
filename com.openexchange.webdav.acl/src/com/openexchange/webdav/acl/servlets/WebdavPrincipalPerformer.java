@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -61,7 +61,6 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.user.UserService;
-import com.openexchange.webdav.InfostorePerformer;
 import com.openexchange.webdav.acl.PrincipalProtocol;
 import com.openexchange.webdav.acl.PrincipalWebdavFactory;
 import com.openexchange.webdav.action.AbstractAction;
@@ -99,26 +98,40 @@ import com.openexchange.webdav.protocol.helpers.PropertyMixin;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class WebdavPrincipalPerformer implements SessionHolder{
+
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebdavPrincipalPerformer.class);
 
-    private static WebdavPrincipalPerformer INSTANCE = null;
+    private static volatile WebdavPrincipalPerformer instance;
+
+    /**
+     * Gets the instance of {@link WebdavPrincipalPerformer}.
+     *
+     * @return The instance of {@link WebdavPrincipalPerformer}.
+     * @throws IllegalStateException If class not yet orderly initialized
+     */
+    public static WebdavPrincipalPerformer getInstance() {
+        WebdavPrincipalPerformer tmp = instance;
+        if (null == tmp) {
+            synchronized (WebdavPrincipalPerformer.class) {
+                tmp = instance;
+                if (null == tmp) {
+                    tmp = new WebdavPrincipalPerformer();
+                    instance = tmp;
+                }
+            }
+        }
+        return tmp;
+    }
 
     private static volatile ServiceLookup services;
 
+    /**
+     * Sets the service look-up reference
+     *
+     * @param lookup The reference
+     */
     public static void setServices(final ServiceLookup lookup){
         services = lookup;
-    }
-
-    /**
-     * Gets the instance of {@link InfostorePerformer}.
-     *
-     * @return The instance of {@link InfostorePerformer}.
-     */
-    public static WebdavPrincipalPerformer getInstance() {
-        if (INSTANCE == null) {
-            return INSTANCE = new WebdavPrincipalPerformer();
-        }
-        return INSTANCE;
     }
 
     public static enum Action {
@@ -151,7 +164,14 @@ public class WebdavPrincipalPerformer implements SessionHolder{
         WebdavAction report;
 
 
-        this.factory = new PrincipalWebdavFactory(services.getService(UserService.class), services.getService(ContactService.class), this);
+        final ServiceLookup serviceLookup = services;
+        if (null == serviceLookup) {
+            final IllegalStateException x = new IllegalStateException("Failed initialization.");
+            LOG.error("Initialization of {} failed. Missing service look-up reference.", WebdavPrincipalPerformer.class.getSimpleName(), x);
+            throw x;
+        }
+
+        this.factory = new PrincipalWebdavFactory(serviceLookup.getService(UserService.class), serviceLookup.getService(ContactService.class), this);
 
         unlock = prepare(new WebdavUnlockAction(), true, true, new WebdavIfAction(0, false, false));
         propPatch = prepare(new WebdavProppatchAction(protocol), true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, false));

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -121,8 +121,7 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
             String path;
             try {
                 final String id = entry.getKey();
-                path =
-                    new URI(entry.getKey().charAt(0) == '/' ? id : new com.openexchange.java.StringAllocator(id.length() + 1).append('/').append(id).toString()).normalize().toString();
+                path = new URI(entry.getKey().charAt(0) == '/' ? id : new StringBuilder(id.length() + 1).append('/').append(id).toString()).normalize().toString();
             } catch (final URISyntaxException e) {
                 log.error("Invalid servlet path skipped: {}", entry.getKey());
                 continue;
@@ -169,7 +168,9 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
                     log.error("", t);
                 }
             }
-            servletPool.put(path, servletQueue);
+            if (null != servletQueue) {
+                servletPool.put(path, servletQueue);
+            }
         }
         log.info("All Servlet Instances created & initialized");
     }

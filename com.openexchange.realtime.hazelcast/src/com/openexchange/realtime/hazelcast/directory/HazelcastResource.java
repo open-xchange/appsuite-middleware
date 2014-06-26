@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,7 +49,6 @@
 
 package com.openexchange.realtime.hazelcast.directory;
 
-import java.io.Serializable;
 import java.util.Date;
 import com.hazelcast.core.Member;
 import com.openexchange.exception.OXException;
@@ -61,7 +60,7 @@ import com.openexchange.realtime.packet.Presence;
 
 /**
  * HazelcastResource - Hazelcast specific {@link Resource} implementation. Can be initialized from an existing DefaultResource.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class HazelcastResource extends AbstractResource implements Resource {
@@ -74,7 +73,7 @@ public class HazelcastResource extends AbstractResource implements Resource {
     /**
      * Initializes a new {@link HazelcastResource} without a Presence state, with the current date for the resource's timestamp and the
      * routing infos of the local hazelcast member.
-     * 
+     *
      * @throws OXException If the HazelcastResource can't determine the localMember of the Hazelcast cluster
      */
     public HazelcastResource() throws OXException {
@@ -85,7 +84,7 @@ public class HazelcastResource extends AbstractResource implements Resource {
     /**
      * Initializes a new {@link HazelcastResource} with a Presence state, the current date for the resource's timestamp and the routing
      * infos of the local hazelcast member.
-     * 
+     *
      * @param state The presence state
      * @throws OXException If the HazelcastResource can't determine the localMember of the Hazelcast cluster
      */
@@ -96,7 +95,7 @@ public class HazelcastResource extends AbstractResource implements Resource {
     /**
      * Initializes a new {@link HazelcastResource} with a Presence state, a given timestamp and the routing infos of the local hazelcast
      * member.
-     * 
+     *
      * @param state The presence state
      * @param timestamp The timestamp
      * @throws OXException If the HazelcastResource can't determine the localMember of the Hazelcast cluster
@@ -105,11 +104,11 @@ public class HazelcastResource extends AbstractResource implements Resource {
         super(presence, timestamp);
         this.routingInfo = HazelcastAccess.getLocalMember();
     }
-    
+
     /**
      * Initializes a new {@link HazelcastResource} with a Presence state, a given timestamp and the routing infos of the local hazelcast
      * member.
-     * 
+     *
      * @param state The presence state
      * @param timestamp The timestamp
      */
@@ -121,7 +120,7 @@ public class HazelcastResource extends AbstractResource implements Resource {
     /**
      * Initializes a new {@link HazelcastResource} from an existing {@link Resource}. During initialization it discards existing routing
      * information and replaces them with the proper Hazelcast Member.
-     * 
+     *
      * @param defaultResource the existing {@link DefaultResource} must not be null
      * @throws OXException If the HazelcastResource can't determine the localMember of the Hazelcast cluster
      * @throws IllegalStateException If the mandatory parameter defaultResource is missing
@@ -141,7 +140,7 @@ public class HazelcastResource extends AbstractResource implements Resource {
     }
 
     @Override
-    public void setRoutingInfo(Serializable routingInfo) {
+    public void setRoutingInfo(Object routingInfo) {
         this.routingInfo = (Member)routingInfo;
     }
 

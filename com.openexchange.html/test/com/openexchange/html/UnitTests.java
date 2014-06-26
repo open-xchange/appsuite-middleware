@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -62,7 +62,7 @@ import com.openexchange.html.internal.css.CSSMatcherTest;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 @RunWith(Suite.class)
-@SuiteClasses({ Bug26237Test.class, Bug26611Test.class, Bug27335Test.class, Bug27708Test.class, CSSMatcherTest.class, Bug30114Test.class })
+@SuiteClasses({ Bug26237Test.class, Bug26611Test.class, Bug27335Test.class, Bug27708Test.class, CSSMatcherTest.class, Bug30114Test.class, Bug31826Test.class, ConformHtmlTest.class })
 public class UnitTests {
 
     private UnitTests() {

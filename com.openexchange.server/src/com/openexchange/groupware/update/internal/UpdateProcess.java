@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,9 +49,12 @@
 
 package com.openexchange.groupware.update.internal;
 
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.SchemaUpdateState;
+import com.openexchange.groupware.update.TaskInfo;
 
 /**
  * The {@link #run()} method of this class is started in a separate thread for
@@ -65,12 +68,38 @@ public class UpdateProcess implements Runnable {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateProcess.class);
 
     private final int contextId;
-
     private final SchemaStore schemaStore = SchemaStore.getInstance();
+    private final Queue<TaskInfo> failures;
 
+    /**
+     * Initializes a new {@link UpdateProcess} w/o tracing failures.
+     *
+     * @param contextId The context identifier
+     */
     public UpdateProcess(int contextId) {
+        this(contextId, false);
+    }
+
+    /**
+     * Initializes a new {@link UpdateProcess}.
+     *
+     * @param contextId The context identifier
+     * @param traceFailures <code>true</code> to trace failures available via {@link #getFailures()}; otherwise <code>false</code>
+     */
+    public UpdateProcess(int contextId, boolean traceFailures) {
         super();
         this.contextId = contextId;
+        this.failures = traceFailures ? new ConcurrentLinkedQueue<TaskInfo>() : null;
+    }
+
+    /**
+     * Gets the optional failures.
+     *
+     * @return The failures or <code>null</code>
+     * @see #UpdateProcess(int, boolean)
+     */
+    public Queue<TaskInfo> getFailures() {
+        return failures;
     }
 
     /**
@@ -85,7 +114,7 @@ public class UpdateProcess implements Runnable {
                 // Already been updated before by previous thread
                 return;
             }
-            new UpdateExecutor(state, contextId, null).execute();
+            new UpdateExecutor(state, contextId, null).execute(failures);
         } catch (OXException e) {
             LOG.error("", e);
         } catch (Throwable t) {

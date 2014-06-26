@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,13 +49,11 @@
 
 package com.openexchange.contacts.json.actions;
 
-import java.sql.Connection;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contacts.json.ContactRequest;
-import com.openexchange.databaseold.Database;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.exception.OXException;
@@ -65,10 +63,8 @@ import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.AttachmentMetadataFactory;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.LinkObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.links.Links;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -134,57 +130,6 @@ public class CopyAction extends ContactAction {
         }
 
         return new AJAXRequestResult(response, contact.getLastModified(), "json");
-    }
-
-    public static void copyLinks(final int folderId, final Session session, final Context ctx, final Contact contactObj, final int origObjectId, final int origFolderId, final User user) throws OXException {
-        /*
-         * Get all
-         */
-        Connection readCon = Database.get(ctx, false);
-        final LinkObject[] links;
-        try {
-            links = Links.getAllLinksFromObject(origObjectId, Types.CONTACT, origFolderId, user.getId(), user.getGroups(), session, readCon);
-        } finally {
-            Database.back(ctx, false, readCon);
-            readCon = null;
-        }
-        if (links == null || links.length == 0) {
-            return;
-        }
-        /*
-         * Copy
-         */
-        final Connection writeCon = Database.get(ctx, true);
-        try {
-            for (final LinkObject link : links) {
-                final LinkObject copy;
-                if (link.getFirstId() == origObjectId) {
-                    copy = new LinkObject(
-                        contactObj.getObjectID(),
-                        Types.CONTACT,
-                        folderId,
-                        link.getSecondId(),
-                        link.getSecondType(),
-                        link.getSecondFolder(),
-                        ctx.getContextId());
-                } else if (link.getSecondId() == origObjectId) {
-                    copy = new LinkObject(
-                        link.getFirstId(),
-                        link.getFirstType(),
-                        link.getFirstFolder(),
-                        contactObj.getObjectID(),
-                        Types.CONTACT,
-                        folderId,
-                        ctx.getContextId());
-                } else {
-                    LOG.error("Invalid link retrieved from Links.getAllLinksFromObject(). Neither first nor second ID matches!");
-                    continue;
-                }
-                Links.performLinkStorage(copy, user.getId(), user.getGroups(), session, writeCon);
-            }
-        } finally {
-            Database.back(ctx, true, writeCon);
-        }
     }
 
     public static void copyAttachments(final int folderId, final Session session, final Context ctx, final Contact contactObj, final int origObjectId, final int origFolderId, final User user, final UserConfiguration uc) throws OXException {

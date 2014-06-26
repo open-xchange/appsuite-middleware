@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -320,14 +320,14 @@ public class AJPv13TaskWatcher {
                 }
                 final Map<String, String> taskProperties = task.getMdcMap();
                 if (null == taskProperties) {
-                    final com.openexchange.java.StringAllocator logBuilder = new com.openexchange.java.StringAllocator(196).append("AJP Listener \"").append(task.getThreadName());
+                    final StringBuilder logBuilder = new StringBuilder(196).append("AJP Listener \"").append(task.getThreadName());
                     logBuilder.append("\" exceeds max. running time of ").append(AJPv13Config.getAJPWatcherMaxRunningTime());
                     logBuilder.append("msec -> Processing time: ").append(now - task.getProcessingStartTime());
                     logBuilder.append("msec");
                     logBuilder.append(lineSeparator);
                     log.info(logBuilder.toString(), t);
                 } else {
-                    final com.openexchange.java.StringAllocator logBuilder = new com.openexchange.java.StringAllocator(2048);
+                    final StringBuilder logBuilder = new StringBuilder(2048);
                     final Map<String, String> sorted = new TreeMap<String, String>();
                     for (final Entry<String, String> entry : taskProperties.entrySet()) {
                         final String propertyName = entry.getKey();
@@ -378,7 +378,7 @@ public class AJPv13TaskWatcher {
 
         private static final int MAX_STACK_TRACE_ELEMENTS = 1000;
 
-        private static void appendStackTrace(final Throwable throwable, final String lineSeparator, final com.openexchange.java.StringAllocator sb) {
+        private static void appendStackTrace(final Throwable throwable, final String lineSeparator, final StringBuilder sb) {
             if (null == throwable) {
                 return;
             }

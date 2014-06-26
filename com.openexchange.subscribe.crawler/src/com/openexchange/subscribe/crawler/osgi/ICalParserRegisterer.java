@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -63,9 +63,9 @@ import com.openexchange.data.conversion.ical.ICalParser;
 public class ICalParserRegisterer implements ServiceTrackerCustomizer<ICalParser,ICalParser> {
 
     private final BundleContext context;
-    private final Activator activator;
+    private final CrawlersActivator activator;
 
-    public ICalParserRegisterer(final BundleContext context, final Activator activator) {
+    public ICalParserRegisterer(final BundleContext context, final CrawlersActivator activator) {
         super();
         this.context = context;
         this.activator = activator;

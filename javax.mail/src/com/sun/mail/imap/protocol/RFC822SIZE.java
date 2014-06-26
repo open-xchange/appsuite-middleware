@@ -51,9 +51,9 @@ import com.sun.mail.iap.*;
 public class RFC822SIZE implements Item {
     
     static final char[] name = {'R','F','C','8','2','2','.','S','I','Z','E'};
-    public int msgno;
+    public final int msgno;
 
-    public int size;
+    public final int size;
 
     /**
      * Constructor

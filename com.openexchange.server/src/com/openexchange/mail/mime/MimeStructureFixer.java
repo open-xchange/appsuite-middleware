@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -77,7 +77,6 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimePart;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
@@ -352,12 +351,12 @@ public final class MimeStructureFixer {
                                 }
                             }
                             if (null == contentId) {
-                                contentId = new StringAllocator(48).append('<').append(UUID.randomUUID().toString()).append('>').toString();
+                                contentId = new StringBuilder(48).append('<').append(UUID.randomUUID().toString()).append('>').toString();
                                 imageBodyPart.setContentID(contentId);
                             }
                             bodyParts.add(imageBodyPart);
                             // Append <img> tag
-                            final String text = new StringAllocator(64).append("<img src=\"cid:").append(getContentId(contentId)).append("\">").toString();
+                            final String text = new StringBuilder(64).append("<img src=\"cid:").append(getContentId(contentId)).append("\">").toString();
                             if (null == textContent) {
                                 textContent = text;
                             } else {
@@ -495,11 +494,11 @@ public final class MimeStructureFixer {
                 final StringBuffer sb = new StringBuffer(mainHtml.length() + anotherHtml.length());
                 mMain.appendReplacement(
                     sb,
-                    new StringAllocator(Matcher.quoteReplacement(anotherHtml)).append(Matcher.quoteReplacement(mMain.group())).toString());
+                    new StringBuilder(Matcher.quoteReplacement(anotherHtml)).append(Matcher.quoteReplacement(mMain.group())).toString());
                 mMain.appendTail(sb);
                 return sb.toString();
             }
-            final StringAllocator sb = new StringAllocator(mainHtml.length() + anotherHtml.length());
+            final StringBuilder sb = new StringBuilder(mainHtml.length() + anotherHtml.length());
             sb.append(mainHtml).append(anotherHtml);
             return sb.toString();
         }
@@ -509,12 +508,12 @@ public final class MimeStructureFixer {
             final StringBuffer sb = new StringBuffer(mainHtml.length() + anotherHtml.length());
             mMain.appendReplacement(
                 sb,
-                new StringAllocator(Matcher.quoteReplacement(anotherHtml.substring(mStart.end(), mEnd.start()))).append(
+                new StringBuilder(Matcher.quoteReplacement(anotherHtml.substring(mStart.end(), mEnd.start()))).append(
                     Matcher.quoteReplacement(mMain.group())).toString());
             mMain.appendTail(sb);
             return sb.toString();
         }
-        final StringAllocator sb = new StringAllocator(mainHtml.length() + anotherHtml.length());
+        final StringBuilder sb = new StringBuilder(mainHtml.length() + anotherHtml.length());
         sb.append(mainHtml).append(anotherHtml.substring(mStart.end(), mEnd.start()));
         return sb.toString();
     }
@@ -602,7 +601,7 @@ public final class MimeStructureFixer {
             return null;
         }
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);

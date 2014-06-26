@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -70,6 +70,8 @@ import com.openexchange.groupware.tools.mappings.MappedTruncation;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.java.Charsets;
 import com.openexchange.l10n.SuperCollator;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -88,7 +90,7 @@ public final class Tools {
      * @return the csv-string
      */
     public static String toCSV(final int[] values) {
-        final com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
+        final StringBuilder stringBuilder = new StringBuilder();
         if (null != values && 0 < values.length) {
             stringBuilder.append(values[0]);
             for (int i = 1; i < values.length; i++) {
@@ -107,7 +109,7 @@ public final class Tools {
      * "?,?,?,?"
      */
     public static String getParameters(final int count) {
-        final com.openexchange.java.StringAllocator parametersBuilder = new com.openexchange.java.StringAllocator(2 * count);
+        final StringBuilder parametersBuilder = new StringBuilder(2 * count);
         if (0 < count) {
             parametersBuilder.append('?');
             for (int i = 1; i < count; i++) {
@@ -127,36 +129,37 @@ public final class Tools {
     }
 
     /**
-     * Extracts the relevant information from a {@link DataTruncation}
-     * exception and puts it into a corresponding {@link OXException}.
+     * Extracts the relevant information from a {@link DataTruncation} exception and puts it into a corresponding {@link OXException}.
      *
-     * @param connection
-     * @param e
-     * @param contact
-     * @param table
-     * @return
+     * @param session The user session
+     * @param connection A (readable) db connection
+     * @param e The data truncation exception
+     * @param contact The affected contact
+     * @param table The database table
+     * @return The exception
      * @throws OXException
      */
-    public static OXException getTruncationException(final Connection connection, final DataTruncation e, final Contact contact,
-    		final Table table) throws OXException {
-        final String[] truncatedColumns = DBUtils.parseTruncatedFields(e);
-        final com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
+    public static OXException getTruncationException(Session session, Connection connection, DataTruncation e, Contact contact, Table table) throws OXException {
+        String[] truncatedColumns = DBUtils.parseTruncatedFields(e);
+        StringBuilder StringBuilder = new StringBuilder();
         /*
          * create truncated attributes
          */
-        final OXException.Truncated[] truncatedAttributes = new OXException.Truncated[truncatedColumns.length];
+        OXException.Truncated[] truncatedAttributes = new OXException.Truncated[truncatedColumns.length];
         for (int i = 0; i < truncatedColumns.length; i++) {
-        	final String columnLabel = truncatedColumns[i];
-        	final int maximumSize =  getMaximumSize(connection, table, columnLabel);
-        	final ContactField field = Mappers.CONTACT.getMappedField(columnLabel);
-    		final DbMapping<? extends Object, Contact> mapping = Mappers.CONTACT.get(field);
-    		final Object object = mapping.get(contact);
-			final int actualSize = null != object && String.class.isInstance(object) ?
-					Charsets.getBytes((String) object, Charsets.UTF_8).length : 0;
-			stringBuilder.append(mapping.getReadableName());
-			truncatedAttributes[i] = new MappedTruncation<Contact>(mapping, maximumSize, actualSize, mapping.getReadableName());
+        	String columnLabel = truncatedColumns[i];
+        	int maximumSize =  getMaximumSize(connection, table, columnLabel);
+        	ContactField field = Mappers.CONTACT.getMappedField(columnLabel);
+    		DbMapping<? extends Object, Contact> mapping = Mappers.CONTACT.get(field);
+    		Object object = mapping.get(contact);
+			int actualSize = null != object && String.class.isInstance(object) ?
+			    Charsets.getBytes((String) object, Charsets.UTF_8).length : 0;
+			String readableName = Translator.getInstance().translate(
+			    ServerSessionAdapter.valueOf(session).getUser().getLocale(), mapping.getReadableName(contact));
+			StringBuilder.append(readableName);
+			truncatedAttributes[i] = new MappedTruncation<Contact>(mapping, maximumSize, actualSize, readableName);
         	if (i != truncatedColumns.length - 1) {
-        		stringBuilder.append(", ");
+        		StringBuilder.append(", ");
         	}
 		}
         /*
@@ -165,10 +168,10 @@ public final class Tools {
         final OXException truncationException;
         if (truncatedAttributes.length > 0) {
             final OXException.Truncated truncated = truncatedAttributes[0];
-            truncationException = ContactExceptionCodes.DATA_TRUNCATION.create(e, stringBuilder.toString(),
+            truncationException = ContactExceptionCodes.DATA_TRUNCATION.create(e, StringBuilder.toString(),
             		Integer.valueOf(truncated.getMaxSize()), Integer.valueOf(truncated.getLength()));
         } else {
-            truncationException = ContactExceptionCodes.DATA_TRUNCATION.create(e, stringBuilder.toString(), Integer.valueOf(-1),
+            truncationException = ContactExceptionCodes.DATA_TRUNCATION.create(e, StringBuilder.toString(), Integer.valueOf(-1),
             		Integer.valueOf(-1));
         }
         for (final OXException.Truncated truncated : truncatedAttributes) {
@@ -292,7 +295,7 @@ public final class Tools {
      * @throws OXException
      */
     public static String getOrderClause(final SortOptions sortOptions) throws OXException {
-        final com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
+        final StringBuilder stringBuilder = new StringBuilder();
         if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
             final SortOrder[] order = sortOptions.getOrder();
             if (null != order && 0 < order.length) {
@@ -300,7 +303,7 @@ public final class Tools {
                 final SuperCollator collator = SuperCollator.get(sortOptions.getCollation());
                 stringBuilder.append(getOrderClause(order[0], collator));
                 for (int i = 1; i < order.length; i++) {
-                    stringBuilder.append(' ').append(getOrderClause(order[i], collator));
+                    stringBuilder.append(", ").append(getOrderClause(order[i], collator));
                 }
             }
         }
@@ -315,7 +318,7 @@ public final class Tools {
      * @throws OXException
      */
     public static String getLimitClause(final SortOptions sortOptions) throws OXException {
-        final com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
+        final StringBuilder stringBuilder = new StringBuilder();
         if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
             if (0 < sortOptions.getLimit()) {
                 stringBuilder.append("LIMIT ");
@@ -329,7 +332,7 @@ public final class Tools {
     }
 
     private static String getOrderClause(final SortOrder order, final SuperCollator collator) throws OXException {
-        final com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
+        final StringBuilder stringBuilder = new StringBuilder();
         if (null == collator || SuperCollator.DEFAULT.equals(collator)) {
             stringBuilder.append(Mappers.CONTACT.get(order.getBy()).getColumnLabel());
         } else {

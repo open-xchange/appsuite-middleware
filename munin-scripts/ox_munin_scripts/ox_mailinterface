@@ -3,7 +3,7 @@
 #%# capabilities=autoconf
 
 $showruntimestats="/opt/open-xchange/sbin/showruntimestats";
-$showexec="$showruntimestats -x";
+$showexec="$showruntimestats --mailinterfacestats";
 
 if ( $ARGV[0] and $ARGV[0] eq "autoconf")
 {
@@ -23,8 +23,6 @@ if ( $ARGV[0] and $ARGV[0] eq "config")
 	print "graph_args --base 1000 -l 0\n";
 	print "graph_category Open Xchange\n";
 	print "graph_vlabel Number\n";
-	print "a.label NumberOfIMAPConnections\n";
-	print "a.draw LINE1\n";
 	print "b.label NumActive\n";
 	print "b.draw LINE1\n";
 	exit 0
@@ -35,12 +33,6 @@ open(SHOWRUNTIME,"$showexec |") || die "can not read monitoring output";
 
 while (<SHOWRUNTIME>)
 {
-	if ( $_ =~ /GeneralMonitor,NumberOfIMAPConnections/) {
-		s/.*\=//; 
-		$val=$_+0;
-		print "a.value $val\n";
-		next;
-	}
 	if ( $_ =~ /MailInterfaceMonitor,NumActive/) {
 		s/.*\=//; 
 		$val=$_+0;

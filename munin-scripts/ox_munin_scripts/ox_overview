@@ -3,7 +3,7 @@
 #%# capabilities=autoconf
 
 $showruntimestats="/opt/open-xchange/sbin/showruntimestats";
-$showexec="$showruntimestats -a";
+$showexec="$showruntimestats --overview";
 
 if ( $ARGV[0] and $ARGV[0] eq "autoconf")
 {
@@ -26,8 +26,6 @@ if ($ARGV[0] and $ARGV[0] eq "config") {
     print "nbofdbc.draw LINE1\n";
     print "nbofajp.label NumberOfOpenAJPSockets\n";
     print "nbofajp.draw LINE1\n";
-    print "nbofimap.label ManuallyCountedIMAPConnections\n";
-    print "nbofimap.draw LINE1\n";
     print "nboffile.label OpenFileDescriptorCount\n";
     print "nboffile.draw LINE1\n";
     exit 0
@@ -46,12 +44,6 @@ while (<SHOWRUNTIME>) {
         s/.*\=//;
         $val=$_+0;
         print "nbofajp.value $val\n";
-        next;
-    }
-    if ($_ =~ /GeneralMonitor,NumberOfIMAPConnections/) {
-        s/.*\=//;
-        $val=$_+0;
-        print "nbofimap.value $val\n";
         next;
     }
     if ($_ =~ /OperatingSystem,OpenFileDescriptorCount/) {

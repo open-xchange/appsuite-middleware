@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -118,12 +118,12 @@ final class SessionData {
 
         sessionList = new LinkedList<SessionContainer>();
         randoms = new ConcurrentHashMap<String, String>();
-        ReadWriteLock rwlock = new ReentrantReadWriteLock(true);
-        rlock = rwlock.readLock();
-        wlock = rwlock.writeLock();
-        rwlock = new ReentrantReadWriteLock(true);
-        wlongTermLock = rwlock.writeLock();
-        rlongTermLock = rwlock.readLock();
+        ReadWriteLock shortTermLock = new ReentrantReadWriteLock(true);
+        rlock = shortTermLock.readLock();
+        wlock = shortTermLock.writeLock();
+        ReadWriteLock longTermLock = new ReentrantReadWriteLock(true);
+        wlongTermLock = longTermLock.writeLock();
+        rlongTermLock = longTermLock.readLock();
         for (int i = 0; i < containerCount; i++) {
             sessionList.add(0, new SessionContainer());
         }
@@ -761,7 +761,6 @@ final class SessionData {
                     control = container.removeSessionById(sessionId);
                     if (null != control) {
                         sessionList.getFirst().putSessionControl(control);
-                        LOG.trace("Moved from container {} to first one.", i);
                     }
                 }
             }

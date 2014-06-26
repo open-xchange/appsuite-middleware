@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,7 +49,6 @@
 
 package com.openexchange.caching.internal;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import com.openexchange.caching.CacheKey;
 
@@ -71,7 +70,7 @@ public class CacheKeyImpl implements CacheKey {
     /**
      * Object keys of the cached object.
      */
-    private final Serializable[] keyObjs;
+    private final String[] keyObjs;
 
     /**
      * Hash code of the context specific object.
@@ -85,28 +84,28 @@ public class CacheKeyImpl implements CacheKey {
      * @param objectId The object ID
      */
     public CacheKeyImpl(final int contextId, final int objectId) {
-        this(contextId, Integer.valueOf(objectId));
+        this(contextId, String.valueOf(objectId));
     }
 
     /**
      * Initializes a new {@link CacheKeyImpl}
      *
      * @param contextId The context ID
-     * @param key Any instance of {@link Serializable} to identify the cached object
+     * @param key A string to identify the cached object
      * @throws IllegalArgumentException If specified key is <code>null</code>
      */
-    public CacheKeyImpl(final int contextId, final Serializable key) {
-        this(contextId, new Serializable[] { key });
+    public CacheKeyImpl(final int contextId, final String key) {
+        this(contextId, new String[] { key });
     }
 
     /**
      * Initializes a new {@link CacheKeyImpl}.
      *
      * @param contextId The context ID
-     * @param keys Instances of {@link Serializable} to identify the cached object.
+     * @param keys Strings to identify the cached object.
      * @throws IllegalArgumentException If specified keys are <code>null</code>
      */
-    public CacheKeyImpl(final int contextId, final Serializable... keys) {
+    public CacheKeyImpl(final int contextId, final String... keys) {
         super();
         if (null == keys) {
             throw new IllegalArgumentException("keys are null");
@@ -117,7 +116,7 @@ public class CacheKeyImpl implements CacheKey {
         final int prime = 31;
         int result = 1;
         result = prime * result + contextId;
-        for (final Serializable key : keys) {
+        for (final String key : keys) {
             result = prime * result + ((key == null) ? 0 : key.hashCode());
         }
         hash = result;
@@ -151,7 +150,7 @@ public class CacheKeyImpl implements CacheKey {
         final StringBuilder sb = new StringBuilder(64);
         sb.append('[');
         sb.append(contextId);
-        for (final Serializable item : keyObjs) {
+        for (final String item : keyObjs) {
             sb.append(',').append(null == item ? "null" : item.toString());
         }
         sb.append(']');
@@ -164,8 +163,8 @@ public class CacheKeyImpl implements CacheKey {
     }
 
     @Override
-    public Serializable[] getKeys() {
-        final Serializable[] retval = new Serializable[keyObjs.length];
+    public String[] getKeys() {
+        final String[] retval = new String[keyObjs.length];
         System.arraycopy(keyObjs, 0, retval, 0, keyObjs.length);
         return retval;
     }

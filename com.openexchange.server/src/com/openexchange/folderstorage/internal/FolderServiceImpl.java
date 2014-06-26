@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -142,38 +142,48 @@ public final class FolderServiceImpl implements FolderService {
     }
 
     @Override
-    public FolderResponse<Void> deleteFolder(final String treeId, final String folderId, final Date timeStamp, final User user, final Context context) throws OXException {
-        final DeletePerformer performer = new DeletePerformer(user, context);
+    public FolderResponse<Void> deleteFolder(final String treeId, final String folderId, final Date timeStamp, final User user, final Context context, final FolderServiceDecorator decorator) throws OXException {
+        final DeletePerformer performer = new DeletePerformer(user, context, decorator);
         performer.doDelete(treeId, folderId, timeStamp);
         return FolderResponseImpl.newFolderResponse(null, performer.getWarnings());
 
     }
 
     @Override
-    public FolderResponse<Void> deleteFolder(final String treeId, final String folderId, final Date timeStamp, final Session session) throws OXException {
-        final DeletePerformer performer = new DeletePerformer(ServerSessionAdapter.valueOf(session));
+    public FolderResponse<Void> deleteFolder(final String treeId, final String folderId, final Date timeStamp, final Session session, final FolderServiceDecorator decorator) throws OXException {
+        final DeletePerformer performer = new DeletePerformer(ServerSessionAdapter.valueOf(session), decorator);
         performer.doDelete(treeId, folderId, timeStamp);
         return FolderResponseImpl.newFolderResponse(null, performer.getWarnings());
     }
 
     @Override
     public UserizedFolder getDefaultFolder(final User user, final String treeId, final ContentType contentType, final User ruser, final Context context, final FolderServiceDecorator decorator) throws OXException {
+        return getDefaultFolder(user, treeId, contentType, PrivateType.getInstance(), ruser, context, decorator);
+    }
+
+    @Override
+    public UserizedFolder getDefaultFolder(final User user, final String treeId, final ContentType contentType, final Type type, final User ruser, final Context context, final FolderServiceDecorator decorator) throws OXException {
         final FolderStorage folderStorage = FolderStorageRegistry.getInstance().getFolderStorageByContentType(treeId, contentType);
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(treeId, contentType.toString());
         }
-        final String folderId = folderStorage.getDefaultFolderID(user, treeId, contentType, PrivateType.getInstance(), new StorageParametersImpl(user, context));
+        final String folderId = folderStorage.getDefaultFolderID(user, treeId, contentType, type, new StorageParametersImpl(user, context));
         return new GetPerformer(user, context, decorator).doGet(treeId, folderId);
     }
 
     @Override
     public UserizedFolder getDefaultFolder(final User user, final String treeId, final ContentType contentType, final Session session, final FolderServiceDecorator decorator) throws OXException {
+        return getDefaultFolder(user, treeId, contentType, PrivateType.getInstance(), session, decorator);
+    }
+
+    @Override
+    public UserizedFolder getDefaultFolder(final User user, final String treeId, final ContentType contentType, final Type type, final Session session, final FolderServiceDecorator decorator) throws OXException {
         final ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         final FolderStorage folderStorage = FolderStorageRegistry.getInstance().getFolderStorageByContentType(treeId, contentType);
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(treeId, contentType.toString());
         }
-        final String folderId = folderStorage.getDefaultFolderID(serverSession.getUser(), treeId, contentType, PrivateType.getInstance(), new StorageParametersImpl(serverSession));
+        final String folderId = folderStorage.getDefaultFolderID(serverSession.getUser(), treeId, contentType, type, new StorageParametersImpl(serverSession));
         return new GetPerformer(serverSession, decorator).doGet(treeId, folderId);
     }
 

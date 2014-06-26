@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -126,6 +126,29 @@ public class TestServlet extends HttpServlet {
         }
         page.append("</p><p>The content: ").append(saneScriptTags(this.getBody(req)));
         page.append("</p></body>\n</html>");
+
+        /*boolean found = false;
+        {
+            Cookie[] cookies = req.getCookies();
+            if (null != cookies) {
+                for (int i = cookies.length; !found && i-- > 0;) {
+                    Cookie cookie = cookies[i];
+                    if ("check-me".equals(cookie.getName())) {
+                        found = true;
+                        System.out.println("Cookie found!");
+                    }
+                }
+            }
+        }
+
+        if (!found) {
+            Cookie cookie = new Cookie("check-me", "foobariscool");
+            cookie.setPath("/");
+            cookie.setMaxAge(10);
+            resp.addCookie(cookie);
+            System.out.println("Cookie added!");
+        }*/
+
         resp.setContentType("text/html; charset=UTF-8");
         final byte[] output = page.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
         resp.setContentLength(output.length);
@@ -197,7 +220,10 @@ public class TestServlet extends HttpServlet {
         try {
             int count = 0;
             final char[] c = new char[8192];
-            final String charset = null == req.getCharacterEncoding() ? ServerConfig.getProperty(Property.DefaultEncoding) : req.getCharacterEncoding();
+            String charset = null == req.getCharacterEncoding() ? ServerConfig.getProperty(Property.DefaultEncoding) : req.getCharacterEncoding();
+            if (null == charset) {
+                charset = "UTF-8";
+            }
             isr = new InputStreamReader(req.getInputStream(), charset);
             if ((count = isr.read(c)) > 0) {
                 final StringBuilder sb = new StringBuilder(16384);

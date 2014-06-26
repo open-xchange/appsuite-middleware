@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,16 +50,16 @@
 package com.openexchange.database.osgi;
 
 import java.util.Stack;
-
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
-
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.internal.CreateReplicationTable;
+import com.openexchange.database.internal.reloadable.GenericReloadable;
 import com.openexchange.management.ManagementService;
 import com.openexchange.timer.TimerService;
 
@@ -71,8 +71,15 @@ import com.openexchange.timer.TimerService;
 public class Activator implements BundleActivator {
 
     private final Stack<ServiceTracker<?, ?>> trackers = new Stack<ServiceTracker<?, ?>>();
+    private volatile ServiceRegistration<CreateTableService> createTableRegistration;
+    private volatile ServiceRegistration<Reloadable> reloadableRegistration;
 
-    private ServiceRegistration<CreateTableService> createTableRegistration;
+    /**
+     * Initializes a new {@link Activator}.
+     */
+    public Activator() {
+        super();
+    }
 
     @Override
     public void start(final BundleContext context) {
@@ -84,6 +91,7 @@ public class Activator implements BundleActivator {
         for (final ServiceTracker<?, ?> tracker : trackers) {
             tracker.open();
         }
+        reloadableRegistration = context.registerService(Reloadable.class, GenericReloadable.getInstance(), null);
     }
 
     @Override
@@ -91,6 +99,15 @@ public class Activator implements BundleActivator {
         while (!trackers.isEmpty()) {
             trackers.pop().close();
         }
-        createTableRegistration.unregister();
+        final ServiceRegistration<CreateTableService> createTableRegistration = this.createTableRegistration;
+        if (null != createTableRegistration) {
+            createTableRegistration.unregister();
+            this.createTableRegistration = null;
+        }
+        final ServiceRegistration<Reloadable> reloadableRegistration = this.reloadableRegistration;
+        if (null != reloadableRegistration) {
+            reloadableRegistration.unregister();
+            this.reloadableRegistration = null;
+        }
     }
 }

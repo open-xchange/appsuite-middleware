@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -57,6 +57,8 @@ import java.nio.charset.CharacterCodingException;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.UnsupportedCharsetException;
+import java.text.Normalizer;
+import java.text.Normalizer.Form;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -94,7 +96,7 @@ public class Strings {
         if (null == objects || 0 == objects.length) {
             return "";
         }
-        final StringAllocator sb = new StringAllocator(2048);
+        final StringBuilder sb = new StringBuilder(2048);
         for (final Object object : objects) {
             sb.append(String.valueOf(object));
         }
@@ -263,7 +265,7 @@ public class Strings {
             return s;
         }
         final int length = s.length();
-        final StringAllocator sb = new StringAllocator(length << 1);
+        final StringBuilder sb = new StringBuilder(length << 1);
         for (int i = 0; i < length; i++) {
             final char c = s.charAt(i);
             if (c == '\\') {
@@ -277,6 +279,21 @@ public class Strings {
             }
         }
         return sb.toString();
+    }
+
+    private static final Pattern PATTERN_CONTROL = Pattern.compile("[\\x00-\\x1F\\x7F]+");
+
+    /**
+     * Replaces control characters with space characters.
+     *
+     * @param str The string to sanitize
+     * @return The sanitized string
+     */
+    public static String sanitizeString(final String str) {
+        if (isEmpty(str)) {
+            return str;
+        }
+        return PATTERN_CONTROL.matcher(str).replaceAll(" ");
     }
 
     /**
@@ -354,10 +371,11 @@ public class Strings {
         if (coll == null) {
             return null;
         }
-        if (coll.size() == 0) {
+        final int size = coll.size();
+        if (size == 0) {
             return "";
         }
-        final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator();
+        final StringBuilder builder = new StringBuilder(size << 4);
         for (final Object obj : coll) {
             if (obj == null) {
                 builder.append("null");
@@ -587,7 +605,7 @@ public class Strings {
             return null;
         }
         final int length = str.length();
-        final StringAllocator sb = new StringAllocator(length << 1);
+        final StringBuilder sb = new StringBuilder(length << 1);
         for (int i = 0; i < length; i++) {
             sb.append(' ').append(str.codePointAt(i));
         }
@@ -615,7 +633,7 @@ public class Strings {
             return null;
         }
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
@@ -629,7 +647,7 @@ public class Strings {
             return null;
         }
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
@@ -637,13 +655,67 @@ public class Strings {
         return builder.toString();
     }
 
+    private static char[] lowercases = {
+        '\000','\001','\002','\003','\004','\005','\006','\007',
+        '\010','\011','\012','\013','\014','\015','\016','\017',
+        '\020','\021','\022','\023','\024','\025','\026','\027',
+        '\030','\031','\032','\033','\034','\035','\036','\037',
+        '\040','\041','\042','\043','\044','\045','\046','\047',
+        '\050','\051','\052','\053','\054','\055','\056','\057',
+        '\060','\061','\062','\063','\064','\065','\066','\067',
+        '\070','\071','\072','\073','\074','\075','\076','\077',
+        '\100','\141','\142','\143','\144','\145','\146','\147',
+        '\150','\151','\152','\153','\154','\155','\156','\157',
+        '\160','\161','\162','\163','\164','\165','\166','\167',
+        '\170','\171','\172','\133','\134','\135','\136','\137',
+        '\140','\141','\142','\143','\144','\145','\146','\147',
+        '\150','\151','\152','\153','\154','\155','\156','\157',
+        '\160','\161','\162','\163','\164','\165','\166','\167',
+        '\170','\171','\172','\173','\174','\175','\176','\177' };
+
+    /**
+     * Fast lower-case conversion.
+     *
+     * @param s The string
+     * @return The lower-case string
+     */
+    public static String asciiLowerCase(String s) {
+        if (null == s) {
+            return null;
+        }
+
+        char[] c = null;
+        int i = s.length();
+
+        // look for first conversion
+        while (i-- > 0) {
+            char c1 = s.charAt(i);
+            if (c1 <= 127) {
+                char c2 = lowercases[c1];
+                if (c1 != c2) {
+                    c = s.toCharArray();
+                    c[i] = c2;
+                    break;
+                }
+            }
+        }
+
+        while (i-- > 0) {
+            if (c[i] <= 127) {
+                c[i] = lowercases[c[i]];
+            }
+        }
+
+        return c == null ? s : new String(c);
+    }
+
     /**
      * Takes a String of separated values, splits it at the separator, trims the split values and returns them as List.
      *
      * @param input String of separated values
-     * @param separator the seperator as regular expression used to split the input around this separator
+     * @param separator the separator as regular expression used to split the input around this separator
      * @return the split and trimmed input as List or an empty list
-     * @throws IllegalArgumentException if input or the seperator are missing or if the separator isn't a valid pattern
+     * @throws IllegalArgumentException if input or the separator are missing or if the separator isn't a valid pattern
      */
     public static List<String> splitAndTrim(String input, String separator) {
         if (input == null) {
@@ -665,6 +737,75 @@ public class Strings {
             throw new IllegalArgumentException("Illegal pattern syntax");
         }
         return trimmedSplits;
+    }
+
+
+    /**
+     * Gets a value indicating whether the supplied strings are equal, using their {@link Form#NFC} normalization from, i.e. canonical
+     * decomposition, followed by canonical composition.
+     *
+     * @param s1 The first string
+     * @param s2 The second string
+     * @return <code>true</code> if the normalized forms of the strings are equal, <code>false</code>, otherwise
+     */
+    public static boolean equalsNormalized(String s1, String s2) {
+        if (null == s1) {
+            return null == s2;
+        }
+        if (null == s2) {
+            return false;
+        }
+        return Normalizer.normalize(s1, Form.NFC).equals(Normalizer.normalize(s2, Form.NFC));
+    }
+
+    /**
+     * Gets a value indicating whether the supplied strings are equal ignoring case, using their {@link Form#NFC} normalization from,
+     * i.e. canonical decomposition, followed by canonical composition.
+     *
+     * @param s1 The first string
+     * @param s2 The second string
+     * @return <code>true</code> if the normalized forms of the strings are equal ignoring case, <code>false</code>, otherwise
+     */
+    public static boolean equalsNormalizedIgnoreCase(String s1, String s2) {
+        if (null == s1) {
+            return null == s2;
+        }
+        if (null == s2) {
+            return false;
+        }
+        return Normalizer.normalize(s1, Form.NFC).equalsIgnoreCase(Normalizer.normalize(s2, Form.NFC));
+    }
+
+    /**
+     * Fast check if passed string is numeric.
+     * <p>
+     * <b>Note</b>: Does no honor possible overflow error; e.g. in case parsed as <code>int</code> value
+     *
+     * @param str The string to check
+     * @return <code>true</code> if string is numeric; otherwise <code>false</code>
+     */
+    public static boolean isNumeric(String str) {
+        if (str == null) {
+            return false;
+        }
+        int length = str.length();
+        if (length == 0) {
+            return false;
+        }
+        int i = 0;
+        if (str.charAt(0) == '-') {
+            if (length == 1) {
+                return false;
+            }
+            i = 1;
+        }
+        for (; i < length; i++) {
+            char c = str.charAt(i);
+            if (c < '0' || c > '9') {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

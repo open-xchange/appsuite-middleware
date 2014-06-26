@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -504,7 +504,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             final String folderId = paramContainer.checkStringParam(PARAMETER_MAILFOLDER);
             final String ignore = paramContainer.getStringParam(PARAMETER_IGNORE);
             String tmp = paramContainer.getStringParam(Mail.PARAMETER_TIMEZONE);
-            final TimeZone timeZone = isEmpty(tmp) ? null : TimeZoneUtils.getTimeZone(tmp.trim());
+            final TimeZone timeZone = com.openexchange.java.Strings.isEmpty(tmp) ? null : TimeZoneUtils.getTimeZone(tmp.trim());
             tmp = null;
             boolean bIgnoreDelete = false;
             boolean bIgnoreModified = false;
@@ -719,7 +719,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 throw MailExceptionCode.MISSING_PARAM.create(PARAMETER_ORDER);
             }
             String tmp = paramContainer.getStringParam(Mail.PARAMETER_TIMEZONE);
-            final TimeZone timeZone = isEmpty(tmp) ? null : TimeZoneUtils.getTimeZone(tmp.trim());
+            final TimeZone timeZone = com.openexchange.java.Strings.isEmpty(tmp) ? null : TimeZoneUtils.getTimeZone(tmp.trim());
             tmp = null;
 
             final int[] fromToIndices;
@@ -793,7 +793,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     /*
                      * Get iterator
                      */
-                    it = mailInterface.getAllMessages(folderId, sortCol, orderDir, columns, fromToIndices);
+                    it = mailInterface.getAllMessages(folderId, sortCol, orderDir, columns, fromToIndices, false);
                     final int size = it.size();
                     for (int i = 0; i < size; i++) {
                         final MailMessage mail = it.next();
@@ -898,7 +898,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
                 data = MessageWriter.writeMailMessage(
                     mailInterface.getAccountID(),
-                    mailInterface.getReplyMessageForDisplay(folderPath, uid, reply2all, usmNoSave),
+                    mailInterface.getReplyMessageForDisplay(folderPath, uid, reply2all, usmNoSave, false),
                     displayMode,
                     false,
                     session,
@@ -1238,7 +1238,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             }
             tmp = paramContainer.getStringParam("ignorable");
             final MimeFilter mimeFilter;
-            if (isEmpty(tmp)) {
+            if (com.openexchange.java.Strings.isEmpty(tmp)) {
                 mimeFilter = null;
             } else {
                 final String[] strings = SPLIT.split(tmp, 0);
@@ -1719,7 +1719,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     }
                 }
                 String tmp = paramContainer.getStringParam(Mail.PARAMETER_TIMEZONE);
-                final TimeZone timeZone = isEmpty(tmp) ? null : TimeZoneUtils.getTimeZone(tmp.trim());
+                final TimeZone timeZone = com.openexchange.java.Strings.isEmpty(tmp) ? null : TimeZoneUtils.getTimeZone(tmp.trim());
                 tmp = null;
                 /*
                  * Pre-Select field writers
@@ -1833,9 +1833,9 @@ public class Mail extends PermissionServlet implements UploadListener {
                             versitPart.getInputStream(),
                             versitPart.getContentType().getBaseType(),
                             versitPart.getContentType().containsCharsetParameter() ? versitPart.getContentType().getCharsetParameter() : MailProperties.getInstance().getDefaultMimeCharset(),
-                            retvalList,
-                            session,
-                            ctx);
+                                retvalList,
+                                session,
+                                ctx);
                     } else if (versitPart.getContentType().isMimeType(MimeTypes.MIME_TEXT_X_VCALENDAR) || versitPart.getContentType().isMimeType(
                         MimeTypes.MIME_TEXT_CALENDAR)) {
                         /*
@@ -1845,9 +1845,9 @@ public class Mail extends PermissionServlet implements UploadListener {
                             versitPart.getInputStream(),
                             versitPart.getContentType().getBaseType(),
                             versitPart.getContentType().containsCharsetParameter() ? versitPart.getContentType().getCharsetParameter() : MailProperties.getInstance().getDefaultMimeCharset(),
-                            retvalList,
-                            session,
-                            ctx);
+                                retvalList,
+                                session,
+                                ctx);
                     } else {
                         throw MailExceptionCode.UNSUPPORTED_VERSIT_ATTACHMENT.create(versitPart.getContentType());
                     }
@@ -2438,8 +2438,8 @@ public class Mail extends PermissionServlet implements UploadListener {
                 jsonObj.getString(ResponseFields.DATA),
                 ParamContainer.getInstance(jsonObj, EnumComponent.MAIL),
                 mi),
-            writer,
-            localeFrom(session));
+                writer,
+                localeFrom(session));
     }
 
     private final void actionPutForwardMultiple(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
@@ -2562,8 +2562,8 @@ public class Mail extends PermissionServlet implements UploadListener {
                 ParamContainer.getInstance(jsonObj, EnumComponent.MAIL),
                 replyAll,
                 mi),
-            writer,
-            localeFrom(session));
+                writer,
+                localeFrom(session));
     }
 
     private final void actionPutReply(final HttpServletRequest req, final HttpServletResponse resp, final boolean replyAll) throws IOException {
@@ -2915,8 +2915,8 @@ public class Mail extends PermissionServlet implements UploadListener {
                 jsonObj.getString(ResponseFields.DATA),
                 ParamContainer.getInstance(jsonObj, EnumComponent.MAIL),
                 mi),
-            writer,
-            localeFrom(session));
+                writer,
+                localeFrom(session));
     }
 
     private final void actionPutMailSearch(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
@@ -2981,7 +2981,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 throw new JSONException(MessageFormat.format("Request body is not a JSON value: {0}", body));
             }
             String s = paramContainer.getStringParam(Mail.PARAMETER_TIMEZONE);
-            final TimeZone timeZone = isEmpty(s) ? null : TimeZoneUtils.getTimeZone(s.trim());
+            final TimeZone timeZone = com.openexchange.java.Strings.isEmpty(s) ? null : TimeZoneUtils.getTimeZone(s.trim());
             s = null;
             /*
              * Perform search dependent on passed JSON value
@@ -3049,7 +3049,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                             }
                         } else {
                             final int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
-                            it = mailInterface.getMessages(folderId, null, sortCol, orderDir, searchCols, searchPats, true, columns);
+                            it = mailInterface.getMessages(folderId, null, sortCol, orderDir, searchCols, searchPats, true, columns, false);
                             final int size = it.size();
                             for (int i = 0; i < size; i++) {
                                 final MailMessage mail = it.next();
@@ -3097,7 +3097,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         }
                     }
                     final int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
-                    it = mailInterface.getMessages(folderId, null, sortCol, orderDir, SearchTermParser.parse(searchArray), true, columns);
+                    it = mailInterface.getMessages(folderId, null, sortCol, orderDir, SearchTermParser.parse(searchArray), true, columns, false);
                     final int size = it.size();
                     for (int i = 0; i < size; i++) {
                         final MailMessage mail = it.next();
@@ -3182,7 +3182,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 headers = null == tmp ? null : SPLIT.split(tmp, 0);
             }
             String tmp = paramContainer.getStringParam(Mail.PARAMETER_TIMEZONE);
-            final TimeZone timeZone = isEmpty(tmp) ? null : TimeZoneUtils.getTimeZone(tmp.trim());
+            final TimeZone timeZone = com.openexchange.java.Strings.isEmpty(tmp) ? null : TimeZoneUtils.getTimeZone(tmp.trim());
             tmp = null;
             /*
              * Pre-Select field writers
@@ -3220,12 +3220,12 @@ public class Mail extends PermissionServlet implements UploadListener {
                     for (final MailMessage mail : mails) {
                         if (mail != null) {
                             final JSONArray ja = new JSONArray();
-                            for (int j = 0; j < writers.length; j++) {
-                                writers[j].writeField(ja, mail, 0, false, accountID, userId, contextId, timeZone);
+                            for (MailFieldWriter writer : writers) {
+                                writer.writeField(ja, mail, 0, false, accountID, userId, contextId, timeZone);
                             }
                             if (null != headerWriters) {
-                                for (int j = 0; j < headerWriters.length; j++) {
-                                    headerWriters[j].writeField(ja, mail, 0, false, accountID, userId, contextId, timeZone);
+                                for (MailFieldWriter headerWriter : headerWriters) {
+                                    headerWriter.writeField(ja, mail, 0, false, accountID, userId, contextId, timeZone);
                                 }
                             }
                             jsonWriter.value(ja);
@@ -3307,8 +3307,8 @@ public class Mail extends PermissionServlet implements UploadListener {
                 jsonObj.getString(ResponseFields.DATA),
                 ParamContainer.getInstance(jsonObj, EnumComponent.MAIL),
                 mi),
-            writer,
-            localeFrom(session));
+                writer,
+                localeFrom(session));
     }
 
     private final void actionPutDeleteMails(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
@@ -3411,8 +3411,8 @@ public class Mail extends PermissionServlet implements UploadListener {
                 jsonObj.getString(ResponseFields.DATA),
                 ParamContainer.getInstance(jsonObj, EnumComponent.MAIL),
                 mailInterface),
-            writer,
-            localeFrom(session));
+                writer,
+                localeFrom(session));
     }
 
     private final void actionPutUpdateMail(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
@@ -3643,7 +3643,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                  */
                 final String fromAddr = message.getHeader(MessageHeaders.HDR_FROM, null);
                 final InternetAddress fromAddress;
-                if (isEmpty(fromAddr)) {
+                if (com.openexchange.java.Strings.isEmpty(fromAddr)) {
                     // Add from address
                     fromAddress = defaultSendAddr;
                     message.setFrom(fromAddress);
@@ -3714,8 +3714,8 @@ public class Mail extends PermissionServlet implements UploadListener {
                 jsonObj.getString(ResponseFields.DATA),
                 ParamContainer.getInstance(jsonObj, EnumComponent.MAIL),
                 mailInterface),
-            writer,
-            localeFrom(session));
+                writer,
+                localeFrom(session));
     }
 
     private final void actionPutTransportMail(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
@@ -3981,7 +3981,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                             }
                         }
                         final String fromAddr = message.getHeader(MessageHeaders.HDR_FROM, null);
-                        if (isEmpty(fromAddr)) {
+                        if (com.openexchange.java.Strings.isEmpty(fromAddr)) {
                             // Add from address
                             message.setFrom(defaultSendAddr);
                         }
@@ -4264,8 +4264,8 @@ public class Mail extends PermissionServlet implements UploadListener {
                 jsonObj.getString(ResponseFields.DATA),
                 ParamContainer.getInstance(jsonObj, EnumComponent.MAIL),
                 mailInterface),
-            writer,
-            localeFrom(session));
+                writer,
+                localeFrom(session));
     }
 
     private final void actionPutCopyMail(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
@@ -4507,8 +4507,8 @@ public class Mail extends PermissionServlet implements UploadListener {
                 jsonObj.getString(ResponseFields.DATA),
                 ParamContainer.getInstance(jsonObj, EnumComponent.MAIL),
                 mi),
-            writer,
-            localeFrom(session));
+                writer,
+                localeFrom(session));
     }
 
     private final void actionPutAttachment(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
@@ -4631,8 +4631,8 @@ public class Mail extends PermissionServlet implements UploadListener {
                 jsonObj.getString(ResponseFields.DATA),
                 ParamContainer.getInstance(jsonObj, EnumComponent.MAIL),
                 mi),
-            writer,
-            localeFrom(session));
+                writer,
+                localeFrom(session));
     }
 
     private final void actionPutReceiptAck(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
@@ -4783,7 +4783,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             }
             throw new UploadServletException(resp, substituteJS(
                 responseObj == null ? STR_NULL : responseObj.toString(),
-                e.getAction() == null ? STR_NULL : e.getAction()), e.getMessage(), e);
+                    e.getAction() == null ? STR_NULL : e.getAction()), e.getMessage(), e);
         } catch (final OXException e) {
             LOG.error("", e);
             JSONObject responseObj = null;
@@ -4796,7 +4796,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             }
             throw new UploadServletException(resp, substituteJS(
                 responseObj == null ? STR_NULL : responseObj.toString(),
-                actionStr == null ? STR_NULL : actionStr), e.getMessage(), e);
+                    actionStr == null ? STR_NULL : actionStr), e.getMessage(), e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
@@ -4810,7 +4810,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             }
             throw new UploadServletException(resp, substituteJS(
                 responseObj == null ? STR_NULL : responseObj.toString(),
-                actionStr == null ? STR_NULL : actionStr), wrapper.getMessage(), wrapper);
+                    actionStr == null ? STR_NULL : actionStr), wrapper.getMessage(), wrapper);
         }
     }
 
@@ -5175,18 +5175,6 @@ public class Mail extends PermissionServlet implements UploadListener {
             accountId = MailAccount.DEFAULT_ID;
         }
         return accountId;
-    }
-
-    static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     private static interface StringProvider {

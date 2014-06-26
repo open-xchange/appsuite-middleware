@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -85,12 +85,12 @@ public class JoinCommand implements GroupCommand {
                 doWelcome(stanza, groupDispatcher);
             }
         } else {
-            groupDispatcher.join(stanza.getFrom(), stanza.getSelector());
+            groupDispatcher.join(stanza.getFrom(), stanza.getSelector(), stanza);
         }
     }
 
     private void doWelcome(Stanza stanza, GroupDispatcher groupDispatcher) throws OXException {
-        groupDispatcher.join(stanza.getOnBehalfOf(), stanza.getSelector());
+        groupDispatcher.join(stanza.getOnBehalfOf(), stanza.getSelector(), stanza);
         Stanza welcomeMessage = groupDispatcher.getWelcomeMessage(stanza.getOnBehalfOf());
         welcomeMessage.setFrom(groupDispatcher.getId());
         welcomeMessage.setTo(stanza.getFrom());
@@ -104,7 +104,7 @@ public class JoinCommand implements GroupCommand {
     
     private boolean shouldExecuteAsynchronously(GroupDispatcher groupDispatcher) {
         try {
-            return ActionHandler.isAsynchronous(groupDispatcher.getClass().getMethod("getWelcomeMessage", ID.class));            
+            return ActionHandler.isAsynchronous(groupDispatcher.getClass().getMethod("getWelcomeMessage", ID.class));
         } catch (SecurityException e) {
             return false;
         } catch (NoSuchMethodException e) {

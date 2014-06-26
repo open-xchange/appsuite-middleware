@@ -71,6 +71,7 @@ import com.openexchange.drive.storage.DriveStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.java.Strings;
 
@@ -451,9 +452,16 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
      * @return <code>true</code> if the path is considered to be ignored, <code>false</code>, otherwise
      * @throws OXException
      */
-    private static boolean isIgnoredPath(String path) throws OXException {
+    private boolean isIgnoredPath(String path) throws OXException {
         if (DriveConstants.TEMP_PATH.equalsIgnoreCase(path)) {
             return true; // no temp path
+        }
+        if (session.getStorage().hasTrashFolder()) {
+            FileStorageFolder trashFolder = session.getStorage().getTrashFolder();
+            String trashPath = session.getStorage().getPath(trashFolder.getId());
+            if (null != trashPath && trashPath.equals(path)) {
+                return true; // no trash path
+            }
         }
         return false;
     }

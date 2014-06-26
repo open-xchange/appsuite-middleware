@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,8 +50,8 @@
 package com.openexchange.rdiff;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 
 /**
@@ -59,16 +59,16 @@ import com.openexchange.exception.OXExceptionFactory;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum RdiffExceptionCodes implements OXExceptionCode {
+public enum RdiffExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    ERROR(RdiffExceptionMessages.ERROR_MSG, Category.CATEGORY_ERROR, 1),
+    ERROR("An error occurred: %1$s", Category.CATEGORY_ERROR, 1, null),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(RdiffExceptionMessages.IO_ERROR_MSG, Category.CATEGORY_ERROR, 2),
+    IO_ERROR("An I/O error occurred: %1$s", Category.CATEGORY_ERROR, 2, null),
 
     ;
 
@@ -79,9 +79,11 @@ public enum RdiffExceptionCodes implements OXExceptionCode {
     private final int number;
 
     private final String message;
+    
+    private String displayMessage;
 
 
-    private RdiffExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private RdiffExceptionCodes(final String message, final Category category, final int detailNumber, String displayMessage) {
         this.message = message;
         number = detailNumber;
         this.category = category;
@@ -105,6 +107,11 @@ public enum RdiffExceptionCodes implements OXExceptionCode {
     @Override
     public int getNumber() {
         return number;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override

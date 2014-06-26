@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
+import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
 import javax.management.MBeanServerInvocationHandler;
 import javax.management.MalformedObjectNameException;
@@ -108,6 +109,7 @@ public final class PreviewCacheTool {
     public static void main(String[] args) {
         CommandLineParser parser = new PosixParser();
         boolean error = true;
+        boolean authFailed = false;
         try {
             final CommandLine cmd = parser.parse(sOptions, args);
             if (cmd.hasOption('h')) {
@@ -201,6 +203,10 @@ public final class PreviewCacheTool {
                         previceCacheProxy.clearFor(contextId);
                         System.out.println("All cache entries cleared for context " + contextId);
                     }
+                } catch (final MBeanException e) {
+                    authFailed = true;
+                    final String errMsg = e.getMessage();
+                    System.out.println(errMsg == null ? "An error occurred." : errMsg);
                 } catch (final Exception e) {
                     final String errMsg = e.getMessage();
                     System.out.println(errMsg == null ? "An error occurred." : errMsg);
@@ -223,6 +229,8 @@ public final class PreviewCacheTool {
         } finally {
             if (error) {
                 System.exit(1);
+            } else if (authFailed) {
+                System.exit(-1);
             }
         }
     }

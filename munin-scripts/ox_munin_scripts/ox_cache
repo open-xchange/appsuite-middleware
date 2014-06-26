@@ -2,8 +2,8 @@
 #%# family=auto
 #%# capabilities=autoconf
 
-$showexec="/opt/open-xchange/sbin/showruntimestats";
-$showruntimestats="$showexec -d com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!";
+$showruntimestats="/opt/open-xchange/sbin/showruntimestats";
+$showexec="$showruntimestats -j";
 
 if ( $ARGV[0] and $ARGV[0] eq "autoconf")
 {
@@ -55,156 +55,105 @@ if ( $ARGV[0] and $ARGV[0] eq "config")
 }
 									
 
-open(SHOWRUNTIME,"${showruntimestats}Context | head -1 |") || die "can not read monitoring output";   
+open(SHOWRUNTIME,"$showexec |") || die "can not read monitoring output"; 
 
 while (<SHOWRUNTIME>)
 {
-	if ( $_ =~ /[0-9]*/) {
+	if ( $_ =~ /Context /) {
+		s/.*\=//; 
 		$val=$_+0;
 		print "a.value $val\n";
 		next;
 	}
-}
 
-open(SHOWRUNTIME,"${showruntimestats}Filestore | head -1 |") || die "can not read monitoring output";   
-
-while (<SHOWRUNTIME>)
-{
-    if ( $_ =~ /[0-9]*/) {
-        $val=$_+0;
-        print "b.value $val\n";
-        next;
-    }
-}
-
-open(SHOWRUNTIME,"${showruntimestats}OXDBPoolCache | head -1 |") || die "can not read monitoring output";   
-
-while (<SHOWRUNTIME>)
-{
-    if ( $_ =~ /[0-9]*/) {
-        $val=$_+0;
-        print "c.value $val\n";
-        next;
-    }
-}
-
-open(SHOWRUNTIME,"${showruntimestats}User | head -1 |") || die "can not read monitoring output";   
-
-while (<SHOWRUNTIME>)
-{
-    if ( $_ =~ /[0-9]*/) {
-        $val=$_+0;
-        print "d.value $val\n";
-        next;
-    }
-}
-
-open(SHOWRUNTIME,"${showruntimestats}UserConfiguration | head -1 |") || die "can not read monitoring output";   
-
-while (<SHOWRUNTIME>)
-{
-    if ( $_ =~ /[0-9]*/) {
-        $val=$_+0;
-        print "e.value $val\n";
-        next;
-    }
-}
-
-open(SHOWRUNTIME,"${showruntimestats}UserSettingMail | head -1 |") || die "can not read monitoring output";   
-
-while (<SHOWRUNTIME>)
-{
-    if ( $_ =~ /[0-9]*/) {
-        $val=$_+0;
-        print "f.value $val\n";
-        next;
-    }
-}
-
-open(SHOWRUNTIME,"${showruntimestats}OXFolderCache | head -1 |") || die "can not read monitoring output";   
-
-while (<SHOWRUNTIME>)
-{
-    if ( $_ =~ /[0-9]*/) {
-        $val=$_+0;
-        print "g.value $val\n";
-        next;
-    }
-}
-
-open(SHOWRUNTIME,"${showruntimestats}OXFolderQueryCache | head -1 |") || die "can not read monitoring output";   
-
-while (<SHOWRUNTIME>)
-{
-    if ( $_ =~ /[0-9]*/) {
-        $val=$_+0;
-        print "h.value $val\n";
-        next;
-    }
-}
-
-open(SHOWRUNTIME,"${showruntimestats}OXIMAPConCache | head -1 |") || die "can not read monitoring output";   
-
-while (<SHOWRUNTIME>)
-{
-    if ( $_ =~ /[0-9]*/) {
-        $val=$_+0;
-        print "i.value $val\n";
-        next;
-    }
-}
-
-open(SHOWRUNTIME,"${showruntimestats}OXMessageCache | head -1 |") || die "can not read monitoring output";   
-
-while (<SHOWRUNTIME>)
-{
-    if ( $_ =~ /[0-9]*/) {
-        $val=$_+0;
-        print "j.value $val\n";
-        next;
-    }
-}
-
-open(SHOWRUNTIME,"${showruntimestats}MailMessageCache | head -1 |") || die "can not read monitoring output";   
-
-while (<SHOWRUNTIME>)
-{
-    if ( $_ =~ /[0-9]*/) {
-        $val=$_+0;
-        print "k.value $val\n";
-        next;
-    }
-}
-
-open(SHOWRUNTIME,"${showruntimestats}MailConnectionCache | head -1 |") || die "can not read monitoring output";   
-
-while (<SHOWRUNTIME>)
-{
-    if ( $_ =~ /[0-9]*/) {
-        $val=$_+0;
-        print "l.value $val\n";
-        next;
-    }
-}
-
-open(SHOWRUNTIME,"${showruntimestats}CalendarCache | head -1 |") || die "can not read monitoring output";   
-
-while (<SHOWRUNTIME>)
-{
-    if ( $_ =~ /[0-9]*/) {
-        $val=$_+0;
-        print "m.value $val\n";
-        next;
-    }
-}
-
-open(SHOWRUNTIME,"${showruntimestats}SessionCache | head -1 |") || die "can not read monitoring output";   
-
-while (<SHOWRUNTIME>)
-{
-    if ( $_ =~ /[0-9]*/) {
-        $val=$_+0;
-        print "n.value $val\n";
-        next;
-    }
+	if ( $_ =~ /Filestore /) {
+		s/.*\=//; 
+		$val=$_+0;
+		print "b.value $val\n";
+		next;
+	}
+	
+	if ( $_ =~ /OXDBPoolCache /) {
+		s/.*\=//; 
+		$val=$_+0;
+		print "c.value $val\n";
+		next;
+	}
+	
+	if ( $_ =~ /User /) {
+		s/.*\=//; 
+		$val=$_+0;
+		print "d.value $val\n";
+		next;
+	}
+	
+	if ( $_ =~ /UserConfiguration /) {
+		s/.*\=//; 
+		$val=$_+0;
+		print "e.value $val\n";
+		next;
+	}
+	
+	if ( $_ =~ /UserSettingMail /) {
+		s/.*\=//; 
+		$val=$_+0;
+		print "f.value $val\n";
+		next;
+	}
+	
+	if ( $_ =~ /OXFolderCache /) {
+		s/.*\=//; 
+		$val=$_+0;
+		print "g.value $val\n";
+		next;
+	}
+	
+	if ( $_ =~ /OXFolderQueryCache /) {
+		s/.*\=//; 
+		$val=$_+0;
+		print "h.value $val\n";
+		next;
+	}
+	
+	if ( $_ =~ /OXIMAPConCache /) {
+		s/.*\=//; 
+		$val=$_+0;
+		print "i.value $val\n";
+		next;
+	}
+	
+	if ( $_ =~ /OXMessageCache /) {
+		s/.*\=//; 
+		$val=$_+0;
+		print "j.value $val\n";
+		next;
+	}
+	
+	if ( $_ =~ /MailMessageCache /) {
+		s/.*\=//; 
+		$val=$_+0;
+		print "k.value $val\n";
+		next;
+	}
+	
+	if ( $_ =~ /MailConnectionCache /) {
+		s/.*\=//; 
+		$val=$_+0;
+		print "l.value $val\n";
+		next;
+	}
+	
+	if ( $_ =~ /CalendarCache /) {
+		s/.*\=//; 
+		$val=$_+0;
+		print "m.value $val\n";
+		next;
+	}
+	
+	if ( $_ =~ /SessionCache /) {
+		s/.*\=//; 
+		$val=$_+0;
+		print "n.value $val\n";
+		next;
+	}
 }

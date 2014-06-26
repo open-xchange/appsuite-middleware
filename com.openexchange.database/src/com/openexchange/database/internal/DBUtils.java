@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -73,7 +73,7 @@ final class DBUtils {
             try {
                 result.close();
             } catch (SQLException e) {
-                LOG.error("", e);
+                LOG.error(e.getMessage(), e);
             }
         }
     }
@@ -83,7 +83,7 @@ final class DBUtils {
             try {
                 stmt.close();
             } catch (SQLException e) {
-                LOG.error("", e);
+                LOG.error(e.getMessage(), e);
             }
         }
     }
@@ -102,7 +102,7 @@ final class DBUtils {
                 con.rollback();
             }
         } catch (SQLException e) {
-            LOG.error("", e);
+            LOG.error(e.getMessage(), e);
         }
     }
 
@@ -115,7 +115,7 @@ final class DBUtils {
                 con.rollback(savePoint);
             }
         } catch (SQLException e) {
-            LOG.error("", e);
+            LOG.error(e.getMessage(), e);
         }
     }
 
@@ -128,7 +128,7 @@ final class DBUtils {
                 con.setAutoCommit(true);
             }
         } catch (SQLException e) {
-            LOG.error("", e);
+            LOG.error(e.getMessage(), e);
         }
     }
 

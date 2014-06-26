@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -73,6 +73,7 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileTimedResult;
+import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.session.Session;
@@ -346,7 +347,12 @@ public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficient
     }
 
     @Override
-    public List<IDTuple> removeDocument(List<IDTuple> ids, long sequenceNumber) throws OXException {
+    public List<IDTuple> removeDocument(final List<IDTuple> ids, final long sequenceNumber) throws OXException {
+        return removeDocument(ids, sequenceNumber, false);
+    }
+
+    @Override
+    public List<IDTuple> removeDocument(final List<IDTuple> ids, final long sequenceNumber, boolean hardDelete) throws OXException {
         for (IDTuple idTuple : ids) {
             toFile(idTuple.getFolder(), idTuple.getId()).delete();
         }
@@ -484,6 +490,11 @@ public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficient
             Collections.<File> emptyList(),
             Collections.<File> emptyList(),
             UNDEFINED_SEQUENCE_NUMBER);
+    }
+
+    @Override
+    public SearchIterator<File> search(List<String> folderIds, final SearchTerm<?> searchTerm, List<Field> fields, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
+        return SearchIteratorAdapter.emptyIterator();
     }
 
     @Override

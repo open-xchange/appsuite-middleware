@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -91,11 +91,11 @@ public enum ContactField{
     CITY_HOME (508 , "field09" , "CITY_HOME" , "City home" , ContactFields.CITY_HOME, Types.VARCHAR),
     STATE_HOME (509 , "field10" , "STATE_HOME" , "State home" , ContactFields.STATE_HOME, Types.VARCHAR),
     COUNTRY_HOME (510 , "field11" , "COUNTRY_HOME" , "Country home" , ContactFields.COUNTRY_HOME, Types.VARCHAR),
-    MARITAL_STATUS (512 , "field12" , "MARITAL_STATUS" , "Martial status"  , ContactFields.MARITAL_STATUS, Types.VARCHAR),
-    NUMBER_OF_CHILDREN (513 , "field13" , "NUMBER_OF_CHILDREN" , "Number of children" , ContactFields.NUMBER_OF_CHILDREN, Types.VARCHAR),
+    MARITAL_STATUS (512 , "field12" , "MARITAL_STATUS" , "Marital status"  , ContactFields.MARITAL_STATUS, Types.VARCHAR),
+    NUMBER_OF_CHILDREN (513 , "field13" , "NUMBER_OF_CHILDREN" , "Children" , ContactFields.NUMBER_OF_CHILDREN, Types.VARCHAR),
     PROFESSION (514 , "field14" , "PROFESSION" , "Profession" , ContactFields.PROFESSION, Types.VARCHAR),
     NICKNAME (515 , "field15" , "NICKNAME" , "Nickname"  , ContactFields.NICKNAME, Types.VARCHAR),
-    SPOUSE_NAME (516 , "field16" , "SPOUSE_NAME" , "Spouse name" , ContactFields.SPOUSE_NAME, Types.VARCHAR),
+    SPOUSE_NAME (516 , "field16" , "SPOUSE_NAME" , "Spouse's name" , ContactFields.SPOUSE_NAME, Types.VARCHAR),
     NOTE (518 , "field17" , "NOTE" , "Note" , ContactFields.NOTE, Types.VARCHAR),
     COMPANY (569 , "field18" , "COMPANY" , "Company" , ContactFields.COMPANY, Types.VARCHAR),
     DEPARTMENT (519 , "field19" , "DEPARTMENT" , "Department" , ContactFields.DEPARTMENT, Types.VARCHAR),
@@ -107,15 +107,15 @@ public enum ContactField{
     CITY_BUSINESS (526 , "field25" , "CITY_BUSINESS" , "City business" , ContactFields.CITY_BUSINESS, Types.VARCHAR),
     STATE_BUSINESS (527 , "field26" , "STATE_BUSINESS" , "State business" , ContactFields.STATE_BUSINESS, Types.VARCHAR),
     COUNTRY_BUSINESS (528 , "field27" , "COUNTRY_BUSINESS" , "Country business" , ContactFields.COUNTRY_BUSINESS, Types.VARCHAR),
-    NUMBER_OF_EMPLOYEE (529 , "field28" , "NUMBER_OF_EMPLOYEE" , "Number of employee"  , ContactFields.NUMBER_OF_EMPLOYEE, Types.VARCHAR),
+    NUMBER_OF_EMPLOYEE (529 , "field28" , "NUMBER_OF_EMPLOYEE" , "Employee ID"  , ContactFields.NUMBER_OF_EMPLOYEE, Types.VARCHAR),
     SALES_VOLUME (530 , "field29" , "SALES_VOLUME" , "Sales volume"  , ContactFields.SALES_VOLUME, Types.VARCHAR),
     TAX_ID (531 , "field30" , "TAX_ID" , "Tax id"  , ContactFields.TAX_ID, Types.VARCHAR),
     COMMERCIAL_REGISTER (532 , "field31" , "COMMERCIAL_REGISTER" , "Commercial register"  , ContactFields.COMMERCIAL_REGISTER, Types.VARCHAR),
     BRANCHES (533 , "field32" , "BRANCHES" , "Branches"  , ContactFields.BRANCHES, Types.VARCHAR),
     BUSINESS_CATEGORY (534 , "field33" , "BUSINESS_CATEGORY" , "Business category"  , ContactFields.BUSINESS_CATEGORY, Types.VARCHAR),
     INFO (535 , "field34" , "INFO" , "Info"  , ContactFields.INFO, Types.VARCHAR),
-    MANAGER_NAME (536 , "field35" , "MANAGER_NAME" , "Manager's name" , ContactFields.MANAGER_NAME, Types.VARCHAR),
-    ASSISTANT_NAME (537 , "field36" , "ASSISTANT_NAME" , "Assistant's name"  , ContactFields.ASSISTANT_NAME, Types.VARCHAR),
+    MANAGER_NAME (536 , "field35" , "MANAGER_NAME" , "Manager" , ContactFields.MANAGER_NAME, Types.VARCHAR),
+    ASSISTANT_NAME (537 , "field36" , "ASSISTANT_NAME" , "Assistant"  , ContactFields.ASSISTANT_NAME, Types.VARCHAR),
     STREET_OTHER (538 , "field37" , "STREET_OTHER" , "Street other" , ContactFields.STREET_OTHER, Types.VARCHAR),
     POSTAL_CODE_OTHER (540 , "field38" , "POSTAL_CODE_OTHER" , "Postal code other" , ContactFields.POSTAL_CODE_OTHER, Types.VARCHAR),
     CITY_OTHER (539 , "field39" , "CITY_OTHER" , "City other" , ContactFields.CITY_OTHER, Types.VARCHAR),
@@ -126,7 +126,7 @@ public enum ContactField{
     TELEPHONE_BUSINESS2 (543 , "field44" , "TELEPHONE_BUSINESS2" , "Telephone business 2" , ContactFields.TELEPHONE_BUSINESS2, Types.VARCHAR),
     FAX_BUSINESS (544 , "field45" , "FAX_BUSINESS" , "FAX business" , ContactFields.FAX_BUSINESS, Types.VARCHAR),
     TELEPHONE_CALLBACK (545 , "field46" , "TELEPHONE_CALLBACK" , "Telephone callback" , ContactFields.TELEPHONE_CALLBACK, Types.VARCHAR),
-    TELEPHONE_CAR (546 , "field47" , "TELEPHONE_CAR" , "Telephone car" , ContactFields.TELEPHONE_CAR, Types.VARCHAR),
+    TELEPHONE_CAR (546 , "field47" , "TELEPHONE_CAR" , "Phone (car)" , ContactFields.TELEPHONE_CAR, Types.VARCHAR),
     TELEPHONE_COMPANY (547 , "field48" , "TELEPHONE_COMPANY" , "Telephone company" , ContactFields.TELEPHONE_COMPANY, Types.VARCHAR),
     TELEPHONE_HOME1 (548 , "field49" , "TELEPHONE_HOME1" , "Telephone home 1" , ContactFields.TELEPHONE_HOME1, Types.VARCHAR),
     TELEPHONE_HOME2 (549 , "field50" , "TELEPHONE_HOME2" , "Telephone home 2" , ContactFields.TELEPHONE_HOME2, Types.VARCHAR),
@@ -136,14 +136,14 @@ public enum ContactField{
     CELLULAR_TELEPHONE2 (552 , "field54" , "CELLULAR_TELEPHONE2" , "Cellular telephone 2"  , ContactFields.CELLULAR_TELEPHONE2, Types.VARCHAR),
     TELEPHONE_OTHER (553 , "field55" , "TELEPHONE_OTHER" , "Telephone other" , ContactFields.TELEPHONE_OTHER, Types.VARCHAR),
     FAX_OTHER (554 , "field56" , "FAX_OTHER" , "FAX other" , ContactFields.FAX_OTHER, Types.VARCHAR),
-    TELEPHONE_PAGER (560 , "field57" , "TELEPHONE_PAGER" , "Telephone pager" , ContactFields.TELEPHONE_PAGER, Types.VARCHAR),
+    TELEPHONE_PAGER (560 , "field57" , "TELEPHONE_PAGER" , "Pager" , ContactFields.TELEPHONE_PAGER, Types.VARCHAR),
     TELEPHONE_PRIMARY (561 , "field58" , "TELEPHONE_PRIMARY" , "Telephone primary" , ContactFields.TELEPHONE_PRIMARY, Types.VARCHAR),
     TELEPHONE_RADIO (562 , "field59" , "TELEPHONE_RADIO" , "Telephone radio" , ContactFields.TELEPHONE_RADIO, Types.VARCHAR),
-    TELEPHONE_TELEX (563 , "field60" , "TELEPHONE_TELEX" , "Telephone telex" , ContactFields.TELEPHONE_TELEX, Types.VARCHAR),
-    TELEPHONE_TTYTDD (564 , "field61" , "TELEPHONE_TTYTDD" , "Telephone TTY/TDD" , ContactFields.TELEPHONE_TTYTDD, Types.VARCHAR),
+    TELEPHONE_TELEX (563 , "field60" , "TELEPHONE_TELEX" , "Telex" , ContactFields.TELEPHONE_TELEX, Types.VARCHAR),
+    TELEPHONE_TTYTDD (564 , "field61" , "TELEPHONE_TTYTDD" , "TTY/TDD" , ContactFields.TELEPHONE_TTYTDD, Types.VARCHAR),
     INSTANT_MESSENGER1 (565 , "field62" , "INSTANT_MESSENGER1" , "Instantmessenger 1"  , ContactFields.INSTANT_MESSENGER1, Types.VARCHAR),
     INSTANT_MESSENGER2 (566 , "field63" , "INSTANT_MESSENGER2" , "Instantmessenger 2"  , ContactFields.INSTANT_MESSENGER2, Types.VARCHAR),
-    TELEPHONE_IP (567 , "field64" , "TELEPHONE_IP" , "Telephone IP"  , ContactFields.TELEPHONE_IP, Types.VARCHAR),
+    TELEPHONE_IP (567 , "field64" , "TELEPHONE_IP" , "IP phone"  , ContactFields.TELEPHONE_IP, Types.VARCHAR),
     EMAIL1 (555 , "field65" , "EMAIL1" , "Email 1" , ContactFields.EMAIL1, Types.VARCHAR),
     EMAIL2 (556 , "field66" , "EMAIL2" , "Email 2" , ContactFields.EMAIL2, Types.VARCHAR),
     EMAIL3 (557 , "field67" , "EMAIL3" , "Email 3" , ContactFields.EMAIL3, Types.VARCHAR),
@@ -171,9 +171,7 @@ public enum ContactField{
     USERFIELD20 (590 , "field89" , "USERFIELD20" , "Dynamic Field 20"  , ContactFields.USERFIELD20, Types.VARCHAR),
     OBJECT_ID (1 , "intfield01" , "OBJECT_ID" , "Object id"  , DataFields.ID, Types.INTEGER),
     NUMBER_OF_DISTRIBUTIONLIST (594 , "intfield02" , "NUMBER_OF_DISTRIBUTIONLIST" , "Number of distributionlists"  , ContactFields.NUMBER_OF_DISTRIBUTIONLIST, Types.INTEGER),
-    NUMBER_OF_LINKS (103 , "intfield03" , "NUMBER_OF_LINKS" , "Number of links"  , ContactFields.NUMBER_OF_LINKS, Types.INTEGER),
     DISTRIBUTIONLIST (592 , "" , "DISTRIBUTIONLIST" , ""  , ContactFields.DISTRIBUTIONLIST, 0),
-    LINKS (591 , "" , "LINKS" , ""  , ContactFields.LINKS, 0),
     FOLDER_ID (20 , "fid" , "FOLDER_ID" , "Folder id"  , ContactFields.FOLDER_ID, Types.INTEGER),
     CONTEXTID (593 , "cid" , "CONTEXTID" , "Context id"  , "", Types.INTEGER),
     PRIVATE_FLAG (101 , "pflag" , "PRIVATE_FLAG" , "private"  , ContactFields.PRIVATE_FLAG, Types.INTEGER),
@@ -192,14 +190,14 @@ public enum ContactField{
     DEFAULT_ADDRESS (605 , "intfield06" , "DEFAULT_ADDRESS" , "Default address"  , ContactFields.DEFAULT_ADDRESS, Types.INTEGER),
     MARK_AS_DISTRIBUTIONLIST (602 , "intfield07" , "MARK_AS_DISTRIBUTIONLIST" , ""  , ContactFields.MARK_AS_DISTRIBUTIONLIST, Types.INTEGER),
     NUMBER_OF_ATTACHMENTS (104 , "intfield08" , "NUMBER_OF_ATTACHMENTS" , ""  , ContactFields.NUMBER_OF_ATTACHMENTS, Types.INTEGER),
-    YOMI_FIRST_NAME(610, "yomiFirstName", "YOMI_FIRST_NAME", "yomiFirstName", ContactFields.YOMI_FIRST_NAME, Types.VARCHAR),
-    YOMI_LAST_NAME(611, "yomiLastName", "YOMI_LAST_NAME", "yomiLastName", ContactFields.YOMI_LAST_NAME, Types.VARCHAR),
-    YOMI_COMPANY(612, "yomiCompany", "YOMI_COMPANY", "yomiCompany", ContactFields.YOMI_COMPANY, Types.VARCHAR),
     NUMBER_OF_IMAGES(596, "intfield04", "NUMBER_OF_IMAGES", "number_of_images", ContactFields.NUMBER_OF_IMAGES, Types.INTEGER),
     LAST_MODIFIED_OF_NEWEST_ATTACHMENT(105, "", "LAST_MODIFIED_OF_NEWEST_ATTACHMENT", "lastModifiedOfNewestAttachment", ContactFields.LAST_MODIFIED_OF_NEWEST_ATTACHMENT_UTC, 0),
     USE_COUNT(608, "useCount", "USE_COUNT", "useCount", ContactFields.USE_COUNT, Types.INTEGER),
     IMAGE1_URL(606, "", "IMAGE1_URL", "image1_url", ContactFields.IMAGE1_URL, 0),
     LAST_MODIFIED_UTC(6, "", "LAST_MODIFIED_UTC", "last_modified_utc", ContactFields.LAST_MODIFIED_UTC, 0),
+    YOMI_FIRST_NAME(Contact.YOMI_FIRST_NAME, "yomiFirstName", "YOMI_FIRST_NAME", "yomiFirstName", ContactFields.YOMI_FIRST_NAME, Types.VARCHAR),
+    YOMI_LAST_NAME(Contact.YOMI_LAST_NAME, "yomiLastName", "YOMI_LAST_NAME", "yomiLastName", ContactFields.YOMI_LAST_NAME, Types.VARCHAR),
+    YOMI_COMPANY(Contact.YOMI_COMPANY, "yomiCompany", "YOMI_COMPANY", "yomiCompany", ContactFields.YOMI_COMPANY, Types.VARCHAR),
     HOME_ADDRESS(Contact.ADDRESS_HOME, "homeAddress", "ADDRESS_HOME", "homeAddress", ContactFields.ADDRESS_HOME, Types.VARCHAR),
     BUSINESS_ADDRESS(Contact.ADDRESS_BUSINESS, "businessAddress", "BUSINESS_ADDRESS", "businessAddress", ContactFields.ADDRESS_BUSINESS, Types.VARCHAR),
     OTHER_ADDRESS(Contact.ADDRESS_OTHER, "otherAddress", "OTHER_ADDRESS", "otherAddress", ContactFields.ADDRESS_OTHER, Types.VARCHAR),
@@ -221,52 +219,52 @@ public enum ContactField{
     }
 
     @Deprecated
-	public int getNumber(){
-		return columnNumber;
-	}
+    public int getNumber(){
+        return columnNumber;
+    }
 
-	/**
-	 * Gets the field name
-	 *
-	 * @return the field name
-	 */
+    /**
+     * Gets the field name
+     *
+     * @return the field name
+     */
     @Deprecated
-	public String getFieldName(){
-		return fieldName;
-	}
-
-    @Deprecated
-	public String getReadableName(){
-		return readableName;
-	}
-
-	/**
-	 * Gets the name of the corresponding database columns
-	 *
-	 * @return the database name, or <code>""</code> if there's no database column associated with this field
-	 */
-    @Deprecated
-	public String getDbName(){
-		return dbName;
-	}
+    public String getFieldName(){
+        return fieldName;
+    }
 
     @Deprecated
-	public String getAjaxName(){
-		return ajaxName;
-	}
+    public String getReadableName(){
+        return readableName;
+    }
+
+    /**
+     * Gets the name of the corresponding database columns
+     *
+     * @return the database name, or <code>""</code> if there's no database column associated with this field
+     */
+    @Deprecated
+    public String getDbName(){
+        return dbName;
+    }
 
     @Deprecated
-	public String getVCardElementName(){
-		return readableName; //TODO get real VCard element name
-	}
+    public String getAjaxName(){
+        return ajaxName;
+    }
 
     @Deprecated
-	public int getSQLType() {
+    public String getVCardElementName(){
+        return readableName; //TODO get real VCard element name
+    }
+
+    @Deprecated
+    public int getSQLType() {
         return sqlType;
     }
 
     @Deprecated
-	public static ContactField getByDBFieldName(final String dbFieldName){
+    public static ContactField getByDBFieldName(final String dbFieldName){
         if( null == dbFieldName) {
             return null;
         }
@@ -275,85 +273,85 @@ public enum ContactField{
         }
 
         for(final ContactField field: values()){
-			if(dbFieldName.equals( field.getFieldName() )){
-				return field;
-			}
-		}
-		return null;
-	}
+            if(dbFieldName.equals( field.getFieldName() )){
+                return field;
+            }
+        }
+        return null;
+    }
 
     @Deprecated
-	public static ContactField getByDisplayName(final String displayName){
-	    if( null == displayName) {
+    public static ContactField getByDisplayName(final String displayName){
+        if( null == displayName) {
             return null;
         }
-	    if( "".equals(displayName)) {
+        if( "".equals(displayName)) {
             return null;
         }
 
-		for(final ContactField field : values()){
-			if(displayName.equals( field.getReadableName() ) ){
-				return field;
-			}
-		}
-		return null;
-	}
+        for(final ContactField field : values()){
+            if(displayName.equals( field.getReadableName() ) ){
+                return field;
+            }
+        }
+        return null;
+    }
 
     @Deprecated
-	public static ContactField getByFieldName(final String fieldName){
-	       if( null == fieldName) {
+    public static ContactField getByFieldName(final String fieldName){
+           if( null == fieldName) {
             return null;
         }
-	        if( "".equals(fieldName)) {
+            if( "".equals(fieldName)) {
                 return null;
             }
 
-		for(final ContactField field : values()){
-			if(fieldName.equals( field.getDbName() ) ){
-				return field;
-			}
-		}
-		return null;
-	}
-
-    @Deprecated
-	public static ContactField getByValue(final int value){
-		for(final ContactField field: values()){
-			if(value == field.getNumber()){
-				return field;
-			}
-		}
-		return null;
-	}
-
-    @Deprecated
-	public static ContactField getByAjaxName(final String value){
-		for(final ContactField field: values()){
-			if(value.equals(field.getAjaxName())){
-				return field;
-			}
-		}
-		return null;
-	}
-
-    @Deprecated
-	public static ContactField getBySimilarity(String value){ //I call this the "d7-compatibility mode"
-		String needle = value.replaceAll("[_\\. ]", "").toLowerCase();
-		for(final ContactField field: values()){
-			List<String> haystack = Arrays.asList(new String[]{
-				field.getAjaxName().replaceAll("[_\\. ]", "").toLowerCase(),
-				field.getReadableName().replaceAll("[_\\. ]", "").toLowerCase(),
-				field.getFieldName().replaceAll("[_\\. ]", "").toLowerCase()
-			});
-			if(haystack.contains(needle)) {
+        for(final ContactField field : values()){
+            if(fieldName.equals( field.getDbName() ) ){
                 return field;
             }
-		}
-		return null;
-	}
+        }
+        return null;
+    }
 
     @Deprecated
-	public Object doSwitch(final ContactSwitcher switcher, final Object... objects) throws OXException {
+    public static ContactField getByValue(final int value){
+        for(final ContactField field: values()){
+            if(value == field.getNumber()){
+                return field;
+            }
+        }
+        return null;
+    }
+
+    @Deprecated
+    public static ContactField getByAjaxName(final String value){
+        for(final ContactField field: values()){
+            if(value.equals(field.getAjaxName())){
+                return field;
+            }
+        }
+        return null;
+    }
+
+    @Deprecated
+    public static ContactField getBySimilarity(String value){ //I call this the "d7-compatibility mode"
+        String needle = value.replaceAll("[_\\. ]", "").toLowerCase();
+        for(final ContactField field: values()){
+            List<String> haystack = Arrays.asList(new String[]{
+                field.getAjaxName().replaceAll("[_\\. ]", "").toLowerCase(),
+                field.getReadableName().replaceAll("[_\\. ]", "").toLowerCase(),
+                field.getFieldName().replaceAll("[_\\. ]", "").toLowerCase()
+            });
+            if(haystack.contains(needle)) {
+                return field;
+            }
+        }
+        return null;
+    }
+
+    @Deprecated
+    public Object doSwitch(final ContactSwitcher switcher, final Object... objects) throws OXException {
         switch(this){
         case DISPLAY_NAME : return switcher.displayname(objects);
         case SUR_NAME : return switcher.surname(objects);
@@ -446,9 +444,7 @@ public enum ContactField{
         case USERFIELD20 : return switcher.userfield20(objects);
         case OBJECT_ID : return switcher.objectid(objects);
         case NUMBER_OF_DISTRIBUTIONLIST : return switcher.numberofdistributionlists(objects);
-        case NUMBER_OF_LINKS : return switcher.numberoflinks(objects);
         case DISTRIBUTIONLIST : return switcher.distributionlist(objects);
-        case LINKS : return switcher.links(objects);
         case FOLDER_ID : return switcher.parentfolderid(objects);
         case CONTEXTID : return switcher.contextid(objects);
         case PRIVATE_FLAG : return switcher.privateflag(objects);
@@ -487,7 +483,7 @@ public enum ContactField{
         return VIRTUAL_FIELDS.contains(this);
     }
 
-    private static final EnumSet<ContactField> NON_DB_FIELDS = EnumSet.of(IMAGE1_URL, IMAGE1_CONTENT_TYPE, IMAGE_LAST_MODIFIED, IMAGE1, DISTRIBUTIONLIST, LINKS, SORT_NAME);
+    private static final EnumSet<ContactField> NON_DB_FIELDS = EnumSet.of(IMAGE1_URL, IMAGE1_CONTENT_TYPE, IMAGE_LAST_MODIFIED, IMAGE1, DISTRIBUTIONLIST, SORT_NAME);
     @Deprecated
     public boolean isDBField() {
         return !NON_DB_FIELDS.contains(this);

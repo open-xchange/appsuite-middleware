@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -55,7 +55,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.slf4j.Logger;
 
 /**
  * HttpErrorServlet
@@ -88,7 +87,7 @@ public class HttpErrorServlet extends HttpServlet {
             resp.setContentType("text/html; charset=UTF-8");
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
             final PrintWriter writer = resp.getWriter();
-            writer.write(new com.openexchange.java.StringAllocator().append("<html>").append(message).append("</html>").toString());
+            writer.write(new StringBuilder().append("<html>").append(message).append("</html>").toString());
         } catch (final IOException exc) {
             LOG.error("", exc);
         }

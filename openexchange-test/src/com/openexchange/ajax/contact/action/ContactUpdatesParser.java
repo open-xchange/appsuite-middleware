@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.contact.action;
 
-import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.java.Autoboxing.l;
 import java.util.ArrayList;
 import java.util.Date;
@@ -58,12 +57,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractColumnsParser;
 import com.openexchange.ajax.framework.CommonUpdatesParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
-import com.openexchange.groupware.container.LinkEntryObject;
 
 /**
  * {@link ContactUpdatesParser}
@@ -126,24 +123,11 @@ public class ContactUpdatesParser extends CommonUpdatesParser<ContactUpdatesResp
                 return new Date(l((Long) actual));
             case Contact.IMAGE1:
                 return ((String) actual).getBytes();
-            case Contact.LINKS:
-                return transformLinks((JSONArray) actual);
             case Contact.DISTRIBUTIONLIST:
                 return transformDistributionList((JSONArray) actual);
 
         }
         return actual;
-    }
-
-    private LinkEntryObject[] transformLinks(JSONArray arr) throws JSONException {
-        LinkEntryObject[] results = new LinkEntryObject[arr.length()];
-        for (int i = 0; i < arr.length(); i++) {
-            JSONObject obj = (JSONObject) arr.get(i);
-            LinkEntryObject entry = new LinkEntryObject();
-            entry.setLinkID(i((Integer) obj.get("id")));
-            results[i] = entry;
-        }
-        return results;
     }
 
     private DistributionListEntryObject[] transformDistributionList(JSONArray arr) throws JSONException {

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -75,7 +75,6 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 	public String IMPORT_ONE = IMPORT_HEADERS + NAME1+", "+EMAIL1+", "+DATE1;
 	public static String DATE1 = "4/1/1981";
 
-	@SuppressWarnings("deprecation")
 	public OutlookCSVContactImportTest() throws Exception{
 		super();
 		defaultFormat = Format.OUTLOOK_CSV;
@@ -93,7 +92,7 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 	}
 
 	protected void checkFirstResult(final int objectID ) throws OXException, OXException, ParseException {
-		final Contact co = new RdbContactSQLImpl(sessObj).getObjectById(objectID, folderId);
+		final Contact co = getEntry(objectID);
 		assertEquals("Checking name" ,  NAME1 , co.getSurName());
 		assertEquals("Checking e-Mail" ,  EMAIL1 , co.getEmail1());
 
@@ -114,8 +113,7 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 		assertTrue( res.isCorrect() );
 
 		//basic check: 1 entry in folder
-		final RdbContactSQLImpl contactSql = new RdbContactSQLImpl(sessObj);
-		assertEquals("One contact in folder?", (Integer) 1, (Integer) contactSql.getNumberOfContacts(folderId));
+		assertEquals("One contact in folder?", 1, getNumberOfContacts(folderId));
 
 		//detailed check:
 		checkFirstResult(
@@ -146,12 +144,12 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 		}
 
 		//check date set correctly though German style
-		final RdbContactSQLImpl contactSql = new RdbContactSQLImpl(sessObj);
-		final Date birthday = contactSql.getObjectById( Integer.parseInt(res.getObjectId()) , Integer.parseInt(res.getFolder()) ).getBirthday();
+		final Date birthday = getEntry(Integer.valueOf(res.getObjectId())).getBirthday();
 		assertDateEquals(new SimpleDateFormat("dd.MM.yyyy").parse("1.4.1981") , birthday);
 
 		//cleaning up
-		contactSql.deleteContactObject(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()), res.getDate());
+		contactStorage.delete(sessObj, res.getFolder(), res.getObjectId(), res.getDate());
+
 	}
 
 	/*

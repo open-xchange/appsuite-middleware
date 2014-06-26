@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -95,7 +95,10 @@ public class ScaleTransformation implements ImageTransformation {
             break;
         }
         transformationContext.addExpense(ImageTransformations.HIGH_EXPENSE);
-        return new ResampleOp(constrain).filter(sourceImage, null);
+        ResampleOp resampleOp = new ResampleOp(constrain);
+        // Do not use more than calling thread
+        resampleOp.setNumberOfThreads(1);
+        return resampleOp.filter(sourceImage, null);
     }
 
     @Override

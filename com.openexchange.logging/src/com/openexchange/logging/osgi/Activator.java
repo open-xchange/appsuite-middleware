@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,7 +52,6 @@ package com.openexchange.logging.osgi;
 import java.util.Collection;
 import java.util.List;
 import javax.management.ObjectName;
-import org.apache.commons.lang.Validate;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -69,7 +68,9 @@ import ch.qos.logback.classic.spi.LoggerContextListener;
 import ch.qos.logback.classic.turbo.TurboFilter;
 import com.openexchange.ajax.response.IncludeStackTraceService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
+import com.openexchange.logging.LogConfigReloadable;
 import com.openexchange.logging.mbean.IncludeStackTraceServiceImpl;
 import com.openexchange.logging.mbean.LogbackConfiguration;
 import com.openexchange.logging.mbean.LogbackConfigurationMBean;
@@ -97,6 +98,8 @@ public class Activator implements BundleActivator {
     private volatile ServiceTracker<ConfigurationService, ConfigurationService> configurationTracker;
     private volatile RankingAwareTurboFilterList rankingAwareTurboFilterList;
     private volatile ServiceRegistration<IncludeStackTraceService> includeStackTraceServiceRegistration;
+
+    private ServiceRegistration<Reloadable> reloadable;
 
     /*
      * Do not implement HousekeepingActivator, track services if you need them!
@@ -143,6 +146,8 @@ public class Activator implements BundleActivator {
         registerExceptionCategoryFilter(context, rankingAwareTurboFilterList, serviceImpl);
 
         registerIncludeStackTraceService(serviceImpl, context);
+
+        reloadable = context.registerService(Reloadable.class, new LogConfigReloadable(), null);
     }
 
     @Override
@@ -175,6 +180,11 @@ public class Activator implements BundleActivator {
             includeStackTraceServiceRegistration.unregister();
             this.includeStackTraceServiceRegistration = null;
         }
+
+        if (null != reloadable) {
+            reloadable.unregister();
+            reloadable = null;
+        }
     }
 
     /**
@@ -199,7 +209,9 @@ public class Activator implements BundleActivator {
      * @return true, if an object of that class is available within the collection. Otherwise false.
      */
     protected <T> boolean hasInstanceOf(Collection<?> collection, Class<T> clazz) {
-        Validate.notNull(collection);
+        if (collection == null) {
+            throw new IllegalArgumentException("The collection is null");
+        }
 
         for (Object o : collection) {
             if (o != null && o.getClass() == clazz) {

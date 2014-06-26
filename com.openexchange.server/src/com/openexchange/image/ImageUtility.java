@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -57,12 +57,15 @@ import java.util.regex.Pattern;
 import jonelo.jacksum.JacksumAPI;
 import jonelo.jacksum.algorithm.AbstractChecksum;
 import jonelo.jacksum.algorithm.MD;
+import org.slf4j.Logger;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
 
@@ -72,6 +75,8 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ImageUtility {
+
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ImageUtility.class);
 
     /**
      * Initializes a new {@link ImageUtility}.
@@ -165,7 +170,7 @@ public final class ImageUtility {
 
     private static String decodeQueryStringValue(final String queryStringValue) {
         try {
-            return AJAXServlet.decodeUrl(queryStringValue, UTF_8);
+            return AJAXUtility.decodeUrl(queryStringValue, UTF_8);
         } catch (final RuntimeException e) {
             return queryStringValue;
         }
@@ -195,34 +200,71 @@ public final class ImageUtility {
      * @param sb The string builder to write to
      */
     public static void startImageUrl(final ImageLocation imageLocation, final Session session, final ImageDataSource imageDataSource, final boolean preferRelativeUrl, final boolean addRoute, final StringBuilder sb) {
+        boolean optImageHostSet = false;
         final String prefix;
         final String route;
+        String publicSessionId = null;
         {
             final HostData hostData = (HostData) session.getParameter(HostnameService.PARAM_HOST_DATA);
             if (hostData == null) {
                 /*
                  * Compose relative URL
                  */
-                prefix = "";
-                {
-                    final String ajpRoute = LogProperties.getLogProperty(LogProperties.Name.AJP_HTTP_SESSION);
-                    route = null == ajpRoute ? LogProperties.getLogProperty(LogProperties.Name.GRIZZLY_HTTP_SESSION) : ajpRoute;
+                final String optImageHost = imageLocation.getOptImageHost();
+                if (Strings.isEmpty(optImageHost)) {
+                    prefix = "";
+                } else {
+                    publicSessionId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
+                    if (Strings.isEmpty(publicSessionId)) {
+                        LOGGER.warn("Cannot use configured image host \"{}\" as associated session has no public session identifier set.", optImageHost);
+                        prefix = "";
+                    } else {
+                        final String tmp = Strings.toLowerCase(optImageHost);
+                        prefix = tmp.startsWith("http") ? optImageHost : new StringBuilder(32).append("http://").append(optImageHost).toString();
+                        optImageHostSet = true;
+                    }
                 }
+                final String ajpRoute = LogProperties.getLogProperty(LogProperties.Name.AJP_HTTP_SESSION);
+                route = null == ajpRoute ? LogProperties.getLogProperty(LogProperties.Name.GRIZZLY_HTTP_SESSION) : ajpRoute;
             } else {
                 /*
                  * Compose absolute URL if a relative one is not preferred
                  */
-                if (preferRelativeUrl) {
-                    prefix = "";
-                } else {
-                    sb.append(hostData.isSecure() ? "https://" : "http://");
-                    sb.append(hostData.getHost());
-                    final int port = hostData.getPort();
-                    if ((hostData.isSecure() && port != 443) || (!hostData.isSecure() && port != 80)) {
-                        sb.append(':').append(port);
+                final String optImageHost = imageLocation.getOptImageHost();
+                if (Strings.isEmpty(optImageHost)) {
+                    if (preferRelativeUrl) {
+                        prefix = "";
+                    } else {
+                        sb.append(hostData.isSecure() ? "https://" : "http://");
+                        sb.append(hostData.getHost());
+                        final int port = hostData.getPort();
+                        if ((hostData.isSecure() && port != 443) || (!hostData.isSecure() && port != 80)) {
+                            sb.append(':').append(port);
+                        }
+                        prefix = sb.toString();
+                        sb.setLength(0);
                     }
-                    prefix = sb.toString();
-                    sb.setLength(0);
+                } else {
+                    publicSessionId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
+                    if (Strings.isEmpty(publicSessionId)) {
+                        LOGGER.warn("Cannot use configured image host \"{}\" as associated session has no public session identifier set.", optImageHost);
+                        if (preferRelativeUrl) {
+                            prefix = "";
+                        } else {
+                            sb.append(hostData.isSecure() ? "https://" : "http://");
+                            sb.append(hostData.getHost());
+                            final int port = hostData.getPort();
+                            if ((hostData.isSecure() && port != 443) || (!hostData.isSecure() && port != 80)) {
+                                sb.append(':').append(port);
+                            }
+                            prefix = sb.toString();
+                            sb.setLength(0);
+                        }
+                    } else {
+                        final String tmp = Strings.toLowerCase(optImageHost);
+                        prefix = tmp.startsWith("http") ? optImageHost : new StringBuilder(32).append("http://").append(optImageHost).toString();
+                        optImageHostSet = true;
+                    }
                 }
                 route = hostData.getRoute();
             }
@@ -230,22 +272,30 @@ public final class ImageUtility {
         /*
          * Compose URL parameters
          */
-        sb.append(prefix);
+        sb.append(prefix.endsWith("/") ? prefix.substring(0, prefix.length() - 1) : prefix);
         sb.append(DefaultDispatcherPrefixService.getInstance().getPrefix());
         sb.append(ImageDataSource.ALIAS_APPENDIX);
         final String alias = imageDataSource.getAlias();
         if (null != alias) {
             sb.append(alias);
         }
-        if (addRoute) {
+        if (optImageHostSet) {
+            if (null != route) {
+                sb.append(";jsessionid=").append(route);
+            }
+        } else if (addRoute ) {
             final Boolean noRoute = (Boolean) imageLocation.getProperty(ImageLocation.PROPERTY_NO_ROUTE);
             if ((null == noRoute || !noRoute.booleanValue()) && null != route) {
                 sb.append(";jsessionid=").append(route);
             }
         }
         boolean first = true;
+        if (null != publicSessionId) {
+            sb.append('?').append(AJAXServlet.PARAMETER_PUBLIC_SESSION).append('=').append(urlEncodeSafe(publicSessionId));
+            first = false;
+        }
         if (null == alias) {
-            sb.append('?').append("source=").append(urlEncodeSafe(imageDataSource.getRegistrationName()));
+            sb.append(first ? '?' : '&').append("source=").append(urlEncodeSafe(imageDataSource.getRegistrationName()));
             first = false;
         }
         /*

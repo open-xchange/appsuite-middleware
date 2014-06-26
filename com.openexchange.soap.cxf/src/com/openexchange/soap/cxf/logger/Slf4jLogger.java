@@ -162,53 +162,53 @@ public class Slf4jLogger extends AbstractDelegatingLogger {
     public void log(final Level level, final String msg, final Object param1) {
         if (Level.FINE.equals(level)) {
             if (locationAwareLogger == null) {
-                logger.debug(formatMessage(msg, new Object[] {param1}, (ResourceBundle) null));
+                logger.debug(formatMessage(msg, new Object[] {param1}, getResourceBundle()));
             } else {
-                locationAwareLogger.log(null, FQCN, LocationAwareLogger.DEBUG_INT, formatMessage(msg, new Object[] {param1}, (ResourceBundle) null), null, null);
+                locationAwareLogger.log(null, FQCN, LocationAwareLogger.DEBUG_INT, formatMessage(msg, new Object[] {param1}, getResourceBundle()), null, null);
             }
         } else if (Level.INFO.equals(level)) {
             if (locationAwareLogger == null) {
-                logger.info(formatMessage(msg, new Object[] {param1}, (ResourceBundle) null));
+                logger.info(formatMessage(msg, new Object[] {param1}, getResourceBundle()));
             } else {
-                locationAwareLogger.log(null, FQCN, LocationAwareLogger.INFO_INT, formatMessage(msg, new Object[] {param1}, (ResourceBundle) null), null, null);
+                locationAwareLogger.log(null, FQCN, LocationAwareLogger.INFO_INT, formatMessage(msg, new Object[] {param1}, getResourceBundle()), null, null);
             }
         } else if (Level.WARNING.equals(level)) {
             if (locationAwareLogger == null) {
-                logger.warn(formatMessage(msg, new Object[] {param1}, (ResourceBundle) null));
+                logger.warn(formatMessage(msg, new Object[] {param1}, getResourceBundle()));
             } else {
-                locationAwareLogger.log(null, FQCN, LocationAwareLogger.WARN_INT, formatMessage(msg, new Object[] {param1}, (ResourceBundle) null), null, null);
+                locationAwareLogger.log(null, FQCN, LocationAwareLogger.WARN_INT, formatMessage(msg, new Object[] {param1}, getResourceBundle()), null, null);
             }
         } else if (Level.FINER.equals(level)) {
             if (locationAwareLogger == null) {
-                logger.trace(formatMessage(msg, new Object[] {param1}, (ResourceBundle) null));
+                logger.trace(formatMessage(msg, new Object[] {param1}, getResourceBundle()));
             } else {
-                locationAwareLogger.log(null, FQCN, LocationAwareLogger.DEBUG_INT, formatMessage(msg, new Object[] {param1}, (ResourceBundle) null), null, null);
+                locationAwareLogger.log(null, FQCN, LocationAwareLogger.DEBUG_INT, formatMessage(msg, new Object[] {param1}, getResourceBundle()), null, null);
             }
         } else if (Level.FINEST.equals(level)) {
             if (locationAwareLogger == null) {
-                logger.trace(formatMessage(msg, new Object[] {param1}, (ResourceBundle) null));
+                logger.trace(formatMessage(msg, new Object[] {param1}, getResourceBundle()));
             } else {
-                locationAwareLogger.log(null, FQCN, LocationAwareLogger.TRACE_INT, formatMessage(msg, new Object[] {param1}, (ResourceBundle) null), null, null);
+                locationAwareLogger.log(null, FQCN, LocationAwareLogger.TRACE_INT, formatMessage(msg, new Object[] {param1}, getResourceBundle()), null, null);
             }
         } else if (Level.ALL.equals(level)) {
             // should never occur, all is used to configure java.util.logging
             // but not accessible by the API Logger.xxx() API
             if (locationAwareLogger == null) {
-                logger.error(formatMessage(msg, new Object[] {param1}, (ResourceBundle) null));
+                logger.error(formatMessage(msg, new Object[] {param1}, getResourceBundle()));
             } else {
-                locationAwareLogger.log(null, FQCN, LocationAwareLogger.ERROR_INT, formatMessage(msg, new Object[] {param1}, (ResourceBundle) null), null, null);
+                locationAwareLogger.log(null, FQCN, LocationAwareLogger.ERROR_INT, formatMessage(msg, new Object[] {param1}, getResourceBundle()), null, null);
             }
         } else if (Level.SEVERE.equals(level)) {
             if (locationAwareLogger == null) {
-                logger.error(formatMessage(msg, new Object[] {param1}, (ResourceBundle) null));
+                logger.error(formatMessage(msg, new Object[] {param1}, getResourceBundle()));
             } else {
-                locationAwareLogger.log(null, FQCN, LocationAwareLogger.ERROR_INT, formatMessage(msg, new Object[] {param1}, (ResourceBundle) null), null, null);
+                locationAwareLogger.log(null, FQCN, LocationAwareLogger.ERROR_INT, formatMessage(msg, new Object[] {param1}, getResourceBundle()), null, null);
             }
         } else if (Level.CONFIG.equals(level)) {
             if (locationAwareLogger == null) {
-                logger.debug(formatMessage(msg, new Object[] {param1}, (ResourceBundle) null));
+                logger.debug(formatMessage(msg, new Object[] {param1}, getResourceBundle()));
             } else {
-                locationAwareLogger.log(null, FQCN, LocationAwareLogger.DEBUG_INT, formatMessage(msg, new Object[] {param1}, (ResourceBundle) null), null, null);
+                locationAwareLogger.log(null, FQCN, LocationAwareLogger.DEBUG_INT, formatMessage(msg, new Object[] {param1}, getResourceBundle()), null, null);
             }
         } else if (Level.OFF.equals(level)) {
             // don't log
@@ -219,53 +219,53 @@ public class Slf4jLogger extends AbstractDelegatingLogger {
     public void log(final Level level, final String msg, final Object[] params) {
         if (Level.FINE.equals(level)) {
             if (locationAwareLogger == null) {
-                logger.debug(formatMessage(msg, params, (ResourceBundle) null));
+                logger.debug(formatMessage(msg, params, getResourceBundle()));
             } else {
-                locationAwareLogger.log(null, FQCN, LocationAwareLogger.DEBUG_INT, formatMessage(msg, params, (ResourceBundle) null), null, null);
+                locationAwareLogger.log(null, FQCN, LocationAwareLogger.DEBUG_INT, formatMessage(msg, params, getResourceBundle()), null, null);
             }
         } else if (Level.INFO.equals(level)) {
             if (locationAwareLogger == null) {
-                logger.info(formatMessage(msg, params, (ResourceBundle) null));
+                logger.info(formatMessage(msg, params, getResourceBundle()));
             } else {
-                locationAwareLogger.log(null, FQCN, LocationAwareLogger.INFO_INT, formatMessage(msg, params, (ResourceBundle) null), null, null);
+                locationAwareLogger.log(null, FQCN, LocationAwareLogger.INFO_INT, formatMessage(msg, params, getResourceBundle()), null, null);
             }
         } else if (Level.WARNING.equals(level)) {
             if (locationAwareLogger == null) {
-                logger.warn(formatMessage(msg, params, (ResourceBundle) null));
+                logger.warn(formatMessage(msg, params, getResourceBundle()));
             } else {
-                locationAwareLogger.log(null, FQCN, LocationAwareLogger.WARN_INT, formatMessage(msg, params, (ResourceBundle) null), null, null);
+                locationAwareLogger.log(null, FQCN, LocationAwareLogger.WARN_INT, formatMessage(msg, params, getResourceBundle()), null, null);
             }
         } else if (Level.FINER.equals(level)) {
             if (locationAwareLogger == null) {
-                logger.trace(formatMessage(msg, params, (ResourceBundle) null));
+                logger.trace(formatMessage(msg, params, getResourceBundle()));
             } else {
-                locationAwareLogger.log(null, FQCN, LocationAwareLogger.DEBUG_INT, formatMessage(msg, params, (ResourceBundle) null), null, null);
+                locationAwareLogger.log(null, FQCN, LocationAwareLogger.DEBUG_INT, formatMessage(msg, params, getResourceBundle()), null, null);
             }
         } else if (Level.FINEST.equals(level)) {
             if (locationAwareLogger == null) {
-                logger.trace(formatMessage(msg, params, (ResourceBundle) null));
+                logger.trace(formatMessage(msg, params, getResourceBundle()));
             } else {
-                locationAwareLogger.log(null, FQCN, LocationAwareLogger.TRACE_INT, formatMessage(msg, params, (ResourceBundle) null), null, null);
+                locationAwareLogger.log(null, FQCN, LocationAwareLogger.TRACE_INT, formatMessage(msg, params, getResourceBundle()), null, null);
             }
         } else if (Level.ALL.equals(level)) {
             // should never occur, all is used to configure java.util.logging
             // but not accessible by the API Logger.xxx() API
             if (locationAwareLogger == null) {
-                logger.error(formatMessage(msg, params, (ResourceBundle) null));
+                logger.error(formatMessage(msg, params, getResourceBundle()));
             } else {
-                locationAwareLogger.log(null, FQCN, LocationAwareLogger.ERROR_INT, formatMessage(msg, params, (ResourceBundle) null), null, null);
+                locationAwareLogger.log(null, FQCN, LocationAwareLogger.ERROR_INT, formatMessage(msg, params, getResourceBundle()), null, null);
             }
         } else if (Level.SEVERE.equals(level)) {
             if (locationAwareLogger == null) {
-                logger.error(formatMessage(msg, params, (ResourceBundle) null));
+                logger.error(formatMessage(msg, params, getResourceBundle()));
             } else {
-                locationAwareLogger.log(null, FQCN, LocationAwareLogger.ERROR_INT, formatMessage(msg, params, (ResourceBundle) null), null, null);
+                locationAwareLogger.log(null, FQCN, LocationAwareLogger.ERROR_INT, formatMessage(msg, params, getResourceBundle()), null, null);
             }
         } else if (Level.CONFIG.equals(level)) {
             if (locationAwareLogger == null) {
-                logger.debug(formatMessage(msg, params, (ResourceBundle) null));
+                logger.debug(formatMessage(msg, params, getResourceBundle()));
             } else {
-                locationAwareLogger.log(null, FQCN, LocationAwareLogger.DEBUG_INT, formatMessage(msg, params, (ResourceBundle) null), null, null);
+                locationAwareLogger.log(null, FQCN, LocationAwareLogger.DEBUG_INT, formatMessage(msg, params, getResourceBundle()), null, null);
             }
         } else if (Level.OFF.equals(level)) {
             // don't log

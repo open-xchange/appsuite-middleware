@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -325,20 +325,21 @@ public class RoundtripTest extends AbstractRMITest {
         com.openexchange.ajax.contact.action.InsertResponse response3 = userClient.execute(contactRequest3);
         response3.fillObject(c3);
 
+        //TODO this has to be read from config file
         MailAccountDescription mail = new MailAccountDescription();
         mail.setLogin("jan.bauerdick424242669");
         mail.setName("jan.bauerdick@premium");
         mail.setPassword("secret");
         mail.setMailProtocol("imap");
         mail.setMailPort(143);
-        mail.setMailServer("devel-mail.netline.de");
+        mail.setMailServer("mail.devel.open-xchange.com");
         mail.setPrimaryAddress("jan.bauerdick@premium");
         mail.setSpamHandler("NoSpamHandler");
         mail.setTransportLogin("jan.bauerdick424242669");
         mail.setTransportPassword("secret");
         mail.setTransportPort(25);
         mail.setTransportProtocol("smtp");
-        mail.setTransportServer("devel-mail.netline.de");
+        mail.setTransportServer("mail.devel.open-xchange.com");
         mail.setConfirmedHamFullname("default0/confirmed_ham_fullname");
         MailAccountInsertRequest mailRequest = new MailAccountInsertRequest(mail);
         MailAccountInsertResponse mailResponse = userClient.execute(mailRequest);
@@ -677,7 +678,6 @@ public class RoundtripTest extends AbstractRMITest {
                 assertEquals("Note is not equal.", a1.getNote(), a2.getNote());
                 assertEquals("Notification is not equal.", a1.getNotification(), a2.getNotification());
                 assertEquals("Number of attachments is not equal.", a1.getNumberOfAttachments(), a2.getNumberOfAttachments());
-                assertEquals("Number of links is not equal.", a1.getNumberOfLinks(), a2.getNumberOfLinks());
                 assertEquals("Occurence is not equal.", a1.getOccurrence(), a2.getOccurrence());
                 assertEquals("Organizer is not equal.", a1.getOrganizer(), a2.getOrganizer());
                 assertEquals("Private flag is not equal.", a1.getPrivateFlag(), a2.getPrivateFlag());
@@ -729,7 +729,6 @@ public class RoundtripTest extends AbstractRMITest {
                 assertEquals("Note is not equal.", t1.getNote(), t2.getNote());
                 assertEquals("Notification is not equal.", t1.getNotification(), t2.getNotification());
                 assertEquals("Number of attachments is not equal.", t1.getNumberOfAttachments(), t2.getNumberOfAttachments());
-                assertEquals("Number of links is not equal.", t1.getNumberOfLinks(), t2.getNumberOfLinks());
                 assertEquals("Occurence is not equal.", t1.getOccurrence(), t2.getOccurrence());
                 assertEquals("Organizer is not equal.", t1.getOrganizer(), t2.getOrganizer());
                 assertEquals("Participants is not equal.", t1.getParticipants(), t2.getParticipants());
@@ -802,9 +801,8 @@ public class RoundtripTest extends AbstractRMITest {
                     "Number of distribution lists is not equal.",
                     c1.getNumberOfDistributionLists(),
                     c2.getNumberOfDistributionLists());
-                assertEquals("Number of employee is not equal.", c1.getNumberOfEmployee(), c2.getNumberOfEmployee());
+                assertEquals("Employee ID is not equal.", c1.getNumberOfEmployee(), c2.getNumberOfEmployee());
                 assertEquals("Number of images is not equal.", c1.getNumberOfImages(), c2.getNumberOfImages());
-                assertEquals("Number of links is not equal.", c1.getNumberOfLinks(), c2.getNumberOfLinks());
                 assertEquals("Position is not equal.", c1.getPosition(), c2.getPosition());
                 assertEquals("Postal code business is not equal.", c1.getPostalCodeBusiness(), c2.getPostalCodeBusiness());
                 assertEquals("Postal code home is not equal.", c1.getPostalCodeHome(), c2.getPostalCodeHome());
@@ -817,7 +815,6 @@ public class RoundtripTest extends AbstractRMITest {
                     "Size of distribution list array is not equal.",
                     c1.getSizeOfDistributionListArray(),
                     c2.getSizeOfDistributionListArray());
-                assertEquals("Size of links is not equal.", c1.getSizeOfLinks(), c2.getSizeOfLinks());
                 assertEquals("Spouse name is not equal.", c1.getSpouseName(), c2.getSpouseName());
                 assertEquals("State business is not equal.", c1.getStateBusiness(), c2.getStateBusiness());
                 assertEquals("State home is not equal.", c1.getStateHome(), c2.getStateHome());

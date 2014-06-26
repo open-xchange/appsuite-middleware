@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -62,6 +62,8 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 
@@ -95,7 +97,12 @@ public final class HasAction extends AppointmentAction {
         final Date start = req.checkTime(AJAXServlet.PARAMETER_START, timeZone);
         final Date end = req.checkTime(AJAXServlet.PARAMETER_END, timeZone);
 
-        final AppointmentSQLInterface appointmentsql = getService().createAppointmentSql(req.getSession());
+        final AppointmentSqlFactoryService factoryService = getService();
+        if (null == factoryService) {
+            throw ServiceExceptionCode.absentService(AppointmentSqlFactoryService.class);
+        }
+
+        final AppointmentSQLInterface appointmentsql = factoryService.createAppointmentSql(req.getSession());
         final boolean[] bHas = appointmentsql.hasAppointmentsBetween(start, end);
 
         final JSONArray jsonResponseArray = new JSONArray();

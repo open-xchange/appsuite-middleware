@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -54,7 +54,6 @@ import java.net.InetAddress;
 import java.util.concurrent.Callable;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.config.POP3Config;
@@ -131,7 +130,7 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
                         pop3Config.getLogin());
             } catch (final Exception e) {
                 final Session ses = pop3Access.getSession();
-                final StringAllocator sb = new StringAllocator("Couldn't detect capabilities from POP3 server \"");
+                final StringBuilder sb = new StringBuilder("Couldn't detect capabilities from POP3 server \"");
                 sb.append(server).append("\" with login \"");
                 sb.append(pop3Config.getLogin()).append("\" (user=");
                 sb.append(ses.getUserId()).append(", context=");

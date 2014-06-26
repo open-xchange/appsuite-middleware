@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -91,7 +91,7 @@ public class OXExceptionFactory {
     }
 
     private static boolean recEquals(final String prefix, final int code, final OXException e) {
-        if (prefix.equals(e.getPrefix()) && e.getCode() == code) {
+        if (e.getCode() == code && prefix.equals(e.getPrefix())) {
             return true;
         }
         final Throwable cause = e.getCause();

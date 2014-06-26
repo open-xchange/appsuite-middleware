@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -93,7 +93,7 @@ public class PresenceTest {
         assertEquals(0, initialPresence.getPriority());
         assertEquals(Type.NONE, initialPresence.getType());
         assertEquals(realtimeException, initialPresence.getError());
-        assertEquals(1, initialPresence.getPayloads().size());
+        assertEquals(1, initialPresence.getPayloadTrees().size());
     }
 
     @Test
@@ -116,11 +116,11 @@ public class PresenceTest {
         assertNull(updatePresence.getError());
 
         // Payload checks
-        assertEquals(updatePresence.getDefaultPayloads(), updatePresence.getPayloads());
-        assertEquals(3, updatePresence.getPayloads().size());
-        ArrayList<PayloadTree> statusTrees = new ArrayList<PayloadTree>(updatePresence.getPayloads(Presence.STATUS_PATH));
-        ArrayList<PayloadTree> messageTrees = new ArrayList<PayloadTree>(updatePresence.getPayloads(Presence.MESSAGE_PATH));
-        ArrayList<PayloadTree> priorityTrees = new ArrayList<PayloadTree>(updatePresence.getPayloads(Presence.PRIORITY_PATH));
+        assertEquals(updatePresence.getDefaultPayloads(), updatePresence.getPayloadTrees());
+        assertEquals(3, updatePresence.getPayloadTrees().size());
+        ArrayList<PayloadTree> statusTrees = new ArrayList<PayloadTree>(updatePresence.getPayloadTrees(Presence.STATUS_PATH));
+        ArrayList<PayloadTree> messageTrees = new ArrayList<PayloadTree>(updatePresence.getPayloadTrees(Presence.MESSAGE_PATH));
+        ArrayList<PayloadTree> priorityTrees = new ArrayList<PayloadTree>(updatePresence.getPayloadTrees(Presence.PRIORITY_PATH));
 
         assertEquals(1, statusTrees.size());
         assertEquals(1, messageTrees.size());
@@ -155,9 +155,9 @@ public class PresenceTest {
         assertEquals(priority, copiedAwayPresence.getPriority());
         assertEquals(away, copiedAwayPresence.getState());
 
-        assertEquals(message, getFirstTreeRootData(copiedAwayPresence.getPayloads(Presence.MESSAGE_PATH)));
-        assertEquals(priority, getFirstTreeRootData(copiedAwayPresence.getPayloads(Presence.PRIORITY_PATH)));
-        assertEquals(away, getFirstTreeRootData(copiedAwayPresence.getPayloads(Presence.STATUS_PATH)));
+        assertEquals(message, getFirstTreeRootData(copiedAwayPresence.getPayloadTrees(Presence.MESSAGE_PATH)));
+        assertEquals(priority, getFirstTreeRootData(copiedAwayPresence.getPayloadTrees(Presence.PRIORITY_PATH)));
+        assertEquals(away, getFirstTreeRootData(copiedAwayPresence.getPayloadTrees(Presence.STATUS_PATH)));
     }
 
     private Object getFirstTreeRootData(Collection<PayloadTree> trees) {

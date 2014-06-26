@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -74,12 +74,6 @@ public class FacebookArchiveImporter extends AbstractImporter {
     }
 
     protected FacebookFriendsImporter delegate = null;
-
-    @Override
-    protected String getNameForFieldInTruncationError(final int id, final OXException dataTruncation) {
-        // Nothing to do
-        return null;
-    }
 
     @Override
     public boolean canImport(final ServerSession sessObj, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws OXException {

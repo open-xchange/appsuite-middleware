@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -99,8 +99,8 @@ public abstract class AbstractDriveAction implements AJAXActionService {
          * check module permissions
          */
         {
-            CapabilityService capabilityService = Services.getService(CapabilityService.class);
-            if (null == capabilityService || false == capabilityService.getCapabilities(session).contains(DriveService.CAPABILITY_DRIVE)) {
+            CapabilityService capabilityService = Services.getService(CapabilityService.class, true);
+            if (false == capabilityService.getCapabilities(session).contains(DriveService.CAPABILITY_DRIVE)) {
                 throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("drive");
             }
         }
@@ -247,9 +247,8 @@ public abstract class AbstractDriveAction implements AJAXActionService {
         if (Strings.isEmpty(hostName)) {
             hostName = "localhost";
         }
-        return requestData.getHostname();
+        return hostName;
     }
-
 
     /**
      * Enables an unlimited body size by setting the maximum body size in the underlying {@link CountingHttpServletRequest} to

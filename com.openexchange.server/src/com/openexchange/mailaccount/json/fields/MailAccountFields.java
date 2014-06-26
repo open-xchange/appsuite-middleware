@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -87,7 +87,8 @@ public interface MailAccountFields {
     public static final String TRANSPORT_PASSWORD = "transport_password";
 
     /**
-     * Defines if IMAP credentials should be used for authentication
+     * Specifies if transport authentication is supposed being performed (with either dedicate credentials or the ones from mail services)
+     * or not (for transport services w/o authentication capability)
      */
     public static final String TRANSPORT_AUTH = "transport_auth";
 
@@ -144,5 +145,4 @@ public interface MailAccountFields {
     public static final String ADDRESSES = "addresses";
 
     public static final String META = "meta";
-
 }

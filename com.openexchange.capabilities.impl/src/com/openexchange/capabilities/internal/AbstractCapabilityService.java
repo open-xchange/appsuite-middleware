@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -131,7 +131,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                 if (Boolean.parseBoolean(propValue)) {
                     capabilities.add(getCapability(Permission.CALDAV));
                 } else {
-                    capabilities.remove(toLowerCase(Permission.CALDAV.name()));
+                    capabilities.remove(Permission.CALDAV.getCapabilityName());
                 }
             }
         });
@@ -143,7 +143,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                 if (Boolean.parseBoolean(propValue)) {
                     capabilities.add(getCapability(Permission.CARDDAV));
                 } else {
-                    capabilities.remove(toLowerCase(Permission.CARDDAV.name()));
+                    capabilities.remove(Permission.CARDDAV.getCapabilityName());
                 }
             }
         });
@@ -168,7 +168,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         }
         Capability capability = p2capabilities.get(permission);
         if (null == capability) {
-            final Capability newcapability = getCapability(toLowerCase(permission.name()));
+            final Capability newcapability = getCapability(permission.getCapabilityName());
             capability = p2capabilities.putIfAbsent(permission, newcapability);
             if (null == capability) {
                 capability = newcapability;
@@ -290,7 +290,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
     private static final Capability CAP_AUTO_LOGIN = new Capability("autologin");
 
     @Override
-    public CapabilitySet getCapabilities(final int userId, final int contextId, final boolean computeCapabilityFilters) throws OXException {
+    public CapabilitySet getCapabilities(final int userId, final int contextId, final boolean computeCapabilityFilters, final boolean allowCache) throws OXException {
         // Initialize server session
         ServerSession serverSession = ServerSessionAdapter.valueOf(userId, contextId);
 
@@ -305,7 +305,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         // ------------- Combined capabilities/permissions ------------ //
         if (!serverSession.isAnonymous()) {
             // Check cache
-            final CapabilitySet cachedCapabilitySet = optCachedCapabilitySet(userId, contextId);
+            final CapabilitySet cachedCapabilitySet = allowCache ? optCachedCapabilitySet(userId, contextId) : null;
             if (null != cachedCapabilitySet) {
                 capabilities = cachedCapabilitySet;
                 if (computeCapabilityFilters) {
@@ -417,12 +417,14 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                             } else {
                                 capabilities.remove(name);
                             }
-                        } else {
-                            // Check for a property handler
-                            final PropertyHandler handler = PROPERTY_HANDLERS.get(propName);
-                            if (null != handler) {
-                                handler.handleProperty(entry.getValue().get(), capabilities);
-                            }
+                        }
+                    }
+
+                    // Check for a property handler
+                    for (final Map.Entry<String, PropertyHandler> entry : PROPERTY_HANDLERS.entrySet()) {
+                        final ComposedConfigProperty<String> composedConfigProperty = all.get(entry.getKey());
+                        if (null != composedConfigProperty) {
+                            entry.getValue().handleProperty(composedConfigProperty.get(), capabilities);
                         }
                     }
 
@@ -436,7 +438,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                 final Set<String> set = new HashSet<String>();
                 final Set<String> removees = new HashSet<String>();
                 // Context-sensitive
-                for (final String sCap : getContextCaps(contextId)) {
+                for (final String sCap : getContextCaps(contextId, allowCache)) {
                     if (!isEmpty(sCap)) {
                         final char firstChar = sCap.charAt(0);
                         if ('-' == firstChar) {
@@ -454,7 +456,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                 }
                 // User-sensitive
                 if (userId > 0) {
-                    for (final String sCap : getUserCaps(userId, contextId)) {
+                    for (final String sCap : getUserCaps(userId, contextId, allowCache)) {
                         if (!isEmpty(sCap)) {
                             final char firstChar = sCap.charAt(0);
                             if ('-' == firstChar) {
@@ -523,7 +525,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             final Map<Permission, PermissionAvailabilityService> serviceList = registry.getServiceMap();
             for (final Permission p : PermissionAvailabilityService.CONTROLLED_PERMISSIONS) {
                 if (!serviceList.containsKey(p)) {
-                    capabilitiesToFilter.remove(toLowerCase(p.name()));
+                    capabilitiesToFilter.remove(p.getCapabilityName());
                 }
             }
         } else {
@@ -533,7 +535,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
 
     @Override
     public CapabilitySet getCapabilities(final int userId, final int contextId) throws OXException {
-        return getCapabilities(userId, contextId, false);
+        return getCapabilities(userId, contextId, false, true);
     }
 
     @Override
@@ -543,13 +545,13 @@ public abstract class AbstractCapabilityService implements CapabilityService {
 
     @Override
     public CapabilitySet getCapabilities(final Session session, final boolean computeCapabilityFilters) throws OXException {
-        return getCapabilities(session.getUserId(), session.getContextId(), computeCapabilityFilters);
+        return getCapabilities(session.getUserId(), session.getContextId(), computeCapabilityFilters, true);
     }
 
     private boolean check(String cap, ServerSession session, CapabilitySet allCapabilities) throws OXException {
         final Map<String, List<CapabilityChecker>> checkers = getCheckers();
 
-        List<CapabilityChecker> list = checkers.get(cap);
+        List<CapabilityChecker> list = checkers.get(cap.toLowerCase());
         if (null != list && !list.isEmpty()) {
             for (CapabilityChecker checker : list) {
                 try {
@@ -619,11 +621,11 @@ public abstract class AbstractCapabilityService implements CapabilityService {
      */
     protected abstract Map<String, List<CapabilityChecker>> getCheckers();
 
-    private Set<String> getContextCaps(final int contextId) throws OXException {
+    private Set<String> getContextCaps(final int contextId, final boolean allowCache) throws OXException {
         if (contextId <= 0) {
             return Collections.emptySet();
         }
-        final Cache cache = optContextCache();
+        final Cache cache = allowCache ? optContextCache() : null;
         if (null == cache) {
             return loadContextCaps(contextId);
         }
@@ -668,11 +670,11 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         }
     }
 
-    private Set<String> getUserCaps(final int userId, final int contextId) throws OXException {
+    private Set<String> getUserCaps(final int userId, final int contextId, final boolean allowCache) throws OXException {
         if (contextId <= 0 || userId <= 0) {
             return Collections.emptySet();
         }
-        final Cache cache = optUserCache();
+        final Cache cache = allowCache ? optUserCache() : null;
         if (null == cache) {
             return loadUserCaps(userId, contextId);
         }

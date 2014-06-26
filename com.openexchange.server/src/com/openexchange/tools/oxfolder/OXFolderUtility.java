@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -213,8 +213,7 @@ public final class OXFolderUtility {
                      */
                     try {
                         final int[] members = GroupStorage.getInstance().getGroup(permission.getEntity(), ctx).getMember();
-                        for (int j = 0; j < members.length; j++) {
-                            final int cur = members[j];
+                        for (final int cur : members) {
                             if (diff.contains(cur) && f.getFolderName().equals(folderName)) {
                                 affectedUsers.add(cur);
                                 // TODO: Throw exception if bug #9111 says
@@ -387,8 +386,7 @@ public final class OXFolderUtility {
         final int allowedFolderPermission = maxAllowedFolderPermission(folderId);
         final int admin = ctx.getMailadmin();
         if (FolderObject.SYSTEM_LDAP_FOLDER_ID == folderId) {
-            for (int i = 0; i < newPerms.length; i++) {
-                final OCLPermission newPerm = newPerms[i];
+            for (final OCLPermission newPerm : newPerms) {
                 if (newPerm.isGroupPermission()) {
                     final String i18nName = FolderObject.getFolderString(folderId, user.getLocale());
                     throw OXFolderExceptionCode.NO_GROUP_PERMISSION.create(null == i18nName ? getFolderName(
@@ -401,8 +399,8 @@ public final class OXFolderUtility {
                 checkSystemFolderObjectPermissions(folderId, newPerm, admin, allowedObjectPermissions, allowedFolderPermission, user, ctx);
             }
         } else {
-            for (int i = 0; i < newPerms.length; i++) {
-                final OCLPermission newPerm = newPerms[i];
+            for (OCLPermission newPerm2 : newPerms) {
+                final OCLPermission newPerm = newPerm2;
                 if (!newPerm.isGroupPermission() && newPerm.getEntity() != admin) {
                     final String i18nName = FolderObject.getFolderString(folderId, user.getLocale());
                     throw OXFolderExceptionCode.NO_INDIVIDUAL_PERMISSION.create(null == i18nName ? getFolderName(
@@ -634,8 +632,6 @@ public final class OXFolderUtility {
             } else if (parentId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
                 return (newFolderModule == FolderObject.INFOSTORE);
             }
-        } else if (parentModule == FolderObject.PROJECT) {
-            return (newFolderModule == FolderObject.PROJECT);
         } else if (parentModule == FolderObject.INFOSTORE) {
             return (newFolderModule == FolderObject.INFOSTORE);
         } else {
@@ -671,6 +667,7 @@ public final class OXFolderUtility {
             break;
         default:
             enforcedType = parentFolder.getType();
+            break;
         }
         return (newFolderType == enforcedType);
     }
@@ -853,8 +850,8 @@ public final class OXFolderUtility {
              */
             try {
                 final int[] members = GroupStorage.getInstance().getGroup(permission.getEntity(), ctx).getMember();
-                for (int j = 0; j < members.length; j++) {
-                    retval.add(members[j]);
+                for (int member : members) {
+                    retval.add(member);
                 }
             } catch (final OXException e) {
                 LOG.error("", e);
@@ -1005,8 +1002,6 @@ public final class OXFolderUtility {
 
     private static final String STR_MODULE_UNBOUND = "'unbound'";
 
-    private static final String STR_MODULE_PROJECT = "'project'";
-
     private static final String STR_MODULE_INFOSTORE = "'infostore'";
 
     /**
@@ -1027,8 +1022,6 @@ public final class OXFolderUtility {
             return STR_MODULE_UNBOUND;
         case FolderObject.SYSTEM_MODULE:
             return STR_SYSTEM;
-        case FolderObject.PROJECT:
-            return STR_MODULE_PROJECT;
         case FolderObject.INFOSTORE:
             return STR_MODULE_INFOSTORE;
         default:

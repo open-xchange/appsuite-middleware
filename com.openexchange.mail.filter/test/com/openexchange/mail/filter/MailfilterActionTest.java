@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -59,7 +59,7 @@ import com.openexchange.mailfilter.ajax.Credentials;
 import com.openexchange.mailfilter.ajax.actions.MailfilterAction;
 import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterExceptionCode;
 import com.openexchange.mailfilter.internal.MailFilterProperties;
-import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;
+import com.openexchange.mailfilter.services.Services;
 
 
 public class MailfilterActionTest extends MailfilterAction {
@@ -79,7 +79,7 @@ public class MailfilterActionTest extends MailfilterAction {
 
     @Test
     public void testGetRightPasswordNothing() throws OXException {
-        final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+        final ConfigurationService config = Services.getService(ConfigurationService.class);
         final String credsPW = "pw2";
         final Credentials creds = new Credentials("", credsPW, 0, 0);
         try {
@@ -93,7 +93,7 @@ public class MailfilterActionTest extends MailfilterAction {
     @Test
     public void testGetRightPasswordSession() throws OXException {
         Common.simConfigurationService.stringProperties.put(MailFilterProperties.Values.SIEVE_PASSWORDSRC.property, MailFilterProperties.PasswordSource.SESSION.name);
-        final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+        final ConfigurationService config = Services.getService(ConfigurationService.class);
         final String credsPW = "pw2";
         final Credentials creds = new Credentials("", credsPW, 0, 0);
         final String rightPassword = getRightPassword(config, creds);
@@ -103,7 +103,7 @@ public class MailfilterActionTest extends MailfilterAction {
     @Test
     public void testGetRightPasswordGlobalNoMasterPW() throws OXException {
         Common.simConfigurationService.stringProperties.put(MailFilterProperties.Values.SIEVE_PASSWORDSRC.property, MailFilterProperties.PasswordSource.GLOBAL.name);
-        final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+        final ConfigurationService config = Services.getService(ConfigurationService.class);
         final String credsPW = "pw2";
         final Credentials creds = new Credentials("", credsPW, 0, 0);
         try {
@@ -119,7 +119,7 @@ public class MailfilterActionTest extends MailfilterAction {
         final String masterPW = "masterPW";
         Common.simConfigurationService.stringProperties.put(MailFilterProperties.Values.SIEVE_PASSWORDSRC.property, MailFilterProperties.PasswordSource.GLOBAL.name);
         Common.simConfigurationService.stringProperties.put(MailFilterProperties.Values.SIEVE_MASTERPASSWORD.property, masterPW);
-        final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+        final ConfigurationService config = Services.getService(ConfigurationService.class);
         final String credsPW = "pw2";
         final Credentials creds = new Credentials("", credsPW, 0, 0);
         final String rightPassword = getRightPassword(config, creds);

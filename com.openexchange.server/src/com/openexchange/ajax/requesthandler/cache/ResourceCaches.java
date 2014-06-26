@@ -57,7 +57,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 
 /**
@@ -104,11 +103,12 @@ public class ResourceCaches {
      * @param optParameters Optional parameters to consider
      * @return The appropriate cache key
      */
-    public static String generatePreviewCacheKey(final String eTag, final AJAXRequestData requestData) {
-        final StringAllocator sb = new StringAllocator(512);
+    public static String generatePreviewCacheKey(final String eTag, final AJAXRequestData requestData, final String... additionalParams) {
+        final StringBuilder sb = new StringBuilder(512);
         sb.append(requestData.getModule());
         sb.append('-').append(requestData.getAction());
         sb.append('-').append(requestData.getSession().getContextId());
+
         // Append sorted parameters
         {
             final List<String> parameters = new ArrayList<String>(requestData.getParameters().keySet());
@@ -123,11 +123,28 @@ public class ResourceCaches {
                 }
             }
         }
+
+        // Append additional parameters, if given
+        if (null != additionalParams) {
+            for (final String additionalParam : additionalParams) {
+                if (!Strings.isEmpty(additionalParam)) {
+                    sb.append('-').append(additionalParam);
+                }
+            }
+        }
+
         // Generate MD5 sum
         try {
             final byte[] md5Bytes = sb.toString().getBytes("UTF-8");
-            sb.setNewLength(0);
-            return sb.append(eTag).append('-').append(asHex(MessageDigest.getInstance("MD5").digest(md5Bytes))).toString();
+            final String hashedParams = asHex(MessageDigest.getInstance("MD5").digest(md5Bytes));
+            String prefix = eTag;
+
+            // ensure key size does not exceed 128 characters (current db limit)
+            if (prefix.length() + 33 > 128) {
+                prefix = asHex(MessageDigest.getInstance("MD5").digest(prefix.getBytes()));
+            }
+            sb.setLength(0);
+            return sb.append(prefix).append('-').append(hashedParams).toString();
         } catch (final UnsupportedEncodingException e) {
             // Shouldn't happen
             LOG.error("", e);

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -78,7 +78,7 @@ public final class PreviewCacheCreateDataTableService extends AbstractCreateTabl
             " cid INT4 unsigned NOT NULL," +
             " user INT4 unsigned NOT NULL," +
             " id VARCHAR(128) CHARACTER SET latin1 NOT NULL," +
-            " data BLOB," +
+            " data LONGBLOB," +
             " PRIMARY KEY (cid, user, id)," +
             " INDEX `globaldocument` (cid, id)" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" };

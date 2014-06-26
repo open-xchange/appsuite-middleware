@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -64,7 +64,6 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.LogProperties.Name;
 import com.openexchange.mail.MailExceptionCode;
@@ -530,7 +529,7 @@ public class MimeMailException extends OXException {
         if (null == folder) {
             return info;
         }
-        final StringAllocator sb = null == info ? new StringAllocator(64) : new StringAllocator(info);
+        final StringBuilder sb = null == info ? new StringBuilder(64) : new StringBuilder(info);
         sb.append(" (folder=\"").append(folder.getFullName()).append('"');
         final Store store = folder.getStore();
         if (null != store) {
@@ -645,7 +644,7 @@ public class MimeMailException extends OXException {
             return defaultValue;
         }
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -76,6 +76,7 @@ public class ContextLoadTaskRegisterer implements ServiceTrackerCustomizer<Conte
         this.context = context;
     }
 
+    @Override
     public ContextService addingService(final ServiceReference<ContextService> reference) {
         final ContextService service = context.getService(reference);
         task = new ContextLoadTask(service);
@@ -84,10 +85,12 @@ public class ContextLoadTaskRegisterer implements ServiceTrackerCustomizer<Conte
         return service;
     }
 
+    @Override
     public void modifiedService(final ServiceReference<ContextService> reference, final ContextService service) {
         // Nothing to do.
     }
 
+    @Override
     public void removedService(final ServiceReference<ContextService> reference, final ContextService service) {
         registration.unregister();
         task = null;

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -54,21 +54,21 @@ import org.json.JSONObject;
 /**
  * {@link Address} - Represents an address.
  * <p>
- *
+ * 
  * <pre>
  *     "private_address": {
  *       "city": "Hamburg",
  *       "country": "DE",
  *       "zip_code": "20357",
  *       "street": "Privatstra\u00dfe 1",
- *       "phone": "49|40|1234560",
- *       "fax": "||",
+ *       "phone": "+49|40|1234560",
+ *       "fax": null,
  *       "province": "Hamburg",
  *       "email": "max@mustermann.de",
- *       "mobile_phone": "49|0155|1234567"
+ *       "mobile_phone": "+49|0155|1234567"
  *     }
  * </pre>
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Address {
@@ -92,11 +92,35 @@ public class Address {
         this.country = addressInformation.optString("country", null);
         this.zipCode = addressInformation.optString("zip_code", null);
         this.street = addressInformation.optString("street", null);
-        this.phone = addressInformation.optString("phone", null);
-        this.fax = addressInformation.optString("fax", null);
+        this.phone = sanitizePhoneNumber(addressInformation.optString("phone", null));
+        this.fax = sanitizePhoneNumber(addressInformation.optString("fax", null));
         this.province = addressInformation.optString("province", null);
         this.email = addressInformation.optString("email", null);
-        this.mobilePhone = addressInformation.optString("mobile_phone", null);
+        this.mobilePhone = sanitizePhoneNumber(addressInformation.optString("mobile_phone", null));
+    }
+
+    /**
+     * Sanitizes the phone number so that it starts with a '+' or '00'
+     * 
+     * @param phoneNumber - the number to sanitize
+     * @return String with the sanitized number or 'null' if provided
+     */
+    private String sanitizePhoneNumber(String phoneNumber) {
+        if (phoneNumber == null) {
+            return phoneNumber;
+        }
+
+        String toSanitize = phoneNumber;
+
+        if (toSanitize.equalsIgnoreCase("null")) {
+            return toSanitize;
+        } else if ((toSanitize.startsWith("+") || (toSanitize.startsWith("00")))) {
+            return toSanitize;
+        } else {
+            toSanitize = "+" + toSanitize;
+        }
+
+        return toSanitize;
     }
 
     /**

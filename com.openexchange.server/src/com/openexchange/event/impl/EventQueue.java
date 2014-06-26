@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -258,6 +258,10 @@ public final class EventQueue {
             LOG.info("Shutting down event system, so no events are accepted. Throwing Invalid State Exception");
             throw new OXException().setLogMessage("Event system is being shut down and therefore does not accept new events.");
         }
+        if (null == eventObj) {
+            LOG.warn("Skipping null event", new Throwable());
+            return;
+        }
         LOG.debug("add EventObject: {}", eventObj);
 
         if (!isEnabled) {
@@ -304,6 +308,10 @@ public final class EventQueue {
     }
 
     protected static void event(final EventObject eventObj, final boolean noDelay) {
+        if (null == eventObj) {
+            LOG.warn("Skipping null event", new Throwable());
+            return;
+        }
         final int module = eventObj.getModule();
         switch (module) {
         case Types.APPOINTMENT:
@@ -708,8 +716,18 @@ public final class EventQueue {
         } finally {
             // Just in case another Thread also stopped the queue, we have to
             // wake that one up as well
-            ALL_EVENTS_PROCESSED.signalAll();
+            signalAll(ALL_EVENTS_PROCESSED);
             SHUTDOWN_LOCK.unlock();
+        }
+    }
+
+    private static void signalAll(final Condition condition) {
+        if (null != condition) {
+            try {
+                condition.signalAll();
+            } catch (final Exception e) {
+                // Ignore
+            }
         }
     }
 

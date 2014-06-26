@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -454,9 +454,26 @@ public class OXFolderAccess {
      * @throws OXException If operation fails
      */
     public final FolderObject getDefaultFolder(final int userId, final int module) throws OXException {
+        return getDefaultFolder(userId, module, -1);
+    }
+
+    /**
+     * Determines user's default folder of given module.
+     *
+     * @param userId The user ID
+     * @param module The module
+     * @param type The type, or <code>-1</code> if not applicable
+     * @return The user's default folder of given module
+     * @throws OXException If operation fails
+     */
+    public final FolderObject getDefaultFolder(final int userId, final int module, final int type) throws OXException {
         try {
-            final int folderId = OXFolderSQL.getUserDefaultFolder(userId, module, readCon, ctx);
-            if (folderId == -1) {
+            /*
+             * Read out default folder
+             */
+            int folderId = -1 == type ? OXFolderSQL.getUserDefaultFolder(userId, module, readCon, ctx) :
+                OXFolderSQL.getUserDefaultFolder(userId, module, type, readCon, ctx);
+            if (-1 == folderId) {
                 if (FolderObject.INFOSTORE != module) {
                     throw OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.create(
                         folderModule2String(module),
@@ -464,24 +481,43 @@ public class OXFolderAccess {
                         Integer.valueOf(ctx.getContextId()));
                 }
                 /*
-                 * Re-Create default infostore folder
+                 * (Re-)Create default infostore / infostore trash folder on demand
                  */
+                User user = UserStorage.getInstance().getUser(userId, ctx);
                 final Connection wc = DBPool.pickupWriteable(ctx);
+                boolean rollback = false;
+                boolean created = false;
                 try {
                     wc.setAutoCommit(false);
-                    final String displayName = UserStorage.getInstance().getUser(userId, ctx).getDisplayName();
-                    final int fuid = new OXFolderAdminHelper().addUserToInfoStore(userId, displayName, ctx.getContextId(), wc);
+                    rollback = true;
+                    /*
+                     * Check existence again within this transaction to avoid race conditions
+                     */
+                    folderId = -1 == type ? OXFolderSQL.getUserDefaultFolder(userId, module, wc, ctx) :
+                        OXFolderSQL.getUserDefaultFolder(userId, module, type, wc, ctx);
+                    if (-1 == folderId) {
+                        /*
+                         * Not found, create default folder
+                         */
+                        if (FolderObject.TRASH == type) {
+                            folderId = new OXFolderAdminHelper().addUserTrashToInfoStore(userId, user.getPreferredLanguage(), ctx.getContextId(), wc);
+                        } else {
+                            folderId = new OXFolderAdminHelper().addUserToInfoStore(userId, user.getPreferredLanguage(), ctx.getContextId(), wc);
+                        }
+                        created = true;
+                    }
                     wc.commit();
-                    return getFolderObject(fuid);
-                } catch (final SQLException e) {
-                    DBUtils.rollback(wc);
-                    throw e;
-                } catch (final Exception e) {
-                    DBUtils.rollback(wc);
-                    throw e;
+                    rollback = false;
                 } finally {
+                    if (rollback) {
+                        DBUtils.rollback(wc);
+                    }
                     DBUtils.autocommit(wc);
-                    DBPool.closeWriterSilent(ctx, wc);
+                    if (created) {
+                        DBPool.closeWriterSilent(ctx, wc);
+                    } else {
+                        DBPool.closeWriterAfterReading(ctx, wc);
+                    }
                 }
             }
             return getFolderObject(folderId);
@@ -489,7 +525,7 @@ public class OXFolderAccess {
             throw e;
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (final RuntimeException e) {
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         }
     }
@@ -580,8 +616,6 @@ public class OXFolderAccess {
             } else if (module == FolderObject.CONTACT) {
                 final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
                 return contactService.containsForeignObjectInFolder(session, String.valueOf(folder.getObjectID()));
-            } else if (module == FolderObject.PROJECT) {
-                return false;
             } else if (module == FolderObject.INFOSTORE) {
                 final InfostoreFacade db = new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
                 return db.hasFolderForeignObjects(folder.getObjectID(), ServerSessionAdapter.valueOf(session, ctx));
@@ -628,8 +662,6 @@ public class OXFolderAccess {
                 final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
                 return contactService.isFolderEmpty(session, String.valueOf(folder.getObjectID()));
             }
-            case FolderObject.PROJECT:
-                return true;
             case FolderObject.INFOSTORE: {
                 final InfostoreFacade db =
                     new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
@@ -656,7 +688,7 @@ public class OXFolderAccess {
      */
     public long getItemCount(final FolderObject folder, final Session session, final Context ctx) throws OXException {
         try {
-            final int userId = session.getUserId();
+            session.getUserId();
             switch (folder.getModule()) {
             case FolderObject.TASK: {
                 return new TasksSQLImpl(session).countTasks(folder);
@@ -677,8 +709,6 @@ public class OXFolderAccess {
                     }
                     throw e;
                 }
-            case FolderObject.PROJECT:
-                return 0;
             case FolderObject.INFOSTORE:
                 try {
                     final InfostoreFacade db = new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));

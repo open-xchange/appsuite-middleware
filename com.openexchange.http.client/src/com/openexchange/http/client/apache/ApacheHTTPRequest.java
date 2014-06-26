@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -83,7 +83,8 @@ public class ApacheHTTPRequest implements HTTPRequest {
 		this.reqBuilder = builder;
 	}
 
-	public HTTPResponse execute() throws OXException {
+	@Override
+    public HTTPResponse execute() throws OXException {
 		try {
 			HttpState state = coreBuilder.getState();
 			if (state != null) {
@@ -107,12 +108,14 @@ public class ApacheHTTPRequest implements HTTPRequest {
 		}
 	}
 
-	public Map<String, String> getHeaders() {
+	@Override
+    public Map<String, String> getHeaders() {
 		return headers;
 	}
 
 
-	public Map<String, String> getParameters() {
+	@Override
+    public Map<String, String> getParameters() {
 		return parameters;
 	}
 

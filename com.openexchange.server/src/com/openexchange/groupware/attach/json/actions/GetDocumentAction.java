@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -63,8 +63,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
-import com.openexchange.log.Log;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -82,7 +80,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "module", description = "Module ID (as per Attachment object) of the attached object."),
     @Parameter(name = "id", description = "Object ID of the requested attachment."),
     @Parameter(name = "content_type", optional=true, description = "If set the responses Content-Type header is set to this value, not the attachements file mime type.")
-}, responseDescription = "The raw byte data of the document. The response type for the HTTP Request is set accordingly to the defined mimetype for this infoitem. Note: The Filename may be added to the customary infostore path to suggest a filename to a Save-As dialog.")
+}, responseDescription = "The raw byte data of the document. The response type for the HTTP Request is set accordingly to the defined mimetype for this infoitem. Note: The File name may be added to the customary infostore path to suggest a filename to a Save-As dialog.")
 public final class GetDocumentAction extends AbstractAttachmentAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GetDocumentAction.class);
@@ -157,7 +155,7 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
                 } else {
                     // Specified Content-Type does NOT match file's real MIME type
                     // Therefore ignore it due to security reasons (see bug #25343)
-                    final StringAllocator sb = new StringAllocator(128);
+                    final StringBuilder sb = new StringBuilder(128);
                     sb.append("Denied parameter \"").append(AJAXServlet.PARAMETER_CONTENT_TYPE).append("\" due to security constraints (");
                     sb.append(contentType).append(" vs. ").append(preferredContentType).append(").");
                     LOG.warn(sb.toString());
@@ -206,19 +204,6 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
         }
     }
 
-    /** Check for an empty string */
-    private boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
     private String toLowerCase(final CharSequence chars) {
         if (null == chars) {
             return null;
@@ -233,7 +218,7 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
     }
 
     private String getPrimaryType(final String contentType) {
-        if (isEmpty(contentType)) {
+        if (com.openexchange.java.Strings.isEmpty(contentType)) {
             return contentType;
         }
         final int pos = contentType.indexOf('/');

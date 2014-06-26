@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -88,6 +88,10 @@ public class UpdateAction extends AbstractMessagingAccountAction {
             throw MessagingExceptionCodes.MISSING_PARAMETER.create("id");
         }
         final MessagingAccount account = parser.parse(data, session.getUserId(), session.getContextId());
+
+        // Check integrity of messaging service and configuration
+        checkAccountConfiguration(account, session);
+
         account.getMessagingService().getAccountManager().updateAccount(account, session);
         return new AJAXRequestResult(Integer.valueOf(1));
     }

@@ -49,7 +49,10 @@
 
 package com.openexchange.logging.mbean;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import ch.qos.logback.classic.Level;
 import com.openexchange.management.MBeanMethodAnnotation;
 
 /**
@@ -70,39 +73,39 @@ public interface LogbackConfigurationMBean {
     /**
      * Filter context
      * @param contextID
+     * @return response object
      */
-    @MBeanMethodAnnotation (description="Create a filter for the specified contextID", parameters={"contextID"}, parameterDescriptions={"The contextID for which to apply the filter"})
-    public void filterContext(int contextID);
+    @MBeanMethodAnnotation (description="Create a filter for the specified contextID", parameters={"contextID", "loggers"}, parameterDescriptions={"The contextID for which to apply the filter", "A Map of logger/level pairs"})
+    public LogbackMBeanResponse filterContext(int contextID, Map<String, Level> loggers);
 
     /**
      * Filter user
      * @param userID
      * @param contextID
      */
-    @MBeanMethodAnnotation (description="Create a filter for the specified userID contextID combo", parameters={"userID", "contextID"}, parameterDescriptions={"The userID for which to apply the filter", "The contextID for which to apply the filter"})
-    public void filterUser(int userID, int contextID);
+    @MBeanMethodAnnotation (description="Create a filter for the specified userID contextID combo", parameters={"userID", "contextID", "loggers"}, parameterDescriptions={"The userID for which to apply the filter", "The contextID for which to apply the filter", "A Map of logger/level pairs"})
+    public LogbackMBeanResponse filterUser(int userID, int contextID, Map<String, Level> loggers);
 
     /**
      * Filter session
      * @param sessionID
      */
-    @MBeanMethodAnnotation (description="Create a filter for the specified sessionID", parameters={"sessionID"}, parameterDescriptions={"The sessionID for which to apply the filter"})
-    public void filterSession(String sessionID);
+    @MBeanMethodAnnotation (description="Create a filter for the specified sessionID", parameters={"sessionID", "loggers"}, parameterDescriptions={"The sessionID for which to apply the filter", "A Map of logger/level pairs"})
+    public LogbackMBeanResponse filterSession(String sessionID, Map<String, Level> loggers);
 
     /**
-     * Set the specified level for the specified loggers
+     * Modifies the specified level for the specified loggers
      * @param loggers
-     * @param level
      */
-    @MBeanMethodAnnotation (description="Set the log level for the specified set of loggers", parameters={"level", "loggers"}, parameterDescriptions={"The desired log level for the specified loggers", "Loggers for which to apply the specified log level"})
-    public void setLogLevel(String level, String[] loggers);
+    @MBeanMethodAnnotation (description="Set the log levels for the specified set of loggers", parameters={"loggers"}, parameterDescriptions={"A Map of logger/level pairs"})
+    public LogbackMBeanResponse modifyLogLevels(Map<String, Level> loggers);
 
     /**
      * Overrides Exception categories to be suppressed (comma separated).
      * @param categories
      */
     @MBeanMethodAnnotation (description="Overrides Exception categories to be suppressed (comma separated).", parameters={"categories"}, parameterDescriptions={"The categories to be suppressed when logging."})
-    public void overrideExceptionCategories(String categories);
+    public LogbackMBeanResponse overrideExceptionCategories(String categories);
 
     /**
      * Returns the Exception categories to be suppressed (comma separated).
@@ -114,24 +117,27 @@ public interface LogbackConfigurationMBean {
     /**
      * Remove the context filter
      * @param contextID
+     * @param loggers loggers to remove from the filter (if the list is empty, then the entire filter is removed)
      */
-    @MBeanMethodAnnotation (description="Remove the context filter for the specified contextID", parameters={"contextID"}, parameterDescriptions={"The contextID for which to remove the logging filter"})
-    public void removeContextFilter(int contextID);
+    @MBeanMethodAnnotation (description="Remove the context filter for the specified contextID", parameters={"contextID", "loggers"}, parameterDescriptions={"The contextID for which to remove the logging filter", "Loggers to remove from the filter"})
+    public LogbackMBeanResponse removeContextFilter(int contextID, List<String> loggers);
 
     /**
      * Remove the user filter
      * @param userID
      * @param contextID
+     * @param loggers loggers to remove from the filter (if the list is empty, then the entire filter is removed)
      */
-    @MBeanMethodAnnotation (description="Remove the user filter for the specified userID, contextID combo", parameters={"userID", "contextID"}, parameterDescriptions={"The userID for which to remove the logging filter", "The contextID for which to remove the logging filter"})
-    public void removeUserFilter(int userID, int contextID);
+    @MBeanMethodAnnotation (description="Remove the user filter for the specified userID, contextID combo", parameters={"userID", "contextID", "loggers"}, parameterDescriptions={"The userID for which to remove the logging filter", "The contextID for which to remove the logging filter", "Loggers to remove from the filter"})
+    public LogbackMBeanResponse removeUserFilter(int userID, int contextID, List<String> loggers);
 
     /**
      * Remove the session filter
      * @param sessionID
+     * @param loggers loggers to remove from the filter (if the list is empty, then the entire filter is removed)
      */
-    @MBeanMethodAnnotation (description="Remove the session filter for the specified sessionID", parameters={"sessionID"}, parameterDescriptions={"The sessionID for which to remove the logging filter"})
-    public void removeSessionFilter(String sessionID);
+    @MBeanMethodAnnotation (description="Remove the session filter for the specified sessionID", parameters={"sessionID", "loggers"}, parameterDescriptions={"The sessionID for which to remove the logging filter", "Loggers to remove from the filter"})
+    public LogbackMBeanResponse removeSessionFilter(String sessionID, List<String> loggers);
 
     /**
      * Returns a list with all loggers of the system along with their log level.
@@ -170,7 +176,7 @@ public interface LogbackConfigurationMBean {
      * Removes all filters
      */
     @MBeanMethodAnnotation (description="Remove all logging filters", parameters={}, parameterDescriptions={})
-    public void removeAllFilters();
+    public LogbackMBeanResponse clearFilters();
 
     /**
      * Filter user

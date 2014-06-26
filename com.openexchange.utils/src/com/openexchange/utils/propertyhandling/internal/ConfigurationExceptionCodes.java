@@ -50,9 +50,10 @@
 package com.openexchange.utils.propertyhandling.internal;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 
 /**
@@ -60,25 +61,33 @@ import com.openexchange.exception.OXExceptionFactory;
  *
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  */
-public enum ConfigurationExceptionCodes implements OXExceptionCode {
+public enum ConfigurationExceptionCodes implements DisplayableOXExceptionCode {
 
-    NO_CONFIGURATION_SERVICE_FOUND(ConfigurationExceptionMessages.NO_CONFIGURATION_SERVICE_FOUND_MSG, CATEGORY_CONFIGURATION,1),
-    NO_INTEGER_VALUE(ConfigurationExceptionMessages.NO_INTEGER_VALUE_MSG, CATEGORY_CONFIGURATION,2),
-    REQUIRED_PROPERTY_NOT_SET(ConfigurationExceptionMessages.REQUIRED_PROPERTIY_NOT_SET_MSG, CATEGORY_CONFIGURATION, 3),
-    CONDITION_NOT_SET(ConfigurationExceptionMessages.CONDITION_NOT_SET_MSG, CATEGORY_CONFIGURATION, 4),
-    MUST_BE_SET_TO(ConfigurationExceptionMessages.MUST_BE_SET_TO_MSG, CATEGORY_CONFIGURATION, 5),
-    UNKNOWN_TYPE_CLASS(ConfigurationExceptionMessages.UNKNOWN_TYPE_CLASS_MSG, CATEGORY_CONFIGURATION, 6);
+    NO_CONFIGURATION_SERVICE_FOUND("No configuration service found.", CATEGORY_CONFIGURATION, 1, null),
+
+    NO_INTEGER_VALUE("The value given in the property %1$s is no integer value.", CATEGORY_CONFIGURATION, 2, null),
+
+    REQUIRED_PROPERTY_NOT_SET("Property %1$s not set but required.", CATEGORY_CONFIGURATION, 3, null),
+
+    CONDITION_NOT_SET("Property %1$s claims to have condition but condition not set.", CATEGORY_CONFIGURATION, 4, null),
+
+    MUST_BE_SET_TO("Property %1$s must be set if %2$s is set to %3$s", CATEGORY_CONFIGURATION, 5, null),
+
+    UNKNOWN_TYPE_CLASS("The %1$s cannot be used as a property type in the property %2$s", CATEGORY_CONFIGURATION, 6, null);
 
     private final Category category;
 
     private final int detailNumber;
 
     private final String message;
+    
+    private String displayMessage;
 
-    private ConfigurationExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private ConfigurationExceptionCodes(final String message, final Category category, final int detailNumber, String displayMessage) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -106,6 +115,11 @@ public enum ConfigurationExceptionCodes implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     /**

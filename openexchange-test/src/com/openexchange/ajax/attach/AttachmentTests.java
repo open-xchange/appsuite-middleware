@@ -59,7 +59,7 @@ import org.junit.runners.Suite.SuiteClasses;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 @RunWith(Suite.class)
-@SuiteClasses({ SimpleAttachmentTest.class, TaskAttachmentTest.class, Bug24876Test.class })
+@SuiteClasses({ SimpleAttachmentTest.class, TaskAttachmentTest.class, Bug24876Test.class, Bug26544Test.class, Bug30701Test.class })
 public final class AttachmentTests {
 
     private AttachmentTests() {

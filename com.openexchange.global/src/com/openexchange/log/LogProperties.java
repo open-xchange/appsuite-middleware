@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -67,7 +67,6 @@ import org.slf4j.MDC;
 import org.slf4j.spi.MDCAdapter;
 import ch.qos.logback.classic.util.LogbackMDCAdapter;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.session.Session;
 
 /**
@@ -609,7 +608,7 @@ public final class LogProperties {
             }
         }
         // If we have additional log properties from the ThreadLocal add it to the logBuilder
-        final StringAllocator logBuilder = new StringAllocator(1024);
+        final StringBuilder logBuilder = new StringBuilder(1024);
         // Sort the properties for readability
         final Map<String, String> sorted = new TreeMap<String, String>();
         final String sep = System.getProperty("line.separator");

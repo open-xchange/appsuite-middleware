@@ -1,6 +1,9 @@
 package com.openexchange.groupware.container;
 
-import static com.openexchange.groupware.container.CommonObject.*;
+import static com.openexchange.groupware.container.CommonObject.CATEGORIES;
+import static com.openexchange.groupware.container.CommonObject.COLOR_LABEL;
+import static com.openexchange.groupware.container.CommonObject.NUMBER_OF_ATTACHMENTS;
+import static com.openexchange.groupware.container.CommonObject.PRIVATE_FLAG;
 
 public class CommonObjectTest extends FolderChildObjectTest {
     @Override
@@ -17,12 +20,8 @@ public class CommonObjectTest extends FolderChildObjectTest {
         otherDataObject.setNumberOfAttachments(-2);
         assertDifferences(dataObject, otherDataObject , CommonObject.CATEGORIES, CommonObject.COLOR_LABEL, CommonObject.NUMBER_OF_ATTACHMENTS);
 
-        otherDataObject.setNumberOfLinks(-2);
-        assertDifferences(dataObject, otherDataObject , CommonObject.CATEGORIES, CommonObject.COLOR_LABEL, CommonObject.NUMBER_OF_ATTACHMENTS, CommonObject.NUMBER_OF_LINKS);
-
-
         otherDataObject.setPrivateFlag(false);
-        assertDifferences(dataObject, otherDataObject , CommonObject.CATEGORIES, CommonObject.COLOR_LABEL, CommonObject.NUMBER_OF_ATTACHMENTS, CommonObject.NUMBER_OF_LINKS, CommonObject.PRIVATE_FLAG);
+        assertDifferences(dataObject, otherDataObject , CommonObject.CATEGORIES, CommonObject.COLOR_LABEL, CommonObject.NUMBER_OF_ATTACHMENTS, CommonObject.PRIVATE_FLAG);
 
     }
 
@@ -64,25 +63,6 @@ public class CommonObjectTest extends FolderChildObjectTest {
         object.remove(CATEGORIES);
         assertFalse(object.contains(CATEGORIES));
         assertFalse(object.containsCategories());
-
-
-
-        // NUMBER_OF_LINKS
-        assertFalse(object.contains(NUMBER_OF_LINKS));
-        assertFalse(object.containsNumberOfLinks());
-
-        object.setNumberOfLinks(-12);
-        assertTrue(object.contains(NUMBER_OF_LINKS));
-        assertTrue(object.containsNumberOfLinks());
-        assertEquals(-12, object.get(NUMBER_OF_LINKS));
-
-        object.set(NUMBER_OF_LINKS,12);
-        assertEquals(12, object.getNumberOfLinks());
-
-        object.remove(NUMBER_OF_LINKS);
-        assertFalse(object.contains(NUMBER_OF_LINKS));
-        assertFalse(object.containsNumberOfLinks());
-
 
 
         // NUMBER_OF_ATTACHMENTS
@@ -130,7 +110,6 @@ public class CommonObjectTest extends FolderChildObjectTest {
         co.setCategories("c1, c2, c3");
         co.setLabel(1);
         co.setNumberOfAttachments(2);
-        co.setNumberOfLinks(3);
         co.setPersonalFolderID(12);
         co.setPrivateFlag(true);
     }

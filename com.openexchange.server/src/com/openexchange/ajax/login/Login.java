@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,11 +50,13 @@
 package com.openexchange.ajax.login;
 
 import java.io.IOException;
+import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.exception.OXException;
+import com.openexchange.login.LoginRampUpService;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
@@ -76,7 +78,8 @@ public class Login extends AbstractLoginRequestHandler {
      * 
      * @param login
      */
-    public Login(LoginConfiguration conf) {
+    public Login(LoginConfiguration conf, Set<LoginRampUpService> rampUp) {
+        super(rampUp);
         this.conf = conf;
     }
 

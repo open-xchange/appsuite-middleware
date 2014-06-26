@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -55,6 +55,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
 
 /**
  * PushConfigInterface
@@ -96,11 +97,11 @@ public class PushConfigurationImpl extends AbstractConfigWrapper implements Push
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushConfigurationImpl.class);
 
-    public PushConfigurationImpl(final ConfigurationService conf) {
+    public PushConfigurationImpl(final ConfigurationService conf) throws OXException {
         this(conf, false);
     }
 
-    public PushConfigurationImpl(final ConfigurationService conf, final boolean ignoreIsInit) {
+    public PushConfigurationImpl(final ConfigurationService conf, final boolean ignoreIsInit) throws OXException {
         if (!ignoreIsInit && isInit) {
             return;
         }
@@ -195,6 +196,11 @@ public class PushConfigurationImpl extends AbstractConfigWrapper implements Push
         } catch (UnknownHostException e) {
             LOG.error("Unable to determine internet address for hostname: {}", hostnameString, e);
         }
+        
+        if (hostname == null) {
+            throw PushUDPExceptionCode.UNRESOLVABLE_HOSTNAME.create(hostnameString);
+        }
+        
         LOG.info("Using {} for inter OX UDP communication.", hostname.getHostAddress());
 
         isInit = true;

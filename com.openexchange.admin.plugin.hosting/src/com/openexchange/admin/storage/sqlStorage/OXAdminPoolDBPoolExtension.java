@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -108,11 +108,7 @@ public class OXAdminPoolDBPoolExtension extends OXAdminPoolDBPool implements OXA
 
     @Override
     public void resetPoolMappingForContext(int contextId) throws PoolException {
-        try {
-            getService().invalidate(contextId);
-        } catch (OXException e) {
-            throw new PoolException("" + e.getMessage(), e);
-        }
+        getService().invalidate(contextId);
     }
 
     @Override

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,15 +52,14 @@ package com.openexchange.pop3;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 
 /**
- * {@link OXExceptionCode} - The POP3 error codes.
- *
+ * {@link DisplayableOXExceptionCode} - The POP3 error codes.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum POP3ExceptionCode implements DisplayableOXExceptionCode {
@@ -126,7 +125,7 @@ public enum POP3ExceptionCode implements DisplayableOXExceptionCode {
      */
     FOLDER_DOES_NOT_HOLD_FOLDERS("Folder %1$s does not allow subfolders.", POP3ExceptionMessage.FOLDER_DOES_NOT_HOLD_FOLDERS_MSG, CATEGORY_PERMISSION_DENIED, 2012),
     /**
-     * Mail folder cannot be created/rename. Name must not contain character '%1$s'
+     * Invalid folder name: "%1$s". Please avoid the following characters: %2$s
      */
     INVALID_FOLDER_NAME(MailExceptionCode.INVALID_FOLDER_NAME),
     /**
@@ -391,7 +390,7 @@ public enum POP3ExceptionCode implements DisplayableOXExceptionCode {
     private final Category category;
 
     private final String prefix;
-    
+
     private final String displayMessage;
 
     private POP3ExceptionCode(final String message, final String displayMessage, final Category category, final int detailNumber) {

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,10 +49,7 @@
 
 package com.openexchange.admin.rmi.impl;
 
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -60,6 +57,7 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.services.PluginInterfaces;
 import com.openexchange.admin.storage.interfaces.OXAuthStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
@@ -72,11 +70,10 @@ public class BasicAuthenticator extends OXCommonImpl {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(BasicAuthenticator.class);
 
-    private OXAuthStorageInterface sqlAuth = null;
-    private OXAuthStorageInterface fileAuth = null;
-    private AdminCache cache = null;
-
-    private BundleContext context = null;
+    private final OXAuthStorageInterface sqlAuth;
+    private final OXAuthStorageInterface fileAuth;
+    private final AdminCache cache;
+    private final BundleContext context;
 
     /**
      * Use this constructor when additional bundles should be able to
@@ -94,6 +91,7 @@ public class BasicAuthenticator extends OXCommonImpl {
      * @throws StorageException  */
     public BasicAuthenticator() throws StorageException {
         super();
+        this.context = null;
         sqlAuth  = OXAuthStorageInterface.getInstanceSQL();
         fileAuth = OXAuthStorageInterface.getInstanceFile();
         cache = ClientAdminThread.cache;
@@ -116,23 +114,15 @@ public class BasicAuthenticator extends OXCommonImpl {
         // only let other plugins authenticate, when we have the BundleContext
         // AND when
         if( this.context != null && doPluginAuth) {
-            final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
-            for (final Bundle bundle : bundles) {
-                final String bundlename = bundle.getSymbolicName();
-                if (Bundle.ACTIVE == bundle.getState()) {
-                    final ServiceReference[] servicereferences = bundle.getRegisteredServices();
-                    if (null != servicereferences) {
-                        for (final ServiceReference servicereference : servicereferences) {
-                            final Object property = servicereference.getProperty("name");
-                            if (null != property && property.toString().equalsIgnoreCase("BasicAuthenticator")) {
-                                final BasicAuthenticatorPluginInterface authplug = (BasicAuthenticatorPluginInterface) this.context.getService(servicereference);
-                                LOG.debug("Calling doAuthentication for plugin: {}", bundlename);
-                                authplug.doAuthentication(authdata);
-                                // leave
-                                return;
-                            }
-                        }
-                    }
+            // Trigger plugin extensions
+            final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+            if (null != pluginInterfaces) {
+                for (final BasicAuthenticatorPluginInterface authplug : pluginInterfaces.getBasicAuthenticatorPlugins().getServiceList()) {
+                    final String bundlename = authplug.getClass().getName();
+                    LOG.debug("Calling doAuthentication for plugin: {}", bundlename);
+                    authplug.doAuthentication(authdata);
+                    // leave
+                    return;
                 }
             }
         }

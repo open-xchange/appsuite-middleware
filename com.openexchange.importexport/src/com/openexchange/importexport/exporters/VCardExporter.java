@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -132,7 +132,6 @@ public class VCardExporter implements Exporter {
         Contact.INSTANT_MESSENGER2,
         Contact.IMAGE1,
         Contact.IMAGE1_CONTENT_TYPE,
-        Contact.LINKS,
         Contact.MANAGER_NAME,
         Contact.MARITAL_STATUS,
         Contact.MIDDLE_NAME,

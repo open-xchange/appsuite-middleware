@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -72,9 +72,13 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     protected String displayName;
     protected String apiKey;
     protected String apiSecret;
+    protected String consumerKey;
+    protected String consumerSecret;
 
     protected String apiKeyName;
     protected String apiSecretName;
+    protected String consumerKeyName;
+    protected String consumerSecretName;
 
     /**
      * Initializes a new {@link AbstractOAuthServiceMetaData}.
@@ -106,9 +110,9 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     }
 
     @Override
-    public boolean isEnabled(int userId, int contextId) throws OXException {
-        ConfigView view = Services.getService(ConfigViewFactory.class).getView(userId, contextId);
-        ComposedConfigProperty<Boolean> property = view.property(getEnabledProperty(), Boolean.class);
+    public boolean isEnabled(final int userId, final int contextId) throws OXException {
+        final ConfigView view = Services.getService(ConfigViewFactory.class).getView(userId, contextId);
+        final ComposedConfigProperty<Boolean> property = view.property(getEnabledProperty(), Boolean.class);
         if (!property.isDefined()) {
             return true;
         }
@@ -130,7 +134,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
      *
      * @param apiKeyName The apiKeyName to set
      */
-    public void setAPIKeyName(String apiKeyName) {
+    public void setAPIKeyName(final String apiKeyName) {
         this.apiKeyName = apiKeyName;
     }
 
@@ -140,12 +144,29 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
      *
      * @param apiSecretName The apiSecretName to set
      */
-    public void setAPISecretName(String apiSecretName) {
+    public void setAPISecretName(final String apiSecretName) {
         this.apiSecretName = apiSecretName;
+    }
+    
+    /**
+     * Used to look up the consumerKey in the confic cascade
+     * @param consumerKeyName
+     */
+    public void setConsumerKeyName(final String consumerKeyName) {
+        this.consumerKeyName = consumerKeyName;
+    }
+    
+    /**
+     * Used to look up the consumerSecret in the config cascade
+     *
+     * @param consumerSecretName The consumerSecretName to set
+     */
+    public void setConsumerSecretName(final String consumerSecretName) {
+        this.consumerSecretName = consumerSecretName;
     }
 
     @Override
-    public String getAPIKey(Session session) throws OXException {
+    public String getAPIKey(final Session session) throws OXException {
         if (session == null || apiKeyName == null) {
             return getAPIKey();
         }
@@ -169,7 +190,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
 
 
     @Override
-    public String getAPISecret(Session session) throws OXException {
+    public String getAPISecret(final Session session) throws OXException {
         if (session == null || apiSecretName == null) {
             return getAPISecret();
         }
@@ -177,6 +198,30 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
         context = session.getContextId();
         user = session.getUserId();
         return Services.getService(ConfigViewFactory.class).getView(user, context).get(apiSecretName, String.class);
+    }
+    
+    @Override
+    public String getConsumerKey() {
+        if (consumerKey == null && consumerKeyName != null) {
+            try {
+                return Services.getService(ConfigViewFactory.class).getView().get(consumerKeyName, String.class);
+            } catch (final OXException e) {
+                LOG.warn("Couldn't look-up consumer key name.", e);
+            }
+        }
+        return consumerKey;
+    }
+    
+    @Override
+    public String getConsumerSecret() {
+        if (consumerSecret == null && consumerSecretName != null) {
+            try {
+                return Services.getService(ConfigViewFactory.class).getView().get(consumerSecretName, String.class);
+            } catch (final OXException e) {
+                LOG.warn("Couldn't look-up consumer secret name.", e);
+            }
+        }
+        return consumerSecret;
     }
 
     /**
@@ -227,7 +272,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     }
 
     @Override
-    public OAuthInteraction initOAuth(final String callbackUrl, Session session) throws OXException {
+    public OAuthInteraction initOAuth(final String callbackUrl, final Session session) throws OXException {
         return null;
     }
 
@@ -252,7 +297,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     }
 
     @Override
-    public String modifyCallbackURL(final String callbackUrl, Session session) {
+    public String modifyCallbackURL(final String callbackUrl, String currentHost, final Session session) {
         return callbackUrl;
     }
 

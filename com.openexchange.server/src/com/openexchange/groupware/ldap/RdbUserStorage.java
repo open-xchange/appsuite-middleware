@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -71,7 +71,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -126,7 +125,7 @@ public class RdbUserStorage extends UserStorage {
         "preferredLanguage, shadowLastChange, smtpServer, timeZone, userPassword, contactId, passwordMech, uidNumber, gidNumber, " +
         "homeDirectory, loginShell) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-    private static final String INSERT_ATTRIBUTES = "INSERT INTO user_attribute (cid, id, name, value) VALUES (?, ?, ?, ?)";
+    private static final String INSERT_ATTRIBUTES = "INSERT INTO user_attribute (cid, id, name, value, uuid) VALUES (?, ?, ?, ?, ?)";
 
     private static final String INSERT_LOGIN_INFO = "INSERT INTO login2user (cid, id, uid) VALUES (?, ?, ?)";
 
@@ -212,7 +211,7 @@ public class RdbUserStorage extends UserStorage {
             writeUserAttributes(con, user, context, userId);
             return userId;
         } catch (final SQLException e) {
-            throw UserExceptionCode.SQL_ERROR.create(e);
+            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
         }
@@ -244,6 +243,7 @@ public class RdbUserStorage extends UserStorage {
                     stmt.setInt(2, userId);
                     stmt.setString(3, key);
                     stmt.setString(4, value);
+                    stmt.setBytes(5, UUIDs.toByteArray(UUID.randomUUID()));
 
                     stmt.addBatch();
                 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -99,7 +99,7 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
                 returnDefaultValue = true;
                 flagsStr = null;
             } else {
-                final com.openexchange.java.StringAllocator flagsStrBuilder = new com.openexchange.java.StringAllocator(16);
+                final StringBuilder flagsStrBuilder = new StringBuilder(16);
                 appendSystemFlags(flags.getSystemFlags(), flagsStrBuilder);
                 appendUserFlags(flags.getUserFlags(), flagsStrBuilder);
                 if (flagsStrBuilder.length() == 0) {
@@ -110,7 +110,7 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
                 }
             }
             args =
-                isSequential ? new String[] { new com.openexchange.java.StringAllocator(64).append(uids[0]).append(':').append(uids[uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(
+                isSequential ? new String[] { new StringBuilder(64).append(uids[0]).append(':').append(uids[uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(
                     uids,
                     !silent,
                     MAX_LENGTH + (null == flagsStr ? 0 : flagsStr.length()));
@@ -121,7 +121,7 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
         uid = true;
     }
 
-    private void appendSystemFlags(final Flag[] systemFlags, final com.openexchange.java.StringAllocator flagsStrBuilder) throws MessagingException {
+    private void appendSystemFlags(final Flag[] systemFlags, final StringBuilder flagsStrBuilder) throws MessagingException {
         if (systemFlags.length > 0) {
             flagsStrBuilder.append(getFlagString(systemFlags[0]));
             for (int i = 1; i < systemFlags.length; i++) {
@@ -130,7 +130,7 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
         }
     }
 
-    private void appendUserFlags(final String[] userFlags, final com.openexchange.java.StringAllocator flagsStrBuilder) {
+    private void appendUserFlags(final String[] userFlags, final StringBuilder flagsStrBuilder) {
         if (userFlags.length > 0) {
             if (flagsStrBuilder.length() > 0) {
                 flagsStrBuilder.append(' ');
@@ -164,7 +164,7 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
             returnDefaultValue = true;
             flagsStr = null;
         } else {
-            final com.openexchange.java.StringAllocator flagsStrBuilder = new com.openexchange.java.StringAllocator(16);
+            final StringBuilder flagsStrBuilder = new StringBuilder(16);
             appendSystemFlags(flags.getSystemFlags(), flagsStrBuilder);
             appendUserFlags(flags.getUserFlags(), flagsStrBuilder);
             if (flagsStrBuilder.length() == 0) {
@@ -196,12 +196,12 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
         if (imapFolder.getMessageCount() <= 0) {
             returnDefaultValue = true;
         }
-        args = new String[] { new com.openexchange.java.StringAllocator(16).append(startSeqNum).append(':').append(endSeqNum).toString() };
+        args = new String[] { new StringBuilder(16).append(startSeqNum).append(':').append(endSeqNum).toString() };
         if (flags == null) {
             returnDefaultValue = true;
             flagsStr = null;
         } else {
-            final com.openexchange.java.StringAllocator flagsStrBuilder = new com.openexchange.java.StringAllocator(16);
+            final StringBuilder flagsStrBuilder = new StringBuilder(16);
             appendSystemFlags(flags.getSystemFlags(), flagsStrBuilder);
             appendUserFlags(flags.getUserFlags(), flagsStrBuilder);
             if (flagsStrBuilder.length() == 0) {
@@ -262,7 +262,7 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
     @Override
     protected String getCommand(final int argsIndex) {
         // UID STORE %s %sFLAGS (%s)
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(args[argsIndex].length() + 64);
+        final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
         if (uid) {
             sb.append("UID ");
         }

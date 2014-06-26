@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,6 +49,7 @@
 
 package com.openexchange.capabilities;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -56,10 +57,13 @@ import java.util.Map;
  * {@link Capability} - Represents a capability.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Capability {
+public class Capability implements Serializable {
 
-    private String id;
+    private static final long serialVersionUID = 8389975218424678442L;
+
+    private final String id;
     private final Map<String, String> attributes = new HashMap<String, String>();
 
     /**
@@ -72,29 +76,55 @@ public class Capability {
         this.id = id;
     }
 
+    /**
+     * Gets this capability's identifier
+     *
+     * @return The identifier
+     */
     public String getId() {
         return id;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
+    /**
+     * Gets this capability's attributes
+     *
+     * @return The attributes
+     */
     public Map<String, String> getAttributes() {
         return attributes;
     }
 
+    /**
+     * Sets specified attribute for this capability.
+     *
+     * @param key The attribute's key
+     * @param value The attribute's value
+     * @return This capability with attribute applied
+     */
     public Capability set(String key, String value) {
         attributes.put(key, value);
         return this;
     }
 
+    /**
+     * Gets the value of the attribute associated with given key.
+     *
+     * @param key The attribute's key
+     * @return The value or <code>null</code> if there is no such attribute
+     */
     public String getAttribute(String key) {
         return attributes.get(key);
     }
 
+    /**
+     * Sets all attributes from given capability for this capability.
+     *
+     * @param otherCapability The other capability providing the attributes
+     */
     public void learnFrom(Capability otherCapability) {
-        attributes.putAll(otherCapability.attributes);
+        if (null != otherCapability) {
+            attributes.putAll(otherCapability.attributes);
+        }
     }
 
     @Override

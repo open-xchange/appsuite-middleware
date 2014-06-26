@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,10 +49,21 @@
 
 package com.openexchange.oauth.xing.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+import com.openexchange.capabilities.CapabilityChecker;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
+import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.exception.OXException;
+import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.xing.XingOAuthServiceMetaData;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 /**
@@ -68,17 +79,39 @@ public final class XingOAuthActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class, DeferringURLService.class, CapabilityService.class, DispatcherPrefixService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        final ConfigurationService config = getService(ConfigurationService.class);
         try {
-            registerService(OAuthServiceMetaData.class, new XingOAuthServiceMetaData(config));
-        } catch (final IllegalStateException e) {
+            final XingOAuthServiceMetaData xingService = new XingOAuthServiceMetaData(this);
+            registerService(OAuthServiceMetaData.class, xingService);
+            registerService(Reloadable.class, xingService);
+
+            final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
+            properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, "xing");
+            registerService(CapabilityChecker.class, new CapabilityChecker() {
+                @Override
+                public boolean isEnabled(String capability, Session ses) throws OXException {
+                    if ("xing".equals(capability)) {
+                        final ServerSession session = ServerSessionAdapter.valueOf(ses);
+                        if (session.isAnonymous()) {
+                            return false;
+                        }
+
+                        return xingService.isEnabled(session.getUserId(), session.getContextId());
+                    }
+
+                    return true;
+                }
+            }, properties);
+
+            getService(CapabilityService.class).declareCapability("xing");
+        } catch (final Exception e) {
             final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(XingOAuthActivator.class);
             log.warn("Could not start-up XING OAuth service", e);
+            throw e;
         }
     }
 

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -68,7 +68,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.internal.parser.HtmlHandler;
 import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 
 /**
@@ -192,7 +191,7 @@ public final class JerichoParser {
         if (null == sep) {
             sep = "\n";
         }
-        return new StreamedSource(new com.openexchange.java.StringAllocator(html.length() + 16).append("<body>").append(sep).append(html).append(sep).append("</body>"));
+        return new StreamedSource(new StringBuilder(html.length() + 16).append("<body>").append(sep).append(html).append(sep).append("</body>"));
     }
 
     private static final Pattern INVALID_DELIM = Pattern.compile("\" *, *\"");
@@ -316,7 +315,7 @@ public final class JerichoParser {
                     /*
                      * Re-parse start tag
                      */
-                    final StreamedSource nestedSource = new StreamedSource(new StringAllocator(m.group(1)).append('>').toString());
+                    final StreamedSource nestedSource = new StreamedSource(new StringBuilder(m.group(1)).append('>').toString());
                     final Thread thread = Thread.currentThread();
                     for (final Iterator<Segment> iter = nestedSource.iterator(); !thread.isInterrupted() && iter.hasNext();) {
                         final Segment nestedSegment = iter.next();

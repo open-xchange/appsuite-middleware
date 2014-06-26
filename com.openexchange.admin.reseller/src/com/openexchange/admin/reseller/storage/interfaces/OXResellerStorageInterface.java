@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,7 +52,6 @@ package com.openexchange.admin.reseller.storage.interfaces;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
-import org.slf4j.Logger;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
@@ -266,18 +265,20 @@ public abstract class OXResellerStorageInterface {
      *
      * @param creds
      * @param access
+     * @param contextAdmin
      * @param restriction_types
      * @throws StorageException
      */
-    public abstract void checkPerSubadminRestrictions(final Credentials creds, final UserModuleAccess access, final String... restriction_types) throws StorageException;
+    public abstract void checkPerSubadminRestrictions(final Credentials creds, final UserModuleAccess access, boolean contextAdmin, final String... restriction_types) throws StorageException;
 
     /**
      * @param ctx
      * @param access
+     * @param contextAdmin
      * @param restriction_types
      * @throws StorageException
      */
-    public abstract void checkPerContextRestrictions(final Context ctx, final UserModuleAccess access, final String... restriction_types) throws StorageException;
+    public abstract void checkPerContextRestrictions(final Context ctx, final UserModuleAccess access, boolean contextAdmin, final String... restriction_types) throws StorageException;
 
     /**
      * @param creds

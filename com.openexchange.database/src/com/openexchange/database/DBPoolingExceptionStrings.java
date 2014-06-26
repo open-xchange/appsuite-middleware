@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -124,10 +124,10 @@ public class DBPoolingExceptionStrings implements LocalizableStrings {
     // %1$d is replaced with the context identifier that is stored in the schema.
     public static final String TRANSACTION_MISSING_MSG = "Transaction counter is missing for context %1$d.";
 
-    // This error message may happen when provisioning contexts. Writing the database assigment failed in database.
+    // This error message may happen when provisioning contexts. Writing the database assigment or updating it failed in database.
     // %1$d is replaced with the context identifier.
     // %2$d is replaced with the server identifier.
-    public static final String INSERT_FAILED_MSG = "Inserting database assignment for context %1$d and server %2$d failed!";
+    public static final String INSERT_FAILED_MSG = "Inserting or updating database assignment for context %1$d and server %2$d failed!";
 
     private DBPoolingExceptionStrings() {
         super();

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -66,7 +66,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderChildObject;
-import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
@@ -241,32 +240,10 @@ public class ContactWriter extends CommonWriter {
         writeParameter(ContactFields.ADDRESS_OTHER, contact.getAddressOther(), json);
         writeParameter(CommonFields.UID, contact.getUid(), json);
 
-        final JSONArray jsonLinkArray = getLinksAsJSONArray(contact);
-        if (jsonLinkArray != null) {
-            json.put(ContactFields.LINKS, jsonLinkArray);
-        }
-
         final JSONArray jsonDistributionListArray = getDistributionListAsJSONArray(contact);
         if (jsonDistributionListArray != null) {
             json.put(ContactFields.DISTRIBUTIONLIST, jsonDistributionListArray);
         }
-    }
-
-    static final JSONArray getLinksAsJSONArray(final Contact contactobject) throws JSONException {
-        final LinkEntryObject[] linkentries = contactobject.getLinks();
-
-        if (linkentries != null) {
-            final JSONArray jsonArray = new JSONArray();
-
-            for (int a = 0; a < linkentries.length; a++) {
-                final JSONObject jsonLinkObject = new JSONObject();
-                writeParameter(DataFields.ID, linkentries[a].getLinkID(), jsonLinkObject, linkentries[a].containsLinkID());
-                writeParameter(ContactFields.DISPLAY_NAME, linkentries[a].getLinkDisplayname(), jsonLinkObject);
-                jsonArray.put(jsonLinkObject);
-            }
-            return jsonArray;
-        }
-        return null;
     }
 
     static final JSONArray getDistributionListAsJSONArray(final Contact contactobject) throws JSONException {
@@ -1256,19 +1233,6 @@ public class ContactWriter extends CommonWriter {
                 writeValue(contact.getLastModifiedOfNewestAttachment(), json, contact.containsLastModifiedOfNewestAttachment());
             }
         });
-        {
-            final ContactFieldWriter fieldWriter = new ContactFieldWriter() {
-
-                @Override
-                public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
-                    writeValue(contactObject.getNumberOfLinks(), jsonArray, contactObject.containsNumberOfLinks());
-                }
-            };
-
-            m.put(CommonObject.NUMBER_OF_LINKS, fieldWriter);
-            m.put(Contact.CONTACT_NUMBER_OF_LINKS, fieldWriter);
-        }
-
         m.put(Contact.NUMBER_OF_DISTRIBUTIONLIST, new ContactFieldWriter() {
 
             @Override
@@ -1303,19 +1267,6 @@ public class ContactWriter extends CommonWriter {
             @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getUseCount(), jsonArray);
-            }
-        });
-
-        m.put(Contact.LINKS, new ContactFieldWriter() {
-
-            @Override
-            public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) throws JSONException {
-                final JSONArray jsonLinksArray = getLinksAsJSONArray(contactObject);
-                if (jsonLinksArray == null) {
-                    jsonArray.put(JSONObject.NULL);
-                } else {
-                    jsonArray.put(jsonLinksArray);
-                }
             }
         });
 

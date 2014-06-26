@@ -3,7 +3,7 @@
 #%# capabilities=autoconf
 
 $showruntimestats="/opt/open-xchange/sbin/showruntimestats";
-$showexec="$showruntimestats -a";
+$showexec="$showruntimestats --misc";
 
 if ( $ARGV[0] and $ARGV[0] eq "autoconf")
 {
@@ -67,7 +67,7 @@ while (<SHOWRUNTIME>)
 		print "e.value $val\n";
 		next;
 	}
-	if ( $_ =~ /GeneralMonitor,NumberOfIMAPConnections/) {
+		if ( $_ =~ /GeneralMonitor,NumberOfIMAPConnections/) {
 		s/.*\=//; 
 		$val=$_+0;
 		print "f.value $val\n";

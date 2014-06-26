@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,7 +53,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link AtmospherePresenceServiceRegistry} - Singleton that acts as central accesspoint for classes of the Atmosphere bundle.
+ * {@link RealtimeServiceRegistry} - Singleton that acts as central accesspoint for classes of the realtime dispatch bundle.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -145,6 +145,6 @@ public final class FullnameArgument {
 
     @Override
     public String toString() {
-        return new com.openexchange.java.StringAllocator(32).append("Account-ID=").append(accountId).append(" Full-Name=").append(fullName).toString();
+        return new StringBuilder(32).append("Account-ID=").append(accountId).append(" Full-Name=").append(fullName).toString();
     }
 }

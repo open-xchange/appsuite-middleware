@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.commons.lang.StringEscapeUtils;
+import com.openexchange.dav.caldav.ICalResource;
 
 
 /**
@@ -103,6 +104,11 @@ public class SimpleICal {
             this.components = new ArrayList<SimpleICal.Component>();
         }
 
+        public Component getVAlarm() {
+            List<Component> components = getComponents(ICalResource.VALARM);
+            return 0 < components.size() ? components.get(0) : null;
+        }
+
     	public String getUID() {
 	        return this.getPropertyValue("UID");
 	    }
@@ -113,6 +119,19 @@ public class SimpleICal {
 
         public String getDescription() {
             return this.getPropertyValue("DESCRIPTION");
+        }
+
+        public Property getAttendee(String email) {
+            List<Property> properties = this.getProperties("ATTENDEE");
+            if (null != properties) {
+                for (Property property : properties) {
+                    String value = property.getValue();
+                    if (null != value && value.contains("mailto:" + email)) {
+                        return property;
+                    }
+                }
+            }
+            return null;
         }
 
         public List<Date> getExDates() throws ParseException {

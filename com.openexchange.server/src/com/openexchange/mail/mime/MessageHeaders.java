@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -138,6 +138,10 @@ public final class MessageHeaders {
     public static final String HDR_X_MAILER = "X-Mailer";
 
     public static final HeaderName X_MAILER = HeaderName.valueOf(HDR_X_MAILER);
+
+    public static final String HDR_X_ORIGINATING_CLIENT = "X-Originating-Client";
+
+    public static final HeaderName X_ORIGINATING_CLIENT = HeaderName.valueOf(HDR_X_ORIGINATING_CLIENT);
 
     public static final String HDR_X_OXMSGREF = "X-OXMsgref";
 

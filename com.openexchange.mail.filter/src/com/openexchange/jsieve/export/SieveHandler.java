@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,7 +49,6 @@
 
 package com.openexchange.jsieve.export;
 
-import static com.openexchange.mailfilter.services.MailFilterServletServiceRegistry.getServiceRegistry;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -59,7 +58,6 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.charset.UnsupportedCharsetException;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -72,11 +70,11 @@ import javax.security.sasl.SaslClient;
 import javax.security.sasl.SaslException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Charsets;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerException;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerInvalidCredentialsException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mailfilter.internal.MailFilterProperties;
+import com.openexchange.mailfilter.services.Services;
 
 /**
  * This class is used to deal with the communication with sieve. For a description of the communication system to sieve see
@@ -233,7 +231,7 @@ public class SieveHandler {
      */
     public void initializeConnection() throws IOException, OXSieveHandlerException, UnsupportedEncodingException, OXSieveHandlerInvalidCredentialsException {
         measureStart();
-        final ConfigurationService config = getServiceRegistry().getService(ConfigurationService.class);
+        final ConfigurationService config = Services.getService(ConfigurationService.class);
 
         useSIEVEResponseCodes = Boolean.parseBoolean(config.getProperty(MailFilterProperties.Values.USE_SIEVE_RESPONSE_CODES.property));
 
@@ -353,7 +351,7 @@ public class SieveHandler {
         String useAuth = "PLAIN";
         final boolean preferGSSAPI;
         {
-            final ConfigurationService service = getServiceRegistry().getService(ConfigurationService.class);
+            final ConfigurationService service = Services.getService(ConfigurationService.class);
             preferGSSAPI = null != service && service.getBoolProperty("com.openexchange.mail.filter.preferGSSAPI", false);
         }
         if (preferGSSAPI && sasl.contains("GSSAPI")) {
@@ -400,7 +398,7 @@ public class SieveHandler {
             return;
         } else if (null != actualline && actualline.startsWith("NO ")) {
             final String errorMessage = parseError(actualline).replaceAll(CRLF, "\n");
-            throw new OXSieveHandlerException(errorMessage, sieve_host, sieve_host_port, parseSIEVEResponse(actualline, errorMessage));
+            throw new OXSieveHandlerException(errorMessage, sieve_host, sieve_host_port, parseSIEVEResponse(actualline, errorMessage)).setParseError(true);
         } else {
             throw new OXSieveHandlerException("Unknown response code", sieve_host, sieve_host_port, parseSIEVEResponse(actualline, null));
         }
@@ -1153,7 +1151,7 @@ public class SieveHandler {
      */
     private static String toString(final String chars, final int start, final int end) {
         final int size = end - start;
-        final StringAllocator theChars = new StringAllocator(size);
+        final StringBuilder theChars = new StringBuilder(size);
         for (int i = 0, j = start; i < size; i++) {
             theChars.append(chars.charAt(j++));
         }

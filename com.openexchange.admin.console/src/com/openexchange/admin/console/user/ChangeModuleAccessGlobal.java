@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -113,8 +113,8 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
 
         try {
             setOptions(parser);
-            prepare(parser);
             parse(parser, args);
+            prepare(parser);
             execute();
         } catch (Exception e) {
             printErrors(null, ctxid, e, parser);
@@ -151,7 +151,6 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
         this.accessIcalOption = setLongOpt(admp, OPT_ACCESS_ICAL,"on/off","Ical module access (Default is off)", true, required, extended);
         this.accessInfostoreOption = setLongOpt(admp, OPT_ACCESS_INFOSTORE,"on/off","Infostore module access (Default is off)", true, required, extended);
         this.accessPinboardWriteOption = setLongOpt(admp, OPT_ACCESS_PINBOARD_WRITE,"on/off","Pinboard write access (Default is off)", true, required, extended);
-        this.accessProjectsOption = setLongOpt(admp, OPT_ACCESS_PROJECTS,"on/off","Project module access (Default is off)", true, required, extended);
         this.accessReadCreateSharedFolderOption = setLongOpt(admp, OPT_ACCESS_READCREATE_SHARED_FOLDERS,"on/off","Read create shared folder access (Default is off)", true, required, extended);
         this.accessRssBookmarkOption= setLongOpt(admp, OPT_ACCESS_RSS_BOOKMARKS,"on/off","RSS bookmarks access (Default is off)", true, required, extended);
         this.accessRssPortalOption = setLongOpt(admp, OPT_ACCESS_RSS_PORTAL,"on/off","RSS portal access (Default is off)", true, required, extended);
@@ -260,13 +259,6 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
                 addAccess.setPinboardWrite(true);
             } else {
                 removeAccess.setPinboardWrite(true);
-            }
-        }
-        if (parser.getOptionValue(accessProjectsOption) != null) {
-            if (accessOption2Boolean(parser, accessProjectsOption)) {
-                addAccess.setProjects(true);
-            } else {
-                removeAccess.setProjects(true);
             }
         }
         if (parser.getOptionValue(accessReadCreateSharedFolderOption) != null) {

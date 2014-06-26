@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,6 +49,8 @@
 
 package com.openexchange.pooling;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.L;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -58,6 +60,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of the object pool.
@@ -66,7 +69,7 @@ import org.slf4j.Logger;
  */
 public class ReentrantLockPool<T> implements Pool<T>, Runnable {
 
-    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ReentrantLockPool.class);
+    static final Logger LOG = LoggerFactory.getLogger(ReentrantLockPool.class);
 
     private final int minIdle;
     private final int maxIdle;
@@ -220,7 +223,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
             LOG.trace("Destroying object.");
             lifecycle.destroy(metaData.getPooled());
         }
-        LOG.trace("Back time: {}", getWaitTime(startTime));
+        LOG.trace("Back time: {}", L(getWaitTime(startTime)));
         return !destroy;
     }
 
@@ -239,13 +242,13 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                     if (other != null && thread.equals(other.getThread())) {
                         if (LOG.isDebugEnabled()) {
                             PoolingException e = new PoolingException("Found thread using two objects. First get.");
-                            if (null != other.getTrace()) {
-                                e.setStackTrace(other.getTrace());
+                            StackTraceElement[] trace = other.getTrace();
+                            if (null != trace) {
+                                e.setStackTrace(trace);
                             }
-                            LOG.debug("", e);
+                            LOG.debug(e.getMessage(), e);
                             e = new PoolingException("Found thread using two objects. Second get.");
-                            e.fillInStackTrace();
-                            LOG.debug("", e);
+                            LOG.debug(e.getMessage(), e);
                         }
                     }
                 }
@@ -267,7 +270,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                             final PoolingException warn = new PoolingException("Thread " + threadName
                                 + " is sent to sleep until an object in the pool is available. " + data.numActive()
                                 + " objects are already in use.");
-                            LOG.warn("", warn);
+                            LOG.warn(warn.getMessage(), warn);
                         }
                         final long sleepStartTime = System.currentTimeMillis();
                         boolean timedOut = false;
@@ -284,8 +287,8 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                         }
                         if (writeWarning) {
                             final PoolingException warn = new PoolingException("Thread " + threadName + " slept for "
-                                + (System.currentTimeMillis() - sleepStartTime) + "ms.");
-                            LOG.warn("", warn);
+                                + getWaitTime(sleepStartTime) + "ms.");
+                            LOG.warn(warn.getMessage(), warn);
                         }
                         if (timedOut) {
                             idleAvailable.signal();
@@ -362,7 +365,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                     lock.unlock();
                 }
             }
-            LOG.trace("Get time: {}, Created: {}", getWaitTime(startTime), created);
+            LOG.trace("Get time: {}, Created: {}", L(getWaitTime(startTime)), B(created));
             return retval.getPooled();
         }
         throw new PoolingException("Pool has been stopped.");
@@ -373,7 +376,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
     }
 
     private static <T> void logThreads(Collection<PooledData<T>> active) {
-        final Logger log = org.slf4j.LoggerFactory.getLogger(ReentrantLockPool.class.getName() + ".logThreads");
+        Logger log = LoggerFactory.getLogger(ReentrantLockPool.class.getName() + ".logThreads");
         if (!log.isDebugEnabled()) {
             return;
         }
@@ -497,7 +500,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                 ReentrantLockPool.this.run();
                 thread.setName(origName);
             } catch (final Exception e) {
-                LOG.error("", e);
+                LOG.error(e.getMessage(), e);
             }
         }
     };
@@ -622,14 +625,14 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
             if (testThreads && null != metaData.getTrace()) {
                 e.setStackTrace(metaData.getTrace());
             }
-            LOG.error("", e);
+            LOG.error(e.getMessage(), e);
         }
         try {
             ensureMinIdle();
         } catch (final PoolingException e) {
             LOG.error("Problem creating the minimum number of connections.", e);
         }
-        LOG.trace("Clean run ending. Time: {}", getWaitTime(startTime));
+        LOG.trace("Clean run ending. Time: {}", L(getWaitTime(startTime)));
     }
 
     public static class Config implements Cloneable {

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,11 +53,14 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.util.IPTools;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.exception.OXException;
@@ -71,7 +74,7 @@ import com.openexchange.server.ServiceExceptionCode;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public final class AJPv13Config implements Initialization {
+public final class AJPv13Config implements Initialization, Reloadable {
 
     // Final static fields
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AJPv13Config.class);
@@ -81,6 +84,9 @@ public final class AJPv13Config implements Initialization {
     public static AJPv13Config getInstance() {
         return instance;
     }
+
+    private static final String CONFIGFILE = "server.properties";
+    private static final String[] PROPERTIES = new String[] {"com.openexchange.server.knownProxies"};
 
     // fields
     private final AtomicBoolean started = new AtomicBoolean();
@@ -423,6 +429,29 @@ public final class AJPv13Config implements Initialization {
     public static String getSystemProperty(final SystemConfig.Property property) {
         final ConfigurationService service = Services.getService(ConfigurationService.class);
         return service == null ? null : service.getProperty(property.getPropertyName());
+    }
+
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        String sProxyCandidates = configService.getProperty("com.openexchange.server.knownProxies", "");
+        if (Strings.isEmpty(sProxyCandidates)) {
+            knownProxies = Collections.emptyList();
+        } else {
+            List<String> proxyCandidates = IPTools.splitAndTrim(sProxyCandidates, IPTools.COMMA_SEPARATOR);
+            List<String> erroneousIPs = IPTools.filterErroneousIPs(proxyCandidates);
+            if (!erroneousIPs.isEmpty()) {
+                LOG.warn("Falling back to empty list as com.openexchange.server.knownProxies contains malformed IPs: {}", erroneousIPs);
+            } else {
+                this.knownProxies = proxyCandidates;
+            }
+        }
+    }
+
+    @Override
+    public Map<String, String[]> getConfigFileNames() {
+        Map<String, String[]> map = new HashMap<String, String[]>(1);
+        map.put(CONFIGFILE, PROPERTIES);
+        return map;
     }
 
 }

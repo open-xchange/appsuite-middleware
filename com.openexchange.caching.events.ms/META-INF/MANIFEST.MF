@@ -2,12 +2,15 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Distributed Cache Events via Message Service
 Bundle-SymbolicName: com.openexchange.caching.events.ms
-Bundle-Version: 7.4.2
+Bundle-Version: 7.6.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.caching,
+Import-Package: com.hazelcast.nio,
+ com.hazelcast.nio.serialization,
+ com.openexchange.caching,
  com.openexchange.caching.events,
  com.openexchange.exception,
+ com.openexchange.hazelcast.serialization,
  com.openexchange.log,
  com.openexchange.ms,
  com.openexchange.osgi,

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -74,49 +74,49 @@ import com.openexchange.report.appsuite.Services;
 
 
 /**
- * The {@link Orchestration} class uses hazelcast to coordinate the clusters efforts in producing reports. It maintains the following resources via hazelcast: 
- * 
+ * The {@link Orchestration} class uses hazelcast to coordinate the clusters efforts in producing reports. It maintains the following resources via hazelcast:
+ *
  * A Map "com.openexchange.report.Reports" that contains an entry per reportType of the last successful report run for that type
  * A Map "com.openexchange.report.PendingReports.[reportType] per reportType that contains currently running reports.
- * 
- * 
+ *
+ *
  * A Lock com.openexchange.report.Reports.[reportType] that acts as a cluster-wide lock for the given resourceType to coordinate
  * when to set up a  new report
  * A Lock com.openexchange.report.Reports.Merge.[reportType] that protects the merge operations for the global report
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class Orchestration implements ReportService {
-    
+
     private static final AtomicReference<Orchestration> INSTANCE = new AtomicReference<Orchestration>(new Orchestration());
-    
+
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(Orchestration.class);
-    
+
     public static Orchestration getInstance() {
         return INSTANCE.get();
     }
-    
+
     @Override
     public Report getLastReport() {
         return getLastReport("default");
     }
-    
+
     @Override
     public Report getLastReport(String reportType) {
         return (Report) Services.getService(HazelcastInstance.class).getMap("com.openexchange.report.Reports").get(reportType);
     }
-    
+
     @Override
     public String run() throws OXException {
         return run("default");
     }
-    
+
     @Override
     public String run(String reportType) throws OXException {
         // Start a new report run or retrieve the UUID of an already running report
-        
+
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
-        
+
         String uuid;
         IMap<Object, Object> pendingReports;
         int numberOfTasks;
@@ -127,34 +127,34 @@ public class Orchestration implements ReportService {
         try {
             // Is a report pending?
            pendingReports = hazelcast.getMap("com.openexchange.report.PendingReports." + reportType);
-            
+
             if (!pendingReports.isEmpty()) {
                 // Yes, there is a report running, so retrieve its UUID and return it.
                 return (String) pendingReports.keySet().iterator().next();
             }
-            
+
             // No, we have to set up a  new report
             uuid = UUIDs.getUnformattedString(UUID.randomUUID());
-            
+
             hazelcast.getLock("com.openexchange.report.Reports.Merge." + reportType);
 
             // Load all contextIds
             allContextIds = Services.getService(ContextService.class).getAllContextIds();
-            
+
             // Chop them up into blocks of 200 each + a remainder
-            numberOfTasks = allContextIds.size() / 200; 
-            
+            numberOfTasks = allContextIds.size() / 200;
+
             int rest = allContextIds.size() % 200;
             if (rest > 0) {
                 numberOfTasks++;
             }
-            
-            // Set up the report instance 
+
+            // Set up the report instance
             Report report = new Report(uuid, reportType, System.currentTimeMillis());
             report.setNumberOfTasks(allContextIds.size());
             // Put it into hazelcast for others to discover
             pendingReports.put(uuid, report);
-             
+
         } finally {
             if (lock != null) {
                 lock.forceUnlock();
@@ -162,7 +162,7 @@ public class Orchestration implements ReportService {
         }
 
         // Set up an AnalyzeContextBatch instance for every chunk of contextIds
-        ExecutorService executorService = hazelcast.getExecutorService();
+        ExecutorService executorService = hazelcast.getExecutorService("default");
 
         for (int i = 0; i < numberOfTasks; i++) {
             int startIndex = i * 200;
@@ -170,12 +170,12 @@ public class Orchestration implements ReportService {
             if (endIndex >= allContextIds.size()) {
                 endIndex = allContextIds.size();
             }
-            
+
             List<Integer> chunk = new ArrayList<Integer>(allContextIds.subList(startIndex, endIndex)); // Create new ArrayList, so it is serializable
             executorService.submit(new AnalyzeContextBatch(uuid, reportType, chunk));
         }
-        
-        
+
+
         return uuid;
     }
 
@@ -184,38 +184,38 @@ public class Orchestration implements ReportService {
         // Simply look up the pending reports for this type in a hazelcast map
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
         IMap<Object, Object> pendingReports = hazelcast.getMap("com.openexchange.report.PendingReports." + reportType);
-        
+
         Collection<Object> reportCol = pendingReports.values();
-        
-        
+
+
         Report[] reports = new Report[reportCol.size()];
         Iterator<Object> iterator = reportCol.iterator();
-        
+
         for(int i = 0; i < reports.length; i++) {
             reports[i] = (Report) iterator.next();
         }
-        
+
         return reports;
     }
-    
+
     @Override
     public Report[] getPendingReports() {
         return getPendingReports("default");
     }
-    
+
     @Override
     public void flushPending(String uuid, String reportType) {
         // Remove entries from hazelcasts pending maps, so a report can be started again
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
-        
+
         IMap<Object, Object> pendingReports = hazelcast.getMap("com.openexchange.report.PendingReports." + reportType);
-        
+
         ILock lock = hazelcast.getLock("com.openexchange.report.Reports.Merge." + reportType);
-        
+
         pendingReports.remove(uuid);
         lock.destroy();
     }
-    
+
     @Override
     public void flushPending(String uuid) {
         flushPending(uuid, "default");
@@ -226,13 +226,13 @@ public class Orchestration implements ReportService {
     public void done(ContextReport contextReport) {
 
         String reportType = contextReport.getType();
-            
+
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
 
         // Retrieve general report and merge in the contextReport
         IMap<Object, Object> pendingReports = hazelcast.getMap("com.openexchange.report.PendingReports." + reportType);
-        
-        // Reports are not threadsafe, plus we have to prevent other nodes from modifying the report 
+
+        // Reports are not threadsafe, plus we have to prevent other nodes from modifying the report
         // Until we've merged in the results of this context analysis
         ILock lock = hazelcast.getLock("com.openexchange.report.Reports.Merge." + reportType);
         Report report;
@@ -262,18 +262,18 @@ public class Orchestration implements ReportService {
             }
             // Mark context as done, thereby decreasing the number of pending tasks
             report.markTaskAsDone();
-            
+
             // Save it back to hazelcast
             pendingReports.put(contextReport.getUUID(), report);
         } finally {
             if (lock != null) {
-                lock.unlock();                
+                lock.unlock();
             }
         }
-        
+
         if (report.getNumberOfPendingTasks() == 0) {
             finishUpReport(reportType, hazelcast, pendingReports, lock, report);
-        }        
+        }
     }
 
     private void finishUpReport(String reportType, HazelcastInstance hazelcast, IMap<Object, Object> pendingReports, ILock lock, Report report) {
@@ -285,7 +285,7 @@ public class Orchestration implements ReportService {
                 handler.runSystemReport(report);
             }
         }
-        
+
         // And perform the finishing touches
         for(ReportFinishingTouches handler: Services.getFinishingTouches()) {
             if (handler.appliesTo(reportType)) {
@@ -296,18 +296,18 @@ public class Orchestration implements ReportService {
         // We are done. Dump Report
         report.setStopTime(System.currentTimeMillis());
         hazelcast.getMap("com.openexchange.report.Reports").put(report.getType(), report);
-        
+
         // Clean up resources
         pendingReports.remove(report.getUUID());
         lock.destroy();
     }
-    
+
     public void abort(String uuid, String reportType, int ctxId) {
         // This contextReport failed, so at least decrese the number of pending tasks
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
-        
+
         IMap<Object, Object> pendingReports = hazelcast.getMap("com.openexchange.report.PendingReports." + reportType);
-        
+
         ILock lock = hazelcast.getLock("com.openexchange.report.Reports.Merge." + reportType);
         Report report;
         try {
@@ -327,13 +327,13 @@ public class Orchestration implements ReportService {
                 return;
             }
             // Mark context as done
-            report.markTaskAsDone();    
+            report.markTaskAsDone();
         } finally {
             if (lock != null) {
                 lock.unlock();
             }
         }
-        
+
         if (report.getNumberOfPendingTasks() == 0) {
             finishUpReport(reportType, hazelcast, pendingReports, lock, report);
         }

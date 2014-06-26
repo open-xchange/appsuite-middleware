@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -107,6 +107,8 @@ public class NotificationMail {
 	private boolean attachmentUpdate;
 
 	private boolean sortedParticipants;
+
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(NotificationMail.class);
 
     public ITipMessage getMessage() {
         return itipMessage;
@@ -283,28 +285,28 @@ public class NotificationMail {
 	}
 
     public boolean shouldBeSent() {
-    	if (endsInPast(appointment)) {
-    		return false;
-    	}
-    	if (recipient.getConfiguration().forceCancelMails() && isCancelMail()) {
-    		return true;
-    	}
-    	if (appointment != null && appointment.containsNotification() && !appointment.getNotification()) {
-    		return false;
-    	}
-    	if (appointment != null && stateType.equals(Type.NEW) && endsInPast(appointment)) {
-    	    return false;
-    	}
-    	if (appointment != null && original != null && stateType.equals(Type.MODIFIED)
-    	                        && isNotWorthUpdateNotification(original, appointment)) {
-    	    return false;
-    	}
-    	if (appointment != null && stateType.equals(Type.DELETED)) {
-    	    return false;
-    	}
-    	if (! anInterestingFieldChanged()) {
-    		return false;
-    	}
+        if (endsInPast(appointment)) {
+            return false;
+        }
+        if (recipient.getConfiguration().forceCancelMails() && isCancelMail()) {
+            return true;
+        }
+        if (appointment != null && appointment.containsNotification() && !appointment.getNotification()) {
+            return false;
+        }
+        if (appointment != null && stateType.equals(Type.NEW) && endsInPast(appointment)) {
+            return false;
+        }
+        if (appointment != null && original != null && stateType.equals(Type.MODIFIED)
+                                && isNotWorthUpdateNotification(original, appointment)) {
+            return false;
+        }
+        if (appointment != null && stateType.equals(Type.DELETED)) {
+            return false;
+        }
+        if (! anInterestingFieldChanged()) {
+            return false;
+        }
         if (stateType == Type.MODIFIED && onlyPseudoChangesOnParticipants()) {
             return false;
         }
@@ -420,7 +422,6 @@ public class NotificationMail {
 	private static final Set<String> FIELDS_TO_REPORT = new HashSet<String>(Arrays.asList(
 			AppointmentFields.LOCATION,
 			AppointmentFields.FULL_TIME,
-			AppointmentFields.SHOW_AS,
 			AppointmentFields.TIMEZONE,
 			AppointmentFields.RECURRENCE_START,
 			AppointmentFields.TITLE,
@@ -460,7 +461,6 @@ public class NotificationMail {
         if (isAttachmentUpdate()) {
         	return false;
         }
-
         return diff.isAboutStateChangesOnly();
     }
 
@@ -468,14 +468,14 @@ public class NotificationMail {
     	if (!isAboutStateChangesOnly()) {
     		return false;
     	}
-		return diff.isAboutCertainParticipantsStateChangeOnly(actor.getIdentifier()+"");
+		return diff.isAboutCertainParticipantsStateChangeOnly(Integer.toString(actor.getIdentifier()));
 	}
 
 	public boolean someoneElseChangedPrincipalsState() {
 		if (actor.getIdentifier() == getPrincipal().getIdentifier()) {
 			return false;
 		}
-		return diff.isAboutCertainParticipantsStateChangeOnly(getPrincipal().getIdentifier()+"");
+		return diff.isAboutCertainParticipantsStateChangeOnly(Integer.toString(getPrincipal().getIdentifier()));
 	}
 
     private boolean isAboutRecipientsStateChangeOnly() {

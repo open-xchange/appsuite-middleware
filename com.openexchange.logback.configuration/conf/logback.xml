@@ -15,10 +15,17 @@
     <property scope="context" name="com.openexchange.logging.filter.loggerWhitelist" value="com.openexchange" />
 
     <!--
-    Propagates changes made to the level of any logback-classic logger onto the java.util.logging framework. 
+    Propagates changes made to the level of any logback-classic logger onto the java.util.logging framework.
     If this listener will be deleted, ox backend will add it programmatically.
     -->
     <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator"/>
+
+    <!--
+    Adds the required PatternLayouts if not yet done by another Open-Xchange PatternLayoutEncoder. This is
+    especially required when using SYSLOG appender. If you remove this definition and no PatternLayout can be
+    found a PARSER_ERROR will be thrown within the log.
+    -->
+    <define name="syslogPatternLayoutActivator" class="com.openexchange.logback.extensions.SyslogPatternLayoutActivator" />
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>/var/log/open-xchange/open-xchange.log.0</file>
@@ -74,7 +81,7 @@
 
     Open-Xchange strongly suggests NOT to modify the configuration for the classes 'com.openexchange.login.internal.LoginPerformer'
     and 'com.openexchange.sessiond.impl.SessionHandler' to coarser logging settings (like WARN, ERROR and OFF). If you do so
-    the Open-Xchange server will revert your change and set the log level for these classes to INFO. Finer settings (like TRACE, DEBUG 
+    the Open-Xchange server will revert your change and set the log level for these classes to INFO. Finer settings (like TRACE, DEBUG
     and ALL) are allowed and will not be overridden.
     -->
     <logger name="com.openexchange.login.internal.LoginPerformer" level="INFO"/>
@@ -92,6 +99,10 @@
     <logger name="org.jaudiotagger" level="ERROR"/>
     <logger name="com.openexchange.documentconverter.impl.Manager" level="WARN"/>
     <logger name="com.gargoylesoftware.htmlunit" level="WARN"/>
+
+    <logger name="org.docx4j" level="WARN"/>
+    <logger name="org.xlsx4j" level="WARN"/>
+    <logger name="org.pptx4j" level="WARN"/>
 
     <!-- Set to DEBUG to log SOAP requests for debugging purpose -->
     <logger name="org.apache.cxf" level="WARN"/>

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,12 +51,13 @@ package com.openexchange.database.internal;
 
 import static com.openexchange.database.internal.Configuration.Property.CHECK_WRITE_CONS;
 import static com.openexchange.database.internal.Configuration.Property.REPLICATION_MONITOR;
+import static com.openexchange.java.Autoboxing.I;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 
 /**
  * Contains the code to startup the complete database connection pooling and replication monitor.
@@ -68,6 +69,28 @@ public final class Initialization {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Initialization.class);
     private static final Initialization SINGLETON = new Initialization();
 
+    private static final AtomicReference<ConfigurationService> CONF_REF = new AtomicReference<ConfigurationService>();
+
+    /**
+     * Sets the configuration service.
+     *
+     * @param configurationService The configuration service
+     */
+    public static void setConfigurationService(final ConfigurationService configurationService) {
+        CONF_REF.set(configurationService);
+    }
+
+    /**
+     * Gets the configuration service.
+     *
+     * @return The configuration service or <code>null</code> if absent
+     */
+    public static ConfigurationService getConfigurationService() {
+        return CONF_REF.get();
+    }
+
+    // -------------------------------------------------------------------------------------------------------------- //
+
     private final Management management = new Management();
     private final Timer timer = new Timer();
     private final Configuration configuration = new Configuration();
@@ -75,7 +98,6 @@ public final class Initialization {
     private CacheService cacheService;
     private ReplicationMonitor monitor;
     private Pools pools;
-    private ContextDatabaseAssignmentImpl contextAssignment;
     private ConfigDatabaseServiceImpl configDatabaseService;
     private DatabaseServiceImpl databaseService;
 
@@ -109,10 +131,8 @@ public final class Initialization {
         pools.addLifeCycle(configDBLifeCycle);
         // Configuration database connection pool service.
         configDatabaseService = new ConfigDatabaseServiceImpl(new ConfigDatabaseAssignmentImpl(), pools, monitor);
-        // Context database assignments.
-        contextAssignment = new ContextDatabaseAssignmentImpl(configDatabaseService);
         if (null != cacheService) {
-            contextAssignment.setCacheService(cacheService);
+            configDatabaseService.setCacheService(cacheService);
         }
         // Context pool life cycle.
         final ContextDatabaseLifeCycle contextDBLifeCycle = new ContextDatabaseLifeCycle(
@@ -124,18 +144,17 @@ public final class Initialization {
         Server.setConfigDatabaseService(configDatabaseService);
         Server.start(configurationService);
         try {
-            LOG.info("Resolved server name \"{}\" to identifier {}", Server.getServerName(), Server.getServerId());
+            LOG.info("Resolved server name \"{}\" to identifier {}", Server.getServerName(), I(Server.getServerId()));
         } catch (OXException e) {
             LOG.warn("Resolving server name to an identifier failed. This is normal until a server has been registered.", e);
         }
-        databaseService = new DatabaseServiceImpl(pools, configDatabaseService, contextAssignment, monitor);
+        databaseService = new DatabaseServiceImpl(pools, configDatabaseService, monitor);
         return databaseService;
     }
 
     public void stop() {
         databaseService = null;
-        contextAssignment.removeCacheService();
-        contextAssignment = null;
+        configDatabaseService.removeCacheService();
         configDatabaseService = null;
         pools.stop(timer);
         pools = null;
@@ -144,15 +163,15 @@ public final class Initialization {
 
     public void setCacheService(final CacheService service) {
         this.cacheService = service;
-        if (null != contextAssignment) {
-            contextAssignment.setCacheService(service);
+        if (null != configDatabaseService) {
+            configDatabaseService.setCacheService(service);
         }
     }
 
     public void removeCacheService() {
         this.cacheService = null;
-        if (null != contextAssignment) {
-            contextAssignment.removeCacheService();
+        if (null != configDatabaseService) {
+            configDatabaseService.removeCacheService();
         }
     }
 

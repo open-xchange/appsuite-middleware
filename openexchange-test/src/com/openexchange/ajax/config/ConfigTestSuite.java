@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -70,7 +70,7 @@ public class ConfigTestSuite {
      * @return the task tests suite.
      */
     public static Test suite() {
-        final TestSuite tests = new TestSuite();
+        final TestSuite tests = new TestSuite("com.openexchange.ajax.config.ConfigTestSuite");
         tests.addTestSuite(AvailableModulesTest.class);
         tests.addTestSuite(ConfigMenuTest.class);
         tests.addTestSuite(ForwardInlineOrAttachmentTest.class);
@@ -79,7 +79,6 @@ public class ConfigTestSuite {
         tests.addTestSuite(ModulesTest.class);
         tests.addTestSuite(BugTests.class);
         tests.addTestSuite(Bug15354Test.class);
-        tests.addTestSuite(Bug19226Test.class);
         tests.addTestSuite(Bug21619Test.class); // This test hammers 1 minute on the backend to try to reproduce an endless loop.
         tests.addTestSuite(Bug22389Test.class);
         return tests;

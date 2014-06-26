@@ -56,7 +56,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import com.openexchange.java.StringAllocator;
 
 /**
  * {@link SaneScriptTags}
@@ -223,7 +222,7 @@ public final class SaneScriptTags {
 
     private static String toLowerCase(final CharSequence chars) {
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);

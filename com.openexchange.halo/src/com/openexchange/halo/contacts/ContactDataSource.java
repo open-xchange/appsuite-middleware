@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -137,7 +137,7 @@ public class ContactDataSource implements HaloContactDataSource, HaloContactImag
 
         // Try with explicit load
         for (Contact c : mergedContacts) {
-            final Contact contact = getContact(session, c.getParentFolderID()+"", c.getObjectID()+"");
+            final Contact contact = getContact(session, Integer.toString(c.getParentFolderID()), Integer.toString(c.getObjectID()));
             if (contact.getImage1() != null) {
                 final ByteArrayFileHolder holder;
                 if (withBytes) {

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2011 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -42,6 +42,7 @@ package com.sun.mail.imap;
 
 import java.lang.reflect.*;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
@@ -57,8 +58,10 @@ import javax.mail.*;
 import javax.mail.event.*;
 import com.sun.mail.iap.*;
 import com.sun.mail.imap.protocol.*;
+import com.sun.mail.util.MailConnectException;
 import com.sun.mail.util.PropUtil;
 import com.sun.mail.util.MailLogger;
+import com.sun.mail.util.SocketConnectException;
 
 /**
  * This class provides access to an IMAP message store. <p>
@@ -69,6 +72,12 @@ import com.sun.mail.util.MailLogger;
  * {@link #setQuota setQuota} methods support the IMAP QUOTA extension.
  * Refer to <A HREF="http://www.ietf.org/rfc/rfc2087.txt">RFC 2087</A>
  * for more information. <p>
+ *
+ * The {@link #id id} method supports the IMAP ID extension;
+ * see <A HREF="http://www.ietf.org/rfc/rfc2971.txt">RFC 2971</A>.
+ * The fields ID_NAME, ID_VERSION, etc. represent the suggested field names
+ * in RFC 2971 section 3.3 and may be used as keys in the Map containing
+ * client values or server values. <p>
  *
  * See the <a href="package-summary.html">com.sun.mail.imap</a> package
  * documentation for further information on the IMAP protocol provider. <p>
@@ -160,6 +169,18 @@ public class IMAPStore extends Store
      * response, if the mail.imap.enableimapevents property is set.
      */
     public static final int RESPONSE = 1000;
+
+    public static final String ID_NAME = "name";
+    public static final String ID_VERSION = "version";
+    public static final String ID_OS = "os";
+    public static final String ID_OS_VERSION = "os-version";
+    public static final String ID_VENDOR = "vendor";
+    public static final String ID_SUPPORT_URL = "support-url";
+    public static final String ID_ADDRESS = "address";
+    public static final String ID_DATE = "date";
+    public static final String ID_COMMAND = "command";
+    public static final String ID_ARGUMENTS = "arguments";
+    public static final String ID_ENVIRONMENT = "environment";
 
     private static final class StampAndError {
         final CommandFailedException error;
@@ -317,7 +338,7 @@ public class IMAPStore extends Store
 	 *
 	 * When an IDLE command is in progress, the thread calling
 	 * the idle method will be reading from the IMAP connection
-	 * while not holding the sotre's lock.
+	 * while not holding the store's lock.
 	 * It's obviously critical that no other thread try to send a
 	 * command or read from the connection while in this state.
 	 * However, other threads can send the DONE continuation
@@ -739,6 +760,8 @@ public class IMAPStore extends Store
 		protocol.disconnect();
 	    protocol = null;
 	    throw new MessagingException(pex.getMessage(), pex);
+	} catch (SocketConnectException scex) {
+	    throw new MailConnectException(scex);
 	} catch (IOException ioex) {
 	    throw new MessagingException(ioex.getMessage(), ioex);
 	} 
@@ -746,7 +769,7 @@ public class IMAPStore extends Store
         return true;
     }
 
-	/**
+    /**
      * Create an IMAPProtocol object connected to the host and port.
      * Subclasses of IMAPStore may override this method to return a
      * subclass of IMAPProtocol that supports product-specific extensions.
@@ -799,8 +822,12 @@ public class IMAPStore extends Store
 	preLogin(p);
 
 	// issue special ID command to Yahoo! Mail IMAP server
-	if (guid != null)
-	    p.id(guid);
+	// http://en.wikipedia.org/wiki/Yahoo%21_Mail#Free_IMAP_and_SMTPs_access
+	if (guid != null) {
+	    Map<String,String> gmap = new HashMap<String,String>();
+	    gmap.put("GUID", guid);
+	    p.id(gmap);
+	}
 
 	/*
 	 * Put a special "marker" in the capabilities list so we can
@@ -916,7 +943,7 @@ public class IMAPStore extends Store
      * @return	true if using SSL
      * @since	JavaMail 1.4.6
      */
-    public boolean isSSL() {
+    public synchronized boolean isSSL() {
         return usingSSL;
     }
 
@@ -1038,6 +1065,34 @@ public class IMAPStore extends Store
 		    }
 		}
 
+		// if proxyAuthUser has changed, switch to new user
+		if (proxyAuthUser != null &&
+			!proxyAuthUser.equals(p.getProxyAuthUser()) &&
+			p.hasCapability("X-UNAUTHENTICATE")) {
+		    try {
+			/*
+			 * Swap in a special response handler that will handle
+			 * alerts, but won't cause the store to be closed and
+			 * cleaned up if the connection is dead.
+			 */
+			p.removeResponseHandler(this);
+			p.addResponseHandler(nonStoreResponseHandler);
+			p.unauthenticate();
+			login(p, user, password);
+			p.removeResponseHandler(nonStoreResponseHandler);
+			p.addResponseHandler(this);
+		    } catch (ProtocolException pex) {
+			try {
+			    p.removeResponseHandler(nonStoreResponseHandler);
+			    p.disconnect();
+			} finally {
+			    // don't let any exception stop us
+			    p = null;
+			    continue;	// try again, from the top
+			}
+		    }
+		}
+
                 // remove the store as a response handler.
                 p.removeResponseHandler(this);
 	    }
@@ -1123,6 +1178,14 @@ public class IMAPStore extends Store
                         "connection available -- size: " +
                         pool.authenticatedConnections.size());
                 p = pool.authenticatedConnections.firstElement();
+
+		// if proxyAuthUser has changed, switch to new user
+		if (proxyAuthUser != null &&
+			!proxyAuthUser.equals(p.getProxyAuthUser()) &&
+			p.hasCapability("X-UNAUTHENTICATE")) {
+		    p.unauthenticate();
+		    login(p, user, password);
+		}
             }
  
 	    if (pool.storeConnectionInUse) {
@@ -1464,6 +1527,29 @@ public class IMAPStore extends Store
     }
 
     /**
+     * Set the user name to be used with the PROXYAUTH command.
+     * The PROXYAUTH user name can also be set using the
+     * <code>mail.imap.proxyauth.user<code> property when this
+     * Store is created.
+     *
+     * @param	user	the user name to set
+     * @since	JavaMail 1.5.1
+     */
+    public void setProxyAuthUser(String user) {
+	proxyAuthUser = user;
+    }
+
+    /**
+     * Get the user name to be used with the PROXYAUTH command.
+     *
+     * @return	the user name
+     * @since	JavaMail 1.5.1
+     */
+    public String getProxyAuthUser() {
+	return proxyAuthUser;
+    }
+
+    /**
      * Return the capabilities the server announced.
      *
      * @return The capabilities the server announced
@@ -1591,7 +1677,7 @@ public class IMAPStore extends Store
 	     * connection, regardless of what happens ..
 	     *
 	     * Also note that protocol.logout() results in a BYE
-	     * response (As per rfc 2060, BYE is a *required* response
+	     * response (As per RFC 3501, BYE is a *required* response
 	     * to LOGOUT). In fact, even if protocol.logout() fails
 	     * with an IOException (if the server connection is dead),
 	     * iap.Protocol.command() converts that exception into a 
@@ -1707,7 +1793,9 @@ public class IMAPStore extends Store
 	// to set the state and send the closed connection event
 	try {
 	    super.close();
-	} catch (MessagingException mex) { }
+	} catch (MessagingException mex) {
+	    // ignore it
+	}
 	logger.fine("IMAPStore cleanup done");
     }
 
@@ -1751,7 +1839,7 @@ public class IMAPStore extends Store
 	if (folderConstructor != null) {
 	    try {
 		Object[] o =
-		    { fullName, new Character(separator), this, isNamespace };
+		  { fullName, Character.valueOf(separator), this, isNamespace };
 		f = (IMAPFolder)folderConstructor.newInstance(o);
 	    } catch (Exception ex) {
 		logger.log(Level.FINE,
@@ -2010,13 +2098,11 @@ public class IMAPStore extends Store
 	synchronized (this) {
 	    checkConnected();
 	}
+	boolean needNotification = false;
 	try {
 	    synchronized (pool) {
 		p = getStoreProtocol();
-		if (pool.idleState == ConnectionPool.RUNNING) {
-		    p.idleStart();
-		    pool.idleState = ConnectionPool.IDLE;
-		} else {
+		if (pool.idleState != ConnectionPool.RUNNING) {
 		    // some other thread must be running the IDLE
 		    // command, we'll just wait for it to finish
 		    // without aborting it ourselves
@@ -2026,6 +2112,9 @@ public class IMAPStore extends Store
 		    } catch (InterruptedException ex) { }
 		    return;
 		}
+		p.idleStart();
+		needNotification = true;
+		pool.idleState = ConnectionPool.IDLE;
 		pool.idleProtocol = p;
 	    }
 
@@ -2047,7 +2136,9 @@ public class IMAPStore extends Store
 		synchronized (pool) {
 		    if (r == null || !p.processIdleResponse(r)) {
 			pool.idleState = ConnectionPool.RUNNING;
+			pool.idleProtocol = null;
 			pool.notifyAll();
+			needNotification = false;
 			break;
 		    }
 		}
@@ -2075,8 +2166,12 @@ public class IMAPStore extends Store
 	} catch (ProtocolException pex) {
 	    throw new MessagingException(pex.getMessage(), pex);
 	} finally {
-	    synchronized (pool) {
-		pool.idleProtocol = null;
+	    if (needNotification) {
+		synchronized (pool) {
+		    pool.idleState = ConnectionPool.RUNNING;
+		    pool.idleProtocol = null;
+		    pool.notifyAll();
+		}
 	    }
 	    releaseStoreProtocol(p);
 	}
@@ -2099,6 +2194,40 @@ public class IMAPStore extends Store
 		pool.wait();
 	    } catch (InterruptedException ex) { }
 	}
+    }
+
+    /**
+     * Send the IMAP ID command (if supported by the server) and return
+     * the result from the server.  The ID command identfies the client
+     * to the server and returns information about the server to the client.
+     * See <A HREF="http://www.ietf.org/rfc/rfc2971.txt">RFC 2971</A>.
+     * The returned Map is unmodifiable.
+     *
+     * @param	clientParams	a Map of keys and values identifying the client
+     * @return			a Map of keys and values identifying the server
+     * @exception MessagingException	if the server doesn't support the
+     *					ID extension
+     * @since	JavaMail 1.5.1
+     */
+    public synchronized Map<String, String> id(Map<String, String> clientParams)
+				throws MessagingException {
+	checkConnected();
+	Map<String, String> serverParams = null;
+
+        IMAPProtocol p = null;
+	try {
+	    p = getStoreProtocol();
+	    serverParams = p.id(clientParams);
+	} catch (BadCommandException bex) {
+	    throw new MessagingException("ID not supported", bex);
+	} catch (ConnectionException cex) {
+	    throw new StoreClosedException(this, cex.getMessage());
+	} catch (ProtocolException pex) {
+	    throw new MessagingException(pex.getMessage(), pex);
+	} finally {
+	    releaseStoreProtocol(p);
+	}
+	return serverParams;
     }
 
     /**
@@ -2152,6 +2281,15 @@ public class IMAPStore extends Store
      */
     public int getPort() {
         return port;
+    }
+    
+    /**
+     * Gets the user/login currently associated with this IMAP store.
+     *
+     * @return The user/login identifier
+     */
+    public String getUser() {
+        return user;
     }
 
     /**

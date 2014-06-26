@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -105,7 +105,7 @@ public final class MessageUIDsIMAPCommand extends AbstractIMAPCommand<long[]> {
 
     @Override
     protected String getCommand(final int argsIndex) {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(args[argsIndex].length() + 64);
+        final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
         sb.append("FETCH ");
         sb.append(args[argsIndex]);
         sb.append(" (UID)");

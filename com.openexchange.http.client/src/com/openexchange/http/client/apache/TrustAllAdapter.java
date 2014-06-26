@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -66,14 +66,17 @@ public class TrustAllAdapter implements ProtocolSocketFactory {
     
     private TrustAllSSLSocketFactory delegate = (TrustAllSSLSocketFactory) TrustAllSSLSocketFactory.getDefault();
 
+    @Override
     public Socket createSocket(String host, int port) throws IOException, UnknownHostException {
         return delegate.createSocket(host, port);
     }
 
+    @Override
     public Socket createSocket(String host, int port, InetAddress localAddress, int localPort) throws IOException, UnknownHostException {
         return delegate.createSocket(host, port, localAddress, localPort);
     }
 
+    @Override
     public Socket createSocket(String host, int port, InetAddress localAddress, int localPort, HttpConnectionParams params) throws IOException, UnknownHostException, ConnectTimeoutException {
         Socket socket;
         int timeout = params.getConnectionTimeout();

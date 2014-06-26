@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,12 +53,11 @@ package com.openexchange.custom.parallels.impl;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.text.MessageFormat;
 import java.util.Arrays;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
-import com.openexchange.custom.parallels.osgi.ParallelsServiceRegistry;
+import com.openexchange.custom.parallels.osgi.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.notify.hostname.HostnameService;
@@ -80,13 +79,13 @@ public final class ParallelsHostnameService implements HostnameService {
     @Override
     public String getHostname(final int userId, final int contextId) {
         if (contextId > 0) {
-            final ContextService service = ParallelsServiceRegistry.getServiceRegistry().getService(ContextService.class);
+            final ContextService service = Services.getService(ContextService.class);
             String hostname = null;
             Context ctx;
             try {
                 ctx = service.getContext(contextId);
                 final String[] login_mappings = ctx.getLoginInfo();
-                final ConfigurationService configservice = ParallelsServiceRegistry.getServiceRegistry().getService(ConfigurationService.class,true);
+                final ConfigurationService configservice = Services.getService(ConfigurationService.class);
 
                 // load suffix for branding string dynamically in loginmappings
                 final String suffix_branded = configservice.getProperty(ParallelsOptions.PROPERTY_BRANDING_SUFFIX);

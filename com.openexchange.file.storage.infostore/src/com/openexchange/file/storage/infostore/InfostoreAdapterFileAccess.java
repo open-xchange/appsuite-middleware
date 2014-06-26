@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,6 +50,8 @@
 package com.openexchange.file.storage.infostore;
 
 import static com.openexchange.file.storage.FileStorageUtility.checkUrl;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -63,9 +65,12 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageRandomFileAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.infostore.internal.VirtualFolderInfostoreFacade;
+import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
@@ -190,8 +195,7 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
     @Override
     public InputStream getDocument(String folderId, String id, String version, long offset, long length) throws OXException {
         try {
-            return getInfostore(folderId).getDocument(
-                ID(id), null == version ? -1 : Integer.parseInt(version), offset, length, sessionObj);
+            return getInfostore(folderId).getDocument(ID(id), null == version ? -1 : Integer.parseInt(version), offset, length, sessionObj);
         } catch (final NumberFormatException e) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
         }
@@ -200,8 +204,12 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
     @Override
     public File getFileMetadata(final String folderId, final String id, final String version) throws OXException {
         try {
-            final DocumentMetadata documentMetadata =
-                getInfostore(folderId).getDocumentMetadata(ID(id), null == version ? -1 : Integer.parseInt(version), sessionObj);
+            final DocumentMetadata documentMetadata = getInfostore(folderId).getDocumentMetadata(ID(id), null == version ? -1 : Integer.parseInt(version), sessionObj);
+
+            if (null != folderId && documentMetadata.getFolderId() > 0 && !folderId.equals(Long.toString(documentMetadata.getFolderId()))) {
+                throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
+            }
+
             return new InfostoreFile(documentMetadata);
         } catch (final NumberFormatException e) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
@@ -224,21 +232,97 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
 
     @Override
     public List<IDTuple> removeDocument(final List<IDTuple> ids, final long sequenceNumber) throws OXException {
+        return removeDocument(ids, sequenceNumber, false);
+    }
+
+    @Override
+    public List<IDTuple> removeDocument(final List<IDTuple> ids, final long sequenceNumber, boolean hardDelete) throws OXException {
         final int[] infostoreIDs = new int[ids.size()];
-        final Map<Integer, IDTuple> id2folder = new HashMap<Integer, IDTuple>();
+        final Map<Integer, IDTuple> id2folder = new HashMap<Integer, IDTuple>(ids.size());
         for (int i = 0; i < infostoreIDs.length; i++) {
             final IDTuple tuple = ids.get(i);
             infostoreIDs[i] = ID(tuple.getId());
             id2folder.put(Integer.valueOf(infostoreIDs[i]), tuple);
         }
-
-        final int[] conflicted = getInfostore(null).removeDocument(infostoreIDs, sequenceNumber, sessionObj);
-
+        InfostoreFacade infostore = getInfostore(null);
+        int[] conflicted = null;
+        if (hardDelete) {
+            /*
+             * perform hard-deletion independently of file's parent folders
+             */
+            conflicted = infostore.removeDocument(infostoreIDs, sequenceNumber, sessionObj);
+        } else {
+            /*
+             * check for presence of trash folder
+             */
+            String trashFolderID = getTrashFolderID();
+            if (null == trashFolderID) {
+                /*
+                 * perform hard-deletion instead
+                 */
+                conflicted = infostore.removeDocument(infostoreIDs, sequenceNumber, sessionObj);
+            } else {
+                /*
+                 * distinguish between files already in or below trash folder
+                 */
+                FileStorageFolderAccess folderAccess = getAccountAccess().getFolderAccess();
+                String rootFolderID = folderAccess.getRootFolder().getId();
+                List<Integer> filesToDelete = new ArrayList<Integer>();
+                List<Integer> filesToMove = new ArrayList<Integer>();
+                Map<String, FileStorageFolder> knownFolders = new HashMap<String, FileStorageFolder>();
+                for (IDTuple tuple : ids) {
+                    String folderID = tuple.getFolder();
+                    while (null != folderID && false == trashFolderID.equals(folderID) && false == rootFolderID.equals(folderID)) {
+                        FileStorageFolder folder = knownFolders.get(folderID);
+                        if (null == folder) {
+                            folder = folderAccess.getFolder(folderID);
+                            knownFolders.put(folderID, folder);
+                        }
+                        folderID = folder.getParentId();
+                    }
+                    if (trashFolderID.equals(folderID)) {
+                        filesToDelete.add(Integer.valueOf(tuple.getId()));
+                    } else {
+                        filesToMove.add(Integer.valueOf(tuple.getId()));
+                    }
+                }
+                /*
+                 * hard-delete already deleted files
+                 */
+                if (0 < filesToDelete.size()) {
+                    int[] idsToDelete = new int[filesToDelete.size()];
+                    for (int i = 0; i < idsToDelete.length; i++) {
+                        idsToDelete[i] = filesToDelete.get(i).intValue();
+                    }
+                    conflicted = infostore.removeDocument(idsToDelete, sequenceNumber, sessionObj);
+                }
+                /*
+                 * move other files to trash folder
+                 */
+                if (0 < filesToMove.size()) {
+                    int[] idsToMove = new int[filesToMove.size()];
+                    for (int i = 0; i < idsToMove.length; i++) {
+                        idsToMove[i] = filesToMove.get(i).intValue();
+                    }
+                    int[] conflicted2 = infostore.moveDocuments(sessionObj, idsToMove, sequenceNumber, trashFolderID, true);
+                    if (null == conflicted || 0 == conflicted.length) {
+                        conflicted = conflicted2;
+                    } else if (null != conflicted2 && 0 < conflicted2.length){
+                        int[] temp = new int[conflicted.length + conflicted2.length];
+                        System.arraycopy(conflicted, 0, temp, 0, conflicted.length);
+                        System.arraycopy(conflicted2, 0, temp, conflicted.length, conflicted2.length);
+                        conflicted = temp;
+                    }
+                }
+            }
+        }
+        /*
+         * return ID tuples for conflicted files
+         */
         final List<IDTuple> retval = new ArrayList<IDTuple>(conflicted.length);
         for (final int id : conflicted) {
             retval.add(id2folder.get(Integer.valueOf(id)));
         }
-
         return retval;
     }
 
@@ -480,6 +564,35 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
     }
 
     @Override
+    public SearchIterator<File> search(List<String> folderIds, SearchTerm<?> searchTerm, List<Field> fields, Field sort, SortDirection order, int start, int end) throws OXException {
+        final TIntList fids = new TIntArrayList(null == folderIds ? 0 : folderIds.size());
+        if (null != folderIds) {
+            for (final String folderId : folderIds) {
+                try {
+                    fids.add(Integer.parseInt(folderId));
+                } catch (final NumberFormatException e) {
+                    throw FileStorageExceptionCodes.INVALID_FOLDER_IDENTIFIER.create(folderId);
+                }
+            }
+        }
+
+        final ToInfostoreTermVisitor visitor = new ToInfostoreTermVisitor();
+//        searchTerm.addField(fields);
+        searchTerm.visit(visitor);
+        final SearchIterator<DocumentMetadata> iterator =
+            search.search(
+                fids.toArray(),
+                visitor.getInfostoreTerm(),
+                FieldMapping.getMatching(fields),
+                FieldMapping.getMatching(sort),
+                FieldMapping.getSortDirection(order),
+                start,
+                end,
+                ctx, user, userPermissions);
+        return new InfostoreSearchIterator(iterator);
+    }
+
+    @Override
     public void commit() throws OXException {
         infostore.commit();
     }
@@ -579,6 +692,27 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
             return VIRTUAL_INFOSTORE;
         }
         return infostore;
+    }
+
+    /**
+     * Gets the ID of the trash folder.
+     *
+     * @return The trash folder ID, or <code>null</code> if not found
+     * @throws OXException
+     */
+    private String getTrashFolderID() throws OXException {
+        FileStorageFolderAccess folderAccess = getAccountAccess().getFolderAccess();
+        try {
+            FileStorageFolder trashFolder = folderAccess.getTrashFolder();
+            if (null != trashFolder) {
+                return trashFolder.getId();
+            }
+        } catch (OXException e) {
+            if (false == FileStorageExceptionCodes.NO_SUCH_FOLDER.equals(e)) {
+                throw e;
+            }
+        }
+        return null;
     }
 
 }

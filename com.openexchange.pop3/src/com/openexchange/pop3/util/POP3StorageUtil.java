@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,7 +49,6 @@
 
 package com.openexchange.pop3.util;
 
-import static com.openexchange.pop3.util.UIDUtil.uid2long;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -57,13 +56,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.pop3.POP3ExceptionCode;
 import com.openexchange.pop3.storage.POP3StoragePropertyNames;
 
@@ -208,32 +205,7 @@ public class POP3StorageUtil {
         return removedUIDLs.size();
     }
 
-    /**
-     * Synchronizes database with specified UIDLs.
-     *
-     * @param uidls The UIDLs reflecting current POP3 INBOX content
-     * @param user The user ID
-     * @param cid The context ID
-     * @return The number of new messages since last sync
-     * @throws OXException If synchronizing messages fails
-     */
-    public static int syncDBEntries(final String[] uidls, final int user, final int cid) throws OXException {
-        final List<String> databaseUIDLs = getUIDLs(user, cid);
-        final List<String> actualUIDLs = Arrays.asList(uidls);
-
-        // Determine & delete removed UIDLs
-        final Set<String> removedUIDLs = new HashSet<String>(databaseUIDLs);
-        removedUIDLs.removeAll(actualUIDLs);
-        deleteMessagesFromTables(removedUIDLs, user, cid);
-
-        // Determine & insert new UIDLs
-        final Set<String> newUIDLs = new HashSet<String>(actualUIDLs);
-        newUIDLs.removeAll(databaseUIDLs);
-        insertMessagesIntoTables(newUIDLs, user, cid);
-        return newUIDLs.size();
-    }
-
-    private static final String SQL_SELECT_UIDLS = "SELECT uidl FROM user_pop3_data WHERE cid = ? AND user = ?";
+    private static final String SQL_SELECT_UIDLS = "SELECT uidl FROM pop3_storage_ids WHERE cid = ? AND user = ?";
 
     /**
      * Gets the UIDLs of the messages currently kept in database.
@@ -269,251 +241,6 @@ public class POP3StorageUtil {
             Database.back(cid, false, con);
         }
         return uidls;
-    }
-
-    private static final String SQL_DELETE_MSGS = "DELETE user_pop3_data, user_pop3_user_flag FROM user_pop3_data, user_pop3_user_flag WHERE user_pop3_data.uid = user_pop3_user_flag.uid AND user_pop3_data.cid = ? AND user_pop3_data.user = ? AND user_pop3_data.uidl = ?";
-
-    /**
-     * Deletes the messages from database whose UIDL is contained in specified collection.
-     *
-     * @param uidls The collection of UIDLs
-     * @param user The user ID
-     * @param cid The context ID
-     * @throws OXException If messages cannot be deleted
-     */
-    public static void deleteMessagesFromTables(final Collection<String> uidls, final int user, final int cid) throws OXException {
-        final Connection con;
-        try {
-            con = Database.get(cid, true);
-        } catch (final OXException e) {
-            throw e;
-        }
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement(SQL_DELETE_MSGS);
-            for (final String uidl : uidls) {
-                stmt.setInt(1, cid);
-                stmt.setInt(2, user);
-                stmt.setString(3, uidl);
-                stmt.addBatch();
-            }
-            stmt.executeBatch();
-        } catch (final SQLException e) {
-            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(null, stmt);
-            Database.back(cid, true, con);
-        }
-    }
-
-    private static final String SQL_INSERT_DATA = "INSERT INTO user_pop3_data (cid, user, uid, uidl, flags, color_flag, received_date) VALUES (?, ?, ?, ?, ?, ?, ?)";
-
-    /**
-     * Inserts the messages to database whose UIDL is contained in specified collection.
-     *
-     * @param uidls The collection of UIDLs
-     * @param user The user ID
-     * @param cid The context ID
-     * @throws OXException If messages cannot be inserted
-     */
-    public static void insertMessagesIntoTables(final Collection<String> uidls, final int user, final int cid) throws OXException {
-        final Connection con;
-        try {
-            con = Database.get(cid, true);
-        } catch (final OXException e) {
-            throw e;
-        }
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement(SQL_INSERT_DATA);
-            final long creatingTime = System.currentTimeMillis();
-            for (final String uidl : uidls) {
-                stmt.setLong(1, cid);
-                stmt.setLong(2, user);
-                stmt.setLong(3, uid2long(uidl));
-                stmt.setString(4, uidl);
-                stmt.setInt(5, 0);
-                stmt.setInt(6, 0);
-                stmt.setLong(7, creatingTime);
-                stmt.addBatch();
-            }
-            stmt.executeBatch();
-        } catch (final SQLException e) {
-            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(null, stmt);
-            Database.back(cid, true, con);
-        }
-    }
-
-    /**
-     * Gets the number of unread messages kept in database.
-     *
-     * @param user The user ID
-     * @param cid The context ID
-     * @return The number of unread messages kept in database
-     * @throws OXException
-     */
-    public static int getUnreadMessagesCount(final int user, final int cid) throws OXException {
-        return getUnreadMessages(user, cid).size();
-    }
-
-    private static final String SQL_SELECT_UNREAD = "SELECT uidl FROM user_pop3_data WHERE cid = ? AND user = ? AND (flags & ?) = ?";
-
-    /**
-     * Gets the UIDLs of unread messages kept in database.
-     *
-     * @param user The user ID
-     * @param cid The context ID
-     * @return The UIDLs of unread messages kept in database
-     * @throws OXException If unread messages cannot be retrieved
-     */
-    public static Set<String> getUnreadMessages(final int user, final int cid) throws OXException {
-        final Connection con;
-        try {
-            con = Database.get(cid, false);
-        } catch (final OXException e) {
-            throw e;
-        }
-        final Set<String> uidls = new HashSet<String>();
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = con.prepareStatement(SQL_SELECT_UNREAD);
-            int pos = 1;
-            stmt.setInt(pos++, cid);
-            stmt.setInt(pos++, user);
-            stmt.setInt(pos++, MailMessage.FLAG_SEEN);
-            stmt.setInt(pos++, 0);
-            rs = stmt.executeQuery();
-            while (rs.next()) {
-                uidls.add(rs.getString(1));
-            }
-        } catch (final SQLException e) {
-            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(rs, stmt);
-            Database.back(cid, false, con);
-        }
-        return uidls;
-    }
-
-    private static final String SQL_SELECT_SYS_FLAGS = "SELECT flags FROM user_pop3_data WHERE uidl = ? AND user = ? AND cid = ?";
-
-    /**
-     * Gets the system flags of the message identified by specified UIDL.
-     *
-     * @param uidl The UIDL
-     * @param user The user ID
-     * @param cid The context ID
-     * @return The system flags of the message identified by specified UIDL
-     * @throws OXException If message's flags cannot be retrieved
-     */
-    public static int getSystemFlags(final String uidl, final int user, final int cid) throws OXException {
-        final Connection con;
-        try {
-            con = Database.get(cid, false);
-        } catch (final OXException e) {
-            throw e;
-        }
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = con.prepareStatement(SQL_SELECT_SYS_FLAGS);
-            stmt.setString(1, uidl);
-            stmt.setLong(2, user);
-            stmt.setLong(3, cid);
-            rs = stmt.executeQuery();
-            if (!rs.next()) {
-                return 0;
-            }
-            return rs.getInt(1);
-        } catch (final SQLException e) {
-            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(rs, stmt);
-            Database.back(cid, false, con);
-        }
-    }
-
-    private static final String SQL_SELECT_COL_FLAGS = "SELECT color_flag FROM user_pop3_data WHERE uidl = ? AND user = ? AND cid = ?";
-
-    /**
-     * Gets the color flag of the message identified by specified UIDL.
-     *
-     * @param uidl The UIDL
-     * @param user The user ID
-     * @param cid The context ID
-     * @return The color flag of the message identified by specified UIDL
-     * @throws OXException If message's color flag cannot be retrieved
-     */
-    public static int getColorFlag(final String uidl, final int user, final int cid) throws OXException {
-        final Connection con;
-        try {
-            con = Database.get(cid, false);
-        } catch (final OXException e) {
-            throw e;
-        }
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = con.prepareStatement(SQL_SELECT_COL_FLAGS);
-            stmt.setString(1, uidl);
-            stmt.setLong(2, user);
-            stmt.setLong(3, cid);
-            rs = stmt.executeQuery();
-            if (!rs.next()) {
-                return 0;
-            }
-            return rs.getInt(1);
-        } catch (final SQLException e) {
-            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(rs, stmt);
-            Database.back(cid, false, con);
-        }
-    }
-
-    private static final String SQL_SELECT_USER_FLAGS = "SELECT user_flag FROM user_pop3_user_flag WHERE uid = ? AND user = ? AND cid = ?";
-
-    /**
-     * Gets the user flags of the message identified by specified UIDL.
-     *
-     * @param uidl The UIDL
-     * @param user The user ID
-     * @param cid The context ID
-     * @return The user flags of the message identified by specified UIDL
-     * @throws OXException If message's flags cannot be retrieved
-     */
-    public static String[] getUserFlags(final String uidl, final int user, final int cid) throws OXException {
-        final Connection con;
-        try {
-            con = Database.get(cid, false);
-        } catch (final OXException e) {
-            throw e;
-        }
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = con.prepareStatement(SQL_SELECT_USER_FLAGS);
-            stmt.setLong(1, UIDUtil.uid2long(uidl));
-            stmt.setLong(2, user);
-            stmt.setLong(3, cid);
-            rs = stmt.executeQuery();
-            if (!rs.next()) {
-                return new String[0];
-            }
-            final List<String> tmp = new ArrayList<String>();
-            do {
-                tmp.add(rs.getString(1));
-            } while (rs.next());
-            return tmp.toArray(new String[tmp.size()]);
-        } catch (final SQLException e) {
-            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(rs, stmt);
-            Database.back(cid, false, con);
-        }
     }
 
     private static final String LOGIN_DELAY = "LOGIN-DELAY";

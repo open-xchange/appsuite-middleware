@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -113,7 +113,7 @@ public final class QuotedPrintable {
             for (int a = 0; a < b.length; a++) {
                 if (b[a] == 61) {
                     if ((a + 2) < b.length) {
-                        x = ((char) b[a + 1] + "" + (char) b[a + 2]);
+                        x = (new StringBuilder().append((char) b[a + 1]).append((char) b[a + 2]).toString());
 
                         i = Integer.parseInt(x, 16);
 

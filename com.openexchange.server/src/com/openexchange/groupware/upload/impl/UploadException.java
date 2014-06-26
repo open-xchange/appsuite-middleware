@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,9 +50,9 @@
 package com.openexchange.groupware.upload.impl;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 
@@ -68,7 +68,7 @@ public class UploadException extends OXException {
     /**
      * The upload error code enumeration.
      */
-    public static enum UploadCode implements OXExceptionCode {
+    public static enum UploadCode implements DisplayableOXExceptionCode {
         /**
          * File upload failed: %1$s
          */
@@ -129,8 +129,7 @@ public class UploadException extends OXException {
         /**
          * Connection has been closed unexpectedly. Please try again.
          */
-        UNEXPECTED_EOF("Connection has been closed unexpectedly. Please try again.", UploadExceptionMessage.UNEXPECTED_EOF_MSG,
-            CATEGORY_TRY_AGAIN, 13),
+        UNEXPECTED_EOF("Connection has been closed unexpectedly. Please try again.", UploadExceptionMessage.UNEXPECTED_EOF_MSG, CATEGORY_TRY_AGAIN, 13),
 
         ;
 
@@ -146,7 +145,7 @@ public class UploadException extends OXException {
         }
 
         private final String message;
-        
+
         private final String displayMessage;
 
         private final Category category;
@@ -178,6 +177,11 @@ public class UploadException extends OXException {
         @Override
         public final String getMessage() {
             return message;
+        }
+
+        @Override
+        public String getDisplayMessage() {
+            return displayMessage;
         }
 
         @Override

@@ -1,0 +1,30 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: The JSON interface for continuation module
+Bundle-SymbolicName: com.openexchange.continuation.json
+Bundle-Version: 7.6.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.ajax.requesthandler,
+ com.openexchange.ajax.requesthandler.osgiservice,
+ com.openexchange.capabilities,
+ com.openexchange.config.cascade,
+ com.openexchange.continuation,
+ com.openexchange.documentation,
+ com.openexchange.documentation.annotations,
+ com.openexchange.exception,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.ldap,
+ com.openexchange.groupware.settings,
+ com.openexchange.groupware.userconfiguration,
+ com.openexchange.java.util,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.tools.servlet,
+ com.openexchange.tools.session,
+ org.json,
+ org.osgi.framework,
+ org.osgi.util.tracker,
+ org.slf4j
+Bundle-Activator: com.openexchange.continuation.json.osgi.ContinuationJsonActivator

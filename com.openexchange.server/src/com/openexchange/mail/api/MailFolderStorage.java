@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.api;
 
-import static com.openexchange.mail.utils.MailFolderUtility.isEmpty;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.exception.OXException;
@@ -120,17 +119,17 @@ public abstract class MailFolderStorage implements IMailFolderStorage {
     @Override
     public String renameFolder(final String fullName, final String newName) throws OXException {
         final MailFolder folder = getFolder(fullName);
-        if (isEmpty(newName)) {
+        if (com.openexchange.java.Strings.isEmpty(newName)) {
             throw MailExceptionCode.INVALID_FOLDER_NAME_EMPTY.create();
         }
         if (newName.indexOf(folder.getSeparator()) != -1) {
-            throw MailExceptionCode.INVALID_FOLDER_NAME2.create(newName);
+            throw MailExceptionCode.INVALID_FOLDER_NAME2.create(newName, Character.toString(folder.getSeparator()));
         }
         final String newPath;
         if (MailFolder.DEFAULT_FOLDER_ID.equals(folder.getParentFullname())) {
             newPath = newName;
         } else {
-            newPath = new com.openexchange.java.StringAllocator(folder.getParentFullname()).append(folder.getSeparator()).append(newName).toString();
+            newPath = new StringBuilder(folder.getParentFullname()).append(folder.getSeparator()).append(newName).toString();
         }
         return moveFolder(fullName, newPath);
     }

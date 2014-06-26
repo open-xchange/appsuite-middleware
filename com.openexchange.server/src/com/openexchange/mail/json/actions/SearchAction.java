@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -57,6 +57,7 @@ import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.parser.SearchTermParser;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -189,7 +190,7 @@ public final class SearchAction extends AbstractMailAction {
                             }
                         } else {
                             final int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
-                            it = mailInterface.getMessages(folderId, null, sortCol, orderDir, searchCols, searchPats, true, columns);
+                            it = mailInterface.getMessages(folderId, null, sortCol, orderDir, searchCols, searchPats, true, columns, AJAXRequestDataTools.parseBoolParameter("continuation", req.getRequest()));
                             final int size = it.size();
                             for (int i = 0; i < size; i++) {
                                 final MailMessage mail = it.next();
@@ -232,7 +233,7 @@ public final class SearchAction extends AbstractMailAction {
                 }
                 final int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
                 final SearchIterator<MailMessage> it =
-                    mailInterface.getMessages(folderId, null, sortCol, orderDir, SearchTermParser.parse(searchArray), true, columns);
+                    mailInterface.getMessages(folderId, null, sortCol, orderDir, SearchTermParser.parse(searchArray), true, columns, AJAXRequestDataTools.parseBoolParameter("continuation", req.getRequest()));
                 final int size = it.size();
                 final OXJSONWriter jsonWriter = new OXJSONWriter();
                 /*

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -94,16 +94,17 @@ public class MimeSnippetActivator extends HousekeepingActivator {
         logger.info("Starting bundle: com.openexchange.snippet.mime");
         try {
 
-            /*
-             * First, check for if a file store is available/permitted
-             */
             /*-
+             *   How SnippetService selection works
+             * =========================================
              *
-            final boolean filestore = getService(ConfigurationService.class).getBoolProperty("com.openexchange.capability.filestore", true);
-            if (!filestore) {
-                logger.info("No registration of filestore-based'" + MimeSnippetService.class.getSimpleName() + "' as property \"com.openexchange.capability.filestore\" is configured to be \"false\".");
-            }
+             * The check if "filestore" capability is available/permitted as per CapabilityService is performed through examining "MimeSnippetService.neededCapabilities()" method
+             * in "SnippetAction.getSnippetService()".
              *
+             * Available SnippetServices are sorted rank-wise, with RdbSnippetService having default (0) ranking and MimeSnippetService with a rank of 10. Thus MimeSnippetService
+             * is preferred provided that "filestore" capability is indicated by CapabilityService.
+             *
+             * If missing, RdbSnippetService is selected.
              */
 
             /*

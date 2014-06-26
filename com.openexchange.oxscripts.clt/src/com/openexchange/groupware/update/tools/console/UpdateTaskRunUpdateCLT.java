@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -178,7 +178,12 @@ public final class UpdateTaskRunUpdateCLT {
                 final MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
 
                 final String param = (null == schemaName ? String.valueOf(contextId) : schemaName);
-                mbsc.invoke(Constants.OBJECT_NAME, "runUpdate", new Object[] { param }, null);
+                Object failures = mbsc.invoke(Constants.OBJECT_NAME, "runUpdate", new Object[] { param }, null);
+                if (null != failures) {
+                    String message = failures.toString();
+                    message = message.replaceAll("\\\\R", System.getProperty("line.separator"));
+                    System.out.println(message);
+                }
             } finally {
                 if (null != jmxConnector) {
                     try {

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -169,7 +169,7 @@ public class DefaultFileStorageAccount implements FileStorageAccount, ServiceAwa
 
     @Override
     public String toString() {
-        final com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator(64);
+        final StringBuilder stringBuilder = new StringBuilder(64);
         stringBuilder.append("DefaultFileStorageAccount ( configuration = ");
         stringBuilder.append(configuration);
         stringBuilder.append(", displayName = ");

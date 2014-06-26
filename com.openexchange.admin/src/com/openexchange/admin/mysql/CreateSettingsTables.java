@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,9 +49,7 @@
 
 package com.openexchange.admin.mysql;
 
-import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.database.AbstractCreateTableImpl;
-import com.openexchange.groupware.update.FullPrimaryKeySupportService;
 
 
 /**
@@ -60,7 +58,7 @@ import com.openexchange.groupware.update.FullPrimaryKeySupportService;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class CreateSettingsTables extends AbstractCreateTableImpl {
-    
+
     private static final String userConfigurationTableName = "user_configuration";
     private static final String userSettingMailTableName = "user_setting_mail";
     private static final String userSettingMailSignatureTableName= "user_setting_mail_signature";
@@ -68,7 +66,7 @@ public class CreateSettingsTables extends AbstractCreateTableImpl {
     private static final String userSettingAdminTableName = "user_setting_admin";
     private static final String userSettingTableName = "user_setting";
     private static final String userSettingServerTableName = "user_setting_server";
-    
+
     private static final String createUserConfigurationTable = "CREATE TABLE user_configuration ("
        + "cid INT4 UNSIGNED NOT NULL,"
        + "user INT4 UNSIGNED NOT NULL,"
@@ -76,7 +74,7 @@ public class CreateSettingsTables extends AbstractCreateTableImpl {
        + "PRIMARY KEY (cid, user),"
        + "FOREIGN KEY (cid, user) REFERENCES user (cid, id)"
      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     private static final String createUserSettingMailTable = "CREATE TABLE user_setting_mail ("
        + "cid INT4 UNSIGNED NOT NULL,"
        + "user INT4 UNSIGNED NOT NULL,"
@@ -97,7 +95,7 @@ public class CreateSettingsTables extends AbstractCreateTableImpl {
        + "PRIMARY KEY (cid, user),"
        + "FOREIGN KEY (cid, user) REFERENCES user (cid, id)"
      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     private static final String createUserSettingMailSignatureTable = "CREATE TABLE user_setting_mail_signature ("
        + "cid INT4 UNSIGNED NOT NULL,"
        + "user INT4 UNSIGNED NOT NULL,"
@@ -106,7 +104,7 @@ public class CreateSettingsTables extends AbstractCreateTableImpl {
        + "PRIMARY KEY (cid, user, id),"
        + "FOREIGN KEY (cid, user) REFERENCES user_setting_mail (cid, user)"
      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     private static final String createUserSettingSpellcheckTable = "CREATE TABLE user_setting_spellcheck ("
        + "cid INT4 UNSIGNED NOT NULL,"
        + "user INT4 UNSIGNED NOT NULL,"
@@ -114,14 +112,14 @@ public class CreateSettingsTables extends AbstractCreateTableImpl {
        + "PRIMARY KEY (cid, user),"
        + "FOREIGN KEY (cid, user) REFERENCES user (cid, id)"
      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     private static final String createUserSettingAdminTable = "CREATE TABLE user_setting_admin ("
        + "cid INT4 UNSIGNED NOT NULL,"
        + "user INT4 UNSIGNED NOT NULL,"
        + "PRIMARY KEY (cid, user),"
        + "FOREIGN KEY (cid, user) REFERENCES user (cid, id)"
      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     private static final String createUserSettingTable = "CREATE TABLE user_setting ("
        + "cid INT4 UNSIGNED NOT NULL,"
        + "user_id INT4 UNSIGNED NOT NULL,"
@@ -129,21 +127,7 @@ public class CreateSettingsTables extends AbstractCreateTableImpl {
        + "value TEXT,"
        + "PRIMARY KEY (cid, user_id, path_id)"
      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
-    private static final String createUserSettingServerTable = "CREATE TABLE user_setting_server ("
-       + "cid INT4 UNSIGNED NOT NULL,"
-       + "user INT4 UNSIGNED NOT NULL,"
-       + "contact_collect_folder INT4 UNSIGNED,"
-       + "contact_collect_enabled BOOL,"
-       + "defaultStatusPrivate INT4 UNSIGNED DEFAULT 0,"
-       + "defaultStatusPublic INT4 UNSIGNED DEFAULT 0,"
-       + "contactCollectOnMailTransport BOOL DEFAULT TRUE,"
-       + "contactCollectOnMailAccess BOOL DEFAULT TRUE,"
-       + "folderTree INT4,"
-       + "uuid BINARY(16) DEFAULT NULL,"
-       + "FOREIGN KEY(cid, user) REFERENCES user(cid, id)"
-     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     private static final String createUserSettingServerTablePrimaryKey = "CREATE TABLE user_setting_server ("
         + "cid INT4 UNSIGNED NOT NULL,"
         + "user INT4 UNSIGNED NOT NULL,"
@@ -166,36 +150,22 @@ public class CreateSettingsTables extends AbstractCreateTableImpl {
         super();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.database.CreateTableService#requiredTables()
-     */
     @Override
     public String[] requiredTables() {
         return new String[] { "user" };
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.database.CreateTableService#tablesToCreate()
-     */
     @Override
     public String[] tablesToCreate() {
         return new String[] { userConfigurationTableName, userSettingMailTableName, userSettingMailSignatureTableName,
             userSettingSpellcheckTableName, userSettingAdminTableName, userSettingTableName, userSettingServerTableName };
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.database.AbstractCreateTableImpl#getCreateStatements()
-     */
     @Override
     protected String[] getCreateStatements() {
-        FullPrimaryKeySupportService fullPrimaryKeySupportService = AdminServiceRegistry.getInstance().getService(FullPrimaryKeySupportService.class);
-        if (fullPrimaryKeySupportService.isFullPrimaryKeySupported()) {
-            return new String[] { createUserConfigurationTable, createUserSettingMailTable, createUserSettingMailSignatureTable,
+        return new String[] { createUserConfigurationTable, createUserSettingMailTable, createUserSettingMailSignatureTable,
                 createUserSettingSpellcheckTable, createUserSettingAdminTable, createUserSettingTable,
                 createUserSettingServerTablePrimaryKey };
-        }
-        return new String[] { createUserConfigurationTable, createUserSettingMailTable, createUserSettingMailSignatureTable,
-            createUserSettingSpellcheckTable, createUserSettingAdminTable, createUserSettingTable, createUserSettingServerTable };
     }
 
 }

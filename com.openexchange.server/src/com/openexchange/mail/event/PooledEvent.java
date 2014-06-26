@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -72,6 +72,7 @@ public final class PooledEvent implements Delayed {
     private final Session session;
     private final boolean contentRelated;
     private final boolean immediateDelivery;
+    private final boolean remote;
     private final int hash;
     private boolean async;
     private final Map<String, Object> properties;
@@ -87,8 +88,8 @@ public final class PooledEvent implements Delayed {
      * @param immediateDelivery <code>true</code> for immediate delivery; otherwise <code>false</code>
      * @param session The session
      */
-    public PooledEvent(final int contextId, final int userId, final int accountId, final String fullname, final boolean contentRelated, final boolean immediateDelivery, final Session session) {
-        this(PushEventConstants.TOPIC, contextId, userId, accountId, fullname, contentRelated, immediateDelivery, session);
+    public PooledEvent(final int contextId, final int userId, final int accountId, final String fullname, final boolean contentRelated, final boolean immediateDelivery, final boolean remote, final Session session) {
+        this(PushEventConstants.TOPIC, contextId, userId, accountId, fullname, contentRelated, immediateDelivery, remote, session);
     }
 
     /**
@@ -102,7 +103,7 @@ public final class PooledEvent implements Delayed {
      * @param immediateDelivery <code>true</code> for immediate delivery; otherwise <code>false</code>
      * @param session The session
      */
-    public PooledEvent(final String topic, final int contextId, final int userId, final int accountId, final String fullname, final boolean contentRelated, final boolean immediateDelivery, final Session session) {
+    public PooledEvent(final String topic, final int contextId, final int userId, final int accountId, final String fullname, final boolean contentRelated, final boolean immediateDelivery, final boolean remote, final Session session) {
         super();
         properties = new HashMap<String, Object>(4);
         async = true;
@@ -115,6 +116,7 @@ public final class PooledEvent implements Delayed {
         this.contentRelated = contentRelated;
         this.immediateDelivery = immediateDelivery;
         this.session = session;
+        this.remote = remote;
         // Hash code
         final int prime = 31;
         int result = 1;
@@ -255,6 +257,18 @@ public final class PooledEvent implements Delayed {
             return false;
         }
         final PooledEvent other = (PooledEvent) obj;
+        if (accountId != other.accountId) {
+            return false;
+        }
+        if (contextId != other.contextId) {
+            return false;
+        }
+        if (userId != other.userId) {
+            return false;
+        }
+        if (contentRelated != other.contentRelated) {
+            return false;
+        }
         if (topic == null) {
             if (other.topic != null) {
                 return false;
@@ -262,23 +276,11 @@ public final class PooledEvent implements Delayed {
         } else if (!topic.equals(other.topic)) {
             return false;
         }
-        if (accountId != other.accountId) {
-            return false;
-        }
-        if (contextId != other.contextId) {
-            return false;
-        }
         if (fullname == null) {
             if (other.fullname != null) {
                 return false;
             }
         } else if (!fullname.equals(other.fullname)) {
-            return false;
-        }
-        if (userId != other.userId) {
-            return false;
-        }
-        if (contentRelated != other.contentRelated) {
             return false;
         }
         return true;
@@ -312,9 +314,9 @@ public final class PooledEvent implements Delayed {
     }
 
     /**
-     * Gets the fullname
+     * Gets the full name
      *
-     * @return The fullname
+     * @return The full name
      */
     public String getFullname() {
         return fullname;
@@ -336,6 +338,15 @@ public final class PooledEvent implements Delayed {
      */
     public boolean isContentRelated() {
         return contentRelated;
+    }
+
+    /**
+     * Checks if this event is supposed to be distributed remotely.
+     *
+     * @return <code>true</code> for remote distribution; otherwise <code>false</code>
+     */
+    public boolean isRemote() {
+        return remote;
     }
 
 }

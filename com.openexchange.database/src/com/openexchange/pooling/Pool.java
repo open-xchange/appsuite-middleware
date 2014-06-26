@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -67,8 +67,7 @@ public interface Pool<T> {
     /**
      * Returns a pooled object back to the pool.
      * @param pooled object to return.
-     * @throws PoolingException if the returned object does not belong to this
-     * pool.
+     * @throws PoolingException if the returned object does not belong to this pool or the given object is <code>null</code>.
      */
     void back(T pooled) throws PoolingException;
 

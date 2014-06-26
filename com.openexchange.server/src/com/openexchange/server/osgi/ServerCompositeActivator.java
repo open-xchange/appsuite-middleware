@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -79,7 +79,6 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new com.openexchange.groupware.attach.osgi.AttachmentActivator(),
         new com.openexchange.groupware.contact.osgi.ContactActivator(),
         new com.openexchange.groupware.infostore.osgi.InfostoreActivator(),
-        new com.openexchange.groupware.links.osgi.LinkActivator(),
         new com.openexchange.groupware.importexport.osgi.ImportExportActivator(),
         new com.openexchange.consistency.osgi.ConsistencyActivator(),
         new com.openexchange.authorization.osgi.AuthorizationActivator(),

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -84,6 +84,7 @@ import com.openexchange.configuration.ClientWhitelist;
 import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
@@ -233,7 +234,7 @@ public abstract class SessionServlet extends AJAXServlet {
             }
         }
         // Try public session
-        findPublicSessionId(req, session, sessiondService, false);
+        findPublicSessionId(req, session, sessiondService, false, false);
     }
 
     private static final String PARAM_ALTERNATIVE_ID = Session.PARAM_ALTERNATIVE_ID;
@@ -247,20 +248,26 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param session The looked-up session
      * @param sessiondService The SessionD service
      * @param mayUseFallbackSession <code>true</code> if request is allowed to use fall-back session, otherwise <code>false</code>
+     * @param mayPerformPublicSessionAuth <code>true</code> if public session authentication is allowed for specified request, otherwise <code>false</code>
      * @throws OXException If public session cannot be created
      */
-    protected void findPublicSessionId(final HttpServletRequest req, final ServerSession session, final SessiondService sessiondService, final boolean mayUseFallbackSession) throws OXException {
+    protected void findPublicSessionId(final HttpServletRequest req, final ServerSession session, final SessiondService sessiondService, final boolean mayUseFallbackSession, final boolean mayPerformPublicSessionAuth) throws OXException {
         final Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
         if (cookies != null) {
             final Cookie cookie = cookies.get(getPublicSessionCookieName(req));
             if (null != cookie) {
-                handlePublicSessionCookie(req, session, sessiondService, cookie);
+                handlePublicSessionCookie(req, session, sessiondService, cookie.getValue(), false);
             } else {
-                if (mayUseFallbackSession && isMediaPlayerAgent(req.getHeader(USER_AGENT))) {
-                    for (final Map.Entry<String, Cookie> entry : cookies.entrySet()) {
-                        if (entry.getKey().startsWith(PUBLIC_SESSION_PREFIX)) {
-                            handlePublicSessionCookie(req, session, sessiondService, entry.getValue());
-                            return;
+                final String publicSessionId = req.getParameter(PARAMETER_PUBLIC_SESSION);
+                if (null != publicSessionId) {
+                    handlePublicSessionCookie(req, session, sessiondService, publicSessionId, mayPerformPublicSessionAuth);
+                } else {
+                    if (mayUseFallbackSession && isMediaPlayerAgent(req.getHeader(USER_AGENT))) {
+                        for (final Map.Entry<String, Cookie> entry : cookies.entrySet()) {
+                            if (entry.getKey().startsWith(PUBLIC_SESSION_PREFIX)) {
+                                handlePublicSessionCookie(req, session, sessiondService, entry.getValue().getValue(), false);
+                                return;
+                            }
                         }
                     }
                 }
@@ -268,8 +275,7 @@ public abstract class SessionServlet extends AJAXServlet {
         }
     }
 
-    private void handlePublicSessionCookie(final HttpServletRequest req, final ServerSession session, final SessiondService sessiondService, final Cookie cookie) throws OXException {
-        final String altId = cookie.getValue();
+    private void handlePublicSessionCookie(final HttpServletRequest req, final ServerSession session, final SessiondService sessiondService, final String altId, final boolean publicSessionAuth) throws OXException {
         if (null != altId && null != session && altId.equals(session.getParameter(PARAM_ALTERNATIVE_ID))) {
             // same session (thus already verified)
             rememberPublicSession(req, session);
@@ -278,7 +284,9 @@ public abstract class SessionServlet extends AJAXServlet {
             final ServerSession publicSession = null == altId ? null : ServerSessionAdapter.valueOf(sessiondService.getSessionByAlternativeId(altId));
             if (publicSession != null) {
                 try {
-                    checkSecret(hashSource, req, publicSession, false);
+                    if (false == publicSessionAuth) {
+                        checkSecret(hashSource, req, publicSession, false);
+                    }
                     verifySession(req, sessiondService, publicSession.getSessionID(), publicSession);
                     rememberPublicSession(req, publicSession);
                 } catch (final OXException e) {
@@ -325,6 +333,17 @@ public abstract class SessionServlet extends AJAXServlet {
             initializeSession(req, resp);
             session = getSessionObject(req, true);
             if (null != session) {
+                /*
+                 * Track DB schema
+                 */
+                String dbSchema = (String) session.getParameter(LogProperties.Name.DATABASE_SCHEMA.getName());
+                if (dbSchema == null) {
+                    DatabaseService dbService = ServerServiceRegistry.getServize(DatabaseService.class, true);
+                    dbSchema = dbService.getSchemaName(session.getContextId());
+                    session.setParameter(LogProperties.Name.DATABASE_SCHEMA.getName(), dbSchema);
+                }
+                LogProperties.put(LogProperties.Name.DATABASE_SCHEMA, dbSchema);
+
                 /*
                  * Check max. concurrent AJAX requests
                  */
@@ -382,8 +401,9 @@ public abstract class SessionServlet extends AJAXServlet {
             if (null != sessionId && null != threadCounter) {
                 threadCounter.decrement(sessionId);
             }
-            ThreadLocalSessionHolder.getInstance().setSession(null);
+            ThreadLocalSessionHolder.getInstance().clear();
             LogProperties.removeSessionProperties();
+            LogProperties.removeProperty(LogProperties.Name.DATABASE_SCHEMA);
             if (null != counter) {
                 counter.getAndDecrement();
             }
@@ -662,6 +682,8 @@ public abstract class SessionServlet extends AJAXServlet {
         }
     }
 
+    private static final Set<String> AGENTS_WO_PUBLIC_SESSION_COOKIE = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("open-xchange usm http client")));
+
     /**
      * Checks presence of public session cookie.
      *
@@ -671,12 +693,20 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param sessiondService The <code>SessiondService</code> instance
      */
     public static void checkPublicSessionCookie(final HttpServletRequest req, final HttpServletResponse resp, final Session session, final SessiondService sessiondService) {
+        final String userAgent = HashCalculator.getUserAgent(req);
+        if (AGENTS_WO_PUBLIC_SESSION_COOKIE.contains(userAgent.toLowerCase())) {
+            return;
+        }
+
+        // Check for public session cookie
         final Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
         if (null != cookies) {
             final String cookieName = getPublicSessionCookieName(req);
             if (null == cookies.get(cookieName)) {
-                LoginServlet.writePublicSessionCookie(req, resp, session, req.isSecure(), req.getServerName(), LoginServlet.getLoginConfiguration());
-                LOG.info("Restored public session cookie for \"{}\": {} (User-Agent: {})", session.getLogin(), cookieName, HashCalculator.getUserAgent(req));
+                final boolean restored = LoginServlet.writePublicSessionCookie(req, resp, session, req.isSecure(), req.getServerName(), LoginServlet.getLoginConfiguration());
+                if (restored) {
+                    LOG.info("Restored public session cookie for \"{}\": {} (User-Agent: {})", session.getLogin(), cookieName, userAgent);
+                }
             }
         }
     }
@@ -732,26 +762,53 @@ public abstract class SessionServlet extends AJAXServlet {
     /**
      * Extracts the secret string from specified cookies using given hash string.
      *
-     * @param req the HTTP servlet request object.
-     * @param hash remembered hash from session.
-     * @param client the remembered client from the session.
-     * @param originalUserAgent The original User-Agent associated with session
-     * @return The secret string or <code>null</code>
+     * @param hashSource The hash source for the secret cookie
+     * @param req The HTTP Servlet request object.
+     * @param hash The remembered hash from session.
+     * @param client The remembered client from the session.
+     * @param originalUserAgent The original <tt>'User-Agent'</tt> associated with session
+     * @return The secret string or <tt>null</tt>
      */
-    public static String extractSecret(final CookieHashSource cookieHash, final HttpServletRequest req, final String hash, final String client, final String originalUserAgent) {
+    public static String extractSecret(final CookieHashSource hashSource, final HttpServletRequest req, final String hash, final String client, final String originalUserAgent) {
         final Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
         if (null != cookies) {
-            Cookie cookie = cookies.get(SECRET_PREFIX + getHash(cookieHash, req, hash, client));
-            if (null != cookie) {
-                return cookie.getValue();
-            }
-            if (isMediaPlayerAgent(req.getHeader(USER_AGENT))) {
-                cookie = cookies.get(SECRET_PREFIX + hash);
+            if (cookies.isEmpty()) {
+                LOG.info("Empty Cookies in HTTP request. No session secret can be looked up.");
+            } else {
+                final String secretPrefix = SECRET_PREFIX;
+                final StringBuilder tmp = new StringBuilder(256);
+                final String expectedSecretCookieName = tmp.append(secretPrefix).append(getHash(hashSource, req, hash, client)).toString();
+
+                // Look-up Cookie by expected name
+                Cookie cookie = cookies.get(expectedSecretCookieName);
                 if (null != cookie) {
                     return cookie.getValue();
                 }
+
+                // Check for special User-Agent to allow look-up by remembered cookie name
+                if (isMediaPlayerAgent(req.getHeader(USER_AGENT))) {
+                    tmp.setLength(0);
+                    cookie = cookies.get(tmp.append(secretPrefix).append(hash).toString());
+                    if (null != cookie) {
+                        return cookie.getValue();
+                    }
+                }
+
+                // All look-up attempts failed - Log information
+                tmp.setLength(0);
+                for (final String cookieName : cookies.keySet()) {
+                    if (cookieName.startsWith(secretPrefix)) {
+                        tmp.append(cookieName.substring(secretPrefix.length())).append(", ");
+                    }
+                }
+                final int hlen = tmp.length();
+                if (hlen > 0) {
+                    tmp.setLength(hlen - 2);
+                    LOG.info("Didn't find an appropriate Cookie for expected name \"{}\" (CookieHashSource={}) which provides the session secret. Remembered hash: {}. Available hashes: {}", expectedSecretCookieName, hashSource.toString(), hash, tmp.toString());
+                } else {
+                    LOG.info("Didn't find an appropriate Cookie for expected name \"{}\" (CookieHashSource={}) which provides the session secret. Remembered hash={}. No available hashes.", expectedSecretCookieName, hashSource.toString(), hash);
+                }
             }
-            LOG.info("Didn't find an appropriate Cookie for name \"{}\" (CookieHashSource={}) which provides the session secret.", (SECRET_PREFIX + getHash(cookieHash, req, hash, client)), cookieHash.toString());
         } else {
             LOG.info("Missing Cookies in HTTP request. No session secret can be looked up.");
         }
@@ -776,14 +833,14 @@ public abstract class SessionServlet extends AJAXServlet {
     /**
      * Gets the appropriate hash for specified request.
      *
-     * @param cookieHash defines how the cookie should be found.
+     * @param hashSource Specifies how the cookie should be found.
      * @param req The HTTP request
      * @param hash The previously remembered hash
      * @param client The client identifier
      * @return The appropriate hash
      */
-    public static String getHash(final CookieHashSource cookieHash, final HttpServletRequest req, final String hash, final String client) {
-        if (CookieHashSource.REMEMBER == cookieHash) {
+    public static String getHash(final CookieHashSource hashSource, final HttpServletRequest req, final String hash, final String client) {
+        if (CookieHashSource.REMEMBER == hashSource) {
             return hash;
         }
         // Default is calculate

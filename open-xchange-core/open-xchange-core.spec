@@ -9,7 +9,7 @@ BuildRequires: open-xchange-osgi
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 26
+%define        ox_release 7
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -448,17 +448,6 @@ if ! ox_exists_property com.openexchange.user.maxClientCount $pfile; then
     ox_set_property com.openexchange.user.maxClientCount -1 $pfile
 fi
 
-# SoftwareChange_Request-1275
-pfile=/opt/open-xchange/etc/server.properties
-if grep -E "com.openexchange.log.propertyNames.*.ajp13." $pfile > /dev/null; then
-   ptmp=${pfile}.$$
-   sed -e 's;\.ajp13\.;.ajpv13.;g' $pfile > $ptmp
-   if [ -s $ptmp ]; then
-      cp $ptmp $pfile
-   fi
-   rm -f $ptmp
-fi
-
 # SoftwareChange_Request-1252
 # -----------------------------------------------------------------------
 pfile=/opt/open-xchange/etc/whitelist.properties
@@ -696,12 +685,6 @@ if ! ox_exists_property com.openexchange.contactcollector.folder.deleteDenied $p
    ox_set_property com.openexchange.contactcollector.folder.deleteDenied false $pfile
 fi
 
-# SoftwareChange_Request-1529
-pfile=/opt/open-xchange/etc/server.properties
-if ! ox_exists_property com.openexchange.server.fullPrimaryKeySupport $pfile; then
-    ox_set_property com.openexchange.server.fullPrimaryKeySupport false $pfile
-fi
-
 # SoftwareChange_Request-1540
 pfile=/opt/open-xchange/etc/permissions.properties
 if ! grep "com.openexchange.capability.boring" >/dev/null $pfile; then
@@ -918,6 +901,91 @@ ox_add_property com.openexchange.capability.alone false /opt/open-xchange/etc/pe
 ox_set_property readProperty.5 autoReconnect=false /opt/open-xchange/etc/configdb.properties
 ox_set_property writeProperty.5 autoReconnect=false /opt/open-xchange/etc/configdb.properties
 
+# Change jolokia.properties comment by reloading properties
+pfile=/opt/open-xchange/etc/jolokia.properties
+VALUE=$(ox_read_property com.openexchange.jolokia.user $pfile)
+if [ -n "$VALUE" ]; then
+    ox_set_property com.openexchange.jolokia.user "$VALUE" $pfile
+else
+    ox_set_property com.openexchange.jolokia.user "" $pfile
+fi
+VALUE=$(ox_read_property com.openexchange.jolokia.password $pfile)
+if [ -n "$VALUE" ]; then
+    ox_set_property com.openexchange.jolokia.password "$VALUE" $pfile
+else
+    ox_set_property com.openexchange.jolokia.password "" $pfile
+fi
+
+# SoftwareChange_Request-1865
+PFILE=/opt/open-xchange/etc/whitelist.properties
+if [ -n "$(ox_read_property html.tag.base $PFILE)" ]; then
+    ox_comment html.tag.base= add /opt/open-xchange/etc/whitelist.properties
+fi
+if [ -n "$(ox_read_property html.tag.meta $PFILE)" ]; then
+    ox_comment html.tag.meta= add $PFILE
+fi
+
+# SoftwareChange_Request-1886
+PFILE=/opt/open-xchange/etc/server.properties
+if ox_exists_property com.openexchange.server.fullPrimaryKeySupport $PFILE; then
+    ox_remove_property com.openexchange.server.fullPrimaryKeySupport $PFILE
+fi
+
+# SoftwareChange_Request-1956
+ox_add_property com.openexchange.ajax.login.formatstring.login "" /opt/open-xchange/etc/login.properties
+ox_add_property com.openexchange.ajax.login.formatstring.logout "" /opt/open-xchange/etc/login.properties
+
+# SoftwareChange_Request-1959
+VALUE=$(ox_read_property com.openexchange.servlet.maxInactiveInterval /opt/open-xchange/etc/server.properties)
+ox_set_property com.openexchange.servlet.maxInactiveInterval "$VALUE" /opt/open-xchange/etc/server.properties
+
+# SoftwareChange_Request-1968
+VALUE=$(ox_read_property com.openexchange.sessiond.sessionDefaultLifeTime /opt/open-xchange/etc/sessiond.properties)
+ox_set_property com.openexchange.sessiond.sessionDefaultLifeTime "$VALUE" /opt/open-xchange/etc/sessiond.properties
+
+# SoftwareChange_Request-1980
+VALUE=$(ox_read_property com.openexchange.jolokia.restrict.to.localhost /opt/open-xchange/etc/jolokia.properties)
+ox_set_property com.openexchange.jolokia.restrict.to.localhost "$VALUE" /opt/open-xchange/etc/jolokia.properties
+
+# SoftwareChange_Request-1985
+ox_remove_property com.openexchange.log.propertyNames /opt/open-xchange/etc/server.properties
+
+# SoftwareChange_Request-1987
+cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration/define -d @name -r -
+<configuration>
+    <define name="syslogPatternLayoutActivator" class="com.openexchange.logback.extensions.SyslogPatternLayoutActivator"/>
+</configuration>
+EOF
+cat /opt/open-xchange/etc/logback.xml.new >/opt/open-xchange/etc/logback.xml
+rm -f /opt/open-xchange/etc/logback.xml.new
+
+# SoftwareChange_Request-1990
+ox_add_property com.openexchange.quota.attachment -1 /opt/open-xchange/etc/quota.properties
+
+# SoftwareChagne_Request-2002
+ox_add_property com.openexchange.infostore.zipDocumentsCompressionLevel -1 /opt/open-xchange/etc/infostore.properties
+
+# SoftwareChange_Request-2027
+pfile=/opt/open-xchange/etc/whitelist.properties
+if ! grep -E '^html.tag.table.*height' $pfile > /dev/null; then
+    oval=$(ox_read_property html.tag.table ${pfile})
+    oval=${oval//\"/}
+    ox_set_property html.tag.table \""${oval}height,"\" $pfile
+fi
+if ! grep -E '^html.style.combimap.background.*radial-gradient' $pfile > /dev/null; then
+    oval=$(ox_read_property html.style.combimap.background ${pfile})
+    oval=${oval//\"/}
+    ox_set_property html.style.combimap.background \""${oval}radial-gradient,"\" $pfile
+fi
+
+# SoftwareChange_Request-2036
+VALUE=$(ox_read_property com.openexchange.hazelcast.network.symmetricEncryption /opt/open-xchange/etc/hazelcast.properties)
+ox_set_property com.openexchange.hazelcast.network.symmetricEncryption "$VALUE" /opt/open-xchange/etc/hazelcast.properties
+
+# SoftwareChange_Request-2055
+ox_add_property com.openexchange.rest.services.basic-auth.login open-xchange /opt/open-xchange/etc/server.properties
+ox_add_property com.openexchange.rest.services.basic-auth.password secret /opt/open-xchange/etc/server.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
@@ -957,20 +1025,34 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Mon Jun 23 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Seventh candidate for 7.6.0 release
+* Fri Jun 20 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Sixth release candidate for 7.6.0
+* Fri Jun 13 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth release candidate for 7.6.0
 * Fri Jun 13 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-06-23
 * Thu Jun 05 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-06-16
+* Fri May 30 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth release candidate for 7.6.0
 * Thu May 22 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-05-26
 * Fri May 16 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-05-26
+* Fri May 16 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 7.6.0
 * Wed May 07 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-05-05
+* Mon May 05 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 7.6.0
 * Fri Apr 25 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-04-29
 * Tue Apr 15 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-04-22
+* Fri Apr 11 2014 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 7.6.0
 * Thu Apr 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-04-11
 * Thu Apr 03 2014 Marcus Klein <marcus.klein@open-xchange.com>
@@ -997,6 +1079,10 @@ Build for patch 2014-02-26
 Build for patch 2014-02-28
 * Fri Feb 21 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-02-26
+* Tue Feb 18 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-02-20
+* Wed Feb 12 2014 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.6.0
 * Fri Feb 07 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Sixth release candidate for 7.4.2
 * Thu Feb 06 2014 Marcus Klein <marcus.klein@open-xchange.com>
@@ -1005,6 +1091,8 @@ Fifth release candidate for 7.4.2
 Build for patch 2014-02-11
 * Tue Feb 04 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Fourth release candidate for 7.4.2
+* Fri Jan 31 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-02-03
 * Thu Jan 30 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-02-03
 * Wed Jan 29 2014 Marcus Klein <marcus.klein@open-xchange.com>

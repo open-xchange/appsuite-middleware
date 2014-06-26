@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -62,7 +62,7 @@ import static com.openexchange.realtime.util.CopyObject.copyObject;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 //TODO: Make cloneable or offer immutable copy
-public class PayloadElement implements VisitablePayload, Serializable {
+public class PayloadElement implements VisitablePayload, Serializable, Comparable<PayloadElement> {
 
     private static final long serialVersionUID = 2523897376910073662L;
 
@@ -224,6 +224,11 @@ public class PayloadElement implements VisitablePayload, Serializable {
     @Override
     public void accept(PayloadVisitor visitor) {
         visitor.visit(this, data);
+    }
+
+    @Override
+    public int compareTo(PayloadElement other) {
+        return getElementPath().compareTo(other.getElementPath());
     }
 
 }

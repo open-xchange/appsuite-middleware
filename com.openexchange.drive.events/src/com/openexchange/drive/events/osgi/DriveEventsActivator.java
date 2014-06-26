@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -61,11 +61,13 @@ import com.openexchange.drive.events.DriveEventService;
 import com.openexchange.drive.events.internal.DriveEventServiceImpl;
 import com.openexchange.drive.events.internal.DriveEventServiceLookup;
 import com.openexchange.drive.events.ms.MsDriveEventHandler;
+import com.openexchange.drive.events.ms.PortableDriveEventFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
-import com.openexchange.ms.MsService;
+import com.openexchange.hazelcast.serialization.CustomPortableFactory;
+import com.openexchange.ms.PortableMsService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
@@ -108,13 +110,14 @@ public class DriveEventsActivator extends HousekeepingActivator {
             FileStorageEventConstants.DELETE_FOLDER_TOPIC
         });
         registerService(EventHandler.class, service, serviceProperties);
-        track(MsService.class, new ServiceTrackerCustomizer<MsService, MsService>() {
+        registerService(CustomPortableFactory.class, new PortableDriveEventFactory());
+        track(PortableMsService.class, new ServiceTrackerCustomizer<PortableMsService, PortableMsService>() {
 
             private volatile MsDriveEventHandler eventHandler;
 
             @Override
-            public MsService addingService(ServiceReference<MsService> reference) {
-                MsService messagingService = context.getService(reference);
+            public PortableMsService addingService(ServiceReference<PortableMsService> reference) {
+                PortableMsService messagingService = context.getService(reference);
                 MsDriveEventHandler.setMsService(messagingService);
                 LOG.debug("Initializing messaging service drive event handler");
                 try {
@@ -127,12 +130,12 @@ public class DriveEventsActivator extends HousekeepingActivator {
             }
 
             @Override
-            public void modifiedService(ServiceReference<MsService> reference, MsService service) {
+            public void modifiedService(ServiceReference<PortableMsService> reference, PortableMsService service) {
                 // Ignored
             }
 
             @Override
-            public void removedService(ServiceReference<MsService> reference, MsService service) {
+            public void removedService(ServiceReference<PortableMsService> reference, PortableMsService service) {
                 LOG.debug("Stopping messaging service cache event handler");
                 MsDriveEventHandler eventHandler = this.eventHandler;
                 if (null != eventHandler) {

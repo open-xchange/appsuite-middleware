@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -274,7 +274,7 @@ public final class HttpSessionManagement {
      * @return The unique ID
      */
     public static String getNewUniqueId() {
-        final com.openexchange.java.StringAllocator s = new com.openexchange.java.StringAllocator(36).append(UUID.randomUUID());
+        final StringBuilder s = new StringBuilder(36).append(UUID.randomUUID());
         s.deleteCharAt(23);
         s.deleteCharAt(18);
         s.deleteCharAt(13);

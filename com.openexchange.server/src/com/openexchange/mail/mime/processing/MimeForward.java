@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -80,8 +80,6 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.java.CharsetDetector;
-import com.openexchange.java.StringAllocator;
-import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailProperties;
@@ -161,8 +159,7 @@ public final class MimeForward {
      * @throws OXException If forward mail cannot be composed
      */
     public static MailMessage getFowardMail(final MailMessage[] originalMails, final Session session, final int accountID, final UserSettingMail usm) throws OXException {
-        for (int i = 0; i < originalMails.length; i++) {
-            final MailMessage cur = originalMails[i];
+        for (final MailMessage cur : originalMails) {
             if (cur.getMailId() != null && cur.getFolder() != null && cur.getAccountId() != accountID) {
                 cur.setAccountId(accountID);
             }
@@ -222,77 +219,77 @@ public final class MimeForward {
             final Context ctx = ContextStorage.getStorageContext(session.getContextId());
             final UserSettingMail usm =
                 userSettingMail == null ? UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx) : userSettingMail;
-            final MimeMessage forwardMsg = new MimeMessage(MimeDefaultSession.getDefaultSession());
-            {
-                /*
-                 * Set its headers. Start with subject constructed from first message.
-                 */
-                final String subjectPrefix = PREFIX_FWD;
-                String origSubject = MimeMessageUtility.checkNonAscii(origMsgs[0].getHeader(MessageHeaders.HDR_SUBJECT, null));
-                if (origSubject == null) {
-                    forwardMsg.setSubject(subjectPrefix, MailProperties.getInstance().getDefaultMimeCharset());
-                } else {
-                    origSubject = MimeMessageUtility.unfold(origSubject);
-                    final String subject =
-                        MimeMessageUtility.decodeMultiEncodedHeader(origSubject.regionMatches(
-                            true,
-                            0,
-                            subjectPrefix,
-                            0,
-                            subjectPrefix.length()) ? origSubject : new com.openexchange.java.StringAllocator(subjectPrefix.length() + origSubject.length()).append(
-                            subjectPrefix).append(origSubject).toString());
-                    forwardMsg.setSubject(subject, MailProperties.getInstance().getDefaultMimeCharset());
-                }
-            }
-            /*
-             * Set from
-             */
-            if (usm.getSendAddr() != null) {
-                forwardMsg.setFrom(new QuotedInternetAddress(usm.getSendAddr(), false));
-            }
-            if (usm.isForwardAsAttachment() || origMsgs.length > 1) {
-                /*
-                 * Attachment-Forward
-                 */
-                if (1 == origMsgs.length) {
-                    final MailMessage originalMsg = origMsgs[0];
-                    final String owner = MimeProcessingUtility.getFolderOwnerIfShared(originalMsg.getFolder(), originalMsg.getAccountId(), session);
-                    if (null != owner) {
-                        final User[] users = UserStorage.getInstance().searchUserByMailLogin(owner, ctx);
-                        if (null != users && users.length > 0) {
-                            final InternetAddress onBehalfOf = new QuotedInternetAddress(users[0].getMail(), true);
-                            forwardMsg.setFrom(onBehalfOf);
-                            final QuotedInternetAddress sender = new QuotedInternetAddress(usm.getSendAddr(), true);
-                            forwardMsg.setSender(sender);
-                        }
+                final MimeMessage forwardMsg = new MimeMessage(MimeDefaultSession.getDefaultSession());
+                {
+                    /*
+                     * Set its headers. Start with subject constructed from first message.
+                     */
+                    final String subjectPrefix = PREFIX_FWD;
+                    String origSubject = MimeMessageUtility.checkNonAscii(origMsgs[0].getHeader(MessageHeaders.HDR_SUBJECT, null));
+                    if (origSubject == null) {
+                        forwardMsg.setSubject(subjectPrefix, MailProperties.getInstance().getDefaultMimeCharset());
+                    } else {
+                        origSubject = MimeMessageUtility.unfold(origSubject);
+                        final String subject =
+                            MimeMessageUtility.decodeMultiEncodedHeader(origSubject.regionMatches(
+                                true,
+                                0,
+                                subjectPrefix,
+                                0,
+                                subjectPrefix.length()) ? origSubject : new StringBuilder(subjectPrefix.length() + origSubject.length()).append(
+                                    subjectPrefix).append(origSubject).toString());
+                        forwardMsg.setSubject(subject, MailProperties.getInstance().getDefaultMimeCharset());
                     }
                 }
-                return asAttachmentForward(origMsgs, forwardMsg);
-            }
-            /*
-             * Inline-Forward
-             */
-            final MailMessage originalMsg;
-            {
-                final MailMessage omm = origMsgs[0];
-                final ContentType contentType = omm.getContentType();
-                if (contentType.startsWith("multipart/related") && ("application/smil".equals(contentType.getParameter(toLowerCase("type"))))) {
-                    originalMsg = MimeSmilFixer.getInstance().process(omm);
-                } else {
-                    originalMsg = omm;
+                /*
+                 * Set from
+                 */
+                if (usm.getSendAddr() != null) {
+                    forwardMsg.setFrom(new QuotedInternetAddress(usm.getSendAddr(), false));
                 }
-            }
-            final String owner = MimeProcessingUtility.getFolderOwnerIfShared(originalMsg.getFolder(), originalMsg.getAccountId(), session);
-            if (null != owner) {
-                final User[] users = UserStorage.getInstance().searchUserByMailLogin(owner, ctx);
-                if (null != users && users.length > 0) {
-                    final InternetAddress onBehalfOf = new QuotedInternetAddress(users[0].getMail(), true);
-                    forwardMsg.setFrom(onBehalfOf);
-                    final QuotedInternetAddress sender = new QuotedInternetAddress(usm.getSendAddr(), true);
-                    forwardMsg.setSender(sender);
+                if (usm.isForwardAsAttachment() || origMsgs.length > 1) {
+                    /*
+                     * Attachment-Forward
+                     */
+                    if (1 == origMsgs.length) {
+                        final MailMessage originalMsg = origMsgs[0];
+                        final String owner = MimeProcessingUtility.getFolderOwnerIfShared(originalMsg.getFolder(), originalMsg.getAccountId(), session);
+                        if (null != owner) {
+                            final User[] users = UserStorage.getInstance().searchUserByMailLogin(owner, ctx);
+                            if (null != users && users.length > 0) {
+                                final InternetAddress onBehalfOf = new QuotedInternetAddress(users[0].getMail(), true);
+                                forwardMsg.setFrom(onBehalfOf);
+                                final QuotedInternetAddress sender = new QuotedInternetAddress(usm.getSendAddr(), true);
+                                forwardMsg.setSender(sender);
+                            }
+                        }
+                    }
+                    return asAttachmentForward(origMsgs, forwardMsg);
                 }
-            }
-            return asInlineForward(originalMsg, session, ctx, usm, forwardMsg);
+                /*
+                 * Inline-Forward
+                 */
+                final MailMessage originalMsg;
+                {
+                    final MailMessage omm = origMsgs[0];
+                    final ContentType contentType = omm.getContentType();
+                    if (contentType.startsWith("multipart/related") && ("application/smil".equals(contentType.getParameter(toLowerCase("type"))))) {
+                        originalMsg = MimeSmilFixer.getInstance().process(omm);
+                    } else {
+                        originalMsg = omm;
+                    }
+                }
+                final String owner = MimeProcessingUtility.getFolderOwnerIfShared(originalMsg.getFolder(), originalMsg.getAccountId(), session);
+                if (null != owner) {
+                    final User[] users = UserStorage.getInstance().searchUserByMailLogin(owner, ctx);
+                    if (null != users && users.length > 0) {
+                        final InternetAddress onBehalfOf = new QuotedInternetAddress(users[0].getMail(), true);
+                        forwardMsg.setFrom(onBehalfOf);
+                        final QuotedInternetAddress sender = new QuotedInternetAddress(usm.getSendAddr(), true);
+                        forwardMsg.setSender(sender);
+                    }
+                }
+                return asInlineForward(originalMsg, session, ctx, usm, forwardMsg);
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         } catch (final IOException e) {
@@ -336,6 +333,7 @@ public final class MimeForward {
         if (originalContentType.startsWith(MULTIPART)) {
             final Multipart multipart = new MimeMultipart();
             List<String> contentIds = null;
+            final boolean isHtml;
             {
                 /*
                  * Grab first seen text from original message
@@ -348,7 +346,7 @@ public final class MimeForward {
                         contentType.setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
                     }
                 }
-                final boolean isHtml = contentType.startsWith(TEXT_HTM);
+                isHtml = contentType.startsWith(TEXT_HTM);
                 if (null == firstSeenText) {
                     firstSeenText = "";
                     contentType.setPrimaryType("text").setSubType("plain");
@@ -362,11 +360,7 @@ public final class MimeForward {
                  */
                 final MimeBodyPart textPart = new MimeBodyPart();
                 final String txt =
-                    usm.isDropReplyForwardPrefix() ? firstSeenText : generateForwardText(
-                        firstSeenText,
-                        new LocaleAndTimeZone(getUser(session, ctx)),
-                        originalMsg,
-                        isHtml);
+                    usm.isDropReplyForwardPrefix() ? firstSeenText : generateForwardText(firstSeenText, new LocaleAndTimeZone(getUser(session, ctx)), originalMsg, isHtml);
                 {
                     final String cs = contentType.getCharsetParameter();
                     if (cs == null || "US-ASCII".equalsIgnoreCase(cs) || !CharsetDetector.isValid(cs) || MessageUtility.isSpecialCharset(cs)) {
@@ -380,7 +374,7 @@ public final class MimeForward {
                 textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(contentType.toString()));
                 multipart.addBodyPart(textPart);
                 MessageUtility.setContent(multipart, forwardMsg);
-                //forwardMsg.setContent(multipart);
+                // forwardMsg.setContent(multipart);
                 forwardMsg.saveChanges();
                 // Remove generated Message-Id header
                 forwardMsg.removeHeader(MessageHeaders.HDR_MESSAGE_ID);
@@ -397,6 +391,11 @@ public final class MimeForward {
             new MailMessageParser().setInlineDetectorBehavior(true).parseMailMessage(originalMsg, handler);
             for (final MailPart mailPart : handler.getNonInlineParts()) {
                 mailPart.getContentDisposition().setDisposition(Part.ATTACHMENT);
+                if (!isHtml) {
+                    // Drop any inline information; such as "Content-Id" header
+                    mailPart.removeContentId();
+                    mailPart.removeHeader(MessageHeaders.HDR_CONTENT_ID);
+                }
                 mailPart.getFileName(); // Enforce to set file name possibly extracted from Content-Type header
                 mailPart.getContentType().removeNameParameter(); // Remove name parameter
                 compositeMail.addAdditionalParts(mailPart);
@@ -419,9 +418,9 @@ public final class MimeForward {
             }
             final String txt = usm.isDropReplyForwardPrefix() ? (content == null ? "" : content) : generateForwardText(
                 content == null ? "" : content,
-                new LocaleAndTimeZone(getUser(session, ctx)),
-                originalMsg,
-                originalContentType.startsWith(TEXT_HTM));
+                    new LocaleAndTimeZone(getUser(session, ctx)),
+                    originalMsg,
+                    originalContentType.startsWith(TEXT_HTM));
             {
                 final String cs = originalContentType.getCharsetParameter();
                 if (cs == null || "US-ASCII".equalsIgnoreCase(cs) || !CharsetDetector.isValid(cs) || MessageUtility.isSpecialCharset(cs)) {
@@ -584,7 +583,7 @@ public final class MimeForward {
                     if (!multipartPart.getContentType().startsWith("multipart/mixed")) {
                         return MimeProcessingUtility.readContent(part, charset);
                     }
-                    final StringAllocator sb = new StringAllocator(MimeProcessingUtility.readContent(part, charset));
+                    final StringBuilder sb = new StringBuilder(MimeProcessingUtility.readContent(part, charset));
                     for (int j = i + 1; j < count; j++) {
                         final MailPart nextPart = multipartPart.getEnclosedMailPart(j);
                         final ContentType nextContentType = nextPart.getContentType();
@@ -599,7 +598,7 @@ public final class MimeForward {
                                 final InlineImageDataSource imgSource = InlineImageDataSource.getInstance();
                                 if (null == fileName) {
                                     final String ext = MimeType2ExtMap.getFileExtension(nextContentType.getBaseType());
-                                    fileName = new StringAllocator("image").append(j).append('.').append(ext).toString();
+                                    fileName = new StringBuilder("image").append(j).append('.').append(ext).toString();
                                 }
                                 final ImageLocation imageLocation = new ImageLocation.Builder(fileName).folder(prepareFullname(origMail.getAccountId(), origMail.getFolder())).id(origMail.getMailId()).build();
                                 imageURL = imgSource.generateUrl(imageLocation, session);
@@ -628,7 +627,7 @@ public final class MimeForward {
                 retvalContentType.setContentType(partContentType);
                 retvalContentType.setCharsetParameter(charset);
                 String text = MimeProcessingUtility.handleInlineTextPart(part, retvalContentType, usm.isDisplayHtmlInlineContent());
-                if (isEmpty(text)) {
+                if (com.openexchange.java.Strings.isEmpty(text)) {
                     final String htmlContent = getHtmlContent(multipartPart, count);
                     if (null != htmlContent) {
                         final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
@@ -638,7 +637,7 @@ public final class MimeForward {
                 if (!multipartPart.getContentType().startsWith("multipart/mixed")) {
                     return text;
                 }
-                final StringAllocator sb = new StringAllocator(text);
+                final StringBuilder sb = new StringBuilder(text);
                 for (int j = i + 1; j < count; j++) {
                     final MailPart nextPart = multipartPart.getEnclosedMailPart(j);
                     final ContentType nextContentType = nextPart.getContentType();
@@ -716,7 +715,7 @@ public final class MimeForward {
             final InternetAddress[] cc = msg.getCc();
             forwardPrefix =
                 PATTERN_CCLINE.matcher(forwardPrefix).replaceFirst(
-                    cc == null || cc.length == 0 ? "" : com.openexchange.java.Strings.quoteReplacement(new com.openexchange.java.StringAllocator(64).append("\nCc: ").append(
+                    cc == null || cc.length == 0 ? "" : com.openexchange.java.Strings.quoteReplacement(new StringBuilder(64).append("\nCc: ").append(
                         MimeProcessingUtility.addrs2String(cc)).toString()));
         }
         {
@@ -789,7 +788,7 @@ public final class MimeForward {
                 replaceBuffer.append("</div>");
                 return replaceBuffer.toString();
             }
-            return new com.openexchange.java.StringAllocator(firstSeenText.length() + 256).append(linebreak).append(forwardPrefix).append(linebreak).append(firstSeenText).toString();
+            return new StringBuilder(firstSeenText.length() + 256).append(linebreak).append(forwardPrefix).append(linebreak).append(firstSeenText).toString();
         }
         /*
          * Surround with quotes
@@ -801,7 +800,7 @@ public final class MimeForward {
             if (m.find()) {
                 mr.appendLiteralReplacement(
                     replaceBuffer,
-                    new com.openexchange.java.StringAllocator(forwardPrefix.length() + 16).append(m.group()).append(forwardPrefix).append(linebreak).append(
+                    new StringBuilder(forwardPrefix.length() + 16).append(m.group()).append(forwardPrefix).append(linebreak).append(
                         linebreak).toString());
             } else {
                 replaceBuffer.append(forwardPrefix).append(linebreak).append(linebreak);
@@ -831,8 +830,7 @@ public final class MimeForward {
 
     private static final Pattern PATTERN_HTML_END = Pattern.compile("</html>", Pattern.CASE_INSENSITIVE);
 
-    private static final String BLOCKQUOTE_START =
-        "<blockquote type=\"cite\" style=\"position: relative; margin-left: 0px; padding-left: 10px; border-left: solid 1px blue;\">\n";
+    private static final String BLOCKQUOTE_START = "<blockquote type=\"cite\" style=\"position: relative; margin-left: 0px; padding-left: 10px; border-left: solid 1px blue;\">\n";
 
     private static final String BLOCKQUOTE_END = "</blockquote>\n<br>&nbsp;";
 
@@ -906,25 +904,12 @@ public final class MimeForward {
         }
     }
 
-    /** Check for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
     private static String toLowerCase(final CharSequence chars) {
         if (null == chars) {
             return null;
         }
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);

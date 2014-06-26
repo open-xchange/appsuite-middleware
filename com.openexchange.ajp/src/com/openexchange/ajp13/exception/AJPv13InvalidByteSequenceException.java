@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -71,6 +71,6 @@ public class AJPv13InvalidByteSequenceException extends AJPv13Exception {
     }
 
     private static String toHexString(final int i) {
-        return new com.openexchange.java.StringAllocator(4).append(i < 16 ? "0x0" : "0x").append(Integer.toHexString(i & 0xff).toUpperCase()).toString();
+        return new StringBuilder(4).append(i < 16 ? "0x0" : "0x").append(Integer.toHexString(i & 0xff).toUpperCase()).toString();
     }
 }

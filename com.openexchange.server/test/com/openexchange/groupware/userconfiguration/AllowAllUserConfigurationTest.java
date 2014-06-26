@@ -104,11 +104,6 @@ public class AllowAllUserConfigurationTest {
     }
 
     @Test
-    public void testHasProject() {
-        assertTrue(userPermission.hasProject());
-    }
-
-    @Test
     public void testHasForum() {
         assertTrue(userPermission.hasForum());
     }

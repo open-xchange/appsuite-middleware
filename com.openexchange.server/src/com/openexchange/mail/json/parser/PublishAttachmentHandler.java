@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -234,7 +234,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
          */
         publisher = target.getPublicationService();
         try {
-        	warnings.add(MailExceptionCode.USED_PUBLISHING_FEATURE.create());
+            warnings.add(MailExceptionCode.USED_PUBLISHING_FEATURE.create());
             return generateComposedMails0(source, publications, folderId, target, publisher, ctx);
         } catch (final OXException e) {
             /*
@@ -268,7 +268,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
              * Add to list
              */
             linkBuilder.setLength(0);
-            linkBuilder.append(isEmpty(protocol) ? (forcedSecure(hostName) ? "https://" : "http://") : saneProtocol(protocol)).append(hostName).append(path);
+            linkBuilder.append(com.openexchange.java.Strings.isEmpty(protocol) ? (forcedSecure(hostName) ? "https://" : "http://") : saneProtocol(protocol)).append(hostName).append(path);
             links.add(new LinkAndNamePair(attachment.getFileName(), linkBuilder.toString()));
         }
         /*
@@ -389,13 +389,13 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             // Apply text part as it is
             internalVersion.setBodyPart(textPart);
             // Generate text for attachment
-            final com.openexchange.java.StringAllocator textBuilder = new com.openexchange.java.StringAllocator(256 * links.size());
+            final StringBuilder textBuilder = new StringBuilder(256 * links.size());
             textBuilder.append(htmlFormat(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_PREFIX))).append("<br>");
             appendLinks(links, textBuilder);
             internalVersion.addEnclosedPart(createLinksAttachment(textBuilder.toString()));
         } else {
             final String text = (String) textPart.getContent();
-            final com.openexchange.java.StringAllocator textBuilder = new com.openexchange.java.StringAllocator(text.length() + 512);
+            final StringBuilder textBuilder = new StringBuilder(text.length() + 512);
             textBuilder.append(htmlFormat(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_PREFIX))).append("<br>");
             appendLinks(links, textBuilder);
             if (elapsedDate != null) {
@@ -429,13 +429,13 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                 // Apply text part as it is
                 externalVersion.setBodyPart(textPart);
                 // Generate text for attachment
-                final com.openexchange.java.StringAllocator textBuilder = new com.openexchange.java.StringAllocator(256 * links.size());
+                final StringBuilder textBuilder = new StringBuilder(256 * links.size());
                 textBuilder.append(htmlFormat(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_PREFIX))).append("<br>");
                 appendLinks(links, textBuilder);
                 externalVersion.addEnclosedPart(createLinksAttachment(textBuilder.toString()));
             } else {
                 final String text = (String) textPart.getContent();
-                final com.openexchange.java.StringAllocator textBuilder = new com.openexchange.java.StringAllocator(text.length() + 512);
+                final StringBuilder textBuilder = new StringBuilder(text.length() + 512);
                 textBuilder.append(htmlFormat(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_PREFIX))).append("<br>");
                 appendLinks(links, textBuilder);
                 if (elapsedDate != null) {
@@ -695,7 +695,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         }
     } // End of rollbackPublications()
 
-    private static void appendLinks(final List<LinkAndNamePair> links, final com.openexchange.java.StringAllocator textBuilder) {
+    private static void appendLinks(final List<LinkAndNamePair> links, final StringBuilder textBuilder) {
         for (final LinkAndNamePair pair : links) {
             final String link = pair.link;
             final char quot;
@@ -793,24 +793,11 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         if (protocol.endsWith("://")) {
             return protocol;
         }
-        return new com.openexchange.java.StringAllocator(protocol).append("://").toString();
+        return new StringBuilder(protocol).append("://").toString();
     }
 
     private static boolean forcedSecure(final String hostName) {
         final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
         return (configurationService != null && configurationService.getBoolProperty(ServerConfig.Property.FORCE_HTTPS.getPropertyName(), false) && !Cookies.isLocalLan(hostName));
     }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

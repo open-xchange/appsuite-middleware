@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -57,6 +57,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -64,6 +65,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.FacebookApi;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.java.Streams;
@@ -80,9 +83,12 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware {
+public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware, Reloadable {
 
     private final DeferringURLService deferrer;
+
+    private final static String[] PROPERTIES = new String[] {"com.openexchange.oauth.facebook.apiKey",
+        "com.openexchange.oauth.facebook.apiSecret"};
 
     /**
      * Initializes a new {@link OAuthServiceMetaDataFacebookImpl}.
@@ -112,6 +118,8 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
 
     @Override
     public String getScope() {
+        // See https://developers.facebook.com/docs/facebook-login/permissions/#
+        // TODO: "xmpp_login" for RTC chat access
         return "offline_access,publish_stream,read_stream,status_update,user_about_me,friends_about_me," +
         		"user_activities,friends_activities,user_birthday,friends_birthday,user_education_history," +
         		"friends_education_history,user_events,friends_events,user_hometown,friends_hometown," +
@@ -122,7 +130,7 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
     }
 
     @Override
-    public String modifyCallbackURL(final String callbackUrl, Session session) {
+    public String modifyCallbackURL(final String callbackUrl, String currentHost, Session session) {
         if (deferrer == null) {
             return callbackUrl;
         }
@@ -141,7 +149,10 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
     public void processArguments(final Map<String, Object> arguments, final Map<String, String> parameter, final Map<String, Object> state) {
         final String code = parameter.get("code");
         arguments.put(OAuthConstants.ARGUMENT_PIN, code);
-        arguments.put(OAuthConstants.ARGUMENT_CALLBACK, modifyCallbackURL((String)state.get(OAuthConstants.ARGUMENT_CALLBACK), (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION)));
+        final String callbackUrl = (String)state.get(OAuthConstants.ARGUMENT_CALLBACK);
+        final String currentHost = (String)state.get(OAuthConstants.ARGUMENT_CURRENT_HOST);
+        final Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
+        arguments.put(OAuthConstants.ARGUMENT_CALLBACK, modifyCallbackURL(callbackUrl, currentHost, session));
     }
 
     private static final int BUFSIZE = 8192;
@@ -273,6 +284,29 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
     @Override
     public Class<? extends Api> getScribeService() {
         return FacebookApi.class;
+    }
+
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        String apiKey = configService.getProperty(apiKeyName);
+        String secretKey = configService.getProperty(apiSecretName);
+
+        if (apiKey.isEmpty()) {
+            throw new IllegalStateException("Missing following property in configuration: " + apiKeyName);
+        }
+        if (secretKey.isEmpty()) {
+            throw new IllegalStateException("Missing following property in configuration: " + apiSecretName);
+        }
+
+        this.apiKey = apiKey;
+        this.apiSecret = secretKey;
+    }
+
+    @Override
+    public Map<String, String[]> getConfigFileNames() {
+        Map<String, String[]> map = new HashMap<String, String[]>(1);
+        map.put("facebookoauth.properties", PROPERTIES);
+        return map;
     }
 
 }

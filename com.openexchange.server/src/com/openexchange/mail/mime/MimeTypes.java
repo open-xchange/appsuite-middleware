@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,8 +49,15 @@
 
 package com.openexchange.mail.mime;
 
+import static com.openexchange.java.Strings.isEmpty;
+import static com.openexchange.java.Strings.toLowerCase;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
- * {@link MimeTypes} - Constants for MIME types.
+ * {@link MimeTypes} - Utilities & constants for MIME types.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -202,4 +209,188 @@ public final class MimeTypes {
      * application/pgp-signature
      */
     public static final String MIME_PGP_SIGN = "application/pgp-signature";
+
+    /**
+     * application/octet-stream as unknown
+     */
+    public static final String MIME_UNKNOWN = MIME_APPL_OCTET;
+
+    /**
+     * The set of such MIME types that are considered as invalid (e.g. for file upload attempts)
+     */
+    public static final Set<String> INVALIDS = Collections.<String> unmodifiableSet(new HashSet<String>(Arrays.asList(
+        "application/octet-stream",
+        "application/force-download",
+        "application/binary",
+        "application/x-download",
+        "application/vnd",
+        "application/vnd.ms-word.document.12n",
+        "application/vnd.ms-word.document.12",
+        "application/vnd.ms-word",
+        "application/odt",
+        "application/x-pdf")));
+
+    // --------------------------------------------------------------------------------------------------------
+
+    /**
+     * Extracts the primary type from specified MIME type string.
+     *
+     * @param contentType The MIME type string
+     * @return The primary type or string itself
+     */
+    public static String getPrimaryType(final String contentType) {
+        if (isEmpty(contentType)) {
+            return contentType;
+        }
+        final int pos = contentType.indexOf('/');
+        return pos > 0 ? contentType.substring(0, pos) : contentType;
+    }
+
+    /**
+     * Extracts the file name prefix from specified file name.
+     *
+     * @param fileName The file name; e.g. <code>"image001.jpg"</code>
+     * @return The file extension (e.g. <code>"image001"</code>) or <code>fileName</code> itself
+     */
+    public static String getFilePrefix(final String fileName) {
+        if (isEmpty(fileName)) {
+            return fileName;
+        }
+        final int pos = fileName.lastIndexOf('.');
+        return pos > 0 && pos < fileName.length() ? fileName.substring(0, pos) : fileName;
+    }
+
+    /**
+     * Extracts the file name extension from specified file name.
+     *
+     * @param fileName The file name; e.g. <code>"image001.jpg"</code>
+     * @return The file extension (e.g. <code>"jpg"</code>) or <code>fileName</code> itself
+     */
+    public static String getFileExtension(final String fileName) {
+        if (isEmpty(fileName)) {
+            return fileName;
+        }
+        final int pos = fileName.lastIndexOf('.');
+        return pos > 0 && pos < fileName.length() ? fileName.substring(pos) : fileName;
+    }
+
+    /**
+     * Extracts the base type from specified MIME type.
+     *
+     * @param mimeType The MIME type; e.g. <code>"text/plain; name=doc001.txt; charset=us-ascii"</code>
+     * @return The base type (e.g. <code>"text/plain"</code>)
+     */
+    public static String getBaseType(final String mimeType) {
+        if (isEmpty(mimeType)) {
+            return null;
+        }
+        final int pos = mimeType.indexOf(';');
+        if (pos <= 0) {
+            return mimeType;
+        }
+        return pos < mimeType.length() ? mimeType.substring(0, pos).trim() : mimeType;
+    }
+
+    /**
+     * Extracts the parameter list from specified MIME type.
+     *
+     * @param mimeType The MIME type; e.g. <code>"text/plain; name=doc001.txt; charset=us-ascii"</code>
+     * @return The parameter list (e.g. <code>"; name=doc001.txt; charset=us-ascii"</code>) or <code>null</code>
+     */
+    public static String getParameterList(final String mimeType) {
+        if (isEmpty(mimeType)) {
+            return null;
+        }
+        final int pos = mimeType.indexOf(';');
+        return pos > 0 && pos < mimeType.length() ? mimeType.substring(pos).trim() : null;
+    }
+
+    /**
+     * Checks if the primary types of specified MIME type strings are equal;<br>
+     * e.g. <code><i>application</i>/...</code>, or <code><i>image</i>/...</code>
+     *
+     * @param contentType1 The first MIME type string
+     * @param contentType2 The second MIME type string
+     * @return <code>true</code> if primary types are equal; otherwise <code>false</code>
+     */
+    public static boolean equalPrimaryTypes(final String contentType1, final String contentType2) {
+        if (null == contentType1 || null == contentType2) {
+            return false;
+        }
+        return toLowerCase(getPrimaryType(contentType1)).startsWith(toLowerCase(getPrimaryType(contentType2)));
+    }
+
+    /**
+     * Gets the checked MIME type by specified file name.
+     * <p>
+     * That is the file name should dictate/dominate the considered MIME type for associated file/attachment.
+     *
+     * @param givenMimeType The given MIME type (as indicated by client)
+     * @param fileName The file name
+     * @return The checked MIME type
+     * @see #checkedMimeType(String, String, Set)
+     * @see #INVALIDS
+     */
+    public static String checkedMimeType(final String givenMimeType, final String fileName) {
+        return checkedMimeType(givenMimeType, fileName, null);
+    }
+
+    /**
+     * Gets the checked MIME type by specified file name.
+     * <p>
+     * That is the file name should dictate/dominate the considered MIME type for associated file/attachment.
+     *
+     * @param givenMimeType The given MIME type (as indicated by client)
+     * @param fileName The file name
+     * @param invalids The set of such MIME types that shall be considered as invalid
+     * @return The checked MIME type
+     * @see #INVALIDS
+     */
+    public static String checkedMimeType(final String givenMimeType, final String fileName, final Set<String> invalids) {
+        if (isEmpty(fileName)) {
+            return givenMimeType;
+        }
+        if (isEmpty(givenMimeType)) {
+            return MimeType2ExtMap.getContentType(fileName);
+        }
+        final String contentTypeByFileName = MimeType2ExtMap.getContentType(fileName);
+        if ((MIME_UNKNOWN.equals(contentTypeByFileName) || equalPrimaryTypes(givenMimeType, contentTypeByFileName)) && !consideredAsInvalid(givenMimeType, invalids)) {
+            // Unknown or MIME types do match
+            return givenMimeType;
+        }
+        final String parameterList = getParameterList(givenMimeType);
+        return isEmpty(parameterList) ? contentTypeByFileName : new StringBuilder(contentTypeByFileName).append(parameterList).toString();
+    }
+
+    private static boolean consideredAsInvalid(final String givenMimeType, final Set<String> invalids) {
+        return null == invalids || invalids.isEmpty() ? false : invalids.contains(toLowerCase(getBaseType(givenMimeType)));
+    }
+
+    /**
+     * Gets the checked file name by specified base MIME type.
+     * <p>
+     * That is the MIME type should dictate/dominate the considered file name for associated file/attachment.
+     *
+     * @param givenFileName The given file name (as indicated by client)
+     * @param baseType The base MIME type
+     * @return The checked file name
+     */
+    public static String checkedFileName(final String givenFileName, final String baseType) {
+        if (isEmpty(baseType)) {
+            return givenFileName;
+        }
+        final String contentTypeByFileName = MimeType2ExtMap.getContentType(givenFileName);
+        if (MIME_UNKNOWN.equals(contentTypeByFileName) || equalPrimaryTypes(baseType, contentTypeByFileName)) {
+            // Unknown or MIME types do match
+            return givenFileName;
+        }
+        final String fileExtension = MimeType2ExtMap.getFileExtension(baseType);
+        if ("dat".equals(fileExtension)) {
+            // Unknown
+            return givenFileName;
+        }
+        final String filePrefix = getFilePrefix(givenFileName);
+        return new StringBuilder(isEmpty(filePrefix) ? "file" : filePrefix).append('.').append(fileExtension).toString();
+    }
+
 }

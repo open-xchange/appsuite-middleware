@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -242,15 +242,11 @@ public interface ContactFields extends CommonFields {
 
     String USER_ID = "user_id";
 
-    String LINKS = "links";
-
     String DISTRIBUTIONLIST = "distribution_list";
 
     String MARK_AS_DISTRIBUTIONLIST = "mark_as_distributionlist";
 
     String NUMBER_OF_DISTRIBUTIONLIST = "number_of_distribution_list";
-
-    String NUMBER_OF_LINKS = "number_of_links";
 
     String NUMBER_OF_IMAGES = "number_of_images";
 

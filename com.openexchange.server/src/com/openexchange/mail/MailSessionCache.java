@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,10 +51,12 @@ package com.openexchange.mail;
 
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import java.util.Collection;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link MailSessionCache} - The main session-bound cache for mail module.
@@ -104,6 +106,30 @@ public final class MailSessionCache {
     }
 
     /**
+     * Gets the session-bound mail cache.
+     *
+     * @param session The session whose mail cache shall be returned
+     * @return The session-bound mail cache or <code>null</code>
+     */
+    public static MailSessionCache optInstance(final Session session) {
+        if (null == session) {
+            return null;
+        }
+        final String key = MailSessionParameterNames.getParamMainCache();
+        MailSessionCache mailCache = null;
+        try {
+            mailCache = (MailSessionCache) session.getParameter(key);
+        } catch (final ClassCastException e) {
+            /*
+             * Class version does not match; just renew session cache.
+             */
+            mailCache = null;
+            session.setParameter(key, null);
+        }
+        return mailCache;
+    }
+
+    /**
      * Drops the session-bound mail cache.
      *
      * @param session The session whose mail cache shall be dropped
@@ -135,6 +161,27 @@ public final class MailSessionCache {
                 }
             } finally {
                 lock.unlock();
+            }
+        }
+    }
+
+    /**
+     * Removes cached standard folder information from user-associated caches.
+     *
+     * @param accountId The account identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     */
+    public static void removeDefaultFolderInformationFrom(final int accountId, final int userId, final int contextId) {
+        final SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
+        if (null != sessiondService) {
+            final Collection<Session> sessions = sessiondService.getSessions(userId, contextId);
+            for (final Session s : sessions) {
+                final MailSessionCache sessionCache = optInstance(s);
+                if (null != sessionCache) {
+                    sessionCache.removeParameter(accountId, MailSessionParameterNames.getParamDefaultFolderChecked());
+                    sessionCache.removeParameter(accountId, MailSessionParameterNames.getParamDefaultFolderArray());
+                }
             }
         }
     }

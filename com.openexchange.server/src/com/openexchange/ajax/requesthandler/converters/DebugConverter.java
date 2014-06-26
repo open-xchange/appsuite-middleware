@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -72,7 +72,7 @@ public class DebugConverter implements ResultConverter {
 
     @Override
     public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
-        com.openexchange.java.StringAllocator out = new com.openexchange.java.StringAllocator("<!DOCTYPE html><head><title>").append(requestData.getAction()+" Response").append("</title></head><body><h1>Request with action ").append(requestData.getAction()).append("</h1>");
+        StringBuilder out = new StringBuilder("<!DOCTYPE html><head><title>").append(requestData.getAction()+" Response").append("</title></head><body><h1>Request with action ").append(requestData.getAction()).append("</h1>");
         out.append("<h2>Parameters:</h2>");
         out.append("<table>");
         Iterator<String> parameterNames = requestData.getParameterNames();

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,10 +51,18 @@ package com.openexchange.configuration;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
+import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.attach.AttachmentConfig;
+import com.openexchange.groupware.calendar.CalendarConfig;
+import com.openexchange.groupware.infostore.InfostoreConfig;
+import com.openexchange.groupware.notify.NotificationConfig;
 import com.openexchange.java.Strings;
 
 /**
@@ -62,7 +70,7 @@ import com.openexchange.java.Strings;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class ServerConfig {
+public final class ServerConfig implements Reloadable {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServerConfig.class);
 
@@ -72,51 +80,92 @@ public final class ServerConfig {
     private static final ServerConfig SINGLETON = new ServerConfig();
 
     /**
+     * Gets the instance.
+     *
+     * @return The instance
+     */
+    public static ServerConfig getInstance() {
+        return SINGLETON;
+    }
+
+    /**
      * Name of the properties file.
      */
     private static final String FILENAME = "server.properties";
 
-    private final Properties props = new Properties();
+    private static final String[] PROPERTIES = new String[] {"all properties in file"};
 
+    // ------------------------------------------------------------------------------ //
+
+    private final Properties props;
     private String uploadDirectory = "/tmp/";
-
     private int maxFileUploadSize = 10000;
-
     private int maxUploadIdleTimeMillis = 300000;
-
     private boolean prefetchEnabled;
-
     private String defaultEncoding;
-
     private int jmxPort;
-
     private String jmxBindAddress;
-
     private Boolean checkIP;
-
     private String ipMaskV4;
-
     private String ipMaskV6;
-
     private final ClientWhitelist clientWhitelist;
-
     private String uiWebPath;
-
     private int cookieTTL;
-
     private boolean cookieHttpOnly;
-
     private int maxBodySize;
-
     private int defaultMaxConcurrentAJAXRequests;
 
     private ServerConfig() {
         super();
+        props = new Properties();
         clientWhitelist = new ClientWhitelist();
     }
 
-    public static ServerConfig getInstance() {
-        return SINGLETON;
+    @Override
+    public void reloadConfiguration(final ConfigurationService configService) {
+        final Properties newProps = configService.getFile(FILENAME);
+        this.props.clear();
+        if (null == newProps) {
+            LOG.info("Configuration file {} is missing. Using defaults.", FILENAME);
+        } else {
+            this.props.putAll(newProps);
+            LOG.info("Read configuration file {}.", FILENAME);
+        }
+        reinit();
+
+        try {
+            final AttachmentConfig attachmentConfig = AttachmentConfig.getInstance();
+            attachmentConfig.stop();
+            attachmentConfig.start();
+        } catch (final Exception e) {
+            LOG.warn("Could not reload attachment configuration.", e);
+        }
+
+        try {
+            final CalendarConfig calendarConfig = CalendarConfig.getInstance();
+            calendarConfig.stop();
+            calendarConfig.start();
+        } catch (final Exception e) {
+            LOG.warn("Could not reload calendar configuration.", e);
+        }
+
+        try {
+            final InfostoreConfig infostoreConfig = InfostoreConfig.getInstance();
+            infostoreConfig.stop();
+            infostoreConfig.start();
+        } catch (final Exception e) {
+            LOG.warn("Could not reload infostore configuration.", e);
+        }
+
+        try {
+            final NotificationConfig notificationConfig = NotificationConfig.getInstance();
+            notificationConfig.stop();
+            notificationConfig.start();
+        } catch (final Exception e) {
+            LOG.warn("Could not reload infostore configuration.", e);
+        }
+
+        LoginWriter.invalidateRandomTokenEnabled();
     }
 
     public void initialize(final ConfigurationService confService) {
@@ -544,5 +593,12 @@ public final class ServerConfig {
         public String getDefaultValue() {
             return defaultValue;
         }
+    }
+
+    @Override
+    public Map<String, String[]> getConfigFileNames() {
+        Map<String, String[]> map = new HashMap<String, String[]>(1);
+        map.put(FILENAME, PROPERTIES);
+        return map;
     }
 }

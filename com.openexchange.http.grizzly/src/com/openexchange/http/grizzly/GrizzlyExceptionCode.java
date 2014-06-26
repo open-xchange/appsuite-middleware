@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,10 +50,10 @@
 package com.openexchange.http.grizzly;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
-import static com.openexchange.http.grizzly.GrizzlyExceptionMessage.*;
+import com.openexchange.exception.OXExceptionStrings;
 
 
 /**
@@ -61,30 +61,32 @@ import static com.openexchange.http.grizzly.GrizzlyExceptionMessage.*;
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public enum GrizzlyExceptionCode implements OXExceptionCode {
+public enum GrizzlyExceptionCode implements DisplayableOXExceptionCode {
 
     /** The grizzly server could not be started. */
-    GRIZZLY_SERVER_NOT_STARTED(GRIZZLY_SERVER_NOT_STARTED_MSG, CATEGORY_ERROR, 1),
+    GRIZZLY_SERVER_NOT_STARTED("The grizzly server could not be started", CATEGORY_ERROR, 1, null),
     /** The following needed service is missing: "%1$s" */
-    NEEDED_SERVICE_MISSING(NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 2),
+    NEEDED_SERVICE_MISSING("The following needed service is missing: \"%1$s\"", CATEGORY_SERVICE_DOWN, 2, null),
     /** The maximum number of HTTP sessions (%1$n) is exceeded */
-    MAX_NUMBER_OF_SESSIONS_REACHED(MAX_NUMBER_OF_SESSIONS_REACHED_MSG, CATEGORY_ERROR, 3),
+    MAX_NUMBER_OF_SESSIONS_REACHED("The maximum number of HTTP sessions (%1$n) is exceeded.", CATEGORY_ERROR, 3, null),
     /** The maximum number of HTTP sessions (%1$n) is exceeded */
-    GRIZZLY_FEATURE_MISSING(GRIZZLY_FEATURE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 4),
+    GRIZZLY_FEATURE_MISSING("The following needed feature could not be enabled: \"%1$s\"", CATEGORY_SERVICE_DOWN, 4, null),
     /** File "%1$s" could not be found */
-    FILE_NOT_FOUND(FILE_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 5),
+    FILE_NOT_FOUND("File \"%1$s\" could not be found.", Category.CATEGORY_ERROR, 5, null),
     /** An I/O error occurred: %1$s */
-    IO_ERROR(IO_ERROR_MSG, Category.CATEGORY_ERROR, 6),
+    IO_ERROR("An I/O error occurred: %1$s", Category.CATEGORY_ERROR, 6, null),
     ;
 
     private final String message;
     private final int number;
     private final Category category;
+    private String displayMessage;
 
-    private GrizzlyExceptionCode(final String message, final Category category, final int detailNumber) {
+    private GrizzlyExceptionCode(final String message, final Category category, final int detailNumber, String displayMessage) {
         this.message = message;
         number = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -110,6 +112,11 @@ public enum GrizzlyExceptionCode implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     /**

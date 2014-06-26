@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -80,6 +80,7 @@ public class InfostoreCopyTaskRegisterer implements ServiceTrackerCustomizer<Quo
     /**
      * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
      */
+    @Override
     public QuotaFileStorageFactory addingService(final ServiceReference<QuotaFileStorageFactory> reference) {
         final QuotaFileStorageFactory service = context.getService(reference);
         copyTask = new InfostoreCopyTask(service);
@@ -90,12 +91,14 @@ public class InfostoreCopyTaskRegisterer implements ServiceTrackerCustomizer<Quo
     /**
      * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
      */
+    @Override
     public void modifiedService(final ServiceReference<QuotaFileStorageFactory> reference, final QuotaFileStorageFactory service) {
     }
 
     /**
      * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
      */
+    @Override
     public void removedService(final ServiceReference<QuotaFileStorageFactory> reference, final QuotaFileStorageFactory service) {
         registration.unregister();
         context.ungetService(reference);

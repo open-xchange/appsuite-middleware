@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,6 +51,7 @@ package com.openexchange.groupware.infostore.database.impl;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.groupware.infostore.DocumentMetadata;
@@ -86,9 +87,8 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 	private int colorLabel;
 	private String filespoolPath;
     private int numberOfVersions;
-
-
-    private Map<String,String> properties = new HashMap<String,String>();
+    private Map<String,Object> meta;
+    private Map<String,String> properties;
     private static final String DEFAULT_TYPE = "application/octet-stream";
 
 
@@ -97,6 +97,8 @@ public class DocumentMetadataImpl implements DocumentMetadata {
      */
     public DocumentMetadataImpl(){
 		super();
+		properties = new HashMap<String,String>();
+		meta = new LinkedHashMap<String, Object>();
 	}
 
 	/**
@@ -106,9 +108,12 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 	public DocumentMetadataImpl(final int id){
 	    super();
 		this.id = id;
+		properties = new HashMap<String,String>();
+		meta = new LinkedHashMap<String, Object>();
 	}
 
 	public DocumentMetadataImpl(final DocumentMetadata dm){
+	    this();
 		final SetSwitch setSwitch = new SetSwitch(this);
 		final GetSwitch getSwitch = new GetSwitch(dm);
 		for(final Metadata attr : Metadata.VALUES) {
@@ -395,5 +400,19 @@ public class DocumentMetadataImpl implements DocumentMetadata {
     @Override
     public void setNumberOfVersions(final int numberOfVersions) {
         this.numberOfVersions = numberOfVersions;
+    }
+
+    @Override
+    public Map<String, Object> getMeta() {
+        return meta;
+    }
+
+    @Override
+    public void setMeta(Map<String, Object> properties) {
+        if (null == properties || properties.isEmpty()) {
+            this.meta = null;
+        } else {
+            this.meta = new LinkedHashMap<String, Object>(properties);
+        }
     }
 }

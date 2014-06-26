@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,7 +53,6 @@ import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
-import com.openexchange.realtime.json.JSONExceptionMessage;
 import com.openexchange.realtime.json.stanza.StanzaBuilder;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
@@ -90,7 +89,7 @@ public class StanzaBuilderSelector {
         }
         String element = json.optString("element");
         if (element == null) {
-            throw RealtimeExceptionCodes.STANZA_BAD_REQUEST.create(JSONExceptionMessage.MISSING_KEY_MSG);
+            throw RealtimeExceptionCodes.STANZA_BAD_REQUEST.create("Obligatory key \"%1$s\" is missing from the Stanza");
         }
         if (element.equalsIgnoreCase("iq")) {
             return new IQBuilder(from, json, session);
@@ -99,7 +98,7 @@ public class StanzaBuilderSelector {
         } else if (element.equalsIgnoreCase("presence")) {
             return new PresenceBuilder(from, json, session);
         } else {
-            throw RealtimeExceptionCodes.STANZA_BAD_REQUEST.create(JSONExceptionMessage.MISSING_BUILDER_FOR_ELEMENT_MSG);
+            throw RealtimeExceptionCodes.STANZA_BAD_REQUEST.create("Could not find a builder for the given element: . \"%1$s\"");
         }
     }
 }

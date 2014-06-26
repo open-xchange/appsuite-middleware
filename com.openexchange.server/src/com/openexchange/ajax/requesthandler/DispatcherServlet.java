@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -54,10 +54,12 @@ import static com.openexchange.tools.servlet.http.Tools.isMultipartContent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -70,13 +72,15 @@ import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
+import com.openexchange.annotation.Nullable;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.UserImpl;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.LogProperties.Name;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -278,6 +282,7 @@ public class DispatcherServlet extends SessionServlet {
         // Check if associated request allows no session (if no "session" parameter was found)
         boolean mayOmitSession = false;
         boolean mayUseFallbackSession = false;
+        boolean mayPerformPublicSessionAuth = false;
         if (!sessionParamFound) {
             final AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
             final String module = requestDataTools.getModule(PREFIX.get(), req);
@@ -285,10 +290,11 @@ public class DispatcherServlet extends SessionServlet {
             final Dispatcher dispatcher = DISPATCHER.get();
             mayOmitSession = dispatcher.mayOmitSession(module, action);
             mayUseFallbackSession = dispatcher.mayUseFallbackSession(module, action);
+            mayPerformPublicSessionAuth = dispatcher.mayPerformPublicSessionAuth(module, action);
         }
         // Try public session
         if (!mayOmitSession) {
-            findPublicSessionId(req, session, sessiondService, mayUseFallbackSession);
+            findPublicSessionId(req, session, sessiondService, mayUseFallbackSession, mayPerformPublicSessionAuth);
         }
     }
 
@@ -318,6 +324,26 @@ public class DispatcherServlet extends SessionServlet {
      * The <code>direct</code> result type.
      */
     private static final AJAXRequestResult.ResultType DIRECT = AJAXRequestResult.ResultType.DIRECT;
+
+    /**
+     * A set of those {@link OXExceptionCode} that should not be logged as <tt>ERROR</tt>, but as <tt>DEBUG</tt> only.
+     */
+    private static final Set<OXExceptionCode> IGNOREES = Collections.unmodifiableSet(new HashSet<OXExceptionCode>(Arrays.<OXExceptionCode> asList(OXFolderExceptionCode.NOT_EXISTS, MailExceptionCode.MAIL_NOT_FOUND)));
+
+    /**
+     * Checks if passed {@code OXException} instance should not be logged as <tt>ERROR</tt>, but as <tt>DEBUG</tt> only.
+     *
+     * @param e The {@code OXException} instance to check
+     * @return <code>true</code> to ignore; otherwise <code>false</code> for common error handling
+     */
+    private static boolean ignore(final OXException e) {
+        for (final OXExceptionCode code : IGNOREES) {
+            if (code.equals(e)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * Handles given HTTP request and generates an appropriate result using referred {@link AJAXActionService}.
@@ -379,29 +405,28 @@ public class DispatcherServlet extends SessionServlet {
                 // No further processing
                 return;
             }
-            /*
+            /*-
              * A common result
+             *
+             * Check for optional exception to log...
              */
-            OXException exception = result.getException();
-            if (exception != null) {
-                if (exception.isLoggable()) {
-                    logException(exception, LogLevel.DEBUG);
-                } else {
-                    logException(exception, LogLevel.TRACE);
-                }
-            }
+            logException(result.getException(), LogLevel.DEBUG);
+            /*
+             * ... and send response
+             */
             sendResponse(requestData, result, httpRequest, httpResponse);
         } catch (final OXException e) {
-            if (AjaxExceptionCodes.BAD_REQUEST.equals(e)) {
+            if (AjaxExceptionCodes.BAD_REQUEST.equals(e) || AjaxExceptionCodes.MISSING_PARAMETER.equals(e)) {
                 httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-                logException(e, LogLevel.DEBUG);
+                logException(e, LogLevel.DEBUG, HttpServletResponse.SC_BAD_REQUEST);
                 return;
             }
             if (AjaxExceptionCodes.HTTP_ERROR.equals(e)) {
                 final Object[] logArgs = e.getLogArgs();
                 final Object statusMsg = logArgs.length > 1 ? logArgs[1] : null;
-                httpResponse.sendError(((Integer) logArgs[0]).intValue(), null == statusMsg ? null : statusMsg.toString());
-                logException(e, LogLevel.DEBUG);
+                final int sc = ((Integer) logArgs[0]).intValue();
+                httpResponse.sendError(sc, null == statusMsg ? null : statusMsg.toString());
+                logException(e, LogLevel.DEBUG, sc);
                 return;
             }
             // Handle other OXExceptions
@@ -409,8 +434,8 @@ public class DispatcherServlet extends SessionServlet {
                 LOG.error("Unexpected error", e);
             } else {
                 // Ignore special "folder not found" error
-                if (OXFolderExceptionCode.NOT_EXISTS.equals(e)) {
-                    logException(e, LogLevel.DEBUG);
+                if (ignore(e)) {
+                    logException(e, LogLevel.DEBUG, -1);
                 } else {
                     logException(e);
                 }
@@ -429,34 +454,43 @@ public class DispatcherServlet extends SessionServlet {
         }
     }
 
-    private void logException(final Exception e) {
-        logException(e, null);
+    private void logException(final @Nullable Exception e) {
+        logException(e, null, -1);
     }
 
-    private void logException(final Exception e, final LogLevel logLevel) {
-        final String msg = "Error processing request.";
+    private void logException(final @Nullable Exception e, final @Nullable LogLevel logLevel) {
+        logException(e, logLevel, -1);
+    }
+
+    private void logException(final @Nullable Exception e, final @Nullable LogLevel logLevel, final int statusCode) {
+        if (null == e) {
+            return;
+        }
+
+        final String msg = statusCode > 0 ? new StringBuilder("Error processing request. Signaling HTTP error ").append(statusCode).toString() : "Error processing request.";
 
         if (null == logLevel) {
             LOG.error(msg, e);
-        } else {
-            switch (logLevel) {
-            case TRACE:
-                LOG.trace(msg, e);
-                break;
-            case DEBUG:
-                LOG.debug(msg, e);
-                break;
-            case INFO:
-                LOG.info(msg, e);
-                break;
-            case WARNING:
-                LOG.warn(msg, e);
-                break;
-            case ERROR:
-                // fall-through
-            default:
-                LOG.error(msg, e);
-            }
+            return;
+        }
+
+        switch (logLevel) {
+        case TRACE:
+            LOG.trace(msg, e);
+            break;
+        case DEBUG:
+            LOG.debug(msg, e);
+            break;
+        case INFO:
+            LOG.info(msg, e);
+            break;
+        case WARNING:
+            LOG.warn(msg, e);
+            break;
+        case ERROR:
+            // fall-through
+        default:
+            LOG.error(msg, e);
         }
     }
 
@@ -511,7 +545,7 @@ public class DispatcherServlet extends SessionServlet {
             return null;
         }
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);

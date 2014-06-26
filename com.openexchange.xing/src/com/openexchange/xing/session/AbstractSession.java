@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -124,6 +124,7 @@ public abstract class AbstractSession implements Session {
     /** The default timeout for client connections. */
     private static final int DEFAULT_TIMEOUT_MILLIS = 30000; // 30 seconds
 
+    private ConsumerPair consumerPair;
     private final AppKeyPair appKeyPair;
     private AccessTokenPair accessTokenPair = null;
     private volatile CommonsHttpOAuthConsumer signer = null;
@@ -135,7 +136,7 @@ public abstract class AbstractSession implements Session {
      * type. The session will not be linked because it has no access token pair.
      */
     protected AbstractSession(final AppKeyPair appKeyPair) {
-        this(appKeyPair, null);
+        this(appKeyPair, (AccessTokenPair)null);
     }
 
     /**
@@ -150,6 +151,22 @@ public abstract class AbstractSession implements Session {
         }
         this.appKeyPair = appKeyPair;
         this.accessTokenPair = accessTokenPair;
+    }
+    
+    /**
+     * Initializes a new {@link WebAuthSession} with the specified {@link ConsumerPair}. 
+     * The session will be used to create a Xing profile, based on the OX account (upsell).
+     * 
+     * @param appKeyPair
+     * @param consumerPair
+     */
+    protected AbstractSession(final AppKeyPair appKeyPair, final ConsumerPair consumerPair) {
+        super();
+        if (appKeyPair == null) {
+            throw new IllegalArgumentException("'appKeyPair' must be non-null");
+        }
+        this.appKeyPair = appKeyPair;
+        this.consumerPair = consumerPair;
     }
 
     /**
@@ -188,6 +205,11 @@ public abstract class AbstractSession implements Session {
     @Override
     public AccessTokenPair getAccessTokenPair() {
         return accessTokenPair;
+    }
+    
+    @Override
+    public ConsumerPair getConsumerPair() {
+        return consumerPair;
     }
 
     /**

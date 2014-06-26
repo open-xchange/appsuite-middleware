@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -133,6 +133,7 @@ public class ContactCopyTask implements CopyUserTaskService {
     /**
      * @see com.openexchange.user.copy.CopyUserTaskService#getAlreadyCopied()
      */
+    @Override
     public String[] getAlreadyCopied() {
         return new String[] {
             UserCopyTask.class.getName(),
@@ -145,6 +146,7 @@ public class ContactCopyTask implements CopyUserTaskService {
     /**
      * @see com.openexchange.user.copy.CopyUserTaskService#getObjectName()
      */
+    @Override
     public String getObjectName() {
         return Contact.class.getName();
     }
@@ -152,6 +154,7 @@ public class ContactCopyTask implements CopyUserTaskService {
     /**
      * @see com.openexchange.user.copy.CopyUserTaskService#copyUser(java.util.Map)
      */
+    @Override
     public IntegerMapping copyUser(final Map<String, ObjectMapping<?>> copied) throws OXException {
         final CopyTools copyTools = new CopyTools(copied);
         final Integer srcCtxId = copyTools.getSourceContextId();
@@ -461,11 +464,12 @@ public class ContactCopyTask implements CopyUserTaskService {
     /**
      * @see com.openexchange.user.copy.CopyUserTaskService#done(java.util.Map, boolean)
      */
+    @Override
     public void done(final Map<String, ObjectMapping<?>> copied, final boolean failed) {
     }
 
     private String buildSelectContactsSql(final List<ContactField> contactFields, final List<Integer> folderIds) {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator("SELECT ");
+        final StringBuilder sb = new StringBuilder("SELECT ");
         boolean first = true;
         for (final ContactField field : contactFields) {
             if (field.isDBField()) {
@@ -486,7 +490,7 @@ public class ContactCopyTask implements CopyUserTaskService {
     }
 
     private String buildInsertContactsSql(final List<ContactField> contactFields) {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator("INSERT INTO prg_contacts (");
+        final StringBuilder sb = new StringBuilder("INSERT INTO prg_contacts (");
         boolean first = true;
         int count = 0;
         for (final ContactField field : contactFields) {

@@ -111,6 +111,21 @@ postFix() {
     ox_add_property SPAM_MAILFOLDER_EN_GB Spam $pfile
     ox_add_property CONFIRMED_SPAM_MAILFOLDER_EN_GB confirmed-spam $pfile
     ox_add_property CONFIRMED_HAM_MAILFOLDER_EN_GB confirmed-ham $pfile
+
+    # SoftwareChange_Request-1831
+    # -----------------------------------------------------------------------
+    pfile=/opt/open-xchange/etc/ModuleAccessDefinitions.properties
+    
+	if grep -E "projects" $pfile > /dev/null; then
+	   ptmp=${pfile}.$$
+	   
+	   sed -e 's;projects *,;;g' -e 's;, *projects;;g' $pfile > $ptmp
+	
+	   if [ -s $ptmp ]; then
+	      cp $ptmp $pfile
+	   fi
+	   rm -f $ptmp
+	fi 
 }
 
 setConfigFilePermissions() {

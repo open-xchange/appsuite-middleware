@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -65,7 +65,7 @@ public final class MailTestSuite extends TestSuite {
     }
 
     public static Test suite() {
-        final TestSuite mailSuite = new TestSuite();
+        final TestSuite mailSuite = new TestSuite("com.openexchange.ajax.mail.MailTestSuite");
         mailSuite.addTestSuite(AllTest.class);
         mailSuite.addTestSuite(AttachmentTest.class);
         mailSuite.addTestSuite(ClearTest.class);
@@ -82,6 +82,7 @@ public final class MailTestSuite extends TestSuite {
         mailSuite.addTestSuite(ReplyTest.class);
         mailSuite.addTestSuite(SearchTest.class);
         mailSuite.addTestSuite(SendTest.class);
+        mailSuite.addTestSuite(Send2Test.class);
         mailSuite.addTestSuite(ThreadSortTest.class);
         mailSuite.addTestSuite(UpdateMailTest.class);
         mailSuite.addTestSuite(ViewTest.class);
@@ -89,6 +90,7 @@ public final class MailTestSuite extends TestSuite {
         mailSuite.addTestSuite(ListAliasTest.class);
         mailSuite.addTestSuite(GetStructureTest.class);
         mailSuite.addTestSuite(Base64Test.class);
+        mailSuite.addTestSuite(AllSeenMailTest.class);
 
         /*mailSuite.addTestSuite(AlwaysTest.class);*/
 
@@ -101,6 +103,10 @@ public final class MailTestSuite extends TestSuite {
         mailSuite.addTestSuite(Bug16141Test.class);
         mailSuite.addTestSuite(Bug29865Test.class);
         mailSuite.addTestSuite(Bug19696Test.class);
+        mailSuite.addTestSuite(Bug30703Test.class);
+        mailSuite.addTestSuite(Bug30903Test.class);
+        mailSuite.addTestSuite(Bug31855Test.class);
+        mailSuite.addTestSuite(Bug32355Test.class);
         mailSuite.addTest(new JUnit4TestAdapter(Bug27708Test.class));
         mailSuite.addTest(new JUnit4TestAdapter(Bug28913Test.class));
         mailSuite.addTestSuite(Bug29437Test.class);

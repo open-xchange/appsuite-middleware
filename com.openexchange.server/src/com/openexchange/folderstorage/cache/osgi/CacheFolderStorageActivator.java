@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -68,7 +68,6 @@ import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventConstants;
-import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.folderstorage.FolderEventConstants;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
@@ -432,13 +431,10 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                  */
                 protected void doHandleEvent(final CacheFolderStorage tmp, final Event event) {
                     try {
-                        final String serviceID = (String)event.getProperty(FileStorageEventConstants.SERVICE);
-                        final String accountID = (String)event.getProperty(FileStorageEventConstants.ACCOUNT_ID);
                         final String folderID = (String)event.getProperty(FileStorageEventConstants.FOLDER_ID);
                         final Session session = (Session)event.getProperty(FileStorageEventConstants.SESSION);
-                        final String uniqueID = new FolderID(serviceID, accountID, folderID).toUniqueID();
-                        tmp.removeFromGlobalCache(uniqueID, FolderStorage.REAL_TREE_ID, session.getContextId());
-                        tmp.removeFromCache(uniqueID, FolderStorage.REAL_TREE_ID, false, session);
+                        tmp.removeFromGlobalCache(folderID, FolderStorage.REAL_TREE_ID, session.getContextId());
+                        tmp.removeFromCache(folderID, FolderStorage.REAL_TREE_ID, false, session);
                     } catch (final OXException e) {
                         LOG.error("", e);
                     }

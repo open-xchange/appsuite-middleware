@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -121,8 +121,15 @@ public final class PushUtility {
             properties.put(PushEventConstants.PROPERTY_USER, Integer.valueOf(userId));
             properties.put(PushEventConstants.PROPERTY_SESSION, session);
             properties.put(PushEventConstants.PROPERTY_FOLDER, folder);
-            /*
-             * Add common event to properties for remote distribution via UDP-push
+            /*-
+             * Add common event to properties for remote distribution via push-UDP/push-MS
+             *
+             * Push-UDP/push-MS listens to OSGi events with "com/openexchange/*" topic, but
+             * an instance of CommonEvent needs to be associated with key CommonEvent.EVENT_KEY
+             * in order to remotely distribute that event.
+             *
+             * (see com.openexchange.push.ms.osgi.PushMsActivator.startBundle() /
+             *      com.openexchange.push.ms.PushMsHandler.handleEvent(Event) )
              */
             if (distributeRemotely) {
                 final EventFactoryService eventFactoryService = ServiceRegistry.getInstance().getService(EventFactoryService.class, true);

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,6 +52,7 @@ package com.openexchange.test;
 import junit.framework.JUnit4TestAdapter;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import com.openexchange.ajax.find.FindTestSuite;
 
 /**
  * Test suite for all AJAX interface tests.
@@ -70,7 +71,6 @@ public final class InterfaceTests {
         tests.addTest(com.openexchange.SmokeTestSuite.suite());
 
         tests.addTestSuite(com.openexchange.ajax.FolderTest.class);
-        tests.addTestSuite(com.openexchange.ajax.LinkTest.class);
         tests.addTestSuite(com.openexchange.ajax.MultipleTest.class);
         tests.addTestSuite(com.openexchange.ajax.UserTest.class);
 
@@ -83,7 +83,6 @@ public final class InterfaceTests {
         tests.addTest(com.openexchange.ajax.group.GroupTestSuite.suite());
         tests.addTest(com.openexchange.ajax.importexport.ImportExportServerSuite.suite());
         tests.addTest(com.openexchange.ajax.infostore.InfostoreAJAXSuite.suite());
-        tests.addTest(com.openexchange.ajax.links.LinksTestSuite.suite());
         tests.addTest(com.openexchange.ajax.mail.MailTestSuite.suite());
         tests.addTest(com.openexchange.ajax.mail.filter.MailFilterTestSuite.suite());
         tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.redirect.RedirectTests.class));
@@ -93,12 +92,14 @@ public final class InterfaceTests {
         tests.addTest(com.openexchange.ajax.publish.PublishTestSuite.suite());
         tests.addTest(com.openexchange.ajax.subscribe.SubscribeTestSuite.suite());
         tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.user.UserAJAXSuite.class));
-        tests.addTest(com.openexchange.ajax.updater.UpdaterTestSuite.suite());
+        tests.addTest(com.openexchange.ajax.xing.XINGTestSuite.suite());
 
         tests.addTest(com.openexchange.dav.caldav.tests.CalDAVTestSuite.suite());
         tests.addTest(com.openexchange.dav.caldav.bugs.CalDAVBugSuite.suite());
         tests.addTest(com.openexchange.dav.carddav.tests.CardDAVTestSuite.suite());
         tests.addTest(com.openexchange.dav.carddav.bugs.CardDAVBugSuite.suite());
+
+        tests.addTest(com.openexchange.grizzly.GrizzlyTestSuite.suite());
 
         tests.addTest(com.openexchange.webdav.xml.appointment.AppointmentWebdavSuite.suite());
         tests.addTest(com.openexchange.webdav.xml.contact.ContactWebdavSuite.suite());
@@ -120,6 +121,9 @@ public final class InterfaceTests {
         tests.addTestSuite(com.openexchange.ajax.tokenloginV2.TokenLoginV2Test.class);
         tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.oauth.OAuthTests.class));
         tests.addTestSuite(com.openexchange.test.resourcecache.ResourceCacheTest.class);
+        tests.addTest(FindTestSuite.suite());
+        // Needs to be disabled as associated test suite requires a frontend package, which is currently not available
+        // tests.addTest(ManifestsTestSuite.suite());
         return tests;
     }
 }

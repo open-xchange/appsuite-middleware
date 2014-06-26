@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Example service implementation for the Mobilenotifier
+Bundle-SymbolicName: com.openexchange.mobilenotifier.example
+Bundle-Version: 7.6.0
+Bundle-Activator: com.openexchange.mobilenotifier.example.osgi.ExampleMobileNotifierActivator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.exception,
+ com.openexchange.mobilenotifier,
+ com.openexchange.mobilenotifier.utility,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.session,
+ org.osgi.framework,
+ org.slf4j

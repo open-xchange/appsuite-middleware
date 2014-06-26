@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -82,5 +82,17 @@ public class WebAuthSession extends AbstractSession {
     public WebAuthSession(AppKeyPair appKeyPair, AccessTokenPair accessTokenPair) {
         super(appKeyPair, accessTokenPair);
     }
+    
+    /**
+     * Initializes a new {@link WebAuthSession} with the specified {@link ConsumerPair}. The session will be used to create a Xing
+     * profile, based on the OX account (upsell).
+     * 
+     * @param appKeyPair the appKeyPair
+     * @param consumerPair the ConsumerPair
+     */
+    public WebAuthSession(AppKeyPair appKeyPair, ConsumerPair consumerPair) {
+        super(appKeyPair, consumerPair);
+    }
+    
 
 }

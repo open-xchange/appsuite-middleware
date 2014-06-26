@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,7 +49,6 @@
 
 package com.openexchange.unifiedinbox.osgi;
 
-import static com.openexchange.unifiedinbox.services.UnifiedInboxServiceRegistry.getServiceRegistry;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.BundleActivator;
@@ -57,15 +56,16 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
+import com.openexchange.continuation.ContinuationRegistryService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.unifiedinbox.Enabled;
 import com.openexchange.unifiedinbox.UnifiedInboxProvider;
+import com.openexchange.unifiedinbox.services.Services;
 import com.openexchange.unifiedinbox.utility.UnifiedInboxSynchronousQueueProvider;
 import com.openexchange.user.UserService;
 
@@ -93,38 +93,14 @@ public final class UnifiedInboxActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        LOG.warn("Absent service: {}", clazz.getName());
-        getServiceRegistry().removeService(clazz);
-    }
-
-    @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        LOG.info("Re-available service: {}", clazz.getName());
-        getServiceRegistry().addService(clazz, getService(clazz));
-    }
-
-    @Override
     public void startBundle() throws Exception {
         try {
-            /*
-             * (Re-)Initialize service registry with available services
-             */
-            {
-                final ServiceRegistry registry = getServiceRegistry();
-                registry.clearRegistry();
-                final Class<?>[] classes = getNeededServices();
-                for (final Class<?> classe : classes) {
-                    final Object service = getService(classe);
-                    if (null != service) {
-                        registry.addService(classe, service);
-                    }
-                }
-            }
+            Services.setServiceLookup(this);
             /*
              * Create & open trackers
              */
             track(I18nService.class, new I18nCustomizer(context));
+            trackService(ContinuationRegistryService.class);
             openTrackers();
             /*
              * Register service(s)
@@ -160,11 +136,8 @@ public final class UnifiedInboxActivator extends HousekeepingActivator {
     public void stopBundle() throws Exception {
         try {
             UnifiedInboxSynchronousQueueProvider.releaseInstance();
-            cleanUp();
-            /*
-             * Clear service registry
-             */
-            getServiceRegistry().clearRegistry();
+            super.stopBundle();
+            Services.setServiceLookup(null);
         } catch (final Exception e) {
             LOG.error("", e);
             throw e;

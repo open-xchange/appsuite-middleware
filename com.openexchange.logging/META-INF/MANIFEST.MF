@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Logging Configuration
 Bundle-SymbolicName: com.openexchange.logging
-Bundle-Version: 7.4.2
+Bundle-Version: 7.6.0
 Bundle-Activator: com.openexchange.logging.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -12,9 +12,13 @@ Import-Package: ch.qos.logback.classic,
  ch.qos.logback.classic.jul,
  ch.qos.logback.classic.spi,
  ch.qos.logback.classic.turbo,
+ ch.qos.logback.classic.util,
  ch.qos.logback.core,
  ch.qos.logback.core.filter,
+ ch.qos.logback.core.joran,
+ ch.qos.logback.core.joran.spi,
  ch.qos.logback.core.spi,
+ ch.qos.logback.core.status,
  com.openexchange.ajax.response,
  com.openexchange.config,
  com.openexchange.exception,

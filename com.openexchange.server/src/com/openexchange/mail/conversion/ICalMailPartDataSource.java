@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -101,7 +101,7 @@ public final class ICalMailPartDataSource extends MailPartDataSource {
             ContentType contentType = mailPart.getContentType();
             if (!isCalendar(contentType)) {
                 final String fileName = mailPart.getFileName();
-                if (isEmpty(fileName)) {
+                if (com.openexchange.java.Strings.isEmpty(fileName)) {
                     throwException(contentType);
                 }
                 final String contentTypeByFileName = MimeType2ExtMap.getContentType(fileName);
@@ -120,7 +120,7 @@ public final class ICalMailPartDataSource extends MailPartDataSource {
             }
             properties.put(DataProperties.PROPERTY_CONTENT_TYPE, contentType.getBaseType());
             final String cs = contentType.getCharsetParameter();
-            properties.put(DataProperties.PROPERTY_CHARSET, isEmpty(cs) ? MailProperties.getInstance().getDefaultMimeCharset() : cs);
+            properties.put(DataProperties.PROPERTY_CHARSET, com.openexchange.java.Strings.isEmpty(cs) ? MailProperties.getInstance().getDefaultMimeCharset() : cs);
             properties.put(DataProperties.PROPERTY_SIZE, Long.toString(mailPart.getSize()));
             properties.put(DataProperties.PROPERTY_NAME, mailPart.getFileName());
             return new SimpleData<D>((D) mailPart.getInputStream(), properties);
@@ -174,17 +174,4 @@ public final class ICalMailPartDataSource extends MailPartDataSource {
             }
         }
     }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

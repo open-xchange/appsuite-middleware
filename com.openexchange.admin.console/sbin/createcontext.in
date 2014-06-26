@@ -149,6 +149,9 @@ case "${BNAME}" in
     "getadminid")
     ACTION="context.GetAdminId"
     ;;
+    "getcontextcapabilities")
+    ACTION="context.GetContextCapabilities"
+    ;;
     "existscontext")
     ACTION="context.Exists"
     ;;

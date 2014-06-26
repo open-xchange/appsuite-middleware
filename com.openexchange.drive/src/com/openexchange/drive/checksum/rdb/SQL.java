@@ -59,7 +59,6 @@ import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
-import com.openexchange.java.StringAllocator;
 
 /**
  * {@link SQL}
@@ -89,8 +88,10 @@ public class SQL {
         return "CREATE TABLE directoryChecksums (" +
             "uuid BINARY(16) NOT NULL," +
             "cid INT4 UNSIGNED NOT NULL," +
+            "user INT4 UNSIGNED DEFAULT NULL," +
             "folder VARCHAR(512) NOT NULL," +
-            "sequence BIGINT(20) NOT NULL," +
+            "sequence BIGINT(20) DEFAULT NULL," +
+            "etag VARCHAR(255) DEFAULT NULL," +
             "checksum BINARY(16) NOT NULL," +
             "PRIMARY KEY (cid, uuid)," +
             "INDEX (folder, cid)," +
@@ -110,27 +111,15 @@ public class SQL {
         "UPDATE fileChecksums SET folder=REVERSE(?) " +
         "WHERE cid=? AND folder=REVERSE(?);";
 
-    /** DELETE FROM checksums WHERE cid=? AND uuid IN (...);" */
-    public static final String DELETE_FILE_CHECKSUMS_STMT(String[] uuids) {
-        if (null == uuids || 0 == uuids.length) {
-            throw new IllegalArgumentException("uuids");
-        }
-        StringAllocator allocator = new StringAllocator();
-        allocator.append("DELETE FROM fileChecksums WHERE cid=? AND uuid");
-        if (1 == uuids.length) {
-            allocator.append("=UNHEX('").append(uuids[0]).append("');");
-        } else {
-            allocator.append(" IN (UNHEX('").append(uuids[0]).append("')");
-            for (int i = 1; i < uuids.length; i++) {
-                allocator.append(",UNHEX('").append(uuids[i]).append("')");
-            }
-            allocator.append(");");
-        }
-        return allocator.toString();
+    /** DELETE FROM checksums WHERE cid=? AND uuid IN (?,?,...);" */
+    public static final String DELETE_FILE_CHECKSUMS_STMT(int length) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("DELETE FROM fileChecksums WHERE cid=? AND uuid");
+        return appendPlaceholders(stringBuilder, length).append(';').toString();
     }
 
     public static final String INSERT_FILE_CHECKSUMS_STMT(int count) {
-        StringAllocator allocator = new StringAllocator();
+        StringBuilder allocator = new StringBuilder();
         allocator.append("INSERT INTO fileChecksums (uuid,cid,folder,file,version,sequence,checksum) ");
         if (0 < count) {
             allocator.append("VALUES (UNHEX(?),?,REVERSE(?),REVERSE(?),?,?,UNHEX(?))");
@@ -167,11 +156,11 @@ public class SQL {
         "WHERE cid=? AND checksum=UNHEX(?);";
 
     public static final String INSERT_DIRECTORY_CHECKSUM_STMT =
-        "INSERT INTO directoryChecksums (uuid,cid,folder,sequence,checksum) " +
-        "VALUES (UNHEX(?),?,REVERSE(?),?,UNHEX(?));";
+        "INSERT INTO directoryChecksums (uuid,cid,user,folder,sequence,etag,checksum) " +
+        "VALUES (UNHEX(?),?,?,REVERSE(?),?,?,UNHEX(?));";
 
     public static final String UPDATE_DIRECTORY_CHECKSUM_STMT =
-        "UPDATE directoryChecksums SET folder=REVERSE(?),sequence=?,checksum=UNHEX(?) " +
+        "UPDATE directoryChecksums SET folder=REVERSE(?),sequence=?,etag=?,checksum=UNHEX(?) " +
         "WHERE cid=? AND uuid=UNHEX(?);";
 
     public static final String UPDATE_DIRECTORY_CHECKSUM_FOLDER_STMT =
@@ -187,94 +176,44 @@ public class SQL {
      * WHERE cid=? AND REVERSE(folder) IN (...);"
      * @throws OXException
      */
-    public static final String DELETE_FILE_CHECKSUMS_IN_FOLDER_STMT(FolderID[] folderIDs) throws OXException {
-        if (null == folderIDs || 0 == folderIDs.length) {
-            throw new IllegalArgumentException("folderIDs");
-        }
-        StringAllocator allocator = new StringAllocator();
-        allocator.append("DELETE FROM fileChecksums ");
-        allocator.append("WHERE cid=? AND REVERSE(folder)");
-        if (1 == folderIDs.length) {
-            allocator.append("='").append(escapeFolder(folderIDs[0])).append("';");
-        } else {
-            allocator.append(" IN ('").append(escapeFolder(folderIDs[0]));
-            for (int i = 1; i < folderIDs.length; i++) {
-                allocator.append("','").append(escapeFolder(folderIDs[i]));
-            }
-            allocator.append("');");
-        }
-        return allocator.toString();
+    public static final String DELETE_FILE_CHECKSUMS_IN_FOLDER_STMT(int length) throws OXException {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("DELETE FROM fileChecksums WHERE cid=? AND folder");
+        return appendPlaceholders(stringBuilder, length).append(';').toString();
     }
 
     /**
      * DELETE FROM directoryChecksums
-     * WHERE cid=? AND REVERSE(folder) IN (...);"
+     * WHERE cid=? AND folder IN (?,?,...);"
      * @throws OXException
      */
-    public static final String DELETE_DIRECTORY_CHECKSUMS_STMT(FolderID[] folderIDs) throws OXException {
-        if (null == folderIDs || 0 == folderIDs.length) {
-            throw new IllegalArgumentException("folderIDs");
-        }
-        StringAllocator allocator = new StringAllocator();
-        allocator.append("DELETE FROM directoryChecksums ");
-        allocator.append("WHERE cid=? AND REVERSE(folder)");
-        if (1 == folderIDs.length) {
-            allocator.append("='").append(escapeFolder(folderIDs[0])).append("';");
-        } else {
-            allocator.append(" IN ('").append(escapeFolder(folderIDs[0]));
-            for (int i = 1; i < folderIDs.length; i++) {
-                allocator.append("','").append(escapeFolder(folderIDs[i]));
-            }
-            allocator.append("');");
-        }
-        return allocator.toString();
+    public static final String DELETE_DIRECTORY_CHECKSUMS_STMT(int length) throws OXException {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("DELETE FROM directoryChecksums WHERE cid=? AND folder");
+        return appendPlaceholders(stringBuilder, length).append(';').toString();
     }
 
     /**
-     * SELECT LOWER(HEX(uuid)),REVERSE(folder),sequence,checksum FROM directoryChecksums
-     * WHERE cid=? AND REVERSE(folder) IN (...);"
+     * SELECT LOWER(HEX(uuid)),REVERSE(folder),sequence,etag,LOWER(HEX(checksum)) FROM directoryChecksums
+     * WHERE cid=? AND user=? AND folder IN (?,?,...);"
      * @throws OXException
      */
-    public static final String SELECT_DIRECTORY_CHECKSUMS_STMT(FolderID[] folderIDs) throws OXException {
-        if (null == folderIDs || 0 == folderIDs.length) {
-            throw new IllegalArgumentException("folderIDs");
-        }
-        StringAllocator allocator = new StringAllocator();
-        allocator.append("SELECT LOWER(HEX(uuid)),REVERSE(folder),sequence,LOWER(HEX(checksum)) FROM directoryChecksums ");
-        allocator.append("WHERE cid=? AND REVERSE(folder)");
-        if (1 == folderIDs.length) {
-            allocator.append("='").append(escapeFolder(folderIDs[0])).append("';");
-        } else {
-            allocator.append(" IN ('").append(escapeFolder(folderIDs[0]));
-            for (int i = 1; i < folderIDs.length; i++) {
-                allocator.append("','").append(escapeFolder(folderIDs[i]));
-            }
-            allocator.append("');");
-        }
-        return allocator.toString();
+    public static final String SELECT_DIRECTORY_CHECKSUMS_STMT(int length) throws OXException {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("SELECT LOWER(HEX(uuid)),REVERSE(folder),sequence,etag,LOWER(HEX(checksum)) FROM directoryChecksums ");
+        stringBuilder.append("WHERE cid=? AND user=? AND folder");
+        return appendPlaceholders(stringBuilder, length).append(';').toString();
     }
 
     /**
      * SELECT LOWER(HEX(uuid)),REVERSE(folder),REVERSE(file),version,sequence,LOWER(HEX(checksum)) FROM fileChecksums
-     * WHERE cid=? AND checksum IN (...);"
+     * WHERE cid=? AND checksum IN (?,?,...);"
      */
-    public static final String SELECT_MATCHING_FILE_CHECKSUMS_STMT(String[] checksums) {
-        if (null == checksums || 0 == checksums.length) {
-            throw new IllegalArgumentException("checksums");
-        }
-        StringAllocator allocator = new StringAllocator();
-        allocator.append("SELECT LOWER(HEX(uuid)),REVERSE(folder),REVERSE(file),version,sequence,LOWER(HEX(checksum)) FROM fileChecksums ");
-        allocator.append("WHERE cid=? AND LOWER(HEX(checksum))");
-        if (1 == checksums.length) {
-            allocator.append("='").append(checksums[0]).append("';");
-        } else {
-            allocator.append(" IN ('").append(checksums[0]);
-            for (int i = 1; i < checksums.length; i++) {
-                allocator.append("','").append(checksums[i]);
-            }
-            allocator.append("');");
-        }
-        return allocator.toString();
+    public static final String SELECT_MATCHING_FILE_CHECKSUMS_STMT(int length) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("SELECT LOWER(HEX(uuid)),REVERSE(folder),REVERSE(file),version,sequence,LOWER(HEX(checksum)) ");
+        stringBuilder.append("FROM fileChecksums WHERE cid=? AND checksum");
+        return appendPlaceholders(stringBuilder, length).append(';').toString();
     }
 
     public static ResultSet logExecuteQuery(PreparedStatement stmt) throws SQLException {
@@ -325,7 +264,7 @@ public class SQL {
             return null;
         }
         try {
-            return URLEncoder.encode(value, "US-ASCII");
+            return URLEncoder.encode(value, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         }
@@ -333,10 +272,59 @@ public class SQL {
 
     public static String unescape(String value) throws OXException {
         try {
-            return URLDecoder.decode(value, "US-ASCII");
+            return URLDecoder.decode(value, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         }
+    }
+
+    /**
+     * Converts the supplied checksum from it's hex string representation into a byte array.
+     *
+     * @param checksum The checksum
+     * @return The byte array
+     */
+    public static byte[] getBytes(String checksum) {
+        int length = checksum.length();
+        byte[] bytes = new byte[length / 2];
+        for (int i = 0; i < length; i += 2) {
+            bytes[i / 2] = (byte) ((Character.digit(checksum.charAt(i), 16) << 4) + Character.digit(checksum.charAt(i + 1), 16));
+        }
+        return bytes;
+    }
+
+    /**
+     * Returns the reverse of the supplied character sequence.
+     *
+     * @param string The string to reverse
+     * @return The reversed string
+     */
+    public static String reverse(String string) {
+        return new StringBuilder(string).reverse().toString();
+    }
+
+    /**
+     * Appends a SQL clause for the given number of placeholders, i.e. either <code>=?</code> if <code>count</code> is <code>1</code>, or
+     * an <code>IN</code> clause like <code>IN (?,?,?,?)</code> in case <code>count</code> is greater than <code>1</code>.
+     *
+     * @param stringBuilder The string builder to append the clause
+     * @param count The number of placeholders to append
+     * @return The string builder
+     */
+    private static StringBuilder appendPlaceholders(StringBuilder stringBuilder, int count) {
+        if (0 >= count) {
+            throw new IllegalArgumentException("count");
+        }
+        if (1 == count) {
+            stringBuilder.append("=?");
+        } else {
+            stringBuilder.append(" IN (?");
+            for (int i = 1; i < count; i++) {
+                stringBuilder.append(",?");
+            }
+            stringBuilder.append(')');
+        }
+        return stringBuilder;
     }
 
     private SQL() {

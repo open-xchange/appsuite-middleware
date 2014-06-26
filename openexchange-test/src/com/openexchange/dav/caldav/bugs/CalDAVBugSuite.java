@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -60,7 +60,7 @@ import junit.framework.TestSuite;
 public final class CalDAVBugSuite {
 
     public static Test suite() {
-        final TestSuite suite = new TestSuite();
+        final TestSuite suite = new TestSuite("com.openexchange.dav.caldav.bugs.CalDAVBugSuite");
         suite.addTestSuite(Bug21794Test.class);
         suite.addTestSuite(Bug22094Test.class);
         suite.addTestSuite(Bug22352Test.class);
@@ -86,6 +86,8 @@ public final class CalDAVBugSuite {
         suite.addTestSuite(Bug29728Test.class);
         suite.addTestSuite(Bug25160Test.class);
         suite.addTestSuite(Bug30359Test.class);
+        suite.addTestSuite(Bug31453Test.class);
+        suite.addTestSuite(Bug31490Test.class);
         return suite;
     }
 }

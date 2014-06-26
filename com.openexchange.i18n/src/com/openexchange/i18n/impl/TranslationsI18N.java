@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,7 +52,6 @@ package com.openexchange.i18n.impl;
 import java.util.Locale;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.i18n.parsing.Translations;
-import com.openexchange.java.StringAllocator;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -86,7 +85,7 @@ public class TranslationsI18N implements I18nService {
 
     @Override
     public String toString() {
-        StringAllocator builder = new StringAllocator(64);
+        StringBuilder builder = new StringBuilder(64);
         builder.append('{');
         final Locale locale = getLocale();
         if (null != locale) {

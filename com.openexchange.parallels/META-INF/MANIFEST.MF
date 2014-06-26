@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Parallels Plugin
 Bundle-SymbolicName: com.openexchange.parallels
-Bundle-Version: 7.4.2
+Bundle-Version: 7.6.0
 Bundle-Activator: com.openexchange.custom.parallels.osgi.SoapParallelsActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -18,6 +18,7 @@ Import-Package: com.openexchange.admin.rmi,
  com.openexchange.config,
  com.openexchange.configuration,
  com.openexchange.context,
+ com.openexchange.control.consoleold,
  com.openexchange.database,
  com.openexchange.databaseold,
  com.openexchange.exception,
@@ -44,7 +45,7 @@ Import-Package: com.openexchange.admin.rmi,
  com.openexchange.tools.ssl,
  com.openexchange.tools.stream,
  com.openexchange.user,
- javax.activation,
+ javax.activation;version="1.1.0",
  javax.jws,
  javax.jws.soap,
  javax.mail,

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -72,7 +72,6 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.MissingArgumentException;
-import org.apache.commons.cli.MissingOptionException;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
@@ -96,7 +95,6 @@ public class ListExecutedTasksCLT {
         toolkitOptions = new Options();
         toolkitOptions.addOption(new Option("h", "help", false, "Prints a help text."));
         Option schemaOption = new Option("n", "name", true, "A valid schema name.");
-        schemaOption.setRequired(true);
         schemaOption.setType(String.class);
         toolkitOptions.addOption(schemaOption);
         Option portOption = new Option("p", "port", true, "The optional JMX port (default:9999)");
@@ -119,18 +117,12 @@ public class ListExecutedTasksCLT {
         final CommandLine cmd;
         try {
             cmd = parser.parse(toolkitOptions, args);
-        } catch (MissingOptionException e) {
-            printHelp();
-            System.err.println("Option " + e.getMessage() + " must be defined.");
-            System.exit(1);
-            return;
         } catch (MissingArgumentException e) {
             printHelp();
             System.err.println(e.getMessage());
             System.exit(1);
             return;
         } catch (ParseException e) {
-            e.printStackTrace();
             System.err.println("Unable to parse command line: " + e.getMessage());
             printHelp();
             System.exit(1);
@@ -139,6 +131,11 @@ public class ListExecutedTasksCLT {
         if (cmd.hasOption('h')) {
             printHelp();
             System.exit(0);
+        }
+        if (!cmd.hasOption('n')) {
+            System.err.println("Schema name must be defined.");
+            printHelp();
+            System.exit(1);
         }
 
         final String schemaName = cmd.getOptionValue('n');

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -55,6 +55,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import com.openexchange.realtime.hazelcast.directory.HazelcastResourceDirectoryTest;
 import com.openexchange.realtime.hazelcast.directory.HazelcastResourceTest;
+import com.openexchange.realtime.hazelcast.group.DistributedGroupManagerImplTest;
 
 /**
  * {@link UnitTests}
@@ -64,6 +65,7 @@ import com.openexchange.realtime.hazelcast.directory.HazelcastResourceTest;
 @RunWith(Suite.class)
 @SuiteClasses({
     HazelcastResourceTest.class,
-    HazelcastResourceDirectoryTest.class
+    HazelcastResourceDirectoryTest.class,
+    DistributedGroupManagerImplTest.class
 })
 public class UnitTests {}

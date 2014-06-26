@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -98,10 +98,11 @@ public interface OAuthService {
      *
      * @param serviceMetaData The identifier of service meta data
      * @param callbackUrl The optional call-back URL
+     * @param currentHost The name of this host
      * @throws OXException If initialization fails
      * @return The OAuth interaction providing needed steps
      */
-    OAuthInteraction initOAuth(String serviceMetaData, String callbackUrl, Session session) throws OXException;
+    OAuthInteraction initOAuth(String serviceMetaData, String callbackUrl, String currentHost, Session session) throws OXException;
 
     /**
      * Creates a new OAuth account completely from specified arguments.

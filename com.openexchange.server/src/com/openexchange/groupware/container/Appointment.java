@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -83,7 +83,7 @@ public class Appointment extends CalendarObject implements Cloneable {
         PARTICIPANTS, USERS, CONFIRMATIONS, RECURRENCE_COUNT, UID, ORGANIZER, SEQUENCE, ORGANIZER_ID, PRINCIPAL, PRINCIPAL_ID,
         // From CommonObject
         CATEGORIES, PRIVATE_FLAG,
-        COLOR_LABEL, NUMBER_OF_LINKS, NUMBER_OF_ATTACHMENTS,
+        COLOR_LABEL, NUMBER_OF_ATTACHMENTS,
         // From FolderChildObject
         FOLDER_ID,
         // From DataObject
@@ -100,7 +100,7 @@ public class Appointment extends CalendarObject implements Cloneable {
         RECURRENCE_COUNT, UID, ORGANIZER, SEQUENCE, ORGANIZER_ID, PRINCIPAL, PRINCIPAL_ID,
         // From CommonObject
         CATEGORIES, PRIVATE_FLAG,
-        COLOR_LABEL, NUMBER_OF_LINKS, NUMBER_OF_ATTACHMENTS,
+        COLOR_LABEL, NUMBER_OF_ATTACHMENTS,
         // From FolderChildObject
         FOLDER_ID,
         // From DataObject

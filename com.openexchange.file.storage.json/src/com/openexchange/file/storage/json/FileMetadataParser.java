@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -166,11 +166,11 @@ public class FileMetadataParser implements FileMetadataParserService{
             if(value.length() == 0) {
                 return "";
             }
-            final com.openexchange.java.StringAllocator b = new com.openexchange.java.StringAllocator();
+            final StringBuilder b = new StringBuilder();
             for(int i = 0, size = value.length(); i < size; i++) {
                 b.append(value.getString(i)).append(", ");
             }
-            b.setNewLength(b.length()-2);
+            b.setLength(b.length()-2);
             return b.toString();
         }
     }

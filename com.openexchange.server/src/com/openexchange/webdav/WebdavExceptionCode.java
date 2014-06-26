@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,132 +50,76 @@
 package com.openexchange.webdav;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.groupware.EnumComponent;
 
-public enum WebdavExceptionCode implements OXExceptionCode {
+public enum WebdavExceptionCode implements DisplayableOXExceptionCode {
 
     /**
      * Invalid value in element &quot;%1$s&quot;: %2$s.
      */
-    INVALID_VALUE(WebdavExceptionCode.INVALID_VALUE_MSG, CATEGORY_ERROR, 1),
+    INVALID_VALUE("Invalid value in element \"%1$s\": %2$s.", CATEGORY_ERROR, 1, null),
     /**
      * An I/O error occurred.
      */
-    IO_ERROR(WebdavExceptionCode.IO_ERROR_MSG, CATEGORY_ERROR, 2),
+    IO_ERROR("An I/O error occurred.", CATEGORY_ERROR, 2, null),
     /**
      * Missing field %1$s.
      */
-    MISSING_FIELD(WebdavExceptionCode.MISSING_FIELD_MSG, CATEGORY_ERROR, 3),
+    MISSING_FIELD("Missing field %1$s.", CATEGORY_ERROR, 3, null),
     /**
      * Missing header field %1$s.
      */
-    MISSING_HEADER_FIELD(WebdavExceptionCode.MISSING_HEADER_FIELD_MSG, CATEGORY_ERROR, 4),
+    MISSING_HEADER_FIELD("Missing header field %1$s.", CATEGORY_ERROR, 4, null),
     /**
      * Invalid action %1$s.
      */
-    INVALID_ACTION(WebdavExceptionCode.INVALID_ACTION_MSG, CATEGORY_ERROR, 5),
+    INVALID_ACTION("Invalid action %1$s.", CATEGORY_ERROR, 5, null),
     /**
      * %1$s is not a number.
      */
-    NOT_A_NUMBER(WebdavExceptionCode.NOT_A_NUMBER_MSG, CATEGORY_ERROR, 6),
+    NOT_A_NUMBER("%1$s is not a number.", CATEGORY_USER_INPUT, 6, WebdavExceptionMessages.NOT_A_NUMBER_MSG),
     /**
      * No principal found: %1$s.
      */
-    NO_PRINCIPAL(WebdavExceptionCode.NO_PRINCIPAL_MSG, CATEGORY_ERROR, 7),
+    NO_PRINCIPAL("No principal found: %1$s.", CATEGORY_ERROR, 7, null),
     /**
      * Empty passwords are not allowed.
      */
-    EMPTY_PASSWORD(WebdavExceptionCode.EMPTY_PASSWORD_MSG, CATEGORY_USER_INPUT, 8),
+    EMPTY_PASSWORD("Empty passwords are not allowed.", CATEGORY_USER_INPUT, 8, WebdavExceptionMessages.EMPTY_PASSWORD_MSG),
     /**
      * Unsupported authorization mechanism in "Authorization" header: %1$s.
      */
-    UNSUPPORTED_AUTH_MECH(WebdavExceptionCode.UNSUPPORTED_AUTH_MECH_MSG, CATEGORY_ERROR, 9),
+    UNSUPPORTED_AUTH_MECH("Unsupported authorization mechanism in \"Authorization\" header: %1$s.", CATEGORY_ERROR, 9, null),
     /**
      * Resolving user name "%1$s" failed.
      */
-    RESOLVING_USER_NAME_FAILED(WebdavExceptionCode.RESOLVING_USER_NAME_FAILED_MSG, CATEGORY_ERROR, 10),
+    RESOLVING_USER_NAME_FAILED("Resolving user name \"%1$s\" failed.", CATEGORY_ERROR, 10, null),
     /**
      * Authentication failed for user name: %1$s
      */
-    AUTH_FAILED(WebdavExceptionCode.AUTH_FAILED_MSG, CATEGORY_ERROR, 11),
+    AUTH_FAILED("Authentication failed for user name: %1$s", CATEGORY_ERROR, 11, WebdavExceptionMessages.AUTH_FAILED_MSG),
     /**
      * Unexpected error: %1$s
      */
-    UNEXPECTED_ERROR(WebdavExceptionCode.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 11);
-
-    /**
-     * Invalid value in element &quot;%1$s&quot;: %2$s.
-     */
-    public final static String INVALID_VALUE_MSG = "Invalid value in element \"%1$s\": %2$s.";
-
-    /**
-     * An I/O error occurred.
-     */
-    public final static String IO_ERROR_MSG = "An I/O error occurred.";
-
-    /**
-     * Missing field %1$s.
-     */
-    public final static String MISSING_FIELD_MSG = "Missing field %1$s.";
-
-    /**
-     * Missing header field %1$s.
-     */
-    public final static String MISSING_HEADER_FIELD_MSG = "Missing header field %1$s.";
-
-    /**
-     * Invalid action %1$s.
-     */
-    public final static String INVALID_ACTION_MSG = "Invalid action %1$s.";
-
-    /**
-     * %1$s is not a number.
-     */
-    public final static String NOT_A_NUMBER_MSG = "%1$s is not a number.";
-
-    /**
-     * No principal found: %1$s.
-     */
-    public final static String NO_PRINCIPAL_MSG = "No principal found: %1$s.";
-
-    /**
-     * Empty passwords are not allowed.
-     */
-    public final static String EMPTY_PASSWORD_MSG = "Empty passwords are not allowed.";
-
-    /**
-     * Unsupported authorization mechanism in "Authorization" header: %1$s.
-     */
-    public final static String UNSUPPORTED_AUTH_MECH_MSG = "Unsupported authorization mechanism in \"Authorization\" header: %1$s.";
-
-    /**
-     * Resolving user name "%1$s" failed.
-     */
-    public final static String RESOLVING_USER_NAME_FAILED_MSG = "Resolving user name \"%1$s\" failed.";
-
-    /**
-     * Authentication failed for user name: %1$s
-     */
-    public final static String AUTH_FAILED_MSG = "Authentication failed for user name: %1$s";
-
-    /**
-     * Unexpected error: %1$s
-     */
-    public final static String UNEXPECTED_ERROR_MSG = "Unexpected error: %1$s";
+    UNEXPECTED_ERROR("Unexpected error: %1$s", CATEGORY_ERROR, 11, null);
 
     private final String message;
 
     private final int detailNumber;
 
     private final Category category;
+    
+    private String displayMessage;
 
-    private WebdavExceptionCode(final String message, final Category category, final int detailNumber) {
+    private WebdavExceptionCode(final String message, final Category category, final int detailNumber, String displayMessage) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -196,6 +140,11 @@ public enum WebdavExceptionCode implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override

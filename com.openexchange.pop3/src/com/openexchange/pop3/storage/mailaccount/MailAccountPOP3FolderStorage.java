@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,7 +51,6 @@ package com.openexchange.pop3.storage.mailaccount;
 
 import static com.openexchange.pop3.storage.mailaccount.util.Utility.prependPath2Fullname;
 import static com.openexchange.pop3.storage.mailaccount.util.Utility.stripPathFromFullname;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -68,9 +67,11 @@ import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.Quota;
 import com.openexchange.mail.Quota.Type;
 import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailFolderStorageInfoSupport;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
+import com.openexchange.mail.dataobjects.MailFolderInfo;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
@@ -95,7 +96,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
+public final class MailAccountPOP3FolderStorage implements IMailFolderStorage, IMailFolderStorageInfoSupport {
 
     static final org.slf4j.Logger LOG =
         org.slf4j.LoggerFactory.getLogger(MailAccountPOP3FolderStorage.class);
@@ -234,6 +235,38 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         } finally {
             lock.unlock();
         }
+    }
+
+    @Override
+    public boolean isInfoSupported() throws OXException {
+        return (delegatee instanceof IMailFolderStorageInfoSupport) && ((IMailFolderStorageInfoSupport) delegatee).isInfoSupported();
+    }
+
+    @Override
+    public MailFolderInfo getFolderInfo(final String fullName) throws OXException {
+        if (delegatee instanceof IMailFolderStorageInfoSupport) {
+            final IMailFolderStorageInfoSupport infoSupport = ((IMailFolderStorageInfoSupport) delegatee);
+            if (infoSupport.isInfoSupported()) {
+                return infoSupport.getFolderInfo(fullName);
+            }
+        }
+        throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
+    }
+
+    @Override
+    public List<MailFolderInfo> getAllFolderInfos(final boolean subscribedOnly) throws OXException {
+        return getFolderInfos(null, subscribedOnly);
+    }
+
+    @Override
+    public List<MailFolderInfo> getFolderInfos(final String optParentFullName, final boolean subscribedOnly) throws OXException {
+        if (delegatee instanceof IMailFolderStorageInfoSupport) {
+            final IMailFolderStorageInfoSupport infoSupport = ((IMailFolderStorageInfoSupport) delegatee);
+            if (infoSupport.isInfoSupported()) {
+                return infoSupport.getFolderInfos(optParentFullName, subscribedOnly);
+            }
+        }
+        throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
     }
 
     @Override

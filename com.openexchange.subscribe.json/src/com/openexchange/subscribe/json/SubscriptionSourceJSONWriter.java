@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -104,7 +104,7 @@ public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWrite
                 if(ID.equals(field)) {
                     row.put(source.getId());
                 } else if (DISPLAY_NAME.equals(field)) {
-                    row.put(source.getDisplayName());
+                    row.put(null != translator ? translator.translate(source.getDisplayName()) : source.getDisplayName());
                 } else if (ICON.equals(field)) {
                     row.put(source.getIcon());
                 } else if (FORM_DESCRIPTION.equals(field)) {
@@ -185,7 +185,7 @@ public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWrite
     }
 
     private String buildStringList(final List<String> strings, final String delimiter) {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator();
+        final StringBuilder sb = new StringBuilder();
         for (final Iterator<String> iter = strings.iterator(); iter.hasNext();) {
             sb.append(iter.next());
             if (iter.hasNext()) {

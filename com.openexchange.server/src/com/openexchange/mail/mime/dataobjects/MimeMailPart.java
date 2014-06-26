@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -58,6 +58,7 @@ import java.io.OutputStream;
 import java.io.PipedOutputStream;
 import java.io.PushbackInputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.Map;
 import javax.activation.DataHandler;
 import javax.mail.Message;
 import javax.mail.MessageRemovedException;
@@ -69,11 +70,13 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.ExceptionAwarePipedInputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.ManagedMimeMessage;
@@ -118,12 +121,31 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                 tmp = useMimeMultipartMailPart;
                 if (null == tmp) {
                     final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    tmp = Boolean.valueOf(null != service && service.getBoolProperty("com.openexchange.mail.mime.useMimeMultipartMailPart", false));
+                    final boolean defaultValue = false;
+                    if (null == service) {
+                        return defaultValue;
+                    }
+                    tmp = Boolean.valueOf(service.getBoolProperty("com.openexchange.mail.mime.useMimeMultipartMailPart", defaultValue));
                     useMimeMultipartMailPart = tmp;
                 }
             }
         }
         return tmp.booleanValue();
+    }
+
+    static {
+        MailReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                useMimeMultipartMailPart = null;
+            }
+
+            @Override
+            public Map<String, String[]> getConfigFileNames() {
+                return null;
+            }
+        });
     }
 
     private static final String ERR_NULL_PART = "Underlying part is null";

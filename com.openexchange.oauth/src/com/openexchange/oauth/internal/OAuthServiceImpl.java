@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -63,7 +63,6 @@ import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -91,7 +90,6 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.java.Charsets;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.DefaultOAuthAccount;
@@ -246,7 +244,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
     }
 
     @Override
-    public OAuthInteraction initOAuth(final String serviceMetaData, final String callbackUrl, final Session session) throws OXException {
+    public OAuthInteraction initOAuth(final String serviceMetaData, final String callbackUrl, final String currentHost, final Session session) throws OXException {
         try {
             final int contextId = session.getContextId();
             final int userId = session.getUserId();
@@ -273,7 +271,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
              * Apply possible modifications to call-back URL
              */
             {
-                final String modifiedUrl = metaData.modifyCallbackURL(cbUrl, session);
+                final String modifiedUrl = metaData.modifyCallbackURL(cbUrl, currentHost, session);
                 if (modifiedUrl != null) {
                     cbUrl = modifiedUrl;
                 }
@@ -283,7 +281,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
              */
             final DeferringURLService ds = Services.getService(DeferringURLService.class);
             {
-                if (null != ds && ds.isDeferrerURLAvailable(userId, contextId)) {
+                if (isDeferrerAvailable(ds, userId, contextId)) {
                     final String deferredURL = ds.getDeferredURL(cbUrl, userId, contextId);
                     if (deferredURL != null) {
                         cbUrl = deferredURL;
@@ -314,7 +312,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
              */
             if (metaData.registerTokenBasedDeferrer() && null != scribeToken) {
                 // Is only applicable if call-back URL is deferred; e.g. /ajax/defer?redirect=http:%2F%2Fmy.host.com%2Fpath...
-                if (null != ds && ds.isDeferrerURLAvailable(userId, contextId)) {
+                if (isDeferrerAvailable(ds, userId, contextId)) {
                     if (ds.seemsDeferred(cbUrl, userId, contextId)) {
                         callbackRegistry.add(scribeToken.getToken(), cbUrl);
                     } else {
@@ -337,6 +335,10 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         } catch (final Exception e) {
             throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private boolean isDeferrerAvailable(final DeferringURLService ds, final int userId, final int contextId) {
+        return null != ds && ds.isDeferrerURLAvailable(userId, contextId);
     }
 
     private static String urlEncode(final String s) {
@@ -391,6 +393,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
              * Execute INSERT command
              */
             executeUpdate(contextId, insert, values);
+            LOG.info("Created new {} account with ID {} for user {} in context {}", serviceMetaData, account.getId(), user, contextId);
             /*
              * Return newly created account
              */
@@ -449,6 +452,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
              * Execute INSERT command
              */
             executeUpdate(contextId, insert, values);
+            LOG.info("Created new {} account with ID {} for user {} in context {}", serviceMetaData, account.getId(), user, contextId);
             /*
              * Return newly created account
              */
@@ -781,9 +785,9 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         if (metaData instanceof com.openexchange.oauth.ScribeAware) {
             apiClass = ((com.openexchange.oauth.ScribeAware) metaData).getScribeService();
         } else {
-            final String serviceId = metaData.getId().toLowerCase(Locale.ENGLISH);
+            final String serviceId = Strings.asciiLowerCase(metaData.getId());
             if (serviceId.indexOf("twitter") >= 0) {
-                apiClass = TwitterApi.SSL.class;
+                apiClass = TwitterApi.class;
             } else if (serviceId.indexOf("linkedin") >= 0) {
                 apiClass = LinkedInApi.class;
             } else if (serviceId.indexOf("google") >= 0) {
@@ -1204,7 +1208,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             return null;
         }
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);

@@ -1,0 +1,157 @@
+#!/usr/bin/perl -w
+#%# family=auto
+#%# capabilities=autoconf
+
+$showruntimestats="/opt/open-xchange/sbin/showruntimestats";
+$showexec="$showruntimestats -z";
+
+if ( $ARGV[0] and $ARGV[0] eq "autoconf")
+{
+	if (-x $showruntimestats) {
+		print "yes\n";
+		exit 0;
+	}
+	else {
+		print "no\n";
+		exit 0;
+	}
+}
+
+if ( $ARGV[0] and $ARGV[0] eq "config")
+{
+	print "graph_title JVM GC duration\n";
+	print "graph_args --base 1000 -l 0\n";
+	print "graph_category Open Xchange\n";
+	print "graph_vlabel time in ms per s \n";
+
+	open(SHOWRUNTIME,"$showexec |") || die "can not read monitoring output";   
+	
+	while (<SHOWRUNTIME>)
+	{
+		if ( $_ =~ /Copy,type=GarbageCollector,CollectionTime /) {
+			print "a.label Copy\n";
+			print "a.draw LINE1\n";
+			print "a.type DERIVE\n";
+			print "a.min 0\n";
+			next;
+		}
+		if ( $_ =~ /MarkSweepCompact,type=GarbageCollector,CollectionTime /) {
+			print "b.label MarkSweepCompact\n";
+			print "b.draw LINE1\n";
+			print "b.type DERIVE\n";
+			print "b.min 0\n";
+			next;
+		}
+		if ( $_ =~ /PS MarkSweep,type=GarbageCollector,CollectionTime /) {
+			print "c.label PS MarkSweep\n";
+			print "c.draw LINE1\n";
+			print "c.type DERIVE\n";
+			print "c.min 0\n";
+			next;
+		}
+		if ( $_ =~ /PS Scavenge,type=GarbageCollector,CollectionTime /) {
+			print "d.label PS Scavenge\n";
+			print "d.draw LINE1\n";
+			print "d.type DERIVE\n";
+			print "d.min 0\n";
+			next;
+		}
+		if ( $_ =~ /ConcurrentMarkSweep,type=GarbageCollector,CollectionTime /) {
+			print "e.label ConcurrentMarkSweep\n";
+			print "e.draw LINE1\n";
+			print "e.type DERIVE\n";
+			print "e.min 0\n";
+			next;
+		}
+		if ( $_ =~ /ParNew,type=GarbageCollector,CollectionTime /) {
+			print "f.label ParNew\n";
+			print "f.draw LINE1\n";
+			print "f.type DERIVE\n";
+			print "f.min 0\n";
+			next;
+		}
+		if ( $_ =~ /G1 Old Generation,type=GarbageCollector,CollectionTime /) {
+			print "g.label G1 Old Generation\n";
+			print "g.draw LINE1\n";
+			print "g.type DERIVE\n";
+			print "g.min 0\n";
+			next;
+		}
+		if ( $_ =~ /G1 Young Generation,type=GarbageCollector,CollectionTime /) {
+			print "h.label G1 Young Generation\n";
+			print "h.draw LINE1\n";
+			print "h.type DERIVE\n";
+			print "h.min 0\n";
+			next;
+		}
+	}
+	
+	close (SHOWRUNTIME);
+
+	exit 0
+}
+						
+
+open(SHOWRUNTIME,"$showexec |") || die "can not read monitoring output";   
+
+while (<SHOWRUNTIME>)
+{
+	if ( $_ =~ /Copy,type=GarbageCollector,CollectionTime /) {
+		s/.*\=//; 
+		s/].*//;
+		$val=$_+0;
+		print "a.value $val\n";
+		next;
+	}
+	if ( $_ =~ /MarkSweepCompact,type=GarbageCollector,CollectionTime /) {
+		s/.*\=//; 
+		s/].*//;
+		$val=$_+0;
+		print "b.value $val\n";
+		next;
+	}
+	if ( $_ =~ /PS MarkSweep,type=GarbageCollector,CollectionTime /) {
+		s/.*\=//; 
+		s/].*//;
+		$val=$_+0;
+		print "c.value $val\n";
+		next;
+	}
+	if ( $_ =~ /PS Scavenge,type=GarbageCollector,CollectionTime /) {
+		s/.*\=//; 
+		s/].*//;
+		$val=$_+0;
+		print "d.value $val\n";
+		next;
+	}
+	if ( $_ =~ /ConcurrentMarkSweep,type=GarbageCollector,CollectionTime /) {
+		s/.*\=//; 
+		s/].*//;
+		$val=$_+0;
+		print "e.value $val\n";
+		next;
+	}
+	if ( $_ =~ /ParNew,type=GarbageCollector,CollectionTime /) {
+		s/.*\=//; 
+		s/].*//;
+		$val=$_+0;
+		print "f.value $val\n";
+		next;
+	}
+	if ( $_ =~ /G1 Old Generation,type=GarbageCollector,CollectionTime /) {
+		s/.*\=//; 
+		s/].*//;
+		$val=$_+0;
+		print "g.value $val\n";
+		next;
+	}
+	if ( $_ =~ /G1 Young Generation,type=GarbageCollector,CollectionTime /) {
+		s/.*\=//; 
+		s/].*//;
+		$val=$_+0;
+		print "h.value $val\n";
+		next;
+	}
+}
+
+close (SHOWRUNTIME);

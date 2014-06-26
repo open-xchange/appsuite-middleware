@@ -1,0 +1,111 @@
+#!/usr/bin/perl -w
+#%# family=auto
+#%# capabilities=autoconf
+
+
+$showruntimestats="/opt/open-xchange/sbin/showruntimestats";
+$showexec="$showruntimestats --memorypool";
+
+if ( $ARGV[0] and $ARGV[0] eq "autoconf")
+{
+	if (-x $showruntimestats) {
+		print "yes\n";
+		exit 0;
+	}
+	else {
+		print "no\n";
+		exit 0;
+	}
+}
+
+if ( $ARGV[0] and $ARGV[0] eq "config")
+{
+	print "graph_title Java Heap\n";
+	print "graph_args --base 1024 -l 0\n";
+	print "graph_category Open Xchange\n";
+	print "graph_vlabel \n";
+
+	my $printA = 0;
+	my $printB = 0;
+	my $printC = 0;
+	my $printD = 0;
+
+	open(SHOWRUNTIME,"$showexec |") || die "can not read monitoring output";   
+
+	while (<SHOWRUNTIME>)
+	{
+		if ( $_ =~ /Old Gen,type=MemoryPool,Usage /) {
+			$printA = 1;
+			next;
+		}
+		if ( $_ =~ /Survivor( Space)?,type=MemoryPool,Usage /) {
+			$printB = 1;
+			next;
+		}
+		if ( $_ =~ /Eden( Space)?,type=MemoryPool,Usage /) {
+			$printC = 1;
+			next;
+		}
+		if ( $_ =~ /Java heap,type=MemoryPool,Usage /) {
+			$printD = 1;
+			next;
+		}
+	}
+	
+	close (SHOWRUNTIME);
+
+	if ( $printA ) {
+		print "a.label Old Gen\n";
+		print "a.draw AREA\n";
+	}
+	if ( $printB ) {
+		print "b.label Survivor\n";
+		print "b.draw STACK\n";
+	}
+	if ( $printC ) {
+		print "c.label Eden Space\n";
+		print "c.draw STACK\n";
+	}
+	if ( $printD ) {
+		print "d.label Java heap\n";
+		print "d.draw AREA\n";
+	}
+	exit 0
+}
+									
+
+open(SHOWRUNTIME,"$showexec |") || die "can not read monitoring output";   
+
+while (<SHOWRUNTIME>)
+{
+	if ( $_ =~ /Old Gen,type=MemoryPool,Usage /) {
+		s/.*\=//; 
+		s/].*//;
+		$val=$_+0;
+		print "a.value $val\n";
+		next;
+	}
+	if ( $_ =~ /Survivor( Space)?,type=MemoryPool,Usage /) {
+		s/.*\=//; 
+		s/].*//;
+		$val=$_+0;
+		print "b.value $val\n";
+		next;
+	}
+	if ( $_ =~ /Eden( Space)?,type=MemoryPool,Usage /) {
+		s/.*\=//; 
+		s/].*//;
+		$val=$_+0;
+		print "c.value $val\n";
+		next;
+	}
+	if ( $_ =~ /Java heap,type=MemoryPool,Usage /) {
+		s/.*\=//; 
+		s/].*//;
+		$val=$_+0;
+		print "d.value $val\n";
+		next;
+	}
+}
+
+close (SHOWRUNTIME);

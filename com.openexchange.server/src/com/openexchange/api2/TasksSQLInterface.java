@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -88,6 +88,18 @@ public interface TasksSQLInterface {
      * @throws OXException
      */
     SearchIterator<Task> getTasksByExtendedSearch(TaskSearchObject searchObj, int orderBy, Order order, int[] cols) throws OXException;
+    
+    /**
+     * Find all tasks that match the criteria specified in the {@link TaskSearchObject}
+     *  
+     * @param searchObj the search object
+     * @param orderBy order by the specified column
+     * @param order order (asc or desc)
+     * @param cols The columns filled to the dataobject
+     * @return a {@link SearchIterator} with all found tasks
+     * @throws OXException
+     */
+    SearchIterator<Task> findTask(TaskSearchObject searchObj, int orderBy, Order order, int[] cols) throws OXException;
 
     /**
      * Loads one tasks by the given ID

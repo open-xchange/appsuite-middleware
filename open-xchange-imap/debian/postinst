@@ -1,5 +1,5 @@
 #!/bin/bash
-# postinst script for open-xchange
+# postinst script for open-xchange-imap
 #
 # see: dh_installdeb(1)
 
@@ -50,6 +50,13 @@ postFix() {
 
     # SoftwareChange_Request-1668
     ox_add_property com.openexchange.imap.storeContainerType boundary-aware $PFILE
+
+    # SoftwareChange_Request-1931
+    ox_add_property com.openexchange.imap.ssl.protocols "SSLv3 TLSv1" $PFILE
+
+    # SoftwareChange_Request-1953
+    VALUE=$(ox_read_property com.openexchange.imap.imapSearch $PFILE)
+    ox_set_property com.openexchange.imap.imapSearch "$VALUE" $PFILE
 
     # SoftwareChange_Request-2016
     ox_add_property com.openexchange.imap.ssl.ciphersuites "" $PFILE

@@ -4,19 +4,18 @@ Eclipse-BuddyPolicy: dependent
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Messaging System Bundle
 Bundle-SymbolicName: com.openexchange.ms
-Bundle-Version: 7.4.2
+Bundle-Version: 7.6.0
 Bundle-Activator: com.openexchange.ms.osgi.MsActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.hazelcast.config,
- com.hazelcast.core,
- com.hazelcast.monitor,
+Import-Package: com.hazelcast.core,
  com.hazelcast.nio,
- com.hazelcast.query,
+ com.hazelcast.nio.serialization,
  com.openexchange.config,
  com.openexchange.exception,
  com.openexchange.groupware,
  com.openexchange.hazelcast.configuration,
+ com.openexchange.hazelcast.serialization,
  com.openexchange.i18n,
  com.openexchange.java,
  com.openexchange.java.util,

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -84,7 +84,6 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Change;
-import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.ConfirmationChange;
 import com.openexchange.groupware.container.Difference;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -165,9 +164,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 			change.setException(true);
 			change.setMaster(original);
 			if (matchingException != null) {
-				final ParticipantChange participantChange = applyParticipantChange(
-						exception, matchingException, message.getMethod(), message);
-				participantChange.setComment(message.getComment());
+			    ParticipantChange participantChange = applyParticipantChange(exception, matchingException, message.getMethod(), message);
 
 				change = new ITipChange();
 				change.setException(true);
@@ -175,13 +172,25 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 				change.setCurrentAppointment(matchingException);
 
 				change.setType(Type.UPDATE);
-				change.setParticipantChange(participantChange);
+				if (participantChange != null) {
+                    participantChange.setComment(message.getComment());
+    				change.setParticipantChange(participantChange);
+				}
 				describeReplyDiff(message, change, wrapper, session);
 
 				analysis.addChange(change);
 			} else {
-				analysis.addAnnotation(new ITipAnnotation(
-						Messages.CHANGE_PARTICIPANT_STATE_IN_UNKNOWN_APPOINTMENT, locale));
+                ParticipantChange participantChange = applyParticipantChange(exception, original, message.getMethod(), message);
+			    change.setCurrentAppointment(original);
+			    change.setNewAppointment(exception);
+			    change.setType(Type.CREATE);
+			    if (participantChange != null) {
+			        change.setParticipantChange(participantChange);
+			    }
+			    describeReplyDiff(message, change, wrapper, session);
+			    analysis.addChange(change);
+			    
+				//analysis.addAnnotation(new ITipAnnotation(Messages.CHANGE_PARTICIPANT_STATE_IN_UNKNOWN_APPOINTMENT, locale));
 			}
 		}
 		if (containsPartyCrasher(analysis)) {
@@ -195,21 +204,21 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 		}
 		return analysis;
 	}
-	
+
 	private boolean containsChangesForUpdate(ITipAnalysis analysis) {
-	    if (analysis.getChanges() == null || analysis.getChanges().size() == 0) { 
+	    if (analysis.getChanges() == null || analysis.getChanges().size() == 0) {
 	        return false;
 	    }
-	    
+
 	    for (ITipChange change : analysis.getChanges()) {
 	        if (change.getDiff() == null) {
 	            continue;
 	        }
-	        
+
 	        if (change.getDiff().getUpdates() == null) {
 	            continue;
 	        }
-	        
+
 	        if (change.getDiff().getUpdates().size() != 0) {
 	            return true;
 	        }
@@ -330,7 +339,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 				// Explicitely ignore title update
 				update.setTitle(original.getTitle());
 			}
-		} else {
+		} else if (!update.containsRecurrenceDatePosition() && !update.containsRecurrencePosition()) {
 			// The Reply may only override participant states
 			final AppointmentDiff diff = AppointmentDiff.compare(update, original,
 					CalendarObject.PARTICIPANTS, CalendarObject.USERS,
@@ -338,6 +347,8 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 			for (final FieldUpdate upd : diff.getUpdates()) {
 				update.set(upd.getFieldNumber(), upd.getNewValue());
 			}
+		} else {
+		    // hier wir
 		}
 
 		final List<Participant> newParticipants = new ArrayList<Participant>();
@@ -559,7 +570,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 
 	private Set<Integer> skipFieldsInCounter(final ITipMessage message) {
 		final Set<Integer> skipList = new HashSet<Integer>();
-		skipList.add(CommonObject.NUMBER_OF_LINKS);
+//		skipList.add(CommonObject.NUMBER_OF_LINKS);
 		if (message.hasFeature(ITipSpecialHandling.MICROSOFT)) {
 			skipList.add(CalendarObject.TITLE);
 		}

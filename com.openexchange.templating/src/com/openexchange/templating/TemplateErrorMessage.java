@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,21 +50,28 @@
 package com.openexchange.templating;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link TemplateErrorMessage} - Error codes for templating module.
  */
-public enum TemplateErrorMessage implements OXExceptionCode {
+public enum TemplateErrorMessage implements DisplayableOXExceptionCode {
 
-    IOException(CATEGORY_SERVICE_DOWN, 1, TemplateExceptionMessage.IOException_HELP, TemplateExceptionMessage.IOException_MSG),
-    UnderlyingException(CATEGORY_ERROR, 2, TemplateExceptionMessage.UnderlyingException_HELP, TemplateExceptionMessage.UnderlyingException_MSG),
-    TemplateNotFound(CATEGORY_ERROR, 3, TemplateExceptionMessage.TemplateNotFound_HELP, TemplateExceptionMessage.TemplateNotFound_MSG),
-    SQLException(CATEGORY_ERROR, 4, TemplateExceptionMessage.SQLException_HELP, TemplateExceptionMessage.SQLException_MSG),
-    AccessDenied(CATEGORY_PERMISSION_DENIED, 5, TemplateExceptionMessage.AccessDenied_HELP, TemplateExceptionMessage.AccessDenied_MSG),
-    TemplateNotWhitelisted(CATEGORY_PERMISSION_DENIED, 6, TemplateExceptionMessage.TemplateNotWhitelisted_HELP, TemplateExceptionMessage.TemplateNotWhitelisted_MSG),
+    IOException(CATEGORY_SERVICE_DOWN, 1, "An I/O error occurred.", null),
+
+    UnderlyingException(CATEGORY_ERROR, 2, "The underlying templating system threw an exception: %1$s", null),
+
+    TemplateNotFound(CATEGORY_ERROR, 3, "The template %1$s does not exist.", null),
+
+    SQLException(CATEGORY_ERROR, 4, "A SQL error occurred: %1$s", OXExceptionStrings.SQL_ERROR_MSG),
+
+    AccessDenied(CATEGORY_PERMISSION_DENIED, 5, "File access denied.", TemplateExceptionMessage.AccessDenied_MSG),
+
+    TemplateNotWhitelisted(CATEGORY_PERMISSION_DENIED, 6, "This template was not whitelisted,",
+        TemplateExceptionMessage.TemplateNotWhitelisted_MSG),
     ;
 
     /**
@@ -74,14 +81,14 @@ public enum TemplateErrorMessage implements OXExceptionCode {
 
     private final Category category;
     private final int errorCode;
-    private final String help;
     private final String message;
+    private String displayMessage;
 
-    private TemplateErrorMessage(final Category category, final int errorCode, final String help, final String message) {
+    private TemplateErrorMessage(final Category category, final int errorCode, final String message, String displayMessage) {
         this.category = category;
         this.errorCode = errorCode;
-        this.help = help;
         this.message = message;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -99,13 +106,14 @@ public enum TemplateErrorMessage implements OXExceptionCode {
         return errorCode;
     }
 
-    public String getHelp() {
-        return help;
-    }
-
     @Override
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -136,8 +136,7 @@ public class CSVContactImportTest extends AbstractContactTest {
         assertTrue( res.isCorrect() );
 
         //basic check: 1 entry in folder
-        final RdbContactSQLImpl contactSql = new RdbContactSQLImpl(sessObj);
-        assertTrue("One contact in folder?", 1 == contactSql.getNumberOfContacts(folderId));
+        assertTrue("One contact in folder?", 1 == getNumberOfContacts(folderId));
 
         //detailed check:
         checkFirstResult(
@@ -145,12 +144,11 @@ public class CSVContactImportTest extends AbstractContactTest {
                 res.getObjectId()));
 
         //cleaning up
-        contactSql.deleteContactObject(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()), res.getDate());
+        contactStorage.delete(sessObj, res.getFolder(), res.getObjectId(), res.getDate());
     }
 
     @Test public void importEmpty() throws NumberFormatException, Exception{
-        final RdbContactSQLImpl contactSql = new RdbContactSQLImpl(sessObj);
-        final int numberOfContactsBefore = contactSql.getNumberOfContacts(folderId);
+        final int numberOfContactsBefore = getNumberOfContacts(folderId);
         final List<ImportResult> results = importStuff(IMPORT_EMPTY);
         assertTrue("One result?" , 1 == results.size());
         final ImportResult res = results.get(0);
@@ -158,7 +156,7 @@ public class CSVContactImportTest extends AbstractContactTest {
         assertEquals("Should contain error for not importing because fields are missing", 808, res.getException().getCode());
 
         //no import, please
-        final int numberOfContactsAfter = contactSql.getNumberOfContacts(folderId);
+        final int numberOfContactsAfter = getNumberOfContacts(folderId);
         assertEquals("Should not have imported a contact", numberOfContactsBefore, numberOfContactsAfter);
     }
 
@@ -174,12 +172,11 @@ public class CSVContactImportTest extends AbstractContactTest {
         }
 
         //basic check
-        final RdbContactSQLImpl contactSql = new RdbContactSQLImpl(sessObj);
-        assertEquals("Two contacts in folder?", 2 , contactSql.getNumberOfContacts(folderId));
+        assertEquals("Two contacts in folder?", 2 , getNumberOfContacts(folderId));
 
         //cleaning up
         for(final ImportResult res : results){
-            contactSql.deleteContactObject(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()), res.getDate());
+            contactStorage.delete(sessObj, res.getFolder(), res.getObjectId(), res.getDate());
         }
     }
 
@@ -222,12 +219,11 @@ public class CSVContactImportTest extends AbstractContactTest {
             assertTrue( res.isCorrect() );
         }
 
-        final RdbContactSQLImpl contactSql = new RdbContactSQLImpl(sessObj);
-        assertEquals("Three contacts in folder?", 3 , contactSql.getNumberOfContacts(folderId));
+        assertEquals("Three contacts in folder?", 3 , getNumberOfContacts(folderId));
 
         //cleaning up
         for(final ImportResult res : results){
-            contactSql.deleteContactObject(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()), res.getDate());
+            contactStorage.delete(sessObj, res.getFolder(), res.getObjectId(), res.getDate());
         }
     }
     // Change this for Bug 12987
@@ -322,7 +318,7 @@ public class CSVContactImportTest extends AbstractContactTest {
 
 
     protected void checkFirstResult(final int objectID ) throws OXException, OXException {
-        final Contact co = new RdbContactSQLImpl(sessObj).getObjectById(objectID, folderId);
+        final Contact co = getEntry(objectID);
         assertEquals("Checking name" ,  NAME1 , co.getGivenName());
         assertEquals("Checking e-Mail" ,  EMAIL1 , co.getEmail1());
     }

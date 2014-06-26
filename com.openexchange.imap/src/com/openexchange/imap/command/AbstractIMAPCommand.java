@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -54,7 +54,6 @@ import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import javax.mail.MessagingException;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.util.ImapUtility;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotaExceededException;
 import com.sun.mail.iap.BadCommandException;
@@ -196,7 +195,7 @@ public abstract class AbstractIMAPCommand<T> {
             return null;
         }
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -58,6 +58,13 @@ import com.openexchange.file.storage.AbstractFileFieldSwitcher;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FileFieldSet extends AbstractFileFieldSwitcher {
+
+    /**
+     * Initializes a new {@link FileFieldSet}.
+     */
+    public FileFieldSet() {
+        super();
+    }
 
     @Override
     public Object categories(final Object... args) {
@@ -194,7 +201,7 @@ public class FileFieldSet extends AbstractFileFieldSwitcher {
         md(args).setVersionComment(string(1, args));
         return ret(args);
     }
-    
+
     @Override
     public Object meta(Object... args) {
         md(args).setMeta((Map<String, Object>) args[1]);

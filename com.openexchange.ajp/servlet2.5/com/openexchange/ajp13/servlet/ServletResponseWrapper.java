@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -227,11 +227,11 @@ public class ServletResponseWrapper implements ServletResponse {
                 if (!characterEncoding.equalsIgnoreCase(m.group(2))) {
                     final StringBuilder newContentType = new StringBuilder();
                     final MatcherReplacer mr = new MatcherReplacer(m, contentType);
-                    mr.appendLiteralReplacement(newContentType, new com.openexchange.java.StringAllocator().append(m.group(1)).append(characterEncoding).toString());
+                    mr.appendLiteralReplacement(newContentType, new StringBuilder().append(m.group(1)).append(characterEncoding).toString());
                     while (m.find()) {
                         mr.appendLiteralReplacement(
                             newContentType,
-                            new com.openexchange.java.StringAllocator().append(m.group(1)).append(characterEncoding).toString());
+                            new StringBuilder().append(m.group(1)).append(characterEncoding).toString());
                     }
                     mr.appendTail(newContentType);
                     headers.put(CONTENT_TYPE, new String[] { newContentType.toString() });

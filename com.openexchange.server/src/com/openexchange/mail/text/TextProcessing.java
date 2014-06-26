@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -97,7 +97,7 @@ public final class TextProcessing {
             final int mlen = foldMe.length() - 1;
             for (end = mlen; end >= 0; end--) {
                 c = foldMe.charAt(end);
-                if (c != ' ' && c != '\t' && c != '\r' && c != '\n') {
+                if (c != '\r' && c != '\n') {
                     break;
                 }
             }
@@ -112,12 +112,12 @@ public final class TextProcessing {
          */
         int total = used + s.length();
         if (total <= linewrap) {
-            return used > 0 ? new com.openexchange.java.StringAllocator(total).append(prefix).append(s).toString() : s;
+            return used > 0 ? new StringBuilder(total).append(prefix).append(s).toString() : s;
         }
         /*
          * Fold the string
          */
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(total);
+        final StringBuilder sb = new StringBuilder(total);
         char lastc = 0;
         if (used > 0) {
             while (total > linewrap) {
@@ -198,7 +198,7 @@ public final class TextProcessing {
         }
         final String[] lines = content.split(SPLIT_LINES);
         if (lines.length > 0) {
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(content.length() + 128);
+            final StringBuilder sb = new StringBuilder(content.length() + 128);
             {
                 final String foldMe = lines[0];
                 sb.append(foldLine(foldMe, linewrap, getQuotePrefix(foldMe)));
@@ -217,7 +217,7 @@ public final class TextProcessing {
             return null;
         }
         final int length = line.length();
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(8);
+        final StringBuilder sb = new StringBuilder(8);
         int lastGT = -1;
         for (int i = 0; i < length; i++) {
             final char c = line.charAt(i);

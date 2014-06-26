@@ -2,16 +2,18 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Hazelcast Configuration
 Bundle-SymbolicName: com.openexchange.hazelcast.configuration
-Bundle-Version: 7.4.2
+Bundle-Version: 7.6.0
 Bundle-Activator: com.openexchange.hazelcast.configuration.osgi.HazelcastConfigurationActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-BuddyPolicy: registered
 Import-Package: com.hazelcast.config,
- com.hazelcast.impl,
+ com.hazelcast.instance,
+ com.hazelcast.nio.serialization,
  com.openexchange.config,
  com.openexchange.configuration,
  com.openexchange.exception,
+ com.openexchange.hazelcast.serialization,
  com.openexchange.java,
  com.openexchange.log,
  com.openexchange.osgi,

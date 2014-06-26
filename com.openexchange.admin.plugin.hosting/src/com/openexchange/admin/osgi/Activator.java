@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,15 +52,22 @@ package com.openexchange.admin.osgi;
 import com.openexchange.admin.PluginStarter;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.exceptions.OXGenericException;
+import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
+import com.openexchange.admin.plugins.OXContextPluginInterface;
+import com.openexchange.admin.plugins.OXGroupPluginInterface;
+import com.openexchange.admin.plugins.OXResourcePluginInterface;
+import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.services.AdminServiceRegistry;
+import com.openexchange.admin.services.PluginInterfaces;
 import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.eventsystem.EventSystemService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersService;
@@ -82,8 +89,35 @@ public class Activator extends HousekeepingActivator {
         track(I18nService.class, new I18nServiceCustomizer(context));
         track(ManagementService.class, new ManagementCustomizer(context));
         track(PipesAndFiltersService.class, new RegistryServiceTrackerCustomizer<PipesAndFiltersService>(context, AdminServiceRegistry.getInstance(), PipesAndFiltersService.class));
-        track(EventSystemService.class, new RegistryServiceTrackerCustomizer<EventSystemService>(context, AdminServiceRegistry.getInstance(), EventSystemService.class));
+        track(CacheService.class, new RegistryServiceTrackerCustomizer<CacheService>(context, AdminServiceRegistry.getInstance(), CacheService.class));
+
+        // Plugin interfaces
+        {
+            final int defaultRanking = 100;
+
+            final RankingAwareNearRegistryServiceTracker<BasicAuthenticatorPluginInterface> batracker = new RankingAwareNearRegistryServiceTracker<BasicAuthenticatorPluginInterface>(context, BasicAuthenticatorPluginInterface.class, defaultRanking);
+            rememberTracker(batracker);
+
+            final RankingAwareNearRegistryServiceTracker<OXContextPluginInterface> ctracker = new RankingAwareNearRegistryServiceTracker<OXContextPluginInterface>(context, OXContextPluginInterface.class, defaultRanking);
+            rememberTracker(ctracker);
+
+            final RankingAwareNearRegistryServiceTracker<OXUserPluginInterface> utracker = new RankingAwareNearRegistryServiceTracker<OXUserPluginInterface>(context, OXUserPluginInterface.class, defaultRanking);
+            rememberTracker(utracker);
+
+            final RankingAwareNearRegistryServiceTracker<OXGroupPluginInterface> gtracker = new RankingAwareNearRegistryServiceTracker<OXGroupPluginInterface>(context, OXGroupPluginInterface.class, defaultRanking);
+            rememberTracker(gtracker);
+
+            final RankingAwareNearRegistryServiceTracker<OXResourcePluginInterface> rtracker = new RankingAwareNearRegistryServiceTracker<OXResourcePluginInterface>(context, OXResourcePluginInterface.class, defaultRanking);
+            rememberTracker(rtracker);
+
+            final PluginInterfaces.Builder builder = new PluginInterfaces.Builder().basicAuthenticatorPlugins(batracker).contextPlugins(ctracker).groupPlugins(gtracker).resourcePlugins(rtracker).userPlugins(utracker);
+
+            PluginInterfaces.setInstance(builder.build());
+        }
+
+        // Open trackers
         openTrackers();
+
         this.starter = new PluginStarter();
         try {
             this.starter.start(context, configurationService);
@@ -101,6 +135,7 @@ public class Activator extends HousekeepingActivator {
         }
         closeTrackers();
         cleanUp();
+        PluginInterfaces.setInstance(null);
     }
 
     @Override

@@ -1,0 +1,41 @@
+open-xchange-rest (7.6.0-6) stable; urgency=low
+
+  * Seventh candidate for 7.6.0 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 23 Jun 2014 13:23:01 +0200
+
+open-xchange-rest (7.6.0-5) stable; urgency=low
+
+  * Sixth release candidate for 7.6.0
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 20 Jun 2014 13:06:22 +0200
+
+open-xchange-rest (7.6.0-4) stable; urgency=low
+
+  * Fifth release candidate for 7.6.0
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 13 Jun 2014 16:40:26 +0200
+
+open-xchange-rest (7.6.0-3) stable; urgency=low
+
+  * Fourth release candidate for 7.6.0
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 30 May 2014 13:47:34 +0200
+
+open-xchange-rest (7.6.0-2) stable; urgency=low
+
+  * Third release candidate for 7.6.0
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 16 May 2014 13:19:52 +0200
+
+open-xchange-rest (7.6.0-1) stable; urgency=low
+
+  * Second release candidate for 7.6.0
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 05 May 2014 11:26:56 +0200
+
+open-xchange-rest (7.6.0-0) stable; urgency=low
+
+  * initial packaging for internal REST services API
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 02 May 2014 09:11:39 +0200

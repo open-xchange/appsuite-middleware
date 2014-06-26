@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -58,7 +58,6 @@ import java.sql.Statement;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.StringAllocator;
 
 /**
  * Abstract class for easily implementing {@link CreateTableService} services.
@@ -92,7 +91,7 @@ public abstract class AbstractCreateTableImpl implements CreateTableService {
                             stmt.execute(create);
                         } catch (SQLException e) {
                             final String sep = System.getProperty("line.separator");
-                            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, new StringAllocator(256).append(e.getMessage()).append(sep).append("Affected statement:").append(sep).append(create).toString());
+                            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, new StringBuilder(256).append(e.getMessage()).append(sep).append("Affected statement:").append(sep).append(create).toString());
                         }
                     }
                 }
@@ -105,7 +104,7 @@ public abstract class AbstractCreateTableImpl implements CreateTableService {
                             stmt.execute(create);
                         } catch (SQLException e) {
                             final String sep = System.getProperty("line.separator");
-                            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, new StringAllocator(256).append(e.getMessage()).append(sep).append("Affected statement:").append(sep).append(create).toString());
+                            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, new StringBuilder(256).append(e.getMessage()).append(sep).append("Affected statement:").append(sep).append(create).toString());
                         }
                     }
                 }

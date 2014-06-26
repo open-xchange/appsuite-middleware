@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -62,12 +62,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -89,15 +92,31 @@ public final class MimeType2ExtMap {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MimeType2ExtMap.class);
 
-    private static volatile Map<String, String> typeMap;
+    private static volatile ConcurrentMap<String, String> typeMap;
 
-    private static volatile Map<String, List<String>> extMap;
+    private static volatile ConcurrentMap<String, List<String>> extMap;
 
     /**
      * No instance.
      */
     private MimeType2ExtMap() {
         super();
+    }
+
+    static {
+        MailReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                reset();
+                init();
+            }
+
+            @Override
+            public Map<String, String[]> getConfigFileNames() {
+                return null;
+            }
+        });
     }
 
     /**
@@ -125,8 +144,8 @@ public final class MimeType2ExtMap {
                     return;
                 }
                 try {
-                    typeMap = new HashMap<String, String>();
-                    extMap = new HashMap<String, List<String>>();
+                    typeMap = new ConcurrentHashMap<String, String>(1024);
+                    extMap = new ConcurrentHashMap<String, List<String>>(1024);
                     final StringBuilder sb = new StringBuilder(128);
                     final boolean debugEnabled = LOG.isDebugEnabled();
                     {
@@ -202,6 +221,41 @@ public final class MimeType2ExtMap {
     }
 
     /**
+     * Adds specified MIME type to file type mapping; e.g <code>"image/png"</code> -&gt; <code>"png"</code>.
+     *
+     * @param mimeType The MIME type
+     * @param fileExtension The file extension
+     */
+    public static void addMimeType(final String mimeType, final String fileExtension) {
+        addMimeType(mimeType, Collections.singletonList(fileExtension));
+    }
+
+    /**
+     * Adds specified MIME type to file type mapping; e.g <code>"image/jpeg"</code> -&gt; [ <code>"jpeg"</code>, <code>"jpg"</code>, <code>"jpe"</code> ].
+     *
+     * @param mimeType The MIME type
+     * @param fileExtensions The file extensions
+     */
+    public static void addMimeType(final String mimeType, final List<String> fileExtensions) {
+        init();
+        final ConcurrentMap<String, String> tm = typeMap;
+        for (String ext : fileExtensions) {
+            tm.put(ext, mimeType);
+        }
+
+        final ConcurrentMap<String, List<String>> em = extMap;
+        List<String> list = em.get(mimeType);
+        if (null == list) {
+            final List<String> nl = new ArrayList<String>(2);
+            list = em.putIfAbsent(mimeType, nl);
+            if (null == list) {
+                list = nl;
+            }
+        }
+        list.add(mimeType);
+    }
+
+    /**
      * Gets the MIME type associated with given file.
      *
      * @param file The file
@@ -221,7 +275,7 @@ public final class MimeType2ExtMap {
      */
     public static String getContentType(final String fileName) {
         init();
-        if (null == fileName) {
+        if (Strings.isEmpty(fileName)) {
             return MIME_APPL_OCTET;
         }
         final String fn = Strings.unquote(fileName);
@@ -248,7 +302,7 @@ public final class MimeType2ExtMap {
      */
     public static String getContentTypeByExtension(final String extension) {
         init();
-        if (null == extension || 0 == extension.length()) {
+        if (Strings.isEmpty(extension)) {
             return MIME_APPL_OCTET;
         }
         final String type = typeMap.get(toLowerCase(extension));
@@ -258,7 +312,9 @@ public final class MimeType2ExtMap {
         return type;
     }
 
-    private static final List<String> DEFAULT_EXT = Collections.unmodifiableList(Arrays.asList("dat"));
+    private static final String DEFAULT_EXT = "dat";
+
+    private static final List<String> DEFAULT_EXTENSIONS = Collections.unmodifiableList(Arrays.asList(DEFAULT_EXT));
 
     /**
      * Gets the file extension for given MIME type.
@@ -268,11 +324,14 @@ public final class MimeType2ExtMap {
      */
     public static List<String> getFileExtensions(String mimeType) {
         init();
+        if (Strings.isEmpty(mimeType)) {
+            return DEFAULT_EXTENSIONS;
+        }
         if (!extMap.containsKey(toLowerCase(mimeType))) {
-            return DEFAULT_EXT;
+            return DEFAULT_EXTENSIONS;
         }
         final List<String> list = extMap.get(mimeType);
-        return null == list ? DEFAULT_EXT : Collections.unmodifiableList(list);
+        return null == list ? DEFAULT_EXTENSIONS : Collections.unmodifiableList(list);
     }
 
     /**
@@ -283,11 +342,14 @@ public final class MimeType2ExtMap {
      */
     public static String getFileExtension(String mimeType) {
         init();
+        if (Strings.isEmpty(mimeType)) {
+            return DEFAULT_EXT;
+        }
         if (!extMap.containsKey(toLowerCase(mimeType))) {
-            return "dat";
+            return DEFAULT_EXT;
         }
         final List<String> list = extMap.get(mimeType);
-        return null == list || list.isEmpty() ? "dat" : list.get(0);
+        return null == list || list.isEmpty() ? DEFAULT_EXT : list.get(0);
     }
 
     /**

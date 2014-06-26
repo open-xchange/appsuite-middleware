@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -55,6 +55,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.generic.FolderUpdaterServiceV2;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 
 
 /**
@@ -116,9 +117,7 @@ public class StrategyFolderUpdaterService<T> implements FolderUpdaterServiceV2<T
             }
             throw x; //TODO: re-throw also in case of passed errors collection?
         } finally {
-            if (null != data) {
-                data.close();
-            }
+            SearchIterators.close(data);
             strategy.closeSession(session);
         }
     }

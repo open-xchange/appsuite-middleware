@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -57,15 +57,6 @@ import com.openexchange.i18n.LocalizableStrings;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IndexedSearchExceptionMessages implements LocalizableStrings {
-
-    // An unexpected error occurred: %1$s
-    public static final String UNEXPECTED_ERROR = "An unexpected error occurred: %1$s";
-
-    // A JSON error occurred: %1$s
-    public static final String JSON_ERROR = "A JSON error occurred: %1$s";
-
-    // Index-based search is not supported for module: %1$s
-    public static final String MODULE_NOT_SUPPORTED = "Index-based search is not supported for module: %1$s";
 
     // There is no search handler for field %1$s.
     public static final String UNKNOWN_HANDLER = "There is no search handler for field %1$s.";

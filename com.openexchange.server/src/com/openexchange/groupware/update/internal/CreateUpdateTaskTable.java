@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,7 +51,6 @@ package com.openexchange.groupware.update.internal;
 
 import com.openexchange.database.AbstractCreateTableImpl;
 import com.openexchange.database.CreateTableService;
-import com.openexchange.groupware.update.FullPrimaryKeySupportService;
 
 /**
  * Implements the {@link CreateTableService} for creating the updateTask table.
@@ -59,34 +58,21 @@ import com.openexchange.groupware.update.FullPrimaryKeySupportService;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public final class CreateUpdateTaskTable extends AbstractCreateTableImpl {
-    
-    private final FullPrimaryKeySupportService fullPrimaryKeySupportService;
 
     private static final String[] CREATED_TABLES = { "updateTask" };
 
-    static final String[] CREATES = {
-        // Using full index is not possible to convert to a primary key because two different tasks may have same beginning letters that
-        // fit into the index and causing a collision.
-        "CREATE TABLE updateTask (cid INT4 UNSIGNED NOT NULL,taskName VARCHAR(1024) NOT NULL,successful BOOLEAN NOT NULL," +
-        "lastModified INT8 NOT NULL,uuid BINARY(16) DEFAULT NULL,INDEX full (cid,taskName(255))) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"
-    };
-    
     static final String[] CREATES_PRIMARY_KEY = {
         "CREATE TABLE updateTask (cid INT4 UNSIGNED NOT NULL,taskName VARCHAR(1024) NOT NULL,successful BOOLEAN NOT NULL," +
             "lastModified INT8 NOT NULL,uuid BINARY(16) NOT NULL,PRIMARY KEY (cid, uuid),INDEX full (cid,taskName(255))) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"
     };
 
-    public CreateUpdateTaskTable(FullPrimaryKeySupportService fullPrimaryKeySupportService) {
+    public CreateUpdateTaskTable() {
         super();
-        this.fullPrimaryKeySupportService = fullPrimaryKeySupportService;
     }
 
     @Override
     protected String[] getCreateStatements() {
-        if (fullPrimaryKeySupportService.isFullPrimaryKeySupported()) {
-            return CREATES_PRIMARY_KEY;
-        }
-        return CREATES.clone();
+        return CREATES_PRIMARY_KEY;
     }
 
     @Override

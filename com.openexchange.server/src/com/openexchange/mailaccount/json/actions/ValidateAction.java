@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,6 +51,7 @@ package com.openexchange.mailaccount.json.actions;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONException;
@@ -128,7 +129,9 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
 
             try {
                 final String password = storageService.getMailAccount(accountDescription.getId(), session.getUserId(), session.getContextId()).getPassword();
-                accountDescription.setPassword(MailPasswordUtil.decrypt(password, session, accountDescription.getId(), accountDescription.getLogin(), accountDescription.getMailServer()));
+                if (null != password) {
+                    accountDescription.setPassword(MailPasswordUtil.decrypt(password, session, accountDescription.getId(), accountDescription.getLogin(), accountDescription.getMailServer()));
+                }
             } catch (final OXException e) {
                 if (!CryptoErrorMessage.BadPassword.equals(e)) {
                     throw e;
@@ -186,6 +189,10 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
      * @throws OXException If an severe error occurs
      */
     public static Boolean actionValidateBoolean(final MailAccountDescription accountDescription, final ServerSession session, final boolean ignoreInvalidTransport, final List<OXException> warnings) throws OXException {
+        // Check for primary account
+        if (MailAccount.DEFAULT_ID == accountDescription.getId()) {
+            return Boolean.TRUE;
+        }
         // Validate mail server
         boolean validated = checkMailServerURL(accountDescription, session, warnings);
         // Failed?
@@ -219,8 +226,12 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         }
         // Now try to connect
         final boolean success = mailAccess.ping();
-        if (success) {
-            warnings.addAll(mailAccess.getWarnings());
+        // Add possible warnings
+        {
+            final Collection<OXException> currentWarnings = mailAccess.getWarnings();
+            if (null != currentWarnings) {
+                warnings.addAll(currentWarnings);
+            }
         }
         return success;
     }
@@ -249,8 +260,19 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
             }
             fillTransportServerCredentials(accountDescription, session, true);
         }
-        transportConfig.setLogin(accountDescription.getTransportLogin());
-        transportConfig.setPassword(accountDescription.getTransportPassword());
+        // Credentials
+        {
+            String login = accountDescription.getTransportLogin();
+            String password = accountDescription.getTransportPassword();
+            if (!seemsValid(login)) {
+                login = accountDescription.getLogin();
+            }
+            if (!seemsValid(password)) {
+                password = accountDescription.getPassword();
+            }
+            transportConfig.setLogin(login);
+            transportConfig.setPassword(password);
+        }
         // Set server and port
         final URI uri;
         try {
@@ -345,4 +367,13 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
             accountDescription.setTransportPassword(password);
         }
     }
+
+    private static boolean seemsValid(final String str) {
+        if (isEmpty(str)) {
+            return false;
+        }
+
+        return !"null".equalsIgnoreCase(str);
+    }
+
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -55,7 +55,6 @@ import java.util.Hashtable;
 import java.util.Set;
 import org.osgi.service.event.Event;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.session.Session;
 
 /**
@@ -237,7 +236,7 @@ public class FileStorageEventHelper {
     }
 
     public static String createDebugMessage(final String eventName, final Event event) {
-        final StringAllocator sb = new StringAllocator("Received ");
+        final StringBuilder sb = new StringBuilder("Received ");
         sb.append(eventName);
         sb.append(": ");
         sb.append(event.toString());

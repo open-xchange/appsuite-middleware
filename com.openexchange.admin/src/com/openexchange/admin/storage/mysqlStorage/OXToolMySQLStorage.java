@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -63,7 +63,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import org.osgi.framework.BundleContext;
-import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -1079,7 +1078,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             prep_check.setInt(2, group_id);
             rs = prep_check.executeQuery();
             if (!rs.next()) {
-                throw new StorageException("No such group "+group_id+" in context "+contextId+"");
+                throw new StorageException("No such group "+group_id+" in context "+contextId);
             }
             // grab username and return
             return rs.getString("identifier");
@@ -1148,7 +1147,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             prep_check.setInt(2, resource_id);
             rs = prep_check.executeQuery();
             if (!rs.next()) {
-                throw new StorageException("No such resource "+resource_id+" in context "+ctx.getId().intValue()+"");
+                throw new StorageException("No such resource "+resource_id+" in context "+ctx.getId().intValue());
             }
             // grab user name and return
             return rs.getString("identifier");
@@ -1226,7 +1225,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             prep_check.setInt(2, user_id);
             rs = prep_check.executeQuery();
             if (!rs.next()) {
-                throw new StorageException("No such user "+user_id+" in context "+ctx.getId().intValue()+"");
+                throw new StorageException("No such user "+user_id+" in context "+ctx.getId().intValue());
             }
             // grab user name and return
             return rs.getString("uid");
@@ -1381,7 +1380,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 stmt.setString(2, username);
                 rs = stmt.executeQuery();
                 if (!rs.next()) {
-                    throw new StorageException("No such user " + username + " in context " + ctxid + "");
+                    throw new StorageException("No such user " + username + " in context " + ctxid);
                 }
                 user.setId(I(rs.getInt(1)));
                 return null == rs.getString(2) ? false : true;
@@ -2391,16 +2390,13 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             // JCS
             final BundleContext context = AdminCache.getBundleContext();
             if (null != context) {
-                final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
-                    CacheService.class);
+                final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
                 if (null != cacheService) {
                     try {
                         final Cache cache = cacheService.getCache("Capabilities");
                         cache.invalidateGroup(Integer.toString(cid));
                     } catch (final OXException e) {
                         log.error("", e);
-                    } finally {
-                        AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
                     }
                 }
             }

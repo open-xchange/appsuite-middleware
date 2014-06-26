@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -60,6 +60,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -74,17 +75,18 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.conversion.InlineImageDataSource;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.mime.ContentType;
@@ -243,7 +245,7 @@ public final class HtmlProcessing {
     }
 
     private static String getMarkerFor(final Session session) throws URISyntaxException {
-        final StringAllocator sb = new StringAllocator(64);
+        final StringBuilder sb = new StringBuilder(64);
         sb.append(Strings.getLineSeparator());
         sb.append("<!-- ").append(new URI("ox", session.getLogin(), "open-xchange.com", 57462, null, null, null).toString()).append(" -->");
         sb.append(Strings.getLineSeparator());
@@ -265,6 +267,22 @@ public final class HtmlProcessing {
             }
         }
         return useSanitize.booleanValue();
+    }
+
+    static {
+        MailReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                useSanitize = null;
+                imageHost = null;
+            }
+
+            @Override
+            public Map<String, String[]> getConfigFileNames() {
+                return null;
+            }
+        });
     }
 
     /**
@@ -335,7 +353,7 @@ public final class HtmlProcessing {
         if (!bodyMatcher.find()) {
             return replaceBodyPlain(htmlContent, cssPrefix);
         }
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(htmlContent.length() + 256);
+        final StringBuilder sb = new StringBuilder(htmlContent.length() + 256);
         sb.append("<div id=\"").append(cssPrefix).append('"');
         {
             final String rest = bodyMatcher.group(1);
@@ -385,7 +403,7 @@ public final class HtmlProcessing {
     private static String replaceBodyPlain(final String htmlContent, final String cssPrefix) {
         final Matcher m = PATTERN_BODY.matcher(htmlContent);
         final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(htmlContent.length() + 256);
+        final StringBuilder sb = new StringBuilder(htmlContent.length() + 256);
         if (m.find()) {
             mr.appendLiteralReplacement(sb, "<div id=\"" + cssPrefix + "\" " + m.group(1) + '>' + m.group(2) + "</div>");
         }
@@ -669,7 +687,7 @@ public final class HtmlProcessing {
 
     private static final String DEFAULT_COLOR = "#0026ff";
 
-    private static final String BLOCKQUOTE_START_TEMPLATE = "<blockquote type=\"cite\" style=\"margin-left: 0px; margin-right: 0px;" + " padding-left: 10px; color:%s; border-left: solid 1px %s;\">";
+    private static final String BLOCKQUOTE_START_TEMPLATE = "<blockquote type=\"cite\" style=\"margin-left: 0px; margin-right: 0px; padding-left: 10px; color:%s; border-left: solid 1px %s;\">";
 
     /**
      * Determines the quote color for given <code>quotelevel</code>.
@@ -698,7 +716,7 @@ public final class HtmlProcessing {
      * @return The HTML text with simple quotes replaced with block quotes
      */
     private static String replaceHTMLSimpleQuotesForDisplay(final String htmlText) {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(htmlText.length());
+        final StringBuilder sb = new StringBuilder(htmlText.length());
         final String[] lines = htmlText.split(STR_SPLIT_BR);
         int levelBefore = 0;
         final int llen = lines.length - 1;
@@ -845,12 +863,32 @@ public final class HtmlProcessing {
 
     private static final String EVENT_RESTRICTIONS = "\" onmousedown=\"return false;\" oncontextmenu=\"return false;\"";
 
+    private static volatile String imageHost;
+    private static String imageHost() {
+        String tmp = imageHost;
+        if (null == tmp) {
+            synchronized (HtmlProcessing.class) {
+                tmp = imageHost;
+                if (null == tmp) {
+                    final ConfigurationService cs = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null == cs) {
+                        // No ConfigurationService available at the moment
+                        return "";
+                    }
+                    tmp = cs.getProperty("com.openexchange.mail.imageHost", "");
+                    imageHost = tmp;
+                }
+            }
+        }
+        return tmp;
+    }
+
     private static String filterBackgroundInlineImages(final String content, final Session session, final MailPath msgUID) {
         String reval = content;
         try {
             final Matcher imgMatcher = BACKGROUND_PATTERN.matcher(reval);
             final MatcherReplacer imgReplacer = new MatcherReplacer(imgMatcher, reval);
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(reval.length());
+            final StringBuilder sb = new StringBuilder(reval.length());
             if (imgMatcher.find()) {
                 final StringBuilder linkBuilder = new StringBuilder(256);
                 /*
@@ -870,7 +908,7 @@ public final class HtmlProcessing {
                     final String imageURL;
                     {
                         final InlineImageDataSource imgSource = InlineImageDataSource.getInstance();
-                        final ImageLocation imageLocation = new ImageLocation.Builder(cid).folder(prepareFullname(msgUID.getAccountId(), msgUID.getFolder())).id(msgUID.getMailID()).build();
+                        final ImageLocation imageLocation = new ImageLocation.Builder(cid).folder(prepareFullname(msgUID.getAccountId(), msgUID.getFolder())).id(msgUID.getMailID()).optImageHost(imageHost()).build();
                         imageURL = imgSource.generateUrl(imageLocation, session);
                     }
                     linkBuilder.setLength(0);
@@ -905,7 +943,7 @@ public final class HtmlProcessing {
         try {
             final Matcher imgMatcher = IMG_PATTERN.matcher(reval);
             final MatcherReplacer imgReplacer = new MatcherReplacer(imgMatcher, reval);
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(reval.length());
+            final StringBuilder sb = new StringBuilder(reval.length());
             if (imgMatcher.find()) {
                 final StringBuilder strBuffer = new StringBuilder(256);
                 final MatcherReplacer mr = new MatcherReplacer();
@@ -930,7 +968,7 @@ public final class HtmlProcessing {
                             final String imageURL;
                             {
                                 final InlineImageDataSource imgSource = InlineImageDataSource.getInstance();
-                                final ImageLocation imageLocation = new ImageLocation.Builder(filename).folder(prepareFullname(msgUID.getAccountId(), msgUID.getFolder())).id(msgUID.getMailID()).build();
+                                final ImageLocation imageLocation = new ImageLocation.Builder(filename).folder(prepareFullname(msgUID.getAccountId(), msgUID.getFolder())).id(msgUID.getMailID()).optImageHost(imageHost()).build();
                                 imageURL = imgSource.generateUrl(imageLocation, session);
                             }
                             linkBuilder.setLength(0);
@@ -976,7 +1014,7 @@ public final class HtmlProcessing {
                     if (mailId.indexOf('%') >= 0) {
                         final int unifiedINBOXAccountID = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class).getUnifiedINBOXAccountID(session);
                         if (unifiedINBOXAccountID < 0 || msgUID.getAccountId() != unifiedINBOXAccountID) {
-                            String tmp = AJAXServlet.decodeUrl(mailId, null);
+                            String tmp = AJAXUtility.decodeUrl(mailId, null);
                             if (tmp.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
                                 // Expect mail path; e.g. "default0/INBOX/123"
                                 try {
@@ -988,7 +1026,7 @@ public final class HtmlProcessing {
                         }
                     }
                     // Build image location
-                    final ImageLocation imageLocation = new ImageLocation.Builder(cid).folder(prepareFullname(msgUID.getAccountId(), msgUID.getFolder())).id(mailId).build();
+                    final ImageLocation imageLocation = new ImageLocation.Builder(cid).folder(prepareFullname(msgUID.getAccountId(), msgUID.getFolder())).id(mailId).optImageHost(imageHost()).build();
                     imageURL = imgSource.generateUrl(imageLocation, session);
                 }
                 linkBuilder.setLength(0);

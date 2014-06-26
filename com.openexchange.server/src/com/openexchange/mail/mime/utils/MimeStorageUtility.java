@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -334,6 +334,16 @@ public final class MimeStorageUtility {
         ENV_FIELDS = set;
     }
 
+    /**
+     * Checks if given field is covered by ENVELOPE fields.
+     *
+     * @param field The field to check
+     * @return <code>true</code> for ENVELOPE field; otherwise <code>false</code>
+     */
+    public static boolean isEnvelopeField(MailField field) {
+        return ENV_FIELDS.contains(field);
+    }
+
     private static final EnumSet<MailField> ENUM_SET_FULL =
         EnumSet.complementOf(EnumSet.of(MailField.BODY, MailField.FULL, MailField.ACCOUNT_NAME));
 
@@ -493,7 +503,13 @@ public final class MimeStorageUtility {
         FIELD2STRING = field2string;
     }
 
-    private static void addFetchItem(final FetchProfile fp, final MailField field) {
+    /**
+     * Adds specified field to given fetch profile.
+     *
+     * @param fp The fetch profile to add to
+     * @param field The field to add
+     */
+    public static void addFetchItem(final FetchProfile fp, final MailField field) {
         if (MailField.COLOR_LABEL.equals(field)) {
             if (!fp.contains(FetchProfile.Item.FLAGS)) {
                 fp.add(FetchProfile.Item.FLAGS);

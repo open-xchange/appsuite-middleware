@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,11 +51,12 @@ package com.openexchange.authentication.kerberos.osgi;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.kerberos.impl.KerberosAuthentication;
 import com.openexchange.config.ConfigurationService;
@@ -70,7 +71,7 @@ import com.openexchange.user.UserService;
  */
 public final class AuthenticationRegisterer implements ServiceTrackerCustomizer<Object, Object> {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AuthenticationRegisterer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AuthenticationRegisterer.class);
 
     private final BundleContext context;
     private final Lock lock = new ReentrantLock();

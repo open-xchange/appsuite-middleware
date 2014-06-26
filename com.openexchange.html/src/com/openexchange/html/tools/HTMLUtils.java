@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -80,7 +80,7 @@ public final class HTMLUtils {
         final Matcher matcher = BR.matcher(html);
         while (matcher.find()) {
             final String spaces = matcher.group(1);
-            final com.openexchange.java.StringAllocator replacement = new com.openexchange.java.StringAllocator("<br />");
+            final StringBuilder replacement = new StringBuilder("<br />");
             for (int i = 0; i < spaces.length(); i++) {
                 replacement.append("&#160;");
             }

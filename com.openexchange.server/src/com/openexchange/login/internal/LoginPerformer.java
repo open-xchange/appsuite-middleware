@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,14 +50,12 @@
 package com.openexchange.login.internal;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.regex.Pattern;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.security.auth.login.LoginException;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.authentication.Authenticated;
@@ -77,12 +75,13 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.java.Strings;
 import com.openexchange.login.Blocking;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.NonTransient;
+import com.openexchange.login.internal.format.DefaultLoginFormatter;
+import com.openexchange.login.internal.format.LoginFormatter;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -147,8 +146,6 @@ public final class LoginPerformer {
         return doLogin(request, properties, new AutoLoginMethod(request, properties));
     }
 
-    private static final Pattern SPLIT = Pattern.compile(" *, *");
-
     /**
      * Performs the login for specified login request.
      *
@@ -212,22 +209,6 @@ public final class LoginPerformer {
             if (null == session) {
                 // Session could not be created
                 throw LoginExceptionCodes.UNKNOWN.create("Session could not be created.");
-            }
-            // Initial parameters
-            {
-                final String capabilities = (String) properties.get("client.capabilities");
-                if (null == capabilities) {
-                    session.setParameter(Session.PARAM_CAPABILITIES, Collections.<String> emptyList());
-                    // retval.addWarning(LoginExceptionCodes.MISSING_CAPABILITIES.create());
-                } else {
-                    final String[] sa = SPLIT.split(capabilities, 0);
-                    final int length = sa.length;
-                    if (0 == length) {
-                        session.setParameter(Session.PARAM_CAPABILITIES, Collections.<String> emptyList());
-                    } else {
-                        session.setParameter(Session.PARAM_CAPABILITIES, Collections.<String> unmodifiableList(Arrays.asList(sa)));
-                    }
-                }
             }
             retval.setServerToken((String) session.getParameter(LoginFields.SERVER_TOKEN));
             if (SessionEnhancement.class.isInstance(authed)) {
@@ -349,7 +330,7 @@ public final class LoginPerformer {
         } else {
             ThreadPoolCompletionService<Void> completionService = null;
             int blocking = 0;
-            boolean tranzient = login.getSession().isTransient();
+            final boolean tranzient = login.getSession().isTransient();
             for (final Iterator<LoginHandlerService> it = LoginHandlerRegistry.getInstance().getLoginHandlers(); it.hasNext();) {
                 final LoginHandlerService handler = it.next();
                 if (tranzient && NonTransient.class.isInstance(handler)) {
@@ -361,7 +342,8 @@ public final class LoginPerformer {
                     if (null == completionService) {
                         completionService = new ThreadPoolCompletionService<Void>(executor);
                     }
-                    Callable<Void> callable = new Callable<Void>() {
+                    final Callable<Void> callable = new Callable<Void>() {
+
                         @Override
                         public Void call() {
                             handleSafely(login, handler, true);
@@ -372,6 +354,7 @@ public final class LoginPerformer {
                     blocking++;
                 } else {
                     executor.submit(new LoginPerformerTask() {
+
                         @Override
                         public Object call() {
                             handleSafely(login, handler, true);
@@ -409,7 +392,8 @@ public final class LoginPerformer {
                     if (null == completionService) {
                         completionService = new ThreadPoolCompletionService<Void>(executor);
                     }
-                    Callable<Void> callable = new Callable<Void>() {
+                    final Callable<Void> callable = new Callable<Void>() {
+
                         @Override
                         public Void call() {
                             handleSafely(logout, handler, false);
@@ -420,6 +404,7 @@ public final class LoginPerformer {
                     blocking++;
                 } else {
                     executor.submit(new LoginPerformerTask() {
+
                         @Override
                         public Object call() {
                             handleSafely(logout, handler, false);
@@ -465,70 +450,36 @@ public final class LoginPerformer {
         }
     }
 
+    private static final AtomicReference<LoginFormatter> FORMATTER_REF = new AtomicReference<LoginFormatter>();
+
+    /**
+     * Sets the applicable formatter.
+     *
+     * @param formatter The formatter or <code>null</code> to remove
+     */
+    public static void setLoginFormatter(final LoginFormatter formatter) {
+        FORMATTER_REF.set(formatter);
+    }
+
     private static void logLoginRequest(final LoginRequest request, final LoginResult result) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("Login:");
-        sb.append(Strings.abbreviate(request.getLogin(), 256));
-        sb.append(" IP:");
-        sb.append(request.getClientIP());
-        sb.append(" AuthID:");
-        sb.append(request.getAuthId());
-        sb.append(" Agent:");
-        sb.append(request.getUserAgent());
-        sb.append(" Client:");
-        sb.append(request.getClient());
-        sb.append('(');
-        sb.append(request.getVersion());
-        sb.append(") Interface:");
-        sb.append(request.getInterface().toString());
-        final Context ctx = result.getContext();
-        if (null != ctx) {
-            sb.append(" Context:");
-            sb.append(ctx.getContextId());
-            sb.append('(');
-            sb.append(Strings.join(ctx.getLoginInfo(), ","));
-            sb.append(')');
-        }
-        final User user = result.getUser();
-        if (null != user) {
-            sb.append(" User:");
-            sb.append(user.getId());
-            sb.append('(');
-            sb.append(user.getLoginInfo());
-            sb.append(')');
-        }
-        final Session session = result.getSession();
-        if (null == session) {
-            sb.append(" No session created.");
+        final LoginFormatter formatter = FORMATTER_REF.get();
+        final StringBuilder sb = new StringBuilder(1024);
+        if (null == formatter) {
+            DefaultLoginFormatter.getInstance().formatLogin(request, result, sb);
         } else {
-            sb.append(" Session:");
-            sb.append(session.getSessionID());
-            sb.append(" Random:");
-            sb.append(session.getRandomToken());
-            sb.append(" Transient:");
-            sb.append(session.isTransient());
+            formatter.formatLogin(request, result, sb);
         }
         LOG.info(sb.toString());
     }
 
     private static void logLogout(final LoginResult result) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("Logout ");
-        final Context ctx = result.getContext();
-        sb.append(" Context:");
-        sb.append(ctx.getContextId());
-        sb.append('(');
-        sb.append(Strings.join(ctx.getLoginInfo(), ","));
-        sb.append(')');
-        final User user = result.getUser();
-        sb.append(" User:");
-        sb.append(user.getId());
-        sb.append('(');
-        sb.append(user.getLoginInfo());
-        sb.append(')');
-        final Session session = result.getSession();
-        sb.append(" Session:");
-        sb.append(session.getSessionID());
+        final LoginFormatter formatter = FORMATTER_REF.get();
+        final StringBuilder sb = new StringBuilder(512);
+        if (null == formatter) {
+            DefaultLoginFormatter.getInstance().formatLogout(result, sb);
+        } else {
+            formatter.formatLogout(result, sb);
+        }
         LOG.info(sb.toString());
     }
 

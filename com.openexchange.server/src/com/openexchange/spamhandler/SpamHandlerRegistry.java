@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -182,16 +182,16 @@ public final class SpamHandlerRegistry {
         }
         final MailProviderGetter mailProviderGetter;
         if (null == mailProvider) {
-            mailProviderGetter = new SessionMailProviderGetter(session, accountId);
+            mailProviderGetter = new SessionMailProviderGetter(mailAccount.getMailProtocol());
         } else {
             mailProviderGetter = new SimpleMailProviderGetter(mailProvider);
         }
         handler = getSpamHandler0(mailAccount, mailProviderGetter);
         //if (!SpamHandler.SPAM_HANDLER_FALLBACK.equals(handler.getSpamHandlerName())) {
-            /*
-             * Cache in session
-             */
-            mailSessionCache.putParameter(accountId, key, handler);
+        /*
+         * Cache in session
+         */
+        mailSessionCache.putParameter(accountId, key, handler);
         //}
         return handler;
     }
@@ -218,8 +218,8 @@ public final class SpamHandlerRegistry {
             /*
              * No spam handler for external accounts
              */
+            LOG.debug("No spam handler for the external account with login {} (user {}) available per design.", mailAccount.getLogin(), mailAccount.getUserId());
             return NoSpamHandler.getInstance();
-            //spamHandlerName = mailAccount.getSpamHandler();
         }
         SpamHandler handler;
         if (null != spamHandlerName && spamHandlerName.length() > 0) {
@@ -357,19 +357,16 @@ public final class SpamHandlerRegistry {
 
     private static final class SessionMailProviderGetter implements MailProviderGetter {
 
-        private final Session session;
+        private final String protocolName;
 
-        private final int accountId;
-
-        public SessionMailProviderGetter(final Session session, final int accountId) {
+        SessionMailProviderGetter(final String protocolName) {
             super();
-            this.session = session;
-            this.accountId = accountId;
+            this.protocolName = protocolName;
         }
 
         @Override
         public MailProvider getMailProvider() throws OXException {
-            return MailProviderRegistry.getMailProviderBySession(session, accountId);
+            return MailProviderRegistry.getRealMailProvider(protocolName);
         }
     }
 
@@ -377,7 +374,7 @@ public final class SpamHandlerRegistry {
 
         private final MailProvider mailProvider;
 
-        public StaticMailProviderGetter(final MailProvider mailProvider) {
+        StaticMailProviderGetter(final MailProvider mailProvider) {
             super();
             this.mailProvider = mailProvider;
         }

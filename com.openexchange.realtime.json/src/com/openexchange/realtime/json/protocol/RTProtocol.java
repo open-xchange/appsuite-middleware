@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -130,6 +130,6 @@ public interface RTProtocol {
      * @param gate The StanzaSequenceGate that has to be reset
      * @param clientState The RTClientState that has to be reset
      */
-    void nextSequence(ID id, int newSequence, StanzaSequenceGate gate, RTClientState clientState);
+    void nextSequence(ID id, int newSequence, StanzaSequenceGate gate, RTClientState clientState) throws RealtimeException;
 
 }

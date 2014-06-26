@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -120,9 +120,25 @@ public final class Create {
     public static FolderObject createPublicFolder(final AJAXClient client,
         final String name, final int module) throws OXException, IOException,
         SAXException, JSONException {
+        return createPublicFolder(client, name, module, true);
+    }
+
+    /**
+     * This method creates a public folder
+     * @param client
+     * @param name
+     * @param module the module (e.g. CONTACT) from FolderObject.java
+     * @param failOnError whether the request will fail if the server returns an error
+     * @return
+     * @throws OXException
+     * @throws IOException
+     * @throws SAXException
+     * @throws JSONException
+     */
+    public static FolderObject createPublicFolder(final AJAXClient client, final String name, final int module, boolean failOnError) throws OXException, IOException, SAXException, JSONException {
         final FolderObject folder = setupPublicFolder(name, module, client.getValues().getUserId());
         folder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
-        final InsertRequest request = new InsertRequest(EnumAPI.OX_OLD, folder);
+        final InsertRequest request = new InsertRequest(EnumAPI.OX_OLD, folder, failOnError);
         final InsertResponse response = client.execute(request);
         response.fillObject(folder);
         return folder;
@@ -132,7 +148,7 @@ public final class Create {
      * This method creates a private folder object. Admin user gets full access
      * permissions.
      * @param name name of the folder.
-     * @param type PIM type of the folder.
+     * @param module PIM module of the folder.
      * @param admin user identifier of the admin.
      * @return a ready to insert folder.
      */

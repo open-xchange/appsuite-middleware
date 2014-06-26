@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -88,7 +88,7 @@ public class ConfigFileStorageAccountImpl extends DefaultFileStorageAccount impl
 
     @Override
     public String toString() {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(256).append(ConfigFileStorageAccountImpl.class.getSimpleName());
+        final StringBuilder sb = new StringBuilder(256).append(ConfigFileStorageAccountImpl.class.getSimpleName());
         sb.append(" ( serviceId=").append(this.serviceId);
         sb.append(", configuration=").append(null == configuration ? "<empty>" : configuration.toString()).append(" )").toString();
         return sb.toString();

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -76,7 +76,7 @@ public final class MessagingFolderIdentifier implements Serializable {
      * @return The fully qualified name
      */
     public static String getFQN(final String serviceId, final int accountId, final String fullname) {
-        return new com.openexchange.java.StringAllocator(64).append(serviceId).append(DELIM).append(accountId).append('/').append(fullname).toString();
+        return new StringBuilder(64).append(serviceId).append(DELIM).append(accountId).append('/').append(fullname).toString();
     }
 
     /**
@@ -164,7 +164,7 @@ public final class MessagingFolderIdentifier implements Serializable {
             }
             fullname = MessagingFolder.ROOT_FULLNAME;
 
-            fqn = new com.openexchange.java.StringAllocator(identifier).append('/').toString();
+            fqn = new StringBuilder(identifier).append('/').toString();
         } else {
             accountId = getUnsignedInteger(identifier.substring(prev, pos));
             if (accountId <= 0) {
@@ -197,7 +197,7 @@ public final class MessagingFolderIdentifier implements Serializable {
         this.serviceId = serviceId;
         this.accountId = accountId;
         this.fullname = fullname;
-        fqn = new com.openexchange.java.StringAllocator(64).append(serviceId).append(DELIM).append(accountId).append('/').append(fullname).toString();
+        fqn = new StringBuilder(64).append(serviceId).append(DELIM).append(accountId).append('/').append(fullname).toString();
         /*
          * Hash code
          */

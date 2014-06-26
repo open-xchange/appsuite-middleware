@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -343,13 +343,17 @@ public final class ConfigJSlobService implements JSlobService {
         for (final Entry<String, Map<String, AttributedProperty>> entry : preferenceItems.entrySet()) {
             final DefaultJSlob jSlob = new DefaultJSlob(new JSONObject());
             jSlob.setId(new JSlobId(SERVICE_ID, entry.getKey(), userId, contextId));
+
+            addConfigTreeToJslob(session, jSlob);
+
             for (final Entry<String, AttributedProperty> entry2 : entry.getValue().entrySet()) {
                 add2JSlob(entry2.getValue(), jSlob, view);
             }
-            addConfigTreeToJslob(session, jSlob);
+
             if (jSlob.getId().getId().equals(CORE)) {
                 coreIncluded = true;
             }
+
             ret.add(jSlob);
         }
         if (!coreIncluded) {
@@ -407,6 +411,9 @@ public final class ConfigJSlobService implements JSlobService {
             }
         }
 
+        // Append config tree settings
+        addConfigTreeToJslob(session, jsonJSlob);
+
         // Append config cascade settings
         final Map<String, AttributedProperty> attributes = preferenceItems.get(id);
         if (null != attributes) {
@@ -415,9 +422,6 @@ public final class ConfigJSlobService implements JSlobService {
                 add2JSlob(attributedProperty, jsonJSlob, view);
             }
         }
-
-        // Append config tree settings
-        addConfigTreeToJslob(session, jsonJSlob);
 
         // Search for shared jslobs and merge them if necessary
         final Map<String, SharedJSlobService> sharedJSlobs = this.sharedJSlobs;
@@ -465,9 +469,11 @@ public final class ConfigJSlobService implements JSlobService {
                     jsonJSlob = new DefaultJSlob(opt);
                 }
             }
-            /*
-             * Fill with config cascade settings
-             */
+
+            // Append config tree settings
+            addConfigTreeToJslob(session, jsonJSlob);
+
+            // Append config cascade settings
             final Map<String, AttributedProperty> attributes = preferenceItems.get(id);
             if (null != attributes) {
                 final ConfigView view = getConfigViewFactory().getView(userId, contextId);
@@ -475,8 +481,6 @@ public final class ConfigJSlobService implements JSlobService {
                     add2JSlob(attributedProperty, jsonJSlob, view);
                 }
             }
-
-            addConfigTreeToJslob(session, jsonJSlob);
 
             ret.add(jsonJSlob);
         }
@@ -547,8 +551,7 @@ public final class ConfigJSlobService implements JSlobService {
                 }
             }
 
-            final JSONObject objectData = jsLob.getJsonObject();
-            jsLob.setJsonObject(JSONUtil.merge(objectData, jObject));
+            jsLob.setJsonObject(JSONUtil.rightMerge(jsLob.getJsonObject(), jObject));
         } catch (final JSONException e) {
             throw JSlobExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException rte) {

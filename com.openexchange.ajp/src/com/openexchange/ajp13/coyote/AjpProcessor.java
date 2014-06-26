@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -77,6 +77,7 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.codec.binary.Base64;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.ajp13.AJPv13Response;
@@ -525,7 +526,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     @Override
     public boolean isLongRunning() {
-        return isEASPingCommand();
+        return isDriveRequest() || isEASPingCommand();
     }
 
     @Override
@@ -830,7 +831,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 } catch (final Throwable t) {
                     // 400 - Bad Request
                     {
-                        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(512);
+                        final StringBuilder sb = new StringBuilder(512);
                         sb.append("400 - Bad Request: Error preparing forward-request: ").append(t.getClass().getName());
                         sb.append(" message=").append(t.getMessage());
                         LOG.warn(sb.toString(), t);
@@ -956,7 +957,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 } catch (final Throwable t) {
                     stage = Stage.STAGE_SERVICE_ENDED;
                     ExceptionUtils.handleThrowable(t);
-                    final com.openexchange.java.StringAllocator tmp = new com.openexchange.java.StringAllocator(128).append("Error processing request: ");
+                    final StringBuilder tmp = new StringBuilder(128).append("Error processing request: ");
                     appendRequestInfo(tmp);
                     LOG.error(tmp.toString(), t);
                     // 500 - Internal Server Error
@@ -985,7 +986,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     error = true;
                 } catch (final Throwable t) {
                     ExceptionUtils.handleThrowable(t);
-                    final com.openexchange.java.StringAllocator tmp = new com.openexchange.java.StringAllocator(128).append("Error processing request: ");
+                    final StringBuilder tmp = new StringBuilder(128).append("Error processing request: ");
                     appendRequestInfo(tmp);
                     LOG.error(tmp.toString(), t);
                     error = true;
@@ -1023,7 +1024,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      *
      * @param builder The builder to append to
      */
-    protected void appendRequestInfo(final com.openexchange.java.StringAllocator builder) {
+    protected void appendRequestInfo(final StringBuilder builder) {
         builder.append("request-URI=''");
         builder.append(request.getRequestURI());
         builder.append("'', query-string=''");
@@ -1250,14 +1251,55 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     private static final String EAS_PING = "Ping";
 
+    private static final int EAS_COMMAND_CODE_PING = 18;
+
     /**
      * Checks for long-running EAS ping command, that is URI is equal to <code>"/Microsoft-Server-ActiveSync"</code> and request's
      * <code>"Cmd"</code> parameter equals <code>"Ping"</code>.
      *
      * @return <code>true</code> if EAS ping command is detected; otherwise <code>false</code>
      */
-    private boolean isEASPingCommand() {
-        return EAS_URI.equals(request.getRequestURI()) && EAS_PING.equals(request.getParameter(EAS_CMD));
+    private final boolean isEASPingCommand() {
+        if (EAS_URI.equals(request.getRequestURI())) {
+            if (EAS_PING.equals(request.getParameter(EAS_CMD))) {
+                return true;
+            }
+
+            /*-
+             * Check for possibly EAS base64-encoded query string
+             *
+             * Second byte reflects EAS command
+             */
+            final byte[] bytes = getBase64Bytes(request.getQueryString());
+            if (null != bytes && bytes.length > 2 && EAS_COMMAND_CODE_PING == bytes[1]) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private final byte[] getBase64Bytes(final String queryString) {
+        if (Strings.isEmpty(queryString)) {
+            return null;
+        }
+
+        try {
+            final byte[] encodedBytes = Charsets.toAsciiBytes(queryString);
+            if (Base64.isBase64(encodedBytes)) {
+                return Base64.decodeBase64(encodedBytes);
+            }
+        } catch (final Exception e) {
+            LOG.warn("Could not check for EAS base64-encoded query string", e);
+        }
+
+        return null;
+    }
+
+    private static final String DRIVE_URI = "/ajax/drive";
+
+    private final boolean isDriveRequest() {
+        return DRIVE_URI.equals(request.getRequestURI());
     }
 
     /**
@@ -1438,8 +1480,12 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 request.setQueryString(queryString);
                 {
                     parseQueryString(queryString);
-                    if (isEASPingCommand()) {
-                        LOG.debug("Incoming long-running EAS ping request.");
+                    if (LOG.isDebugEnabled()) {
+                        if (isEASPingCommand()) {
+                            LOG.debug("Incoming long-running EAS ping request.");
+                        } else if (isDriveRequest()) {
+                            LOG.debug("Incoming long-running OX Drive request.");
+                        }
                     }
                 }
             }
@@ -1901,7 +1947,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         /*
          * Create a new unique id
          */
-        final com.openexchange.java.StringAllocator jsessionIDVal = new com.openexchange.java.StringAllocator(HttpSessionManagement.getNewUniqueId());
+        final StringBuilder jsessionIDVal = new StringBuilder(HttpSessionManagement.getNewUniqueId());
         final String jvmRoute = AJPv13Config.getJvmRoute();
         final String domain = getDomainValue(serverName);
         if ((jvmRoute != null) && (jvmRoute.length() > 0)) {
@@ -2433,7 +2479,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     } // End of class
 
-    private static void appendStackTrace(final StackTraceElement[] trace, final com.openexchange.java.StringAllocator sb, final String lineSeparator) {
+    private static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb, final String lineSeparator) {
         if (null == trace) {
             return;
         }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -71,6 +71,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.OXCloneable;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
@@ -115,8 +116,6 @@ public class FolderObject extends FolderChildObject implements Cloneable {
             return strHelper.getString(FolderStrings.SYSTEM_LDAP_FOLDER_NAME);
         case SYSTEM_OX_FOLDER_ID:
             return strHelper.getString(FolderStrings.SYSTEM_OX_FOLDER_NAME);
-        case SYSTEM_OX_PROJECT_FOLDER_ID:
-            return strHelper.getString(FolderStrings.SYSTEM_OX_PROJECT_FOLDER_NAME);
         case SYSTEM_INFOSTORE_FOLDER_ID:
             return strHelper.getString(FolderStrings.SYSTEM_INFOSTORE_FOLDER_NAME);
         case SYSTEM_USER_INFOSTORE_FOLDER_ID:
@@ -153,8 +152,6 @@ public class FolderObject extends FolderChildObject implements Cloneable {
 
     public static final int SYSTEM_OX_FOLDER_ID = 7;
 
-    public static final int SYSTEM_OX_PROJECT_FOLDER_ID = 8;
-
     public static final int SYSTEM_INFOSTORE_FOLDER_ID = 9;
 
     public static final int SYSTEM_USER_INFOSTORE_FOLDER_ID = 10;
@@ -185,8 +182,6 @@ public class FolderObject extends FolderChildObject implements Cloneable {
     public static final String SYSTEM_LDAP_FOLDER_NAME = "system_ldap";
 
     public static final String SYSTEM_OX_FOLDER_NAME = "user";
-
-    public static final String SYSTEM_OX_PROJECT_FOLDER_NAME = "projects";
 
     public static final String SYSTEM_INFOSTORE_FOLDER_NAME = "infostore";
 
@@ -231,14 +226,14 @@ public class FolderObject extends FolderChildObject implements Cloneable {
     public static final int SUBSCR_SUBFLDS = 315;
 
     public static final int[] ALL_COLUMNS =
-        {
-            // From FolderObject itself
-            FOLDER_NAME, MODULE, TYPE, SUBFOLDERS, OWN_RIGHTS, PERMISSIONS_BITS, SUMMARY, STANDARD_FOLDER, TOTAL, NEW, UNREAD, DELETED,
-            CAPABILITIES, SUBSCRIBED, SUBSCR_SUBFLDS,
-            // From FolderChildObject
-            FOLDER_ID,
-            // From DataObject
-            OBJECT_ID, CREATED_BY, MODIFIED_BY, CREATION_DATE, LAST_MODIFIED, LAST_MODIFIED_UTC };
+    {
+        // From FolderObject itself
+        FOLDER_NAME, MODULE, TYPE, SUBFOLDERS, OWN_RIGHTS, PERMISSIONS_BITS, SUMMARY, STANDARD_FOLDER, TOTAL, NEW, UNREAD, DELETED,
+        CAPABILITIES, SUBSCRIBED, SUBSCR_SUBFLDS,
+        // From FolderChildObject
+        FOLDER_ID,
+        // From DataObject
+        OBJECT_ID, CREATED_BY, MODIFIED_BY, CREATION_DATE, LAST_MODIFIED, LAST_MODIFIED_UTC };
 
     // Modules
     public static final int TASK = 1;
@@ -250,8 +245,6 @@ public class FolderObject extends FolderChildObject implements Cloneable {
     public static final int UNBOUND = 4;
 
     public static final int SYSTEM_MODULE = 5;
-
-    public static final int PROJECT = 6;
 
     public static final int MAIL = 7;
 
@@ -267,6 +260,8 @@ public class FolderObject extends FolderChildObject implements Cloneable {
     public static final int PUBLIC = 2;
 
     public static final int SHARED = 3;
+
+    public static final int TRASH = 16;
 
     public static final int SYSTEM_TYPE = SYSTEM_MODULE; // Formerly 6;
 
@@ -362,7 +357,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
      * @param folderName The folder name
      * @param objectId The object ID
      * @param module The module; {@link #TASK}, {@link #CALENDAR}, {@link #CONTACT} , {@link #UNBOUND}, {@link #SYSTEM_MODULE},
-     *            {@link #PROJECT}, {@link #MAIL}, or {@link #INFOSTORE}
+     *            {@link #MAIL}, or {@link #INFOSTORE}
      * @param type The type; {@link #PRIVATE}, {@link #PUBLIC}, or {@link #SYSTEM_TYPE}
      * @param creator The folder creator
      */
@@ -454,11 +449,11 @@ public class FolderObject extends FolderChildObject implements Cloneable {
     }
 
     /**
-     * Gets the module; either {@link #TASK}, {@link #CALENDAR}, {@link #CONTACT} , {@link #UNBOUND}, {@link #SYSTEM_MODULE},
-     * {@link #PROJECT}, {@link #MAIL}, or {@link #INFOSTORE}
+     * Gets the module; either {@link #TASK}, {@link #CALENDAR}, {@link #CONTACT} , {@link #UNBOUND}, {@link #SYSTEM_MODULE}, {@link #MAIL},
+     * or {@link #INFOSTORE}
      *
      * @return The module; either {@link #TASK}, {@link #CALENDAR}, {@link #CONTACT} , {@link #UNBOUND}, {@link #SYSTEM_MODULE},
-     *         {@link #PROJECT}, {@link #MAIL}, or {@link #INFOSTORE}
+     *         {@link #MAIL}, or {@link #INFOSTORE}
      */
     public int getModule() {
         return module;
@@ -477,7 +472,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
      * Sets the module
      *
      * @param module The module to set; either {@link #TASK}, {@link #CALENDAR}, {@link #CONTACT} , {@link #UNBOUND}, {@link #SYSTEM_MODULE}
-     *            , {@link #PROJECT}, {@link #MAIL}, or {@link #INFOSTORE}
+     *            , {@link #MAIL}, or {@link #INFOSTORE}
      */
     public void setModule(final int module) {
         this.module = module;
@@ -896,13 +891,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            if (iter != null) {
-                try {
-                    iter.close();
-                } catch (final OXException e) {
-                    LOG.error("SearchIterator cannot be closed", e);
-                }
-            }
+            SearchIterators.close(iter);
         }
     }
 
@@ -985,10 +974,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
             }
             return retval;
         } finally {
-            if (iter != null) {
-                iter.close();
-                iter = null;
-            }
+            SearchIterators.close(iter);
         }
     }
 
@@ -1059,10 +1045,6 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         b_fullName = false;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.groupware.container.DataObject#reset()
-     */
     @Override
     public final void reset() {
         super.reset();
@@ -1074,10 +1056,11 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         removeFolderName();
         removeSubfolderFlag();
         removeSubfolderIds();
+        removeFullName();
     }
 
     /**
-     * Fills this folder with all availbable values from given folder and returns itself.
+     * Fills this folder with all available values from given folder and returns itself.
      *
      * @return filled folder
      */

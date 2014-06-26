@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,7 +50,6 @@
 package com.openexchange.caldav.mixins;
 
 import com.openexchange.caldav.CaldavProtocol;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 
@@ -87,18 +86,18 @@ public class SupportedCalendarComponentSets extends SingleXMLPropertyMixin {
     protected String getValue() {
         if (null != this.components) {
 
-            StringAllocator stringAllocator = new StringAllocator("");
+            StringBuilder StringBuilder = new StringBuilder("");
             for (String component : components) {
-                stringAllocator.append("<CAL:supported-calendar-component-set><CAL:comp name=\"")
+                StringBuilder.append("<CAL:supported-calendar-component-set><CAL:comp name=\"")
                     .append(component).append("\"/></CAL:supported-calendar-component-set>");
             }
-            return stringAllocator.toString();
-//            StringAllocator stringAllocator = new StringAllocator("<CAL:supported-calendar-component-set>");
+            return StringBuilder.toString();
+//            StringBuilder StringBuilder = new StringBuilder("<CAL:supported-calendar-component-set>");
 //            for (String component : components) {
-//                stringAllocator.append("<CAL:comp name=\"").append(component).append("\"/>");
+//                StringBuilder.append("<CAL:comp name=\"").append(component).append("\"/>");
 //            }
-//            stringAllocator.append("</CAL:supported-calendar-component-set>");
-//            return stringAllocator.toString();
+//            StringBuilder.append("</CAL:supported-calendar-component-set>");
+//            return StringBuilder.toString();
         }
         return null;
     }

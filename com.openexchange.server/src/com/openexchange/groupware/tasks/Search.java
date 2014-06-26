@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -75,21 +75,21 @@ public class Search {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Search.class);
 
-    private final Context ctx;
+    protected final Context ctx;
 
-    private final User user;
+    protected final User user;
 
-    private final UserPermissionBits permissionBits;
+    protected final UserPermissionBits permissionBits;
 
-    private final TaskSearchObject search;
+    protected final TaskSearchObject search;
 
-    private final int orderBy;
+    protected final int orderBy;
 
-    private final Order order;
+    protected final Order order;
 
-    private final int[] columns;
+    protected final int[] columns;
 
-    private final List<Integer> all = new ArrayList<Integer>(), own = new ArrayList<Integer>(), shared = new ArrayList<Integer>();
+    protected final List<Integer> all = new ArrayList<Integer>(), own = new ArrayList<Integer>(), shared = new ArrayList<Integer>();
 
     public Search(final Context ctx, final User user, final UserPermissionBits permissionBits, final TaskSearchObject search, final int orderBy, final Order order, final int[] columns) {
         super();
@@ -111,7 +111,7 @@ public class Search {
         return TaskStorage.getInstance().search(ctx, getUserId(), search, orderBy, order, columns, all, own, shared);
     }
 
-    private void checkConditions() throws OXException {
+    protected void checkConditions() throws OXException {
         if (SearchObject.NO_PATTERN == search.getPattern()) {
             return;
         }
@@ -124,7 +124,7 @@ public class Search {
         }
     }
 
-    private void prepareFolder() throws OXException, OXException {
+    protected void prepareFolder() throws OXException, OXException {
         SearchIterator<FolderObject> folders;
         if (search.hasFolders()) {
             folders = loadFolder(ctx, search.getFolders());

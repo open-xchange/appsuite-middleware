@@ -11,7 +11,7 @@ import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
-import com.openexchange.control.console.AbstractJMXHandler;
+import com.openexchange.control.consoleold.AbstractJMXHandler;
 
 
 public class JMXHelper extends AbstractJMXHandler {

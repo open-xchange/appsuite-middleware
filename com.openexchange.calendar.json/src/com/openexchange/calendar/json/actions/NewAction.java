@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -66,8 +66,10 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -117,7 +119,11 @@ public final class NewAction extends AppointmentAction {
 
         convertExternalToInternalUsersIfPossible(appointmentObj, session.getContext(), LOG);
 
-        final AppointmentSQLInterface appointmentSql = getService().createAppointmentSql(session);
+        final AppointmentSqlFactoryService factoryService = getService();
+        if (null == factoryService) {
+            throw ServiceExceptionCode.absentService(AppointmentSqlFactoryService.class);
+        }
+        final AppointmentSQLInterface appointmentSql = factoryService.createAppointmentSql(session);
         final Appointment[] conflicts = appointmentSql.insertAppointmentObject(appointmentObj);
 
         final JSONObject jsonResponseObj = new JSONObject();

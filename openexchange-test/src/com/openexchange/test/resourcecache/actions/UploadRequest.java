@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,6 +51,7 @@ package com.openexchange.test.resourcecache.actions;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.framework.Header.SimpleHeader;
@@ -65,12 +66,26 @@ public class UploadRequest extends AbstractResourceCacheRequest<UploadResponse> 
 
     private final List<FileParameter> files = new ArrayList<FileParameter>();
 
+    private final boolean waitForAlignment;
+
+    private String resourceId = null;
+
     public UploadRequest() {
         super("upload");
+        this.waitForAlignment = false;
+    }
+
+    public UploadRequest(boolean waitForAlignment) {
+        super("upload");
+        this.waitForAlignment = waitForAlignment;
     }
 
     public void addFile(String fileName, String mimeType, InputStream is) {
         files.add(new FileParameter("resource_" + files.size(), fileName, is, mimeType));
+    }
+
+    public void setResourceId(String id) {
+        resourceId = id;
     }
 
     @Override
@@ -80,12 +95,14 @@ public class UploadRequest extends AbstractResourceCacheRequest<UploadResponse> 
 
     @Override
     public Parameter[] getAdditionalParameters() {
-        Parameter[] params = new Parameter[files.size()];
-        for (int i = 0; i < files.size(); i++) {
-            params[i] = files.get(i);
+        List<Parameter> allParams = new LinkedList<Parameter>();
+        allParams.addAll(files);
+        allParams.add(new URLParameter("waitForAlignment", Boolean.toString(waitForAlignment)));
+        if (resourceId != null) {
+            allParams.add(new URLParameter("id", resourceId));
         }
 
-        return params;
+        return allParams.toArray(new Parameter[0]);
     }
 
     @Override

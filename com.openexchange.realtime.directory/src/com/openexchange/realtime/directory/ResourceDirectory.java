@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,7 +52,6 @@ package com.openexchange.realtime.directory;
 import java.util.Collection;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.IDEventHandler;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.util.IDMap;
 
@@ -149,26 +148,5 @@ public interface ResourceDirectory {
      * @throws OXException when the Presence lookup fails
      */
     Presence getPresence(ID id) throws OXException;
-    
-    /**
-     * 
-     * {@link Events} is a collection of event constants to be used with {@link ID#trigger(String, Object)} and {@link ID#on(String, IDEventHandler)} 
-     *
-     * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
-     */
-    public static interface Events {
-        /**
-         * Called when an entry in the resource directory is updated
-         */
-        public static final String UPDATE = "update";
-        
-        /**
-         * Called when an entry in the resource directory is added
-         */
-        public static final String ADD = "add";
-        
-        /**
-         * A good event to find out when a resource is removed is ID.Events.DISPOSE
-         */
-    }
+
 }

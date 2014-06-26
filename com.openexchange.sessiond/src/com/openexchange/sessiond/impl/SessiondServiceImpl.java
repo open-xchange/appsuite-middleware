@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -54,8 +54,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
@@ -74,14 +72,11 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessiondServiceImpl.class);
 
-    private final Lock migrateLock;
-
     /**
      * Initializes a new {@link SessiondServiceImpl}.
      */
     public SessiondServiceImpl() {
         super();
-        migrateLock = new ReentrantLock();
     }
 
     @Override
@@ -170,21 +165,9 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
             return null;
         }
         SessionControl sessionControl = SessionHandler.getSession(sessionId, considerSessionStorage);
-        if (null == sessionControl) {
-            // No local/distributed session found. Maybe it should be migrated.
-            // Look for a cached session must be serialized. Multiple threads can reach simultaneously this code part. The first one
-            // migrates the session and the second one will not find a session in the cache.
-            migrateLock.lock();
-            try {
-                // First look again locally. Maybe another thread already migrated the session while this one waits on the lock.
-                sessionControl = SessionHandler.getSession(sessionId, false);
-                if (null == sessionControl) {
-                    // Migrate session.
-                    sessionControl = SessionHandler.getCachedSession(sessionId);
-                }
-            } finally {
-                migrateLock.unlock();
-            }
+        if (!considerSessionStorage && null == sessionControl) {
+            // No local session found. Maybe available in session storage...
+            sessionControl = SessionHandler.getSession(sessionId, false, true);
         }
         if (null == sessionControl) {
             if ("unset".equalsIgnoreCase(sessionId)) {

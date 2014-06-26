@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -68,7 +68,6 @@ import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.management.StanzaSequenceGateMBean;
 import com.openexchange.realtime.management.StanzaSequenceGateManagement;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.IDEventHandler;
 import com.openexchange.realtime.packet.Stanza;
 
 /**
@@ -185,19 +184,7 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
             if (threshold == null) {
                 threshold = new AtomicLong(0);
                 AtomicLong meantime = sequenceNumbers.putIfAbsent(stanza.getSequencePrincipal(), threshold);
-                /*
-                 * Add eventhandler to clean up the traces we left in the gate when the the principal receives the dispose event, e.g when
-                 * all members left the GroupDispatcher(SequencePrincipal)
-                 */
-                if (meantime == null) {
-                    stanza.getSequencePrincipal().on(ID.Events.DISPOSE, new IDEventHandler() {
-
-                        @Override
-                        public void handle(String event, ID id, Object source, Map<String, Object> properties) {
-                            freeResourcesFor(id);
-                        }
-                    });
-                } else {
+                if(meantime != null) {
                     if(LOG.isDebugEnabled()) {
                         LOG.debug("Found another number: " + meantime + "in the meantime for the SequencePrincipal: " + stanza.getSequencePrincipal());
                     }
@@ -255,7 +242,7 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
                 /* Stanzas got out of sync, enqueue until we receive the Stanza matching threshold */
                 if (threshold.get() > stanza.getSequenceNumber()) {
                     stanza.trace("Discarded as this sequence number has already successfully passed this gate: " + stanza.getSequenceNumber());
-                    LOG.debug("Discarded as this sequence number has already successfully passed this gate: {}", stanza.getSequenceNumber());
+                    LOG.debug("Discarded as this sequence number has already successfully passed this gate: {}, {}", stanza.getSequenceNumber(), stanza);
                     return true;
                 }
 
@@ -309,8 +296,9 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
      * Resets the current threshold for the given ID and empties the buffer of Stanzas with now incorrect sequence numbers
      * @param constructedId The ID for that we want to reset the threshold
      * @param newSequence the new sequence number to use
+     * @throws RealtimeException
      */
-    public void resetThreshold(ID constructedId, long newSequence) {
+    public void resetThreshold(ID constructedId, long newSequence) throws RealtimeException {
         constructedId.lock("gate");
         try {
             List<StanzaWithCustomAction> list = inboxes.get(constructedId);
@@ -326,9 +314,7 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
 
 
     public void freeResourcesFor(ID sequencePrincipal) {
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Freeing Ressources for SequencePrincipal: " + sequencePrincipal);
-        }
+        LOG.debug("Freeing Ressources for SequencePrincipal: " + sequencePrincipal);
         sequenceNumbers.remove(sequencePrincipal);
         inboxes.remove(sequencePrincipal);
         notifyManagementSequenceNumbers();

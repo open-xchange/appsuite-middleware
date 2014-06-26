@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -71,7 +71,7 @@ import com.openexchange.subscribe.crawler.internal.LoginStep;
 import com.openexchange.subscribe.crawler.internal.LogoutStep;
 import com.openexchange.subscribe.crawler.internal.NeedsLoginStepString;
 import com.openexchange.subscribe.crawler.internal.Step;
-import com.openexchange.subscribe.crawler.osgi.Activator;
+import com.openexchange.subscribe.crawler.osgi.CrawlersActivator;
 
 /**
  * A crawling workflow. This holds the individual Steps and the session information (WebClient instance).
@@ -90,7 +90,7 @@ public class Workflow {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Workflow.class);
 
-    private Activator activator;
+    private CrawlersActivator activator;
 
     private boolean enableJavascript;
 
@@ -181,7 +181,7 @@ public class Workflow {
                     currentStep.setInput(previousStep.getOutput());
                 }
                 currentStep.setWorkflow(this);
-                LOG.info("Current Step : {}", currentStep.getClass());
+                LOG.debug("Current Step : {}", currentStep.getClass());
                 if (currentStep.isSwitchUserAgent()){
                     crawlerConnection.switchUserAgent();
                 }
@@ -255,11 +255,11 @@ public class Workflow {
         this.useThreadedRefreshHandler = useThreadedRefreshHandler;
     }
 
-    public Activator getActivator() {
+    public CrawlersActivator getActivator() {
         return activator;
     }
 
-    public void setActivator(Activator activator) {
+    public void setActivator(CrawlersActivator activator) {
         this.activator = activator;
     }
 

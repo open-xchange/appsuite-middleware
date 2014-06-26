@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -610,7 +610,10 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
                     LOG.error("Error while shutting down \"{}\" bundle", bundleName, e);
                 }
             }
-            m_context.addBundleListener(listener);
+            // Need to check if the context is still there, because it might be that the bundles stop method was called before and the context is null
+            if (null != this.m_context) {
+                m_context.addBundleListener(listener);
+            }
         }
     }
 

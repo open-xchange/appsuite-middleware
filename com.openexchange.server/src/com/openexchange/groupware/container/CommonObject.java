@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -109,8 +109,6 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
 
     public static final int COLOR_LABEL = 102;
 
-    public static final int NUMBER_OF_LINKS = 103;
-
     public static final int NUMBER_OF_ATTACHMENTS = 104;
 
     public static final int LAST_MODIFIED_OF_NEWEST_ATTACHMENT = 105;
@@ -129,8 +127,6 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
 
     protected Date lastModifiedOfNewestAttachment;
 
-    protected int number_of_links;
-
     protected String categories;
 
     protected boolean privateFlag;
@@ -148,8 +144,6 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
     protected boolean b_number_of_attachments;
 
     protected boolean containsLastModifiedOfNewestAttachment;
-
-    protected boolean b_number_of_links;
 
     protected boolean b_categories;
 
@@ -207,10 +201,6 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
 
     public Date getLastModifiedOfNewestAttachment() {
         return lastModifiedOfNewestAttachment;
-    }
-
-    public int getNumberOfLinks() {
-        return number_of_links;
     }
 
     public boolean getPrivateFlag() {
@@ -319,11 +309,6 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
         containsLastModifiedOfNewestAttachment = true;
     }
 
-    public void setNumberOfLinks(final int number_of_links) {
-        this.number_of_links = number_of_links;
-        b_number_of_links = true;
-    }
-
     public void setPrivateFlag(final boolean privateFlag) {
         this.privateFlag = privateFlag;
         b_private_flag = true;
@@ -370,11 +355,6 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
         containsLastModifiedOfNewestAttachment = false;
     }
 
-    public void removeNumberOfLinks() {
-        number_of_links = 0;
-        b_number_of_links = false;
-    }
-
     public void removePrivateFlag() {
         privateFlag = false;
         b_private_flag = false;
@@ -416,10 +396,6 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
         return containsLastModifiedOfNewestAttachment;
     }
 
-    public boolean containsNumberOfLinks() {
-        return b_number_of_links;
-    }
-
     public boolean containsPrivateFlag() {
         return b_private_flag;
     }
@@ -443,7 +419,6 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
         personal_folder_id = 0;
         number_of_attachments = 0;
         lastModifiedOfNewestAttachment = null;
-        number_of_links = 0;
         categories = null;
         label = 0;
         uid = null;
@@ -453,7 +428,6 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
         b_personal_folder_id = false;
         b_number_of_attachments = false;
         containsLastModifiedOfNewestAttachment = false;
-        b_number_of_links = false;
         b_categories = false;
         bLabel = false;
         b_uid = false;
@@ -489,9 +463,9 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
             differingFields.add(I(LAST_MODIFIED_OF_NEWEST_ATTACHMENT));
         }
 
-        if ((!containsNumberOfLinks() && other.containsNumberOfLinks()) || (containsNumberOfLinks() && other.containsNumberOfLinks() && getNumberOfLinks() != other.getNumberOfLinks())) {
-            differingFields.add(I(NUMBER_OF_LINKS));
-        }
+//        if ((!containsNumberOfLinks() && other.containsNumberOfLinks()) || (containsNumberOfLinks() && other.containsNumberOfLinks() && getNumberOfLinks() != other.getNumberOfLinks())) {
+//            differingFields.add(I(NUMBER_OF_LINKS));
+//        }
 
         if ((!containsPrivateFlag() && other.containsPrivateFlag()) || (containsPrivateFlag() && other.containsPrivateFlag() && getPrivateFlag() != other.getPrivateFlag())) {
             differingFields.add(I(PRIVATE_FLAG));
@@ -517,9 +491,9 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
         case CATEGORIES:
             setCategories((String) value);
             break;
-        case NUMBER_OF_LINKS:
-            setNumberOfLinks(((Integer) value).intValue());
-            break;
+//        case NUMBER_OF_LINKS:
+//            setNumberOfLinks(((Integer) value).intValue());
+//            break;
         case NUMBER_OF_ATTACHMENTS:
             setNumberOfAttachments(((Integer) value).intValue());
             break;
@@ -555,8 +529,8 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
             return I(getLabel());
         case CATEGORIES:
             return getCategories();
-        case NUMBER_OF_LINKS:
-            return I(getNumberOfLinks());
+//        case NUMBER_OF_LINKS:
+//            return I(getNumberOfLinks());
         case NUMBER_OF_ATTACHMENTS:
             return I(getNumberOfAttachments());
         case LAST_MODIFIED_OF_NEWEST_ATTACHMENT:
@@ -582,8 +556,8 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
             return containsLabel();
         case CATEGORIES:
             return containsCategories();
-        case NUMBER_OF_LINKS:
-            return containsNumberOfLinks();
+//        case NUMBER_OF_LINKS:
+//            return containsNumberOfLinks();
         case NUMBER_OF_ATTACHMENTS:
             return containsNumberOfAttachments();
         case LAST_MODIFIED_OF_NEWEST_ATTACHMENT:
@@ -611,9 +585,9 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
         case CATEGORIES:
             removeCategories();
             break;
-        case NUMBER_OF_LINKS:
-            removeNumberOfLinks();
-            break;
+//        case NUMBER_OF_LINKS:
+//            removeNumberOfLinks();
+//            break;
         case NUMBER_OF_ATTACHMENTS:
             removeNumberOfAttachments();
             break;

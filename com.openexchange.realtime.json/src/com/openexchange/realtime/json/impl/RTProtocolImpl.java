@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -86,18 +86,12 @@ public class RTProtocolImpl implements RTProtocol {
         return PROTOCOL.get();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.realtime.atmosphere.protocol.RTProtocol#getReceived(com.openexchange.realtime.atmosphere.protocol.RTClientState, com.openexchange.realtime.atmosphere.protocol.StanzaTransmitter)
-     */
     @Override
     public void getReceived(RTClientState state, StanzaTransmitter transmitter) {
         LOG.debug("Get received from {}", state.getId());
         emptyBuffer(state, transmitter);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.realtime.atmosphere.protocol.RTProtocol#ping(com.openexchange.realtime.packet.ID, boolean, com.openexchange.realtime.atmosphere.protocol.RTClientState, com.openexchange.realtime.atmosphere.protocol.StanzaTransmitter)
-     */
     @Override
     public void ping(ID from, boolean commit, RTClientState state, StanzaTransmitter transmitter) {
         try {
@@ -111,17 +105,11 @@ public class RTProtocolImpl implements RTProtocol {
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.realtime.atmosphere.protocol.RTProtocol#acknowledgementReceived(long, com.openexchange.realtime.atmosphere.protocol.RTClientState)
-     */
     @Override
     public void acknowledgementReceived(long seq, RTClientState state) {
         state.acknowledgementReceived(seq);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.realtime.atmosphere.protocol.RTProtocol#send(com.openexchange.realtime.packet.Stanza, com.openexchange.realtime.atmosphere.protocol.RTClientState, com.openexchange.realtime.atmosphere.protocol.StanzaTransmitter)
-     */
     @Override
     public void send(Stanza stanza, RTClientState state, StanzaTransmitter transmitter) {
         try {
@@ -133,9 +121,6 @@ public class RTProtocolImpl implements RTProtocol {
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.realtime.atmosphere.protocol.RTProtocol#receivedMessage(com.openexchange.realtime.packet.Stanza, com.openexchange.realtime.util.StanzaSequenceGate, com.openexchange.realtime.atmosphere.protocol.RTClientState, boolean, com.openexchange.realtime.atmosphere.protocol.StanzaTransmitter)
-     */
     @Override
     public void receivedMessage(Stanza stanza, StanzaSequenceGate gate, RTClientState state, boolean newState, StanzaTransmitter transmitter) throws RealtimeException {
         try {
@@ -164,14 +149,11 @@ public class RTProtocolImpl implements RTProtocol {
     }
 
     @Override
-    public void nextSequence(ID constructedId, int newSequence, StanzaSequenceGate gate, RTClientState clientState) {
+    public void nextSequence(ID constructedId, int newSequence, StanzaSequenceGate gate, RTClientState clientState) throws RealtimeException {
         gate.resetThreshold(constructedId, newSequence);
         clientState.reset();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.realtime.atmosphere.protocol.RTProtocol#receivedMessage(com.openexchange.realtime.packet.Stanza, com.openexchange.realtime.util.StanzaSequenceGate, com.openexchange.realtime.atmosphere.protocol.RTClientState, boolean, com.openexchange.realtime.atmosphere.protocol.StanzaTransmitter)
-     */
     @Override
     public void receivedMessage(Stanza stanza, StanzaSequenceGate gate, RTClientState state, boolean newState, StanzaTransmitter transmitter, List<Long> acknowledgements) throws RealtimeException {
         try {
@@ -193,9 +175,6 @@ public class RTProtocolImpl implements RTProtocol {
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.realtime.atmosphere.protocol.RTProtocol#emptyBuffer(com.openexchange.realtime.atmosphere.protocol.RTClientState, com.openexchange.realtime.atmosphere.protocol.StanzaTransmitter)
-     */
     @Override
     public void emptyBuffer(RTClientState state, StanzaTransmitter transmitter) {
         if (transmitter == null) {

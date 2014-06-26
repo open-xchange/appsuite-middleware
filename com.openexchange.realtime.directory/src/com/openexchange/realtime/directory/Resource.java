@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -55,21 +55,21 @@ import com.openexchange.realtime.packet.Presence;
 
 /**
  * {@link Resource} - Combines Presence and RoutingInfo.
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface Resource extends Serializable {
 
     /**
      * Gets the presence information.
-     * 
+     *
      * @return null or the associated Presence Stanza
      */
     Presence getPresence();
 
     /**
      * Sets the presence information
-     * 
+     *
      * @param presence the Presence Stanza to set
      */
     void setPresence(Presence presence);
@@ -77,28 +77,28 @@ public interface Resource extends Serializable {
     /**
      * Gets internal routing information inside the server, e.g. to specify a node in a cluster member the resource is physically connected
      * to.
-     * 
+     *
      * @return The routing information
      */
-    Serializable getRoutingInfo();
+    Object getRoutingInfo();
 
     /**
      * Sets the routing information
-     * 
+     *
      * @param routingInfo The routing information to set
      */
-    void setRoutingInfo(Serializable routingInfo);
+    void setRoutingInfo(Object routingInfo);
 
     /**
      * Gets the time the resource was last updated or created
-     * 
+     *
      * @return The timestamp
      */
     Date getTimestamp();
 
     /**
      * Sets the timestamp
-     * 
+     *
      * @param timestamp The timestamp to set
      */
     void setTimestamp(Date timestamp);

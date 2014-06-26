@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -81,7 +81,7 @@ public class Bug6335Test extends AbstractTaskTest {
         task.setParentFolderID(client.getValues().getPrivateTaskFolder());
         final InsertResponse iResponse = client.execute(new InsertRequest(task, client.getValues().getTimeZone(), false));
         assertTrue("Invalid character was not detected.", iResponse.hasError());
-        OXException expected = TaskExceptionCode.INVALID_DATA.create();
+        OXException expected = TaskExceptionCode.INVALID_DATA.create("foo");
         final OXException actual = iResponse.getException();
         assertTrue("Wrong exception", actual.similarTo(expected));
     }

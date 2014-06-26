@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -71,7 +71,6 @@ import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.formats.vcard.VCardFileToken;
 import com.openexchange.importexport.formats.vcard.VCardTokenizer;
 import com.openexchange.java.Charsets;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.EffectivePermission;
@@ -263,7 +262,7 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
     }
 
     private String generateErrorMessage(final Exception e, final String vcard) {
-        final StringAllocator sb = new StringAllocator(null != vcard ? 8192 : 128);
+        final StringBuilder sb = new StringBuilder(null != vcard ? 8192 : 128);
         sb.append("Cannot parse contact object: ").append(e.getMessage());
         if (null != vcard) {
             final String sep = Strings.getLineSeparator();

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,6 +52,12 @@ package com.openexchange.groupware.infostore.database.impl;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.Map;
+import org.json.JSONException;
+import org.json.JSONInputStream;
+import org.json.JSONObject;
+import org.json.JSONValue;
+import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.database.tx.AbstractDBAction;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.utils.GetSwitch;
@@ -76,30 +82,52 @@ public abstract class AbstractInfostoreAction extends AbstractDBAction {
      * @return The updated parameter index
      * @throws SQLException
      */
-    protected final int fillStmt(int parameterIndex, final PreparedStatement stmt, final Metadata[] fields, final DocumentMetadata doc, final Object...additional) throws SQLException {
+    protected final int fillStmt(final int parameterIndex, final PreparedStatement stmt, final Metadata[] fields, final DocumentMetadata doc, final Object...additional) throws SQLException {
         final GetSwitch get = new GetSwitch(doc);
+        int index = parameterIndex;
         for(final Metadata m : fields) {
-            stmt.setObject(parameterIndex++, process(m, m.doSwitch(get)));
+            if (Metadata.META_LITERAL.getId() == m.getId()) {
+                setMeta(index++, stmt, doc);
+            } else {
+                stmt.setObject(index++, process(m, m.doSwitch(get)));
+            }
         }
-
         for(final Object o : additional) {
-            stmt.setObject(parameterIndex++, o);
+            stmt.setObject(index++, o);
         }
-        return parameterIndex;
+        return index;
     }
 
-	private final Object process(final Metadata field, final Object value) {
-		switch(field.getId()) {
-		default : return value;
-		    case Metadata.CREATION_DATE:
-		    case Metadata.LOCKED_UNTIL :
-		    case Metadata.LAST_MODIFIED_UTC:
-		    	return Long.valueOf(((Date)value).getTime());
-		    case Metadata.LAST_MODIFIED:
-		    	return (value != null) ?  Long.valueOf(((Date)value).getTime()) : Long.valueOf(System.currentTimeMillis());
+    private final Object process(final Metadata field, final Object value) {
+        switch (field.getId()) {
+        default:
+            return value;
+        case Metadata.CREATION_DATE:
+        case Metadata.LOCKED_UNTIL:
+        case Metadata.LAST_MODIFIED_UTC:
+            return Long.valueOf(((Date) value).getTime());
+        case Metadata.LAST_MODIFIED:
+            return (value != null) ? Long.valueOf(((Date) value).getTime()) : Long.valueOf(System.currentTimeMillis());
+        }
+    }
 
-		}
-	}
+    private final void setMeta(int parameterIndex, final PreparedStatement stmt, final DocumentMetadata doc) throws SQLException {
+        final Map<String, Object> meta = doc.getMeta();
+        if (null == meta || meta.isEmpty()) {
+            stmt.setNull(parameterIndex, java.sql.Types.BLOB); // meta
+        } else {
+            try {
+                final Object coerced = JSONCoercion.coerceToJSON(meta);
+                if (null == coerced || JSONObject.NULL.equals(coerced)) {
+                    stmt.setNull(parameterIndex, java.sql.Types.BLOB); // meta
+                } else {
+                    stmt.setBinaryStream(parameterIndex, new JSONInputStream((JSONValue) coerced, "US-ASCII")); // meta
+                }
+            } catch (final JSONException e) {
+                throw new SQLException("Meta information could not be coerced to a JSON equivalent.", e);
+            }
+        }
+    }
 
 	public void setQueryCatalog(final InfostoreQueryCatalog queries){
 		this.queries = queries;

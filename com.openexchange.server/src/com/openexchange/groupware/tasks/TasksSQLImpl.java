@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -67,6 +67,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 /**
  * This class implements the methods needed by the tasks interface of the API version 2.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a> (findTask method)
  */
 public class TasksSQLImpl implements TasksSQLInterface {
 
@@ -316,5 +317,17 @@ public class TasksSQLImpl implements TasksSQLInterface {
         boolean onlyOwn = Permission.canReadInFolder(ctx, user, permissionBits, folder);
         boolean isShared = FolderObject.SHARED == folder.getType(userId);
         return TaskStorage.getInstance().countTasks(ctx, userId, folder.getObjectID(), onlyOwn, isShared);
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.api2.TasksSQLInterface#findTask(com.openexchange.groupware.search.TaskSearchObject, int, com.openexchange.groupware.search.Order, int[])
+     */
+    @Override
+    public SearchIterator<Task> findTask(TaskSearchObject searchObj, int orderBy, Order order, int[] cols) throws OXException {
+        final Context ctx = Tools.getContext(session.getContextId());
+        final int userID = session.getUserId();
+        final User user = Tools.getUser(ctx, userID);
+        final UserPermissionBits upb = Tools.getUserPermissionBits(ctx, userID);
+        return new FindTask(ctx, user, upb, searchObj, orderBy, order, cols).perform();
     }
 }

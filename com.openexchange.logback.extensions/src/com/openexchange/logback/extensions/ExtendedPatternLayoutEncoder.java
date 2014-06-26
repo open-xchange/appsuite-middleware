@@ -61,13 +61,28 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 public class ExtendedPatternLayoutEncoder extends PatternLayoutEncoder {
 
     /**
+     * Key for lmdc
+     */
+    public static final String LMDC = "lmdc";
+
+    /**
+     * Key for ereplace
+     */
+    public static final String EREPLACE = "ereplace";
+
+    /**
+     * Key for tid
+     */
+    public static final String TID = "tid";
+
+    /**
      * Initializes a new {@link ExtendedPatternLayoutEncoder}.
      */
     public ExtendedPatternLayoutEncoder() {
         super();
-        PatternLayout.defaultConverterMap.put("lmdc", LineMDCConverter.class.getName());
-        PatternLayout.defaultConverterMap.put("ereplace", ExtendedReplacingCompositeConverter.class.getName());
-        PatternLayout.defaultConverterMap.put("tid", ThreadIdConverter.class.getName());
+        PatternLayout.defaultConverterMap.put(LMDC, LineMDCConverter.class.getName());
+        PatternLayout.defaultConverterMap.put(EREPLACE, ExtendedReplacingCompositeConverter.class.getName());
+        PatternLayout.defaultConverterMap.put(TID, ThreadIdConverter.class.getName());
     }
 
 }

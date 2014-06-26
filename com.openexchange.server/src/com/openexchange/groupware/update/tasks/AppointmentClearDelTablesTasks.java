@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -63,7 +63,6 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -123,14 +122,14 @@ public final class AppointmentClearDelTablesTasks extends UpdateTaskAdapter {
             "intfield08", "field01", "field02", "field04", "field06", "field07", "field08", "field09", "organizer", "sequence",
             "organizerId", "principal", "principalId"
         };
-        StringAllocator stringAllocator = new StringAllocator("UPDATE del_dates SET ").append(columsToClear[0]).append("=NULL");
+        StringBuilder StringBuilder = new StringBuilder("UPDATE del_dates SET ").append(columsToClear[0]).append("=NULL");
         for (int i = 1; i < columsToClear.length; i++) {
-            stringAllocator.append(',').append(columsToClear[i]).append("=NULL");
+            StringBuilder.append(',').append(columsToClear[i]).append("=NULL");
         }
-        stringAllocator.append(';');
+        StringBuilder.append(';');
         PreparedStatement statement = null;
         try {
-            statement = connection.prepareStatement(stringAllocator.toString());
+            statement = connection.prepareStatement(StringBuilder.toString());
             return statement.executeUpdate();
         } finally {
             DBUtils.closeSQLStuff(statement);

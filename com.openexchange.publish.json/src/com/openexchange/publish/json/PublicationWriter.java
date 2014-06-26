@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,13 +49,13 @@
 
 package com.openexchange.publish.json;
 
+import static com.openexchange.publish.json.FieldNames.CREATED;
 import static com.openexchange.publish.json.FieldNames.DISPLAYNAME;
 import static com.openexchange.publish.json.FieldNames.ENABLED;
 import static com.openexchange.publish.json.FieldNames.ENTITY;
 import static com.openexchange.publish.json.FieldNames.ENTITY_MODULE;
 import static com.openexchange.publish.json.FieldNames.ID;
 import static com.openexchange.publish.json.FieldNames.TARGET;
-import static com.openexchange.publish.json.FieldNames.CREATED;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
@@ -84,10 +84,17 @@ public class PublicationWriter {
 
     private final Map<String, EntityType> entityTypes = new EntityMap();
 
+    /**
+     * Initializes a new {@link PublicationWriter}.
+     */
     public PublicationWriter() {
+        super();
     }
 
     public JSONObject write(Publication publication, String urlPrefix, TimeZone tz) throws JSONException, OXException {
+        if (null == publication) {
+            return null;
+        }
         JSONObject object = new JSONObject();
         object.put(ID, publication.getId());
         object.put(ENTITY, writeEntity(publication));

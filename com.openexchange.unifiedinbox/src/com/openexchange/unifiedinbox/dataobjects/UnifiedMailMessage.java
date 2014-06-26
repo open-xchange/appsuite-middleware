@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -126,6 +126,66 @@ public final class UnifiedMailMessage extends MailMessage implements Delegatized
     @Override
     public String getMailId() {
         return mailId == null ? delegatee.getMailId() : mailId;
+    }
+
+    @Override
+    public void setHeader(final String name, final String value) {
+        delegatee.setHeader(name, value);
+    }
+
+    @Override
+    public MailPath getMailPath() {
+        return delegatee.getMailPath();
+    }
+
+    @Override
+    public String getMessageId() {
+        return delegatee.getMessageId();
+    }
+
+    @Override
+    public boolean containsMessageId() {
+        return delegatee.containsMessageId();
+    }
+
+    @Override
+    public void removeMessageId() {
+        delegatee.removeMessageId();
+    }
+
+    @Override
+    public void setMessageId(final String messageId) {
+        delegatee.setMessageId(messageId);
+    }
+
+    @Override
+    public String getInReplyTo() {
+        return delegatee.getInReplyTo();
+    }
+
+    @Override
+    public String[] getReferences() {
+        return delegatee.getReferences();
+    }
+
+    @Override
+    public boolean containsReferences() {
+        return delegatee.containsReferences();
+    }
+
+    @Override
+    public void removeReferences() {
+        delegatee.removeReferences();
+    }
+
+    @Override
+    public void setReferences(final String sReferences) {
+        delegatee.setReferences(sReferences);
+    }
+
+    @Override
+    public void setReferences(final String[] references) {
+        delegatee.setReferences(references);
     }
 
     @Override
@@ -921,7 +981,7 @@ public final class UnifiedMailMessage extends MailMessage implements Delegatized
     @Override
     public int getUnreadMessages() {
         final Integer unreadCount = this.unreadCount;
-        return null == unreadCount ? -1 : unreadCount.intValue(); //delegatee.getUnreadMessages();
+        return null == unreadCount ? -1 : unreadCount.intValue(); // delegatee.getUnreadMessages();
     }
 
     @Override

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -143,7 +143,7 @@ public class HumanReadableRecurrences {
             return format(locale, HRRStrings.DAY);
         }
 
-        com.openexchange.java.StringAllocator days = new com.openexchange.java.StringAllocator();
+        StringBuilder days = new StringBuilder();
 
         if ((cdao.getDays() & CalendarObject.MONDAY) == CalendarObject.MONDAY) {
             days.append(format(locale, HRRStrings.MONDAY)).append(", ");

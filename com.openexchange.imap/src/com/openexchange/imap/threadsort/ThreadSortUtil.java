@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -62,7 +62,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.MessagingException;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.ThreadSortMailMessage;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
@@ -228,7 +227,7 @@ public final class ThreadSortUtil {
      */
     public static ExtendedMimeMessage[] getMessagesFromThreadResponse(final String folderFullname, final char separator, final String threadResponse) {
         final List<ExtendedMimeMessage> tmp = new ArrayList<ExtendedMimeMessage>();
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(8);
+        final StringBuilder sb = new StringBuilder(8);
         final int length = threadResponse.length();
         int i = 0;
         while (i < length) {
@@ -239,7 +238,7 @@ public final class ThreadSortUtil {
             }
             if (sb.length() > 0) {
                 tmp.add(new ExtendedMimeMessage(folderFullname, separator, Integer.parseInt(sb.toString())));
-                sb.reinitTo(0);
+                sb.setLength(0);
             }
         }
         return tmp.toArray(new ExtendedMimeMessage[tmp.size()]);
@@ -296,7 +295,7 @@ public final class ThreadSortUtil {
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
                 final Response[] r;
                 {
-                    final String command = new StringAllocator("THREAD REFERENCES UTF-8 ").append(sortRange).toString();
+                    final String command = new StringBuilder("THREAD REFERENCES UTF-8 ").append(sortRange).toString();
                     final long start = System.currentTimeMillis();
                     r = p.command(command, null);
                     final long dur = System.currentTimeMillis() - start;
@@ -319,10 +318,10 @@ public final class ThreadSortUtil {
                     }
                     p.notifyResponseHandlers(r);
                 } else if (response.isBAD()) {
-                    throw new ProtocolException(new StringAllocator("IMAP server does not support THREAD command: ").append(
+                    throw new ProtocolException(new StringBuilder("IMAP server does not support THREAD command: ").append(
                         response.toString()).toString());
                 } else if (response.isNO()) {
-                    throw new ProtocolException(new StringAllocator("IMAP server does not support THREAD command: ").append(
+                    throw new ProtocolException(new StringBuilder("IMAP server does not support THREAD command: ").append(
                         response.toString()).toString());
                 } else {
                     p.handleResult(response);
@@ -338,10 +337,10 @@ public final class ThreadSortUtil {
     static String toUnifiedThreadResponse(final String resp) {
         final Matcher matcher = PATTERN_NUM.matcher(resp);
         final StringBuffer sb = new StringBuffer(resp.length() << 1);
-        final com.openexchange.java.StringAllocator tmp = new com.openexchange.java.StringAllocator(8);
+        final StringBuilder tmp = new StringBuilder(8);
         while (matcher.find()) {
             if (tmp.length() > 0) {
-                tmp.reinitTo(0);
+                tmp.setLength(0);
             }
             matcher.appendReplacement(sb, tmp.append('{').append(matcher.group()).append('}').toString());
         }

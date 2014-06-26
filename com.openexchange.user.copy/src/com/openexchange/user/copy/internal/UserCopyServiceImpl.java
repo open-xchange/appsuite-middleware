@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -78,16 +78,20 @@ public final class UserCopyServiceImpl implements UserCopyService {
         super();
     }
 
+    @Override
     public int copyUser(final int srcCtxId, final int dstCtxId, final int userId) throws OXException {
         final List<CopyUserTaskService> toExecute = new CopyTaskSorter().sort(tasks);
         final Map<String, ObjectMapping<?>> copied = new HashMap<String, ObjectMapping<?>>();
         copied.put(Constants.CONTEXT_ID_KEY, new ObjectMapping<Integer>() {
+            @Override
             public Integer getSource(final int id) {
                 return I(srcCtxId);
             }
+            @Override
             public Integer getDestination(final Integer source) {
                 return I(dstCtxId);
             }
+            @Override
             public Set<Integer> getSourceKeys() {
                 final Set<Integer> keySet = new HashSet<Integer>(1);
                 keySet.add(I(srcCtxId));
@@ -96,12 +100,15 @@ public final class UserCopyServiceImpl implements UserCopyService {
             }});
 
         copied.put(Constants.USER_ID_KEY, new ObjectMapping<Integer>() {
+            @Override
             public Integer getSource(final int id) {
                 return I(userId);
             }
+            @Override
             public Integer getDestination(final Integer source) {
                 return null;
             }
+            @Override
             public Set<Integer> getSourceKeys() {
                 final Set<Integer> keySet = new HashSet<Integer>(1);
                 keySet.add(I(userId));

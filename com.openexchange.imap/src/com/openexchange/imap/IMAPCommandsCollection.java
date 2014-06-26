@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -98,7 +98,6 @@ import com.openexchange.imap.sort.IMAPSort;
 import com.openexchange.imap.util.IMAPUpdateableData;
 import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.java.Charsets;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
@@ -179,7 +178,7 @@ public final class IMAPCommandsCollection {
 
         @Override
         public String toString() {
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(set.size() * 8);
+            final StringBuilder sb = new StringBuilder(set.size() * 8);
             for (final String cap : set) {
                 sb.append(' ').append(cap);
             }
@@ -231,18 +230,19 @@ public final class IMAPCommandsCollection {
                 /*
                  * Encode the mbox as per RFC2060
                  */
-                final String fname = new StringAllocator("probe").append(UUIDs.getUnformattedString(UUID.randomUUID())).toString();
+                final String fname = new StringBuilder("probe").append(UUIDs.getUnformattedString(UUID.randomUUID())).toString();
                 final String mboxName = prepareStringArgument(fname);
-                LOG.debug("Trying to probe IMAP server {} for root subfolder capability with mbox name: {}", p.getHost(), mboxName);
+                final String login = ((IMAPStore) rootFolder.getStore()).getUser();
+                LOG.debug("Trying to probe IMAP server {} on behalf of {} for root subfolder capability with mbox name: {}", p.getHost(), login, mboxName);
                 /*
                  * Perform command: CREATE
                  */
-                final StringAllocator sb = new StringAllocator(7 + mboxName.length());
+                final StringBuilder sb = new StringBuilder(7 + mboxName.length());
                 final Response[] r = performCommand(p, sb.append("CREATE ").append(mboxName).toString());
                 final Response response = r[r.length - 1];
                 if (response.isOK()) {
                     // Well, CREATE command succeeded. Is folder really on root level...?
-                    sb.reinitTo(0);
+                    sb.setLength(0);
                     boolean retval = true;
                     // Query the folder
                     final ListInfo[] li = p.list("", sb.append("*").append(mboxName).append("*").toString());
@@ -254,15 +254,15 @@ public final class IMAPCommandsCollection {
                             }
                         }
                         if (!found) {
-                            LOG.info("Probe of IMAP server {} for root subfolder capability with mbox name {} failed as test folder was not created at expected position. Thus assuming no root subfolder capability", p.getHost(), mboxName);
+                            LOG.info("Probe of IMAP server {} on behalf of {} for root subfolder capability with mbox name {} failed as test folder was not created at expected position. Thus assuming no root subfolder capability", p.getHost(), login, mboxName);
                         }
                         retval = found;
                     }
                     // Delete probe folder and return
-                    sb.reinitTo(0);
+                    sb.setLength(0);
                     performCommand(p, sb.append("DELETE ").append(mboxName).toString());
                     if (retval) {
-                        LOG.info("Probe of IMAP server {} for root subfolder capability with mbox name {} succeeded. Thus assuming root subfolder capability", p.getHost(), mboxName);
+                        LOG.info("Probe of IMAP server {} on behalf of {} for root subfolder capability with mbox name {} succeeded. Thus assuming root subfolder capability", p.getHost(), login, mboxName);
                     }
                     return Boolean.valueOf(retval);
                 }
@@ -272,7 +272,7 @@ public final class IMAPCommandsCollection {
                         // Creating folder failed due to a exceeded quota exception. Thus assume "true".
                         return Boolean.TRUE;
                     }
-                    LOG.info("Probe of IMAP server {} for root subfolder capability with mbox name {} failed (\"NO {}\"). Thus assuming no root subfolder capability", p.getHost(), mboxName, rest);
+                    LOG.info("Probe of IMAP server {} on behalf of {} for root subfolder capability with mbox name {} failed (\"NO {}\"). Thus assuming no root subfolder capability", p.getHost(), login, mboxName, rest);
                 }
                 return Boolean.FALSE;
             }
@@ -304,7 +304,7 @@ public final class IMAPCommandsCollection {
                 if (null == fullnamePrefix || fullnamePrefix.length() == 0) {
                     fullName = Long.toString(System.currentTimeMillis());
                 } else {
-                    fullName = new StringAllocator(64).append(fullnamePrefix).append(Long.toString(System.currentTimeMillis())).toString();
+                    fullName = new StringBuilder(64).append(fullnamePrefix).append(Long.toString(System.currentTimeMillis())).toString();
                 }
                 try {
                     Boolean retval = Boolean.TRUE;
@@ -397,16 +397,16 @@ public final class IMAPCommandsCollection {
                  * Encode the mbox as per RFC2060
                  */
                 final String now = Long.toString(System.currentTimeMillis());
-                final StringAllocator sb = new StringAllocator(now.length() + prefix.length() + 16);
+                final StringBuilder sb = new StringBuilder(now.length() + prefix.length() + 16);
                 final String mboxName = prepareStringArgument(sb.append(prefix).append(now).toString());
                 /*
                  * Perform command: CREATE
                  */
-                sb.reinitTo(0);
+                sb.setLength(0);
                 final Response[] r = performCommand(p, sb.append("CREATE ").append(mboxName).toString());
                 final Response response = r[r.length - 1];
                 if (response.isOK()) {
-                    sb.reinitTo(0);
+                    sb.setLength(0);
                     performCommand(p, sb.append("DELETE ").append(mboxName).toString());
                     return Boolean.TRUE;
                 }
@@ -946,6 +946,7 @@ public final class IMAPCommandsCollection {
      * @throws MessagingException If determining counts fails
      */
     public static int[] getTotalAndUnread(final IMAPStore imapStore, final String fullName) throws MessagingException {
+        // TODO: Main method for acquiring STATUS information
         final DefaultFolder defaultFolder = (DefaultFolder) imapStore.getDefaultFolder();
         return ((int[]) defaultFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
@@ -1311,7 +1312,7 @@ public final class IMAPCommandsCollection {
 
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                final Response[] r = performCommand(p, new StringAllocator().append(COMMAND_LSUB).append(" \"\" ").append(prepareStringArgument(lfolder)).toString());
+                final Response[] r = performCommand(p, new StringBuilder().append(COMMAND_LSUB).append(" \"\" ").append(prepareStringArgument(lfolder)).toString());
                 final Response response = r[r.length - 1];
                 if (response.isOK()) {
                     int res = -1;
@@ -1356,7 +1357,7 @@ public final class IMAPCommandsCollection {
                 final String original = prepareStringArgument(folder.getFullName());
                 final String newName = prepareStringArgument(renameFullname);
                 // Create command
-                final String command = new StringAllocator(32).append("RENAME ").append(original).append(' ').append(newName).toString();
+                final String command = new StringBuilder(32).append("RENAME ").append(original).append(' ').append(newName).toString();
                 // Issue command
                 final Response[] r = performCommand(protocol, command);
                 final Response response = r[r.length - 1];
@@ -1374,7 +1375,7 @@ public final class IMAPCommandsCollection {
         });
         if (null == ret) {
             final ProtocolException pex =
-                new ProtocolException(new StringAllocator(64).append("IMAP folder \"").append(folder.getFullName()).append(
+                new ProtocolException(new StringBuilder(64).append("IMAP folder \"").append(folder.getFullName()).append(
                     "\" cannot be renamed.").toString());
             throw new MessagingException(pex.getMessage(), pex);
         }
@@ -1419,7 +1420,7 @@ public final class IMAPCommandsCollection {
                 // Create command
                 final String command;
                 {
-                    final StringAllocator cmdBuilder = new StringAllocator(32).append("CREATE ").append(mbox);
+                    final StringBuilder cmdBuilder = new StringBuilder(32).append("CREATE ").append(mbox);
                     if (null != specialUses && !specialUses.isEmpty()) {
                         cmdBuilder.append(" (USE (");
                         final Iterator<String> iterator = specialUses.iterator();
@@ -1442,7 +1443,7 @@ public final class IMAPCommandsCollection {
                         final ListInfo[] li = protocol.list("", fullName);
                         if (errorOnUnsupportedType && li != null && !li[0].hasInferiors) {
                             protocol.delete(fullName);
-                            throw new ProtocolException(new StringAllocator(32).append("Created IMAP folder \"").append(fullName).append(
+                            throw new ProtocolException(new StringBuilder(32).append("Created IMAP folder \"").append(fullName).append(
                                 "\" (").append(newFolder.getStore().toString()).append(") should hold folders AND messages, but can only hold messages.").toString());
                         }
                     }
@@ -1468,7 +1469,7 @@ public final class IMAPCommandsCollection {
         });
         if (null == ret) {
             final ProtocolException pex =
-                new ProtocolException(new StringAllocator(64).append("IMAP folder \"").append(newFolder.getFullName()).append(
+                new ProtocolException(new StringBuilder(64).append("IMAP folder \"").append(newFolder.getFullName()).append(
                     "\" (").append(newFolder.getStore().toString()).append(") cannot be created.").toString());
             throw new MessagingException(pex.getMessage(), pex);
         }
@@ -1500,7 +1501,7 @@ public final class IMAPCommandsCollection {
                 // Create command
                 final String command;
                 {
-                    final StringAllocator cmdBuilder = new StringAllocator(32).append("SETMETADATA ").append(mbox);
+                    final StringBuilder cmdBuilder = new StringBuilder(32).append("SETMETADATA ").append(mbox);
                     cmdBuilder.append("(");
                     for (final String specialUse : specialUses) {
                         if (specialUse.charAt(0) == '\\') {
@@ -1584,7 +1585,7 @@ public final class IMAPCommandsCollection {
      * @return <code>true</code> if everything went fine; otherwise <code>false</code>
      * @throws MessagingException - if an error occurs in underlying protocol
      */
-    public static boolean clearAllColorLabels(final IMAPFolder imapFolder, final long[] msgUIDs) throws MessagingException {
+    private static boolean clearAllColorLabels(final IMAPFolder imapFolder, final long[] msgUIDs) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             /*
@@ -1608,6 +1609,7 @@ public final class IMAPCommandsCollection {
                 Response[] r = null;
                 Response response = null;
                 Next: for (int i = 0; i < args.length; i++) {
+
                     final String command = String.format(format, args[i], "-", ALL_COLOR_LABELS);
                     r = performCommand(p, command);
                     response = r[r.length - 1];
@@ -1643,7 +1645,7 @@ public final class IMAPCommandsCollection {
      * @return <code>true</code> if everything went fine; otherwise <code>false</code>
      * @throws MessagingException - if an error occurs in underlying protocol
      */
-    public static boolean setColorLabel(final IMAPFolder imapFolder, final long[] msgUIDs, final String colorLabelFlag) throws MessagingException {
+    private static boolean setColorLabel(final IMAPFolder imapFolder, final long[] msgUIDs, final String colorLabelFlag) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             /*
@@ -1762,7 +1764,7 @@ public final class IMAPCommandsCollection {
 
                 @Override
                 public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-                    final Response[] r = performCommand(protocol, new StringAllocator(COMMAND_NOOP).append(' ').append(clientIP).toString());
+                    final Response[] r = performCommand(protocol, new StringBuilder(COMMAND_NOOP).append(' ').append(clientIP).toString());
                     /*
                      * Grab last response that should indicate an OK
                      */
@@ -1833,7 +1835,7 @@ public final class IMAPCommandsCollection {
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
                 final String command =
-                    new StringAllocator(numArgument.length() + 16).append("SORT (").append(sortCrit).append(") UTF-8 ").append(numArgument).toString();
+                    new StringBuilder(numArgument.length() + 16).append("SORT (").append(sortCrit).append(") UTF-8 ").append(numArgument).toString();
                 final Response[] r = performCommand(p, command);
                 final Response response = r[r.length - 1];
                 final SmartIntArray sia = new SmartIntArray(32);
@@ -2502,6 +2504,46 @@ public final class IMAPCommandsCollection {
     private static final String TEMPL_UID_FETCH_UID = "UID FETCH %s (UID)";
 
     /**
+     * Checks there is such a message with specified UID in given IMAP folder.
+     *
+     * @param imapFolder The IMAP folder
+     * @param uid The UID to check
+     * @return <code>true</code> if such a message exists; otherwise <code>false</code>
+     * @throws MessagingException If a messaging error occurs
+     */
+    public static boolean existsMessage(final IMAPFolder imapFolder, final long uid) throws MessagingException {
+        final int messageCount = imapFolder.getMessageCount();
+        if (messageCount <= 0) {
+            return false;
+        }
+        if (uid <= 0) {
+            return false;
+        }
+        return ((Boolean) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+            @Override
+            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+                final String command = String.format(TEMPL_UID_FETCH_UID, Long.toString(uid));
+                final Response[] r = performCommand(p, command);
+                final int len = r.length - 1;
+                final Response response = r[len];
+                r[len] = null;
+                if (response.isOK()) {
+                    return Boolean.valueOf(len > 0);
+                } else if (response.isBAD()) {
+                    throw new BadCommandException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                } else if (response.isNO()) {
+                    throw new CommandFailedException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                } else {
+                    p.handleResult(response);
+                }
+                return Boolean.FALSE;
+            }
+
+        }))).booleanValue();
+    }
+
+    /**
      * Maps specified UIDs to current corresponding sequence numbers.
      *
      * @param imapFolder The IMAP folder
@@ -3124,7 +3166,7 @@ public final class IMAPCommandsCollection {
         if (prefix == null) {
             return String.valueOf(partCount);
         }
-        return new com.openexchange.java.StringAllocator(prefix).append('.').append(partCount).toString();
+        return new StringBuilder(prefix).append('.').append(partCount).toString();
     }
 
     private static final String TEMPL_UID_EXPUNGE = "UID EXPUNGE %s";
@@ -3202,7 +3244,7 @@ public final class IMAPCommandsCollection {
 
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                final String command = new StringAllocator("SELECT ").append(prepareStringArgument(imapFolder.getFullName())).toString();
+                final String command = new StringBuilder("SELECT ").append(prepareStringArgument(imapFolder.getFullName())).toString();
                 final Response[] r = performCommand(p, command);
                 final Response response = r[r.length - 1];
                 Boolean retval = Boolean.FALSE;
@@ -3466,7 +3508,7 @@ public final class IMAPCommandsCollection {
          */
         final boolean quote = PATTERN_QUOTE_ARG.matcher(lfolder).find() || "NIL".equalsIgnoreCase(lfolder);
         final boolean escape = PATTERN_ESCAPE_ARG.matcher(lfolder).find();
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(lfolder.length() + 8);
+        final StringBuilder sb = new StringBuilder(lfolder.length() + 8);
         if (escape) {
             sb.append(lfolder.replaceAll(REPLPAT_BACKSLASH, REPLACEMENT_BACKSLASH).replaceAll(REPLPAT_QUOTE, REPLACEMENT_QUOTE));
         } else {
@@ -3509,7 +3551,7 @@ public final class IMAPCommandsCollection {
      * @return The item associated with given class in specified <i>FETCH</i> response or <code>null</code>.
      * @see #getItemOf(Class, FetchResponse, String)
      */
-    protected static <I extends Item> I getItemOf(final Class<? extends I> clazz, final FetchResponse fetchResponse) {
+    public static <I extends Item> I getItemOf(final Class<? extends I> clazz, final FetchResponse fetchResponse) {
         final int len = fetchResponse.getItemCount();
         for (int i = 0; i < len; i++) {
             final Item item = fetchResponse.getItem(i);
@@ -3529,7 +3571,7 @@ public final class IMAPCommandsCollection {
      */
     protected static ProtocolException missingFetchItem(final String itemName) {
         return new ProtocolException(
-            new StringAllocator(48).append("Missing ").append(itemName).append(" item in FETCH response.").toString());
+            new StringBuilder(48).append("Missing ").append(itemName).append(" item in FETCH response.").toString());
     }
 
     /**

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -77,10 +77,10 @@ public class Bug16158Test extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        sessionData = new SessionData(100, 1, 60000, 167, true);
+        sessionData = new SessionData(100, 1, 60000, 167, false);
         threadPoolService = new SimThreadPoolService();
         sessionData.addThreadPoolService(threadPoolService);
-        final SessionIdGenerator idGenerator = new  UUIDSessionIdGenerator();
+        final SessionIdGenerator idGenerator = new UUIDSessionIdGenerator();
         session = new SessionImpl(-1, "bug16158", null, 0, idGenerator.createSessionId(null, null), null, idGenerator.createRandomId(), null, null, null, null, null, false);
         sessionData.addSession(session, true);
         for (int i = 0; i < finders.length; i++) {
@@ -114,6 +114,10 @@ public class Bug16158Test extends TestCase {
         for (final Thread rotatorThread : rotatorThreads) {
             rotatorThread.join();
         }
+
+        //ensure that the finders are able to set notFound to true if no session is present.
+        Thread.sleep(50);
+
         for (final SessionFinder finder : finders) {
             finder.stop();
         }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -73,6 +73,7 @@ public final class ImageLocation {
         protected String folder;
         protected String id;
         protected String timestamp;
+        protected String optImageHost;
 
         public Builder() {
             super();
@@ -100,21 +101,20 @@ public final class ImageLocation {
         public Builder timestamp(final String timestamp) {
             this.timestamp = timestamp; return this;
         }
+        public Builder optImageHost(final String optImageHost) {
+            this.optImageHost = optImageHost; return this;
+        }
         public ImageLocation build() {
             return new ImageLocation(this);
         }
     }
 
     private final String accountId;
-
     private final String folder;
-
     private final String id;
-
     private final String imageId;
-
     private final String timestamp;
-
+    private final String optImageHost;
     private final ConcurrentMap<String, Object> properties;
 
     /**
@@ -130,6 +130,7 @@ public final class ImageLocation {
         this.id = builder.id;
         this.imageId = builder.imageId;
         this.timestamp = builder.timestamp;
+        this.optImageHost = builder.optImageHost;
     }
 
     /**
@@ -226,12 +227,21 @@ public final class ImageLocation {
     }
 
     /**
-     * Gets the timestamp
+     * Gets the time stamp
      *
-     * @return The timestamp
+     * @return The time stamp
      */
     public String getTimestamp() {
         return timestamp;
+    }
+
+    /**
+     * Gets the optional image host.
+     *
+     * @return The image host or an empty string
+     */
+    public String getOptImageHost() {
+        return optImageHost;
     }
 
     /**

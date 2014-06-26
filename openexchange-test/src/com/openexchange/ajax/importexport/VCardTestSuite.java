@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,10 +49,9 @@
 
 package com.openexchange.ajax.importexport;
 
-import com.openexchange.ajax.conversion.VCardMailPartAttachTest;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import com.openexchange.ajax.conversion.VCardMailPartAttachTest;
 
 public class VCardTestSuite extends TestSuite{
 
@@ -64,6 +63,7 @@ public class VCardTestSuite extends TestSuite{
 		tests.addTestSuite(Bug18094Test_VCardRoundtrip.class);
 		tests.addTestSuite(VCardMailPartAttachTest.class);
 		tests.addTestSuite(Bug27151Test_RoundtripOfYomiFields.class);
+        tests.addTestSuite(Bug25701Test.class);
 		return tests;
 	}
 }

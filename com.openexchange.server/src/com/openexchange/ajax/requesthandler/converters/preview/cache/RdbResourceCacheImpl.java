@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -68,19 +68,20 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.preview.PreviewExceptionCodes;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link RdbResourceCacheImpl} - The database-backed preview cache implementation for documents.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class RdbResourceCacheImpl extends AbstractResourceCache {
+public class RdbResourceCacheImpl extends AbstractResourceCache {
 
     /**
      * Initializes a new {@link RdbResourceCacheImpl}.
      */
-    public RdbResourceCacheImpl() {
-        super();
+    public RdbResourceCacheImpl(final ServiceLookup serviceLookup) {
+        super(serviceLookup);
     }
 
     @Override
@@ -121,7 +122,7 @@ public final class RdbResourceCacheImpl extends AbstractResourceCache {
             metadata.setUserId(userId);
             metadata.setResourceId(id);
             metadata.setFileName(optName);
-            metadata.setFileType(optType);
+            metadata.setFileType(prepareFileName(optName));
             metadata.setSize(bytes.length);
             metadata.setCreatedAt(System.currentTimeMillis());
             if (existingMetadata == null) {
@@ -163,9 +164,8 @@ public final class RdbResourceCacheImpl extends AbstractResourceCache {
 
     private boolean ensureUnexceededContextQuota(final Connection con, final long desiredSize, final int contextId, final long existingSize) throws OXException {
         final ResourceCacheMetadataStore metadataStore = getMetadataStore();
-        final long[] qts = getContextQuota(contextId);
-        final long total = qts[0];
-        final long totalPerDocument = qts[1];
+        final long total = getGlobalQuota();
+        final long totalPerDocument = getDocumentQuota();
         if (total > 0L || totalPerDocument > 0L) {
             if (total <= 0L) {
                 return (totalPerDocument <= 0 || desiredSize <= totalPerDocument);

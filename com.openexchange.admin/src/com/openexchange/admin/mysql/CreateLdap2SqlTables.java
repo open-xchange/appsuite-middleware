@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,9 +49,7 @@
 
 package com.openexchange.admin.mysql;
 
-import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.database.AbstractCreateTableImpl;
-import com.openexchange.groupware.update.FullPrimaryKeySupportService;
 
 
 /**
@@ -153,16 +151,6 @@ public class CreateLdap2SqlTables extends AbstractCreateTableImpl {
        + "FOREIGN KEY (cid, id) REFERENCES user(cid, id)"
      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
-    private static final String createUserAttributeTable = "CREATE TABLE user_attribute ("
-       + "cid INT4 UNSIGNED NOT NULL,"
-       + "id INT4 UNSIGNED NOT NULL,"
-       + "name VARCHAR(128) NOT NULL,"
-       + "value TEXT NOT NULL,"
-       + "uuid BINARY(16) DEFAULT NULL,"
-       + "INDEX (cid,name,value(20)),"
-       + "FOREIGN KEY (cid, id) REFERENCES user(cid, id)"
-     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-
     private static final String createUserAttributeTablePrimaryKey = "CREATE TABLE user_attribute ("
         + "cid INT4 UNSIGNED NOT NULL,"
         + "id INT4 UNSIGNED NOT NULL,"
@@ -205,17 +193,11 @@ public class CreateLdap2SqlTables extends AbstractCreateTableImpl {
         super();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.database.CreateTableService#requiredTables()
-     */
     @Override
     public String[] requiredTables() {
         return NO_TABLES;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.database.CreateTableService#tablesToCreate()
-     */
     @Override
     public String[] tablesToCreate() {
         return new String[] { groupsTableName, delGroupsTableName, userTableName, delUserTableName,
@@ -223,18 +205,10 @@ public class CreateLdap2SqlTables extends AbstractCreateTableImpl {
             delResourceTableName };
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.database.AbstractCreateTableImpl#getCreateStatements()
-     */
     @Override
     protected String[] getCreateStatements() {
-        FullPrimaryKeySupportService fullPrimaryKeySupportService = AdminServiceRegistry.getInstance().getService(FullPrimaryKeySupportService.class);
-        if (fullPrimaryKeySupportService.isFullPrimaryKeySupported()) {
-            return new String[] { createGroupsTable, createDelGroupsTable, createUserTable, createDelUserTable, createGroupsMemberTable,
-                createLogin2UserTable, createUserAttributeTablePrimaryKey, createResourceTable, createDelResourceTable };
-        }
         return new String[] { createGroupsTable, createDelGroupsTable, createUserTable, createDelUserTable, createGroupsMemberTable,
-            createLogin2UserTable, createUserAttributeTable, createResourceTable, createDelResourceTable };
+            createLogin2UserTable, createUserAttributeTablePrimaryKey, createResourceTable, createDelResourceTable };
     }
 
 }

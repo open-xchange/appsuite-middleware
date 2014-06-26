@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,20 +51,30 @@ package com.openexchange.mail.json.actions;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.List;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.ajax.helper.DownloadUtility;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.MailRequest;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link GetMultipleAttachmentAction}
@@ -104,18 +114,37 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
             final MailServletInterface mailInterface = getMailInterface(req);
             ManagedFile mf = null;
             try {
-                mf = mailInterface.getMessageAttachments(folderPath, uid, sequenceIds);
                 /*
                  * Set Content-Type and Content-Disposition header
                  */
                 final String fileName;
                 {
                     final String subject = mailInterface.getMessage(folderPath, uid).getSubject();
-                    fileName = new com.openexchange.java.StringAllocator(subject).append(".zip").toString();
+                    fileName = new StringBuilder(subject).append(".zip").toString();
                 }
                 /*
                  * We are supposed to offer attachment for download. Therefore enforce application/octet-stream and attachment disposition.
                  */
+                {
+                    final AJAXRequestData ajaxRequestData = req.getRequest();
+                    if (null != ajaxRequestData) {
+                        if (ajaxRequestData.setResponseHeader("Content-Type", "application/zip")) {
+                            try {
+                                final StringBuilder sb = new StringBuilder(512);
+                                sb.append("attachment");
+                                DownloadUtility.appendFilenameParameter(fileName, "application/zip", ajaxRequestData.getUserAgent(), sb);
+                                ajaxRequestData.setResponseHeader("Content-Disposition", sb.toString());
+                                createZipArchive(folderPath, uid, sequenceIds, mailInterface, ajaxRequestData.optOutputStream());
+                                // Streamed
+                                return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
+                            } catch (final IOException e) {
+                                throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                            }
+                        }
+                    }
+                }
+                // The regular way
+                mf = mailInterface.getMessageAttachments(folderPath, uid, sequenceIds);
                 final ThresholdFileHolder fileHolder = new ThresholdFileHolder();
                 /*
                  * Write from content's input stream to response output stream
@@ -152,6 +181,74 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
             throw e;
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private void createZipArchive(final String folderPath, final String uid, final String[] sequenceIds, final MailServletInterface mailInterface, OutputStream out) throws OXException {
+        final ZipArchiveOutputStream zipOutput = new ZipArchiveOutputStream(out);
+        zipOutput.setEncoding("UTF-8");
+        zipOutput.setUseLanguageEncodingFlag(true);
+        try {
+            final int buflen = 8192;
+            final byte[] buf = new byte[buflen];
+            for (final String sequenceId : sequenceIds) {
+                final MailPart mailPart = mailInterface.getMessageAttachment(folderPath, uid, sequenceId, false);
+                final InputStream in = mailPart.getInputStream();
+                try {
+                    /*
+                     * Add ZIP entry to output stream
+                     */
+                    String name = mailPart.getFileName();
+                    if (null == name) {
+                        final List<String> extensions = MimeType2ExtMap.getFileExtensions(mailPart.getContentType().getBaseType());
+                        name = extensions == null || extensions.isEmpty() ? "part.dat" : "part." + extensions.get(0);
+                    }
+                    int num = 1;
+                    ZipArchiveEntry entry;
+                    while (true) {
+                        try {
+                            final String entryName;
+                            {
+                                final int pos = name.indexOf('.');
+                                if (pos < 0) {
+                                    entryName = name + (num > 1 ? "_(" + num + ")" : "");
+                                } else {
+                                    entryName = name.substring(0, pos) + (num > 1 ? "_(" + num + ")" : "") + name.substring(pos);
+                                }
+                            }
+                            entry = new ZipArchiveEntry(entryName);
+                            zipOutput.putArchiveEntry(entry);
+                            break;
+                        } catch (final java.util.zip.ZipException e) {
+                            final String message = e.getMessage();
+                            if (message == null || !message.startsWith("duplicate entry")) {
+                                throw e;
+                            }
+                            num++;
+                        }
+                    }
+                    /*
+                     * Transfer bytes from the file to the ZIP file
+                     */
+                    long size = 0;
+                    for (int read; (read = in.read(buf, 0, buflen)) > 0;) {
+                        zipOutput.write(buf, 0, read);
+                        size += read;
+                    }
+                    entry.setSize(size);
+                    /*
+                     * Complete the entry
+                     */
+                    zipOutput.closeArchiveEntry();
+                } catch (final IOException e) {
+                    throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                } finally {
+                    Streams.close(in);
+                }
+            }
+        } finally {
+            // Complete the ZIP file
+            Streams.close(zipOutput);
         }
     }
 

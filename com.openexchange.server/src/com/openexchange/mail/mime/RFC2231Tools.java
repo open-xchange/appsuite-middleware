@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -267,7 +267,7 @@ public final class RFC2231Tools {
         } else if (!Charset.isSupported(charset)) {
             return toEncode;
         }
-        final com.openexchange.java.StringAllocator retval = new com.openexchange.java.StringAllocator(toEncode.length() * 3);
+        final StringBuilder retval = new StringBuilder(toEncode.length() * 3);
         if (prepend) {
             retval.append(charset.toLowerCase(ENGLISH)).append('\'').append(
                 (language == null) || (language.length() == 0) ? "" : language).append('\'');

@@ -56,7 +56,7 @@ public final class RecipientTerm extends AddressTerm {
      *
      * @serial
      */
-    protected Message.RecipientType type;
+    private Message.RecipientType type;
 
     private static final long serialVersionUID = 6548700653122680468L;
 

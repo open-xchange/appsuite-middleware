@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Control
 Bundle-SymbolicName: com.openexchange.control
-Bundle-Version: 7.4.2
+Bundle-Version: 7.6.0
 Bundle-Activator: com.openexchange.control.osgi.ControlActivator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.exception,
@@ -22,3 +22,4 @@ Import-Package: com.openexchange.exception,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-Vendor: Open-Xchange Inc.
+Export-Package: com.openexchange.control.consoleold

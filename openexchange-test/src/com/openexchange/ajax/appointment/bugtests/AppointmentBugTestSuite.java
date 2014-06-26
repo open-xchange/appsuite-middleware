@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -144,7 +144,11 @@ public class AppointmentBugTestSuite extends TestSuite {
         tests.addTestSuite(Bug30118Test.class);
         tests.addTestSuite(Bug30142Test.class);
         tests.addTestSuite(Bug30414Test.class);
+        tests.addTestSuite(Bug31810Test.class);
+        tests.addTestSuite(Bug31779Test.class);
+        tests.addTestSuite(Bug31963Test.class);
         tests.addTestSuite(Bug32278Test.class);
+        tests.addTestSuite(Bug32385Test.class);
 		return tests;
 	}
 }

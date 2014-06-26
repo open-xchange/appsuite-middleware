@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -373,7 +373,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
                             mailAccess.setCached(false);
                             LOG.debug("Timed-out mail access for {}", entry.getKey());
 
-                            //System.out.println(new com.openexchange.java.StringAllocator("Timed-out mail access for ").append(entry.getKey()).toString());
+                            //System.out.println(new StringBuilder("Timed-out mail access for ").append(entry.getKey()).toString());
 
                             mailAccess.close(false);
                         }
@@ -456,7 +456,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
 
         @Override
         public String toString() {
-            final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(16);
+            final StringBuilder builder = new StringBuilder(16);
             builder.append("{ Key [accountId=").append(accountId).append(", user=").append(user).append(", context=").append(context).append(
                 "] }");
             return builder.toString();

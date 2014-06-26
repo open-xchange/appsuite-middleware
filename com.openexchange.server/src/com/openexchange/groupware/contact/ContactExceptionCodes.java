@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -223,8 +223,8 @@ public enum ContactExceptionCodes implements DisplayableOXExceptionCode {
     PFLAG_IN_PUBLIC_FOLDER("A contact with private flag cannot be stored in a public folder. Folder: %1$d context %2$d user %3$d",
             ContactExceptionMessages.PFLAG_IN_PUBLIC_FOLDER_DISPLAY, Category.CATEGORY_USER_INPUT, 171),
 
-    /** Image size too large. Image size: %1$d. Max. size: %2$d. */
-    IMAGE_TOO_LARGE("Image size too large. Image size: %1$d. Max. size: %2$d.", ContactExceptionMessages.IMAGE_TOO_LARGE_DISPLAY,
+    /** Image size too large. Image size: %1$s. Max. size: %2$s. */
+    IMAGE_TOO_LARGE("Image size too large. Image size: %1$s. Max. size: %2$s.", ContactExceptionMessages.IMAGE_TOO_LARGE_DISPLAY,
         Category.CATEGORY_USER_INPUT, 172),
 
     /**

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -180,7 +180,7 @@ public interface AppointmentSQLInterface {
      * @return A SearchIterator contains AppointmentObjects
      * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
      */
-    public SearchIterator<Appointment> getAppointmentsByExtendedSearch(AppointmentSearchObject searchObject, int orderBy, Order orderDir, int cols[]) throws OXException, SQLException;
+    //    public SearchIterator<Appointment> getAppointmentsByExtendedSearch(AppointmentSearchObject searchObject, int orderBy, Order orderDir, int cols[]) throws OXException, SQLException;
 
     /**
      * Lists all appointments where the title or description matches the given pattern in the {@link AppointmentSearchObject}.
@@ -282,7 +282,7 @@ public interface AppointmentSQLInterface {
 
     /**
      * checks if the given folder contains any foreign objects
-         * @param user_id
+     * @param user_id
      * @param folderid
      * @throws OXException, SQLException
      */
@@ -304,16 +304,18 @@ public interface AppointmentSQLInterface {
      * @param folderid
      * @throws OXException, SQLException
      */
-     public boolean isFolderEmpty(int uid, int fid) throws OXException, SQLException;
+    public boolean isFolderEmpty(int uid, int fid) throws OXException, SQLException;
 
     /**
-      * returns true if the given folder is empty using specified connection
+     * returns true if the given folder is empty using specified connection
      * @param user_id
-      * @param folderid
-      * @param readCon
-      * @throws OXException, SQLException
-      */
-     public boolean isFolderEmpty(int uid, int fid, Connection readCon) throws OXException, SQLException;
+     * @param folderid
+     * @param readCon
+     * @throws OXException, SQLException
+     */
+    public boolean isFolderEmpty(int uid, int fid, Connection readCon) throws OXException, SQLException;
+
+    // ---------------------------------------------------------------------------------------------------------------------------------- //
 
     /**
      * Sets the confirmation of an appointment for a user.
@@ -323,22 +325,53 @@ public interface AppointmentSQLInterface {
      * @param userId unique identifier of the user.
      * @param confirm The confirm status
      * @param confirmMessage The confirm message
-     * @throws OXException
+     * @return The last-modified time stamp of associated appointment
+     * @throws OXException If setting the confirmation fails
      */
-    Date setUserConfirmation(int object_id, int folderId, int user_id, int confirm, String confirm_message) throws OXException;
+    Date setUserConfirmation(int objectId, int folderId, int userId, int confirm, String confirmMessage) throws OXException;
 
     /**
      * Sets the confirmation of an appointment for an external user, identified with his mail address.
      *
-     * @param oid
-     * @param folderId
-     * @param mail
-     * @param confirm
-     * @param message
-     * @return
-     * @throws OXException
+     * @param objectId unique identifier of the appointment.
+     * @param folderId folder of the appointment
+     * @param mail The E-Mail address of the associated external participant
+     * @param confirm The confirm status
+     * @param message The confirm message
+     * @return The last-modified time stamp of associated appointment
+     * @throws OXException If setting the confirmation fails
      */
-    public Date setExternalConfirmation(int oid, int folderId, String mail, int confirm, String message) throws OXException;
+    Date setExternalConfirmation(int objectId, int folderId, String mail, int confirm, String message) throws OXException;
+
+    /**
+     * Sets the confirmation of an appointment for a user.
+     * 
+     * @param objectId unique identifier of the appointment.
+     * @param folderId folder of the appointment
+     * @param optOccurrenceId The numeric identifier of the occurrence to which the confirmation applies in case <code>objectId</code>
+     *            denotes a series appointment; otherwise <code>0</code> (zero)
+     * @param userId unique identifier of the user.
+     * @param confirm The confirm status
+     * @param confirmMessage The confirm message
+     * @return A change exception object, if created, otherwise an almost empty object with just the timestamp.
+     * @throws OXException If setting the confirmation fails
+     */
+    CalendarDataObject setUserConfirmation(int objectId, int folderId, int optOccurrenceId, int userId, int confirm, String confirmMessage) throws OXException;
+
+    /**
+     * Sets the confirmation of an appointment for an external user, identified with his mail address.
+     * 
+     * @param objectId unique identifier of the appointment.
+     * @param folderId folder of the appointment
+     * @param optOccurrenceId The numeric identifier of the occurrence to which the confirmation applies in case <code>objectId</code>
+     *            denotes a series appointment; otherwise <code>0</code> (zero)
+     * @param mail The E-Mail address of the associated external participant
+     * @param confirm The confirm status
+     * @param message The confirm message
+     * @return A change exception object, if created, otherwise an almost empty object with just the timestamp.
+     * @throws OXException If setting the confirmation fails
+     */
+    CalendarDataObject setExternalConfirmation(int objectId, int folderId, int optOccurrenceId, String mail, int confirm, String message) throws OXException;
 
     /**
      * Method to attach or detach attachments
@@ -437,7 +470,7 @@ public interface AppointmentSQLInterface {
 
     /**
      * Counts the visible calendar objects in the given folder.
-     * 
+     *
      * @param folderId
      * @return
      * @throws OXException

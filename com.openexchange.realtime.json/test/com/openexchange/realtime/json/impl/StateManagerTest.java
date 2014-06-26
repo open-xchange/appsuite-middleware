@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,28 +49,25 @@
 
 package com.openexchange.realtime.json.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.realtime.json.impl.RTClientStateImpl;
-import com.openexchange.realtime.json.impl.StateEntry;
-import com.openexchange.realtime.json.impl.StateManager;
 import com.openexchange.realtime.json.mock.JSONServiceRegistryMock;
 import com.openexchange.realtime.json.osgi.JSONServiceRegistry;
 import com.openexchange.realtime.json.protocol.StanzaTransmitter;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.IDEventHandler;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 /**
  * {@link StateManagerTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class StateManagerTest {
+public class StateManagerTest extends StateManager {
     
     
     StateManager stateManager;
@@ -106,11 +103,16 @@ public class StateManagerTest {
     
     @Test
     public void timesOutStaleState() {
-        StateEntry entry1 = stateManager.retrieveState(new ID("test1@1"));
-        StateEntry entry2 = stateManager.retrieveState(new ID("test1@2"));
-        StateEntry entry3 = stateManager.retrieveState(new ID("test1@3"));
-        StateEntry entry4 = stateManager.retrieveState(new ID("test1@4"));
-        StateEntry entry5 = stateManager.retrieveState(new ID("test1@5"));
+        ID one = new ID("test1@1");
+        ID two = new ID("test1@2");
+        ID three = new ID("test1@3");
+        ID four = new ID("test1@4");
+        ID five = new ID("test1@5");
+        StateEntry entry1 = retrieveState(one);
+        StateEntry entry2 = retrieveState(two);
+        StateEntry entry3 = retrieveState(three);
+        StateEntry entry4 = retrieveState(four);
+        StateEntry entry5 = retrieveState(five);
         
         ((RTClientStateImpl) entry1.state).setLastSeen(0);
         ((RTClientStateImpl) entry2.state).setLastSeen(0);
@@ -118,43 +120,19 @@ public class StateManagerTest {
         ((RTClientStateImpl) entry4.state).setLastSeen(60000);
         ((RTClientStateImpl) entry5.state).setLastSeen(60000);
         
-        List<Integer> disposed = new ArrayList<Integer>();
-        
-        entry1.state.getId().on(ID.Events.DISPOSE, new DisposeHandler(disposed, 1));
-        entry2.state.getId().on(ID.Events.DISPOSE, new DisposeHandler(disposed, 2));
-        entry3.state.getId().on(ID.Events.DISPOSE, new DisposeHandler(disposed, 3));
-        entry4.state.getId().on(ID.Events.DISPOSE, new DisposeHandler(disposed, 4));
-        entry5.state.getId().on(ID.Events.DISPOSE, new DisposeHandler(disposed, 5));
-        
         //set serviceLookup Mock so we can call timeOutStaleStates that would call GlobalCleanup
-        JSONServiceRegistry.SERVICES.set(new JSONServiceRegistryMock());
-        stateManager.timeOutStaleStates(1800001);
+        JSONServiceRegistry.SERVICES.set(new JSONServiceRegistryMock(states));
+        timeOutStaleStates(1800001);
         
-        assertEquals(2, disposed.size());
-        assertTrue(disposed.contains(1));
-        assertTrue(disposed.contains(2));
+        Set<ID> keySet = states.keySet();
+        assertEquals(3, keySet.size());
+        
+        assertTrue(keySet.contains(three));
+        assertTrue(keySet.contains(four));
+        assertTrue(keySet.contains(five));
         
     }
-    
-    public class DisposeHandler implements IDEventHandler {
 
-        private List<Integer> disposed;
-        private int number;
-
-        public DisposeHandler(List<Integer> disposed, int number) {
-            super();
-            this.disposed = disposed;
-            this.number = number;
-            
-        }
-
-        @Override
-        public void handle(String event, ID id, Object source, Map<String, Object> properties) {
-            disposed.add(number);
-        }
-
-    }
-    
     @Test
     public void isConnectedReturnsStateBasedOnEntries() {
         stateManager.retrieveState(new ID("connected@1"));

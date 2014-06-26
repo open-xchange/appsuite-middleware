@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -54,6 +54,7 @@ import static com.openexchange.folderstorage.outlook.sql.Utility.getDatabaseServ
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import org.slf4j.Logger;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -65,6 +66,8 @@ import com.openexchange.tools.sql.DBUtils;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Delete {
+
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(Delete.class);
 
     /**
      * Initializes a new {@link Delete}.
@@ -264,6 +267,7 @@ public final class Delete {
         /*
          * Delete folder data
          */
+        final boolean success;
         try {
             stmt = con.prepareStatement(global ? SQL_GLOBAL_DELETE : SQL_DELETE);
             int pos = 1;
@@ -273,13 +277,19 @@ public final class Delete {
                 stmt.setInt(pos++, user);
             }
             stmt.setString(pos, folderId);
-            return stmt.executeUpdate() > 0;
+            success = stmt.executeUpdate() > 0;
         } catch (final SQLException e) {
             debugSQL(stmt);
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
+
+        if (success) {
+            LOGGER.debug("{} {}folder {} from virtual tree {} (user={}, context={})", (backup ? "Backup'ed" : "Deleted"), (global ? "global " : ""), folderId, tree, user, cid, new Throwable("Debug throwable"));
+        }
+
+        return success;
     }
 
 }

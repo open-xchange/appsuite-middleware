@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -90,4 +90,59 @@ public interface ConfigDatabaseService {
     int getServerId() throws OXException;
 
     String getServerName() throws OXException;
+
+    int getWritablePool(int contextId) throws OXException;
+
+    String getSchemaName(int contextId) throws OXException;
+
+    /**
+     * Finds all contexts their data is stored in the same schema and on the same database like the given one.
+     * @param contextId identifier of a context.
+     * @return all contexts having their data in the same schema and on the same database.
+     * @throws OXException if some problem occurs.
+     */
+    int[] getContextsInSameSchema(int contextId) throws OXException;
+
+    /**
+     * Finds all contexts their data is stored in the same schema and on the same database like the given one.
+     * @param con connection to the config database
+     * @param contextId identifier of a context.
+     * @return all contexts having their data in the same schema and on the same database.
+     * @throws OXException if some problem occurs.
+     */
+    int[] getContextsInSameSchema(Connection con, int contextId) throws OXException;
+
+    int[] getContextsInSchema(Connection con, int poolId, String schema) throws OXException;
+
+    /**
+     * Searches for schemas that store less that <code>maxContexts</code> contexts and that are stored on given database identified by
+     * <code>poolId</code>.
+     * @param con connection to the config database
+     * @param poolId only schema stored on the given database should be considered.
+     * @param maxContexts configured maximum allowed contexts for a database schema.
+     * @return a list of schemas that are not filled up to the given maximum number of contexts.
+     * @throws OXException if reading from the database fails.
+     */
+    String[] getUnfilledSchemas(Connection con, int poolId, int maxContexts) throws OXException;
+
+    /**
+     * Invalidates all cached database pooling information for a context. This are especially the assignments to database servers.
+     * @param contextId unique identifier of the context.
+     */
+    void invalidate(int contextId);
+
+    /**
+     * Writes a database assignment for a certain context.
+     * @param assignment the assignment to write.
+     */
+    void writeAssignment(Connection con, Assignment assignment) throws OXException;
+
+    /**
+     * Deletes a database assignment for a certain context;
+     * @param con writable connection in a transaction to the config database.
+     * @param contextId for this context the database assignment is deleted.
+     */
+    void deleteAssignment(Connection con, int contextId) throws OXException;
+
+    void lock(Connection con) throws OXException;
 }

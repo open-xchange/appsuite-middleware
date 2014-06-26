@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -139,6 +139,8 @@ public class RssAction implements AJAXActionService {
                 for (final URL url : urls) {
                     try {
                         feeds.add(fetcher.retrieveFeed(url));
+                    } catch (final java.net.SocketTimeoutException e) {
+                        throw RssExceptionCodes.TIMEOUT_ERROR.create(e, url.toString());
                     } catch (final ParsingFeedException parsingException) {
                         final OXException oxe = RssExceptionCodes.INVALID_RSS.create(parsingException, url.toString());
                         if (1 == urls.size()) {
@@ -156,6 +158,13 @@ public class RssAction implements AJAXActionService {
                         }
                         if (NOT_FOUND == responseCode) {
                             LOG.debug("Resource could not be found: {}", url, e);
+                        } else if (responseCode >= 500 && responseCode < 600) {
+                            final OXException oxe = RssExceptionCodes.RSS_HTTP_ERROR.create(e, Integer.valueOf(responseCode), url);
+                            if (1 == urls.size()) {
+                                throw oxe;
+                            }
+                            oxe.setCategory(Category.CATEGORY_WARNING);
+                            warnings.add(oxe);
                         } else {
                             LOG.warn("Could not load RSS feed from: {}", url, e);
                         }

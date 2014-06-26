@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -216,20 +216,78 @@ public class MockDBService implements DatabaseService {
     }
 
     @Override
-    public void invalidate(final int contextId) throws OXException {
-        // Nothing to do
+    public int[] getContextsInSameSchema(Connection con, int contextId) {
+        return null;
+    }
 
+    @Override
+    public int[] getContextsInSchema(Connection con, int poolId, String schema) {
+        return null;
+    }
+
+    @Override
+    public String[] getUnfilledSchemas(Connection con, int poolId, int maxContexts) {
+        return null;
+    }
+
+    @Override
+    public void lock(Connection con) {
+        // Nothing to do
+    }
+
+    @Override
+    public void invalidate(final int contextId) {
+        // Nothing to do
     }
 
     @Override
     public void writeAssignment(Connection con, Assignment assignment) {
         // Nothing to do
+    }
 
+    @Override
+    public void deleteAssignment(Connection con, int contextId) {
+        // Nothing to do
     }
 
     @Override
     public void backForUpdateTaskAfterReading(int contextId, Connection con) {
         // nothing to do
-        
+
+    }
+
+    @Override
+    public Connection getReadOnlyMonitored(int readPoolId, int writePoolId, String schema, int partitionId) throws OXException {
+        return null;
+    }
+
+    @Override
+    public Connection getWritableMonitored(int readPoolId, int writePoolId, String schema, int partitionId) throws OXException {
+        return null;
+    }
+
+    @Override
+    public Connection getWritableMonitoredForUpdateTask(int readPoolId, int writePoolId, String schema, int partitionId) throws OXException {
+        return null;
+    }
+
+    @Override
+    public void backReadOnlyMonitored(int readPoolId, int writePoolId, String schema, int partitionId, Connection con) {
+    }
+
+    @Override
+    public void backWritableMonitored(int readPoolId, int writePoolId, String schema, int partitionId, Connection con) {
+    }
+
+    @Override
+    public void backWritableMonitoredForUpdateTask(int readPoolId, int writePoolId, String schema, int partitionId, Connection con) {
+    }
+
+    @Override
+    public void initMonitoringTables(int writePoolId, String schema) throws OXException {
+    }
+
+    @Override
+    public void initPartitions(int writePoolId, String schema, int... partitions) throws OXException {
     }
 }

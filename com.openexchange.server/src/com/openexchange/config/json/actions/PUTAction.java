@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -103,7 +103,7 @@ public final class PUTAction extends AbstractConfigAction {
             final ConfigurationService service = services.getService(ConfigurationService.class);
             final Set<String> ignorees = new HashSet<String>(16);
             String text = service.getText("appsuite.properties");
-            if (!isEmpty(text)) {
+            if (!com.openexchange.java.Strings.isEmpty(text)) {
                 for (final String line : SPLIT.split(text, 0)) {
                     if (!isComment(line)) {
                         final int pos = line.indexOf('=');
@@ -120,7 +120,7 @@ public final class PUTAction extends AbstractConfigAction {
                 }
             }
             text = service.getText("paths.perfMap");
-            if (!isEmpty(text)) {
+            if (!com.openexchange.java.Strings.isEmpty(text)) {
                 for (final String line : SPLIT.split(text, 0)) {
                     if (!isComment(line)) {
                         final int pos = line.indexOf('>');
@@ -182,7 +182,7 @@ public final class PUTAction extends AbstractConfigAction {
             final String path = setting.getPath();
             if (!ignorees.contains(path) && (path.indexOf("/io.ox/core") < 0)) {
                 final String value = (String) setting.getSingleValue();
-                if (!isEmpty(value)) {
+                if (!com.openexchange.java.Strings.isEmpty(value)) {
                     if ('[' == value.charAt(0)) {
                         final JSONArray array = new JSONArray(value);
                         if (array.length() == 0) {
@@ -285,7 +285,7 @@ public final class PUTAction extends AbstractConfigAction {
 
     private static final Pattern COMMENT = Pattern.compile("^\\s*[!#]");
     private static boolean isComment(final String line) {
-        if (isEmpty(line)) {
+        if (com.openexchange.java.Strings.isEmpty(line)) {
             return true;
         }
         return COMMENT.matcher(line).find();

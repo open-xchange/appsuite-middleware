@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -76,7 +76,6 @@ import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.calendar.CalendarCache;
-import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -109,30 +108,6 @@ public final class OXFolderAdminHelper {
     public OXFolderAdminHelper() {
         super();
     }
-
-    /*
-     * INSERT INTO oxfolder_tree VALUES (1, 0, 'private', 'system', 'system','system', 'system', 'now', 'System', null, null); INSERT INTO
-     * oxfolder_tree VALUES (2, 0, 'public', 'system', 'system','system', 'system', 'now', 'System', null, null); INSERT INTO oxfolder_tree
-     * VALUES (3, 0, 'shared', 'system', 'system','system', 'system', 'now', 'System', null, null); INSERT INTO oxfolder_tree VALUES (4, 0,
-     * 'system', 'system', 'system','system', 'system', 'now', 'System', null, null); INSERT INTO oxfolder_tree VALUES (5, 4,
-     * 'system_global', 'contact', 'system','system', 'system', 'now', 'System', null, null); INSERT INTO oxfolder_tree VALUES (6, 4,
-     * 'system_ldap', 'contact', 'system','system', 'system', 'now', 'System', null, null); INSERT INTO oxfolder_tree VALUES (7, 0, 'user',
-     * 'system', 'system','system', 'system', 'now', 'System', null, null); INSERT INTO oxfolder_tree VALUES (8, 7, 'projects', 'projects',
-     * 'system','system', 'system', 'now', 'System', null, null); INSERT INTO oxfolder_permissions VALUES ((select nextval('serial_id')), 1,
-     * 512,'all_ox_users_and_ox_groups', 0, 8, 0, 0, 0); INSERT INTO oxfolder_permissions VALUES ((select nextval('serial_id')), 2, 512,
-     * 'all_ox_users_and_ox_groups', 0, 8, 0, 0, 0); INSERT INTO oxfolder_permissions VALUES ((select nextval('serial_id')), 3, 512,
-     * 'all_ox_users_and_ox_groups', 0, 2, 0, 0, 0); INSERT INTO oxfolder_permissions VALUES ((select nextval('serial_id')), 4, 512,
-     * 'all_ox_users_and_ox_groups', 0, 2, 0, 0, 0); INSERT INTO oxfolder_permissions VALUES ((select nextval('serial_id')), 5, 512,
-     * 'all_ox_users_and_ox_groups', 0, 4, 128, 128, 128); INSERT INTO oxfolder_permissions VALUES ((select nextval('serial_id')), 6, 512,
-     * 'all_ox_users_and_ox_groups', 0, 2, 4, 0, 0); INSERT INTO oxfolder_permissions VALUES ((select nextval('serial_id')), 7, 512,
-     * 'all_ox_users_and_ox_groups', 0, 2, 0, 0, 0); INSERT INTO oxfolder_permissions VALUES ((select nextval('serial_id')), 8, 512,
-     * 'all_ox_users_and_ox_groups', 0, 8, 4, 2, 2); INSERT INTO oxfolder_permissions VALUES ((select nextval('serial_id')), 8, 32768,
-     * 'mailadmin', 0, 128, 128, 128, 128); INSERT INTO oxfolder_specialfolders VALUES ('private', 1); INSERT INTO oxfolder_specialfolders
-     * VALUES ('public', 2); INSERT INTO oxfolder_specialfolders VALUES ('shared', 3); INSERT INTO oxfolder_specialfolders VALUES ('system',
-     * 4); INSERT INTO oxfolder_specialfolders VALUES ('system_global', 5); INSERT INTO oxfolder_specialfolders VALUES ('system_ldap', 6);
-     * INSERT INTO oxfolder_specialfolders VALUES ('user', 7); INSERT INTO oxfolder_userfolders VALUES ('projects',
-     * 'projects/projects_list_all', null, 'folder/item_projects.png');
-     */
 
     private static final int[] CHANGEABLE_PUBLIC_FOLDERS =
         { FolderObject.SYSTEM_PUBLIC_FOLDER_ID, FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID };
@@ -472,8 +447,7 @@ public final class OXFolderAdminHelper {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt =
-                writeCon.prepareStatement("SELECT permission_id,system FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND permission_id = ?");
+            stmt = writeCon.prepareStatement("SELECT permission_id,system FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND permission_id = ?");
             int pos = 1;
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, globalAddressBookId);
@@ -488,8 +462,7 @@ public final class OXFolderAdminHelper {
              * Insert/Update
              */
             if (update) {
-                stmt =
-                    writeCon.prepareStatement("UPDATE oxfolder_permissions SET fp = ?, orp = ?, owp = ?, admin_flag = ?, odp = ? WHERE cid = ? AND fuid = ? AND permission_id = ? AND system = ?");
+                stmt = writeCon.prepareStatement("UPDATE oxfolder_permissions SET fp = ?, orp = ?, owp = ?, admin_flag = ?, odp = ? WHERE cid = ? AND fuid = ? AND permission_id = ? AND system = ?");
                 pos = 1;
                 if (disable) {
                     stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS);
@@ -498,9 +471,7 @@ public final class OXFolderAdminHelper {
                 } else {
                     stmt.setInt(pos++, OCLPermission.READ_FOLDER);
                     stmt.setInt(pos++, OCLPermission.READ_ALL_OBJECTS);
-                    stmt.setInt(
-                        pos++,
-                        OXFolderProperties.isEnableInternalUsersEdit() ? OCLPermission.WRITE_OWN_OBJECTS : OCLPermission.NO_PERMISSIONS);
+                    stmt.setInt(pos++, OXFolderProperties.isEnableInternalUsersEdit() ? OCLPermission.WRITE_OWN_OBJECTS : OCLPermission.NO_PERMISSIONS);
                 }
                 stmt.setInt(pos++, isAdmin ? 1 : 0);
                 stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS);
@@ -510,8 +481,7 @@ public final class OXFolderAdminHelper {
                 stmt.setInt(pos++, system);
                 stmt.executeUpdate();
             } else {
-                stmt =
-                    writeCon.prepareStatement("INSERT INTO oxfolder_permissions (cid, fuid, permission_id, fp, orp, owp, odp, admin_flag, group_flag, system) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                stmt = writeCon.prepareStatement("INSERT INTO oxfolder_permissions (cid, fuid, permission_id, fp, orp, owp, odp, admin_flag, group_flag, system) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 pos = 1;
                 stmt.setInt(pos++, cid); // cid
                 stmt.setInt(pos++, globalAddressBookId); // fuid
@@ -523,9 +493,7 @@ public final class OXFolderAdminHelper {
                 } else {
                     stmt.setInt(pos++, OCLPermission.READ_FOLDER); // fp
                     stmt.setInt(pos++, OCLPermission.READ_ALL_OBJECTS); // orp
-                    stmt.setInt(
-                        pos++,
-                        OXFolderProperties.isEnableInternalUsersEdit() ? OCLPermission.WRITE_OWN_OBJECTS : OCLPermission.NO_PERMISSIONS); // owp
+                    stmt.setInt(pos++, OXFolderProperties.isEnableInternalUsersEdit() ? OCLPermission.WRITE_OWN_OBJECTS : OCLPermission.NO_PERMISSIONS); // owp
                 }
                 stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // odp
                 stmt.setInt(pos++, isAdmin ? 1 : 0); // admin_flag
@@ -753,27 +721,6 @@ public final class OXFolderAdminHelper {
             cid,
             writeCon);
         /*
-         * Insert system projects folder
-         */
-        systemPermission.setAllPermission(
-            OCLPermission.CREATE_SUB_FOLDERS,
-            OCLPermission.READ_ALL_OBJECTS,
-            OCLPermission.WRITE_OWN_OBJECTS,
-            OCLPermission.DELETE_OWN_OBJECTS);
-        systemPermission.setFolderAdmin(false);
-        createSystemFolder(
-            FolderObject.SYSTEM_OX_PROJECT_FOLDER_ID,
-            FolderObject.SYSTEM_OX_PROJECT_FOLDER_NAME,
-            systemPermission,
-            FolderObject.SYSTEM_OX_FOLDER_ID,
-            FolderObject.SYSTEM_MODULE,
-            true,
-            creatingTime,
-            mailAdmin,
-            true,
-            cid,
-            writeCon);
-        /*
          * Insert system userstore infostore folder
          */
         systemPermission.setAllPermission(
@@ -854,18 +801,6 @@ public final class OXFolderAdminHelper {
                 cid,
                 writeCon);
         }
-        /*
-         * Grant full access for project folder to admin
-         */
-        createSingleUserPermission(
-            FolderObject.SYSTEM_OX_PROJECT_FOLDER_ID,
-            mailAdmin,
-            new int[] {
-                OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION },
-            true,
-            cid,
-            writeCon);
         addUserToOXFolders(mailAdmin, mailAdminDisplayName, language, cid, writeCon);
         LOG.info("Folder rights for mail admin successfully added for context {}", cid);
     }
@@ -1457,8 +1392,7 @@ public final class OXFolderAdminHelper {
         }
     }
 
-    private static final String SQL_SELECT_DISPLAY_NAME =
-        "SELECT " + Contacts.mapping[Contact.DISPLAY_NAME].getDBFieldName() + " FROM prg_contacts WHERE cid = ? AND " + Contacts.mapping[Contact.INTERNAL_USERID].getDBFieldName() + " = ?";
+    private static final String SQL_SELECT_DISPLAY_NAME = "SELECT field01 FROM prg_contacts WHERE cid = ? AND userid = ?;";
 
     /**
      * Load specified user's display name with given connection (which is possibly in non-auto-commit mode). Thus we obtain most up-to-date
@@ -1498,6 +1432,8 @@ public final class OXFolderAdminHelper {
     private static final String DEFAULT_CON_NAME = "My Contacts";
 
     private static final String DEFAULT_TASK_NAME = "My Tasks";
+
+    private static final String DEFAULT_INFOSTORE_TRASH_NAME = "Deleted files";
 
     /**
      * Creates default folders for modules task, calendar, contact, and infostore for given user ID
@@ -1554,7 +1490,12 @@ public final class OXFolderAdminHelper {
             if (defaultTaskName == null || defaultTaskName.length() == 0) {
                 defaultTaskName = DEFAULT_TASK_NAME;
             }
-            LOG.info("Folder names determined for default folders:\n\tCalendar={}\tContact={}\tTask={}", defaultCalName, defaultConName, defaultTaskName);
+            String defaultInfostoreTrashName = strHelper.getString(FolderStrings.SYSTEM_TRASH_FILES_FOLDER_NAME);
+            if (defaultInfostoreTrashName == null || defaultInfostoreTrashName.length() == 0) {
+                defaultInfostoreTrashName = DEFAULT_INFOSTORE_TRASH_NAME;
+            }
+            LOG.info("Folder names determined for default folders:\n\tCalendar={}\tContact={}\tTask={}\tInfostore Trash={}",
+                defaultCalName, defaultConName, defaultTaskName, defaultInfostoreTrashName);
             /*
              * Insert default calendar folder
              */
@@ -1607,6 +1548,16 @@ public final class OXFolderAdminHelper {
             newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
             OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
             LOG.info("User's default INFOSTORE folder successfully created");
+            /*
+             * Insert default infostore trash folder
+             */
+            fo.setParentFolderID(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
+            fo.setType(FolderObject.TRASH);
+            fo.setFolderName(defaultInfostoreTrashName);
+            newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
+            OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
+            LOG.info("User's default INFOSTORE trash folder successfully created");
+
             LOG.info("All user default folders were successfully created");
             /*
              * TODO: Set standard special folders (projects, ...) located beneath system user folder
@@ -1662,6 +1613,56 @@ public final class OXFolderAdminHelper {
             final int newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
             OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
             LOG.info("User's default INFOSTORE folder successfully created");
+            return newFolderId;
+        } catch (final SQLException e) {
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Creates default trash folder for infostore module for given user ID
+     *
+     * @param userId The user ID
+     * @param language The user's language to translate the folder name into
+     * @param cid The context ID
+     * @param writeCon A writable connection to (master) database
+     * @return THe folder identifier
+     * @throws OXException If user's default infostore folder could not be created successfully
+     */
+    public int addUserTrashToInfoStore(final int userId, final String language, final int cid, final Connection writeCon) throws OXException {
+        try {
+            final Context ctx = new ContextImpl(cid);
+            /*
+             * Get folder name
+             */
+            StringHelper strHelper = StringHelper.valueOf(LocaleTools.getLocale(language));
+            String folderName = strHelper.getString(FolderStrings.SYSTEM_TRASH_FILES_FOLDER_NAME);
+            if (folderName == null || folderName.length() == 0) {
+                folderName = DEFAULT_INFOSTORE_TRASH_NAME;
+            }
+            /*
+             * Insert default infostore trash folder
+             */
+            final long creatingTime = System.currentTimeMillis();
+            final OCLPermission defaultPerm = new OCLPermission();
+            defaultPerm.setEntity(userId);
+            defaultPerm.setGroupPermission(false);
+            defaultPerm.setAllPermission(
+                OCLPermission.ADMIN_PERMISSION,
+                OCLPermission.ADMIN_PERMISSION,
+                OCLPermission.ADMIN_PERMISSION,
+                OCLPermission.ADMIN_PERMISSION);
+            defaultPerm.setFolderAdmin(true);
+            final FolderObject fo = new FolderObject();
+            fo.setPermissionsAsArray(new OCLPermission[] { defaultPerm });
+            fo.setDefaultFolder(true);
+            fo.setParentFolderID(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
+            fo.setType(FolderObject.TRASH);
+            fo.setFolderName(folderName);
+            fo.setModule(FolderObject.INFOSTORE);
+            final int newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
+            OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
+            LOG.info("User's default INFOSTORE trash folder successfully created");
             return newFolderId;
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());

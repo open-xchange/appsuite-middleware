@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,6 +51,8 @@ package com.openexchange.authentication.database.impl;
 
 import static com.openexchange.authentication.LoginExceptionCodes.COMMUNICATION;
 import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS;
+import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_CONTEXT_MAPPING;
+import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_USER_MAPPING;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginExceptionCodes;
@@ -122,7 +124,7 @@ public class DatabaseAuthentication implements AuthenticationService {
                 throw COMMUNICATION.create(e);
             }
             if (ContextStorage.NOT_FOUND == ctxId) {
-                throw INVALID_CREDENTIALS.create();
+                throw INVALID_CREDENTIALS_MISSING_CONTEXT_MAPPING.create(splitted[0]);
             }
             final Context ctx = contextService.getContext(ctxId);
             final int userId;
@@ -130,7 +132,7 @@ public class DatabaseAuthentication implements AuthenticationService {
                 userId = userService.getUserId(splitted[1], ctx);
             } catch (final OXException e) {
                 if (UserExceptionCode.PROPERTY_MISSING.getPrefix().equals(e.getPrefix()) && LdapExceptionCode.USER_NOT_FOUND.getNumber() == e.getCode()) {
-                    throw INVALID_CREDENTIALS.create();
+                    throw INVALID_CREDENTIALS_MISSING_USER_MAPPING.create(splitted[1]);
                 }
                 throw e;
             }

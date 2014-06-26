@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -183,6 +183,10 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
      * Invalid folder identifier: %1$s
      */
     INVALID_FOLDER_IDENTIFIER("Invalid folder identifier: %1$s", Category.CATEGORY_ERROR, 31, FileStorageExceptionMessages.FOLDER_NOT_EXISTS_MSG),
+    /**
+     * The allowed quota is reached. Please delete some items in order to store new ones.
+     */
+    QUOTA_REACHED("The allowed Quota is reached", Category.CATEGORY_CAPACITY, 32, FileStorageExceptionMessages.QUOTA_REACHED_MSG),
 
     ;
 

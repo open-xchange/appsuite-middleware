@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -72,12 +72,14 @@ public class HTTPClientActivator extends HousekeepingActivator {
 		@SuppressWarnings("rawtypes")
 		SimpleRegistryListener<HTTPResponseProcessor> listener = new SimpleRegistryListener<HTTPResponseProcessor>() {
 
-			public void added(ServiceReference<HTTPResponseProcessor> ref,
+			@Override
+            public void added(ServiceReference<HTTPResponseProcessor> ref,
 					HTTPResponseProcessor service) {
 				client.registerProcessor(service);
 			}
 
-			public void removed(ServiceReference<HTTPResponseProcessor> ref,
+			@Override
+            public void removed(ServiceReference<HTTPResponseProcessor> ref,
 					HTTPResponseProcessor service) {
 				client.forgetProcessor(service);
 			}

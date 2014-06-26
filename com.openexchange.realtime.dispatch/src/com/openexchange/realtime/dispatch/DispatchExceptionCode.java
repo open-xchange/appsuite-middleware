@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,37 +50,41 @@
 package com.openexchange.realtime.dispatch;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link DispatchExceptionCode}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public enum DispatchExceptionCode implements OXExceptionCode {
+public enum DispatchExceptionCode implements DisplayableOXExceptionCode {
 
 
     /** Could not find a handler for the specified stanza: . \"%1$s\" */
-    MISSING_HANDLER_FOR_STANZA(DispatchExceptionMessage.MISSING_HANDLER_FOR_STANZA_MSG, CATEGORY_ERROR, 1),
+    MISSING_HANDLER_FOR_STANZA("Could not find a handler for the given stanza: . \"%1$s\"", CATEGORY_ERROR, 1, null),
     /** Could not send stanza to resource. Resource was offline: %1$s */
-    RESOURCE_OFFLINE(DispatchExceptionMessage.RESOURCE_OFFLINE_MSG, CATEGORY_ERROR, 2),
+    RESOURCE_OFFLINE("Could not send stanza to resource. Resource was offline: %1$s", CATEGORY_ERROR, 2,
+        DispatchExceptionMessage.RESOURCE_OFFLINE_MSG),
     /** Unknown channel %1$s */
-    UNKNOWN_CHANNEL(DispatchExceptionMessage.UNKNOWN_CHANNEL, CATEGORY_CONNECTIVITY, 3),
+    UNKNOWN_CHANNEL("Unknown channel %1$s", CATEGORY_CONNECTIVITY, 3, DispatchExceptionMessage.UNKNOWN_CHANNEL),
     /** Unexpected error: %1$s */
-    UNEXPECTED_ERROR(DispatchExceptionMessage.UNEXPECTED_ERROR, CATEGORY_ERROR, 4),
+    UNEXPECTED_ERROR("Unexpected error: %1$s", CATEGORY_ERROR, 4, null),
     
     ;
 
     private final String message;
     private final int number;
     private final Category category;
+    private final String displayMessage;
 
-    private DispatchExceptionCode(final String message, final Category category, final int detailNumber) {
+    private DispatchExceptionCode(final String message, final Category category, final int detailNumber, String displayMessage) {
         this.message = message;
         number = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -97,10 +101,15 @@ public enum DispatchExceptionCode implements OXExceptionCode {
     public Category getCategory() {
         return category;
     }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
+    }
 
     @Override
     public String getPrefix() {
-        return "ATMOSPHERE";
+        return "RT_DISPATCH";
     }
 
     @Override

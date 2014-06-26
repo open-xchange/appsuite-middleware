@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -62,7 +62,7 @@ import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link ConfigProviderServiceImpl}
+ * {@link ConfigProviderServiceImpl} - The implementation of ConfigProviderService for the scope <code>"server"</code>.
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
@@ -141,7 +141,7 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
         }
 
     }
-    
+
     private void initStructuredObjects(final ConfigurationService config) throws OXException {
         Map<String, Object> yamlInFolder = config.getYamlInFolder(SETTINGS);
         for(Object yamlContent: yamlInFolder.values()) {
@@ -219,6 +219,13 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Invalidates cached properties.
+     */
+    public void invalidate() {
+        properties.clear();
     }
 
 }

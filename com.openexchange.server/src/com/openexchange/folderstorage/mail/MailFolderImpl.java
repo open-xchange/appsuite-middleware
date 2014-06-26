@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -227,7 +227,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
         this.capabilities = mailConfig.getCapabilities().getCapabilities();
         {
             final String value =
-                mailFolder.isRootFolder() ? "" : new com.openexchange.java.StringAllocator(16).append('(').append(mailFolder.getMessageCount()).append('/').append(
+                mailFolder.isRootFolder() ? "" : new StringBuilder(16).append('(').append(mailFolder.getMessageCount()).append('/').append(
                     mailFolder.getUnreadMessageCount()).append(')').toString();
             summary = value;
         }

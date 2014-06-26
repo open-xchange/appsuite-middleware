@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -79,8 +79,8 @@ import com.openexchange.session.Session;
 public abstract class InfostoreDocumentMailPart extends MailPart implements ComposedMailPart {
 
     /**
-	 *
-	 */
+     *
+     */
     private static final long serialVersionUID = -3158021272821196715L;
 
     private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostoreDocumentMailPart.class);
@@ -111,7 +111,7 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
             setContentType(docMIMEType == null || docMIMEType.length() == 0 ? MimeTypes.MIME_APPL_OCTET : fileMetadata.getFileMIMEType());
             {
                 final String fileName = fileMetadata.getFileName();
-                if (!isEmpty(fileName)) {
+                if (!com.openexchange.java.Strings.isEmpty(fileName)) {
                     try {
                         setFileName(MimeUtility.encodeText(fileName, MailProperties.getInstance().getDefaultMimeCharset(), "Q"));
                     } catch (final UnsupportedEncodingException e) {
@@ -252,12 +252,12 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
                     }
                 }
             }
-//            try {
-//                final IDBasedFileAccess fileAccess = fileAccess(session);
-//                return new ClosingInputStream(fileAccess.getDocument(documentId, FileStorageFileAccess.CURRENT_VERSION), fileAccess);
-//            } catch (final OXException e) {
-//                throw new IOException("Input stream cannot be retrieved", e);
-//            }
+            //            try {
+            //                final IDBasedFileAccess fileAccess = fileAccess(session);
+            //                return new ClosingInputStream(fileAccess.getDocument(documentId, FileStorageFileAccess.CURRENT_VERSION), fileAccess);
+            //            } catch (final OXException e) {
+            //                throw new IOException("Input stream cannot be retrieved", e);
+            //            }
         }
 
         @Override
@@ -265,18 +265,6 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
             return name;
         }
     } // End of DocumentInputStreamProvider class
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
 
     private static final class ClosingInputStream extends InputStream {
 

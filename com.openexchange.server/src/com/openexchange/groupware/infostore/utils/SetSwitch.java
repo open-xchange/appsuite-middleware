@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,6 +53,7 @@
 package com.openexchange.groupware.infostore.utils;
 
 import java.util.Date;
+import java.util.Map;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 
 public class SetSwitch implements MetadataSwitcher{
@@ -75,6 +76,13 @@ public class SetSwitch implements MetadataSwitcher{
 
 	public void setValue(final Object value) {
 		this.value = value;
+	}
+
+	@Override
+	public Object meta() {
+	    if(null == value) { return null; }
+        impl.setMeta((Map<String, Object>)value);
+        return null;
 	}
 
 	@Override

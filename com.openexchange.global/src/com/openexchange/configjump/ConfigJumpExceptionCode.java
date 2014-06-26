@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,46 +50,47 @@
 package com.openexchange.configjump;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * Error codes for login exceptions.
  */
-public enum ConfigJumpExceptionCode implements OXExceptionCode {
+public enum ConfigJumpExceptionCode implements DisplayableOXExceptionCode {
     /**
      * Unknown problem: "%s".
      */
-    UNKNOWN(ConfigJumpExceptionMessage.UNKNOWN_MSG, CATEGORY_ERROR, 1),
+    UNKNOWN("Unknown problem: \"%s\".", CATEGORY_ERROR, 1, null),
     /**
      * Too few (%d) login attributes.
      */
-    MISSING_ATTRIBUTES(ConfigJumpExceptionMessage.MISSING_ATTRIBUTES_MSG, CATEGORY_USER_INPUT, 2),
+    MISSING_ATTRIBUTES("Too few (%d) login attributes.", CATEGORY_USER_INPUT, 2, ConfigJumpExceptionMessage.MISSING_ATTRIBUTES_MSG),
     /**
      * Problem while communicating with external authorization.
      */
-    COMMUNICATION(ConfigJumpExceptionMessage.COMMUNICATION_MSG, CATEGORY_SERVICE_DOWN, 3),
+    COMMUNICATION("Problem while communicating with external " + "authorization.", CATEGORY_SERVICE_DOWN, 3, null),
     /**
      * Instantiating the class failed.
      */
-    INSTANTIATION_FAILED(ConfigJumpExceptionMessage.INSTANTIATION_FAILED_MSG, CATEGORY_ERROR, 4),
+    INSTANTIATION_FAILED("Instantiating the class failed.", CATEGORY_ERROR, 4, null),
     /**
      * Class %1$s can not be found.
      */
-    CLASS_NOT_FOUND(ConfigJumpExceptionMessage.CLASS_NOT_FOUND_MSG, CATEGORY_CONFIGURATION, 5),
+    CLASS_NOT_FOUND("Class %1$s can not be found.", CATEGORY_CONFIGURATION, 5, null),
     /**
      * Missing property %1$s in system.properties.
      */
-    MISSING_SETTING(ConfigJumpExceptionMessage.MISSING_SETTING_MSG, CATEGORY_CONFIGURATION, 6),
+    MISSING_SETTING("Missing property %1$s in system.properties.", CATEGORY_CONFIGURATION, 6, null),
     /**
      * URL "%s" is malformed.
      */
-    MALFORMED_URL(ConfigJumpExceptionMessage.MALFORMED_URL_MSG, CATEGORY_ERROR, 7),
+    MALFORMED_URL("URL \"%s\" is malformed.", CATEGORY_ERROR, 7, null),
     /**
      * Link is not implemented.
      */
-    NOT_IMPLEMENTED(ConfigJumpExceptionMessage.NOT_IMPLEMENTED_MSG, CATEGORY_CONFIGURATION, 8);
+    NOT_IMPLEMENTED("Extras link is not implemented.", CATEGORY_CONFIGURATION, 8, null);
 
     /**
      * Message of the exception.
@@ -105,6 +106,8 @@ public enum ConfigJumpExceptionCode implements OXExceptionCode {
      * Detail number of the exception.
      */
     final int number;
+    
+    private String displayMessage;
 
     /**
      * Default constructor.
@@ -113,10 +116,11 @@ public enum ConfigJumpExceptionCode implements OXExceptionCode {
      * @param category category.
      * @param detailNumber detail number.
      */
-    private ConfigJumpExceptionCode(final String message, final Category category, final int detailNumber) {
+    private ConfigJumpExceptionCode(final String message, final Category category, final int detailNumber, String displayMessage) {
         this.message = message;
         this.category = category;
         number = detailNumber;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -138,6 +142,11 @@ public enum ConfigJumpExceptionCode implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     /**

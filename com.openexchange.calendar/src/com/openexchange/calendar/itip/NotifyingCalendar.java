@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -85,9 +85,9 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class NotifyingCalendar extends ITipCalendarWrapper implements AppointmentSQLInterface {
 
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(NotifyingCalendar.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(NotifyingCalendar.class);
 
-	private final AppointmentSQLInterface delegate;
+    private final AppointmentSQLInterface delegate;
 
     private final MailSenderService sender;
 
@@ -95,48 +95,48 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
 
     private final CalendarCollection calendarCollection;
 
-	private final AttachmentMemory attachmentMemory;
+    private final AttachmentMemory attachmentMemory;
 
-	private static class AppointmentAddress {
-		private final int id;
-		private final int cid;
-		public AppointmentAddress(final int id, final int cid) {
-			super();
-			this.id = id;
-			this.cid = cid;
-		}
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + cid;
-			result = prime * result + id;
-			return result;
-		}
-		@Override
-		public boolean equals(final Object obj) {
-			if (this == obj) {
+    private static class AppointmentAddress {
+        private final int id;
+        private final int cid;
+        public AppointmentAddress(final int id, final int cid) {
+            super();
+            this.id = id;
+            this.cid = cid;
+        }
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + cid;
+            result = prime * result + id;
+            return result;
+        }
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
                 return true;
             }
-			if (obj == null) {
+            if (obj == null) {
                 return false;
             }
-			if (getClass() != obj.getClass()) {
+            if (getClass() != obj.getClass()) {
                 return false;
             }
-			final AppointmentAddress other = (AppointmentAddress) obj;
-			if (cid != other.cid) {
+            final AppointmentAddress other = (AppointmentAddress) obj;
+            if (cid != other.cid) {
                 return false;
             }
-			if (id != other.id) {
+            if (id != other.id) {
                 return false;
             }
-			return true;
-		}
+            return true;
+        }
 
-	}
+    }
 
-	private static ConcurrentHashMap<AppointmentAddress, AppointmentAddress> createNewLimbo = new ConcurrentHashMap<AppointmentAddress, AppointmentAddress>();
+    private static ConcurrentHashMap<AppointmentAddress, AppointmentAddress> createNewLimbo = new ConcurrentHashMap<AppointmentAddress, AppointmentAddress>();
 
 
     public NotifyingCalendar(final ITipMailGeneratorFactory generators, final MailSenderService sender, final AppointmentSQLInterface delegate, final AttachmentMemory attachmentMemory, final ServiceLookup services, final Session session) {
@@ -151,30 +151,30 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
 
     @Override
     public long attachmentAction(final int folderId, final int objectId, final int userId, final Session session, final Context c, final int numberOfAttachments) throws OXException {
-    	attachmentMemory.rememberAttachmentChange(objectId, c.getContextId());
+        attachmentMemory.rememberAttachmentChange(objectId, c.getContextId());
 
-    	final long retval = delegate.attachmentAction(folderId, objectId, userId, session, c, numberOfAttachments);
-    	// Trigger Update Mail unless attachment is in create new limbo
-    	if (!createNewLimbo.containsKey(new AppointmentAddress(objectId, c.getContextId()))) {
-    		try {
-        		final CalendarDataObject reloaded = getObjectById(objectId);
+        final long retval = delegate.attachmentAction(folderId, objectId, userId, session, c, numberOfAttachments);
+        // Trigger Update Mail unless attachment is in create new limbo
+        if (!createNewLimbo.containsKey(new AppointmentAddress(objectId, c.getContextId()))) {
+            try {
+                final CalendarDataObject reloaded = getObjectById(objectId);
                 final ITipMailGenerator generator = generators.create(reloaded, reloaded, session, onBehalfOf(folderId));
                 final List<NotificationParticipant> recipients = generator.getRecipients();
                 for (final NotificationParticipant notificationParticipant : recipients) {
                     NotificationMail mail;
                     mail = generator.generateUpdateMailFor(notificationParticipant);
                     if (mail != null) {
-                    	if (mail.getStateType() == null) {
-                    		mail.setStateType(State.Type.MODIFIED);
-                    	}
+                        if (mail.getStateType() == null) {
+                            mail.setStateType(State.Type.MODIFIED);
+                        }
                         sender.sendMail(mail, session);
                     }
                 }
-    		} catch (final SQLException e) {
-    			throw OXCalendarExceptionCodes.SQL_ERROR.create(e);
-    		}
-    	}
-    	return retval;
+            } catch (final SQLException e) {
+                throw OXCalendarExceptionCodes.SQL_ERROR.create(e);
+            }
+        }
+        return retval;
 
     }
 
@@ -212,20 +212,20 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
             return;
         }
         calculateExceptionPosition(appointmentObject, original, true);
-		final ITipMailGenerator generator = generators.create(null, original,
-				session, onBehalfOf(inFolder));
-		final List<NotificationParticipant> recipients = generator
-				.getRecipients();
-		for (final NotificationParticipant notificationParticipant : recipients) {
-			final NotificationMail mail = generator
-					.generateDeleteMailFor(notificationParticipant);
-			if (mail != null) {
-				if (mail.getStateType() == null) {
-					mail.setStateType(State.Type.DELETED);
-				}
-				sender.sendMail(mail, session);
-			}
-		}
+        final ITipMailGenerator generator = generators.create(null, original,
+            session, onBehalfOf(inFolder));
+        final List<NotificationParticipant> recipients = generator
+            .getRecipients();
+        for (final NotificationParticipant notificationParticipant : recipients) {
+            final NotificationMail mail = generator
+                .generateDeleteMailFor(notificationParticipant);
+            if (mail != null) {
+                if (mail.getStateType() == null) {
+                    mail.setStateType(State.Type.DELETED);
+                }
+                sender.sendMail(mail, session);
+            }
+        }
     }
 
     @Override
@@ -261,11 +261,6 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
     @Override
     public SearchIterator<Appointment> getAppointmentsBetweenInFolder(final int folderId, final int[] cols, final Date start, final Date end, final int orderBy, final Order order) throws OXException, SQLException {
         return delegate.getAppointmentsBetweenInFolder(folderId, cols, start, end, orderBy, order);
-    }
-
-    @Override
-    public SearchIterator<Appointment> getAppointmentsByExtendedSearch(final AppointmentSearchObject searchObject, final int orderBy, final Order orderDir, final int[] cols) throws OXException, SQLException {
-        return delegate.getAppointmentsByExtendedSearch(searchObject, orderBy, orderDir, cols);
     }
 
     @Override
@@ -332,16 +327,16 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
                 for (final NotificationParticipant notificationParticipant : recipients) {
                     final NotificationMail mail = generator.generateCreateMailFor(notificationParticipant);
                     if (mail != null) {
-                    	if (mail.getStateType() == null) {
-                    		mail.setStateType(State.Type.NEW);
-                    	}
+                        if (mail.getStateType() == null) {
+                            mail.setStateType(State.Type.NEW);
+                        }
                         sender.sendMail(mail, session);
                     }
                 }
             }
             return retval;
         } catch (final SQLException e) {
-        	throw OXCalendarExceptionCodes.SQL_ERROR.create(e);
+            throw OXCalendarExceptionCodes.SQL_ERROR.create(e);
         }
     }
 
@@ -373,8 +368,52 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
     }
 
     @Override
-    public Date setExternalConfirmation(final int oid, final int folderId, final String mail, final int confirm, final String message) throws OXException {
-        return delegate.setExternalConfirmation(oid, folderId, mail, confirm, message);
+    public Date setExternalConfirmation(final int objectId, final int folderId, final String mail, final int confirm, final String message) throws OXException {
+        return delegate.setExternalConfirmation(objectId, folderId, mail, confirm, message);
+    }
+
+    @Override
+    public CalendarDataObject setUserConfirmation(final int objectId, final int folderId, final int optOccurrenceId, final int userId, final int confirm, final String confirmMessage) throws OXException {
+        if (optOccurrenceId <= 0) {
+            LOG.warn("No occurrence to set confirmation for found. Delegate set confirmation for whole series or one time appointment!");
+            CalendarDataObject retval = new CalendarDataObject();
+            retval.setLastModified(setUserConfirmation(objectId, folderId, userId, confirm, confirmMessage));
+            return retval;
+        }
+        CalendarDataObject retval = null;
+        try {
+            CalendarDataObject original = getObjectById(objectId);
+            retval = delegate.setUserConfirmation(objectId, folderId, optOccurrenceId, userId, confirm, confirmMessage);
+            if (retval.getObjectID() > 0 && retval.getObjectID() != objectId) { // Change exception was created
+                retval = getObjectById(retval.getObjectID());
+                generateUpdateMail(folderId, original, retval);
+            }
+        } catch (SQLException e) {
+            throw OXCalendarExceptionCodes.SQL_ERROR.create(e);
+        }
+        return retval;
+    }
+
+    @Override
+    public CalendarDataObject setExternalConfirmation(final int objectId, final int folderId, final int optOccurrenceId, final String mail, final int confirm, final String message) throws OXException {
+        if (optOccurrenceId <= 0) {
+            LOG.warn("No occurrence to set confirmation for found. Delegate set confirmation for whole series or one time appointment!");
+            CalendarDataObject retval = new CalendarDataObject();
+            retval.setLastModified(setExternalConfirmation(objectId, folderId, mail, confirm, message));
+            return retval;
+        }
+        CalendarDataObject retval = null;
+        try {
+            CalendarDataObject original = getObjectById(objectId);
+            retval = delegate.setExternalConfirmation(objectId, folderId, optOccurrenceId, mail, confirm, message);
+            if (retval.getObjectID() > 0 && retval.getObjectID() != objectId) { // Change exception was created
+                retval = getObjectById(retval.getObjectID());
+                generateUpdateMail(folderId, original, retval);
+            }
+        } catch (SQLException e) {
+            throw OXCalendarExceptionCodes.SQL_ERROR.create(e);
+        }
+        return retval;
     }
 
     @Override
@@ -383,18 +422,18 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
     }
 
     @Override
-    public Date setUserConfirmation(final int object_id, final int folderId, final int user_id, final int confirm, final String confirm_message) throws OXException {
+    public Date setUserConfirmation(final int objectId, final int folderId, final int userId, final int confirm, final String confirmMessage) throws OXException {
         try {
-            final CalendarDataObject original = getObjectById(object_id);
-            final Date retval = delegate.setUserConfirmation(object_id, folderId, user_id, confirm, confirm_message);
-            final CalendarDataObject reloaded = getObjectById(object_id);
+            final CalendarDataObject original = getObjectById(objectId);
+            final Date retval = delegate.setUserConfirmation(objectId, folderId, userId, confirm, confirmMessage);
+            final CalendarDataObject reloaded = getObjectById(objectId);
             final ITipMailGenerator generator = generators.create(original, reloaded, session, onBehalfOf(folderId));
             final List<NotificationParticipant> recipients = generator.getRecipients();
             for (final NotificationParticipant notificationParticipant : recipients) {
                 final NotificationMail mail = generator.generateUpdateMailFor(notificationParticipant);
                 if (mail != null) {
-                	if (mail.getStateType() == null) {
-                    	State.Type type;
+                    if (mail.getStateType() == null) {
+                        State.Type type;
                         switch (ConfirmStatus.byId(confirm)) {
                         case ACCEPT:
                             type = State.Type.ACCEPTED;
@@ -411,7 +450,7 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
                         }
 
                         mail.setStateType(type);
-                	}
+                    }
 
                     sender.sendMail(mail, session);
                 }
@@ -419,7 +458,7 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
 
             return retval;
         } catch (final SQLException e) {
-        	throw OXCalendarExceptionCodes.SQL_ERROR.create(e);
+            throw OXCalendarExceptionCodes.SQL_ERROR.create(e);
         }
     }
 
@@ -437,21 +476,21 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
 
     @Override
     public List<Appointment> getAppointmentsWithExternalParticipantBetween(
-			final String email, final int[] cols, final Date start, final Date end, final int orderBy,
-			final Order order) throws OXException {
-		return delegate.getAppointmentsWithExternalParticipantBetween(email,
-				cols, start, end, orderBy, order);
-	}
+        final String email, final int[] cols, final Date start, final Date end, final int orderBy,
+        final Order order) throws OXException {
+        return delegate.getAppointmentsWithExternalParticipantBetween(email,
+            cols, start, end, orderBy, order);
+    }
 
-	@Override
+    @Override
     public List<Appointment> getAppointmentsWithUserBetween(final User user,
-			final int[] cols, final Date start, final Date end, final int orderBy, final Order order)
-			throws OXException {
-		return delegate.getAppointmentsWithUserBetween(user, cols, start, end,
-				orderBy, order);
-	}
+        final int[] cols, final Date start, final Date end, final int orderBy, final Order order)
+            throws OXException {
+        return delegate.getAppointmentsWithUserBetween(user, cols, start, end,
+            orderBy, order);
+    }
 
-	@Override
+    @Override
     public Appointment[] updateAppointmentObject(final CalendarDataObject cdao, final int inFolder, final Date clientLastModified, final boolean checkPermissions) throws OXException {
         try {
             final CalendarDataObject original = getObjectById(cdao.getObjectID());
@@ -462,22 +501,26 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
                     reloaded.setNotification(cdao.getNotification());
                 }
                 calculateExceptionPosition(cdao, original, false);
-                final ITipMailGenerator generator = generators.create(original, reloaded, session, onBehalfOf(inFolder));
-                final List<NotificationParticipant> recipients = generator.getRecipients();
-                for (final NotificationParticipant notificationParticipant : recipients) {
-                    NotificationMail mail;
-                    mail = generator.generateUpdateMailFor(notificationParticipant);
-                    if (mail != null) {
-                    	if (mail.getStateType() == null) {
-                    		mail.setStateType(State.Type.MODIFIED);
-                    	}
-                        sender.sendMail(mail, session);
-                    }
-                }
+                generateUpdateMail(inFolder, original, reloaded);
             }
             return retval;
         } catch (final SQLException e) {
             throw OXCalendarExceptionCodes.SQL_ERROR.create(e);
+        }
+    }
+
+    private void generateUpdateMail(final int inFolder, final CalendarDataObject original, final CalendarDataObject reloaded) throws OXException {
+        final ITipMailGenerator generator = generators.create(original, reloaded, session, onBehalfOf(inFolder));
+        final List<NotificationParticipant> recipients = generator.getRecipients();
+        for (final NotificationParticipant notificationParticipant : recipients) {
+            NotificationMail mail;
+            mail = generator.generateUpdateMailFor(notificationParticipant);
+            if (mail != null) {
+                if (mail.getStateType() == null) {
+                    mail.setStateType(State.Type.MODIFIED);
+                }
+                sender.sendMail(mail, session);
+            }
         }
     }
 
@@ -501,7 +544,7 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
                 if (!isException) {
                     recResults = calendarCollection.calculateRecurring(target, 0, 0, target.getRecurrencePosition());
                     if (recResults == null) {
-                    	return;
+                        return;
                     }
                     final RecurringResultInterface recurringResult = recResults.getRecurringResult(0);
                     target.setStartDate(new Date(recurringResult.getStart()));

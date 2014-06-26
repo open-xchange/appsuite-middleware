@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -67,7 +67,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mailfilter.ajax.actions.AbstractAction;
 import com.openexchange.mailfilter.ajax.actions.AbstractRequest;
 import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterExceptionCode;
-import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;
+import com.openexchange.mailfilter.services.Services;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
@@ -151,7 +151,7 @@ public abstract class AJAXServlet extends HttpServlet {
                 throw OXMailfilterExceptionCode.MISSING_PARAMETER.create("session");
             }
 
-            final SessiondService service = MailFilterServletServiceRegistry.getServiceRegistry().getService(SessiondService.class);
+            final SessiondService service = Services.getService(SessiondService.class);
             if (null == service) {
                 throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
             }
@@ -216,7 +216,7 @@ public abstract class AJAXServlet extends HttpServlet {
         Session session = null;
         try {
             final String sessionId = req.getParameter(PARAMETER_SESSION);
-            final SessiondService service = MailFilterServletServiceRegistry.getServiceRegistry().getService(SessiondService.class);
+            final SessiondService service = Services.getService(SessiondService.class);
             if (null == service) {
                 throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class);
             }

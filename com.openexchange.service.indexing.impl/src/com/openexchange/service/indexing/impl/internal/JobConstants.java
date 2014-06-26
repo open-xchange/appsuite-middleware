@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -58,11 +58,13 @@ package com.openexchange.service.indexing.impl.internal;
 public class JobConstants {
 
     public static final String JOB_INFO = "jobInfo";
-    
+
     public static final String START_DATE = "startDate";
-    
+
     public static final String PRIORITY = "priority";
-    
+
     public static final String INTERVAL = "interval";
+
+    public static final String HZ_EXECUTOR = "com.openexchange.service.indexing.impl";
 
 }

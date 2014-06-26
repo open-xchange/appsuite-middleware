@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,6 +50,7 @@
 package com.openexchange.groupware.search;
 
 import java.util.Date;
+import java.util.Set;
 
 public class TaskSearchObject extends CalendarSearchObject {
 
@@ -71,7 +72,19 @@ public class TaskSearchObject extends CalendarSearchObject {
     private int status = NO_STATUS;
 
     private int priority = NO_PRIORITY;
-
+    
+    private Set<Integer> stateFilters;
+    
+    private boolean seriesFilter;
+    
+    private boolean singleOccurrenceFilter;
+    
+    private Set<String> externalParticipants;
+    
+    private int start;
+    
+    private int size;
+    
     /**
      * This array contains 2 values between them the task ends. If the task has
      * no end date it won't appear if the range is defined.
@@ -104,5 +117,113 @@ public class TaskSearchObject extends CalendarSearchObject {
 
     public void setRange(final Date[] range) {
         this.range = range;
+    }
+
+    /**
+     * Gets the stateFilters
+     *
+     * @return The stateFilters
+     */
+    public Set<Integer> getStateFilters() {
+        return stateFilters;
+    }
+
+    /**
+     * Sets the stateFilters
+     *
+     * @param stateFilters The stateFilters to set
+     */
+    public void setStateFilters(Set<Integer> stateFilters) {
+        this.stateFilters = stateFilters;
+    }
+
+    /**
+     * Gets the seriesFilter
+     *
+     * @return The seriesFilter
+     */
+    public boolean isSeriesFilter() {
+        return seriesFilter;
+    }
+
+    /**
+     * Sets the seriesFilter
+     *
+     * @param seriesFilter The seriesFilter to set
+     */
+    public void setSeriesFilter(boolean seriesFilter) {
+        this.seriesFilter = seriesFilter;
+    }
+
+    /**
+     * Gets the singleFilter
+     *
+     * @return The singleFilter
+     */
+    public boolean isSingleOccurenceFilter() {
+        return singleOccurrenceFilter;
+    }
+
+    /**
+     * Sets the singleFilter
+     *
+     * @param singleFilter The singleFilter to set
+     */
+    public void setSingleOccurrenceFilter(boolean singleFilter) {
+        this.singleOccurrenceFilter = singleFilter;
+    }
+
+    /**
+     * Gets the externalParticipants
+     *
+     * @return The externalParticipants
+     */
+    public Set<String> getExternalParticipants() {
+        return externalParticipants;
+    }
+
+    /**
+     * Sets the externalParticipants
+     *
+     * @param externalParticipants The externalParticipants to set
+     */
+    public void setExternalParticipants(Set<String> externalParticipants) {
+        this.externalParticipants = externalParticipants;
+    }
+
+    /**
+     * Gets the start
+     *
+     * @return The start
+     */
+    public int getStart() {
+        return start;
+    }
+
+    /**
+     * Sets the start
+     *
+     * @param start The start to set
+     */
+    public void setStart(int start) {
+        this.start = start;
+    }
+
+    /**
+     * Gets the size
+     *
+     * @return The size
+     */
+    public int getSize() {
+        return size;
+    }
+
+    /**
+     * Sets the size
+     *
+     * @param size The size to set
+     */
+    public void setSize(int size) {
+        this.size = size;
     }
 }

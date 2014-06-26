@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,24 +51,25 @@
 package com.openexchange.spamsettings.generic.service;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link SpamSettingExceptionCodes} - Enumeration of all {@link SpamSettingException}s.
  *
  * @author francisco.laguna@open-xchange.com
  */
-public enum SpamSettingExceptionCodes implements OXExceptionCode {
+public enum SpamSettingExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(SpamSettingExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
-    COULD_NOT_COERCE_VALUE(SpamSettingExceptionMessages.COULD_NOT_COERCE_VALUE_MSG, CATEGORY_ERROR, 2),
-    CAN_NOT_DEFINE_METADATA(SpamSettingExceptionMessages.CAN_NOT_DEFINE_METADATA_MSG, CATEGORY_ERROR, 3),
-    CAN_NOT_SET_PROPERTY(SpamSettingExceptionMessages.CAN_NOT_SET_PROPERTY_MSG, CATEGORY_ERROR, 4),
+    UNEXPECTED_ERROR("An error occurred: %1$s", CATEGORY_ERROR, 1, null),
+    COULD_NOT_COERCE_VALUE("Could not coerce value %1$s into class %2$s", CATEGORY_ERROR, 2, null),
+    CAN_NOT_DEFINE_METADATA("Can not define metadata %1$s in scope %2$s", CATEGORY_ERROR, 3, null),
+    CAN_NOT_SET_PROPERTY("Can not set property %1$s in scope %2$s", CATEGORY_ERROR, 4, null),
     ;
 
     private final Category category;
@@ -76,11 +77,14 @@ public enum SpamSettingExceptionCodes implements OXExceptionCode {
     private final int detailNumber;
 
     private final String message;
+    
+    private String displayMessage;
 
-    private SpamSettingExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private SpamSettingExceptionCodes(final String message, final Category category, final int detailNumber, String displayMessage) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     private static final String PREFIX = "SPAM_SETTING"; // aka "SSG"
@@ -98,6 +102,11 @@ public enum SpamSettingExceptionCodes implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override

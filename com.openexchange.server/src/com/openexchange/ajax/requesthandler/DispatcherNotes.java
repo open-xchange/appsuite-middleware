@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -56,6 +56,7 @@ import java.lang.annotation.RetentionPolicy;
  * {@link DispatcherNotes} - The action annotation provides the default format for an {@link AJAXActionService}.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DispatcherNotes {
@@ -73,6 +74,12 @@ public @interface DispatcherNotes {
      * @return Whether to allow access using the fallback session or not
      */
     boolean allowPublicSession() default false;
+
+    /**
+     * Indicates whether this action allows authentication via public session identifier.
+     * @return Whether to allow authentication via public session identifier or not
+     */
+    boolean publicSessionAuth() default false;
 
     /**
      * Indicates that this action may be called without a session

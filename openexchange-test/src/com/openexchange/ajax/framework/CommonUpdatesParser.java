@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -54,6 +54,7 @@ import java.util.Set;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.container.DataObject;
+import com.openexchange.groupware.container.FolderObject;
 
 /**
  *
@@ -127,7 +128,12 @@ public class CommonUpdatesParser<T extends CommonUpdatesResponse> extends Abstra
     private int getIdFromObject(Object object) {
         int id = -1;
         if (object instanceof String) {
-            id = Integer.parseInt((String) object);
+            String s = (String) object;
+            if (s.startsWith(FolderObject.SHARED_PREFIX)) {
+                id = Integer.parseInt(s.substring(FolderObject.SHARED_PREFIX.length()));
+            } else {
+                id = Integer.parseInt((String) object);
+            }
         } else {
             id = ((Integer) object).intValue();
         }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -74,7 +74,6 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Charsets;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.systemname.SystemNameService;
@@ -203,6 +202,8 @@ public final class Tools {
 
     private static final long MILLIS_5MIN = 300000L;
 
+    private static final long MILLIS_HOUR = 3600000L;
+
     private static final long MILLIS_WEEK = 604800000L;
 
     private static final long MILLIS_YEAR = 52 * MILLIS_WEEK;
@@ -227,21 +228,30 @@ public final class Tools {
             synchronized (HEADER_DATEFORMAT) {
                 resp.setHeader(NAME_EXPIRES, HEADER_DATEFORMAT.format(new Date(System.currentTimeMillis() + expiry)));
             }
-            resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=" + (expiry / 1000)); // 1 year
+            resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=" + (expiry / 1000));
         }
     }
 
     /**
-     * Gets the default of 5 minutes for <code>Expires</code> header.
+     * Gets the default of 5 minutes for <tt>Expires</tt> and <tt>Cache-Control</tt>'s <tt>max-age</tt> header information.
      *
-     * @return The default of 5 minutes for <code>Expires</code> header
+     * @return The default of 5 minutes for <tt>Expires</tt> and <tt>Cache-Control</tt>'s <tt>max-age</tt> header information
      */
     public static long getDefaultExpiry() {
         return MILLIS_5MIN;
     }
 
     /**
-     * Sets the given date for <code>Expires</code> header.
+     * Gets the default of 1 hour for image resources for <tt>Expires</tt> and <tt>Cache-Control</tt>'s <tt>max-age</tt> header information.
+     *
+     * @return The default of 1 hour for image resources for <tt>Expires</tt> and <tt>Cache-Control</tt>'s <tt>max-age</tt> header information
+     */
+    public static long getDefaultImageExpiry() {
+        return MILLIS_HOUR;
+    }
+
+    /**
+     * Sets the given date for <tt>Expires</tt> and <tt>Cache-Control</tt>'s <tt>max-age</tt> header information.
      *
      * @param resp The HTTP response to apply to
      */
@@ -250,12 +260,17 @@ public final class Tools {
             synchronized (HEADER_DATEFORMAT) {
                 resp.setHeader(NAME_EXPIRES, HEADER_DATEFORMAT.format(expires));
             }
-            resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=31521018"); // 1 year
+            int maxAge = (int) ((System.currentTimeMillis() - expires.getTime()) / 1000);
+            if (maxAge > 0) {
+                resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=" + maxAge);
+            } else {
+                resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=1");
+            }
         }
     }
 
     /**
-     * Sets the default of 5 minutes for <code>Expires</code> header.
+     * Sets the default of 5 minutes for <tt>Expires</tt> and <tt>Cache-Control</tt>'s <tt>max-age</tt> header information.
      *
      * @param resp The HTTP response to apply to
      */
@@ -267,7 +282,19 @@ public final class Tools {
     }
 
     /**
-     * Sets the amount of 1 year for <code>Expires</code> header.
+     * Sets the default of 1 hour for image resources for <tt>Expires</tt> and <tt>Cache-Control</tt>'s <tt>max-age</tt> header information.
+     *
+     * @param resp The HTTP response to apply to
+     */
+    public static void setDefaultImageExpiry(final HttpServletResponse resp) {
+        synchronized (HEADER_DATEFORMAT) {
+            resp.setHeader(NAME_EXPIRES, HEADER_DATEFORMAT.format(new Date(System.currentTimeMillis() + MILLIS_HOUR)));
+        }
+        resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=3600"); // 1 hour
+    }
+
+    /**
+     * Sets the amount of 1 year for <tt>Expires</tt> and <tt>Cache-Control</tt>'s <tt>max-age</tt> header information.
      *
      * @param resp The HTTP response to apply to
      */
@@ -544,7 +571,7 @@ public final class Tools {
             return defaultLocale;
         }
         String header = request.getHeader(NAME_ACCEPT_LANGUAGE);
-        if (isEmpty(header)) {
+        if (com.openexchange.java.Strings.isEmpty(header)) {
             return defaultLocale;
         }
         int pos = header.indexOf(';');
@@ -632,24 +659,12 @@ public final class Tools {
         return new AuthCookie(cookie);
     }
 
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
     private static String toLowerCase(final CharSequence chars) {
         if (null == chars) {
             return null;
         }
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);

@@ -65,11 +65,17 @@ public class BucketInputStream extends InputStream {
     private static final AtomicReference<DriveTokenBucket> tokenBucketReference = new AtomicReference<DriveTokenBucket>();
 
     /**
-     * Sets the drive token bucket reference to use.
+     * Sets the drive token bucket reference to use, or terminates the token bucket by passing <code>null</code>.
      *
      * @param tokenBucket The token bucket, or <code>null</code> to disable.
      */
     public static void setTokenBucket(DriveTokenBucket tokenBucket) {
+        if (null == tokenBucket) {
+            DriveTokenBucket previousTokenBucket = tokenBucketReference.get();
+            if (null != previousTokenBucket) {
+                previousTokenBucket.stop();
+            }
+        }
         tokenBucketReference.set(tokenBucket);
     }
 

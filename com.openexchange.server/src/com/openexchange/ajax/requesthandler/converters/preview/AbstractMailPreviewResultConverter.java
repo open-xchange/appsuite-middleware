@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -116,7 +116,7 @@ abstract class AbstractMailPreviewResultConverter implements ResultConverter {
          * Create appropriate file holder
          */
         fileHolder.setContentType("application/octet-stream");
-        fileHolder.setName(new com.openexchange.java.StringAllocator(mail.getSubject()).append(".eml").toString());
+        fileHolder.setName(new StringBuilder(mail.getSubject()).append(".eml").toString());
         result.setResultObject(fileHolder, "file");
         result.setParameter("__mail", mail);
         /*

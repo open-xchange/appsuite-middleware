@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -73,9 +73,6 @@ public class SocketFetcher {
 	"DEBUG SocketFetcher",
 	PropUtil.getBooleanSystemProperty("mail.socket.debug", false),
 	System.out);
-
-    private static final String SOCKS_SUPPORT =
-					    "com.sun.mail.util.SocksSupport";
 
     // No one should instantiate this class.
     private SocketFetcher() {
@@ -227,13 +224,8 @@ public class SocketFetcher {
 		}
 		if (ex instanceof IOException)
 		    throw (IOException)ex;
-		IOException ioex = new IOException(
-				    "Couldn't connect using " + sfErr +
-				    " to host, port: " +
-				    host + ", " + sfPort +
-				    "; Exception: " + ex);
-		ioex.initCause(ex);
-		throw ioex;
+		throw new SocketConnectException("Using " + sfErr, ex,
+						host, sfPort, cto);
 	    }
 	}
 
@@ -270,6 +262,7 @@ public class SocketFetcher {
 
 	String socksHost = props.getProperty(prefix + ".socks.host", null);
 	int socksPort = 1080;
+	String err = null;
 	if (socksHost != null) {
 	    int i = socksHost.indexOf(':');
 	    if (i >= 0) {
@@ -282,6 +275,7 @@ public class SocketFetcher {
 	    }
 	    socksPort = PropUtil.getIntProperty(props,
 					prefix + ".socks.port", socksPort);
+	    err = "Using SOCKS host, port: " + socksHost + ", " + socksPort;
 	    if (logger.isLoggable(Level.FINER))
 		logger.finer("socks host " + socksHost + ", port " + socksPort);
 	}
@@ -289,52 +283,28 @@ public class SocketFetcher {
 	if (sf != null)
 	    socket = sf.createSocket();
 	if (socket == null) {
-	    if (socksHost != null) {
-		try {
-		    ClassLoader cl = getContextClassLoader();
-		    Class proxySupport = null;
-		    if (cl != null) {
-			try {
-			    proxySupport = Class.forName(SOCKS_SUPPORT,
-							    false, cl);
-			} catch (Exception cex) { }
-		    }
-		    if (proxySupport == null)
-			proxySupport = Class.forName(SOCKS_SUPPORT);
-		    // get & invoke the getSocket(host, port) method
-		    Method mthGetSocket = proxySupport.getMethod("getSocket", 
-			    new Class[] { String.class, int.class });
-		    socket = (Socket)mthGetSocket.invoke(new Object(),
-			    new Object[] { socksHost, new Integer(socksPort) });
-		} catch (Exception ex) {
-		    // ignore any errors
-		    logger.log(Level.FINER, "failed to load ProxySupport class",
-						ex);
-		}
-	    }
-	    if (socket == null)
+	    if (socksHost != null)
+		socket = new Socket(
+				new java.net.Proxy(java.net.Proxy.Type.SOCKS,
+				new InetSocketAddress(socksHost, socksPort)));
+	    else
 		socket = new Socket();
 	}
 	if (to >= 0)
 	    socket.setSoTimeout(to);
+	int writeTimeout = PropUtil.getIntProperty(props,
+						prefix + ".writetimeout", -1);
+	if (writeTimeout != -1)	// wrap original
+	    socket = new WriteTimeoutSocket(socket, writeTimeout);
 	if (localaddr != null)
 	    socket.bind(new InetSocketAddress(localaddr, localport));
-	if (cto >= 0) {
-	    if (logger.isLoggable(Level.FINER)) {
-	        InetSocketAddress socketAddress = new InetSocketAddress(host, port);
-	        socket = new CountingSocket(socket, getCounter(socketAddress));
-	        socket.connect(socketAddress, cto);
-        } else {
-            socket.connect(new InetSocketAddress(host, port), cto);
-        }    
-	} else {
-	    if (logger.isLoggable(Level.FINER)) {
-	        InetSocketAddress socketAddress = new InetSocketAddress(host, port);
-	        socket = new CountingSocket(socket, getCounter(socketAddress));
-	        socket.connect(socketAddress);
-	    } else {
-	        socket.connect(new InetSocketAddress(host, port));
-	    }
+	try {
+	    if (cto >= 0)
+		socket.connect(new InetSocketAddress(host, port), cto);
+	    else
+		socket.connect(new InetSocketAddress(host, port));
+	} catch (IOException ex) {
+	    throw new SocketConnectException(err, ex, host, port, cto);
 	}
 
 	/*
@@ -642,7 +612,7 @@ public class SocketFetcher {
 	    Method getInstance = hnc.getMethod("getInstance", 
 					new Class[] { byte.class });
 	    Object hostnameChecker = getInstance.invoke(new Object(),
-					new Object[] { new Byte((byte)2) });
+					new Object[] { Byte.valueOf((byte)2) });
 
 	    // invoke hostnameChecker.match( server, cert)
 	    if (logger.isLoggable(Level.FINER))

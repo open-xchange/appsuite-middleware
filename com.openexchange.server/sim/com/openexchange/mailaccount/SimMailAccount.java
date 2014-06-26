@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -89,6 +89,7 @@ public class SimMailAccount implements MailAccount {
     private String mailServer;
 
     private Map<String, String> properties;
+    private Map<String, String> transportProperties;
 
     public void setProperties(final Map<String, String> properties) {
         this.properties = properties;
@@ -371,6 +372,16 @@ public class SimMailAccount implements MailAccount {
     @Override
     public String getArchiveFullname() {
         return null;
+    }
+
+    @Override
+    public Map<String, String> getTransportProperties() {
+        return transportProperties;
+    }
+
+    @Override
+    public void addTransportProperty(String name, String value) {
+        // nothing to do
     }
 
 }

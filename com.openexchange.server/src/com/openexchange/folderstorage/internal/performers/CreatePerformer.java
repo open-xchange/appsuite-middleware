@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -436,7 +436,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
                             for (int i = 0; !found && i < subfolders.length; i++) {
                                 if (n.equals(capStorage.getFolder(FolderStorage.REAL_TREE_ID, subfolders[i].getId(), storageParameters).getName())) {
                                     found = true;
-                                    clone4Real.setName(new com.openexchange.java.StringAllocator(prefix).append('_').append(appendixCount++).toString());
+                                    clone4Real.setName(new StringBuilder(prefix).append('_').append(appendixCount++).toString());
                                 }
                             }
                             if (!found) {

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -76,7 +76,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -731,10 +730,10 @@ public final class MessageUtility {
      * @return The HTML content with duplicate &lt;html&gt; tags removed
      */
     public static String simpleHtmlDuplicateRemoval(final String html) {
-        if (isEmpty(html)) {
+        if (com.openexchange.java.Strings.isEmpty(html)) {
             return html;
         }
-        final String lc = html.toLowerCase();
+        final String lc = com.openexchange.java.Strings.asciiLowerCase(html);
         final String sub = "<html>";
         {
             int count = 0;
@@ -757,18 +756,6 @@ public final class MessageUtility {
             }
         }
         return html;
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     // ---------------------------------- JAF DataHandler stuff ---------------------------------------- //
@@ -984,7 +971,7 @@ public final class MessageUtility {
             return;
         }
         final String st = null == subtype ? "plain" : subtype;
-        final String objectMimeType = new StringAllocator(32).append("text/").append(st).append("; charset=").append(
+        final String objectMimeType = new StringBuilder(32).append("text/").append(st).append("; charset=").append(
             MimeUtility.quote(null == charset ? "us-ascii" : charset, HeaderTokenizer.MIME)).toString();
         final DataContentHandler dch = dchFor(toLowerCase(st));
         if (null == dch) {
@@ -1008,7 +995,7 @@ public final class MessageUtility {
             return null;
         }
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);

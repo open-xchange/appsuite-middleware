@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -56,7 +56,7 @@ import com.openexchange.ajax.contact.action.ExemplaryContactTestManagerTest;
 public class ContactAJAXSuite extends TestSuite {
 
     public static Test suite() {
-        final TestSuite tests = new TestSuite();
+        final TestSuite tests = new TestSuite("com.openexchange.ajax.contact.ContactAJAXSuite");
         tests.addTestSuite(AllTest.class);
         tests.addTestSuite(CopyTest.class);
         tests.addTestSuite(DeleteTest.class);

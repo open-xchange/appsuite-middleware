@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,6 +50,8 @@
 package com.openexchange.groupware.infostore.search.impl;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.I2i;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -57,11 +59,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.tx.DBService;
@@ -75,16 +79,18 @@ import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog;
 import com.openexchange.groupware.infostore.database.impl.InfostoreSecurityImpl;
+import com.openexchange.groupware.infostore.search.SearchTerm;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.java.StringAllocator;
+import com.openexchange.java.AsciiReader;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.sql.SearchStrings;
@@ -122,6 +128,61 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
     }
 
     @Override
+    public SearchIterator<DocumentMetadata> search(final int[] folderIds, final SearchTerm<?> searchTerm, final Metadata[] cols, final Metadata sortedBy, final int dir, final int start, final int end, final Context ctx, final User user, final UserPermissionBits userPermissions) throws OXException {
+        Connection con = getReadConnection(ctx);
+        List<Integer> all = new ArrayList<Integer>();
+        List<Integer> own = new ArrayList<Integer>();
+        if (folderIds == null || folderIds.length == 0) {
+            gatherVisibleFolders(con, ctx, user, userPermissions, all, own);
+        } else {
+            for (int folderId : folderIds) {
+                final EffectivePermission perm = security.getFolderPermission(folderId, ctx, user, userPermissions, con);
+                if (perm.canReadAllObjects()) {
+                    all.add(Integer.valueOf(folderId));
+                } else if (perm.canReadOwnObjects()) {
+                    own.add(Integer.valueOf(folderId));
+                }
+            }
+        }
+
+        if (all.isEmpty() && own.isEmpty()) {
+            return SearchIteratorAdapter.emptyIterator();
+        }
+
+        ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(I2i(all.toArray(new Integer[all.size()])),
+            I2i(own.toArray(new Integer[own.size()])),
+            ctx.getContextId(),
+            user.getId(),
+            getResultFieldsSelect(cols),
+            sortedBy,
+            dir,
+            start,
+            end);
+        searchTerm.visit(visitor);
+        String sqlQuery = visitor.getMySqlQuery();
+
+        boolean keepConnection = false;
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(sqlQuery);
+            final InfostoreSearchIterator iter = new InfostoreSearchIterator(stmt.executeQuery(), this, cols, ctx, con, stmt);
+            // Iterator has been successfully generated, thus closing DB resources is performed by iterator instance.
+            keepConnection = true;
+            return iter;
+        } catch (final SQLException e) {
+            LOG.error("", e);
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, sqlQuery);
+        } catch (final OXException e) {
+            LOG.error("", e);
+            throw InfostoreExceptionCodes.PREFETCH_FAILED.create(e);
+        } finally {
+            if (con != null && !keepConnection) {
+                releaseReadConnection(ctx, con);
+            }
+        }
+    }
+
+    @Override
     public SearchIterator<DocumentMetadata> search(final String query, final Metadata[] cols, final int folderId, final Metadata sortedBy, final int dir, final int start, final int end, final Context ctx, final User user, final UserPermissionBits userPermissions) throws OXException {
 
         List<Integer> all = new ArrayList<Integer>();
@@ -131,22 +192,8 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
         {
             Connection con = getReadConnection(ctx);
             try {
-                final int userId = user.getId();
-                if (folderId == NOT_SET || folderId == NO_FOLDER) {
-                    final Queue<FolderObject> queue = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
-                        userId,
-                        user.getGroups(),
-                        userPermissions.getAccessibleModules(),
-                        FolderObject.INFOSTORE,
-                        ctx, con)).asQueue();
-                    for (final FolderObject folder : queue) {
-                        final EffectivePermission perm = folder.getEffectiveUserPermission(userId, userPermissions);
-                        if (perm.canReadAllObjects()) {
-                            all.add(Integer.valueOf(folder.getObjectID()));
-                        } else if (perm.canReadOwnObjects()) {
-                            own.add(Integer.valueOf(folder.getObjectID()));
-                        }
-                    }
+                if (NOT_SET == folderId || NO_FOLDER == folderId) {
+                    gatherVisibleFolders(con, ctx, user, userPermissions, all, own);
                 } else {
                     final EffectivePermission perm = security.getFolderPermission(folderId, ctx, user, userPermissions, con);
                     if (perm.canReadAllObjects()) {
@@ -179,8 +226,8 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             } else {
                 maxResults = NOT_SET;
             }
-            if (NOT_SET != maxResults && own.size() + all.size() > maxResults &&
-                (null == sortedBy || InfostoreQueryCatalog.Table.INFOSTORE.getFieldSet().contains(sortedBy))) {
+            if (NOT_SET != maxResults && own.size() + all.size() > maxResults && (null == sortedBy || InfostoreQueryCatalog.Table.INFOSTORE.getFieldSet().contains(
+                sortedBy))) {
                 /*
                  * no pattern, ordering possible, and more folders queried than results needed - use optimized query
                  */
@@ -188,7 +235,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             }
         }
 
-        final StringAllocator SQL_QUERY = new StringAllocator(512);
+        final StringBuilder SQL_QUERY = new StringBuilder(512);
         SQL_QUERY.append(getResultFieldsSelect(cols));
         SQL_QUERY.append(
             " FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version WHERE infostore.cid = ").append(
@@ -260,7 +307,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
         }
     }
 
-    private void appendFolders(StringAllocator sqlQuery, int userID, List<Integer> readAllFolders, List<Integer> readOwnFolders) {
+    private void appendFolders(StringBuilder sqlQuery, int userID, List<Integer> readAllFolders, List<Integer> readOwnFolders) {
         boolean needOr = false;
 
         if (!readAllFolders.isEmpty()) {
@@ -281,7 +328,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
         }
     }
 
-    private void appendLimit(StringAllocator sqlQuery, int start, int end) {
+    private void appendLimit(StringBuilder sqlQuery, int start, int end) {
         if ((start != NOT_SET) && (end != NOT_SET)) {
             if (end >= start) {
                 sqlQuery.append(" LIMIT ");
@@ -302,7 +349,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
         }
     }
 
-    private void appendOrderBy(StringAllocator sqlQuery, Metadata sortedBy, int dir) {
+    private void appendOrderBy(StringBuilder sqlQuery, Metadata sortedBy, int dir) {
         if (sortedBy != null && dir != NOT_SET) {
             final String[] orderColumn = switchMetadata2DBColumns(new Metadata[] { sortedBy });
             if ((orderColumn != null) && (orderColumn[0] != null)) {
@@ -323,7 +370,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
         /*
          * get matching object IDs first
          */
-        StringAllocator sqlQuery = new StringAllocator();
+        StringBuilder sqlQuery = new StringBuilder();
         sqlQuery.append("SELECT infostore.id FROM infostore WHERE infostore.cid=").append(context.getContextId());
         appendFolders(sqlQuery, user.getId(), readAllFolders, readOwnFolders);
         appendOrderBy(sqlQuery, sortedBy, dir);
@@ -351,10 +398,11 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
         /*
          * get requested metadata in a second step
          */
-        sqlQuery = new StringAllocator();
+        sqlQuery = new StringBuilder();
         sqlQuery.append(getResultFieldsSelect(cols));
-        sqlQuery.append(" FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version WHERE infostore.cid = ")
-            .append(context.getContextId()).append(" AND infostore.id IN (").append(join(objectIDs)).append(")");
+        sqlQuery.append(
+            " FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version WHERE infostore.cid = ").append(
+            context.getContextId()).append(" AND infostore.id IN (").append(join(objectIDs)).append(")");
         appendOrderBy(sqlQuery, sortedBy, dir);
         boolean keepConnection = false;
         PreparedStatement stmt = null;
@@ -481,6 +529,9 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             case Metadata.COLOR_LABEL:
                 retval.add("infostore.color_label");
                 break Metadata2DBSwitch;
+            case Metadata.META:
+                retval.add("infostore_document.meta");
+                break Metadata2DBSwitch;
             }
         }
         return (retval.toArray(new String[0]));
@@ -511,18 +562,56 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
         return retval;
     }
 
+
+    /**
+     * Collects all infostore folders visible to a user and puts their folder IDs into the supplied lists, depending on the user being
+     * allowed to read all contained items or only own ones.
+     *
+     * @param connection A readable connection to the database
+     * @param context The context
+     * @param user The user
+     * @param userPermissions The user's permission bits
+     * @param all A collection to add the IDs of folder the user is able to read "all" items from
+     * @param own A collection to add the IDs of folder the user is able to read only "own" items from
+     * @throws OXException
+     */
+    private static void gatherVisibleFolders(Connection connection, Context context, User user, UserPermissionBits userPermissions, Collection<Integer> all, Collection<Integer> own) throws OXException {
+        SearchIterator<FolderObject> searchIterator = null;
+        try {
+            searchIterator = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfType(user.getId(), user.getGroups(),
+                userPermissions.getAccessibleModules(), FolderObject.PUBLIC, new int[] { FolderObject.INFOSTORE }, context, connection);
+            while (searchIterator.hasNext()) {
+                FolderObject folder = searchIterator.next();
+                EffectivePermission perm = folder.getEffectiveUserPermission(user.getId(), userPermissions);
+                if (perm.canReadAllObjects()) {
+                    all.add(Integer.valueOf(folder.getObjectID()));
+                } else if (perm.canReadOwnObjects()) {
+                    own.add(Integer.valueOf(folder.getObjectID()));
+                }
+            }
+        } finally {
+            SearchIterators.close(searchIterator);
+        }
+    }
+
     public static class InfostoreSearchIterator implements SearchIterator<DocumentMetadata> {
 
         private Statement stmt;
+
         private Connection readCon;
+
         private ResultSet rs;
 
         private DocumentMetadata next;
 
         private final Metadata[] columns;
+
         private final SearchEngineImpl s;
+
         private final Context ctx;
+
         private final List<OXException> warnings;
+
         private final SearchIterator<DocumentMetadata> delegate;
 
         public InfostoreSearchIterator(final ResultSet rs, final SearchEngineImpl s, final Metadata[] columns, final Context ctx, final Connection readCon, final Statement stmt) throws OXException {
@@ -538,7 +627,8 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             try {
                 if (rs.next()) {
                     // Preload?
-                    if (false && Arrays.asList(columns).contains(Metadata.CONTENT_LITERAL)) { // Metadata.CONTENT_LITERAL is mapped to description in fillDocumentMetadata()
+                    if (false && Arrays.asList(columns).contains(Metadata.CONTENT_LITERAL)) { // Metadata.CONTENT_LITERAL is mapped to
+                                                                                              // description in fillDocumentMetadata()
                         next = fillDocumentMetadata(new DocumentMetadataImpl(), columns, rs);
                     } else {
                         final List<DocumentMetadata> list = new LinkedList<DocumentMetadata>();
@@ -584,7 +674,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
         }
 
         @Override
-        public DocumentMetadata next() throws OXException, OXException {
+        public DocumentMetadata next() throws OXException {
             if (null != delegate) {
                 return delegate.next();
             }
@@ -676,7 +766,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             return !warnings.isEmpty();
         }
 
-        private DocumentMetadataImpl fillDocumentMetadata(final DocumentMetadataImpl retval, final Metadata[] columns, final ResultSet result) throws SQLException {
+        private DocumentMetadataImpl fillDocumentMetadata(final DocumentMetadataImpl retval, final Metadata[] columns, final ResultSet result) throws SQLException, OXException {
             for (int i = 0; i < columns.length; i++) {
                 FillDocumentMetadata: switch (columns[i].getId()) {
                 default:
@@ -747,6 +837,17 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
                 case Metadata.COLOR_LABEL:
                     retval.setColorLabel(result.getInt(i + 1));
                     break FillDocumentMetadata;
+                case Metadata.META:
+                    final InputStream jsonBlobStream = rs.getBinaryStream(i + 1);
+                    if (!rs.wasNull() && null != jsonBlobStream) {
+                        try {
+                            retval.setMeta(new JSONObject(new AsciiReader(jsonBlobStream)).asMap());
+                        } catch (final JSONException e) {
+                            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+                        } finally {
+                            Streams.close(jsonBlobStream);
+                        }
+                    }
                 }
             }
             retval.setIsCurrentVersion(true);

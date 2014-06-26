@@ -49,7 +49,10 @@
 
 package com.openexchange.realtime.json.mock;
 
+import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
+import com.openexchange.realtime.json.protocol.RTClientState;
+import com.openexchange.realtime.packet.ID;
 import com.openexchange.server.ServiceLookup;
 
 
@@ -60,10 +63,21 @@ import com.openexchange.server.ServiceLookup;
  */
 public class JSONServiceRegistryMock implements ServiceLookup {
 
+    private ConcurrentHashMap<ID, RTClientState> states;
+
+    /**
+     * Initializes a new {@link JSONServiceRegistryMock}.
+     * @param states
+     */
+    public JSONServiceRegistryMock(ConcurrentHashMap<ID, RTClientState> states) {
+        super();
+        this.states = states;
+    }
+
     @Override
     public <S> S getService(Class<? extends S> clazz) {
         if(GlobalRealtimeCleanup.class.isAssignableFrom(clazz)) {
-            return (S) new NoOpGlobalRealtimeCleanup();
+            return (S) new NoOpGlobalRealtimeCleanup(states);
         } else {
             return null;
         }

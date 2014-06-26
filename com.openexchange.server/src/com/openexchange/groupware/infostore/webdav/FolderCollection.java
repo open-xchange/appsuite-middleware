@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -78,6 +78,7 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.session.ServerSession;
@@ -142,14 +143,11 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		if(!exists) {
 			return;
 		}
-//		OXFolderManager oxma = new OXFolderManagerImpl(getSession());
-//		OXFolderAction oxfa = new OXFolderAction(getSession());
 		Connection con = null;
 		try {
 			con = provider.getWriteConnection(getSession().getContext());
 			final OXFolderManager oxma = OXFolderManager.getInstance(getSession(), con, con);
 			oxma.deleteFolder(new FolderObject(id), true, FileStorageFileAccess.DISTANT_FUTURE);
-			//oxfa.deleteFolder(id, getSession(),con, con, true,System.currentTimeMillis()); // FIXME
 			exists = false;
 			factory.removed(this);
 		} catch (final OXException x) {
@@ -631,29 +629,32 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 			return;
 		}
 		loadedChildren = true;
-		try {
-			if(folder==null) {
-				loadFolder();
-			}
-			final ServerSession session = getSession();
-			final User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContext());
-			final UserPermissionBits userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(session.getUserId(), session.getContext());
-			final Context ctx = session.getContext();
+		SearchIterator<FolderObject> iter = null;
+        try {
+            if (folder == null) {
+                loadFolder();
+            }
+            final ServerSession session = getSession();
+            final User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContext());
+            final UserPermissionBits userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(session.getUserId(), session.getContext());
+            final Context ctx = session.getContext();
 
-			final SearchIterator<FolderObject> iter = OXFolderIteratorSQL.getVisibleSubfoldersIterator(id, user.getId(),user.getGroups(), ctx, userPermissionBits, new Timestamp(0));
-			//final SearchIterator iter = OXFolderTools.getVisibleSubfoldersIterator(id, user.getId(),user.getGroups(), ctx, userConfig, new Timestamp(0));
-
-
-			while(iter.hasNext()) {
-				final FolderObject folder = iter.next();
-				final WebdavPath newUrl = getUrl().dup().append(getFolderName(folder));
+            iter = OXFolderIteratorSQL.getVisibleSubfoldersIterator(id, user.getId(), user.getGroups(), ctx, userPermissionBits, new Timestamp(0));
+            while (iter.hasNext()) {
+                final FolderObject folder = iter.next();
+                if (FolderObject.TRASH == folder.getType()) {
+                    continue; // skip trash folder
+                }
+                final WebdavPath newUrl = getUrl().dup().append(getFolderName(folder));
                 children.add(new FolderCollection(newUrl, factory, folder));
-			}
-
-			//children.addAll(factory.getCollections(folder.getSubfolderIds(true, getSession().getContext())));
-			children.addAll(factory.getResourcesInFolder(this, folder.getObjectID()));
-		} catch (final Exception e) {
+            }
+            children.addAll(factory.getResourcesInFolder(this, folder.getObjectID()));
+        } catch (final WebdavProtocolException e) {
+            throw e;
+        } catch (final Exception e) {
 		    throw WebdavProtocolException.generalError(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		} finally {
+		    SearchIterators.close(iter);
 		}
 		// Duplicates?
 	}

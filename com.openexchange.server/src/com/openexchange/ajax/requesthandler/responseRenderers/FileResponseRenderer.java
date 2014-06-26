@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -72,6 +72,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.tika.Tika;
 import org.apache.tika.config.TikaConfig;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.container.ByteArrayInputStreamClosure;
 import com.openexchange.ajax.container.FileHolder;
@@ -93,7 +94,6 @@ import com.openexchange.config.PropertyListener;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.HTMLDetector;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
@@ -234,11 +234,11 @@ public class FileResponseRenderer implements ResponseRenderer {
              *
              */
             // Check certain parameters
-            String delivery = AJAXServlet.sanitizeParam(req.getParameter(DELIVERY));
+            String delivery = AJAXUtility.sanitizeParam(req.getParameter(DELIVERY));
             if (delivery == null) {
                 delivery = file.getDelivery();
             }
-            String contentType = AJAXServlet.encodeUrl(req.getParameter(PARAMETER_CONTENT_TYPE), true);
+            String contentType = AJAXUtility.encodeUrl(req.getParameter(PARAMETER_CONTENT_TYPE), true);
             boolean contentTypeByParameter = false;
             if (null == contentType) {
                 if (DOWNLOAD.equalsIgnoreCase(delivery)) {
@@ -258,7 +258,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                     contentType = SAVE_AS_TYPE;
                 }
             }
-            String contentDisposition = AJAXServlet.encodeUrl(req.getParameter(PARAMETER_CONTENT_DISPOSITION));
+            String contentDisposition = AJAXUtility.encodeUrl(req.getParameter(PARAMETER_CONTENT_DISPOSITION));
             if (null == contentDisposition) {
                 if (VIEW.equalsIgnoreCase(delivery)) {
                     contentDisposition = "inline";
@@ -293,11 +293,11 @@ public class FileResponseRenderer implements ResponseRenderer {
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND, "File not found.");
                 return;
             }
-            final String userAgent = AJAXServlet.sanitizeParam(req.getHeader("user-agent"));
+            final String userAgent = AJAXUtility.sanitizeParam(req.getHeader("user-agent"));
             if (DOWNLOAD.equalsIgnoreCase(delivery) || (SAVE_AS_TYPE.equals(contentType) && !VIEW.equalsIgnoreCase(delivery))) {
                 // Write as a common file download: application/octet-stream
-                final StringAllocator sb = new StringAllocator(32);
-                sb.append(isEmpty(contentDisposition) ? "attachment" : checkedContentDisposition(contentDisposition.trim(), file));
+                final StringBuilder sb = new StringBuilder(32);
+                sb.append(com.openexchange.java.Strings.isEmpty(contentDisposition) ? "attachment" : checkedContentDisposition(contentDisposition.trim(), file));
                 DownloadUtility.appendFilenameParameter(fileName, null, userAgent, sb);
                 resp.setHeader("Content-Disposition", sb.toString());
                 resp.setContentType(SAVE_AS_TYPE);
@@ -354,7 +354,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                  * Set headers...
                  */
                 if (delivery == null || !delivery.equalsIgnoreCase(VIEW)) {
-                    if (isEmpty(contentDisposition)) {
+                    if (com.openexchange.java.Strings.isEmpty(contentDisposition)) {
                         resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
                     } else {
                         if (contentDisposition.indexOf(';') >= 0) {
@@ -373,7 +373,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                     // Force attachment download
                     resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
                 } else if (delivery.equalsIgnoreCase(VIEW) && null != fileName) {
-                    final StringAllocator sb = new StringAllocator(32);
+                    final StringBuilder sb = new StringBuilder(32);
                     sb.append("inline");
                     DownloadUtility.appendFilenameParameter(fileName, null, userAgent, sb);
                     resp.setHeader("Content-Disposition", sb.toString());
@@ -431,7 +431,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                             }
                         } else {
                             // Ignore it due to security reasons (see bug #25343)
-                            final StringAllocator sb = new StringAllocator(128);
+                            final StringBuilder sb = new StringBuilder(128);
                             sb.append("Denied parameter \"").append(PARAMETER_CONTENT_TYPE);
                             sb.append("\" due to security constraints (requested \"");
                             sb.append(contentType).append("\" , but is \"").append(preferredContentType).append("\").");
@@ -528,7 +528,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                     if (full || ranges.isEmpty()) {
                         // Return full file.
                         final Range r = new Range(0L, length - 1, length);
-                        resp.setHeader("Content-Range", new StringAllocator("bytes ").append(r.start).append('-').append(r.end).append('/').append(r.total).toString());
+                        resp.setHeader("Content-Range", new StringBuilder("bytes ").append(r.start).append('-').append(r.end).append('/').append(r.total).toString());
 
                         // Copy full range.
                         copy(documentData, outputStream, r.start, r.length);
@@ -536,7 +536,7 @@ public class FileResponseRenderer implements ResponseRenderer {
 
                         // Return single part of file.
                         final Range r = ranges.get(0);
-                        resp.setHeader("Content-Range", new StringAllocator("bytes ").append(r.start).append('-').append(r.end).append('/').append(r.total).toString());
+                        resp.setHeader("Content-Range", new StringBuilder("bytes ").append(r.start).append('-').append(r.end).append('/').append(r.total).toString());
                         resp.setHeader("Content-Length", Long.toString(r.length));
                         resp.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT); // 206.
 
@@ -545,16 +545,16 @@ public class FileResponseRenderer implements ResponseRenderer {
                     } else {
                         // Return multiple parts of file.
                         final String boundary = MULTIPART_BOUNDARY;
-                        resp.setContentType(new StringAllocator("multipart/byteranges; boundary=").append(boundary).toString());
+                        resp.setContentType(new StringBuilder("multipart/byteranges; boundary=").append(boundary).toString());
                         resp.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT); // 206.
 
                         // Copy multi part range.
                         for (final Range r : ranges) {
                             // Add multipart boundary and header fields for every range.
                             outputStream.println();
-                            outputStream.println(new StringAllocator("--").append(boundary).toString());
-                            outputStream.println(new StringAllocator("Content-Type: ").append(contentType).toString());
-                            outputStream.println(new StringAllocator("Content-Range: bytes ").append(r.start).append('-').append(r.end).append('/').append(r.total).toString());
+                            outputStream.println(new StringBuilder("--").append(boundary).toString());
+                            outputStream.println(new StringBuilder("Content-Type: ").append(contentType).toString());
+                            outputStream.println(new StringBuilder("Content-Range: bytes ").append(r.start).append('-').append(r.end).append('/').append(r.total).toString());
 
                             // Copy single part range of multi part range.
                             copy(documentData, outputStream, r.start, r.length);
@@ -562,7 +562,7 @@ public class FileResponseRenderer implements ResponseRenderer {
 
                         // End with multipart boundary.
                         outputStream.println();
-                        outputStream.println(new StringAllocator("--").append(boundary).append("--").toString());
+                        outputStream.println(new StringBuilder("--").append(boundary).append("--").toString());
                     }
                 } else {
                     // Check if "Range" header was sent by client although we do not know exact size/length
@@ -577,6 +577,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                     final int amount = AJAXRequestDataTools.parseIntParameter(req.getParameter("len"), -1);
                     if (off >= 0 && amount > 0) {
                         try {
+                            resp.setHeader("Content-Length", Long.toString(amount));
                             copy(documentData, outputStream, off, amount);
                         } catch (final OffsetOutOfRangeIOException e) {
                             setHeaderSafe("Content-Range", "bytes */" + e.getAvailable(), resp); // Required in 416.
@@ -594,7 +595,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                                 count += read;
                             }
                             if (length != count) {
-                                final StringAllocator sb = new StringAllocator("Transferred ").append((length > count ? "less" : "more"));
+                                final StringBuilder sb = new StringBuilder("Transferred ").append((length > count ? "less" : "more"));
                                 sb.append(" bytes than signaled through \"Content-Length\" response header. File download may get paused (less) or be corrupted (more).");
                                 sb.append(" Associated file \"").append(fileName).append("\" with indicated length of ").append(length).append(", but is ").append(count);
                                 LOG.warn(sb.toString());
@@ -611,9 +612,9 @@ public class FileResponseRenderer implements ResponseRenderer {
                 final String lmsg = toLowerCase(e.getMessage());
                 if ("broken pipe".equals(lmsg) || "connection reset".equals(lmsg)) {
                     // Assume client-initiated connection closure
-                    LOG.debug("Underlying (TCP) protocol communication aborted while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
+                    LOG.debug("Underlying (TCP) protocol communication aborted while trying to output file{}", (com.openexchange.java.Strings.isEmpty(fileName) ? "" : " " + fileName), e);
                 } else {
-                    LOG.warn("Lost connection to client while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
+                    LOG.warn("Lost connection to client while trying to output file{}", (com.openexchange.java.Strings.isEmpty(fileName) ? "" : " " + fileName), e);
                 }
             } catch (final com.sun.mail.util.MessageRemovedIOException e) {
                 sendErrorSafe(HttpServletResponse.SC_NOT_FOUND, "Message not found.", resp);
@@ -628,13 +629,26 @@ public class FileResponseRenderer implements ResponseRenderer {
                      * For the next write attempt by us, the peer's TCP stack will issue an RST,
                      * which results in this exception and message at the sender.
                      */
-                    LOG.debug("Client dropped connection while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
+                    LOG.debug("Client dropped connection while trying to output file{}", (com.openexchange.java.Strings.isEmpty(fileName) ? "" : " " + fileName), e);
                 } else {
-                    LOG.warn("Lost connection to client while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
+                    LOG.warn("Lost connection to client while trying to output file{}", (com.openexchange.java.Strings.isEmpty(fileName) ? "" : " " + fileName), e);
                 }
             }
+        } catch (final OXException e) {
+            final String message = "Exception while trying to output file" + (com.openexchange.java.Strings.isEmpty(fileName) ? "" : " " + fileName);
+            LOG.error(message, e);
+            if (AjaxExceptionCodes.BAD_REQUEST.equals(e)) {
+                Throwable cause = e;
+                while (cause.getCause() != null) {
+                    cause = cause.getCause();
+                }
+                final String causeMsg = cause.getMessage();
+                sendErrorSafe(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, null == causeMsg ? message : causeMsg, resp);
+            } else {
+                sendErrorSafe(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message, resp);
+            }
         } catch (final Exception e) {
-            final String message = "Exception while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName);
+            final String message = "Exception while trying to output file" + (com.openexchange.java.Strings.isEmpty(fileName) ? "" : " " + fileName);
             LOG.error(message, e);
             sendErrorSafe(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message, resp);
         } finally {
@@ -747,7 +761,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
         // Get eTag from result that provides the IFileHolder
         final String eTag = result.getHeader("ETag");
-        final boolean isValidEtag = !isEmpty(eTag);
+        final boolean isValidEtag = !com.openexchange.java.Strings.isEmpty(eTag);
         if (null != resourceCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", request, true)) {
             final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, request);
             final CachedResource cachedResource = resourceCache.get(cacheKey, 0, request.getSession().getContextId());
@@ -807,7 +821,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             stream.mark(131072); // 128KB
         }
         // Start transformations: scale, rotate, ...
-        final ImageTransformations transformations = scaler.transfom(stream);
+        final ImageTransformations transformations = scaler.transfom(stream, request.getSession().getSessionID());
         // Rotate by default when not delivering as download
         final Boolean rotate = request.isSet("rotate") ? request.getParameter("rotate", Boolean.class) : null;
         if (null == rotate && false == DOWNLOAD.equalsIgnoreCase(delivery) || null != rotate && rotate.booleanValue()) {
@@ -830,7 +844,11 @@ public class FileResponseRenderer implements ResponseRenderer {
                 throw AjaxExceptionCodes.BAD_REQUEST.create("Height " + maxHeight + " exceeds max. supported height " + Constants.getMaxHeight());
             }
             final ScaleType scaleType = ScaleType.getType(request.getParameter("scaleType"));
-            transformations.scale(maxWidth, maxHeight, scaleType);
+            try {
+                transformations.scale(maxWidth, maxHeight, scaleType);
+            } catch (final IllegalArgumentException e) {
+                throw AjaxExceptionCodes.BAD_REQUEST_CUSTOM.create(e, e.getMessage());
+            }
         }
         // Compress by default when not delivering as download
         final Boolean compress = request.isSet("compress") ? request.getParameter("compress", Boolean.class) : null;
@@ -871,7 +889,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             }
             // Return immediately if not cacheable
             if (!cachingAdvised || null == resourceCache || !isValidEtag || !AJAXRequestDataTools.parseBoolParameter("cache", request, true)) {
-                return new FileHolder(Streams.newByteArrayInputStream(transformed), -1, file.getContentType(), file.getName());
+                return new FileHolder(Streams.newByteArrayInputStream(transformed), -1, fileContentType, file.getName());
             }
 
             // (Asynchronously) Add to cache if possible
@@ -879,7 +897,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, request);
             final ServerSession session = request.getSession();
             final String fileName = file.getName();
-            final String contentType = file.getContentType();
+            final String contentType = fileContentType;
             final AbstractTask<Void> task = new AbstractTask<Void>() {
                 @Override
                 public Void call() {
@@ -991,18 +1009,6 @@ public class FileResponseRenderer implements ResponseRenderer {
         return builder.toString();
     }
 
-    private boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
     /**
      * Removes single or double quotes from a string if its quoted.
      *
@@ -1010,14 +1016,14 @@ public class FileResponseRenderer implements ResponseRenderer {
      * @return The unquoted value or <code>null</code>
      */
     private String unquote(final String s) {
-        if (!isEmpty(s) && ((s.startsWith("\"") && s.endsWith("\"")) || (s.startsWith("'") && s.endsWith("'")))) {
+        if (!com.openexchange.java.Strings.isEmpty(s) && ((s.startsWith("\"") && s.endsWith("\"")) || (s.startsWith("'") && s.endsWith("'")))) {
             return s.substring(1, s.length() - 1);
         }
         return s;
     }
 
     private String getPrimaryType(final String contentType) {
-        if (isEmpty(contentType)) {
+        if (com.openexchange.java.Strings.isEmpty(contentType)) {
             return contentType;
         }
         final int pos = contentType.indexOf('/');
@@ -1098,7 +1104,7 @@ public class FileResponseRenderer implements ResponseRenderer {
 
     private boolean hasNoFileItem(final IFileHolder file) {
         final String fileMIMEType = file.getContentType();
-        return ((isEmpty(fileMIMEType) || SAVE_AS_TYPE.equals(fileMIMEType)) && isEmpty(file.getName()) && (file.getLength() <= 0L));
+        return ((com.openexchange.java.Strings.isEmpty(fileMIMEType) || SAVE_AS_TYPE.equals(fileMIMEType)) && com.openexchange.java.Strings.isEmpty(file.getName()) && (file.getLength() <= 0L));
     }
 
     private static final class Range {
@@ -1217,7 +1223,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 }
             }
         }
-       return write2Disk(file, "brokenimage-", suffix);
+        return write2Disk(file, "brokenimage-", suffix);
     }
 
     private File write2Disk(final IFileHolder file, final String prefix, final String suffix) throws IOException, OXException, FileNotFoundException {

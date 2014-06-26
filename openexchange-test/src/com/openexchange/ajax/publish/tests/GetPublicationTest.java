@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -71,12 +71,11 @@ public class GetPublicationTest extends AbstractPublicationTest {
         super(name);
     }
 
-    public void testShouldNotFindNonExistingPublication() throws OXException, IOException, SAXException, JSONException{
+    public void testShouldNotFindNonExistingPublication() throws OXException, IOException, JSONException {
         GetPublicationRequest req = new GetPublicationRequest(Integer.MAX_VALUE);
 
         GetPublicationResponse res = getClient().execute(req);
         OXException exception = res.getException();
         assertNotNull("Should contain an exception" , exception);
     }
-
 }

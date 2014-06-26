@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -85,14 +85,17 @@ public class ConnectionFetcherTask implements CopyUserTaskService {
         this.service = service;
     }
 
+    @Override
     public String[] getAlreadyCopied() {
         return new String[] { ContextLoadTask.class.getName() };
     }
 
+    @Override
     public String getObjectName() {
         return Connection.class.getName();
     }
 
+    @Override
     public ConnectionHolder copyUser(final Map<String, ObjectMapping<?>> copied) throws OXException {
         final CopyTools tools = new CopyTools(copied);
         srcCtx = tools.getSourceContext();
@@ -118,6 +121,7 @@ public class ConnectionFetcherTask implements CopyUserTaskService {
         return retval;
     }
 
+    @Override
     public void done(final Map<String, ObjectMapping<?>> copied, final boolean failed) {
         if (null != dstCon) {
             try {

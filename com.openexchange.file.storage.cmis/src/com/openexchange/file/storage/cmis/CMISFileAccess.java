@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -85,6 +85,8 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileTimedResult;
+import com.openexchange.file.storage.search.FieldCollectorVisitor;
+import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
@@ -333,7 +335,7 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
     }
 
     @Override
-    public IDTuple copy(final IDTuple source, String version, final String destFolder, final File update, final InputStream newFil, final List<Field> modifiedFields) throws OXException {
+    public IDTuple copy(final IDTuple source, final String version, final String destFolder, final File update, final InputStream newFil, final List<Field> modifiedFields) throws OXException {
         if (version != CURRENT_VERSION) {
             throw CMISExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
         }
@@ -417,7 +419,7 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
     }
 
     @Override
-    public IDTuple move(IDTuple source, String destFolder, long sequenceNumber, File update, List<File.Field> modifiedFields) throws OXException {
+    public IDTuple move(final IDTuple source, final String destFolder, final long sequenceNumber, final File update, final List<File.Field> modifiedFields) throws OXException {
         try {
             CmisObject object;
             /*
@@ -463,7 +465,7 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
             /*
              * Move document
              */
-            FileableCmisObject movedDoc = document.move(cmisSession.createObjectId(source.getFolder()), destinationFolder);
+            final FileableCmisObject movedDoc = document.move(cmisSession.createObjectId(source.getFolder()), destinationFolder);
             //TODO: rename if needed?
             /*
              * Return
@@ -585,6 +587,11 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
 
     @Override
     public List<IDTuple> removeDocument(final List<IDTuple> ids, final long sequenceNumber) throws OXException {
+        return removeDocument(ids, sequenceNumber, false);
+    }
+
+    @Override
+    public List<IDTuple> removeDocument(final List<IDTuple> ids, final long sequenceNumber, boolean hardDelete) throws OXException {
         try {
             final List<IDTuple> ret = new ArrayList<FileStorageFileAccess.IDTuple>();
             for (final IDTuple id : ids) {
@@ -757,7 +764,15 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
         return new FileTimedResult(getFileList(folderId, fields));
     }
 
-    private List<File> getFileList(final String folderId, final List<Field> fields) throws OXException {
+    /**
+     * Gets the file listing from given folder.
+     *
+     * @param folderId The folder identifier
+     * @param fields The fields to fill
+     * @return The file listing
+     * @throws OXException If listing cannot be returned
+     */
+    public List<File> getFileList(final String folderId, final List<Field> fields) throws OXException {
         try {
             final ObjectId folderObjectId;
             CmisObject object;
@@ -887,6 +902,64 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
         return new FileDelta(EMPTY_ITER, EMPTY_ITER, EMPTY_ITER, 0L);
     }
 
+    @Override
+    public SearchIterator<File> search(final List<String> folderIds, final SearchTerm<?> searchTerm, final List<Field> fields, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
+        final List<File> results;
+        {
+            final FieldCollectorVisitor fieldCollector = new FieldCollectorVisitor(Field.ID, Field.FOLDER_ID);
+            searchTerm.visit(fieldCollector);
+
+            final List<Field> fieldz = new ArrayList<Field>(fields);
+            fieldz.addAll(fieldCollector.getFields());
+
+            final CMISSearchVisitor visitor = null != folderIds && !folderIds.isEmpty() ? new CMISSearchVisitor(folderIds, fields, this) : new CMISSearchVisitor(fieldz, this);
+            searchTerm.visit(visitor);
+            results = visitor.getResults();
+        }
+        return getSortedRangeFrom(results, sort, order, start, end);
+    }
+
+    public void recursiveSearchFile(final SearchTerm<?> searchTerm, final String folderId, final List<Field> fields, final List<File> results) throws OXException {
+        try {
+            final ObjectId folderObjectId;
+            CmisObject object;
+            if (FileStorageFolder.ROOT_FULLNAME.equals(folderId) || rootUrl.equals(folderId)) {
+                object = cmisSession.getRootFolder();
+                folderObjectId = cmisSession.createObjectId(object.getId());
+            } else {
+                folderObjectId = cmisSession.createObjectId(folderId);
+                object = cmisSession.getObject(folderObjectId);
+            }
+            if (null == object) {
+                throw CMISExceptionCodes.NOT_FOUND.create(folderId);
+            }
+            if (!ObjectType.FOLDER_BASETYPE_ID.equals(object.getType().getId())) {
+                throw CMISExceptionCodes.NOT_A_FOLDER.create(folderId);
+            }
+            final Folder folder = (Folder) object;
+            object = null;
+            /*
+             * List its sub-resources
+             */
+            for (final CmisObject child : folder.getChildren()) {
+                final String typeId = child.getType().getId();
+                if (ObjectType.DOCUMENT_BASETYPE_ID.equals(typeId)) {
+                    final Document document = (Document) child;
+                    final CMISFile file = new CMISFile(folderId, document.getId(), session.getUserId()).parseSmbFile(document);
+                    if (searchTerm.matches(file)) {
+                        results.add(file);
+                    }
+                } else if (ObjectType.FOLDER_BASETYPE_ID.equals(typeId)) {
+                    recursiveSearchFile(searchTerm, child.getId(), fields, results);
+                }
+            }
+        } catch (final CmisBaseException e) {
+            throw handleCmisException(e);
+        } catch (final RuntimeException e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
     private static final String ALL = "*";
 
     @Override
@@ -914,6 +987,10 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
                 }
             }
         }
+        return getSortedRangeFrom(results, sort, order, start, end);
+    }
+
+    private SearchIterator<File> getSortedRangeFrom(final List<File> results, final Field sort, final SortDirection order, final int start, final int end) {
         /*
          * Empty?
          */

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -58,6 +58,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
+import com.google.common.util.concurrent.RateLimiter;
 import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
 import com.googlecode.concurrentlinkedhashmap.Weighers;
 import com.openexchange.exception.OXException;
@@ -412,7 +413,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                 }
             }
         }
-        imapIdleFuture = threadPool.submit(ThreadPools.task(this, getClass().getName()));
+        imapIdleFuture = threadPool.submit(ThreadPools.task(this, ImapIdlePushListener.class.getSimpleName()));
     }
 
     /**
@@ -453,8 +454,12 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         try {
             Run: while (!shutdown) {
                 try {
-                    while (checkNewMail()) {
-                        // Nothing...
+                    // Checks for new mails with a rate of 1 permit per 5 seconds
+                    final RateLimiter rateLimiter = RateLimiter.create(0.2); // rate is "0.2 permits per second"
+                    boolean keepOnChecking = true;
+                    while (keepOnChecking) {
+                        rateLimiter.acquire(); // may wait
+                        keepOnChecking = checkNewMail();
                     }
                 } catch (final MissingSessionException e) {
                     LOG.info(e.getMessage());
@@ -623,42 +628,50 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                 }
             }
         } catch (final OXException e) {
-            if ("PUSH".equals(e.getPrefix())) {
-                throw e;
-            }
-            // throw new PushException(e);
-            if ("ACC".equalsIgnoreCase(e.getPrefix()) && MailAccountExceptionCodes.NOT_FOUND.getNumber() == e.getCode()) {
-                /*
-                 * Missing mail account; drop listener
-                 */
-                LOG.debug("Missing (default) mail account for user {}. Stopping obsolete IMAP-IDLE listener.", userId);
-                return false;
-            }
+            launderOXException(e);
+            // Non-aborting OXException
             dropSessionRef("MSG".equals(e.getPrefix()) && (1001 == e.getCode() || 1000 == e.getCode()));
+            // Close & sleep
+            closeMailAccess(mailAccess);
+            mailAccess = null;
             sleep(errDelay, e);
         } catch (final MessagingException e) {
             dropSessionRef(e instanceof javax.mail.AuthenticationFailedException);
+            // Close & sleep
+            closeMailAccess(mailAccess);
+            mailAccess = null;
             sleep(errDelay, e);
         } catch (final MissingSessionException e) {
             throw e;
         } catch (final RuntimeException e) {
             dropSessionRef(false);
+            // Close & sleep
+            closeMailAccess(mailAccess);
+            mailAccess = null;
             sleep(errDelay, e);
         } finally {
-            if (null != mailAccess) {
-                mailAccess.close(false);
-                mailAccess = null;
-            }
+            closeMailAccess(mailAccess);
+            mailAccess = null;
             running.set(false);
         }
         return true;
     }
 
+    private void closeMailAccess(final MailAccess<?, ?> mailAccess) {
+        if (null != mailAccess) {
+            try {
+                mailAccess.close(false);
+            } catch (final Exception x) {
+                // Ignore
+            }
+        }
+    }
+
     private void sleep(final int errDelay, final Exception e) {
         if (isDebugEnabled()) {
-            LOG.error("Interrupted while IDLE'ing: {}, sleeping for {}ms", e.getMessage(), errDelay, e);
+            LOG.debug("Interrupted while IDLE'ing: {}, sleeping for {}ms", e.getMessage(), errDelay, e);
         } else {
-            LOG.info("Interrupted while IDLE'ing: {}, sleeping for {}ms", e.getMessage(), errDelay);
+            LOG.debug("Interrupted while IDLE'ing: {}, sleeping for {}ms", e.getMessage(), errDelay);
         }
         try {
             Thread.sleep(errDelay);
@@ -667,6 +680,22 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
             if (isDebugEnabled()) {
                 LOG.error("ERROR in IDLE'ing: {}", e1.getMessage(), e1);
             }
+        }
+    }
+
+    private void launderOXException(OXException e) throws OXException {
+        if (PushExceptionCodes.PREFIX.equals(e.getPrefix())) {
+            throw e;
+        }
+        if (MailAccountExceptionCodes.NOT_FOUND.equals(e)) {
+            /*
+             * Missing mail account; drop listener
+             */
+            LOG.debug("Missing (default) mail account for user {}. Stopping obsolete IMAP-IDLE listener.", userId);
+            throw e;
+        }
+        if ("DBP".equals(e.getPrefix())) {
+            throw e;
         }
     }
 

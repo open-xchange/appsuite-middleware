@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -118,7 +118,6 @@ public class AttachmentConfig extends AbstractConfig implements Initialization {
 		}
         return singleton.getPropertyInternal(key);
     }
-
 
     public static long getMaxUploadSize() {
 		final String sizeS = getProperty(AttachmentProperty.MAX_UPLOAD_SIZE.name());

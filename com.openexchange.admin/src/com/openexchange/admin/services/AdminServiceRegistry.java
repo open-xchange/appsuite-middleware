@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,7 +52,7 @@ package com.openexchange.admin.services;
 import com.openexchange.osgi.AbstractServiceRegistry;
 
 /**
- * {@link AdminServiceRegistry} - A registry for services needed by the administration daemon.
+ * {@link AdminServiceRegistry} - A registry for services for <i>com.openexchange.admin</i> bundle..
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

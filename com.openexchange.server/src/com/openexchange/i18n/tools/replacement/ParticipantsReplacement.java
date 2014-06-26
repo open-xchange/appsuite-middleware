@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -115,8 +115,7 @@ public final class ParticipantsReplacement implements TemplateReplacement {
         if (!changed) {
             return false;
         }
-        for (final Iterator<EmailableParticipant> iter = participantsSet.iterator(); iter.hasNext();) {
-            final EmailableParticipant participant = iter.next();
+        for (EmailableParticipant participant : participantsSet) {
             if (participant.state == EmailableParticipant.STATE_NEW) {
                 /*
                  * Participant was newly added
@@ -201,7 +200,7 @@ public final class ParticipantsReplacement implements TemplateReplacement {
         if (participant.type == Participant.USER) {
             b.append(" (");
             b.append(new StatusReplacement(participant.confirm, l).getReplacement());
-            if (!isEmpty(participant.confirmMessage)) {
+            if (!com.openexchange.java.Strings.isEmpty(participant.confirmMessage)) {
                 b.append(": ").append(participant.confirmMessage);
             }
             b.append(')');
@@ -210,18 +209,6 @@ public final class ParticipantsReplacement implements TemplateReplacement {
             b.append(stringHelper.getString(Notifications.STATUS_EXTERNAL));
             b.append(')');
         }
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     @Override

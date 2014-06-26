@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -66,6 +66,8 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.login.ConfigurationProperty;
+import com.openexchange.login.LoginRampUpService;
+import com.openexchange.osgi.ServiceSet;
 
 /**
  * {@link LoginServletRegisterer}
@@ -86,9 +88,10 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
 
     private LoginServlet login;
 
-    public LoginServletRegisterer(final BundleContext context) {
+    public LoginServletRegisterer(final BundleContext context, final ServiceSet<LoginRampUpService> rampUp) {
         super();
         this.context = context;
+        LoginServlet.setRampUpServices(rampUp);
     }
 
     @Override

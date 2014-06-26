@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -54,7 +54,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.meta.FileComparator;
+import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -371,6 +373,10 @@ public interface FileStorageFileAccess extends TransactionAware {
     /**
      * Removes the files with the given identifiers from the folder. Documents identifiers that could not be removed due to an
      * edit-delete conflict are returned.
+     * <p>
+     * Calling this method should have the same effect as invoking {@link #removeDocument(List, long, boolean)} with
+     * <code>hardDelete</code> set to <code>false</code>, i.e. if the storage supports a trash folder, and a document is not yet located
+     * below that trash folder, it is backed up, otherwise it is deleted permanently.
      *
      * @param ids The identifiers
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
@@ -378,6 +384,22 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @throws OXException If operation fails
      */
     List<IDTuple> removeDocument(List<IDTuple> ids, long sequenceNumber) throws OXException;
+
+    /**
+     * Removes the documents with the given IDs from the folder. Documents' identifiers that could not be removed due to an edit-delete
+     * conflict are returned.
+     * <p>
+     * If <code>hardDelete</code> is <code>false</code>, the storage supports a trash folder, and a document is not yet located below
+     * that trash folder, it is backed up, otherwise it is deleted permanently.
+     *
+     * @param ids The identifiers
+     * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
+     * @param hardDelete <code>true</code> to permanently remove the documents, <code>false</code> to move the documents to the default
+     *                   trash folder of the storage if possible
+     * @return The IDs of documents that could not be deleted due to an edit-delete conflict
+     * @throws OXException If operation fails
+     */
+    List<IDTuple> removeDocument(List<IDTuple> ids, long sequenceNumber, boolean hardDelete) throws OXException;
 
     /**
      * Remove a certain version of a file
@@ -523,7 +545,7 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @param pattern The search pattern possibly containing wild-cards
      * @param fields Which fields to load
      * @param folderId In which folder to search. Pass ALL_FOLDERS to search in all folders.
-     * @param sort Which field to sort by. May be null.
+     * @param sort Which field to sort by. May be <code>null</code>.
      * @param order The order in which to sort
      * @param start A start index (inclusive) for the search results. Useful for paging.
      * @param end An end index (exclusive) for the search results. Useful for paging.
@@ -531,6 +553,21 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @throws OXException If operation fails
      */
     SearchIterator<File> search(String pattern, List<File.Field> fields, String folderId, File.Field sort, SortDirection order, int start, int end) throws OXException;
+
+    /**
+     * Search for a given file.
+     *
+     * @param folderIds The optional folder identifiers
+     * @param searchTerm The search term
+     * @param fields The fields to load
+     * @param sort Which field to sort by. May be <code>null</code>.
+     * @param order The order in which to sort
+     * @param start A start index (inclusive) for the search results. Useful for paging.
+     * @param end An end index (exclusive) for the search results. Useful for paging.
+     * @return The search results
+     * @throws OXException If operation fails
+     */
+    SearchIterator<File> search(List<String> folderIds, SearchTerm<?> searchTerm, List<Field> fields, File.Field sort, SortDirection order, int start, int end) throws OXException;
 
     /**
      * Retrieve the parent account access.

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -55,7 +55,7 @@ import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.exception.OXException;
 import com.openexchange.spamhandler.spamassassin.exceptions.SpamhandlerSpamassassinConfigurationExceptionCode;
-import com.openexchange.spamhandler.spamassassin.osgi.ServiceRegistry;
+import com.openexchange.spamhandler.spamassassin.osgi.Services;
 import com.openexchange.spamhandler.spamassassin.osgi.SpamAssassinSpamHandlerActivator;
 
 /**
@@ -93,12 +93,6 @@ public class PropertyHandler {
         }
     }
 
-//    public enum UserSource {
-//        login,
-//        mail,
-//        name
-//    }
-
     public static final String bundlename = "com.openexchange.spamhandler.spamassassin.";
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PropertyHandler.class);
@@ -119,8 +113,6 @@ public class PropertyHandler {
 
     private long timeout;
 
-//    private UserSource userSource;
-
     public static PropertyHandler getInstance() {
         return singleton;
     }
@@ -130,9 +122,8 @@ public class PropertyHandler {
         final String property = conf.getProperty(name);
         if (null == property) {
             throw SpamhandlerSpamassassinConfigurationExceptionCode.PARAMETER_NOT_SET.create(name);
-        } else {
-            return property;
         }
+        return property;
     }
 
     private static String checkStringPropertyOptional(final ConfigurationService conf, final Parameters param) {
@@ -175,9 +166,8 @@ public class PropertyHandler {
         });
         if (null == property || 0 == property.length()) {
             return null;
-        } else {
-            return property;
         }
+        return property;
     }
 
     public String getHostname() {
@@ -189,16 +179,9 @@ public class PropertyHandler {
         return port;
     }
 
-//    public UserSource getUserSource() {
-//        return userSource;
-//    }
-
     public int getRetries() {
         return retries;
     }
-
-
-
 
     public int getRetrysleep() {
         return retrysleep;
@@ -217,7 +200,7 @@ public class PropertyHandler {
     public void loadProperties() throws OXException {
         final StringBuilder logBuilder = new StringBuilder();
 
-        final ConfigurationService configuration = ServiceRegistry.getInstance().getService(ConfigurationService.class);
+        final ConfigurationService configuration = Services.getService(ConfigurationService.class);
 
         logBuilder.append("\nLoading spamhandler spamassassin properties...\n");
 
@@ -255,7 +238,7 @@ public class PropertyHandler {
         } else {
             try {
                 this.setTimeout(Long.parseLong(timeoutstring));
-                logBuilder.append('\t').append(Parameters.timeout.getName()).append(": ").append(this.getHostname()).append('\n');
+                logBuilder.append('\t').append(Parameters.timeout.getName()).append(": ").append(this.getTimeout()).append('\n');
             } catch (final NumberFormatException e) {
                 throw SpamhandlerSpamassassinConfigurationExceptionCode.PARAMETER_NO_LONG.create(Parameters.timeout.getName(), timeoutstring);
             }
@@ -274,19 +257,6 @@ public class PropertyHandler {
                 setRetrysleep(value);
             }
         });
-
-//        final String userSourceString = checkStringPropertyOptional(configuration, Parameters.userSource);
-//        if (null == userSourceString) {
-//            if (spamd) {
-//                throw new OXException(Code.USERSOURCE_NOT_SET);
-//            }
-//        } else {
-//            try {
-//                this.setUserSource(UserSource.valueOf(userSourceString));
-//            } catch (final IllegalArgumentException e) {
-//                throw new OXException(Code.USERSOURCE_WRONG, userSourceString);
-//            }
-//        }
 
         this.loaded.set(true);
         LOG.info(logBuilder.toString());
@@ -338,9 +308,5 @@ public class PropertyHandler {
     private void setTimeout(final long timeout) {
         this.timeout = timeout;
     }
-
-//    private void setUserSource(UserSource userSource) {
-//        this.userSource = userSource;
-//    }
 
 }

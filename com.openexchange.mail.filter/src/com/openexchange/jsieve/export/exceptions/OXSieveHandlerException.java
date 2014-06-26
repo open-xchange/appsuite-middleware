@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -63,10 +63,11 @@ public class OXSieveHandlerException extends Exception {
 	private final String sieveHost;
 	private final int sieveHostPort;
 	private final SIEVEResponse.Code sieveResponseCode;
+    private boolean parseError;
 
     /**
      * Initializes a new {@link OXSieveHandlerException}
-     * 
+     *
      * @param message The message
      * @param sieveHost The sieve host name
      * @param sieveHostPort The sieve host port
@@ -80,7 +81,7 @@ public class OXSieveHandlerException extends Exception {
 
     /**
      * Initializes a new {@link OXSieveHandlerException}
-     * 
+     *
      * @param message The message
      * @param sieveHost The sieve host name
      * @param sieveHostPort The sieve host port
@@ -91,6 +92,26 @@ public class OXSieveHandlerException extends Exception {
         this.sieveHost = sieveHost;
         this.sieveHostPort = sieveHostPort;
         this.sieveResponseCode = responseCode;
+    }
+
+    /**
+     * Sets whether this SIEVE exception is caused by a parsing error
+     *
+     * @param parseError The flag to set
+     * @return This <code>OXSieveHandlerException</code> instance
+     */
+    public OXSieveHandlerException setParseError(final boolean parseError) {
+        this.parseError = parseError;
+        return this;
+    }
+
+    /**
+     * Signals whether this SIEVE exception is caused by a parsing error
+     *
+     * @return <code>true</code> for parse error; otherwise <code>false</code>
+     */
+    public boolean isParseError() {
+        return parseError;
     }
 
 	/**

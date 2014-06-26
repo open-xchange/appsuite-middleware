@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -69,7 +69,6 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
-import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -100,7 +99,7 @@ public class ContactWriter extends CommonWriter {
         ContactField.DEPARTMENT, ContactField.DISPLAY_NAME, ContactField.DISTRIBUTIONLIST, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3,
         ContactField.EMPLOYEE_TYPE, ContactField.FAX_BUSINESS, ContactField.FAX_HOME, ContactField.FAX_OTHER, ContactField.FILE_AS, ContactField.FOLDER_ID,
         ContactField.GIVEN_NAME, ContactField.IMAGE1, ContactField.IMAGE1_CONTENT_TYPE, ContactField.INFO, ContactField.INSTANT_MESSENGER1,
-        ContactField.INSTANT_MESSENGER2, ContactField.LINKS, ContactField.MANAGER_NAME, ContactField.MARITAL_STATUS, ContactField.MIDDLE_NAME, ContactField.NICKNAME,
+        ContactField.INSTANT_MESSENGER2, ContactField.MANAGER_NAME, ContactField.MARITAL_STATUS, ContactField.MIDDLE_NAME, ContactField.NICKNAME,
         ContactField.NOTE, ContactField.NUMBER_OF_CHILDREN, ContactField.NUMBER_OF_EMPLOYEE, ContactField.POSITION, ContactField.POSTAL_CODE_BUSINESS,
         ContactField.POSTAL_CODE_HOME, ContactField.POSTAL_CODE_OTHER, ContactField.PRIVATE_FLAG, ContactField.PROFESSION, ContactField.ROOM_NUMBER,
         ContactField.SALES_VOLUME, ContactField.SPOUSE_NAME, ContactField.STATE_BUSINESS, ContactField.STATE_HOME, ContactField.STATE_OTHER,
@@ -253,9 +252,6 @@ public class ContactWriter extends CommonWriter {
                 addElement(ContactFields.DISTRIBUTIONLIST_FLAG, false, e);
             }
 
-            if (contactobject.getNumberOfLinks() > 0) {
-                writeLinks(contactobject, e);
-            }
         }
     }
 
@@ -407,29 +403,6 @@ public class ContactWriter extends CommonWriter {
                 child.setAttribute("isInternal", "true");
             }
         }
-    }
-
-    protected void writeLinks(final Contact contactobject, final Element e_prop) {
-        final Element e_links = new Element(ContactFields.LINKS, XmlServlet.NS);
-
-        final LinkEntryObject[] links = contactobject.getLinks();
-        if (links != null) {
-            for (int a = 0; a < links.length; a++) {
-                final int id = links[a].getLinkID();
-                String displayname = links[a].getLinkDisplayname();
-                if (displayname == null) {
-                    displayname = Integer.toString(id);
-                }
-
-                final Element e = new Element("link", XmlServlet.NS);
-                e.addContent(Integer.toString(id));
-                e.setAttribute("displayname", displayname, XmlServlet.NS);
-
-                e_links.addContent(e);
-            }
-            e_prop.addContent(e_links);
-        }
-
     }
 
     protected void writeDistributionList(final Contact contactobject, final Element e_prop) {

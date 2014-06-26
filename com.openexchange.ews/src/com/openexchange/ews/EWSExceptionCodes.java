@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,9 +52,10 @@ package com.openexchange.ews;
 import com.microsoft.schemas.exchange.services._2006.messages.ResponseMessageType;
 import com.microsoft.schemas.exchange.services._2006.types.ResponseClassType;
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link EWSExceptionCodes}
@@ -63,28 +64,28 @@ import com.openexchange.exception.OXExceptionFactory;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public enum EWSExceptionCodes implements OXExceptionCode {
+public enum EWSExceptionCodes implements DisplayableOXExceptionCode {
 
     /** Got %1$d instead of %2$d response messages */
-    UNEXPECTED_RESPONSE_COUNT(EWSExceptionMessages.UNEXPECTED_RESPONSE_COUNT_MSG, Category.CATEGORY_ERROR, 1),
+    UNEXPECTED_RESPONSE_COUNT("Got %1$d instead of %2$d response messages", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 1),
 
     /** Got no response messages */
-    NO_RESPONSE(EWSExceptionMessages.NO_RESPONSE_MSG, Category.CATEGORY_ERROR, 2),
+    NO_RESPONSE("Got no response messages", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 2),
 
     /** EWS error: %1$s (%2$s) */
-    EWS_ERROR(EWSExceptionMessages.EWS_ERROR_MSG, Category.CATEGORY_ERROR, 3),
+    EWS_ERROR("EWS error: %1$s (%2$s)", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 3),
 
     /** EWS warning: %1$s (%2$s) */
-    EWS_WARNING(EWSExceptionMessages.EWS_WARNING_MSG, Category.CATEGORY_WARNING, 4),
+    EWS_WARNING("EWS warning: %1$s (%2$s)", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 4),
 
     /** Object \"%1$s\" not found */
-    NOT_FOUND(EWSExceptionMessages.NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 5),
+    NOT_FOUND("Object \"%1$s\" not found", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 5),
 
     /** The name \"%1$s\" is ambiguous */
-    AMBIGUOUS_NAME(EWSExceptionMessages.AMBIGUOUS_NAME_MSG, Category.CATEGORY_CONFLICT, 6),
+    AMBIGUOUS_NAME("The name \"%1$s\" is ambiguous", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 6),
 
     /** An external error occured: %1$s */
-    EXTERNAL_ERROR(EWSExceptionMessages.EXTERNAL_ERROR_MSG, Category.CATEGORY_ERROR, 7),
+    EXTERNAL_ERROR("An external error occured: %1$s", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 7),
 
     ;
 
@@ -93,9 +94,11 @@ public enum EWSExceptionCodes implements OXExceptionCode {
     private final Category category;
     private final int number;
     private final String message;
+    private final String displayMessage;
 
-    private EWSExceptionCodes(String message, Category category, int detailNumber) {
+    private EWSExceptionCodes(String message, String displayMessage, Category category, int detailNumber) {
         this.message = message;
+        this.displayMessage = displayMessage;
         number = detailNumber;
         this.category = category;
     }
@@ -113,6 +116,11 @@ public enum EWSExceptionCodes implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override

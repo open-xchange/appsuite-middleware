@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -75,6 +75,7 @@ import net.fortuna.ical4j.model.parameter.Role;
 import net.fortuna.ical4j.model.parameter.Rsvp;
 import net.fortuna.ical4j.model.property.Attendee;
 import net.fortuna.ical4j.model.property.Resources;
+import net.fortuna.ical4j.util.Uris;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ConversionWarning.Code;
@@ -94,6 +95,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.NotificationConfig;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
+import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.resource.Resource;
 
@@ -173,7 +176,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             LOG.error("", e);
         }
     }
-    
+
     private PartStat getPartStat(ExternalUserParticipant external) {
         switch (external.getStatus()) {
         case ACCEPT:
@@ -231,12 +234,12 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             LOG.error("", e);
         }
     }
-    
+
     private int getConfirm(UserParticipant p, U obj) {
         if (p.containsConfirm()) {
             return p.getConfirm();
         }
-        
+
         for (UserParticipant u : obj.getUsers()) {
             if (u.getIdentifier() == p.getIdentifier()) {
                 return u.getConfirm();
@@ -294,11 +297,34 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                 }
             } else {
                 final URI uri = attendee.getCalAddress();
-                if(null != uri && "mailto".equalsIgnoreCase(uri.getScheme())) {
-                    String mail = uri.getSchemeSpecificPart();
-                    mail = IDNA.toIDN(mail);
-                    final ICalParticipant icalP = createIcalParticipant(attendee, mail, comment);
-                    mails.put(mail, icalP);
+                if (null != uri) {
+                    String specificPart = uri.getSchemeSpecificPart();
+                    if (false == Strings.isEmpty(specificPart)) {
+                        String mail = null;
+                        if ("mailto".equalsIgnoreCase(uri.getScheme())) {
+                            /*
+                             * mailto-scheme -> e-mail address
+                             */
+                            mail = uri.getSchemeSpecificPart();
+                        } else if (Uris.INVALID_SCHEME.equals(uri.getScheme())) {
+                            /*
+                             * try and parse value as quoted internet address (best effort)
+                             */
+                            try {
+                                mail = new QuotedInternetAddress(specificPart).getAddress();
+                            } catch (AddressException e) {
+                                // ignore
+                            }
+                        }
+                        /*
+                         * add iCal participant if parsed successfully
+                         */
+                        if (false == Strings.isEmpty(mail)) {
+                            mail = IDNA.toIDN(mail);
+                            final ICalParticipant icalP = createIcalParticipant(attendee, mail, comment);
+                            mails.put(mail, icalP);
+                        }
+                    }
                 }
             }
         }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -119,8 +119,7 @@ public class PresencePublisher implements ChangeListener {
                     for (ID subscriber : subscribers) {
                         Presence directedPresence = new Presence(presence);
                         directedPresence.setTo(subscriber);
-                        @SuppressWarnings("unused")// TODO: Can Presence safely be discarded
-                        Map<ID, OXException> failures = messageDispatcher.send(directedPresence);
+                        messageDispatcher.send(directedPresence);
                     }
                 }
             } catch (OXException e) {
@@ -148,10 +147,7 @@ public class PresencePublisher implements ChangeListener {
                         for (ID subscriber : subscribers) {
                             Presence directedPresence = new Presence(currentPresence);
                             directedPresence.setTo(subscriber);
-                            Map<ID, OXException> failures = messageDispatcher.send(directedPresence);
-                            for (OXException oxe : failures.values()) {
-                                LOG.error(oxe.toString(), oxe);
-                            }
+                            messageDispatcher.send(directedPresence);
                         }
                     }
                 } catch (OXException e) {

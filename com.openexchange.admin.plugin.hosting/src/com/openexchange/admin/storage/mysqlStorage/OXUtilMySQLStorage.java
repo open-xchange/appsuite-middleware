@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -60,10 +60,12 @@ import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -112,223 +114,242 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
     @Override
     public int createMaintenanceReason(final MaintenanceReason reason) throws StorageException {
-
         Connection con = null;
         PreparedStatement stmt = null;
-
+        boolean rollback = false;
         try {
-
             con = cache.getConnectionForConfigDB();
+
+            final int res_id = nextId(con);
+
             con.setAutoCommit(false);
-            final int res_id = IDGenerator.getId(con);
-            con.commit();
+            rollback = true;
             stmt = con.prepareStatement("INSERT INTO reason_text (id,text) VALUES(?,?)");
             stmt.setInt(1, res_id);
             stmt.setString(2, reason.getText());
             stmt.executeUpdate();
             con.commit();
-
+            rollback = false;
             return res_id;
         } catch (final DataTruncation dt) {
             LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
-            try {
-                if (con != null && !con.getAutoCommit()) {
-                    con.rollback();
-                }
-            } catch (final SQLException exp) {
-                LOG.error("Error processing rollback of configdb connection!", exp);
-            }
             throw AdminCache.parseDataTruncation(dt);
         } catch (final PoolException pexp) {
             LOG.error("Pool error", pexp);
             throw new StorageException(pexp);
         } catch (final SQLException ecp) {
             LOG.error("Error", ecp);
-            try {
-                if (con != null && !con.getAutoCommit()) {
-                    con.rollback();
-                }
-            } catch (final SQLException exp) {
-                LOG.error("Error processing rollback of configdb connection!", exp);
-            }
             throw new StorageException(ecp);
         } finally {
-
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (final SQLException e) {
-                LOG.error("Error closing statement", e);
+            if (rollback) {
+                DBUtils.rollback(con);
             }
-
-            try {
-                if (con != null) {
+            DBUtils.closeSQLStuff(stmt);
+            if (con != null) {
+                try {
                     cache.pushConnectionForConfigDB(con);
+                } catch (final PoolException exp) {
+                    LOG.error("Error pushing configdb connection to pool!", exp);
                 }
-            } catch (final PoolException exp) {
-                LOG.error("Error pushing configdb connection to pool!", exp);
             }
         }
     }
 
     @Override
     public void changeDatabase(final Database db) throws StorageException {
-
-        Connection con = null;
-        PreparedStatement prep = null;
-
+        // Get connection
+        final Connection con;
         try {
-
             con = cache.getConnectionForConfigDB();
+        } catch (final PoolException e) {
+            LOG.error("Pool Error", e);
+            throw new StorageException(e);
+        }
+
+        // Process it...
+        boolean rollback = true;
+        try {
             con.setAutoCommit(false);
 
-            if (db.getName() != null && db.getName().length() > 0) {
-                prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_pool.name = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
-                prep.setString(1, db.getName());
-                prep.setInt(2, db.getId().intValue());
-                prep.setInt(3, db.getId().intValue());
-                prep.setInt(4, db.getId().intValue());
-                prep.executeUpdate();
-                prep.close();
+            // Lock appropriate rows
+            final Integer id = db.getId();
+            if (null == id) {
+                throw new StorageException("Missing database identifier");
             }
+            lock(con);
 
-            if (db.getLogin() != null && db.getLogin().length() > 0) {
-                prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_pool.login = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
-                prep.setString(1, db.getLogin());
-                prep.setInt(2, db.getId().intValue());
-                prep.setInt(3, db.getId().intValue());
-                prep.setInt(4, db.getId().intValue());
-                prep.executeUpdate();
-                prep.close();
-            }
-
-            if (db.getPassword() != null && db.getPassword().length() > 0) {
-                prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_pool.password = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
-                prep.setString(1, db.getPassword());
-                prep.setInt(2, db.getId().intValue());
-                prep.setInt(3, db.getId().intValue());
-                prep.setInt(4, db.getId().intValue());
-                prep.executeUpdate();
-                prep.close();
-            }
-
-            if (db.getDriver() != null && db.getDriver().length() > 0) {
-                prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_pool.driver = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
-                prep.setString(1, db.getDriver());
-                prep.setInt(2, db.getId().intValue());
-                prep.setInt(3, db.getId().intValue());
-                prep.setInt(4, db.getId().intValue());
-                prep.executeUpdate();
-                prep.close();
-            }
-
-            if (db.getPoolInitial() != null) {
-                prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_pool.initial = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
-                prep.setInt(1, db.getPoolInitial().intValue());
-                prep.setInt(2, db.getId().intValue());
-                prep.setInt(3, db.getId().intValue());
-                prep.setInt(4, db.getId().intValue());
-                prep.executeUpdate();
-                prep.close();
-            }
-
-            if (db.getPoolMax() != null) {
-                prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_pool.max = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
-                prep.setInt(1, db.getPoolMax().intValue());
-                prep.setInt(2, db.getId().intValue());
-                prep.setInt(3, db.getId().intValue());
-                prep.setInt(4, db.getId().intValue());
-                prep.executeUpdate();
-                prep.close();
-            }
-
-            if (db.getPoolHardLimit() != null) {
-                prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_pool.hardlimit = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
-                prep.setInt(1, db.getPoolHardLimit().intValue());
-                prep.setInt(2, db.getId().intValue());
-                prep.setInt(3, db.getId().intValue());
-                prep.setInt(4, db.getId().intValue());
-                prep.executeUpdate();
-                prep.close();
-            }
-
-            if (db.getUrl() != null && db.getUrl().length() > 0) {
-                prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_pool.url = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
-                prep.setString(1, db.getUrl());
-                prep.setInt(2, db.getId().intValue());
-                prep.setInt(3, db.getId().intValue());
-                prep.setInt(4, db.getId().intValue());
-                prep.executeUpdate();
-                prep.close();
-            }
-
-            if (db.getClusterWeight() != null) {
-                prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_cluster.weight = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
-                prep.setInt(1, db.getClusterWeight().intValue());
-                prep.setInt(2, db.getId().intValue());
-                prep.setInt(3, db.getId().intValue());
-                prep.setInt(4, db.getId().intValue());
-                prep.executeUpdate();
-                prep.close();
-            }
-
-            if (db.getMaxUnits() != null) {
-                prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_cluster.max_units = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
-                prep.setInt(1, db.getMaxUnits().intValue());
-                prep.setInt(2, db.getId().intValue());
-                prep.setInt(3, db.getId().intValue());
-                prep.setInt(4, db.getId().intValue());
-                prep.executeUpdate();
-                prep.close();
-            }
-
+            // Change database
+            changeDatabase(db, con);
             con.commit();
+            rollback = false;
         } catch (final DataTruncation dt) {
+            DBUtils.rollback(con);
+            rollback = false;
             LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
-            try {
-                if (con != null && !con.getAutoCommit()) {
-                    con.rollback();
-                }
-            } catch (final SQLException sql) {
-                LOG.error("Rollback failed for configdb connection", sql);
-            }
             throw AdminCache.parseDataTruncation(dt);
-        } catch (final PoolException pe) {
-            LOG.error("Pool Error", pe);
-            try {
-                if (con != null && !con.getAutoCommit()) {
-                    con.rollback();
-                }
-            } catch (final SQLException sql) {
-                LOG.error("Rollback failed for configdb connection", sql);
-            }
-            throw new StorageException(pe);
-        } catch (final SQLException sqle) {
-            LOG.error("SQL Error", sqle);
-            try {
-                if (con != null && !con.getAutoCommit()) {
-                    con.rollback();
-                }
-            } catch (final SQLException sql) {
-                LOG.error("Rollback failed for configdb connection", sql);
-            }
-            throw new StorageException(sqle);
+        } catch (final SQLException sql) {
+            DBUtils.rollback(con);
+            rollback = false;
+            LOG.error("SQL Error", sql);
+            throw new StorageException(sql.toString(), sql);
         } finally {
-            try {
-                if (prep != null) {
-                    prep.close();
-                }
-            } catch (final SQLException ee) {
-                LOG.error("Error closing statement", ee);
+            if (rollback) {
+                DBUtils.rollback(con);
             }
+            DBUtils.autocommit(con);
             try {
-                if (con != null) {
-                    cache.pushConnectionForConfigDB(con);
-                }
+                cache.pushConnectionForConfigDB(con);
             } catch (final PoolException e) {
                 LOG.error("Error pushing configdb connection to pool!", e);
             }
+        }
+    }
+
+    private void lock(final Connection con) throws SQLException {
+        if (null == con) {
+            return;
+        }
+        Statement stmt = null;
+        try {
+            if (con.getAutoCommit()) {
+                throw new SQLException("Connection is not in transaction state.");
+            }
+            stmt = con.createStatement();
+            stmt.execute("SELECT COUNT(*) FROM db_cluster FOR UPDATE");
+            closeSQLStuff(stmt);
+
+            stmt = con.createStatement();
+            stmt.execute("SELECT COUNT(*) FROM db_pool FOR UPDATE");
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    private void changeDatabase(final Database db, final Connection con) throws SQLException {
+        PreparedStatement prep = null;
+        try {
+            final StringBuilder sqlBuilder = new StringBuilder(2048);
+            sqlBuilder.append("UPDATE db_pool,db_cluster SET ");
+
+            final List<Object> params = new LinkedList<Object>();
+            boolean first = true;
+
+            if (db.getName() != null && db.getName().length() > 0) {
+                first = false;
+                sqlBuilder.append("db_pool.name = ?");
+                params.add(db.getName());
+            }
+
+            if (db.getLogin() != null && db.getLogin().length() > 0) {
+                if (first) {
+                    first = false;
+                } else {
+                    sqlBuilder.append(", ");
+                }
+                sqlBuilder.append("db_pool.login = ?");
+                params.add(db.getLogin());
+            }
+
+            if (db.getPassword() != null && db.getPassword().length() > 0) {
+                if (first) {
+                    first = false;
+                } else {
+                    sqlBuilder.append(", ");
+                }
+                sqlBuilder.append("db_pool.password = ?");
+                params.add(db.getPassword());
+            }
+
+            if (db.getDriver() != null && db.getDriver().length() > 0) {
+                if (first) {
+                    first = false;
+                } else {
+                    sqlBuilder.append(", ");
+                }
+                sqlBuilder.append("db_pool.driver = ?");
+                params.add(db.getDriver());
+            }
+
+            if (db.getPoolInitial() != null) {
+                if (first) {
+                    first = false;
+                } else {
+                    sqlBuilder.append(", ");
+                }
+                sqlBuilder.append("db_pool.initial = ?");
+                params.add(db.getPoolInitial());
+            }
+
+            if (db.getPoolMax() != null) {
+                if (first) {
+                    first = false;
+                } else {
+                    sqlBuilder.append(", ");
+                }
+                sqlBuilder.append("db_pool.max = ?");
+                params.add(db.getPoolMax());
+            }
+
+            if (db.getPoolHardLimit() != null) {
+                if (first) {
+                    first = false;
+                } else {
+                    sqlBuilder.append(", ");
+                }
+                sqlBuilder.append("db_pool.hardlimit = ?");
+                params.add(db.getPoolHardLimit());
+            }
+
+            if (db.getUrl() != null && db.getUrl().length() > 0) {
+                if (first) {
+                    first = false;
+                } else {
+                    sqlBuilder.append(", ");
+                }
+                sqlBuilder.append("db_pool.url = ?");
+                params.add(db.getUrl());
+            }
+
+            if (db.getClusterWeight() != null) {
+                if (first) {
+                    first = false;
+                } else {
+                    sqlBuilder.append(", ");
+                }
+                sqlBuilder.append("db_cluster.weight = ?");
+                params.add(db.getClusterWeight());
+            }
+
+            if (db.getMaxUnits() != null) {
+                if (first) {
+                    first = false;
+                } else {
+                    sqlBuilder.append(", ");
+                }
+                sqlBuilder.append("db_cluster.max_units = ?");
+                params.add(db.getMaxUnits());
+            }
+
+            if (first) {
+                // No changes applied
+                return;
+            }
+
+            // Finish SQL
+            sqlBuilder.append(" WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
+            params.add(db.getId());
+            params.add(db.getId());
+            params.add(db.getId());
+
+            // Create statement, fill parameters, and execute update
+            prep = con.prepareStatement(sqlBuilder.toString());
+            final int size = params.size();
+            for (int pos = 1; pos <= size; pos++) {
+                prep.setObject(pos, params.get(pos - 1));
+            }
+            prep.executeUpdate();
+        } finally {
+            DBUtils.closeSQLStuff(prep);
         }
     }
 
@@ -657,7 +678,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         return stores.toArray(new Filestore[stores.size()]);
     }
 
-    private static List<Integer> listFilestoreIds(final String pattern) throws StorageException {
+    private static List<Integer> listAllFilestoreIds() throws StorageException {
         final Connection con;
         try {
             con = cache.getConnectionForConfigDB();
@@ -668,8 +689,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         ResultSet result = null;
         final List<Integer> ids = new ArrayList<Integer>();
         try {
-            stmt = con.prepareStatement("SELECT id FROM filestore WHERE uri LIKE ?");
-            stmt.setString(1, pattern.replace('*', '%'));
+            stmt = con.prepareStatement("SELECT id FROM filestore");
             result = stmt.executeQuery();
             while (result.next()) {
                 ids.add(I(result.getInt(1)));
@@ -687,18 +707,41 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         return ids;
     }
 
+    private int nextId(final Connection con) throws SQLException {
+        boolean rollback = false;
+        try {
+            // BEGIN
+            con.setAutoCommit(false);
+            rollback = true;
+            // Acquire next available identifier
+            final int id = IDGenerator.getId(con);
+            // COMMIT
+            con.commit();
+            rollback = false;
+            return id;
+        } finally {
+            if (rollback) {
+                DBUtils.rollback(con);
+            }
+        }
+    }
+
     @Override
     public int registerDatabase(final Database db) throws StorageException {
-
         Connection con = null;
         PreparedStatement prep = null;
+        ResultSet rs = null;
+        boolean rollback = false;
         try {
-
             con = cache.getConnectionForConfigDB();
 
+            final int db_id = nextId(con);
+            final int c_id = db.isMaster() ? nextId(con) : -1;
+
             con.setAutoCommit(false);
-            final int db_id = IDGenerator.getId(con);
-            con.commit();
+            rollback = true;
+
+            lock(con);
 
             prep = con.prepareStatement("INSERT INTO db_pool VALUES (?,?,?,?,?,?,?,?,?);");
             prep.setInt(1, db_id);
@@ -735,11 +778,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             prep.close();
 
             if (db.isMaster()) {
-
-                con.setAutoCommit(false);
-                final int c_id = IDGenerator.getId(con);
-                con.commit();
-
                 prep = con.prepareStatement("INSERT INTO db_cluster VALUES (?,?,?,?,?);");
                 prep.setInt(1, c_id);
 
@@ -754,7 +792,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             } else {
                 prep = con.prepareStatement("SELECT db_pool_id FROM db_pool WHERE db_pool_id = ?");
                 prep.setInt(1, db.getMasterId());
-                ResultSet rs = prep.executeQuery();
+                rs = prep.executeQuery();
                 if (!rs.next()) {
                     throw new StorageException("No such master with ID=" + db.getMasterId());
                 }
@@ -780,44 +818,28 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
             }
             con.commit();
+            rollback = false;
             return db_id;
         } catch (final DataTruncation dt) {
             LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
-            try {
-                if (con != null && !con.getAutoCommit()) {
-                    con.rollback();
-                }
-            } catch (final SQLException exp) {
-                LOG.error("Error processing rollback of configdb connection!", exp);
-            }
             throw AdminCache.parseDataTruncation(dt);
         } catch (final PoolException pe) {
             LOG.error("Pool Error", pe);
             throw new StorageException(pe);
         } catch (final SQLException ecp) {
             LOG.error("SQL Error", ecp);
-            try {
-                if (con != null && !con.getAutoCommit()) {
-                    con.rollback();
-                }
-            } catch (final SQLException exp) {
-                LOG.error("Error processing rollback of configdb connection!", exp);
-            }
             throw new StorageException(ecp);
         } finally {
-            try {
-                if (prep != null) {
-                    prep.close();
-                }
-            } catch (final SQLException ee) {
-                LOG.error("Error closing statement", ee);
+            if (rollback) {
+                DBUtils.rollback(con);
             }
-            try {
-                if (con != null) {
+            DBUtils.closeSQLStuff(rs, prep);
+            if (con != null) {
+                try {
                     cache.pushConnectionForConfigDB(con);
+                } catch (final PoolException e) {
+                    LOG.error("Error pushing configdb connection to pool!", e);
                 }
-            } catch (final PoolException e) {
-                LOG.error("Error pushing configdb connection to pool!", e);
             }
         }
     }
@@ -832,13 +854,14 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         }
         store_size *= Math.pow(2, 20);
         PreparedStatement stmt = null;
+        boolean rollback = false;
         try {
-
             con = cache.getConnectionForConfigDB();
-            con.setAutoCommit(false);
-            final int fstore_id = IDGenerator.getId(con);
-            con.commit();
 
+            final int fstore_id = nextId(con);
+
+            con.setAutoCommit(false);
+            rollback = true;
             stmt = con.prepareStatement("INSERT INTO filestore (id,uri,size,max_context) VALUES (?,?,?,?)");
             stmt.setInt(1, fstore_id);
             stmt.setString(2, fstore.getUrl());
@@ -846,67 +869,104 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             stmt.setInt(4, fstore.getMaxContexts());
             stmt.executeUpdate();
             con.commit();
+            rollback = false;
 
             return fstore_id;
         } catch (final DataTruncation dt) {
             LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
-            try {
-                if (con != null && !con.getAutoCommit()) {
-                    con.rollback();
-                }
-            } catch (final SQLException exp) {
-                LOG.error("Error processing rollback of configdb connection!", exp);
-            }
             throw AdminCache.parseDataTruncation(dt);
         } catch (final PoolException pe) {
             LOG.error("Pool Error", pe);
             throw new StorageException(pe);
         } catch (final SQLException ecp) {
             LOG.error("SQL Error", ecp);
-            try {
-                if (con != null && !con.getAutoCommit()) {
-                    con.rollback();
-                }
-            } catch (final SQLException exp) {
-                LOG.error("Error processing rollback of configdb connection!", exp);
-            }
             throw new StorageException(ecp);
         } finally {
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (final SQLException e) {
-                LOG.error("Error closing statement", e);
+            if (rollback) {
+                DBUtils.rollback(con);
             }
-            try {
-                if (con != null) {
+            DBUtils.closeSQLStuff(stmt);
+            if (con != null) {
+                try {
                     cache.pushConnectionForConfigDB(con);
+                } catch (final PoolException exp) {
+                    LOG.error("Error pushing configdb connection to pool!", exp);
                 }
-            } catch (final PoolException exp) {
-                LOG.error("Error pushing configdb connection to pool!", exp);
             }
         }
     }
 
     @Override
     public Filestore findFilestoreForContext() throws StorageException {
-        final List<Integer> ids = listFilestoreIds("*");
-        final List<Filestore> filestores = new ArrayList<Filestore>();
-        for (final int id : ids) {
-            filestores.add(getFilestore(id, false));
-        }
-        for (final Filestore filestore : filestores) {
-            // This is the special value for not adding contexts to this filestore.
-            if (isContextLimitReached(filestore)) {
-                continue;
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getConnectionForConfigDB();
+            stmt = con.prepareStatement("SELECT filestore.id, filestore.max_context, COUNT(context.cid) AS num FROM filestore LEFT JOIN context ON filestore.id=context.filestore_id GROUP BY filestore.id ORDER BY num ASC");
+            rs = stmt.executeQuery();
+
+            if (!rs.next()) {
+                // None found
+                throw new StorageException("No filestore found");
             }
-            if (!enoughSpaceForContext(filestore)) {
-                continue;
+
+            // Load potential candidates
+            class Candidate {
+                final int id;
+                final int maxNumberOfContexts;
+                final int numberOfContexts;
+
+                Candidate(final int id, final int maxNumberOfContexts, final int numberOfContexts) {
+                    super();
+                    this.id = id;
+                    this.maxNumberOfContexts = maxNumberOfContexts;
+                    this.numberOfContexts = numberOfContexts;
+                }
             }
-            return filestore;
+
+            final List<Candidate> candidates = new LinkedList<Candidate>();
+            do {
+                candidates.add(new Candidate(rs.getInt(1), rs.getInt(2), rs.getInt(3)));
+            } while (rs.next());
+
+            // Close resources as no more needed
+            DBUtils.closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
+
+            // Find a suitable one from ordered list of candidates
+            for (final Candidate candidate : candidates) {
+                if (candidate.maxNumberOfContexts > 0 && candidate.numberOfContexts < candidate.maxNumberOfContexts) {
+                    // Get filestore
+                    final Filestore filestore = getFilestore(candidate.id, false, con);
+                    if (enoughSpaceForContext(filestore)) {
+                        return filestore;
+                    }
+                }
+            }
+
+            // None found
+            throw new StorageException("No usable or suitable filestore found");
+        } catch (final DataTruncation dt) {
+            LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
+            throw AdminCache.parseDataTruncation(dt);
+        } catch (final SQLException ecp) {
+            LOG.error("SQL Error", ecp);
+            throw new StorageException(ecp);
+        } catch (final PoolException pe) {
+            LOG.error("Pool Error", pe);
+            throw new StorageException(pe);
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+            if (con != null) {
+                try {
+                    cache.pushConnectionForConfigDB(con);
+                } catch (final PoolException exp) {
+                    LOG.error("Error pushing configdb connection to pool!", exp);
+                }
+            }
         }
-        throw new StorageException("No usable or free enough filestore found");
     }
 
     @Override
@@ -943,18 +1003,16 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
     @Override
     public int registerServer(final String serverName) throws StorageException {
-
         Connection con = null;
         PreparedStatement prep = null;
+        boolean rollback = false;
         try {
-
             con = cache.getConnectionForConfigDB();
 
-            con.setAutoCommit(false);
-            final int srv_id = IDGenerator.getId(con);
-            con.commit();
-            con.setAutoCommit(true);
+            final int srv_id = nextId(con);
 
+            con.setAutoCommit(false);
+            rollback = true;
             prep = con.prepareStatement("INSERT INTO server VALUES (?,?);");
             prep.setInt(1, srv_id);
             if (serverName != null) {
@@ -964,6 +1022,8 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             }
             prep.executeUpdate();
             prep.close();
+            con.commit();
+            rollback = false;
 
             return srv_id;
         } catch (final DataTruncation dt) {
@@ -976,19 +1036,16 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             LOG.error("SQL Error", ecp);
             throw new StorageException(ecp);
         } finally {
-            try {
-                if (prep != null) {
-                    prep.close();
-                }
-            } catch (final SQLException e) {
-                LOG.error("Error closing statement", e);
+            if (rollback) {
+                DBUtils.rollback(con);
             }
-            try {
-                if (con != null) {
+            DBUtils.closeSQLStuff(prep);
+            if (con != null) {
+                try {
                     cache.pushConnectionForConfigDB(con);
+                } catch (final PoolException e) {
+                    LOG.error("Error pushing configdb connection to pool!", e);
                 }
-            } catch (final PoolException e) {
-                LOG.error("Error pushing configdb connection to pool!", e);
             }
         }
 
@@ -1157,6 +1214,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         PreparedStatement stmt = null;
         try {
             DBUtils.startTransaction(con);
+
+            lock(con);
+
             if (isMaster) {
                 try {
                     stmt = con.prepareStatement("DELETE db_pool FROM db_pool JOIN db_cluster WHERE db_pool.db_pool_id=db_cluster.read_db_pool_id AND db_cluster.write_db_pool_id=?");
@@ -1192,6 +1252,10 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         } catch (final SQLException e) {
             rollback(con);
             LOG.error("SQL Error", e);
+            throw new StorageException(e);
+        } catch (final RuntimeException e) {
+            rollback(con);
+            LOG.error("Runtime Error", e);
             throw new StorageException(e);
         } finally {
             try {
@@ -1300,13 +1364,35 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
      */
     @Override
     public Filestore getFilestore(final int id, final boolean loadRealUsage) throws StorageException {
-        final Connection con;
+        Connection con = null;
         try {
             con = cache.getConnectionForConfigDB();
+            return getFilestore(id, loadRealUsage, con);
         } catch (final PoolException e) {
             LOG.error("Pool Error", e);
             throw new StorageException(e);
+        } finally {
+            if (null != con) {
+                try {
+                    cache.pushConnectionForConfigDB(con);
+                } catch (final PoolException e) {
+                    LOG.error("Error pushing configdb connection to pool!", e);
+                }
+            }
         }
+    }
+
+    /**
+     * Loads all filestore information. BEWARE! If loadRealUsage is set to <code>true</code> this operation may be very expensive because
+     * the filestore usage for all contexts stored in that filestore must be loaded. Setting this parameter to <code>false</code> will set
+     * the read usage of the filestore to 0.
+     *
+     * @param id unique identifier of the filestore.
+     * @param loadRealUsage <code>true</code> to load the real file store usage of that filestore.
+     * @return all filestore information
+     * @throws StorageException if loading the filestore information fails.
+     */
+    private Filestore getFilestore(final int id, final boolean loadRealUsage, final Connection con) throws StorageException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         final Filestore fs;
@@ -1328,11 +1414,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             throw new StorageException(e);
         } finally {
             closeSQLStuff(result, stmt);
-            try {
-                cache.pushConnectionForConfigDB(con);
-            } catch (final PoolException e) {
-                LOG.error("Error pushing configdb connection to pool!", e);
-            }
         }
         final FilestoreUsage usage = getUsage(id, loadRealUsage);
         fs.setUsed(L(toMB(usage.getUsage())));

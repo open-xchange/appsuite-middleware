@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -126,6 +126,34 @@ public enum Attribute {
         Attribute.TRANSPORT_PROTOCOL_LITERAL,
         Attribute.TRANSPORT_SECURE_LITERAL,
         Attribute.TRANSPORT_SERVER_LITERAL));
+
+    /**
+     * Contains attributes which denote an account's default folders.
+     */
+    public static final EnumSet<Attribute> DEFAULT = EnumSet.of(
+        Attribute.CONFIRMED_HAM_FULLNAME_LITERAL,
+        Attribute.CONFIRMED_HAM_LITERAL,
+        Attribute.CONFIRMED_SPAM_FULLNAME_LITERAL,
+        Attribute.CONFIRMED_SPAM_LITERAL,
+        Attribute.DRAFTS_FULLNAME_LITERAL,
+        Attribute.DRAFTS_LITERAL,
+        Attribute.SENT_FULLNAME_LITERAL,
+        Attribute.SENT_LITERAL,
+        Attribute.SPAM_FULLNAME_LITERAL,
+        Attribute.SPAM_LITERAL,
+        Attribute.TRASH_FULLNAME_LITERAL,
+        Attribute.TRASH_LITERAL);
+
+    /**
+     * Contains attributes which denote the full names of an account's default folders.
+     */
+    public static final EnumSet<Attribute> DEFAULT_FULL_NAMES = EnumSet.of(
+        Attribute.CONFIRMED_HAM_FULLNAME_LITERAL,
+        Attribute.CONFIRMED_SPAM_FULLNAME_LITERAL,
+        Attribute.DRAFTS_FULLNAME_LITERAL,
+        Attribute.SENT_FULLNAME_LITERAL,
+        Attribute.SPAM_FULLNAME_LITERAL,
+        Attribute.TRASH_FULLNAME_LITERAL);
 
     private int id;
 

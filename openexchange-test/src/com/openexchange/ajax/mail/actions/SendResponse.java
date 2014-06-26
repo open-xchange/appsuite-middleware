@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -82,7 +82,7 @@ public final class SendResponse extends AbstractAJAXResponse {
 	public String[] getFolderAndID() {
 		if (null == folderAndID) {
 			final String str;
-			if (getData() == null || (str = getData().toString()).length() == 0) {
+			if (getData() == null || (str = getData().toString()).length() == 0 || "null".equalsIgnoreCase(str)) {
 				return null;
 			}
 			try {

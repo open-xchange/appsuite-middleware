@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,14 +53,11 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.CreateTableService;
-import com.openexchange.groupware.update.FullPrimaryKeySupportService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.internal.CreateUpdateTaskTable;
 import com.openexchange.groupware.update.internal.ExcludedList;
-import com.openexchange.groupware.update.internal.FullPrimaryKeySupportImpl;
 import com.openexchange.groupware.update.internal.InternalList;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * This {@link Activator} currently is only used to initialize some structures within the database update component. Later on this may used
@@ -83,11 +80,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     public void startBundle() {
-
         final ConfigurationService configService = getService(ConfigurationService.class);
-        final FullPrimaryKeySupportImpl fullPrimaryKeySupport = new FullPrimaryKeySupportImpl(configService);
-        registerService(FullPrimaryKeySupportService.class, fullPrimaryKeySupport);
-        ServerServiceRegistry.getInstance().addService(FullPrimaryKeySupportService.class, fullPrimaryKeySupport);
 
         ExcludedList.getInstance().configure(configService);
         InternalList.getInstance().start();
@@ -96,14 +89,13 @@ public class Activator extends HousekeepingActivator {
         rememberTracker(new ServiceTracker<CacheService, CacheService>(context, CacheService.class.getName(), new CacheCustomizer(context)));
 
         openTrackers();
-        
-        registerService(CreateTableService.class, new CreateUpdateTaskTable(fullPrimaryKeySupport));
+
+        registerService(CreateTableService.class, new CreateUpdateTaskTable());
     }
 
     @Override
     protected void stopBundle() throws Exception {
         InternalList.getInstance().stop();
-        ServerServiceRegistry.getInstance().removeService(FullPrimaryKeySupportService.class);
         super.stopBundle();
     }
 

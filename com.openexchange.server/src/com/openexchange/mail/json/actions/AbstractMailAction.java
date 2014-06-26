@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -220,6 +220,30 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
     protected abstract AJAXRequestResult perform(MailRequest req) throws OXException, JSONException;
 
     /**
+     * Checks whether specified mail should be discarded according to filter flags
+     *
+     * @param m The mail to check
+     * @param ignoreSeen <code>true</code> to ignore \Seen ones; otherwise <code>false</code>
+     * @param ignoreDeleted <code>true</code> to ignore \Deleted ones that are \Seen; otherwise <code>false</code>
+     * @return <code>true</code> if mail should be discarded according to filter flags; otherwise <code>false</code>
+     */
+    protected static boolean discardMail(final MailMessage m, final boolean ignoreSeen, final boolean ignoreDeleted) {
+        if (null == m) {
+            return true;
+        }
+        if (ignoreSeen && m.isSeen()) {
+            // Discard \Seen mails
+            return true;
+        }
+        if (ignoreDeleted && m.isDeleted() && m.isSeen()) {
+            // Discard \Seen mails that are \Deleted
+            return true;
+        }
+        // Do not discard
+        return false;
+    }
+
+    /**
      * Triggers the contact collector for specified mail's addresses.
      *
      * @param session The session
@@ -367,9 +391,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
          */
         int accountId;
         {
-            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                MailAccountStorageService.class,
-                true);
+            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
             final int user = session.getUserId();
             final int cid = session.getContextId();
             if (null == from) {
@@ -440,15 +462,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
     }
 
     protected static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
+        return com.openexchange.java.Strings.isEmpty(string);
     }
 
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -93,9 +93,11 @@ public final class IMAPSessionProperties {
      * Resets the default IMAP session properties
      */
     public static void resetDefaultSessionProperties() {
-        if (null != imapSessionProperties) {
+        Properties tmp = imapSessionProperties;
+        if (null != tmp) {
             synchronized (IMAPSessionProperties.class) {
-                if (null != imapSessionProperties) {
+                tmp = imapSessionProperties;
+                if (null != tmp) {
                     imapSessionProperties = null;
                 }
             }

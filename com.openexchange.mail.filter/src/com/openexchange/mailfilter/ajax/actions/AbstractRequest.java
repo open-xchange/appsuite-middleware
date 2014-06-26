@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -55,7 +55,7 @@ import com.openexchange.mailfilter.ajax.Action;
 import com.openexchange.mailfilter.ajax.Credentials;
 import com.openexchange.mailfilter.ajax.Parameter;
 import com.openexchange.mailfilter.internal.MailFilterProperties;
-import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;
+import com.openexchange.mailfilter.services.Services;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -127,7 +127,7 @@ public abstract class AbstractRequest {
     }
 
     public Credentials getCredentials() throws OXException {
-        final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(
+        final ConfigurationService config = Services.getService(
             ConfigurationService.class);
         final String credsrc = config.getProperty(MailFilterProperties.Values.SIEVE_CREDSRC.property);
         final String loginName;

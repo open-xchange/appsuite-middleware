@@ -3,6 +3,7 @@
 
     <!-- Customizable values -->
     <property name="bundlesDir" value="bundles"/>
+    <property name="cltDir" value="cltLib"/>
     <property name="testBundlesDir" value="testBundles"/>
 
     <!-- Constants -->
@@ -25,6 +26,9 @@
             <include name="**/*.jar"/>
             <exclude name="**/xerces.jar"/>
             <exclude name="**/lib/json*.jar"/>
+        </fileset>
+        <fileset dir="${cltDir}">
+            <include name="*.jar"/>
         </fileset>
         <fileset dir="${testBundlesDir}">
             <include name="*.jar"/>
@@ -93,6 +97,20 @@
         </antcall>
     </target>
 
+    <target name="run-updater-tests">
+        <antcall target="run-tests">
+            <param name="testJar" value="open-xchange-updater-test.jar"/>
+            <param name="testClass" value="com.openexchange.updater.test.AllTests"/>
+        </antcall>
+    </target>
+	
+    <target name="run-oxrtc-tests">
+        <antcall target="run-tests">
+            <param name="testJar" value="open-xchange-rtc-test.jar"/>
+            <param name="testClass" value="com.openexchange.ajax.rtc.RTCTestSuite"/>
+        </antcall>
+    </target>
+    	
     <target name="run-unit-tests">
         <antcall target="run-tests">
             <param name="testJar" value="open-xchange-unit-tests.jar"/>

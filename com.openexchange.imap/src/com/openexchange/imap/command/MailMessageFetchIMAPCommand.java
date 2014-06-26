@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -75,7 +75,6 @@ import javax.mail.internet.InternetHeaders;
 import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.ParameterList;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -97,6 +96,7 @@ import com.sun.mail.imap.protocol.Item;
 import com.sun.mail.imap.protocol.RFC822DATA;
 import com.sun.mail.imap.protocol.RFC822SIZE;
 import com.sun.mail.imap.protocol.UID;
+import com.sun.mail.imap.protocol.X_REAL_UID;
 
 /**
  * {@link MailMessageFetchIMAPCommand} - performs a prefetch of messages in given folder with only those fields set that need to be present for
@@ -110,7 +110,8 @@ import com.sun.mail.imap.protocol.UID;
  */
 public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]> {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailMessageFetchIMAPCommand.class);
+    /** The logger constant */
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailMessageFetchIMAPCommand.class);
 
     private static final int LENGTH = 9; // "FETCH <nums> (<command>)"
     private static final int LENGTH_WITH_UID = 13; // "UID FETCH <nums> (<command>)"
@@ -221,7 +222,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
 
     @Override
     protected String getDebugInfo(final int argsIndex) {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(command.length() + 64);
+        final StringBuilder sb = new StringBuilder(command.length() + 64);
         if (uid) {
             sb.append("UID ");
         }
@@ -253,7 +254,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
 
     @Override
     protected String getCommand(final int argsIndex) {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(args[argsIndex].length() + 64);
+        final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
         if (uid) {
             sb.append("UID ");
         }
@@ -293,7 +294,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                 server = server.substring(pos);
             }
             final MessagingException e =
-                new MessagingException(new com.openexchange.java.StringAllocator(32).append("Expected ").append(length).append(" FETCH responses but got ").append(
+                new MessagingException(new StringBuilder(32).append("Expected ").append(length).append(" FETCH responses but got ").append(
                     index).append(" from IMAP folder \"").append(imapFolder.getFullName()).append("\" on server \"").append(server).append(
                     "\".").toString());
             LOG.warn("", e);
@@ -400,16 +401,41 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @throws OXException If an OX error occurs
      */
     public static MailMessage handleFetchRespone(final FetchResponse fetchResponse, final String fullName, final char separator) throws MessagingException, OXException {
-        return handleFetchRespone(fetchResponse, fullName, separator, null, false);
+        return handleFetchRespone(new IDMailMessage(null, fullName), fetchResponse, fullName, separator, null, false);
+    }
+
+    /**
+     * Applies given FETCH response to an given {@link MailMessage} instance.
+     *
+     * @param mail The message to apply to
+     * @param fetchResponse The FETCH response to handle
+     * @param fullName The full name of associated folder
+     * @param separator The separator character
+     * @return The resulting mail message
+     * @throws MessagingException If a messaging error occurs
+     * @throws OXException If an OX error occurs
+     */
+    public static MailMessage handleFetchRespone(final IDMailMessage mail, final FetchResponse fetchResponse, final String fullName, final char separator) throws MessagingException, OXException {
+        return handleFetchRespone(mail, fetchResponse, fullName, separator, null, false);
     }
 
     private static MailMessage handleFetchRespone(final FetchResponse fetchResponse, final String fullName, final char separator, final Set<FetchItemHandler> lastHandlers, final boolean determineAttachmentByHeader) throws MessagingException, OXException {
-        final IDMailMessage mail = new IDMailMessage(null, fullName);
+        return handleFetchRespone(new IDMailMessage(null, fullName), fetchResponse, fullName, separator, lastHandlers, determineAttachmentByHeader);
+    }
+
+    private static MailMessage handleFetchRespone(final IDMailMessage mail, final FetchResponse fetchResponse, final String fullName, final char separator, final Set<FetchItemHandler> lastHandlers, final boolean determineAttachmentByHeader) throws MessagingException, OXException {
+        final IDMailMessage m;
+        if (null == mail) {
+            m = new IDMailMessage(null, fullName);
+        } else {
+            m = mail;
+            m.setFolder(fullName);
+        }
         // mail.setRecentCount(recentCount);
         if (separator != '\0') {
-            mail.setSeparator(separator);
+            m.setSeparator(separator);
         }
-        mail.setSeqnum(fetchResponse.getNumber());
+        m.setSeqnum(fetchResponse.getNumber());
         final int itemCount = fetchResponse.getItemCount();
         final Map<Class<? extends Item>, FetchItemHandler> map = MAP;
         for (int j = 0; j < itemCount; j++) {
@@ -423,22 +449,22 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                     if (null != lastHandlers) {
                         lastHandlers.add(itemHandler);
                     }
-                    itemHandler.handleItem(item, mail, LOG);
+                    itemHandler.handleItem(item, m, LOG);
                 }
             } else {
                 if (null != lastHandlers) {
                     lastHandlers.add(itemHandler);
                 }
-                itemHandler.handleItem(item, mail, LOG);
+                itemHandler.handleItem(item, m, LOG);
             }
         }
         if (determineAttachmentByHeader) {
-            final String cts = mail.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null);
+            final String cts = m.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null);
             if (null != cts) {
-                mail.setHasAttachment(new ContentType(cts).startsWith("multipart/mixed"));
+                m.setHasAttachment(new ContentType(cts).startsWith("multipart/mixed"));
             }
         }
-        return mail;
+        return m;
     }
 
     private static FetchItemHandler getItemHandlerByItem(final Item item) {
@@ -456,6 +482,10 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             return SIZE_ITEM_HANDLER;
         } else if (item instanceof BODYSTRUCTURE) {
             return BODYSTRUCTURE_ITEM_HANDLER;
+        } else if (item instanceof X_REAL_UID) {
+            return X_REAL_UID_ITEM_HANDLER;
+        } else if (item instanceof com.sun.mail.imap.protocol.X_MAILBOX) {
+            return X_MAILBOX_ITEM_HANDLER;
         } else {
             return null;
         }
@@ -906,7 +936,13 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                         final String name = names.nextElement().toString();
                         final String value = cParams.get(name);
                         if (!isEmpty(value)) {
-                            contentType.setParameter(name, value);
+                            try {
+                                contentType.setParameterErrorAware(name, value);
+                            } catch (final OXException e) {
+                                final long uid = msg.getUid();
+                                final String folder = msg.getFolder();
+                                LOG.debug("Ignoring invalid parameter in Content-Type header contained in message {} of folder {}.", uid <= 0 ? "<unknown>" : Long.toString(uid), null == folder ? "<unknown>" : folder);
+                            }
                         }
                     }
                 }
@@ -961,11 +997,39 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         }
     };
 
+    private static final FetchItemHandler X_REAL_UID_ITEM_HANDLER = new FetchItemHandler() {
+
+        @Override
+        public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) {
+            msg.setUid(((X_REAL_UID) item).uid);
+        }
+
+        @Override
+        public void handleMessage(final Message message, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException {
+            // Nothing
+        }
+    };
+
+    private static final FetchItemHandler X_MAILBOX_ITEM_HANDLER = new FetchItemHandler() {
+
+        @Override
+        public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) {
+            msg.setFolder(((com.sun.mail.imap.protocol.X_MAILBOX) item).mailbox);
+        }
+
+        @Override
+        public void handleMessage(final Message message, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException {
+            // Nothing
+        }
+    };
+
     private static final Map<Class<? extends Item>, FetchItemHandler> MAP;
 
     static {
         MAP = new HashMap<Class<? extends Item>, FetchItemHandler>(8);
         MAP.put(UID.class, UID_ITEM_HANDLER);
+        MAP.put(X_REAL_UID.class, X_REAL_UID_ITEM_HANDLER);
+        MAP.put(com.sun.mail.imap.protocol.X_MAILBOX.class, X_MAILBOX_ITEM_HANDLER);
         MAP.put(INTERNALDATE.class, INTERNALDATE_ITEM_HANDLER);
         MAP.put(FLAGS.class, FLAGS_ITEM_HANDLER);
         MAP.put(ENVELOPE.class, ENVELOPE_ITEM_HANDLER);
@@ -1001,6 +1065,16 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
     public static final FetchProfile.Item ENVELOPE_ONLY = new FetchItem("ENVELOPE_ONLY");
 
     /**
+     * This is the X-MAILBOX item.
+     */
+    public static final FetchProfile.Item X_MAILBOX = new FetchItem("X-MAILBOX");
+
+    /**
+     * This is the X-REAL-UID item.
+     */
+    public static final FetchProfile.Item X_REAL_UID = new FetchItem("X-REAL-UID");
+
+    /**
      * Turns given fetch profile into FETCH items to craft a FETCH command.
      *
      * @param isRev1 Whether IMAP protocol is revision 1 or not
@@ -1009,7 +1083,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @return The FETCH items to craft a FETCH command
      */
     public static String getFetchCommand(final boolean isRev1, final FetchProfile fp, final boolean loadBody) {
-        final StringAllocator command = new StringAllocator(128);
+        final StringBuilder command = new StringBuilder(128);
         final boolean sizeIncluded;
         if (fp.contains(FetchProfile.Item.ENVELOPE)) {
             if (loadBody) {
@@ -1038,6 +1112,12 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         }
         if (fp.contains(UIDFolder.FetchProfileItem.UID)) {
             command.append(" UID");
+        }
+        if (fp.contains(X_MAILBOX)) {
+            command.append(" X-MAILBOX");
+        }
+        if (fp.contains(X_REAL_UID)) {
+            command.append(" X-REAL-UID");
         }
         boolean allHeaders = false;
         if (fp.contains(IMAPFolder.FetchProfileItem.HEADERS) && !loadBody) {

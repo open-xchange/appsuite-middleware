@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -62,15 +62,19 @@ import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.http.grizzly.GrizzlyExceptionCode;
 import com.openexchange.http.grizzly.service.comet.CometContextService;
 import com.openexchange.http.grizzly.service.comet.impl.CometContextServiceImpl;
 import com.openexchange.http.grizzly.service.http.HttpServiceFactory;
+import com.openexchange.http.grizzly.service.websocket.WebApplicationService;
+import com.openexchange.http.grizzly.service.websocket.impl.WebApplicationServiceImpl;
 import com.openexchange.http.grizzly.threadpool.GrizzlOXExecutorService;
 import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.startup.SignalStartedService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 
@@ -80,8 +84,6 @@ import com.openexchange.timer.TimerService;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class GrizzlyActivator extends HousekeepingActivator {
-
-    private volatile OXHttpServer grizzly;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -110,14 +112,13 @@ public class GrizzlyActivator extends HousekeepingActivator {
                 }
             });
 
-            GrizzlyConfig grizzlyConfig = GrizzlyConfig.getInstance();
+            final GrizzlyConfig grizzlyConfig = GrizzlyConfig.getInstance();
             grizzlyConfig.start();
 
             /*
              * create, configure and start server
              */
             final OXHttpServer grizzly = new OXHttpServer();
-            this.grizzly = grizzly;
 
             ServerConfiguration serverConfiguration = grizzly.getServerConfiguration();
             serverConfiguration.setMaxRequestParameters(grizzlyConfig.getMaxRequestParameters());
@@ -163,6 +164,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
 
             if (grizzlyConfig.isWebsocketsEnabled()) {
                 networkListener.registerAddOn(new WebSocketAddOn());
+                registerService(WebApplicationService.class, new WebApplicationServiceImpl());
                 log.info("Enabled WebSockets for Grizzly server.");
             }
 
@@ -174,7 +176,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
 
             grizzly.addListener(networkListener);
             grizzly.start();
-            log.info("Registered Grizzly HttpNetworkListener on host: {} and port: {}", grizzlyConfig.getHttpHost(), Integer.valueOf(grizzlyConfig.getHttpPort()));
+            log.info("Prepared Grizzly HttpNetworkListener on host: {} and port: {}, but not yet started...", grizzlyConfig.getHttpHost(), Integer.valueOf(grizzlyConfig.getHttpPort()));
 
             /*
              * Servicefactory that creates instances of the HttpService interface that grizzly implements. Each distinct bundle that uses
@@ -183,6 +185,11 @@ public class GrizzlyActivator extends HousekeepingActivator {
             registerService(HttpService.class.getName(), new HttpServiceFactory(grizzly, context.getBundle()));
             log.info("Registered OSGi HttpService for Grizzly server.");
 
+            registerService(Reloadable.class, grizzlyConfig);
+
+            // Finally start listeners if server start-up is completed
+            track(SignalStartedService.class, new StartUpTracker(grizzly, grizzlyConfig, context));
+            openTrackers();
         } catch (final Exception e) {
             throw GrizzlyExceptionCode.GRIZZLY_SERVER_NOT_STARTED.create(e, new Object[] {});
         }
@@ -195,14 +202,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
         Services.setServiceLookup(null);
 
         log.info("Unregistering services.");
-        cleanUp();
-
-        log.info("Stopping Grizzly.");
-        final OXHttpServer grizzly = this.grizzly;
-        if (null != grizzly) {
-            grizzly.stop();
-            this.grizzly = null;
-        }
+        super.stopBundle();
     }
 
     /**

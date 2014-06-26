@@ -1,27 +1,296 @@
+* 2014-06-22 - thorben.betten@open-xchange.com
+
+ - Fix for bug 33219: Proper access to config cascade to orderly acquire scope-cascaded quota setting
+
+* 2014-06-20 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32323: Introduced "acknowledge" parameter for EDIT actions to prevent implicit client-side acknowledgments of unknown files  
+
+* 2014-06-18 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 33182: Also consider trash folder in the file copy optimizer  
+
+* 2014-06-17 - martin.schneider@open-xchange.com
+
+ - Fix for bug 33132: use encoded site url to get site content
+
+* 2014-06-13 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 33134: Don't auto-insert system-folder permission for possible non-visible parent folders when moving to trash  
+
+* 2014-06-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32962: Use a fix-size look-ahead and only adjust if boundaries reached
+
+* 2014-06-12 - marc.arens@open-xchange.com
+
+ - Fix for bug Bug 33000: Abstain from transactions again to prevent cluster deadlock of documents
+ 
+* 2014-06-12 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 33094: Invalidate folder and subfolders in cache folder storage on "clear" operation  
+
+* 2014-06-11 - thorben.betten@open-xchange.com
+
+ - Fix for bug 33061: Ignore alternative HTML part nested inside multipart/related part if text-only is user's preference
+
+* 2014-06-11 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 32769: Show appointments for public folders just once.
+ - Fix for bug 33092: Templating issue, bad lable width.
+
+* 2014-06-11 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 33038: Check existence of default folder within same transaction 
+ - Fix for bug 33066: Fall back to an empty JSON object on encountered exceptions during deserialization  
+
+* 2014-06-10 - marc.arens@open-xchange.com
+
+ - Fix for bug 32875: Properly clean distributed state and remove sequencenumber when resending to previously offline resource
+ 
+* 2014-06-10 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32946: Don't query trash folders when performing the "recently changed files" search
+ - Fix for bug 32554: Exclude trash folders when searching without explicitly specified folder list
+ - Fix for bug 33018: Don't consider folders below trash as "not seen in tree view" 
+
+* 2014-06-06 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32865: Don't anticipate upcoming ACKNOWLEDGE for the new version of server-side executed EDIT action 
+
+* 2014-06-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32642: Ensure no database boundaries are exceeded when converting a XING user to a contact entry
+ - Fix for bug 32974: Cancel running IMAP-IDLE listener in case context has been deleted in the meantime +
+                      Improved handling in ReplicationMonitor class to avoid default retry mechanism in case a "DBP-0021" (Transaction counter is missing) occurs
+ - Fix for bug 32942: Support separate namespaces for different IMAP users (do not globally cache root subfolder capability per IMAP server anymore)
+
+* 2014-06-04 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32745: Propagate result from EDIT action in following SYNC actions
+
+* 2014-06-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32899: Let 'Capability' class implement java.io.Serializable marker interface
+
+* 2014-06-04 - martin.schneider@open-xchange.com
+
+ - Fix for bug 32923: Import javax.activation in bundles which use it
+
+* 2014-06-03 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 32809: Workaround to negate boolean false filters for ldap
+
+* 2014-06-03 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31072: Ensure first- and lastname are supplied before displayname when inserting/updating records in the database
+
+* 2014-06-03 - martin.schneider@open-xchange.com
+
+ - Fix for bug 32883: Use up to date account information to get folder separator
+
 * 2014-06-03 - marcus.klein@open-xchange.com
 
  - Fix for bug 32743: Property was added in a patch and according post installation scripting should be contained in a patch, too.
 
+* 2014-06-02 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 32874: Removed unsupported "file content" facet
+
 * 2014-06-02 - thorben.betten@open-xchange.com
 
  - Fix for bug 32555: Keep other Content-Type parameters when fixing Apple Mailer messages
+ - Fix for bug 32877: Proper field look-up for "attachment_name" field name
+
+* 2014-05-28 - marc.arens@open-xchange.com
+
+ - Fix for bug 32798:  Use optService and check for availability, log proper error on unavailability
+ 
+* 2014-05-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32796: Proper handling of special "*" query during task search
+ - Fix for bug 32800: Respect index boundaries when adding SIEVE rules to a java.util.List
+ - Fix for bug 32802: Ensure storage instance is initialized during start-up
+ - Fix for bug 31539: Orderly signal an error if an identity check is encountered during crawler-based subscription of Google calendar
+
+* 2014-05-28 - martin.schneider@open-xchange.com
+
+ - Fix for bug 32784: Prepare file sizes for error messages to be human readable
+
+* 2014-05-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32732: Orderly detect a duplicate lead request
+
+* 2014-05-23 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32708: Fixed forwarding of mails from Unified Mail
  - Fix for bug 32625: Keep subscription statuses when moving IMAP folders
 
 * 2014-05-22 - thorben.betten@open-xchange.com
 
  - Fix for bug 32677: Do net set SMTP credentials if not explicitly set + several sanitizing operations to ensure SMTP authentication does still work
+ - Fix for bug 32692: Ignore alternative XML part
 
 * 2014-05-21 - thorben.betten@open-xchange.com
 
+ - Fix for bug 32652: Do also consider pre-auth capabilities when checking for a secure connection
+ - Fix for bug 32651: Do not overwrite settings fetched from config-cascade in JSON merge
+ - Fix for bug 32409: Check retrieved document against passed folder identifier (if any)
  - Fix for bug 32226: Fixed regex used for look-up of referenced inline images
+
+* 2014-05-21 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 31798: Implemented a ClusterLockService with which a cluster wide lock can be acquired in order for single nodes to run periodic tasks
+
+* 2014-05-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28175: Tag wording for detected configuration flaws explicitly as "Warning"
+ - Fix for bug 32633: Drop all remnants for obsolete POP3 tables
+ - Fix for bug 32643: Check for possibly empty map prior to coercing to a JSON object
+ - Fix for bug 31962: Properly detect EAS ping request in case of base64-encoded binary data in request's query string
 
 * 2014-05-19 - thorben.betten@open-xchange.com
 
  - Fix for bug 32481: Ignore requests to LinkedIn JSON API if no LinkedIn OAuth account is available for associated user
+ - Fix for bug 32410: Set default expiry for image resources to 1 hour; reopens bug #31918, but will be resolved by UI
+
+* 2014-05-16 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 32554: Add all trashed folders to a list and ignore those when searching for all files.
+
+* 2014-05-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29046: Disabled unsafe auto-consistency check & ensure folder changes are reflected in database on modifying operations
+ - Fix for bug 32565: Best effort attempt to collect as many mobile numbers as possible on Google contact subscription
+ - Fix for bug 32590: Improved sanitizing of user input during search
+
+* 2014-05-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32033: Escape auto-complete prefix delivered in JSON response
+ - Fix for bug 32559: Orderly parenthesized CSS assignment & allow "radial-gradient" for "background" style tag
+ - Fix for bug 29377: Perform a "right merge" from config tree to JSlob JSON data
+
+* 2014-05-14 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 32465: Bad until value on series update.
 
 * 2014-05-14 - thorben.betten@open-xchange.com
 
  - Fix for bug 32519: Fixed parsing JSON in case JSON NULL is set as value and fall-back to mail account credentials if transport ones seems to be "not set"
+ - Fix for bug 32541: Expect master administrator credentials
+
+* 2014-05-13 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32226: Do not specify any cache-controlling HTTP header for "file" HTTP-API module
+
+* 2014-05-12 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 32385: New appointments request returns duplicate entries.
+
+* 2014-05-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30843: Introduced properties for IMAP, POP3, and SMTP to specify the SSL cipher suites that will be enabled for SSL connections
+ - Fix for bug 32466: Ignore transport credentials on primary mail account update
+ - Fix for bug 32478: Orderly signal error exit code if MBean execution failed
+
+* 2014-05-09 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32358: Drop any inline information on plain/text forward; such as "Content-Id" header
+ - Fix for bug 32413: Added null guard
+ - Fix for bug 32415/32417: Several null guard to deal with possible null return value
+ - Fix for bug 32017: Keep subfolder information intact for "Public files" (15) folder
+
+* 2014-05-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32358: Do not append references to inline image for modifiable message content
+
+* 2014-05-08 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 32392: Do not throw an exception when the request body is null; the null value is interpreted as a remove operation
+
+* 2014-05-07 - marc.arens@open-xchange.com
+
+ - Fix for bug 32326: Send proper exception when non-member tries to send to GroupDispatcher
+ 
+* 2014-05-07 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 32369: Use the correct HTTP method, i.e. POST and the correct response code from Xing, i.e. 201.
+ - Fix for bug 32384: Throw an exception and stop the com.openexchange.push.udp bundle if there is a misconfiguration with the hostname 
+
+* 2014-05-07 - lars.hoogestraat@open-xchange.com
+
+ - Fix for bug 32351: Fix for bug 32351: Throwing error message if mail is expunged in the meantime
+
+* 2014-05-07 - martin.schneider@open-xchange.com
+
+ - Fix for bug 32263: Set transport password instead of IMAP password for account update
+
+* 2014-05-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32339: Drop comments in advance
+ - Fix for bug 32350: Deal with empty array on mailbox append operation
+ - Fix for bug 32361: Introduced capability "xingjson" to signal presence of XING JSON bundle
+ - Fix for bug 32285: More resource-reluctant approach when performing an IMAP FETCH command
+ - Fix for bug 32371: Check validity of created-by/modified-by from appointment prior to trying to load user information
+ - Fix for bug 32317: Support boolean URL parameter "setFrom" to signal reply template generated by server shall contain "From" header from
+                      original message
+
+* 2014-05-06 - marcus.klein@open-xchange.com
+
+ - Fix for bug 32272: Java must be installed completely before open-xchange-core post installation scripts are executed.
+ - Fix for bug 32102: Only increment transaction counter if replication monitor is enabled.
+
+* 2014-05-06 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31391: Register push certificate provider for Mac OS under the correct class
+ - Fix for bug 32298: Really skip trash folders when listing WebDAV resource collections
+
+* 2014-05-06 - martin.schneider@open-xchange.com
+
+ - Fix for bug 32301: Also accept '\r' as escape sequence in vcard text value fields
+
+* 2014-05-05 - lars.hoogestraat@open-xchange.com
+
+ - Fix for bug 32250: Changed yahoo api access to https further added error message on receiving invalid response
+
+* 2014-05-05 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32296: Do not use proxy authentication for external mail accounts
+
+* 2014-05-05 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32292: Prevent USM-JSON* and USM-EAS* sessions from being put to distributed storage 
+
+* 2014-05-04 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 30647: Display the maximum allowed size of an attachment in a human readable format. 
+
+* 2014-05-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32265: Check for possible absent user participant prior to checking appointment's permissions
+
+* 2014-05-03 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32288: Pass the correct mandatory contact fields
+
+* 2014-05-02 - marc.arens@open-xchange.com
+
+ - Fix for bug 31833: Add DistributedGroupManager and inform GroupDispatchers about client inactivity
+   
+* 2014-05-02 - marcus.klein@open-xchange.com
+
+ - Fix for bug 32044: Update the reminder's folderID for all accessing users, if there are no participants. Check additionally permissions
+   on the destination folder for all reminder.
+
+* 2014-05-02 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32259: Exclude folders with files storage type TRASH_FOLDER
+ - Fix for bug 32267: Translate subscription display name when serializing subscription sources
+ - Fix for bug 32260: Reworked search term construction for file type facet
+
+* 2014-04-30 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29904: Throw "FILE_STORAGE-0017" in case of empty or missing "folder" parameter
 
 * 2014-05-13 - thorben.betten@open-xchange.com
 
@@ -49,46 +318,252 @@
 
  - Fix for bug 32036: Use 'transport_auth' for setting SMTP credentials usage. 
 
+* 2014-04-29 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32221: Supply reference to old parent folder ID in folder update event
+ - Fix for bug 32169: Added debug logging to track down unnatural big JSlobs
+
 * 2014-04-29 - thorben.betten@open-xchange.com
 
+ - Fix for bug 32211: Removed usage of removed String constructor in JSON bundle + Proper reflection-wise look-up of "extendedProvider" field in Java8
+ - Fix for bug 31842: Provide human-readable quota information
+ - Fix for bug 32238: Do not pre-acquire Writer from HTTP response to leave room for error responses
  - Fix for bug 31842: Provide human-readable quota information
  - Fix for bug 32239: Filter associated account's address from recipient list
 
+* 2014-04-28 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 32059: Added port to connection string for distributed files.
+
+* 2014-04-28 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 32149: Improved POP3 validation warning message.
+
+* 2014-04-28 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32200: Added import from and export to csv for "categories" property
+ - Fix for bug 32216: Respond with "SRV-0001" in case the capability service is missing
+ 
+* 2014-04-25 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 25701: Consider "pref" in "TEL" properties of vCards 
+ - Fix for bug 32193: Don't try to deliver null events 
+ 
 * 2014-04-25 - thorben.betten@open-xchange.com
 
+ - Fix for bug 32191: Added hardening in case a mail account update takes place that might have its URL set to null
+ - Fix for bug 31918: Set more reasonable max-age for images held in Browser cache
+ - Fix for bug 32099: Drop obsolete reminders during reminder range check
+
+* 2014-04-25 - marc.arens@open-xchange.com
+
+ - Fix for bug 32127: Don't send keepalive pings/processing while reading data from upstream
+
+* 2014-04-24 - martin.schneider@open-xchange.com
+
+ - Fix for bug 32152: Sanitize imported Xing phone, fax and cell numbers  
+
+* 2014-04-24 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31970: Always close LDAP naming enumerations  
+ - Fix for bug 29613: Allow configuration of used zip compression level  
+
+* 2014-04-24 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 31963: Conflict handling for full time appointments.
+
+* 2014-04-24 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32157: Added null guard for possible null reference to a MailMessage
+ - Fix for bug 32156: Deal with possible null value int metadata settings extension
+
+* 2014-04-22 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32111: Added setParameter() method that is error aware & improved log output in case of an invalid Content-Type parameter
  - Fix for bug 31684: Prefer look-up by user identifier over look-up by object/folder identifier pair
 
-* 2014-04-16 - tobias.friedrich@open-xchange.com
+* 2014-04-21 - thorben.betten@open-xchange.com
 
- - Fix for bug 32076: Process images of imported contacts in a serialized way
-  
+ - Fix for bug 32033: Escape user input that is supposed to be displayed as HTML
+ - Fix for bug 32108: Ignore duplicate Ical attachment that is part of multipart/alternative
+
+* 2014-04-17 - martin.schneider@open-xchange.com
+
+ - Fix for bug 30914: Ignore dates for import that contain only zeros
+
+* 2014-04-17 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32076: Process images of imported contacts in a serialized way  
+ - Fix for bug 30835: Sort languages by name  
+
+* 2014-04-15 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32060: Require valid module in autocomplete request 
+
+* 2014-04-14 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32004: Use default type for folders below infostore trash 
+
+* 2014-04-11 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31993: Don't rely on "day of year" comparison in leap years 
+
 * 2014-04-10 - marc.arens@open-xchange.com
 
- - Fix for bug 31942: Fix for unconsumed request remainders and configure that we want to accept payloads for methods where a payload is currently undefined but not forbidden.
+ - Fix for bug 31942: Fix for unconsumed request remainders and configure that we want to accept payloads for methods where a payload is
+                      currently undefined but not forbidden.
+
+* 2014-04-10 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29950: Require "write own objects" permissions when creating files via WebDAV 
+
+* 2014-04-10 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31828: Honor possible surrogate pairs when splitting a string during mail-safe conversion
+ - Fix for bug 31987: Extended infostore document tables by the (`cid`, `file_md5sum`) index
+ - Fix for bug 31826: Keep unicode representation for special HTML entities
+
+* 2014-04-09 - marc.arens@open-xchange.com
+
+ - Fix for bug 31974: Don't lookup ssl attributes on an unsecure request
+
+* 2014-04-09 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31966: Check for quota exceptions from external storages, too 
 
 * 2014-04-09 - thorben.betten@open-xchange.com
 
+ - Fix for bug 31968: Drop personal infostore folders on user deletion
+ - Fix for bug 31978: Added proper i18n error display message for error code APP-0093
  - Fix for bug 31962: Fixed request watcher runs
- 
+
+* 2014-04-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31929: Support quota for attachments of PIM objects
+
+* 2014-07-07 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 26544: Get all attachments sorted by ID fails
+
+* 2014-04-07 - martin.schneider@open-xchange.com
+
+ - Fix for bug 31797: Initialize PatternLayout for LMDC manually if just the SyslogAppender is configured
+
 * 2014-04-07 - tobias.friedrich@open-xchange.com
 
+ - Fix for bug 31935: Check for potential case- and unicode-normalization conflicts when storing folders
  - Fix for bug 31685: Added displayable exception message for IFO-1700
-
+  
 * 2014-04-06 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 31912: Don't apply personal reminder setting for appointments in shared folders  
+ - Fix for bug 31895: Corrected file ID encoding when accessing the checksum storage   
+
+* 2014-04-05 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31903: Added "infostore" to necessary dependencies
+
+* 2014-04-05 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31899: Pass unique folder ID when requesting quota information  
+
+* 2014-04-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31582: Remove leading and trailing whitespaces in duplicated folder check
+
+* 2014-04-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31782: Proper spam handler look-up if wrapping SMAL bundle is enabled
+ - Fix for bug 31906: Deny changing mail/transport protocol on mail account update operation
+
+* 2014-04-03 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 31884: Avoid NPE.
+
+* 2014-04-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31883: Ensure a non-null subject attribute to TNEF message arguments
+
+* 2014-04-03 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 30943: Throw exception on unknown options
+
+* 2014-04-02 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 31779: Wrong created-by on change exception creation.
+
+* 2014-04-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31856: Changed log level for a failed update task to ERROR
+ - Fix for bug 31864: Added dedicated property to disable Hazelcast-based session storage
+ - Fix for bug 31079: Display parsing error to user to let him know his input is invalid
 
 * 2014-04-02 - ioannis.chouklis@open-xchange.com
 
  - Fix for Bug 31855: [L3] email cannot be displayed and customer gets only a MSG-0020
+ - Fix for bug 31854: NPE at POP3Store.reinitCapabilities
 
-* 2014-03-30 - martin.schneider@open-xchange.com
+* 2014-04-02 - jan.bauerdick@open-xchange.com
 
- - Fix for bug 31443: Do not autorename folders equal to default folder names while creation. Throw exception instead.
+ - Fix for bug 30835: Compare ISO 639-1 codes
+
+* 2014-04-02 - lars.hoogestraat@open-xchange.com
+
+ - Fix for bug 30766: Fixed copying of IMAP message UIDs if UIDPLUS capability is missing
+
+* 2014-04-01 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 29758: Extracted CLT parts from c.o.control to new project c.o.control.clt & let CLT do help output before connecting to
+                      server
+
+* 2014-04-01 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 31821: Properly sanitize E-Mail's CSS content to not affect App Suite UI's CSS scope
+
+* 2014-04-01 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31217: No translation of standard folders for external accounts + prefer localized standard folder names than taking the ones
+                      from primary account (as they might get translated)
+
+* 2014-03-31 - thorben.betten@open-xchange.com
+ 
+ - Fix for bug 31816: Support SMTP server that do not support authentication capability
+ - Fix for bug 31809: Enhanced key associated with an IMAP store cache by dedicated user information
+
+* 2014-03-31 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 31810: Bad conflict handling on update.
+
+* 2014-03-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31648: Detect Content-Type by file name if specified one is of generic nature; e.g "application/binary"
+ - Fix for bug 31005: Check every incoming JSON request payload if it contains an empty JSON array
+
+* 2014-03-28 - martin.schneider@open-xchange.com
+
+ - Fix for bug 31795: Do not check capability if session is anonymous
+ - Fix for bug 31805: Translate task priority in notifications
+
+* 2014-03-28 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 30835: Replaced unordered json object by an ordered json array
+
+* 2014-03-27 - marc.arens@open-xchange.com
+
+ - Fix for bug 26436: Document workaround for Apache < 2.4 and set up combined balancing proxy for usm and eas
+ - Fix for bug 29128: Move default config to ProxyPass syntax suitable for apache 2.2 and 2.4
+ - Fix for bug 31700: Increase sync timeout to 1900 to respect com.openexchange.usm.eas.ping.max_heartbeat
+ - Fix for bug 31701: Document workaround for Apache < 2.4 and set up combined balancing proxy for usm and eas
+ - Fix for bug 31702: Document workaround for Apache < 2.4 and set up combined balancing proxy for usm and eas
 
 * 2014-03-27 - martin.herfurth@open-xchange.com
 
  - Fix for bug 31525: Removed shown_as field (ical: transparency) from emmitted ical to suppress unnecessary changes.
+
+* 2014-03-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31783: Avoid time zones for administrative zones
+ - Fix for bug 31750: Fixed download for plain-text files
 
 * 2014-03-26 - thorben.betten@open-xchange.com
 
@@ -96,68 +571,298 @@
 
 * 2014-03-25 - thorben.betten@open-xchange.com
 
- - Fix for bug 31684: Prefer look-up by user identifier over look-up by object/folder identifier pair
+ - Fix for bug 31747: Added property to adjust JVM XML entityExpansionLimit o certain needs
+ - Fix for bug 31745: Mention the unit for property "com.openexchange.sessiond.sessionDefaultLifeTime"
+ - Fix for bug 31189: Added appropriate display message for error code "MSG-0014"
 
-* 2014-03-14 - thorben.betten@open-xchange.com
+* 2014-03-25 - tobias.friedrich@open-xchange.com
 
- - Fix for bug 31582: Invalidate affected users' LIST/LSUB cache on IMAP folder changes & remotely distribute this
+ - Fix for bug 31716: Don't rely on cookies being accepted by WebDAV clients  
 
-* 2014-03-12 - thorben.betten@open-xchange.com
+* 2014-03-24 - thorben.betten@open-xchange.com
 
- - Fix for bug 31395: Enhanced localized error message according to proposal from documentation team
+ - Fix for bug 31727: Improved descriptions for database-based and script-based password-change bundles
+ - Fix for bug 31717: Improved description of "com.openexchange.servlet.maxInactiveInterval" property
 
-* 2014-03-06 - thorben.betten@open-xchange.com
+* 2014-03-24 - steffen.templin@open-xchange.com
 
- - Fix for bug 31392: Made module-specific error messages
- - Fix for bug 31217: No translation of standard folders for external accounts + prefer localized standard folder names than taking the ones
-                      from primary account (as they might get translated)
- - Fix for bug 31394: Added possibility to delete a quota value once it is set through specifying a value less than zero
-
-* 2014-04-02 - ioannis.chouklis@open-xchange.com
-
- - Fix for Bug 31855: [L3] email cannot be displayed and customer gets only a MSG-0020
- - Fix for bug 31854: NPE at POP3Store.reinitCapabilities
-
-* 2014-03-01 - thorben.betten@open-xchange.com
-
- - Fix for bug 30598: Set disposition explicitly to "attachment" on forward-as-attachment action
-
-* 2014-04-01 - jan.bauerdick@open-xchange.com
-
-- Fix for bug 29758: Extracted CLT parts from c.o.control to new project c.o.control.clt & let CLT do help output before connecting to server
-
-* 2014-03-31 - thorben.betten@open-xchange.com
- 
- - Fix for bug 31809: Enhanced key associated with an IMAP store cache by dedicated user information
+ - Fix for Bug 31037: Enlarged DB columns for fileName and fileType in preview table
 
 * 2014-03-23 - thorben.betten@open-xchange.com
 
  - Fix for bug 31677: Properly do the thread-sort for subscribed POP3 accounts accessed via Unified Mail
+ - Fix for bug 22930: Fixed SQL query to determine non-hierarchically-visible public folders
  - Fix for bug 31714: Set upper limits for width/height parameter on image transformation request
+
+* 2014-03-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31366: Support configurable formats for logged login/logout events
+
+* 2014-03-21 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31705: Always populate all field names during Portable serialization  
+
+* 2014-03-21 - marcus.klein@open-xchange.com
+
+ - Fix for bug 31707: Method did not list empty file stores due to wrong SQL statement. Corrected that SQL statement.
 
 * 2014-03-20 - thorben.betten@open-xchange.com
 
  - Fix for bug 31657: Drop "webmail" capability for context administrator if "com.openexchange.mail.adminMailLoginEnabled" is set to "false"
 
+* 2014-03-19 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 31399: Don't suppress exception
+
+* 2014-03-19 - ioannis.chouklis@open-xchange.com
+ 
+ -  Fix for Bug 31637: [L3] Unclear usage of logconf '-u' and '-c' parameter
+
 * 2014-03-19 - thorben.betten@open-xchange.com
 
  - Fix for bug 31644: Properly collect available text parts on reply if original message contains multipart/alternative appendix
+ - Fix for bug 31470: Adjusted description of property "com.openexchange.mail.filter.useUTF7FolderEncoding" to also consider Cyrus IMAP
+                      server setting "sieve_utf8fileinto"
+
+* 2014-03-19 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31646: Be aware of unknown folder type 
+
+* 2014-03-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31157: Keep trailing whitespace character in signature-delimiting line
+ - Fix for bug 31629: Handle SMTP server that do not support authentication 
+
+* 2014-03-18 - marcus.klein@open-xchange.com
+
+ - Fix for bug 31599: Corrected RPM post installation script to not modify logback.xml anymore if log configuration migration has performed
+   once.
 
 * 2014-03-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 31587: Pass obtained BundleContext instance to initializing method, not the stored one to ensure working on most recent bundle/framework state
+ - Fix for bug 31602 + 31603: Deal with possible absence of needed service
+ - Fix for bug 31601: Ensure a session reference is present prior to performing permission checks
+
+* 2014-03-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31582: Invalidate affected users' LIST/LSUB cache on IMAP folder changes & remotely distribute this
+ - Fix for bug 31463: Enhanced login response writer to check login string against possible ACE E-Mail address; convert to IDN if so
+
+* 2014-03-14 - marc.arens@open-xchange.com
+
+ - Fix for bug 29802: Send LeaveStanza on behalf of timed out client 
+ - Fix for bug 31293: IDManager cleans up states for disposed IDs
+ 
+* 2014-03-13 - jan.bauerdick@open-xchange.com
+
+ - Change for bug 31539: Added exception code if account needs to be verified
+
+* 2014-03-13 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31552: Also support IPv6 addresses when setting IMAP/SMTP server
+ - Fix for bug 31531: Do not hold connection while writing resource cache file to storage
+ - Fix for bug 31555: Also check standard folders' subscription status in case SPECIAL-USE capability is supported by IMAP server
+
+* 2014-03-12 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31490: More lenient parsing in case ATTENDEE is not in "mailto:" URI format
+ - Fix for bug 31489: Added optional "admin" parameter for actions "birthdays", "anniversaries", "updates", "search" and "advancedSearch"
+
+* 2014-03-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31491: Removed duplicate CREATE TABLE statements from affected classes
+ - Fix for bug 19763: Support setter for IMAP/SMTP port through SOAP interface
+ - Fix for bug 31395: Enhanced localized error message according to proposal from documentation team
+ - Fix for bug 31061: Simply select oldest chunk in case ascending sort order is selected
+
+* 2014-03-11 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 30843: Added properties to explicitly choose SSL protocols
+
+* 2014-03-11 - marcus.klein@open-xchange.com
+
+ - Fix for bug 29980: Use row locks on complete table configdb.context_server2db_pool to prevent a delete context call to remove the schema
+   a create context call is currently writing to. The complete table must be locked to prevent deadlocks on concurrent create context calls.
 
 * 2014-03-10 - thorben.betten@open-xchange.com
 
+ - Fix for bug 30652: Signal value of property "com.openexchange.forceHTTPS" to App Suite UI
  - Fix for bug 31304: Suppress warning if "pop3.refreshrate" property is missing. Silently use fall-back value
+
+* 2014-03-10 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31453: Prefer user's personal reminder for CalDAV in public folders
+ - Fix for bug 31073: Use "Display name" for a contact, use "Name" for a distribution list in truncation error messages 
+ - Fix for bug 31072: Use "First name" instead of "Given name" in truncation error messages 
+
+* 2014-03-07 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 31335: Fixed/Added missing dependencies on update tasks
 
 * 2024-03-07 - ioannis.chouklis@open-xchange.com
 
  - Fix for bug 31448: [L3] Backend mistakes IMAP with SMTP password entries by updating external mail account credentials 
 
+* 2014-03-07 - marcus.klein@open-xchange.com
+
+ - Fix for bug 31154: Necessary Ant tasks for our build system have not be available by default on Debian Squeeze but on Wheezy. Adding an
+   additional JAR to the build call on Debian Squeeze systems when using CDBS for building.
+ - Fix for bug 31405: Implementation of move context now uses existing functionality to update context to database mapping that takes care
+   about MySQL master/slave setups.
+
+* 2014-03-06 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 31447: [L3] Logging for missing user and context mapping should be improved for IMAP auth bundle
+ - Fix for bug 31415: NullPointerException: A null service reference is not allowed
+ 
+* 2014-03-06 - martin.schneider@open-xchange.com
+
+ - Fix for bug 31443: Do not autorename folders equal to default folder names while creation. Throw exception instead.
+
+* 2014-03-06 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 30732: Ignore removal of resources by externals.
+
+* 2014-03-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31392: Made module-specific error messages
+ - Fix for bug 31394: Added possibility to delete a quota value once it is set through specifying a value less than zero
+
+* 2014-03-06 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31391: Use dynamically registered key and certificate providers for cloud-based push notifications
+ - Fix for bug 30369: Replaced equinox event admin with multithreaded implementation from apache felix project, introduced background
+                      event processing for time-consuming handlers
+
+* 2014-03-03 - dennis.sieben@open-xchange.com
+
+ - Fix for bug 31329: Multi-line calculation has now also been added for PGP_ENCRYPT commands
+
+* 2014-03-03 - dennis.sieben@open-xchange.com
+
+ - Added null check for possible NPE in OSGiAbstractor
+
+* 2014-03-03 - marcus.klein@open-xchange.com
+
+ - Fix for bug 31364: Marked autoconfig.properties as configuration file.
+ - Fix for bug 29975: Committing now first the context data to the user database before committing the context to the config database. This
+   is possible by writing the context database mapping through the database pooling component that writes the information in their own
+   caches, too. This allows later committing to the config database.
+
+* 2014-03-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31324: Fixed parsing of .po file that contain non-ascii characters
+ - Fix for bug 31319: Implemented CLI to check that login2context mappings contain context identifier
+
+* 2014-03-03 - lars.hoogestraat@open-xchange.com
+
+ - Fix for bug 31137: Ignore conversion error on referencing inline images
+
+* 2014-03-03 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31258: Add (cid,changing_date) index to calendar tables to speed up change detection 
+ - Fix for bug 30995: Introduced displayable exception in case the redirect address is invalid or rejected 
+ - Fix for bug 31362: Corrected CREATE TABLE statements 
+
+* 2014-03-01 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30701: Signal proper "Content-Length" in case "off"/"len" parameters were specified
+ - Fix for bug 30598: Set disposition explicitly to "attachment" on forward-as-attachment action
+
+* 2014-02-28 - marcus.klein@open-xchange.com
+
+ - Fix for bug 23141: Remember parsed uploaded and temporarily stored files even if too much form fields are sent in the upload.
+
+* 2014-02-28 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 31335: Re-run update-tasks in correct order
+
+* 2014-02-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31347: Dropped tabs in empty lines
+ - Fix for bug 31001: Changed lock manager API to have a session as argument for safe access to user's session
+
+* 2014-02-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31299: Check validity of associated OAuth account prior to creating a messaging account
+
+* 2014-02-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31316: Check for a syntactically empty-element tag prior to marking it
+ - Fix for bug 31298: Enforce to use secure connection to Twitter API; since Jan 14th, 2014, api.twitter.com only accepts SSL connections
+
+* 2014-02-25 - marc.arens@open-xchange.com
+
+ - Fix for bug 31300: Retrieve client state after blocking cleanup of local member
+ 
+* 2024-02-25 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 30773: NullPointerException at com.openexchange.spamsettings.generic.osgi.Activator.stop()
+
+* 2014-02-25 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 31191: Fixed erroneous permission check.
+
 * 2014-02-25 - thorben.betten@open-xchange.com
 
+ - Fix for bug 31252: Put error arguments into "error_params" field for compatibility reasons
+ - Fix for bug 31287: Do not apply black-list on provisioning calls
  - Fix for bug 31222: Signal support for SSLv3 protocol on secure connect to POP3 server
+ - Fix for bug 31302: Set reasonable timeouts when checking connectivity + several other improvements
+ - Fix for bug 31177: Only invoke 'java.util.concurrent.locks.Condition.signalAll()' when holding associated lock
+ - Fix for bug 31091: Stop reading from stream if EOF is reached
+
+* 2014-02-24 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30969: Fully leverage from folder cache within folder layer, do not use a custom one in IMAP bundle
+ - Fix for bug 31264: Added cache invalidator to capabilities caches
+ - Fix for bug 31152: Do not throw EmiG-specific error codes, but just mark as non-EmiG capable
+
+* 2014-02-24 - marcus.klein@open-xchange.com
+
+ - Fix for bug 31238: Use the same properties map for the general login method of the LoginPerformer and the AuthenticationService.
+
+* 2014-02-24 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 30708: Incorrect credentials for "clearpreviewcache" don't return an error-code 
+
+* 2014-02-24 - tobias.friedrich@open-xchange.com
+
+- Fix for bug 31249: Be aware of infostore items without files when filtering, set appropriate HTTP status in download response 
+
+* 2014-02-21 - marc.arens@open-xchange.com
+
+ - Fix for bug 31188: Use userId and contextId instead of names when enroling clients
+
+* 2014-02-21 - marcus.klein@open-xchange.com
+
+ - Fix for bug 30761: Do not occupy a database connection without using it.
+
+* 2014-02-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31251: Fixed possible NPE on authentication failed error during POP3 sync
+
+* 2014-02-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30138: Ensure each probe for root subfolder capability is exclusively performed
+
+* 2014-02-19 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31216: Added dependency to "PrgDatesMembersPrimaryKeyUpdateTask" update task
+
+* 2014-02-19 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31199: Process multicast results from GCM
+ - Fix for bug 31181: Consider empty parameter values during parsing
+
+* 2014-02-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31086: Ignore failed attempt to save non-existent setting
+
+* 2014-02-18 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 31185: Avoid Autoconfig cache from storing personal data.
 
 * 2014-02-17 - thorben.betten@open-xchange.com
 
@@ -241,6 +946,10 @@
 * 2014-01-24 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 30692: Preserve previous filename unless explicitly set when creating a new file version   
+
+* 2014-01-23 - lars.hoogestraat@open-xchange.com
+
+ - Fix for bug 25300: Exchanged conflicting column ids in contact details
 
 * 2014-01-23 - tobias.friedrich@open-xchange.com
 
@@ -332,6 +1041,10 @@
 * 2014-01-13 - martin.herfurth@open-xchange.com
 
  - Fix for bug 29807: Missing confirmations status of participants in update mail and bad check for last modified.
+
+* 2014-01-10 - martin.schneider@open-xchange.com
+
+ - Fix for bug 30543, removed obsolete code for feature 'projects'
 
 * 2014-01-10- jan.bauerdick@open-xchange.com
 

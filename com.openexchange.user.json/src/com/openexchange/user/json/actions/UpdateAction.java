@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -94,11 +94,11 @@ import com.openexchange.user.json.services.ServiceRegistry;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @Action(method = RequestMethod.PUT, name = "update", description = "Update a user.", parameters = {
-		@Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-		@Parameter(name = "id", description = "Object ID of the updated user."),
-		@Parameter(name = "timestamp", type = Type.NUMBER, description = "Timestamp of the updated user. If the user was modified after the specified timestamp, then the update must fail.")
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "id", description = "Object ID of the updated user."),
+    @Parameter(name = "timestamp", type = Type.NUMBER, description = "Timestamp of the updated user. If the user was modified after the specified timestamp, then the update must fail.")
 }, requestBody = "User object as described in Common object data, Detailed contact data and Detailed user data. Only modified fields are present. Note: \"timezone\" and \"locale\" are the only fields from Detailed user data which are allowed to be updated.",
-responseDescription = "Response with timestamp: An empty object.")
+    responseDescription = "Response with timestamp: An empty object.")
 public final class UpdateAction extends AbstractUserAction {
 
     /**
@@ -117,78 +117,78 @@ public final class UpdateAction extends AbstractUserAction {
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
-		try {
-	        /*
-	         * Parse parameters
-	         */
-	        boolean containsImage = request.hasUploads();
+        try {
+            /*
+             * Parse parameters
+             */
+            boolean containsImage = request.hasUploads();
 
-	        final int id = checkIntParameter(AJAXServlet.PARAMETER_ID, request);
-	        final Date clientLastModified = new Date(checkLongParameter(AJAXServlet.PARAMETER_TIMESTAMP, request));
-	        /*
-	         * Get user service to get contact ID
-	         */
-	        final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
-	        final User storageUser = userService.getUser(id, session.getContext());
-	        final int contactId = storageUser.getContactId();
-	        /*
-	         * Parse user & contact data
-	         */
-	        String timeZoneID = request.getParameter("timezone");
-	        if (null == timeZoneID) {
-	            timeZoneID = session.getUser().getTimeZone();
-	        }
-	        final JSONObject jData = containsImage ? new JSONObject(request.getUploadEvent().getFormField("json")) : (JSONObject) request.requireData();
-	        Contact parsedUserContact;
-	        User parsedUser;
-			parsedUserContact = ContactMapper.getInstance().deserialize(jData, ContactMapper.getInstance().getAllFields(), timeZoneID);
-	        parsedUserContact.setObjectID(contactId);
-			jData.put(UserField.ID.getName(), id);
-			parsedUser = UserMapper.getInstance().deserialize(jData, USER_FIELDS, timeZoneID);
+            final int id = checkIntParameter(AJAXServlet.PARAMETER_ID, request);
+            final Date clientLastModified = new Date(checkLongParameter(AJAXServlet.PARAMETER_TIMESTAMP, request));
+            /*
+             * Get user service to get contact ID
+             */
+            final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
+            final User storageUser = userService.getUser(id, session.getContext());
+            final int contactId = storageUser.getContactId();
+            /*
+             * Parse user & contact data
+             */
+            String timeZoneID = request.getParameter("timezone");
+            if (null == timeZoneID) {
+                timeZoneID = session.getUser().getTimeZone();
+            }
+            final JSONObject jData = containsImage ? new JSONObject(request.getUploadEvent().getFormField("json")) : (JSONObject) request.requireData();
+            Contact parsedUserContact;
+            User parsedUser;
+            parsedUserContact = ContactMapper.getInstance().deserialize(jData, ContactMapper.getInstance().getAllFields(), timeZoneID);
+            parsedUserContact.setObjectID(contactId);
+            jData.put(UserField.ID.getName(), id);
+            parsedUser = UserMapper.getInstance().deserialize(jData, USER_FIELDS, timeZoneID);
 
-	        if (containsImage) {
-	        	setImageData(request, parsedUserContact);
-	        }
+            if (containsImage) {
+                setImageData(request, parsedUserContact);
+            }
 
 
-	        /*
-	         * Update contact
-	         */
-	        final ContactService contactService = ServiceRegistry.getInstance().getService(ContactService.class, true);
-	        if (parsedUserContact.containsDisplayName()) {
-	            final String displayName = parsedUserContact.getDisplayName();
-	            if (null != displayName) {
-	                if (isEmpty(displayName)) {
-	                    parsedUserContact.removeDisplayName();
-	                } else {
-	                    // Remove display name if equal to storage version to avoid update conflict
-	                    final Contact storageContact = contactService.getUser(session, id);
-	                    if (displayName.equals(storageContact.getDisplayName())) {
-	                        parsedUserContact.removeDisplayName();
-	                    }
-	                }
-	            }
-	        }
-	        contactService.updateUser(session, Integer.toString(Constants.USER_ADDRESS_BOOK_FOLDER_ID), Integer.toString(contactId), parsedUserContact, clientLastModified);
-	        /*
-	         * Update user, too, if necessary
-	         */
-	        final String parsedTimeZone = parsedUser.getTimeZone();
-	        final Locale parsedLocale = parsedUser.getLocale();
-	        if ((null != parsedTimeZone) || (null != parsedLocale)) {
-	            if (null == parsedTimeZone) {
-	            	UserMapper.getInstance().get(UserField.TIME_ZONE).copy(storageUser, parsedUser);
-	            }
-	            if (null == parsedLocale) {
-	            	UserMapper.getInstance().get(UserField.LOCALE).copy(storageUser, parsedUser);
-	            }
-	            userService.updateUser(parsedUser, session.getContext());
-	        }
-	        /*
-	         * Check what has been updated
-	         */
-	        if (parsedUserContact.containsDisplayName() && null != parsedUserContact.getDisplayName()) {
-	            // Update folder name if display-name was changed
+            /*
+             * Update contact
+             */
+            final ContactService contactService = ServiceRegistry.getInstance().getService(ContactService.class, true);
+            if (parsedUserContact.containsDisplayName()) {
+                final String displayName = parsedUserContact.getDisplayName();
+                if (null != displayName) {
+                    if (com.openexchange.java.Strings.isEmpty(displayName)) {
+                        parsedUserContact.removeDisplayName();
+                    } else {
+                        // Remove display name if equal to storage version to avoid update conflict
+                        final Contact storageContact = contactService.getUser(session, id);
+                        if (displayName.equals(storageContact.getDisplayName())) {
+                            parsedUserContact.removeDisplayName();
+                        }
+                    }
+                }
+            }
+            contactService.updateUser(session, Integer.toString(Constants.USER_ADDRESS_BOOK_FOLDER_ID), Integer.toString(contactId), parsedUserContact, clientLastModified);
+            /*
+             * Update user, too, if necessary
+             */
+            final String parsedTimeZone = parsedUser.getTimeZone();
+            final Locale parsedLocale = parsedUser.getLocale();
+            if ((null != parsedTimeZone) || (null != parsedLocale)) {
+                if (null == parsedTimeZone) {
+                    UserMapper.getInstance().get(UserField.TIME_ZONE).copy(storageUser, parsedUser);
+                }
+                if (null == parsedLocale) {
+                    UserMapper.getInstance().get(UserField.LOCALE).copy(storageUser, parsedUser);
+                }
+                userService.updateUser(parsedUser, session.getContext());
+            }
+            /*
+             * Check what has been updated
+             */
+            if (parsedUserContact.containsDisplayName() && null != parsedUserContact.getDisplayName()) {
+                // Update folder name if display-name was changed
                 final DatabaseService service = com.openexchange.user.json.services.ServiceRegistry.getInstance().getService(DatabaseService.class);
                 if (null != service) {
                     final int contextId = session.getContextId();
@@ -215,49 +215,36 @@ public final class UpdateAction extends AbstractUserAction {
                     }
                 }
             }
-	        /*
-	         * Return contact last-modified from server
-	         */
-	        return new AJAXRequestResult(new JSONObject(0), parsedUserContact.getLastModified());
-		} catch (final JSONException e) {
+            /*
+             * Return contact last-modified from server
+             */
+            return new AJAXRequestResult(new JSONObject(0), parsedUserContact.getLastModified());
+        } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-		}
+        }
 
     }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
     // Copied from RequestTools in contact module
 
     public static void setImageData(final AJAXRequestData request, final Contact contact) throws OXException {
-		UploadEvent uploadEvent = null;
-		try {
-		    uploadEvent = request.getUploadEvent();
-		    final UploadFile uploadFile;
+        UploadEvent uploadEvent = null;
+        try {
+            uploadEvent = request.getUploadEvent();
+            final UploadFile uploadFile;
             {
                 final List<UploadFile> list = uploadEvent.getUploadFilesByFieldName("file");
                 uploadFile = null == list || list.isEmpty() ? null : list.get(0);
             }
-		    if (null == uploadFile) {
-		        throw AjaxExceptionCodes.NO_UPLOAD_IMAGE.create();
-		    }
-		    setImageData(contact, uploadFile);
-		} finally {
-		    if (null != uploadEvent) {
-		        uploadEvent.cleanUp();
-		    }
-		}
-	}
+            if (null == uploadFile) {
+                throw AjaxExceptionCodes.NO_UPLOAD_IMAGE.create();
+            }
+            setImageData(contact, uploadFile);
+        } finally {
+            if (null != uploadEvent) {
+                uploadEvent.cleanUp();
+            }
+        }
+    }
 
     public static void setImageData(final Contact contact, final UploadFile file) throws OXException {
         checkIsImageFile(file);
@@ -299,10 +286,10 @@ public final class UpdateAction extends AbstractUserAction {
             }
         }
         String readableType = (null == contentType ? (null == mimeType ? "application/unknown" : mimeType) : contentType);
-//        int idx = readableType.indexOf('/');
-//        if (-1 < idx && idx < readableType.length()) {
-//            readableType = readableType.substring(idx + 1);
-//        }
+        //        int idx = readableType.indexOf('/');
+        //        if (-1 < idx && idx < readableType.length()) {
+        //            readableType = readableType.substring(idx + 1);
+        //        }
         throw AjaxExceptionCodes.NO_IMAGE_FILE.create(file.getPreparedFileName(), readableType);
     }
 

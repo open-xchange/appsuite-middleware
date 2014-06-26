@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -183,7 +183,7 @@ public class MockOAuthService implements OAuthService {
      * @see com.openexchange.oauth.OAuthService#initOAuth(java.lang.String, java.lang.String)
      */
     @Override
-    public OAuthInteraction initOAuth(final String serviceMetaData, final String callbackUrl, Session session) throws OXException {
+    public OAuthInteraction initOAuth(final String serviceMetaData, final String callbackUrl, String currentHost, Session session) throws OXException {
         // Nothing to do
         return null;
     }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,17 +49,26 @@
 
 package com.openexchange.halo.linkedin.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
+import com.openexchange.exception.OXException;
 import com.openexchange.halo.HaloContactDataSource;
+import com.openexchange.halo.linkedin.AbstractLinkedinDataSource;
 import com.openexchange.halo.linkedin.LinkedinInboxDataSource;
 import com.openexchange.halo.linkedin.LinkedinProfileDataSource;
 import com.openexchange.halo.linkedin.LinkedinUpdatesDataSource;
-import com.openexchange.halo.linkedin.LoFiLinkedinProfileDataSource;
+import com.openexchange.halo.linkedin.helpers.LinkedinPlusChecker;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.linkedin.LinkedInService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
 
 /**
@@ -69,23 +78,48 @@ import com.openexchange.user.UserService;
  */
 public class LinkedinHaloActivator extends HousekeepingActivator {
 
+    private static final String PLUS_CAPABILITY = "linkedinPlus";
+
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { LinkedInService.class, OAuthService.class, ContactService.class, UserService.class, ConfigurationService.class, CapabilityService.class };
+        return new Class[] {
+            LinkedInService.class, OAuthService.class, ContactService.class,
+            UserService.class, ConfigurationService.class, CapabilityService.class,
+            ConfigViewFactory.class
+        };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        final ConfigurationService cs = getService(ConfigurationService.class);
-        final boolean enabledMailCapableKey = cs.getBoolProperty("com.openexchange.halo.linkedin.enabledMailCapableKey", false);
-        if (enabledMailCapableKey) {
-            getService(CapabilityService.class).declareCapability("linkedinPlus");
-            registerService(HaloContactDataSource.class, new LinkedinProfileDataSource(this));
-            registerService(HaloContactDataSource.class, new LinkedinInboxDataSource(this));
-            registerService(HaloContactDataSource.class, new LinkedinUpdatesDataSource(this));
-        } else {
-            registerService(HaloContactDataSource.class, new LoFiLinkedinProfileDataSource(this));
-        }
+        final LinkedinPlusChecker plusChecker = new LinkedinPlusChecker(this);
+        getService(CapabilityService.class).declareCapability(PLUS_CAPABILITY);
+        Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
+        properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, PLUS_CAPABILITY);
+        registerService(CapabilityChecker.class, new CapabilityChecker() {
+            @Override
+            public boolean isEnabled(String capability, Session session) throws OXException {
+                if (PLUS_CAPABILITY.equals(capability)) {
+                    final ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+                    if (serverSession.isAnonymous()) {
+                        return false;
+                    }
+                    return plusChecker.hasPlusFeatures(new ServerSessionAdapter(serverSession));
+                }
+
+                return true;
+            }
+        }, properties);
+
+        AbstractLinkedinDataSource profile = new LinkedinProfileDataSource(this);
+        profile.setPlusChecker(plusChecker);
+        AbstractLinkedinDataSource inbox = new LinkedinInboxDataSource(this);
+        inbox.setPlusChecker(plusChecker);
+        AbstractLinkedinDataSource updates = new LinkedinUpdatesDataSource(this);
+        updates.setPlusChecker(plusChecker);
+
+        registerService(HaloContactDataSource.class, profile);
+        registerService(HaloContactDataSource.class, inbox);
+        registerService(HaloContactDataSource.class, updates);
     }
 
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -59,7 +59,6 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
@@ -91,39 +90,39 @@ public class Invite extends SingleXMLPropertyMixin {
         if (null == collection || null == collection.getFolder() || null == collection.getFolder().getPermissions()) {
             return null;
         }
-        StringAllocator stringAllocator = new StringAllocator();
+        StringBuilder StringBuilder = new StringBuilder();
         Permission[] permissions = collection.getFolder().getPermissions();
         for (Permission permission : permissions) {
             try {
                 if (permission.isAdmin()) {
-                    stringAllocator.append("<CS:organizer>").append(getEntityElements(permission)).append("</CS:organizer>");
+                    StringBuilder.append("<CS:organizer>").append(getEntityElements(permission)).append("</CS:organizer>");
                 } else if (CalDAVPermission.impliesReadPermissions(permission)) {
-                    stringAllocator.append("<CS:user>").append(getEntityElements(permission)).append("<CS:invite-accepted/>")
+                    StringBuilder.append("<CS:user>").append(getEntityElements(permission)).append("<CS:invite-accepted/>")
                         .append("<CS:access><CS:read");
                     if (CalDAVPermission.impliesReadWritePermissions(permission)) {
-                        stringAllocator.append("-write");
+                        StringBuilder.append("-write");
                     }
-                    stringAllocator.append("/></CS:access></CS:user>");
+                    StringBuilder.append("/></CS:access></CS:user>");
                 }
             } catch (OXException e) {
                 LOG.warn("error resolving permission entity from '{}'", collection.getFolder(), e);
             }
         }
-        return stringAllocator.toString();
+        return StringBuilder.toString();
     }
 
     private String getEntityElements(Permission permission) throws OXException {
-        StringAllocator stringAllocator = new StringAllocator();
+        StringBuilder StringBuilder = new StringBuilder();
         if (permission.isGroup()) {
             Group group = CalDAVServiceLookup.getService(GroupService.class).getGroup(factory.getContext(), permission.getEntity());
-            stringAllocator.append("<D:href>/principals/groups/").append(group.getIdentifier())
+            StringBuilder.append("<D:href>/principals/groups/").append(group.getIdentifier())
                 .append("/</D:href><CS:common-name> + ").append(group.getDisplayName()).append("</CS:common-name>");
         } else {
             User user = factory.resolveUser(permission.getEntity());
-            stringAllocator.append("<D:href>/principals/users/").append(user.getLoginInfo())
+            StringBuilder.append("<D:href>/principals/users/").append(user.getLoginInfo())
                 .append("/</D:href><CS:common-name>").append(user.getDisplayName()).append("</CS:common-name>");
         }
-        return stringAllocator.toString();
+        return StringBuilder.toString();
     }
 
 }

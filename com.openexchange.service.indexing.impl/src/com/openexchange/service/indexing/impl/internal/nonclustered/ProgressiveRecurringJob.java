@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,8 +50,6 @@
 package com.openexchange.service.indexing.impl.internal.nonclustered;
 
 import java.util.Date;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.FutureTask;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobDetail;
@@ -61,8 +59,8 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
-import com.hazelcast.core.DistributedTask;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IExecutorService;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.Member;
 import com.openexchange.config.cascade.ConfigView;
@@ -78,6 +76,7 @@ import com.openexchange.index.SearchHandlers;
 import com.openexchange.index.solr.ModuleSet;
 import com.openexchange.service.indexing.IndexingJob;
 import com.openexchange.service.indexing.JobInfo;
+import com.openexchange.service.indexing.impl.internal.JobConstants;
 import com.openexchange.service.indexing.impl.internal.Services;
 import com.openexchange.service.indexing.impl.internal.Tools;
 import com.openexchange.solr.SolrCoreIdentifier;
@@ -179,10 +178,8 @@ public class ProgressiveRecurringJob implements Job {
         }
 
         LOG.debug("Rescheduling job {} at member {}.", jobInfo, executor);
-
-        FutureTask<Object> task = new DistributedTask<Object>(new ScheduleProgressiveRecurringJobCallable(jobInfo, trigger.getPriority()), executor);
-        ExecutorService executorService = hazelcast.getExecutorService();
-        executorService.submit(task);
+        IExecutorService executorService = hazelcast.getExecutorService(JobConstants.HZ_EXECUTOR);
+        executorService.executeOnMember(new ScheduleProgressiveRecurringJobRunnable(jobInfo, trigger.getPriority()), executor);
         try {
             context.getScheduler().unscheduleJob(trigger.getKey());
         } catch (SchedulerException e) {

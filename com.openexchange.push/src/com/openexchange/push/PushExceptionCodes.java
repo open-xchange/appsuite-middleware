@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,45 +50,49 @@
 package com.openexchange.push;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link PushExceptionCodes} - Enumeration about all {@link OXException}s.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum PushExceptionCodes implements OXExceptionCode {
+public enum PushExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(PushExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR("An error occurred: %1$s", Category.CATEGORY_ERROR, 1, null),
     /**
      * Missing property: %1$s
      */
-    MISSING_PROPERTY(PushExceptionMessages.MISSING_PROPERTY_MSG, Category.CATEGORY_ERROR, 2),
+    MISSING_PROPERTY("Missing property: %1$s", Category.CATEGORY_ERROR, 2, null),
     /**
      * Invalid property value in property "%1$s": %2$s
      */
-    INVALID_PROPERTY(PushExceptionMessages.INVALID_PROPERTY_MSG, Category.CATEGORY_ERROR, 3);
+    INVALID_PROPERTY("Invalid property value in property \"%1$s\": %2$s", Category.CATEGORY_ERROR, 3, null);
+
+    /** The exception code prefix */
+    public static final String PREFIX = "PUSH";
 
     private final Category category;
-
     private final int detailNumber;
-
     private final String message;
+    private final String displayMessage;
 
-    private PushExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private PushExceptionCodes(final String message, final Category category, final int detailNumber, String displayMessage) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
     public String getPrefix() {
-        return "PUSH";
+        return PREFIX;
     }
 
     @Override
@@ -104,6 +108,11 @@ public enum PushExceptionCodes implements OXExceptionCode {
     @Override
     public int getNumber() {
         return detailNumber;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override

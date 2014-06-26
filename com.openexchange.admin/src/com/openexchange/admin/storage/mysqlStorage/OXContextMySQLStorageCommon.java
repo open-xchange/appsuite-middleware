@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,9 +49,9 @@
 
 package com.openexchange.admin.storage.mysqlStorage;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -70,6 +70,8 @@ import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
+import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
+import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.config.ConfigurationService;
@@ -109,7 +111,6 @@ public class OXContextMySQLStorageCommon {
         final int context_id = ctx.getId();
 
         try {
-            oxdb_read = cache.getConnectionForContext(context_id);
 
             prep = configdb_con.prepareStatement("SELECT context.name, context.enabled, context.reason_id, context.filestore_id, context.filestore_name, context.quota_max, context_server2db_pool.write_db_pool_id, context_server2db_pool.read_db_pool_id, context_server2db_pool.db_schema, login2context.login_info FROM context LEFT JOIN ( login2context, context_server2db_pool, server ) ON ( context.cid = context_server2db_pool.cid AND context_server2db_pool.server_id = server.server_id AND context.cid = login2context.cid ) WHERE context.cid = ? AND server.name = ?");
             prep.setInt(1, context_id);
@@ -173,6 +174,8 @@ public class OXContextMySQLStorageCommon {
 
             rs.close();
             prep.close();
+
+            oxdb_read = cache.getConnectionForContext(context_id);
 
             prep = oxdb_read.prepareStatement("SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ?");
             prep.setInt(1, context_id);
@@ -268,7 +271,7 @@ public class OXContextMySQLStorageCommon {
                 output = output.addFilter(f);
             }
         }
-        output = output.addFilter(new LoginInfoLoader(cache)).addFilter(new FilestoreUsageLoader(cache, averageSize)).addFilter(new DynamicAttributesLoader(cache));
+        output = output.addFilter(new LoginInfoLoader(cache)).addFilter(new FilestoreUsageLoader(cache, averageSize, failOnMissing)).addFilter(new DynamicAttributesLoader(cache));
         final SortedMap<Integer, Context> retval = new TreeMap<Integer, Context>();
         try {
             while (output.hasData()) {
@@ -305,81 +308,54 @@ public class OXContextMySQLStorageCommon {
         group_stmt.close();
     }
 
-    public final void deleteContextFromConfigDB(final Connection configCon, final int contextId) throws SQLException {
-        // find out what db_schema context belongs to
-        PreparedStatement stmt3 = null;
-        PreparedStatement stmt2 = null;
+    /**
+     * If this method is used the surrounding code needs to take care, that according locks on the database tables are created. If they are
+     * no such locks this method may delete schemas where another request currently writes to.
+     */
+    public static void deleteEmptySchema(Connection con, int poolId, String dbSchema) throws StorageException {
+        final int[] otherContexts;
+        try {
+            otherContexts = ClientAdminThread.cache.getPool().getContextInSchema(con, poolId, dbSchema);
+        } catch (PoolException e) {
+            log.error(e.getMessage(), e);
+            throw new StorageException(e.getMessage(), e);
+        }
+        if (otherContexts.length == 0) {
+            Database db = OXToolStorageInterface.getInstance().loadDatabaseById(poolId);
+            db.setScheme(dbSchema);
+            OXUtilMySQLStorageCommon.deleteDatabase(db);
+        }
+    }
+
+    public final void deleteContextFromConfigDB(Connection con, int contextId) throws StorageException {
+        OXAdminPoolInterface pool = ClientAdminThread.cache.getPool();
         PreparedStatement stmt = null;
         try {
-            boolean cs2dbBroken = false;
-            stmt2 = configCon.prepareStatement("SELECT db_schema,write_db_pool_id FROM context_server2db_pool WHERE cid=?");
-            stmt2.setInt(1, contextId);
-            ResultSet rs = stmt2.executeQuery();
-            String dbSchema = null;
-            int poolId = -1;
-            if (!rs.next()) {
-                // throw new OXContextException("Unable to determine db_schema of context " + context_id);
-                cs2dbBroken = true;
-                log.error("Unable to determine db_schema of context {}", contextId);
-            } else {
-                dbSchema = rs.getString(1);
-                poolId = rs.getInt(2);
-            }
-            stmt2.close();
-            log.debug("Deleting context_server2dbpool mapping for context {}", contextId);
-            // delete context from context_server2db_pool
-            stmt2 = configCon.prepareStatement("DELETE FROM context_server2db_pool WHERE cid=?");
-            stmt2.setInt(1, contextId);
-            stmt2.executeUpdate();
-            stmt2.close();
-            // tell pool, that database has been removed
-            try {
-                com.openexchange.databaseold.Database.reset(contextId);
-            } catch (final OXException e) {
-                log.error("", e);
-            }
-
-            if (!cs2dbBroken) {
-                try {
-                    // check if any other context uses the same db_schema
-                    // if not, delete it
-                    stmt2 = configCon.prepareStatement("SELECT db_schema FROM context_server2db_pool WHERE db_schema=?");
-                    stmt2.setString(1, dbSchema);
-                    rs = stmt2.executeQuery();
-
-                    if (!rs.next()) {
-                        // get auth data from db_pool to delete schema
-                        stmt3 = configCon.prepareStatement("SELECT url,driver,login,password FROM db_pool WHERE db_pool_id=?");
-                        stmt3.setInt(1, poolId);
-                        final ResultSet rs3 = stmt3.executeQuery();
-
-                        if (!rs3.next()) {
-                            throw new StorageException("Unable to determine authentication data of pool_id " + poolId);
-                        }
-                        final Database db = new Database(rs3.getString("login"), rs3.getString("password"), rs3.getString("driver"), rs3.getString("url"), dbSchema);
-                        log.debug("Deleting database {}", dbSchema);
-                        oxutilcommon.deleteDatabase(db);
-                        stmt3.close();
-                    }
-                    stmt2.close();
-                } catch (final Exception e) {
-                    log.error("Problem deleting database while doing rollback, cid={}: ", contextId, e);
-                }
-            }
-            log.debug("Deleting login2context entries for context {}", contextId);
-            stmt = configCon.prepareStatement("DELETE FROM login2context WHERE cid=?");
+            // This creates a lock on context_server2db_pool on the rows with contexts in the same schema. Concurrent create and delete of
+            // context can cause removed schemas while creating a context in it. This can not happen anymore with the introduced lock.
+            pool.lock(con);
+            final int poolId = pool.getWritePool(contextId);
+            final String dbSchema = pool.getSchemaName(contextId);
+            pool.deleteAssignment(con, contextId);
+            deleteEmptySchema(con, poolId, dbSchema);
+            log.debug("Deleting login2context entries for context {}", I(contextId));
+            stmt = con.prepareStatement("DELETE FROM login2context WHERE cid=?");
             stmt.setInt(1, contextId);
             stmt.executeUpdate();
             stmt.close();
-            log.debug("Deleting context entry for context {}", contextId);
-            stmt = configCon.prepareStatement("DELETE FROM context WHERE cid=?");
+            log.debug("Deleting context entry for context {}", I(contextId));
+            stmt = con.prepareStatement("DELETE FROM context WHERE cid=?");
             stmt.setInt(1, contextId);
             stmt.executeUpdate();
             stmt.close();
+        } catch (PoolException e) {
+            log.error(e.getMessage(), e);
+            throw new StorageException(e.getMessage(), e);
+        } catch (SQLException e) {
+            log.error(e.getMessage(), e);
+            throw new StorageException(e.getMessage(), e);
         } finally {
             closePreparedStatement(stmt);
-            closePreparedStatement(stmt2);
-            closePreparedStatement(stmt3);
         }
     }
 
@@ -434,28 +410,9 @@ public class OXContextMySQLStorageCommon {
                 public String getSchema() {
                     return db.getScheme();
                 }
-                @Override
-                public boolean isToConfigDB() {
-                    return true;
-                }
             });
         } catch (PoolException e) {
             throw new StorageException(e.getMessage(), e);
-        }
-    }
-
-    public final void handleCreateContextRollback(final Connection configCon, final Connection oxCon, final int contextId) {
-        // Creating the whole context is now done in a transaction. Rolling back this transaction should be sufficient to remove the context
-        // if creation fails.
-        rollback(oxCon);
-        // remove all entries from configuration database because everything to configuration database has been commited.
-        try {
-            if (configCon != null) {
-                deleteContextFromConfigDB(configCon, contextId);
-                configCon.commit();
-            }
-        } catch (final SQLException e) {
-            log.error("SQL Error removing/rollback entries from configdb for context {}", contextId, e);
         }
     }
 
@@ -625,5 +582,4 @@ public class OXContextMySQLStorageCommon {
             }
         }
     }
-
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -152,9 +152,9 @@ public class MailObject {
 
     private boolean internalRecipient;
 
-	private String uid;
+    private String uid;
 
-	private long recurrenceDatePosition;
+    private long recurrenceDatePosition;
 
     /**
      * Initializes a new {@link MailObject}
@@ -176,29 +176,17 @@ public class MailObject {
     }
 
     private final void validateMailObject() throws OXException {
-        if (isEmpty(fromAddr)) {
+        if (com.openexchange.java.Strings.isEmpty(fromAddr)) {
             throw MailExceptionCode.MISSING_FIELD.create("From");
         } else if (toAddrs == null || toAddrs.length == 0) {
             throw MailExceptionCode.MISSING_FIELD.create("To");
-        } else if (isEmpty(contentType)) {
+        } else if (com.openexchange.java.Strings.isEmpty(contentType)) {
             throw MailExceptionCode.MISSING_FIELD.create("Content-Type");
         } else if (subject == null) {
             throw MailExceptionCode.MISSING_FIELD.create("Subject");
         } else if (text == null) {
             throw MailExceptionCode.MISSING_FIELD.create("Text");
         }
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     /**
@@ -548,11 +536,11 @@ public class MailObject {
             }
 
             if (internalRecipient && uid != null) {
-            	msg.setHeader(HEADER_X_OX_UID, uid);
+                msg.setHeader(HEADER_X_OX_UID, uid);
             }
 
             if (internalRecipient && recurrenceDatePosition != 0) {
-            	msg.setHeader(HEADER_X_OX_RECURRENCE_DATE, String.valueOf(recurrenceDatePosition));
+                msg.setHeader(HEADER_X_OX_RECURRENCE_DATE, String.valueOf(recurrenceDatePosition));
             }
             saveChangesSafe(msg);
             /*
@@ -701,20 +689,20 @@ public class MailObject {
     }
 
     public void setUid(final String uid) {
-		this.uid = uid;
-	}
+        this.uid = uid;
+    }
 
     public String getUid() {
-		return uid;
-	}
+        return uid;
+    }
 
     public void setRecurrenceDatePosition(final long time) {
-    	this.recurrenceDatePosition = time;
-	}
+        this.recurrenceDatePosition = time;
+    }
 
     public long getRecurrenceDatePosition() {
-		return recurrenceDatePosition;
-	}
+        return recurrenceDatePosition;
+    }
 
     private static final String[] addAddr(final String addr, String[] arr) {
         if (arr == null) {

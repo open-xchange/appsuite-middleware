@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -62,13 +62,13 @@ import org.osgi.service.event.EventAdmin;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
+import com.openexchange.contact.ContactService;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.StaticDBPoolProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderEventConstants;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCache;
-import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
@@ -356,8 +356,6 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
             case FolderObject.INFOSTORE:
                 deleteContainedDocuments(fuid, event);
                 break;
-            case FolderObject.PROJECT:
-                break;
             default:
                 throw OXFolderExceptionCode.UNKNOWN_MODULE.create(Integer.valueOf(imodule),
                     Integer.valueOf(event.getContext().getContextId()));
@@ -399,17 +397,9 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
     }
 
     private static void deleteContainedContacts(final int folderID, final DowngradeEvent event) throws OXException {
-        Connection writeCon = event.getWriteCon();
-        final boolean createWriteCon = (writeCon == null);
-        if (createWriteCon) {
-            writeCon = DBPool.pickupWriteable(event.getContext());
-        }
-        try {
-            Contacts.trashContactsFromFolder(folderID, event.getSession(), writeCon, writeCon, false);
-        } finally {
-            if (createWriteCon && writeCon != null) {
-                DBPool.closeWriterSilent(event.getContext(), writeCon);
-            }
+        ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
+        if (null != contactService) {
+            contactService.deleteContacts(event.getSession(), String.valueOf(folderID));
         }
     }
 
@@ -479,9 +469,9 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
         }
         final EventAdmin eventAdmin = ServerServiceRegistry.getInstance().getService(EventAdmin.class);
         if (null != eventAdmin) {
-            for (int i = 0; i < folderIDs.length; i++) {
+            for (int folderID : folderIDs) {
                 final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
-                props.put(FolderEventConstants.PROPERTY_FOLDER, String.valueOf(folderIDs[i]));
+                props.put(FolderEventConstants.PROPERTY_FOLDER, String.valueOf(folderID));
                 props.put(FolderEventConstants.PROPERTY_CONTEXT, Integer.valueOf(ctx.getContextId()));
                 props.put(FolderEventConstants.PROPERTY_USER, Integer.valueOf(userId));
                 props.put(FolderEventConstants.PROPERTY_CONTENT_RELATED, Boolean.FALSE);

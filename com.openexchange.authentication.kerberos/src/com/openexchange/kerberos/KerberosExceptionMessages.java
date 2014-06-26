@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -59,36 +59,26 @@ import com.openexchange.i18n.LocalizableStrings;
 final class KerberosExceptionMessages implements LocalizableStrings {
 
     // The client send a ticket within the browser request and the verification of this ticket failed.
-    // %1$s will be replaced with a detailed exception message.
-    static final String TICKET_WRONG_MSG = "Verification of client ticket failed: %1$s";
-
-    // If the problem could not be specified in some more detailed way this message can be used.
-    // %1$s is replaced by some own message that will not be translated.
-    static final String UNKNOWN_MSG = "Unknown problem: \"%1$s\".";
+    static final String TICKET_WRONG_MSG = "Verification of client ticket failed.";
 
     // The Kerberos ticket granting service denied to issue a delegate ticket for the client.
-    // %1$s will be replaced with the Kerberos name of the client.
-    static final String DELEGATE_FAILED_MSG = "Failed to get a delegate ticket for %1$s.";
+    static final String DELEGATE_FAILED_MSG = "Failed to get a delegate ticket.";
 
     // Some problem occurred while talking to Kerberos server.
-    // %1$s will be replaced with the message from the underlying exception.
-    static final String COMM_FAILED_MSG = "Communication to Kerberos server failed: %1$s";
+    static final String COMM_FAILED_MSG = "Communication to Kerberos server failed.";
 
     // Initial login of this service on the Kerberos server failed.
-    // %1$s will be replaced with the detailed not translated message from the underlying implementation.
-    static final String LOGIN_FAILED_MSG = "Authenticating this service against the Kerberos server failed: %1$s";
+    static final String LOGIN_FAILED_MSG = "Authenticating this service against the Kerberos server failed.";
 
     // When shutting down this service the termination of the service ticket failed.
-    // %1$s will be replaced with the detailed not translated message from the underlying implementation.
-    static final String LOGOUT_FAILED_MSG = "Problem while terminating service ticket: %1$s";
+    static final String LOGOUT_FAILED_MSG = "Problem while terminating service ticket.";
 
     // Written to the log file if the session contains a Kerberos subject that does not contain any ticket that needs a renewal.
     // %1$s is replaced with the subjects principal name.
     static final String NO_CREDENTIALS_MSG = "Can not find credentials in subject %1$s that need a renewal.";
 
     // Written to the log file if the session does not contain a Kerberos subject for the delegation.
-    // %1$s is replaced with the session identifier.
-    static final String TICKET_MISSING_MSG = "No Kerberos delegation ticket found in session %1$s.";
+    static final String TICKET_MISSING_MSG = "No Kerberos delegation ticket found in session.";
 
     private KerberosExceptionMessages() {
         super();

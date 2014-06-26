@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,12 +49,11 @@
 
 package com.openexchange.jolokia;
 
-
-import static com.openexchange.jolokia.JolokiaExceptionMessage.NEEDED_SERVICE_MISSING_MSG;
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 
 /**
@@ -62,21 +61,23 @@ import com.openexchange.exception.OXExceptionFactory;
  *
  * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
  */
-public enum JolokiaExceptionCode implements OXExceptionCode {
+public enum JolokiaExceptionCode implements DisplayableOXExceptionCode {
 
     /** The following needed service is missing: "%1$s" */
-    NEEDED_SERVICE_MISSING(NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 1),
+    NEEDED_SERVICE_MISSING("The following needed service is missing: \"%1$s\"", CATEGORY_SERVICE_DOWN, 1, null),
 
     ;
 
     private final String message;
     private final int number;
     private final Category category;
+    private String displayMessage;
 
-    private JolokiaExceptionCode(final String message, final Category category, final int detailNumber) {
+    private JolokiaExceptionCode(final String message, final Category category, final int detailNumber, String displayMessage) {
         this.message = message;
         number = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     private static final String PREFIX = "JOLOKIA";
@@ -113,6 +114,11 @@ public enum JolokiaExceptionCode implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     /**

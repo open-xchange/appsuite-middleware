@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -114,6 +114,20 @@ public enum CacheExceptionCode implements DisplayableOXExceptionCode {
     UNSUPPORTED_OPERATION("Method not supported.", MESSAGE, Category.CATEGORY_ERROR, 13)
     ;
 
+    /** The cache exception prefix */
+    private static final String PREFIX = "CAC";
+
+    /**
+     * Gets the prefix for cache exception.
+     *
+     * @return The <code>"CAC"</code> prefix
+     */
+    public static String prefix() {
+        return PREFIX;
+    }
+
+    // ------------------------------------------------------------------------------------- //
+
     private final String message;
 
     private final String displayMessage;
@@ -131,7 +145,7 @@ public enum CacheExceptionCode implements DisplayableOXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "CAC";
+        return PREFIX;
     }
 
     @Override

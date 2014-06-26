@@ -59,7 +59,6 @@ import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
 
-
 /**
  * {@link PrgDatesPrimaryKeyUpdateTask}
  *
@@ -77,9 +76,6 @@ public class PrgDatesPrimaryKeyUpdateTask extends UpdateTaskAdapter {
         super();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
-     */
     @Override
     public void perform(PerformParameters params) throws OXException {
         int cid = params.getContextId();
@@ -93,8 +89,8 @@ public class PrgDatesPrimaryKeyUpdateTask extends UpdateTaskAdapter {
             }
             if (Tools.hasPrimaryKey(con, PRG_DATES)) {
                 Tools.dropPrimaryKey(con, PRG_DATES);
+                Tools.createPrimaryKey(con, PRG_DATES, new String[] { "cid", "intfield01", "fid" });
             }
-            Tools.createPrimaryKey(con, PRG_DATES, new String[] { "cid", "intfield01", "fid" });
             con.commit();
         } catch (SQLException e) {
             DBUtils.rollback(con);
@@ -108,9 +104,6 @@ public class PrgDatesPrimaryKeyUpdateTask extends UpdateTaskAdapter {
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
-     */
     @Override
     public String[] getDependencies() {
         return new String[] { DateExternalDropForeignKeyUpdateTask.class.getName() };

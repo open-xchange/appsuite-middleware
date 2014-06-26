@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -100,6 +100,7 @@ public class LoginPageStep extends AbstractStep<HtmlPage, Object> implements Log
         try {
             // Get the page, fill in the credentials and submit the login form
             loginPage = webClient.getPage(url);
+            // loginPage cannot be null after this call as getPage would throw an exception otherwise
             this.loginPage = loginPage;
             final HtmlForm loginForm = loginPage.getFormByName(nameOfLoginForm);
             final HtmlTextInput userfield = loginForm.getInputByName(nameOfUserField);
@@ -127,7 +128,12 @@ public class LoginPageStep extends AbstractStep<HtmlPage, Object> implements Log
         } catch (final IOException e) {
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
         } catch (final ElementNotFoundException e){
-            LOG.debug("The page that does not contain the needed form : \n{}", loginPage.getWebResponse().getContentAsString());
+            // As this is only thrown when loginPage is already evaluated, loginPage cannot be null. This check is just to be sure in this situation
+            if (null != loginPage) {
+                LOG.debug("The page that does not contain the needed form : \n{}", loginPage.getWebResponse().getContentAsString());
+            } else {
+                LOG.debug("The page that does not contain the needed form, also loginPage is null");
+            }
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
         }
     }

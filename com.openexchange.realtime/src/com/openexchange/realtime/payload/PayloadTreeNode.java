@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -71,6 +71,9 @@ public class PayloadTreeNode implements VisitablePayload, Serializable {
     public static volatile DefaultPayloadTreeConverter CONVERTER = null;
     
     private PayloadTreeNode parent;
+    
+    // ElementPath for empty container nodes
+    private ElementPath elementPath;
 
     /** The payloadElement representing the data of this node. Used as Delegate. */
     private PayloadElement payloadElement;
@@ -92,6 +95,16 @@ public class PayloadTreeNode implements VisitablePayload, Serializable {
     public PayloadTreeNode(PayloadElement payloadElement) {
         this();
         this.payloadElement = payloadElement;
+    }
+
+    /**
+     * Initializes a new {@link PayloadTreeNode} without a PayloadElement For e.g. Collection nodes that contain data as cildren. 
+     * 
+     * @param elementPath The {@link ElementPath} to use for this node.
+     */
+    public PayloadTreeNode(ElementPath elementPath) {
+        this();
+        this.elementPath = elementPath;
     }
 
     /**
@@ -269,6 +282,10 @@ public class PayloadTreeNode implements VisitablePayload, Serializable {
         payloadElement.setData(data, format);
     }
 
+    public void setElementPath(ElementPath elementPath) {
+        this.elementPath = elementPath;
+    }
+
     /**
      * Get the element name of the PayloadElement associated with this node.
      *
@@ -305,7 +322,7 @@ public class PayloadTreeNode implements VisitablePayload, Serializable {
         if (payloadElement != null) {
             return new ElementPath(getNamespace(), getElementName());
         }
-        return null;
+        return elementPath;
     }
 
     /**
@@ -317,9 +334,9 @@ public class PayloadTreeNode implements VisitablePayload, Serializable {
     public String getNamespace() {
         if (payloadElement != null) {
             return payloadElement.getNamespace();
-            // wenn namespace null, ersten namespace der hierarchie nutzen
+        } else {
+            return elementPath.getNamespace();
         }
-        return null;
     }
 
     /**
@@ -449,6 +466,10 @@ public class PayloadTreeNode implements VisitablePayload, Serializable {
             this.node = new PayloadTreeNode();
         }
 
+        public Builder withoutPayload(String namespace, String elementName) {
+            node.setElementPath(new ElementPath(namespace, elementName));
+            return this;
+        }
         /**
          * Create and set the PayloadElemet of the PayloadTreeNode we are currently building.
          *
@@ -485,6 +506,22 @@ public class PayloadTreeNode implements VisitablePayload, Serializable {
          */
         public Builder andChild(Object data, String format, String namespace, String elementName) {
             node.addChild(new PayloadTreeNode(new PayloadElement(data, format, namespace, elementName)));
+            return this;
+        }
+
+        /**
+         * Create a new PayloadTreeNode and add it as child to the PayloadTreeNode we are currently building.
+         *
+         * @param data Uniform list data of the PayloadElement of the new PayloadTreeNodes
+         * @param format format of all the PayloadElements of the new PayloadTreeNodes
+         * @param namespace namespace of all the PayloadElements of the new PayloadTreeNodes
+         * @param elementName elementname of all the PayloadElements of the new PayloadTreeNodes
+         * @return the builder for further modification or building of the current PayloadTreenode
+         */
+        public Builder andChildren(List<? extends Object> data, String format, String namespace, String elementName) {
+            for (Object object : data) {
+                node.addChild(new PayloadTreeNode(new PayloadElement(object, format, namespace, elementName)));
+            }
             return this;
         }
 

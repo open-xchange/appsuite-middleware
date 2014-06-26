@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -585,17 +585,19 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         if (check_permissions && cdao.getEffectiveFolderId() != inFolder) {
             if (cdao.getFolderType() != FolderObject.SHARED && check_special_action == action) {
                 LOG.debug(
-                    "Permission Exception 2 (fid!inFolder) for user:oid:fid:inFolder {}:{}:{}:{}",
+                    "Permission Exception 2 (fid!inFolder) for user:oid:fid:inFolder:action {}:{}:{}:{}:{}",
                     I(so.getUserId()),
                     I(oid),
+                    I(cdao.getEffectiveFolderId()),
                     I(inFolder),
                     I(action));
                 throw OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_2.create();
             } else if (action_folder != inFolder && check_special_action == action) {
                 LOG.debug(
-                    "Permission Exception 3 (fid!inFolder) for user:oid:fid:inFolder {}:{}:{}:{}",
+                    "Permission Exception 3 (fid!inFolder) for user:oid:fid:inFolder:action {}:{}:{}:{}:{}",
                     I(so.getUserId()),
                     I(oid),
+                    I(action_folder),
                     I(inFolder),
                     I(action));
                 throw OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_3.create();
@@ -1142,6 +1144,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 throw OXCalendarExceptionCodes.SEARCH_ITERATOR_NULL.create();
             }
             try {
+                final boolean fastFetch = CachedCalendarIterator.CACHED_ITERATOR_FAST_FETCH.get();
                 for (int col : cols) {
                     final FieldFiller ff = FILLERS.get(I(col));
                     if (null == ff) {
@@ -1149,7 +1152,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                          * Fields not covered by FieldFiller: USERS, PARTICIPANTS, and FOLDER_ID
                          */
                         if (CalendarObject.USERS == col) {
-                            if (cdao.containsUserParticipants() || CachedCalendarIterator.CACHED_ITERATOR_FAST_FETCH) {
+                            if (cdao.containsUserParticipants() || fastFetch) {
                                 cdao.setFillUserParticipants();
                             } else {
                                 final Participants users = cimp.getUserParticipants(cdao, readcon, uid);
@@ -1157,14 +1160,14 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                                 bbs = true;
                             }
                         } else if (CalendarObject.PARTICIPANTS == col) {
-                            if (CachedCalendarIterator.CACHED_ITERATOR_FAST_FETCH) {
+                            if (fastFetch) {
                                 cdao.setFillParticipants();
                             } else {
                                 final Participants participants = cimp.getParticipants(cdao, readcon);
                                 cdao.setParticipants(participants.getList());
                             }
                         } else if (CalendarObject.CONFIRMATIONS == col) {
-                            if (CachedCalendarIterator.CACHED_ITERATOR_FAST_FETCH) {
+                            if (fastFetch) {
                                 cdao.setFillConfirmations();
                             } else {
                                 final ExternalUserParticipant[] externals =
@@ -1182,7 +1185,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                                         } else {
                                             if (bbs) {
                                                 cdao.setGlobalFolderID(cdao.getEffectiveFolderId());
-                                            } else if (!CachedCalendarIterator.CACHED_ITERATOR_FAST_FETCH) {
+                                            } else if (!fastFetch) {
                                                 final Participants users = cimp.getUserParticipants(cdao, readcon, uid);
                                                 cdao.setUsers(users.getUsers());
                                                 cdao.setGlobalFolderID(cdao.getEffectiveFolderId());
@@ -1218,7 +1221,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                                 }
                             }
                         } else if (CommonObject.LAST_MODIFIED_OF_NEWEST_ATTACHMENT == col) {
-                            if (CachedCalendarIterator.CACHED_ITERATOR_FAST_FETCH) {
+                            if (fastFetch) {
                                 cdao.setFillLastModifiedOfNewestAttachment(true);
                             } else {
                                 setAttachmentLastModified(readcon, c, cdao);
@@ -1265,7 +1268,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 
                 if (!recColl.checkPermissions(cdao, so, c, readcon, CalendarOperation.READ, check_folder_id)) {
                     if (LOG.isDebugEnabled()) {
-                        final com.openexchange.java.StringAllocator colss = new com.openexchange.java.StringAllocator(cols.length << 3);
+                        final StringBuilder colss = new StringBuilder(cols.length << 3);
                         for (int a = 0; a < cols.length; a++) {
                             String fn = recColl.getFieldName(cols[a]);
                             if (fn == null) {
@@ -1869,7 +1872,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 recColl.checkRecurringCompleteness(cdao, !edao.containsUntil() && !edao.containsOccurrence());
                 completenessChecked = true;
             }
-            cdao.removeUntil();
+            //cdao.removeUntil();
             // Calculate occurrence's time
             final Date occurrenceDate;
             if (cdao.getOccurrence() <= 0) {

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -57,7 +57,7 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailfilter.ajax.MailfilterServlet;
 import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterExceptionCode;
-import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;
+import com.openexchange.mailfilter.services.Services;
 import com.openexchange.server.Initialization;
 
 /**
@@ -110,12 +110,12 @@ public class MailFilterServletInit implements Initialization {
 			LOG.debug("add action writer implementations");
 
 
-		final HttpService httpService = MailFilterServletServiceRegistry.getServiceRegistry().getService(HttpService.class);
+		final HttpService httpService = Services.getService(HttpService.class);
 		if (httpService == null) {
 			LOG.error("HTTP service is null. Mail Filter servlet cannot be registered");
 			return;
 		}
-		PREFIX.set(MailFilterServletServiceRegistry.getServiceRegistry().getService(DispatcherPrefixService.class));
+		PREFIX.set(Services.getService(DispatcherPrefixService.class));
 		try {
 			/*
 			 * Register mail filter servlet
@@ -141,7 +141,7 @@ public class MailFilterServletInit implements Initialization {
 			LOG.error("Mail filter servlet has not been started.");
 			return;
 		}
-		final HttpService httpService = MailFilterServletServiceRegistry.getServiceRegistry().getService(HttpService.class);
+		final HttpService httpService = Services.getService(HttpService.class);
 		if (httpService == null) {
 			LOG.error("HTTP service is null. Mail Filter servlet cannot be unregistered");
 		} else {

@@ -45,6 +45,20 @@ public interface OXUserServicePortType {
         Change parameters
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, NoSuchUserException_Exception, DatabaseUpdateException_Exception;
 
+    @WebResult(name = "return", targetNamespace = "http://soap.admin.openexchange.com")
+    @Action(input = "urn:getUserCapabilities", output = "urn:getUserCapabilitiesResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:getUserCapabilitiesStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:getUserCapabilitiesInvalidCredentialsException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:getUserCapabilitiesInvalidDataException"), @FaultAction(className = NoSuchContextException_Exception.class, value = "urn:getUserCapabilitiesNoSuchContextException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:getUserCapabilitiesRemoteException"), @FaultAction(className = NoSuchUserException_Exception.class, value = "urn:getUserCapabilitiesNoSuchUserException"), @FaultAction(className = DatabaseUpdateException_Exception.class, value = "urn:getUserCapabilitiesDatabaseUpdateException")})
+    @RequestWrapper(localName = "getUserCapabilities", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.user.soap.GetUserCapabilities")
+    @WebMethod(action = "urn:getUserCapabilities")
+    @ResponseWrapper(localName = "getUserCapabilitiesResponse", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.user.soap.GetUserCapabilitiesResponse")
+    public java.lang.String getUserCapabilities(
+        @WebParam(name = "ctx", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.user.dataobjects.Context ctx,
+        @WebParam(name = "user", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.user.dataobjects.User user,
+        @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.user.dataobjects.Credentials auth
+    ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, NoSuchUserException_Exception, DatabaseUpdateException_Exception;
+
     @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
     @Action(input = "urn:changeCapabilities", output = "urn:changeCapabilitiesResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:changeCapabilitiesStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:changeCapabilitiesInvalidCredentialsException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:changeCapabilitiesInvalidDataException"), @FaultAction(className = NoSuchContextException_Exception.class, value = "urn:changeCapabilitiesNoSuchContextException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:changeCapabilitiesRemoteException"), @FaultAction(className = NoSuchUserException_Exception.class, value = "urn:changeCapabilitiesNoSuchUserException"), @FaultAction(className = DatabaseUpdateException_Exception.class, value = "urn:changeCapabilitiesDatabaseUpdateException")})
     @WebMethod(action = "urn:changeCapabilities")

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -59,6 +59,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -990,11 +991,11 @@ public class AppointmentRequest extends CalendarRequest {
 
         if (jData.has(AJAXServlet.PARAMETER_INFOLDER)) {
             final int inFolder = DataParser.parseInt(jData, AJAXServlet.PARAMETER_INFOLDER);
-            searchObj.addFolder(inFolder);
+            searchObj.setFolderIDs(Collections.singleton(Integer.valueOf(inFolder)));
         }
 
         if (jData.has(SearchFields.PATTERN)) {
-            searchObj.setPattern(DataParser.parseString(jData, SearchFields.PATTERN));
+            searchObj.setQueries(Collections.singleton(DataParser.parseString(jData, SearchFields.PATTERN)));
         }
 
         final int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
@@ -1085,7 +1086,8 @@ public class AppointmentRequest extends CalendarRequest {
         final Date lastModified = null;
 
         final AppointmentSearchObject searchObj = new AppointmentSearchObject();
-        searchObj.setRange(new Date[] { start, end });
+        searchObj.setMinimumEndDate(start);
+        searchObj.setMaximumStartDate(end);
 
         final LinkedList<Appointment> appointmentList = new LinkedList<Appointment>();
 
@@ -1095,7 +1097,7 @@ public class AppointmentRequest extends CalendarRequest {
         try {
             final AppointmentSQLInterface appointmentsql = appointmentFactory.createAppointmentSql(session);
             final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
-            searchIterator = appointmentsql.getAppointmentsByExtendedSearch(searchObj, orderBy, orderDir, _appointmentFields);
+            searchIterator = appointmentsql.searchAppointments(searchObj, orderBy, orderDir, _appointmentFields);
 
             final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone).setSession(session);
 
@@ -1160,8 +1162,6 @@ public class AppointmentRequest extends CalendarRequest {
             }
 
             return jsonResponseArray;
-        } catch (final SQLException e) {
-            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);
         } finally {
             if (searchIterator != null) {
                 searchIterator.close();

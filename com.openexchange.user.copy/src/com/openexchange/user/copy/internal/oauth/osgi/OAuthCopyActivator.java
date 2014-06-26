@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -67,6 +67,7 @@ public class OAuthCopyActivator implements BundleActivator {
     /**
      * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
      */
+    @Override
     public void start(final BundleContext context) throws Exception {
         tracker = new ServiceTracker<IDGeneratorService, IDGeneratorService>(context, IDGeneratorService.class.getName(), new OAuthCopyTaskRegisterer(context));
         tracker.open();
@@ -75,6 +76,7 @@ public class OAuthCopyActivator implements BundleActivator {
     /**
      * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
      */
+    @Override
     public void stop(final BundleContext context) throws Exception {
         if (tracker != null) {
             tracker.close();

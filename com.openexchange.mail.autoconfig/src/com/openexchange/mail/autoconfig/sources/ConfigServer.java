@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -63,7 +63,6 @@ import org.apache.commons.httpclient.params.HttpMethodParams;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.autoconfig.Autoconfig;
 import com.openexchange.mail.autoconfig.xmlparser.AutoconfigParser;
 import com.openexchange.mail.autoconfig.xmlparser.ClientConfig;
@@ -89,13 +88,13 @@ public class ConfigServer extends AbstractConfigSource {
         client.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
 
         // GET method
-        String uri = new StringAllocator("http://autoconfig.").append(emailDomain).append("/mail/config-v1.1.xml").toString();
+        String uri = new StringBuilder("http://autoconfig.").append(emailDomain).append("/mail/config-v1.1.xml").toString();
         final GetMethod getMethod = new GetMethod(uri);
         try {
             // Name-value-pairs
             final List<NameValuePair> pairs = new ArrayList<NameValuePair>(4);
             {
-                final NameValuePair pair = new NameValuePair("emailaddress", new StringAllocator(emailLocalPart).append('@').append(emailDomain).toString());
+                final NameValuePair pair = new NameValuePair("emailaddress", new StringBuilder(emailLocalPart).append('@').append(emailDomain).toString());
                 pairs.add(pair);
             }
             getMethod.setQueryString(pairs.toArray(new NameValuePair[0]));
@@ -105,7 +104,7 @@ public class ConfigServer extends AbstractConfigSource {
             if (statusCode != 200) {
                 LOG.info("Could not retrieve config XML from autoconfig server. Return code was: {}", statusCode);
                 // Try 2nd URL
-                uri = new StringAllocator(64).append("http://").append(emailDomain).append("/.well-known/autoconfig/mail/config-v1.1.xml").toString();
+                uri = new StringBuilder(64).append("http://").append(emailDomain).append("/.well-known/autoconfig/mail/config-v1.1.xml").toString();
                 getMethod.setURI(new URI(uri, false));
                 statusCode = client.executeMethod(getMethod);
                 if (statusCode != 200) {

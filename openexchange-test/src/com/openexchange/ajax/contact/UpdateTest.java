@@ -7,7 +7,6 @@ import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
-import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.test.OXTestToolkit;
 
 public class UpdateTest extends AbstractContactTest {
@@ -41,7 +40,7 @@ public class UpdateTest extends AbstractContactTest {
         contactEntry.setObjectID(contactId);
 
         final int objectId = createContactWithDistributionList("testUpdateWithDistributionList", contactEntry);
-        
+
         GetRequest getRequest = new GetRequest(contactFolderId, objectId, tz, false);
         GetResponse getResponse = client.execute(getRequest);
         Date lastModified = new Date(((JSONObject) getResponse.getData()).getLong("last_modified"));
@@ -57,41 +56,6 @@ public class UpdateTest extends AbstractContactTest {
         entry[1] = new DistributionListEntryObject("displayname b", "b@b.de", DistributionListEntryObject.INDEPENDENT);
 
         contactObj.setDistributionList(entry);
-        contactObj.removeParentFolderID();
-
-        updateContact(contactObj, contactFolderId);
-    }
-
-    public void testUpdateWithLinks() throws Exception {
-        final Contact link1 = createContactObject("link1");
-        final Contact link2 = createContactObject("link2");
-        final int linkId1 = insertContact(link1);
-        link1.setObjectID(linkId1);
-        final int linkId2 = insertContact(link2);
-        link2.setObjectID(linkId2);
-
-        final int objectId = createContactWithLinks("testUpdateWithLinks", link1, link2);
-
-        final Contact link3 = createContactObject("link3");
-        final int linkId3 = insertContact(link3);
-        
-        GetRequest getRequest = new GetRequest(contactFolderId, objectId, tz, false);
-        GetResponse getResponse = client.execute(getRequest);
-        Date lastModified = new Date(((JSONObject) getResponse.getData()).getLong("last_modified"));
-
-        final Contact contactObj = new Contact();
-        
-        contactObj.setSurName("testUpdateWithLinks");
-        contactObj.setParentFolderID(contactFolderId);
-        contactObj.setObjectID(objectId);
-
-        final LinkEntryObject[] links = new LinkEntryObject[1];
-        links[0] = new LinkEntryObject();
-        links[0].setLinkID(linkId3);
-        links[0].setLinkDisplayname(link3.getDisplayName());
-
-        contactObj.setLinks(links);
-        contactObj.setLastModified(lastModified);
         contactObj.removeParentFolderID();
 
         updateContact(contactObj, contactFolderId);

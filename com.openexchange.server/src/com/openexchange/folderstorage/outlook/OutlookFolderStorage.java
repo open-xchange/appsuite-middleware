@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -129,6 +129,7 @@ import com.openexchange.folderstorage.outlook.sql.Update;
 import com.openexchange.folderstorage.outlook.sql.Utility;
 import com.openexchange.folderstorage.type.MailType;
 import com.openexchange.folderstorage.type.PublicType;
+import com.openexchange.folderstorage.type.TrashType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -482,8 +483,9 @@ public final class OutlookFolderStorage implements FolderStorage {
                             if (restore) {
                                 folderStorage.restore(realTreeId, folderId, storageParameters);
                             } else {
-                                deleteFolder(treeId, folderId, storageParameters, isDatabaseFolder(folderId), memoryTable);
-                                LOG.warn("Deleted absent folder '{}' from virtual folder tree as there is no real counterpart", folderId, new Throwable());
+                                // Disabled deletion...
+                                // deleteFolder(treeId, folderId, storageParameters, isDatabaseFolder(folderId), memoryTable);
+                                // LOG.warn("Deleted absent folder '{}' from virtual folder tree as there is no real counterpart", folderId, new Throwable());
                             }
                         } else if (isDatabaseFolder(folderId)) {
                             final String parentId = memoryTree.getParentOf(folderId);
@@ -1213,8 +1215,10 @@ public final class OutlookFolderStorage implements FolderStorage {
                         outlookFolder.setName(defaultAccount.getDisplayName());
                     }
                 }
-                // Force invocation of getSubfolders() through setting to null
-                outlookFolder.setSubfolderIDs(null);
+                if (!INFOSTORE_PUBLIC.equals(folderId)) {
+                    // Force invocation of getSubfolders() through setting to null
+                    outlookFolder.setSubfolderIDs(null);
+                }
             } else {
                 setSubfolders(treeId, folderId, storageParameters, user, tree, contextId, outlookFolder, realFolder);
             }
@@ -2695,6 +2699,9 @@ public final class OutlookFolderStorage implements FolderStorage {
         } else if (showPersonalBelowInfoStore(session, altNames) && id.equals(getDefaultInfoStoreFolderId(session))) {
             folder.setParentID(INFOSTORE);
             folder.setName(FolderStrings.DEFAULT_FILES_FOLDER_NAME);
+        } else if (MODULE_FILE == folder.getContentType().getModule() && TrashType.getInstance().equals(folder.getType()) && folder.isDefault()) {
+            folder.setParentID(INFOSTORE);
+            folder.setName(altNames ? FolderStrings.SYSTEM_TRASH_FILES_FOLDER_NAME : FolderStrings.SYSTEM_TRASH_INFOSTORE_FOLDER_NAME);
         }
     }
 

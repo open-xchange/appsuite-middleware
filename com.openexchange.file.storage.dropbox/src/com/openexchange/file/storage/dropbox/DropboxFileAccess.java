@@ -68,10 +68,10 @@ import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.dropbox.session.DropboxOAuthAccess;
+import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -191,7 +191,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
             final String name = id.substring(id.lastIndexOf('/') + 1);
             final String destPath = toPath(destFolder);
             final int pos = destPath.lastIndexOf('/');
-            final Entry entry = dropboxAPI.copy(id, pos > 0 ? new StringAllocator(destPath).append('/').append(name).toString() : name);
+            final Entry entry = dropboxAPI.copy(id, pos > 0 ? new StringBuilder(destPath).append('/').append(name).toString() : name);
             return new IDTuple(entry.parentPath(), entry.path);
         } catch (final DropboxServerException e) {
             if (404 == e.error) {
@@ -213,7 +213,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
                 update.getFileName() : id.substring(id.lastIndexOf('/') + 1);
             final String destPath = toPath(destFolder);
             final int pos = destPath.lastIndexOf('/');
-            final Entry entry = dropboxAPI.move(id, pos > 0 ? new StringAllocator(destPath).append('/').append(name).toString() : name);
+            final Entry entry = dropboxAPI.move(id, pos > 0 ? new StringBuilder(destPath).append('/').append(name).toString() : name);
             return new IDTuple(entry.parentPath(), entry.path);
         } catch (final DropboxServerException e) {
             if (404 == e.error) {
@@ -258,7 +258,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
             if (isEmpty(id) || !exists(null, id, CURRENT_VERSION)) {
                 // Create
                 entry = dropboxAPI.putFile(
-                    new StringAllocator(file.getFolderId()).append('/').append(file.getFileName()).toString(),
+                    new StringBuilder(file.getFolderId()).append('/').append(file.getFileName()).toString(),
                     data,
                     length,
                     null,
@@ -306,6 +306,11 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
 
     @Override
     public List<IDTuple> removeDocument(final List<IDTuple> ids, final long sequenceNumber) throws OXException {
+        return removeDocument(ids, sequenceNumber, false);
+    }
+
+    @Override
+    public List<IDTuple> removeDocument(final List<IDTuple> ids, final long sequenceNumber, boolean hardDelete) throws OXException {
         try {
             final List<IDTuple> ret = new ArrayList<IDTuple>(ids.size());
             for (final IDTuple id : ids) {
@@ -510,6 +515,12 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
     @Override
     public Delta<File> getDelta(final String folderId, final long updateSince, final List<Field> fields, final Field sort, final SortDirection order, final boolean ignoreDeleted) throws OXException {
         return new FileDelta(EMPTY_ITER, EMPTY_ITER, EMPTY_ITER, 0L);
+    }
+
+    @Override
+    public SearchIterator<File> search(final List<String> folderIds, final SearchTerm<?> searchTerm, List<Field> fields, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     @Override

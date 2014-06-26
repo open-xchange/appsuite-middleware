@@ -32,9 +32,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.java.StringAllocator;
 
 /**
  * This is an updated version with enhancements made by Daniel Migowski,
@@ -108,7 +106,7 @@ public class AlphanumComparator implements Comparator<String> {
     private final String getChunk(final String s, final int length, final int start) {
         char c = s.charAt(start);
         final boolean digit = Character.isDigit(c);
-        final com.openexchange.java.StringAllocator chunk = new com.openexchange.java.StringAllocator(length - start);
+        final StringBuilder chunk = new StringBuilder(length - start);
         chunk.append(c);
         for (int marker = start + 1; marker < length && digit == Character.isDigit(c = s.charAt(marker)); marker++) {
             chunk.append(c);
@@ -156,7 +154,7 @@ public class AlphanumComparator implements Comparator<String> {
         Map<Locale, Collator> overrides = new HashMap<Locale, Collator>();
         Collator defaultJapaneseCollator = Collator.getInstance(Locale.JAPANESE);
         if (null != defaultJapaneseCollator && RuleBasedCollator.class.isInstance(defaultJapaneseCollator)) {
-            StringAllocator customRules = new StringAllocator(((RuleBasedCollator)defaultJapaneseCollator).getRules());
+            StringBuilder customRules = new StringBuilder(((RuleBasedCollator)defaultJapaneseCollator).getRules());
             /*
              * insert custom rules after the 0 character to sort those characters before any others
              */

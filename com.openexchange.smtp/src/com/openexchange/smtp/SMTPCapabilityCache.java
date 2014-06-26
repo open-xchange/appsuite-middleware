@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -223,7 +223,7 @@ public final class SMTPCapabilityCache {
                 }
                 final InputStream in = s.getInputStream();
                 final OutputStream out = s.getOutputStream();
-                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(512);
+                final StringBuilder sb = new StringBuilder(512);
                 /*
                  * Read IMAP server greeting on connect
                  */
@@ -244,7 +244,7 @@ public final class SMTPCapabilityCache {
                 }
                 /*final String greeting = sb.toString();*/
                 if (sb.length() > 0) {
-                    sb.reinitTo(0);
+                    sb.setLength(0);
                 }
                 if (skipLF) {
                     /*

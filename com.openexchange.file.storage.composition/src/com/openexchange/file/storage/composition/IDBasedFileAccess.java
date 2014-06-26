@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -54,8 +54,10 @@ import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
+import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -68,6 +70,7 @@ import com.openexchange.tx.TransactionAware;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface IDBasedFileAccess extends TransactionAware {
+
     /**
      * Find out whether the file with a given ID exists or not.
      * @param id The ID to check for
@@ -76,7 +79,7 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @return true when the file exists and is readable, false otherwise.
      * @throws OXException If operation fails
      */
-    public boolean exists(String id, String version) throws OXException;
+    boolean exists(String id, String version) throws OXException;
 
     /**
      * Load the metadata about a file
@@ -85,7 +88,7 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @return The File Metadata
      * @throws OXException If operation fails
      */
-    public File getFileMetadata(String id, String version) throws OXException;
+    File getFileMetadata(String id, String version) throws OXException;
 
     /**
      * Save the file metadata.
@@ -93,7 +96,7 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass UNDEFINED_SEQUENCE_NUMBER for new files or DISTANT_FUTURE to circumvent the check
      * @throws OXException If operation fails
      */
-    public void saveFileMetadata(File document, long sequenceNumber) throws OXException ; // No modifiedColumns means all columns
+    void saveFileMetadata(File document, long sequenceNumber) throws OXException ; // No modifiedColumns means all columns
 
     /**
      * Save the file metadata.
@@ -102,7 +105,7 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @param modifiedColumns The fields to save. All other fields will be ignored
      * @throws OXException If operation fails
      */
-    public void saveFileMetadata(File document, long sequenceNumber, List<File.Field> modifiedColumns) throws OXException ;
+    void saveFileMetadata(File document, long sequenceNumber, List<File.Field> modifiedColumns) throws OXException ;
 
     /**
      * Copies a file from the source to the destination.
@@ -124,8 +127,8 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @return
      * @throws OXException If operation fails
      */
-    public InputStream getDocument(String id, String version) throws OXException;
-    
+    InputStream getDocument(String id, String version) throws OXException;
+
     /**
      * Tries to load the documents content and associated metadata. Returns null if the underlying implementation cannot satisfy this call
      * @param id The id of the document
@@ -133,22 +136,22 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @return An InputStream Source and metadata or null if the underlying filestore does not implement this feature
      * @throws OXException
      */
-    public Document getDocumentAndMetadata(String id, String version) throws OXException;
+    Document getDocumentAndMetadata(String id, String version) throws OXException;
 
     /**
      * Tries to load the documents content and associated metadata. Only retrieves
-     * the document if the given eTag does not match, otherwise returns a document instance with the 
+     * the document if the given eTag does not match, otherwise returns a document instance with the
      * etag set and no input stream. Returns null if the underlying implementation cannot satisfy this call
      * @param id The id of the document
      * @param version The version of the document. Pass in CURRENT_VERSION for the current version of the document.
-     * @param clientEtag The eTag supplied by the client, only fill in the input stream if the 
+     * @param clientEtag The eTag supplied by the client, only fill in the input stream if the
      *                     client etag does NOT match the current etag of the document. Still fill in the
      *                     Document#getEtag field.
      * @return An InputStream Source and metadata or null if the underlying filestore does not implement this feature
      * @throws OXException
      */
-    public Document getDocumentAndMetadata(String id, String version, String clientEtag) throws OXException;
-    
+    Document getDocumentAndMetadata(String id, String version, String clientEtag) throws OXException;
+
     /**
      * Save the file metadata and binary content
      * @param document The metadata to save
@@ -156,7 +159,7 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass UNDEFINED_SEQUENCE_NUMBER for new files or DISTANT_FUTURE to circumvent the check
      * @throws OXException If operation fails
      */
-    public void saveDocument(File document, InputStream data, long sequenceNumber) throws OXException ;
+    void saveDocument(File document, InputStream data, long sequenceNumber) throws OXException ;
 
     /**
      * Save the file metadata.
@@ -166,7 +169,7 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @param modifiedColumns The fields to save. All other fields will be ignored
      * @throws OXException If operation fails
      */
-    public void saveDocument(File document, InputStream data, long sequenceNumber, List<File.Field> modifiedColumns) throws OXException ;
+    void saveDocument(File document, InputStream data, long sequenceNumber, List<File.Field> modifiedColumns) throws OXException ;
 
     /**
      * Remove all documents in the given folder.
@@ -174,16 +177,38 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
      * @throws OXException If operation fails
      */
-    public void removeDocument(String folderId, long sequenceNumber) throws OXException;
+    void removeDocument(String folderId, long sequenceNumber) throws OXException;
 
     /**
-     * Removes the documents with the given IDs from the folder. Documents' identifiers that could not be removed due to an edit-delete conflict are returned.
+     * Removes the files with the given identifiers from the folder. Documents identifiers that could not be removed due to an
+     * edit-delete conflict are returned.
+     * <p>
+     * Calling this method should have the same effect as invoking {@link #removeDocument(List, long, boolean)} with
+     * <code>hardDelete</code> set to <code>false</code>, i.e. if the storage supports a trash folder, and a document is not yet located
+     * below that trash folder, it is backed up, otherwise it is deleted permanently.
+     *
      * @param ids The identifiers
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
-     * @return
+     * @return The IDs of documents that could not be deleted due to an edit-delete conflict
      * @throws OXException If operation fails
      */
-    public List<String> removeDocument(List<String> ids, long sequenceNumber) throws OXException;
+    List<String> removeDocument(List<String> ids, long sequenceNumber) throws OXException;
+
+    /**
+     * Removes the documents with the given IDs from the folder. Documents' identifiers that could not be removed due to an edit-delete
+     * conflict are returned.
+     * <p>
+     * If <code>hardDelete</code> is <code>false</code>, the storage supports a trash folder, and a document is not yet located below
+     * that trash folder, it is backed up, otherwise it is deleted permanently.
+     *
+     * @param ids The identifiers
+     * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
+     * @param hardDelete <code>true</code> to permanently remove the documents, <code>false</code> to move the documents to the default
+     *                   trash folder of the storage if possible
+     * @return The IDs of documents that could not be deleted due to an edit-delete conflict
+     * @throws OXException If operation fails
+     */
+    List<String> removeDocument(List<String> ids, long sequenceNumber, boolean hardDelete) throws OXException;
 
     /**
      * Remove a certain version of a file
@@ -192,14 +217,14 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @return
      * @throws OXException If operation fails
      */
-    public String[] removeVersion(String id, String[] versions) throws OXException;
+    String[] removeVersion(String id, String[] versions) throws OXException;
 
     /**
      * Unlocks a given file.
      * @param id The file to unlock
      * @throws OXException If operation fails
      */
-    public void unlock(String id) throws OXException;
+    void unlock(String id) throws OXException;
 
     /**
      * Locks a given file for the given duration (in milliseconds)
@@ -207,14 +232,14 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @param diff The duration in milliseconds
      * @throws OXException If operation fails
      */
-    public void lock(String id, long diff) throws OXException;
+    void lock(String id, long diff) throws OXException;
 
     /**
      * Updates a files sequence number
      * @param id The file whose sequence number should be updated
      * @throws OXException If operation fails
      */
-    public void touch(String id) throws OXException;
+    void touch(String id) throws OXException;
 
     /**
      * List a folders content
@@ -222,7 +247,7 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @return
      * @throws OXException If operation fails
      */
-    public TimedResult<File> getDocuments(String folderId) throws OXException;
+    TimedResult<File> getDocuments(String folderId) throws OXException;
 
     /**
      * List a folders content loading only the columns given
@@ -231,7 +256,7 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @return
      * @throws OXException If operation fails
      */
-    public TimedResult<File> getDocuments(String folderId, List<File.Field> columns) throws OXException;
+    TimedResult<File> getDocuments(String folderId, List<File.Field> columns) throws OXException;
 
     /**
      * List a folders content loading only the columns given and sorting by a certain field either ascendingly or descendingly
@@ -242,7 +267,7 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @return
      * @throws OXException If operation fails
      */
-    public TimedResult<File> getDocuments(String folderId, List<File.Field> columns, File.Field sort, SortDirection order) throws OXException;
+    TimedResult<File> getDocuments(String folderId, List<File.Field> columns, File.Field sort, SortDirection order) throws OXException;
 
     /**
      * List all versions of a document
@@ -250,7 +275,7 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @return
      * @throws OXException If operation fails
      */
-    public TimedResult<File> getVersions(String id) throws OXException;
+    TimedResult<File> getVersions(String id) throws OXException;
 
     /**
      * List all versions of a document loading the given columns
@@ -259,7 +284,7 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @return
      * @throws OXException If operation fails
      */
-    public TimedResult<File> getVersions(String id, List<File.Field> columns) throws OXException;
+    TimedResult<File> getVersions(String id, List<File.Field> columns) throws OXException;
 
     /**
      * List all versions of a document loading the given columns sorted according to the given field in a given order
@@ -268,7 +293,7 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @return
      * @throws OXException If operation fails
      */
-    public TimedResult<File> getVersions(String id, List<File.Field> columns, File.Field sort, SortDirection order) throws OXException;
+    TimedResult<File> getVersions(String id, List<File.Field> columns, File.Field sort, SortDirection order) throws OXException;
 
     /**
      * Load the document metadata with the given identifiers
@@ -277,7 +302,7 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @return
      * @throws OXException If operation fails
      */
-    public TimedResult<File> getDocuments(List<String> ids, List<File.Field> columns) throws OXException;
+    TimedResult<File> getDocuments(List<String> ids, List<File.Field> columns) throws OXException;
 
     /**
      * Get changes in a given folder since a certain sequence number
@@ -288,7 +313,7 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @return
      * @throws OXException If operation fails
      */
-    public Delta<File> getDelta(String folderId, long updateSince, List<File.Field> columns, boolean ignoreDeleted) throws OXException;
+    Delta<File> getDelta(String folderId, long updateSince, List<File.Field> columns, boolean ignoreDeleted) throws OXException;
 
     /**
      * Get changes in a given folder since a certain sequence number
@@ -301,7 +326,7 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @return
      * @throws OXException If operation fails
      */
-    public Delta<File> getDelta(String folderId, long updateSince, List<File.Field> columns, File.Field sort, SortDirection order, boolean ignoreDeleted) throws OXException;
+    Delta<File> getDelta(String folderId, long updateSince, List<File.Field> columns, File.Field sort, SortDirection order, boolean ignoreDeleted) throws OXException;
 
     /**
      * Search for a given file.
@@ -309,13 +334,29 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @param query The search query
      * @param cols Which fields to load
      * @param folderId In which folder to search. Pass ALL_FOLDERS to search in all folders.
-     * @param sort Which field to sort by. May be null.
+     * @param sort Which field to sort by. May be <code>null</code>.
      * @param order The order in which to sort
      * @param start A start index (inclusive) for the search results. Useful for paging.
      * @param end An end index (exclusive) for the search results. Useful for paging.
      * @return
      * @throws OXException If operation fails
      */
-    public SearchIterator<File> search(String query, List<File.Field> cols, String folderId, File.Field sort, SortDirection order, int start, int end) throws OXException;
+    SearchIterator<File> search(String query, List<File.Field> cols, String folderId, File.Field sort, SortDirection order, int start, int end) throws OXException;
+
+    /**
+     * Search for a given file.
+     *
+     * @param folderIds The optional folder identifiers
+     * @param searchTerm The search term
+     * @param fields The fields to load
+     * @param sort Which field to sort by. May be <code>null</code>.
+     * @param order The order in which to sort
+     * @param start A start index (inclusive) for the search results. Useful for paging.
+     * @param end An end index (exclusive) for the search results. Useful for paging.
+     *
+     * @return
+     * @throws OXException If operation fails
+     */
+    SearchIterator<File> search(List<String> folderIds, SearchTerm<?> searchTerm, List<Field> fields, File.Field sort, SortDirection order, int start, int end) throws OXException;
 
 }

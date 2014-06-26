@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,6 +52,7 @@ package com.openexchange.ajax.login;
 import static com.openexchange.ajax.ConfigMenu.convert2JS;
 import java.io.IOException;
 import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import javax.servlet.http.HttpServletRequest;
@@ -63,6 +64,7 @@ import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.Multiple;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.ajax.writer.ResponseWriter;
@@ -75,6 +77,7 @@ import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.log.LogProperties;
+import com.openexchange.login.LoginRampUpService;
 import com.openexchange.login.LoginResult;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.AbstractTask;
@@ -82,6 +85,7 @@ import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
@@ -93,10 +97,21 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractLoginRequestHandler.class);
 
+    private final Set<LoginRampUpService> rampUpServices;
+
+    /**
+     * Initializes a new {@link AbstractLoginRequestHandler}.
+     *
+     * @param rampUpServices The optional ramp-up services
+     */
+    protected AbstractLoginRequestHandler(final Set<LoginRampUpService> rampUpServices) {
+        this.rampUpServices = rampUpServices;
+    }
+
     /**
      * @return a boolean value indicated if an auto login should proceed afterwards
      */
-    public boolean loginOperation(final HttpServletRequest req, final HttpServletResponse resp, final LoginClosure login, LoginConfiguration conf) throws IOException, OXException {
+    protected boolean loginOperation(final HttpServletRequest req, final HttpServletResponse resp, final LoginClosure login, LoginConfiguration conf) throws IOException, OXException {
         Tools.disableCaching(resp);
         resp.setContentType(LoginServlet.CONTENTTYPE_JAVASCRIPT);
 
@@ -146,10 +161,11 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
 
             // Handle initial multiple
             final String multipleRequest = req.getParameter("multiple");
+            ServerSession serverSession = ServerSessionAdapter.valueOf(session);
             if (multipleRequest != null) {
                 final JSONArray dataArray = new JSONArray(multipleRequest);
                 if (dataArray.length() > 0) {
-                    JSONArray responses = Multiple.perform(dataArray, req, ServerSessionAdapter.valueOf(session));
+                    JSONArray responses = Multiple.perform(dataArray, req, serverSession);
                     json.put("multiple", responses);
                 } else {
                     json.put("multiple", new JSONArray(0));
@@ -173,6 +189,9 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                     LOG.warn("Modules could not be added to login JSON response", cause);
                 }
             }
+
+            // Perform Client Specific Ramp-Up
+            performRampUp(req, json, serverSession);
 
             // Set response
             response.setData(json);
@@ -232,6 +251,49 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
             return false;
         }
         return false;
+    }
+
+    /**
+     * Performs the ramp-up.
+     *
+     * @param req The HTTP request
+     * @param json The JSON object to contribute to
+     * @param session The associated session
+     * @throws OXException If an Open-Xchange error occurred
+     * @throws IOException If an I/O error occurred
+     */
+    protected void performRampUp(HttpServletRequest req, JSONObject json, ServerSession session) throws OXException, IOException {
+        performRampUp(req, json, session, false);
+    }
+
+    /**
+     * (Possibly enforced) Performs the ramp-up.
+     *
+     * @param req The HTTP request
+     * @param json The JSON object to contribute to
+     * @param session The associated session
+     * @param force <code>true</code> to enforce; otherwise <code>false</code> to check for presence of <code>"...&rampup=true"</code> URL parameter
+     * @throws OXException If an Open-Xchange error occurred
+     * @throws IOException If an I/O error occurred
+     */
+    protected void performRampUp(HttpServletRequest req, JSONObject json, ServerSession session, boolean force) throws OXException, IOException {
+        if (force || Boolean.parseBoolean(req.getParameter("rampup"))) {
+            final Set<LoginRampUpService> rampUpServices = this.rampUpServices;
+            if (rampUpServices != null) {
+                try {
+                    String client = session.getClient();
+                    for (LoginRampUpService rampUpService : rampUpServices) {
+                        if (rampUpService.contributesTo(client)) {
+                            JSONObject contribution = rampUpService.getContribution(session, AJAXRequestDataTools.getInstance().parseRequest(req, false, false, session, ""));
+                            json.put("rampup", contribution);
+                            break;
+                        }
+                    }
+                } catch (JSONException e) {
+                    throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+                }
+            }
+        }
     }
 
     private Locale bestGuessLocale(LoginResult result, final HttpServletRequest req) {

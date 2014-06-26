@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -253,7 +253,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
             if (0 == length) {
                 returnDefaultValue = true;
             } else {
-                args = isSequential ? new String[] { new com.openexchange.java.StringAllocator(32).append(seqNums[0]).append(':').append(
+                args = isSequential ? new String[] { new StringBuilder(32).append(seqNums[0]).append(':').append(
                     seqNums[seqNums.length - 1]).toString() } : IMAPNumArgSplitter.splitSeqNumArg(
                     seqNums,
                     keepOrder,
@@ -271,7 +271,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
                 if (0 == length) {
                     returnDefaultValue = true;
                 } else {
-                    args = isSequential ? new String[] { new com.openexchange.java.StringAllocator(32).append(seqNums[0]).append(':').append(
+                    args = isSequential ? new String[] { new StringBuilder(32).append(seqNums[0]).append(':').append(
                         seqNums[seqNums.length - 1]).toString() } : IMAPNumArgSplitter.splitSeqNumArg(
                         seqNums,
                         true,
@@ -285,7 +285,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
                 if (0 == length) {
                     returnDefaultValue = true;
                 } else {
-                    args = isSequential ? new String[] { new com.openexchange.java.StringAllocator(32).append(uids[0]).append(':').append(uids[uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(
+                    args = isSequential ? new String[] { new StringBuilder(32).append(uids[0]).append(':').append(uids[uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(
                         uids,
                         false,
                         LENGTH_WITH_UID + command.length());
@@ -299,7 +299,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
             if (0 == length) {
                 returnDefaultValue = true;
             } else {
-                args = isSequential ? new String[] { new com.openexchange.java.StringAllocator(64).append(msgs[0].getMessageNumber()).append(':').append(
+                args = isSequential ? new String[] { new StringBuilder(64).append(msgs[0].getMessageNumber()).append(':').append(
                     msgs[msgs.length - 1].getMessageNumber()).toString() } : IMAPNumArgSplitter.splitMessageArg(
                     msgs,
                     keepOrder,
@@ -307,7 +307,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
                 seqNumFetcher = keepOrder ? new MsgSeqNumFetcher(msgs) : null;
             }
         } else {
-            throw new MessagingException(new com.openexchange.java.StringAllocator("Invalid array type! ").append(arr.getClass().getName()).toString());
+            throw new MessagingException(new StringBuilder("Invalid array type! ").append(arr.getClass().getName()).toString());
         }
     }
 
@@ -359,7 +359,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
 
     @Override
     protected String getDebugInfo(final int argsIndex) {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(command.length() + 64);
+        final StringBuilder sb = new StringBuilder(command.length() + 64);
         if (uid) {
             sb.append("UID ");
         }
@@ -391,7 +391,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
 
     @Override
     protected String getCommand(final int argsIndex) {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(args[argsIndex].length() + 64);
+        final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
         if (uid) {
             sb.append("UID ");
         }
@@ -416,7 +416,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
             if (pos >= 0 && ++pos < server.length()) {
                 server = server.substring(pos);
             }
-            final MessagingException e = new MessagingException(new com.openexchange.java.StringAllocator(32).append("Expected ").append(length)
+            final MessagingException e = new MessagingException(new StringBuilder(32).append("Expected ").append(length)
                     .append(" FETCH responses but got ").append(index).append(" from IMAP folder \"").append(imapFolder.getFullName())
                     .append("\" on server \"").append(server).append("\".").toString());
             LOG.warn("", e);
@@ -715,7 +715,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
         public void handleItem(final Item item, final ExtendedMimeMessage msg, final org.slf4j.Logger logger) throws OXException {
             final BODYSTRUCTURE bs = (BODYSTRUCTURE) item;
             msg.setBodystructure(bs);
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator();
+            final StringBuilder sb = new StringBuilder();
             sb.append(bs.type).append('/').append(bs.subtype);
             if (bs.cParams != null) {
                 sb.append(bs.cParams);

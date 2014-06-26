@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Global
 Bundle-SymbolicName: com.openexchange.global
-Bundle-Version: 7.4.2
+Bundle-Version: 7.6.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: com.openexchange.ajax.meta,
@@ -32,6 +32,7 @@ Export-Package: com.openexchange.ajax.meta,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.sessiond,
+ com.openexchange.startup,
  com.openexchange.tools.arrays,
  com.openexchange.tools.global,
  com.openexchange.tools.id,

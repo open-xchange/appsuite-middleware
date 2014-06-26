@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -72,6 +72,8 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public class SyncFilesAction extends AbstractDriveAction {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SyncFilesAction.class);
+
     @Override
     public AJAXRequestResult doPerform(AJAXRequestData requestData, DriveSession session) throws OXException {
         /*
@@ -98,14 +100,11 @@ public class SyncFilesAction extends AbstractDriveAction {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
         /*
-         * determine sync actions
-         */
-        DriveService driveService = Services.getService(DriveService.class, true);
-        SyncResult<FileVersion> syncResult = driveService.syncFiles(session, path, originalFiles, clientFiles);
-        /*
-         * return json result
+         * determine sync actions & return json result
          */
         try {
+            DriveService driveService = Services.getService(DriveService.class, true);
+            SyncResult<FileVersion> syncResult = driveService.syncFiles(session, path, originalFiles, clientFiles);
             if (null != session.isDiagnostics()) {
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("diagnostics", syncResult.getDiagnostics());
@@ -113,6 +112,13 @@ public class SyncFilesAction extends AbstractDriveAction {
                 return new AJAXRequestResult(jsonObject, "json");
             }
             return new AJAXRequestResult(JsonDriveAction.serializeActions(syncResult.getActionsForClient(), session.getLocale()), "json");
+        } catch (OXException e) {
+            if ("DRV".equals(e.getPrefix())) {
+                LOG.debug("Error performing syncFiles request", e);
+            } else {
+                LOG.warn("Error performing syncFiles request", e);
+            }
+            throw e;
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }

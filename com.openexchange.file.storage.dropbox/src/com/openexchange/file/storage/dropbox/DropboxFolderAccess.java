@@ -63,7 +63,6 @@ import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.dropbox.session.DropboxOAuthAccess;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.session.Session;
 
 /**
@@ -128,6 +127,11 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
     }
 
     @Override
+    public FileStorageFolder getTrashFolder() throws OXException {
+        throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
+    }
+
+    @Override
     public FileStorageFolder[] getPublicFolders() throws OXException {
         return new FileStorageFolder[0];
     }
@@ -168,7 +172,7 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
         try {
             final String parentPath = toPath(toCreate.getParentId());
             final Entry entry =
-                dropboxAPI.createFolder(new StringAllocator("/".equals(parentPath) ? "" : parentPath).append('/').append(toCreate.getName()).toString());
+                dropboxAPI.createFolder(new StringBuilder("/".equals(parentPath) ? "" : parentPath).append('/').append(toCreate.getName()).toString());
             return toId(entry.path);
         } catch (final DropboxServerException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
@@ -199,7 +203,7 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
             final Entry moved =
                 dropboxAPI.move(
                     path,
-                    new StringAllocator("/".equals(newParentPath) ? "" : newParentPath).append('/').append(
+                    new StringBuilder("/".equals(newParentPath) ? "" : newParentPath).append('/').append(
                         null != newName ? newName : (pos < 0 ? path : path.substring(pos + 1))).toString());
             return toId(moved.path);
         } catch (final DropboxServerException e) {
@@ -222,7 +226,7 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
             final Entry moved =
                 dropboxAPI.move(
                     path,
-                    pos <= 0 ? newName : new StringAllocator(path.substring(0, pos)).append('/').append(newName).toString());
+                    pos <= 0 ? newName : new StringBuilder(path.substring(0, pos)).append('/').append(newName).toString());
             return toId(moved.path);
         } catch (final DropboxServerException e) {
             if (404 == e.error) {

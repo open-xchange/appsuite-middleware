@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -191,7 +191,7 @@ public final class Tools  {
         if(ldapfilter == null) {
             return "";
         }
-        final com.openexchange.java.StringAllocator sa = new com.openexchange.java.StringAllocator();
+        final StringBuilder sa = new StringBuilder();
         for (int i = 0; i < ldapfilter.length(); i++) {
             final char curChar = ldapfilter.charAt(i);
             switch (curChar) {

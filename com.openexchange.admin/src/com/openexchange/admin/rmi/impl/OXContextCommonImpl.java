@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -48,13 +48,9 @@
  */
 package com.openexchange.admin.rmi.impl;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
+import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -65,28 +61,38 @@ import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.services.AdminServiceRegistry;
+import com.openexchange.admin.services.PluginInterfaces;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.tools.GenericChecks;
-import com.openexchange.eventsystem.Event;
-import com.openexchange.eventsystem.EventSystemService;
-import com.openexchange.eventsystem.provisioning.ProviosioningEventConstants;
 
 
 public abstract class OXContextCommonImpl extends OXCommonImpl {
 
-    protected BundleContext context;
+    private final static org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OXContextCommonImpl.class);
 
-    public OXContextCommonImpl() throws StorageException {
+    /** The bundle context */
+    protected final BundleContext context;
+
+    protected OXContextCommonImpl(final BundleContext context) throws StorageException {
         super();
+        this.context = context;
     }
-
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXContextCommonImpl.class);
 
     protected void createchecks(final Context ctx, final User admin_user, final OXToolStorageInterface tool) throws StorageException, ContextExistsException, InvalidDataException {
 
         try {
-            final Boolean ret = (Boolean)callPluginMethod("checkMandatoryMembersContextCreate", ctx);
+            Boolean ret = null;
+
+            // Trigger plugin extensions
+            {
+                final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+                if (null != pluginInterfaces) {
+                    for (final OXContextPluginInterface oxContextPlugin : pluginInterfaces.getContextPlugins().getServiceList()) {
+                        ret = oxContextPlugin.checkMandatoryMembersContextCreate(ctx);
+                    }
+                }
+            }
+
             if( ret == null || ( ret != null && ret.booleanValue())  ) {
                 if (!ctx.mandatoryCreateMembersSet()) {
                     throw new InvalidDataException("Mandatory fields in context not set: " + ctx.getUnsetMembers());
@@ -94,6 +100,8 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
             }
         } catch (final EnforceableDataObjectException e) {
             throw new InvalidDataException(e.getMessage());
+        } catch (final PluginException e) {
+            throw StorageException.wrapForRMI(e);
         }
 
         if (tool.existsContext(ctx)) {
@@ -122,23 +130,28 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
             doNullCheck(ctx,admin_user);
         } catch (final InvalidDataException e1) {
             final InvalidDataException invalidDataException = new InvalidDataException("Context or user not correct");
-            log.error("", invalidDataException);
+            LOGGER.error("", invalidDataException);
             throw invalidDataException;
         }
 
         new BasicAuthenticator(context).doAuthentication(auth);
 
-        log.debug("{} - {}", ctx, admin_user);
+        LOGGER.debug("{} - {}", ctx, admin_user);
 
         try {
             final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
             Context ret = ctx;
             if( isAnyPluginLoaded() ) {
-                try {
-                    ret = (Context)callPluginMethod("preCreate", ret, admin_user, auth);
-                } catch(final StorageException e) {
-                    log.error("",e);
-                    throw e;
+                final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+                if (null != pluginInterfaces) {
+                    for (final OXContextPluginInterface contextInterface : pluginInterfaces.getContextPlugins().getServiceList()) {
+                        try {
+                            ret = contextInterface.preCreate(ret, admin_user, auth);
+                        } catch (PluginException e) {
+                            LOGGER.error("",e);
+                            throw StorageException.wrapForRMI(e);
+                        }
+                    }
                 }
             }
 
@@ -163,91 +176,18 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
 
             final Context retval = createmaincall(ret, admin_user, db, access,auth);
 
-            final EventSystemService eventSystemService = AdminServiceRegistry.getInstance().getService(EventSystemService.class);
-            if (null != eventSystemService) {
-                try {
-                    final Event event = new Event(ProviosioningEventConstants.TOPIC_CONTEXT_CREATE);
-                    event.setProperty(ProviosioningEventConstants.PROP_CONTEXT_ID, retval.getId());
-                    eventSystemService.publish(event);
-                } catch (final Exception e) {
-                    log.warn("Could not distribute context event.", e);
-                }
-            }
-
             return retval;
         } catch (final ContextExistsException e) {
-            log.error("",e);
+            LOGGER.error("",e);
             throw e;
         } catch (final InvalidDataException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         } catch (StorageException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             // Eliminate nested root cause exceptions. These are mostly unknown to clients.
             throw new StorageException(e.getMessage());
         }
-    }
-
-    /**
-     * Call method <code>method</code> of all bundles registered to the OXContext Service
-     * <b>Important:</b> No argument of any args here must be null!
-     * Arguments, that are null will cause a {@link StorageException}
-     *
-     * @param method Name of the method to call
-     * @param args All required args of that method
-     * @throws StorageException
-     */
-    protected Object callPluginMethod(final String method, final Object... args) throws StorageException {
-        Object ret = null;
-        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
-        for (final Bundle bundle : bundles) {
-            final String bundlename = bundle.getSymbolicName();
-            if (Bundle.ACTIVE == bundle.getState()) {
-                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
-                if (null != servicereferences) {
-                    for (final ServiceReference servicereference : servicereferences) {
-                        final Object property = servicereference.getProperty("name");
-                        if (null != property && property.toString().equalsIgnoreCase("oxcontext")) {
-                            final OXContextPluginInterface oxctx = (OXContextPluginInterface) this.context.getService(servicereference);
-                            log.debug("Calling {} for plugin: {}", method, bundlename);
-                            try {
-                                final Class[] classes = new Class[args.length];
-                                for(int i=0; i<args.length; i++) {
-                                    if( args[i] == null ) {
-                                        final String errtxt = "Error calling method " + method + "() for plugin: " + bundlename + ": argument " + (i+1) + " is null";
-                                        final StorageException e = new StorageException(errtxt);
-                                        log.error(errtxt);
-                                        throw e;
-                                    }
-                                    classes[i] = args[i].getClass();
-                                }
-                                final Method pmethod = OXContextPluginInterface.class.getDeclaredMethod(method, classes);
-                                ret = pmethod.invoke(oxctx, args);
-                                if( args[0] instanceof Context && ret instanceof Context ) {
-                                    args[0] = ret;
-                                }
-                            } catch (final SecurityException e) {
-                                log.error("Error while calling method {} of plugin {}", method, bundlename,e);
-                                throw new StorageException(e.getCause());
-                            } catch (final NoSuchMethodException e) {
-                                log.error("Error while calling method {} of plugin {}", method, bundlename,e);
-                                throw new StorageException(e.getCause());
-                            } catch (final IllegalArgumentException e) {
-                                log.error("Error while calling method {} of plugin {}", method, bundlename,e);
-                                throw new StorageException(e.getCause());
-                            } catch (final IllegalAccessException e) {
-                                log.error("Error while calling method {} of plugin {}", method, bundlename,e);
-                                throw new StorageException(e.getCause());
-                            } catch (final InvocationTargetException e) {
-                                log.error("Error while calling method {} of plugin {}", method, bundlename,e);
-                                throw new StorageException(e.getCause());
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return ret;
     }
 
     /**
@@ -255,20 +195,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
      * @throws StorageException
      */
     protected boolean isAnyPluginLoaded() throws StorageException {
-        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
-        for (final Bundle bundle : bundles) {
-            if (Bundle.ACTIVE == bundle.getState()) {
-                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
-                if (null != servicereferences) {
-                    for (final ServiceReference servicereference : servicereferences) {
-                        final Object property = servicereference.getProperty("name");
-                        if (null != property && property.toString().equalsIgnoreCase("oxcontext")) {
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-        return false;
+        final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+        return null != pluginInterfaces && false == pluginInterfaces.getContextPlugins().getServiceList().isEmpty();
     }
 }

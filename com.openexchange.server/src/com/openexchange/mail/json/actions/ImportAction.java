@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,10 +49,13 @@
 
 package com.openexchange.mail.json.actions;
 
+import static com.openexchange.mail.mime.utils.MimeMessageUtility.unfold;
+import static com.openexchange.mail.utils.DateUtils.getDateRFC822;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -152,6 +155,7 @@ public final class ImportAction extends AbstractMailAction {
                     force = AJAXRequestDataTools.parseBoolParameter(tmp.trim());
                 }
             }
+            final boolean preserveReceivedDate = mailRequest.optBool("preserveReceivedDate", false);
             /*
              * Iterate upload files
              */
@@ -176,7 +180,43 @@ public final class ImportAction extends AbstractMailAction {
                         final InputStream is = item.openStream();
                         final MimeMessage message;
                         try {
-                            message = new MimeMessage(defaultSession, is);
+                            if (preserveReceivedDate) {
+                                message = new MimeMessage(defaultSession, is) {
+
+                                    private boolean notParsed = true;
+                                    private Date receivedDate = null;
+
+                                    @Override
+                                    public Date getReceivedDate() throws MessagingException {
+                                        if (notParsed) {
+                                            notParsed = false;
+                                            final String[] receivedHdrs = getHeader(MessageHeaders.HDR_RECEIVED);
+                                            if (null != receivedHdrs) {
+                                                long lastReceived = Long.MIN_VALUE;
+                                                for (int i = 0; i < receivedHdrs.length; i++) {
+                                                    final String hdr = unfold(receivedHdrs[i]);
+                                                    int pos;
+                                                    if (hdr != null && (pos = hdr.lastIndexOf(';')) != -1) {
+                                                        try {
+                                                            lastReceived = Math.max(lastReceived, getDateRFC822(hdr.substring(pos + 1).trim()).getTime());
+                                                        } catch (final Exception e) {
+                                                            continue;
+                                                        }
+                                                    }
+                                                }
+
+                                                if (lastReceived > 0L) {
+                                                    receivedDate = new Date(lastReceived);
+                                                }
+                                            }
+                                        }
+
+                                        return receivedDate;
+                                    }
+                                };
+                            } else {
+                                message = new MimeMessage(defaultSession, is);
+                            }
                             message.removeHeader("x-original-headers");
                         } finally {
                             Streams.close(is);

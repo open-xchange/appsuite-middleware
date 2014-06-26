@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -118,7 +118,7 @@ public final class SourcedImage {
 
     @Override
     public String toString() {
-        final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(64);
+        final StringBuilder builder = new StringBuilder(64);
         builder.append("SourcedImage [contentType=").append(contentType).append(", transferEncoding=").append(transferEncoding).append(
             ", contentId=").append(contentId).append(", data=");
         if (data.length() <= 10) {

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -117,7 +117,7 @@ public class RequestRegistryEntry implements Comparable<RequestRegistryEntry> {
      * @return the request parameters as String in the form of name=value&name=value
      */
     public String getRequestParameters() {
-        final com.openexchange.java.StringAllocator sa = new com.openexchange.java.StringAllocator();
+        final StringBuilder sa = new StringBuilder();
         @SuppressWarnings("unchecked") final Map<String, String[]> parameterMap = request.getParameterMap();
         final String[] parameterNames = parameterMap.keySet().toArray(new String[0]);
         for (int i = 0; i < parameterNames.length; i++) {
@@ -150,7 +150,7 @@ public class RequestRegistryEntry implements Comparable<RequestRegistryEntry> {
      * @return thread infos in the form of "id=threadId, name=threadName"
      */
     public String getThreadInfo() {
-        return new com.openexchange.java.StringAllocator("id=").append(thread.getId()).append(", name=").append(thread.getName()).toString();
+        return new StringBuilder("id=").append(thread.getId()).append(", name=").append(thread.getName()).toString();
     }
 
     /**
@@ -178,6 +178,9 @@ public class RequestRegistryEntry implements Comparable<RequestRegistryEntry> {
 
     @Override
     public boolean equals(final Object obj) {
+        if (null == obj) {
+            return false;
+        }
         if (this == obj) {
             return true;
         }

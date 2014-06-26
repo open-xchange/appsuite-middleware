@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -191,7 +191,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
         if (cachedContent != null) {
             return cachedContent;
         }
-        if (getContentType().isMimeType(MimeTypes.MIME_TEXT_ALL)) {
+        if (getContentType().startsWith(TEXT)) {
             String charset = getContentType().getCharsetParameter();
             if (charset == null) {
                 try {

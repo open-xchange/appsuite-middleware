@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,57 +51,59 @@ package com.openexchange.jslob;
 
 import com.openexchange.exception.Category;
 import com.openexchange.exception.Category.EnumCategory;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link JSlobExceptionCodes} - The error code for JSlob module.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum JSlobExceptionCodes implements OXExceptionCode {
+public enum JSlobExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An unexpected error occurred: %1$s
      */
-    UNEXPECTED_ERROR(JSlobExceptionMessages.UNEXPECTED_ERROR, CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR("An unexpected error occurred: %1$s", CATEGORY_ERROR, 1, null),
     /**
      * A JSON error occurred: %1$s
      */
-    JSON_ERROR(JSlobExceptionMessages.JSON_ERROR, CATEGORY_ERROR, 2),
+    JSON_ERROR("A JSON error occurred: %1$s", CATEGORY_ERROR, 2, null),
     /**
      * No JSlob storage found for identifier: %1$s
      */
-    NOT_FOUND(JSlobExceptionMessages.NOT_FOUND, CATEGORY_ERROR, 3),
+    NOT_FOUND("No JSlob storage found for identifier: %1$s", CATEGORY_ERROR, 3, null),
     /**
      * No JSlob found for service %1$s.
      */
-    NOT_FOUND_EXT(JSlobExceptionMessages.NOT_FOUND_EXT, CATEGORY_USER_INPUT, 4),
+    NOT_FOUND_EXT("No JSlob found for service %1$s.", CATEGORY_USER_INPUT, 4, null),
     /**
      * Conflicting deletion of JSlob for service %1$s.
      */
-    CONFLICT(JSlobExceptionMessages.CONFLICT, CATEGORY_USER_INPUT, 5),
+    CONFLICT("Conflicting deletion of JSlob for service %1$s.", CATEGORY_USER_INPUT, 5, null),
     /**
      * Path does not exist: %1$s
      */
-    PATH_NOT_FOUND(JSlobExceptionMessages.PATH_NOT_FOUND, CATEGORY_USER_INPUT, 6),
+    PATH_NOT_FOUND("Path doesn't exist: %1$s", CATEGORY_USER_INPUT, 6, null),
     /**
      * Invalid path: %1$s.
      */
-    INVALID_PATH(JSlobExceptionMessages.INVALID_PATH, EnumCategory.CATEGORY_USER_INPUT, 7),
+    INVALID_PATH("Invalid path: %1$s.", CATEGORY_USER_INPUT, 7, null),
     /**
      * Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done.
      */
-    SET_NOT_SUPPORTED(JSlobExceptionMessages.SET_NOT_SUPPORTED, CATEGORY_WARNING, 8),
+    SET_NOT_SUPPORTED("Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done.", CATEGORY_WARNING, 8,
+        JSlobExceptionMessages.SET_NOT_SUPPORTED),
     /**
      * "%1$s" is a reserved identifier. Please choose a different one.
      */
-    RESERVED_IDENTIFIER(JSlobExceptionMessages.RESERVED_IDENTIFIER, EnumCategory.CATEGORY_USER_INPUT, 9),
+    RESERVED_IDENTIFIER("\"%1$s\" is a reserved identifier. Please choose a different one.", EnumCategory.CATEGORY_USER_INPUT, 9, null),
     /**
-     * The JSlob %1$s is too big.
+     * The JSlob %1$s is too big in context %2$d for user %3$d.
      */
-    JSLOB_TOO_BIG(JSlobExceptionMessages.JSLOB_TOO_BIG, EnumCategory.CATEGORY_USER_INPUT, 10)
+    JSLOB_TOO_BIG("The JSlob %1$s is too big in context %2$d for user %3$d.", EnumCategory.CATEGORY_USER_INPUT, 10, null)
 
     ;
 
@@ -116,11 +118,14 @@ public enum JSlobExceptionCodes implements OXExceptionCode {
 
     private final String message;
 
+    private String displayMessage;
 
-    private JSlobExceptionCodes(final String message, final Category category, final int detailNumber) {
+
+    private JSlobExceptionCodes(final String message, final Category category, final int detailNumber, String displayMessage) {
         this.message = message;
         number = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -141,6 +146,11 @@ public enum JSlobExceptionCodes implements OXExceptionCode {
     @Override
     public int getNumber() {
         return number;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -170,6 +170,24 @@ public class EventFiringInfostoreFacadeImpl extends InfostoreFacadeImpl implemen
                     sessionObj, SERVICE_ID, ACCOUNT_ID, getFolderID(document), getFileID(document), document.getFileName(), null));
             }
         }
+    }
+
+    @Override
+    protected List<DocumentMetadata> moveDocuments(ServerSession session, List<DocumentMetadata> documents, long destinationFolderID,
+        long sequenceNumber, boolean adjustFilenamesAsNeeded) throws OXException {
+        List<DocumentMetadata> rejectedDocuments = super.moveDocuments(
+            session, documents, destinationFolderID, sequenceNumber, adjustFilenamesAsNeeded);
+        if (null != documents && 0 < documents.size()) {
+            for (DocumentMetadata document : documents) {
+                if (null != rejectedDocuments && rejectedDocuments.contains(document)) {
+                    continue;
+                }
+                fireEvent(FileStorageEventHelper.buildUpdateEvent(session, SERVICE_ID, ACCOUNT_ID,
+                    new FolderID(SERVICE_ID, ACCOUNT_ID, String.valueOf(destinationFolderID)).toUniqueID(),
+                    getFileID(document), document.getFileName()));
+            }
+        }
+        return rejectedDocuments;
     }
 
     @Override

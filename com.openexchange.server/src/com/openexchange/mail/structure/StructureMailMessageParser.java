@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -527,6 +527,10 @@ public final class StructureMailMessageParser {
                      */
                     final Multipart mp;
                     try {
+                        final Attr subjetcAttr = message.getAttribute(Attr.attSubject);
+                        if (null == subjetcAttr) {
+                            message.addAttribute(new Attr(Attr.LVL_MESSAGE, Attr.atpText, Attr.attSubject, "vcard"));
+                        }
                         mp = ContactHandler.convert(message);
                     } catch (final RuntimeException e) {
                         LOG.error("Invalid TNEF contact", e);
@@ -704,36 +708,6 @@ public final class StructureMailMessageParser {
                     return;
                 }
             }
-        } else if (/*rootLevelMultipart && */isMultipartSigned(contentType)) {
-            /*
-             * Determine the part which is considered to be the message' text according to
-             */
-            MailPart part = mailPart;
-            if (!handler.handleSMIMEBodyText(part)) {
-                stop = true;
-                return;
-            }
-            part = null;
-            final ByteArrayOutputStream buf = new UnsynchronizedByteArrayOutputStream(2048);
-            final byte[] bytes;
-            {
-                mailPart.writeTo(buf);
-                bytes = buf.toByteArray();
-                buf.reset();
-            }
-            {
-                final String version = mailPart.getFirstHeader("MIME-Version");
-                buf.write(Charsets.toAsciiBytes("MIME-Version: " + (null == version ? "1.0" : version) + "\r\n"));
-            }
-            {
-                final String ct = MimeMessageUtility.extractHeader("Content-Type", new UnsynchronizedByteArrayInputStream(bytes), false);
-                buf.write(Charsets.toAsciiBytes("Content-Type:" + ct + "\r\n"));
-            }
-            buf.write(extractBodyFrom(bytes));
-            if (!handler.handleSMIMEBodyData(buf.toByteArray())) {
-                stop = true;
-                return;
-            }
         } else {
             if (!mailPart.containsSequenceId()) {
                 mailPart.setSequenceId(getSequenceId(prefix, partCount));
@@ -829,7 +803,7 @@ public final class StructureMailMessageParser {
         String filename = rawFileName;
         if ((filename == null) || isEmptyString(filename)) {
             final List<String> exts = MimeType2ExtMap.getFileExtensions(baseMimeType.toLowerCase(Locale.ENGLISH));
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(16).append(PREFIX).append(sequenceId).append('.');
+            final StringBuilder sb = new StringBuilder(16).append(PREFIX).append(sequenceId).append('.');
             if (exts == null) {
                 sb.append("dat");
             } else {
@@ -870,7 +844,7 @@ public final class StructureMailMessageParser {
         if (prefix == null) {
             return String.valueOf(partCount);
         }
-        return new com.openexchange.java.StringAllocator(prefix).append('.').append(partCount).toString();
+        return new StringBuilder(prefix).append('.').append(partCount).toString();
     }
 
     /**
@@ -987,7 +961,7 @@ public final class StructureMailMessageParser {
      *    Content-Disposition header field.  These parameters that give the
      *    file suffix are not listed below as part of the parameter section.
      *
-     *    Media type:  application/pkcs7-mime OR application/x-pkcs7-mime
+     *    Media type:  application/pkcs7-mime
      *    parameters:  any
      *    file suffix: any
      *
@@ -1004,7 +978,7 @@ public final class StructureMailMessageParser {
      * @return <code>true</code> if content type matches <code>multipart/signed</code>; otherwise <code>false</code>
      */
     private static boolean isMultipartSigned(final ContentType contentType) {
-        if (contentType.startsWithAny("application/pkcs7-mime", "application/x-pkcs7-mime")) {
+        if (contentType.startsWith("application/pkcs7-mime")) {
             return true;
         }
         if (contentType.startsWith(PRIMARY_MULTI_SIGNED)) {

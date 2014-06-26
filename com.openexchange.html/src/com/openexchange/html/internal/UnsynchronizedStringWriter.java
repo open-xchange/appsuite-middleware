@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -59,13 +59,13 @@ import java.io.Writer;
  */
 public class UnsynchronizedStringWriter extends Writer {
 
-    private final com.openexchange.java.StringAllocator buf;
+    private final StringBuilder buf;
 
     /**
      * Create a new string writer, using the default initial string-buffer size.
      */
     public UnsynchronizedStringWriter() {
-        buf = new com.openexchange.java.StringAllocator();
+        buf = new StringBuilder();
         lock = buf;
     }
 
@@ -78,7 +78,7 @@ public class UnsynchronizedStringWriter extends Writer {
         if (initialSize < 0) {
             throw new IllegalArgumentException("Negative buffer size");
         }
-        buf = new com.openexchange.java.StringAllocator(initialSize);
+        buf = new StringBuilder(initialSize);
         lock = buf;
     }
 
@@ -87,7 +87,7 @@ public class UnsynchronizedStringWriter extends Writer {
      *
      * @param initialSize The initial buffer.
      */
-    public UnsynchronizedStringWriter(final com.openexchange.java.StringAllocator builder) {
+    public UnsynchronizedStringWriter(final StringBuilder builder) {
         if (null == builder) {
             throw new IllegalArgumentException("Builder is null.");
         }
@@ -221,9 +221,9 @@ public class UnsynchronizedStringWriter extends Writer {
     /**
      * Return the string buffer itself.
      *
-     * @return The {@link com.openexchange.java.StringAllocator} instance holding the current buffer value.
+     * @return The {@link StringBuilder} instance holding the current buffer value.
      */
-    public com.openexchange.java.StringAllocator getBuffer() {
+    public StringBuilder getBuffer() {
         return buf;
     }
 

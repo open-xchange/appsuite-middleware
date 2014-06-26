@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -112,8 +112,8 @@ public class PresenceBuilderTest {
     public void testBuildPresence() throws OXException {
         StanzaBuilder<? extends Stanza> builder = StanzaBuilderSelector.getBuilder(new ID("ox://thorben.betten@premium"), null, presenceJSON);
         Stanza stanza = builder.build();
-        assertEquals(4, stanza.getPayloads().size());
-        ArrayList<PayloadTree> payloads = new ArrayList<PayloadTree>(stanza.getPayloads());
+        assertEquals(4, stanza.getPayloadTrees().size());
+        ArrayList<PayloadTree> payloads = new ArrayList<PayloadTree>(stanza.getPayloadTrees());
 //        for (PayloadTree tree : payloads) {
 //            System.out.println(tree);
 //            System.out.println("\n");

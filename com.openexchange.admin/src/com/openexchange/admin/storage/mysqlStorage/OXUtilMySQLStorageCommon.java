@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -72,7 +72,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.Updater;
-import com.openexchange.java.StringAllocator;
 
 public class OXUtilMySQLStorageCommon {
 
@@ -216,7 +215,7 @@ public class OXUtilMySQLStorageCommon {
             }
         }
         if (!toCreate.isEmpty()) {
-            final StringAllocator sb = new StringAllocator(2048);
+            final StringBuilder sb = new StringBuilder(2048);
             sb.append("Unable to determine next CreateTableService to execute.\n");
             sb.append("Existing tables: ");
             for (final String existingTable : existingTables) {
@@ -263,7 +262,7 @@ public class OXUtilMySQLStorageCommon {
         }
     }
 
-    public void deleteDatabase(final Database db) throws StorageException {
+    public static void deleteDatabase(final Database db) throws StorageException {
         final Connection con;
         try {
             con = cache.getSimpleSQLConnectionWithoutTimeout(db.getUrl(), db.getLogin(), db.getPassword(), db.getDriver());
@@ -281,7 +280,7 @@ public class OXUtilMySQLStorageCommon {
         }
     }
 
-    private void deleteDatabase(final Connection con, final Database db) throws StorageException {
+    private static void deleteDatabase(final Connection con, final Database db) throws StorageException {
         Statement stmt = null;
         try {
             con.setAutoCommit(false);
@@ -295,5 +294,4 @@ public class OXUtilMySQLStorageCommon {
             closeSQLStuff(stmt);
         }
     }
-
 }

@@ -91,6 +91,61 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
+    public void setHeader(final String name, final String value) {
+        mail.setHeader(name, value);
+    }
+
+    @Override
+    public String getMessageId() {
+        return mail.getMessageId();
+    }
+
+    @Override
+    public boolean containsMessageId() {
+        return mail.containsMessageId();
+    }
+
+    @Override
+    public void removeMessageId() {
+        mail.removeMessageId();
+    }
+
+    @Override
+    public void setMessageId(final String messageId) {
+        mail.setMessageId(messageId);
+    }
+
+    @Override
+    public String getInReplyTo() {
+        return mail.getInReplyTo();
+    }
+
+    @Override
+    public String[] getReferences() {
+        return mail.getReferences();
+    }
+
+    @Override
+    public boolean containsReferences() {
+        return mail.containsReferences();
+    }
+
+    @Override
+    public void removeReferences() {
+        mail.removeReferences();
+    }
+
+    @Override
+    public void setReferences(final String sReferences) {
+        mail.setReferences(sReferences);
+    }
+
+    @Override
+    public void setReferences(final String[] references) {
+        mail.setReferences(references);
+    }
+
+    @Override
     public int hashCode() {
         return mail.hashCode();
     }

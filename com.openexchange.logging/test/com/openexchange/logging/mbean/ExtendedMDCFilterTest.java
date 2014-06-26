@@ -68,6 +68,7 @@ import ch.qos.logback.core.spi.FilterReply;
  * {@link ExtendedMDCFilterTest}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(Logger.class)
@@ -128,5 +129,28 @@ public class ExtendedMDCFilterTest {
             MDC.clear();
         }
     }
+    
+    @Test
+    public void testUserFilterWithLoggingLevel() {
+        ExtendedMDCFilter filter = new ExtendedMDCFilter(Collections.singleton("com.openexchange"));
+        filter.addTuple("context", "314");
+        filter.addTuple("user", "1618");
+        filter.addLogger("com.openexchange.a", Level.DEBUG);
+        Logger loggerA = mock(Logger.class);
+        when(loggerA.getName()).thenReturn("com.openexchange.a.some.logger");
+        
+        Logger loggerB = mock(Logger.class);
+        when(loggerB.getName()).thenReturn("com.openexchange.b.some.logger");
+        
+        Assert.assertEquals(FilterReply.NEUTRAL, filter.decide(null, loggerA, Level.TRACE, "Some message", null, null));
 
+        try {
+            MDC.put("user", "1618");
+            MDC.put("context", "314");
+            Assert.assertEquals(FilterReply.ACCEPT, filter.decide(null, loggerA, Level.DEBUG, "Some message", null, null));
+            Assert.assertEquals(FilterReply.NEUTRAL, filter.decide(null, loggerB, Level.TRACE, "Some message", null, null));
+        } finally {
+            MDC.clear();
+        }
+    }
 }

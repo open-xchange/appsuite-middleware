@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,7 +49,6 @@
 
 package twitter4j.conf;
 
-import java.text.MessageFormat;
 import java.util.regex.Pattern;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.twitter.internal.TwitterConfiguration;
@@ -74,7 +73,7 @@ public final class OXConfigurationBase {
 
     private String clientVersion;
 
-    private boolean httpUseSSL;
+    private final boolean httpUseSSL;
 
     private String httpProxyHost;
 
@@ -93,6 +92,7 @@ public final class OXConfigurationBase {
      */
     private OXConfigurationBase() {
         super();
+        httpUseSSL = true;
     }
 
     /**
@@ -114,20 +114,6 @@ public final class OXConfigurationBase {
                     // Not a valid version
                     log.warn("Not a valid version string: {}. Using fallback \"2.2.3\"", property);
                     clientVersion = "2.2.3";
-                }
-            }
-        }
-        {
-            String property = configurationService.getProperty("com.openexchange.twitter.http.useSSL");
-            if (null != property && (property = property.trim()).length() > 0) {
-                if ("true".equalsIgnoreCase(property)) {
-                    httpUseSSL = true;
-                } else if ("false".equalsIgnoreCase(property)) {
-                    httpUseSSL = false;
-                } else {
-                    // Not a valid boolean value
-                    log.warn("Not a valid flag whether to use SSL over HTTP: {}. Using fallback \"false\"", property);
-                    httpUseSSL = false;
                 }
             }
         }

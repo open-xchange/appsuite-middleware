@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -74,7 +74,7 @@ import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
  */
 public abstract class OXCommonImpl {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXCommonImpl.class);
+    private final static org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OXCommonImpl.class);
 
     protected final OXToolStorageInterface tool;
 
@@ -85,7 +85,7 @@ public abstract class OXCommonImpl {
     protected final void contextcheck(final Context ctx) throws InvalidCredentialsException {
         if (null == ctx || null == ctx.getId()) {
             final InvalidCredentialsException e = new InvalidCredentialsException("Client sent invalid context data object");
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         }
     }
@@ -153,13 +153,13 @@ public abstract class OXCommonImpl {
      * @throws com.openexchange.admin.rmi.exceptions.NoSuchContextException
      */
     protected void checkContextAndSchema(final Context ctx) throws StorageException, DatabaseUpdateException, NoSuchContextException {
-        if(!tool.existsContext(ctx)) {
-            throw new NoSuchContextException("The context "+ctx.getId()+" does not exist!");
+        if (!tool.existsContext(ctx)) {
+            throw new NoSuchContextException("The context " + ctx.getId() + " does not exist!");
         }
         if (tool.checkAndUpdateSchemaIfRequired(ctx)) {
-            final DatabaseUpdateException databaseUpdateException = new DatabaseUpdateException("Database is locked or is now beeing updated, please try again later");
-            log.error("", databaseUpdateException);
-            throw databaseUpdateException;
+            final DatabaseUpdateException e = new DatabaseUpdateException("Database is locked or is now beeing updated, please try again later");
+            LOGGER.error(e.getMessage(), e);
+            throw e;
         }
     }
 }

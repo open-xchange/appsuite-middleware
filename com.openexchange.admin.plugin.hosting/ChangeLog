@@ -1,3 +1,8 @@
+* 2014-03-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31545: Fall-back to write DB identifier in case read-only one is missing
+                      (as done in OXContextMySQLStorageCommon.fillContextAndServer2DBPool)
+
 * 2013-03-30 - thorben.betten@open-xchange.com
 
  - Fix bug 25024: Consider all UserModuleAccess options when performing hashcode() & equals() methods

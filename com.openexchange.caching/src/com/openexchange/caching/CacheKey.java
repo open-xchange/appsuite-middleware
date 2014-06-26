@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -61,13 +61,13 @@ public interface CacheKey extends Serializable {
      *
      * @return The context ID
      */
-    public int getContextId();
+    int getContextId();
 
     /**
-     * Gets the serializable key objects
+     * Gets the key objects
      *
-     * @return The serializable key objects
+     * @return The key objects
      */
-    public Serializable[] getKeys();
+    String[] getKeys();
 
 }

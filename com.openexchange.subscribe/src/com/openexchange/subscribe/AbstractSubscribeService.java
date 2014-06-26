@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -158,7 +158,14 @@ public abstract class AbstractSubscribeService implements SubscribeService {
 
     @Override
     public void unsubscribe(final Subscription subscription) throws OXException {
-        checkDelete(loadSubscription(subscription.getContext(), subscription.getId(), null));
+        final Subscription loadedSubscription = loadSubscription(subscription.getContext(), subscription.getId(), null);
+        if (null == loadedSubscription) {
+            throw SubscriptionErrorMessage.SubscriptionNotFound.create();
+        }
+        if (loadedSubscription.getSession() == null) {
+            loadedSubscription.setSession(subscription.getSession());
+        }
+        checkDelete(loadedSubscription);
         STORAGE.get().forgetSubscription(subscription);
     }
 
@@ -275,7 +282,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
                 boolean save = false;
                 for (final String passwordField : passwordFields) {
                     final String password = (String) configuration.get(passwordField);
-                    if (!isEmpty(password)) {
+                    if (!com.openexchange.java.Strings.isEmpty(password)) {
                         try {
                             // If we can already decrypt with the new secret, we're done with this entry
                             cryptoService.decrypt(password, newSecret);
@@ -314,7 +321,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
                 boolean save = false;
                 for (final String passwordField : passwordFields) {
                     final String password = (String) configuration.get(passwordField);
-                    if (!isEmpty(password)) {
+                    if (!com.openexchange.java.Strings.isEmpty(password)) {
                         try {
                             // If we can already decrypt with the new secret, we're done with this entry
                             cryptoService.decrypt(password, secret);
@@ -352,7 +359,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
                 final Map<String, Object> configuration = subscription.getConfiguration();
                 for (final String passwordField : passwordFields) {
                     final String password = (String) configuration.get(passwordField);
-                    if (!isEmpty(password)) {
+                    if (!com.openexchange.java.Strings.isEmpty(password)) {
                         try {
                             // If we can already decrypt with the new secret, we're done with this entry
                             cryptoService.decrypt(password, secret);
@@ -368,6 +375,9 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         }
 
         for (Subscription subscription : subscriptionsToDelete) {
+            if (null == subscription.getSession()) {
+                subscription.setSession(serverSession);
+            }
             unsubscribe(subscription);
         }
     }
@@ -432,17 +442,5 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         final UserPermissionBits userPerm = USER_PERMISSIONS.get().getUserPermissionBits(userId, ctx);
 
         return new OXFolderAccess(ctx).getFolderPermission(folderId, userId, userPerm);
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 }

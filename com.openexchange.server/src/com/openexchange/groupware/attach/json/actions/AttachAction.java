@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -79,6 +79,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
+import com.openexchange.groupware.attach.AttachmentUtility;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.upload.UploadFile;
@@ -155,9 +156,8 @@ public final class AttachAction extends AbstractAttachmentAction {
                     attachments.set(index, attachment);
                     uploadFiles.set(index, uploadFile);
                     sum += uploadFile.getSize();
-                    // checkSingleSize(uploadFile.getSize(), UserSettingMailStorage.getInstance().getUserSettingMail(
-                    // session.getUserId(), session.getContext()));
-                    checkSize(sum, requestData);
+
+                    AttachmentUtility.checkSize(sum, requestData);
                 }
 
                 return attach(attachments, uploadFiles, session, session.getContext(), user, userConfiguration);
@@ -274,50 +274,39 @@ public final class AttachAction extends AbstractAttachmentAction {
 
     private AJAXRequestResult attach(final List<AttachmentMetadata> attachments, final List<UploadFile> uploadFiles, final ServerSession session, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         initAttachments(attachments, uploadFiles);
+        boolean rollback = false;
         try {
             ATTACHMENT_BASE.startTransaction();
-            // final Iterator<AttachmentMetadata> attIter = attachments.iterator();
+            rollback = true;
+
             final Iterator<UploadFile> ufIter = uploadFiles.iterator();
-
             final JSONArray arr = new JSONArray();
-
             long timestamp = 0;
 
             for (final AttachmentMetadata attachment : attachments) {
-                // while(attIter.hasNext()) {
-                // final AttachmentMetadata attachment = attIter.next();
                 final UploadFile uploadFile = ufIter.next();
 
                 attachment.setId(AttachmentBase.NEW);
 
-                final long modified =
-                    ATTACHMENT_BASE.attachToObject(
-                        attachment,
-                        new BufferedInputStream(new FileInputStream(uploadFile.getTmpFile()), 65536),
-                        session,
-                        ctx,
-                        user,
-                        userConfig);
+                BufferedInputStream data = new BufferedInputStream(new FileInputStream(uploadFile.getTmpFile()), 65536);
+                final long modified = ATTACHMENT_BASE.attachToObject(attachment, data, session, ctx, user, userConfig);
                 if (modified > timestamp) {
                     timestamp = modified;
                 }
                 arr.put(attachment.getId());
 
             }
+
             ATTACHMENT_BASE.commit();
+            rollback = false;
             return new AJAXRequestResult(arr, new Date(timestamp), "json");
-        } catch (final OXException t) {
-            rollback();
-            throw t;
         } catch (final IOException e) {
-            rollback();
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
-            try {
-                ATTACHMENT_BASE.finish();
-            } catch (final OXException e) {
-                LOG.debug("", e);
+            if (rollback) {
+                AttachmentUtility.rollback();
             }
+            AttachmentUtility.finish();
         }
     }
 

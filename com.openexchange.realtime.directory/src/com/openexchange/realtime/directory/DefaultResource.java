@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -56,7 +56,7 @@ import com.openexchange.realtime.packet.Presence;
 /**
  * {@link DefaultResource} {@link Resource} implementation that doesn't carry any routing information, yet. Routing information is
  * automatically added by a transport specific Resource implmentation e.g. when adding a DefaultResource to a HazelcastResourceDirectory.
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -73,7 +73,7 @@ public class DefaultResource extends AbstractResource implements Resource {
 
     /**
      * Initializes a new {@link DefaultResource}.
-     * 
+     *
      * @param state The presence state
      * @param timestamp The timestamp
      */
@@ -84,7 +84,7 @@ public class DefaultResource extends AbstractResource implements Resource {
 
     /**
      * Initializes a new {@link DefaultResource}.
-     * 
+     *
      * @param presence The presence state
      * @param timestamp The timestamp
      */
@@ -102,7 +102,8 @@ public class DefaultResource extends AbstractResource implements Resource {
     }
 
     @Override
-    public void setRoutingInfo(Serializable routingInfo) {
+    public void setRoutingInfo(Object routingInfo) {
+        // Nothing to do
     }
 
 }

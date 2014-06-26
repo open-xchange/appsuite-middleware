@@ -73,7 +73,6 @@ import com.openexchange.drive.sync.IntermediateSyncResult;
 import com.openexchange.drive.sync.SimpleDirectoryVersion;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.java.StringAllocator;
 
 /**
  * {@link SyncTracker}
@@ -332,19 +331,19 @@ public class SyncTracker {
     private static void trace(SyncSession session, RepeatedSequence<HistoryEntry> cycle) {
         if (null != cycle && session.isTraceEnabled()) {
             List<HistoryEntry> sequence = cycle.getSequence();
-            StringAllocator stringAllocator = new StringAllocator();
-            stringAllocator.append("A synchronization cycle was detected - the following ").append(sequence.size())
+            StringBuilder StringBuilder = new StringBuilder();
+            StringBuilder.append("A synchronization cycle was detected - the following ").append(sequence.size())
                 .append(" sync results were repeated ").append(cycle.getRepetitions()).append(" times:\n\n");
             for (int i = 0; i < sequence.size(); i++) {
                 HistoryEntry entry = sequence.get(i);
-                stringAllocator.append(" # ").append(i + 1).append(' ').append(null != entry.getPath() ? entry.getPath() : "")
+                StringBuilder.append(" # ").append(i + 1).append(' ').append(null != entry.getPath() ? entry.getPath() : "")
                     .append(" : [").append(entry.hashCode()).append("]\n");
                 IntermediateSyncResult<? extends DriveVersion> result = entry.getSyncResult();
                 if (null != result) {
-                    stringAllocator.append(result);
+                    StringBuilder.append(result);
                 }
             }
-            session.trace(stringAllocator.toString());
+            session.trace(StringBuilder.toString());
         }
     }
 

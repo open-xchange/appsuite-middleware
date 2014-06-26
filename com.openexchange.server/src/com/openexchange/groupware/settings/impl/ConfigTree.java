@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -61,7 +61,6 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingExceptionCodes;
 import com.openexchange.groupware.settings.SharedNode;
-import com.openexchange.java.StringAllocator;
 
 /**
  * This class is a container for the settings tree.
@@ -318,6 +317,7 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.folder.SharedFolders.class,
             com.openexchange.groupware.settings.tree.modules.infostore.GUI.class,
             com.openexchange.groupware.settings.tree.modules.infostore.Module.class,
+            com.openexchange.groupware.settings.tree.modules.infostore.folder.Trash.class,
             com.openexchange.groupware.settings.tree.modules.interfaces.ICal.class,
             com.openexchange.groupware.settings.tree.modules.interfaces.SyncML.class,
             com.openexchange.groupware.settings.tree.modules.interfaces.VCard.class,
@@ -440,7 +440,7 @@ public final class ConfigTree {
             return null;
         }
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);

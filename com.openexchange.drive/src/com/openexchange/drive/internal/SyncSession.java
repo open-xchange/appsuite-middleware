@@ -75,7 +75,6 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.groupware.notify.hostname.HostData;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -294,7 +293,7 @@ public class SyncSession {
 
             @Override
             public List<ServerDirectoryVersion> call() throws OXException {
-                StringAllocator stringAllocator = isTraceEnabled() ? new StringAllocator("Server directories:\n") : null;
+                StringBuilder StringBuilder = isTraceEnabled() ? new StringBuilder("Server directories:\n") : null;
                 Map<String, FileStorageFolder> folders = getStorage().getFolders();
                 List<String> folderIDs = new ArrayList<String>(folders.size());
                 for (Map.Entry<String, FileStorageFolder> entry : folders.entrySet()) {
@@ -311,13 +310,13 @@ public class SyncSession {
                         getStorage().getPath(folderIDs.get(i)), checksums.get(i));
                     serverDirectories.add(directoryVersion);
                     if (isTraceEnabled()) {
-                        stringAllocator.append(" [").append(directoryVersion.getDirectoryChecksum().getFolderID()).append("] ")
+                        StringBuilder.append(" [").append(directoryVersion.getDirectoryChecksum().getFolderID()).append("] ")
                             .append(directoryVersion.getPath()).append(" | ").append(directoryVersion.getChecksum())
                             .append(" (").append(directoryVersion.getDirectoryChecksum().getSequenceNumber()).append(")\n");
                     }
                 }
                 if (isTraceEnabled()) {
-                    trace(stringAllocator);
+                    trace(StringBuilder);
                 }
                 return serverDirectories;
             }

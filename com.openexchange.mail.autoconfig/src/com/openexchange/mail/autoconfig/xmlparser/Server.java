@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -234,5 +234,26 @@ public abstract class Server {
     }
 
     public abstract void setType(String setType);
+
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder(1024);
+        builder.append("Server [");
+        if (hostname != null) {
+            builder.append("hostname=").append(hostname).append(", ");
+        }
+        builder.append("port=").append(port).append(", ");
+        if (socketType != null) {
+            builder.append("socketType=").append(socketType.getKeyword()).append(", ");
+        }
+        if (username != null) {
+            builder.append("username=").append(username).append(", ");
+        }
+        if (authentication != null) {
+            builder.append("authentication=").append(authentication);
+        }
+        builder.append("]");
+        return builder.toString();
+    }
 
 }

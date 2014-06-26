@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -93,9 +93,11 @@ public final class FolderTestSuite {
      * @return the task tests suite.
      */
     public static Test suite() {
-        final TestSuite tests = new TestSuite();
+        final TestSuite tests = new TestSuite("com.openexchange.ajax.folder.FolderTestSuite");
         // First the function tests.
         tests.addTestSuite(FunctionTests.class);
+        tests.addTestSuite(com.openexchange.ajax.folder.ShareFolderTest.class);
+        tests.addTestSuite(com.openexchange.ajax.folder.DeleteFolderTest.class);
 
         // Now several single function tests.
         tests.addTestSuite(GetMailInboxTest.class);

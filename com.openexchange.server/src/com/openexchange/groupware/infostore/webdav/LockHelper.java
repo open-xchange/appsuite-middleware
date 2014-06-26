@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -162,7 +162,7 @@ public abstract class LockHelper {
 		loadedLocks = true;
 		try {
             final ServerSession session = getSession();
-		    final List<Lock> locks = lockManager.findLocks(id, session.getContext(), UserStorage.getInstance().getUser(session.getUserId(), session.getContext()));
+		    final List<Lock> locks = lockManager.findLocks(id, session);
 			final List<Lock> cleanedLocks = new ArrayList<Lock>();
 			for(final Lock lock : locks) {
 				if (!removedLockIDs.contains(Integer.valueOf(lock.getId()))) {
@@ -190,7 +190,7 @@ public abstract class LockHelper {
 		final User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContext());
 		final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext());
 		for(final int id : removedLockIDs) {
-			lockManager.unlock(id, ctx, user);
+			lockManager.unlock(id, session);
 		}
 		removedLocks.clear();
 		removedLockIDs.clear();
@@ -198,12 +198,12 @@ public abstract class LockHelper {
 
 	public void deleteLocks() throws OXException {
 		final ServerSession session = getSession();
-		lockManager.removeAll(id, session.getContext(), UserStorage.getInstance().getUser(session.getUserId(), session.getContext()));
+		lockManager.removeAll(id, session);
 	}
 
 	public void transferLock(final WebdavLock lock) throws OXException {
 		final ServerSession session = getSession();
-		lockManager.insertLock(id, toLock(lock), session.getContext(), UserStorage.getInstance().getUser(session.getUserId(), session.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()));
+		lockManager.insertLock(id, toLock(lock), session);
 	}
 
     private ServerSession getSession() throws OXException {

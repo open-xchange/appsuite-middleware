@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -80,7 +80,7 @@ public class SupportedCalendarComponentSet extends SingleXMLPropertyMixin {
 
     @Override
     protected String getValue() {
-        com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
+        StringBuilder stringBuilder = new StringBuilder();
         if (null != this.components) {
             for (String component : components) {
                 stringBuilder.append("<CAL:comp name=\"").append(component).append("\"/>");

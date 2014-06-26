@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,9 +50,10 @@
 package com.openexchange.messaging;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link MessagingExceptionCodes} - Enumeration of all {@link OXException}s.
@@ -60,104 +61,119 @@ import com.openexchange.exception.OXExceptionFactory;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public enum MessagingExceptionCodes implements OXExceptionCode {
+public enum MessagingExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(MessagingExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR("An error occurred: %1$s", CATEGORY_ERROR, 1, null),
     /**
      * A SQL error occurred: %1$s
      */
-    SQL_ERROR(MessagingExceptionMessages.SQL_ERROR_MSG, CATEGORY_ERROR, 2),
+    SQL_ERROR("A SQL error occurred: %1$s", CATEGORY_ERROR, 2, OXExceptionStrings.SQL_ERROR_MSG),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(MessagingExceptionMessages.IO_ERROR_MSG, CATEGORY_ERROR, 3),
+    IO_ERROR("An I/O error occurred: %1$s", CATEGORY_ERROR, 3, null),
     /**
-     * An I/O error occurred: %1$s
+     * A JSON error occurred: %1$s
      */
-    JSON_ERROR(MessagingExceptionMessages.JSON_ERROR_MSG, CATEGORY_ERROR, 14),
+    JSON_ERROR("A JSON error occurred: %1$s", CATEGORY_ERROR, 14, null),
     /**
      * Messaging account %1$s of service "%2$s" could not be found for user %3$s in context %4$s.
      */
-    ACCOUNT_NOT_FOUND(MessagingExceptionMessages.ACCOUNT_NOT_FOUND_MSG, CATEGORY_ERROR, 4),
+    ACCOUNT_NOT_FOUND("Messaging account %1$s of service \"%2$s\" could not be found for user %3$s in context %4$s.", CATEGORY_ERROR, 4,
+        null),
     /**
      * The operation is not supported by service %1$s.
      */
-    OPERATION_NOT_SUPPORTED(MessagingExceptionMessages.OPERATION_NOT_SUPPORTED_MSG, CATEGORY_ERROR, 6),
+    OPERATION_NOT_SUPPORTED("The operation is not supported by service %1$s.", CATEGORY_ERROR, 6, null),
     /**
      * The folder "%1$s" cannot be found in account %2$s of service "%3$s" of user %4$s in context %5$s.
      */
-    FOLDER_NOT_FOUND(MessagingExceptionMessages.FOLDER_NOT_FOUND_MSG, CATEGORY_ERROR, 7),
+    FOLDER_NOT_FOUND("The folder \"%1$s\" cannot be found in account %2$s of service \"%3$s\" of user %4$s in context %5$s.",
+        CATEGORY_ERROR, 7, null),
     /**
      * Invalid message identifier: %1$s
      */
-    INVALID_MESSAGE_IDENTIFIER(MessagingExceptionMessages.INVALID_MESSAGE_IDENTIFIER_MSG, CATEGORY_ERROR, 8),
+    INVALID_MESSAGE_IDENTIFIER("Invalid message identifier: %1$s", CATEGORY_ERROR, 8, null),
     /**
      * Invalid header "%1$s": %2$s
      */
-    INVALID_HEADER(MessagingExceptionMessages.INVALID_HEADER_MSG, CATEGORY_ERROR, 9),
+    INVALID_HEADER("Invalid header \"%1$s\": %2$s", CATEGORY_ERROR, 9, null),
     /**
      * Unknown action to perform: %1$s.
      */
-    UNKNOWN_ACTION(MessagingExceptionMessages.UNKNOWN_ACTION_MSG, CATEGORY_ERROR, 10),
+    UNKNOWN_ACTION("Unknown action to perform: %1$s.", CATEGORY_ERROR, 10, null),
     /**
      * A messaging error occurred: %1$s
      */
-    MESSAGING_ERROR(MessagingExceptionMessages.MESSAGING_ERROR_MSG, CATEGORY_ERROR, 11),
+    MESSAGING_ERROR("A messaging error occurred: %1$s", CATEGORY_ERROR, 11, MessagingExceptionMessages.MESSAGING_ERROR_MSG),
     /**
      * Wrongly formatted address: %1$s.
      */
-    ADDRESS_ERROR(MessagingExceptionMessages.ADDRESS_ERROR_MSG, CATEGORY_ERROR, 12),
+    ADDRESS_ERROR("Wrongly formatted address: %1$s.", CATEGORY_ERROR, 12, MessagingExceptionMessages.ADDRESS_ERROR_MSG),
     /**
      * Unknown messaging content: %1$s.
      */
-    UNKNOWN_MESSAGING_CONTENT(MessagingExceptionMessages.UNKNOWN_MESSAGING_CONTENT_MSG, CATEGORY_ERROR, 14),
+    UNKNOWN_MESSAGING_CONTENT("Unknown messaging content: %1$s.", CATEGORY_ERROR, 14,
+        MessagingExceptionMessages.UNKNOWN_MESSAGING_CONTENT_MSG),
     /**
      * Unknown messaging service: %1$s.
      */
-    UNKNOWN_MESSAGING_SERVICE(MessagingExceptionMessages.UNKNOWN_MESSAGING_SERVICE_MSG, CATEGORY_SERVICE_DOWN, 15),
+    UNKNOWN_MESSAGING_SERVICE("Unknown messaging service: %1$s.", CATEGORY_SERVICE_DOWN, 15, null),
     /**
      * Missing parameter: %1$s.
      */
-    MISSING_PARAMETER(MessagingExceptionMessages.MISSING_PARAMETER_MSG, CATEGORY_USER_INPUT, 16),
+    MISSING_PARAMETER("Missing parameter: %1$s.", CATEGORY_USER_INPUT, 16, null),
     /**
      * Invalid parameter: %1$s with value '%2$s'.
      */
-    INVALID_PARAMETER(MessagingExceptionMessages.INVALID_PARAMETER_MSG, CATEGORY_USER_INPUT, 17),
+    INVALID_PARAMETER("Invalid parameter: %1$s with value '%2$s'.", CATEGORY_USER_INPUT, 17,
+        MessagingExceptionMessages.INVALID_PARAMETER_MSG),
     /**
      * Messaging part is read-only: %1$s
      */
-    READ_ONLY(MessagingExceptionMessages.READ_ONLY_MSG, CATEGORY_USER_INPUT, 18),
+    READ_ONLY("Messaging part is read-only.: %1$s", CATEGORY_USER_INPUT, 18, MessagingExceptionMessages.READ_ONLY_MSG),
     /**
      * Unknown color label index: %1$s
      */
-    UNKNOWN_COLOR_LABEL(MessagingExceptionMessages.UNKNOWN_COLOR_LABEL_MSG, CATEGORY_USER_INPUT, 19),
+    UNKNOWN_COLOR_LABEL("Unknown color label index: %1$s", CATEGORY_USER_INPUT, 19, MessagingExceptionMessages.UNKNOWN_COLOR_LABEL_MSG),
     /**
      * A duplicate folder named "%1$s" already exists below parent folder "%2$s".
      */
-    DUPLICATE_FOLDER(MessagingExceptionMessages.DUPLICATE_FOLDER_MSG, CATEGORY_ERROR, 20),
+    DUPLICATE_FOLDER("A duplicate folder named \"%1$s\" already exists below parent folder \"%2$s\".", CATEGORY_ERROR, 20,
+        MessagingExceptionMessages.DUPLICATE_FOLDER_MSG),
     /**
      * No create access on mail folder %1$s.
      */
-    NO_CREATE_ACCESS(MessagingExceptionMessages.NO_CREATE_ACCESS_MSG, CATEGORY_PERMISSION_DENIED, 21),
+    NO_CREATE_ACCESS("No create access on mail folder %1$s.", CATEGORY_PERMISSION_DENIED, 21,
+        MessagingExceptionMessages.NO_CREATE_ACCESS_MSG),
     /**
      * Not connected
      */
-    NOT_CONNECTED(MessagingExceptionMessages.NOT_CONNECTED_MSG, CATEGORY_PERMISSION_DENIED, 22),
+    NOT_CONNECTED("Not connected", CATEGORY_PERMISSION_DENIED, 22, MessagingExceptionMessages.NOT_CONNECTED_MSG),
     /**
      * Invalid sorting column. Cannot sort by %1$s.
      */
-    INVALID_SORTING_COLUMN(MessagingExceptionMessages.INVALID_SORTING_COLUMN_MSG, CATEGORY_USER_INPUT, 23),
+    INVALID_SORTING_COLUMN("Invalid sorting column. Cannot sort by %1$s.", CATEGORY_USER_INPUT, 23,
+        MessagingExceptionMessages.INVALID_SORTING_COLUMN_MSG),
     /**
      * No attachment found with section identifier %1$s in message %2$s in folder %3$s.
      */
-    ATTACHMENT_NOT_FOUND(MessagingExceptionMessages.ATTACHMENT_NOT_FOUND_MSG, CATEGORY_ERROR, 24),
+    ATTACHMENT_NOT_FOUND("No attachment found with section identifier %1$s in message %2$s in folder %3$s.", CATEGORY_ERROR, 24,
+        MessagingExceptionMessages.ATTACHMENT_NOT_FOUND_MSG),
     /**
      * Message %1$s not found in folder %2$s.
      */
-    MESSAGE_NOT_FOUND(MessagingExceptionMessages.MESSAGE_NOT_FOUND_MSG, CATEGORY_ERROR, 25);
+    MESSAGE_NOT_FOUND("Message %1$s not found in folder %2$s.", CATEGORY_ERROR, 25, MessagingExceptionMessages.MESSAGE_NOT_FOUND_MSG),
+    /**
+     * Invalid OAuth account specified. OAuth account of type '%1$s' cannot be mapped to messaging service '%2$s'.
+     */
+    INVALID_OAUTH_ACCOUNT("Invalid OAuth account specified. OAuth account of type '%1$s' cannot be mapped to messaging service '%2$s'.", CATEGORY_ERROR, 26, MessagingExceptionMessages.INVALID_OAUTH_ACCOUNT_MSG),
+
+    ;
+
 
     private final Category category;
 
@@ -165,10 +181,13 @@ public enum MessagingExceptionCodes implements OXExceptionCode {
 
     private final String message;
 
-    private MessagingExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private String displayMessage;
+
+    private MessagingExceptionCodes(final String message, final Category category, final int detailNumber, String displayMessage) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -184,6 +203,11 @@ public enum MessagingExceptionCodes implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override

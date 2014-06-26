@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,6 +53,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import com.openexchange.tokenlogin.impl.osgi.TokenLoginActivatorTest;
+import com.openexchange.tokenlogin.impl.Bug32698Test;
 
 /**
  * Unit tests for the bundle com.openexchange.tokenlogin.impl
@@ -63,7 +64,8 @@ import com.openexchange.tokenlogin.impl.osgi.TokenLoginActivatorTest;
 @RunWith(Suite.class)
 @SuiteClasses({
     TokenLoginActivatorTest.class,
-    TokenLoginServiceImplTest.class
+    TokenLoginServiceImplTest.class,
+    Bug32698Test.class
 
 })
 public class UnitTests {

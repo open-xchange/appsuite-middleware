@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -365,4 +365,19 @@ public interface MailAccount extends Serializable {
      * @param value The property value
      */
     public void addProperty(String name, String value);
+
+    /**
+     * Gets this account's transport properties.
+     *
+     * @return Account's transport properties
+     */
+    public Map<String, String> getTransportProperties();
+
+    /**
+     * Adds specified name-value-pair to transport properties.
+     *
+     * @param name The transport property name
+     * @param value The transport property value
+     */
+    public void addTransportProperty(String name, String value);
 }

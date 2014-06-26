@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -58,35 +58,8 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class JSlobExceptionMessages implements LocalizableStrings {
 
-    // An unexpected error occurred: %1$s
-    public static final String UNEXPECTED_ERROR = "An unexpected error occurred: %1$s";
-
-    // A JSON error occurred: %1$s
-    public static final String JSON_ERROR = "A JSON error occurred: %1$s";
-
-    // No JSlob storage found for identifier: %1$s
-    public static final String NOT_FOUND = "No JSlob storage found for identifier: %1$s";
-
-    // No JSlob found for service %1$s.
-    public static final String NOT_FOUND_EXT = "No JSlob found for service %1$s.";
-
-    // Conflicting deletion of JSlob for service %1$s.
-    public static final String CONFLICT = "Conflicting deletion of JSlob for service %1$s.";
-
-    // Path does not exist: %1$s
-    public static final String PATH_NOT_FOUND = "Path doesn't exist: %1$s";
-
-    // Invalid path: %1$s.
-    public static final String INVALID_PATH = "Invalid path: %1$s.";
-
     // Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done.
     public static final String SET_NOT_SUPPORTED = "Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done.";
-
-    // "%1$s" is a reserved identifier. Please choose a different one.
-    public static final String RESERVED_IDENTIFIER = "\"%1$s\" is a reserved identifier. Please choose a different one.";
-
-    // The JSlob %1$s is too big.
-    public static final String JSLOB_TOO_BIG = "The JSlob %1$s is too big.";
 
     /**
      * Initializes a new {@link JSlobExceptionMessages}.

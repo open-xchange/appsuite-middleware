@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -114,7 +114,7 @@ public class LineWrap implements PreferencesItemService {
                 final UserSettingMail usm = storage.getUserSettingMail(user.getId(), ctx);
                 if (null != usm) {
                     final String s = setting.getSingleValue().toString();
-                    if (!isEmpty(s)) {
+                    if (!com.openexchange.java.Strings.isEmpty(s)) {
                         try {
                             int autoLinebreak;
                             try {
@@ -136,19 +136,6 @@ public class LineWrap implements PreferencesItemService {
             @Override
             public int getId() {
                 return -1;
-            }
-
-            /** Check for an empty string */
-            private boolean isEmpty(final String string) {
-                if (null == string) {
-                    return true;
-                }
-                final int len = string.length();
-                boolean isWhitespace = true;
-                for (int i = 0; isWhitespace && i < len; i++) {
-                    isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-                }
-                return isWhitespace;
             }
         };
     }

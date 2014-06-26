@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,12 +49,12 @@
 
 package com.openexchange.config.json.actions;
 
-import static com.openexchange.ajax.AJAXServlet.decodeUrl;
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import javax.servlet.http.HttpServletRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -137,12 +137,12 @@ public abstract class AbstractConfigAction implements AJAXActionService {
         String uri;
         try {
             final String characterEncoding = req.getCharacterEncoding();
-            uri = decodeUrl(req.getRequestURI(), characterEncoding == null ? ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding) : characterEncoding);
+            uri = AJAXUtility.decodeUrl(req.getRequestURI(), characterEncoding == null ? ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding) : characterEncoding);
         } catch (final RuntimeException e) {
             LOG.error("Unsupported encoding", e);
             uri = req.getRequestURI();
         }
-        final String path = new com.openexchange.java.StringAllocator(req.getContextPath()).append(req.getServletPath()).toString();
+        final String path = new StringBuilder(req.getContextPath()).append(req.getServletPath()).toString();
         final int pos = uri.indexOf(path);
         if (pos != -1) {
             uri = uri.substring(pos + path.length());
@@ -158,17 +158,4 @@ public abstract class AbstractConfigAction implements AJAXActionService {
     protected static AJAXRequestResult getJSONNullResult() {
         return RESULT_JSON_NULL;
     }
-
-    protected static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

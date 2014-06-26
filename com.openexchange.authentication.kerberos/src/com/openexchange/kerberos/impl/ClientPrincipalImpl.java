@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,9 +50,10 @@
 package com.openexchange.kerberos.impl;
 
 import javax.security.auth.Subject;
-import org.apache.commons.logging.LogFactory;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.kerberos.ClientPrincipal;
 import com.openexchange.kerberos.KerberosUtils;
 
@@ -63,7 +64,7 @@ import com.openexchange.kerberos.KerberosUtils;
  */
 public final class ClientPrincipalImpl implements ClientPrincipal {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ClientPrincipalImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ClientPrincipalImpl.class);
 
     private Subject clientSubject;
     private Subject delegateSubject;

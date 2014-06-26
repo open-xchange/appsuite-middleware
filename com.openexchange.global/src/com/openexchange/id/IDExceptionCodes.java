@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,33 +50,34 @@
 package com.openexchange.id;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link IDExceptionCodes} - Enumeration of all {@link IDException}s.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum IDExceptionCodes implements OXExceptionCode {
+public enum IDExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(IDExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR("An error occurred: %1$s", CATEGORY_ERROR, 1, null),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(IDExceptionMessages.IO_ERROR_MSG, CATEGORY_ERROR, 2),
+    IO_ERROR("An I/O error occurred: %1$s", CATEGORY_ERROR, 2, null),
     /**
      * A SQL error occurred: %1$s
      */
-    SQL_ERROR(IDExceptionMessages.SQL_ERROR_MSG, CATEGORY_ERROR, 3),
+    SQL_ERROR("A SQL error occurred: %1$s", CATEGORY_ERROR, 3, OXExceptionStrings.SQL_ERROR_MSG),
     /**
      * ID generation failed
      */
-    ID_GEN_FAILED(IDExceptionMessages.ID_GEN_FAILED_MSG, CATEGORY_ERROR, 4),
+    ID_GEN_FAILED("ID generation failed", CATEGORY_ERROR, 4, null),
 
 
 
@@ -87,11 +88,14 @@ public enum IDExceptionCodes implements OXExceptionCode {
     private final int detailNumber;
 
     private final String message;
+    
+    private String displayMessage;
 
-    private IDExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private IDExceptionCodes(final String message, final Category category, final int detailNumber, String displayMessage) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -112,6 +116,11 @@ public enum IDExceptionCodes implements OXExceptionCode {
     @Override
     public int getNumber() {
         return detailNumber;
+    }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override

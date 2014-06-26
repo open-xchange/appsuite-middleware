@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -95,6 +95,15 @@ public abstract class AbstractCMISAccess {
         this.account = account;
         this.session = session;
         this.cmisSession = cmisSession;
+    }
+
+    /**
+     * Gets the root URL
+     *
+     * @return The root URL
+     */
+    public String getRootUrl() {
+        return rootUrl;
     }
 
     /**

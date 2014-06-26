@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -144,7 +144,7 @@ public final class BodyFetchIMAPCommand extends AbstractIMAPCommand<byte[]> {
     @Override
     protected String getCommand(final int argsIndex) {
         final String arg = args[argsIndex];
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(arg.length() + 64);
+        final StringBuilder sb = new StringBuilder(arg.length() + 64);
         if (uid) {
             sb.append("UID ");
         }

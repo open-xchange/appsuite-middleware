@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,23 +49,35 @@
 
 package com.openexchange.ajax.requesthandler.cache;
 
+import static com.openexchange.ajax.requesthandler.cache.ResourceCacheProperties.DOCUMENT_QUOTA;
+import static com.openexchange.ajax.requesthandler.cache.ResourceCacheProperties.ENABLED;
+import static com.openexchange.ajax.requesthandler.cache.ResourceCacheProperties.GLOBAL_QUOTA;
+import static com.openexchange.ajax.requesthandler.cache.ResourceCacheProperties.PROP_FILE;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventConstants;
+import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.ContentType;
 import com.openexchange.preview.PreviewExceptionCodes;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.timer.TimerService;
 
 
 /**
@@ -73,9 +85,25 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public abstract class AbstractResourceCache implements ResourceCache, EventHandler {
+public abstract class AbstractResourceCache implements ResourceCache, EventHandler, Reloadable {
+
+    protected static final int MAX_FILE_TYPE_LENGTH = 255;
+
+    protected static final int MAX_FILE_NAME_LENGTH = 767;
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractResourceCache.class);
+
+    private final AtomicLong globalQuota = new AtomicLong(-1L);
+
+    private final AtomicLong documentQuota = new AtomicLong(-1L);
+
+    private final ServiceLookup serviceLookup;
+
+    protected AbstractResourceCache(final ServiceLookup serviceLookup) {
+        super();
+        this.serviceLookup = serviceLookup;
+        initQuotas(serviceLookup.getService(ConfigurationService.class));
+    }
 
     @Override
     public boolean isEnabledFor(int contextId, int userId) throws OXException {
@@ -85,32 +113,8 @@ public abstract class AbstractResourceCache implements ResourceCache, EventHandl
             return defaultValue;
         }
         final ConfigView configView = factory.getView(userId, contextId);
-        final ComposedConfigProperty<Boolean> enabledProp = configView.property("com.openexchange.preview.cache.enabled", boolean.class);
+        final ComposedConfigProperty<Boolean> enabledProp = configView.property(ENABLED, boolean.class);
         return enabledProp.isDefined() ? enabledProp.get().booleanValue() : defaultValue;
-    }
-
-    @Override
-    public long[] getContextQuota(final int contextId) {
-        long quota = -1L;
-        long quotaPerDocument = -1L;
-
-        // TODO: Check context-wise quota values
-        final ConfigurationService confService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-        if (null != confService) {
-            String property = confService.getProperty("com.openexchange.preview.cache.quota", "10485760").trim();
-            try {
-                quota = Long.parseLong(property);
-            } catch (final NumberFormatException e) {
-                quota = -1L;
-            }
-            property = confService.getProperty("com.openexchange.preview.cache.quotaPerDocument", "524288").trim();
-            try {
-                quotaPerDocument = Long.parseLong(property);
-            } catch (final NumberFormatException e) {
-                quotaPerDocument = -1L;
-            }
-        }
-        return new long[] { quota, quotaPerDocument };
     }
 
     @Override
@@ -137,12 +141,49 @@ public abstract class AbstractResourceCache implements ResourceCache, EventHandl
         }
     }
 
+    //                                                               \\
+    // ===================== Reloadable ===================== \\
+    //
+
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        initQuotas(configService);
+    }
+
+    @Override
+    public Map<String, String[]> getConfigFileNames() {
+        return Collections.singletonMap(PROP_FILE, new String[] {
+            GLOBAL_QUOTA,
+            DOCUMENT_QUOTA
+        });
+    }
+
+    private void initQuotas(ConfigurationService configService) {
+        String property = configService.getProperty(GLOBAL_QUOTA, "10485760").trim();
+        try {
+            globalQuota.set(Long.parseLong(property));
+        } catch (final NumberFormatException e) {
+            globalQuota.set(-1L);
+        }
+
+        property = configService.getProperty(DOCUMENT_QUOTA, "524288").trim();
+        try {
+            documentQuota.set(Long.parseLong(property));
+        } catch (final NumberFormatException e) {
+            documentQuota.set(-1L);
+        }
+    }
+
+    //                                                               \\
+    // ===================== protected members ===================== \\
+    //                                                               \\
+
     protected ResourceCacheMetadataStore getMetadataStore() {
         return ResourceCacheMetadataStore.getInstance();
     }
 
     protected DatabaseService getDBService() throws OXException {
-        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        final DatabaseService dbService = serviceLookup.getService(DatabaseService.class);
         if (dbService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
         }
@@ -150,10 +191,87 @@ public abstract class AbstractResourceCache implements ResourceCache, EventHandl
         return dbService;
     }
 
+    protected ConfigurationService getConfigurationService() throws OXException {
+        final ConfigurationService configService = serviceLookup.getService(ConfigurationService.class);
+        if (configService == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigurationService.class.getName());
+        }
+
+        return configService;
+    }
+
+    protected TimerService optTimerService() {
+        return serviceLookup.getService(TimerService.class);
+    }
+
+    protected long getGlobalQuota() {
+        return globalQuota.get();
+    }
+
+    protected long getDocumentQuota() {
+        return documentQuota.get();
+    }
+
+    /**
+     * Prepares specified file MIME type for being put into storage.
+     *
+     * @param fileType The file MIME type to prepare
+     * @return The prepared file MIME type or <code>null</code>
+     */
+    protected String prepareFileType(final String fileType) {
+        if (Strings.isEmpty(fileType)) {
+            return null;
+        }
+        try {
+            final String baseType = new ContentType(fileType.trim()).getBaseType();
+            return baseType.length() > MAX_FILE_TYPE_LENGTH ? baseType.substring(0, MAX_FILE_TYPE_LENGTH) : baseType;
+        } catch (final OXException e) {
+            LOG.warn("Could not parse file type: " + fileType, e);
+            return null;
+        }
+    }
+
+    /**
+     * Prepares specified file name for being put into storage.
+     *
+     * @param fileType The file name to prepare
+     * @return The prepared file name or <code>null</code>
+     */
+    protected String prepareFileName(final String fileName) {
+        if (Strings.isEmpty(fileName)) {
+            return null;
+        }
+
+        if (fileName.length() <= MAX_FILE_NAME_LENGTH) {
+            return fileName;
+        }
+
+        return fileName.substring(0, MAX_FILE_NAME_LENGTH);
+    }
+
     protected static ResourceCacheMetadata loadExistingEntry(ResourceCacheMetadataStore metadataStore, Connection con, int contextId, int userId, String id) throws OXException {
         ResourceCacheMetadata existingMetadata = null;
         try {
             existingMetadata = metadataStore.load(con, contextId, userId, id);
+        } catch (SQLException e) {
+            throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
+        }
+
+        return existingMetadata;
+    }
+
+    protected static boolean entryExists(ResourceCacheMetadataStore metadataStore, Connection con, int contextId, int userId, String id) throws OXException {
+        try {
+            return metadataStore.exists(con, contextId, userId, id);
+        } catch (SQLException e) {
+            throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
+        }
+    }
+
+    protected static ResourceCacheMetadata loadExistingEntryForUpdate(ResourceCacheMetadataStore metadataStore, Connection con, int contextId, int userId, String id) throws OXException {
+        ResourceCacheMetadata existingMetadata = null;
+        try {
+            existingMetadata = metadataStore.loadForUpdate(con, contextId, userId, id);
         } catch (SQLException e) {
             throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
         }

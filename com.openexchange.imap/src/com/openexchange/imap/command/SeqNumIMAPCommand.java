@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -85,7 +85,7 @@ public final class SeqNumIMAPCommand extends AbstractIMAPCommand<int[]> {
         this.uids = uids == null ? L1 : uids;
         returnDefaultValue = (this.uids.length == 0);
         length = this.uids.length;
-        args = length == 0 ? ARGS_EMPTY : (isSequential ? new String[] { new com.openexchange.java.StringAllocator(64).append(this.uids[0]).append(':').append(
+        args = length == 0 ? ARGS_EMPTY : (isSequential ? new String[] { new StringBuilder(64).append(this.uids[0]).append(':').append(
             this.uids[this.uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(this.uids, true, -1));
         sia = new SmartIntArray(length);
     }
@@ -102,7 +102,7 @@ public final class SeqNumIMAPCommand extends AbstractIMAPCommand<int[]> {
 
     @Override
     protected String getCommand(final int argsIndex) {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(args[argsIndex].length() + 64);
+        final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
         sb.append("UID FETCH ");
         sb.append(args[argsIndex]);
         sb.append(" (UID)");

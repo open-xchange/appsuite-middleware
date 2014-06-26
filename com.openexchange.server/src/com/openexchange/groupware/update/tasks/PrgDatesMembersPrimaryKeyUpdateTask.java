@@ -65,12 +65,10 @@ import com.openexchange.tools.update.Tools;
 
 /**
  * {@link PrgDatesMembersPrimaryKeyUpdateTask}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class PrgDatesMembersPrimaryKeyUpdateTask extends UpdateTaskAdapter {
-
-    private static final String PRG_DATES_MEMBERS = "prg_dates_members";
 
     /**
      * Initializes a new {@link PrgDatesMembersPrimaryKeyUpdateTask}.
@@ -79,23 +77,20 @@ public class PrgDatesMembersPrimaryKeyUpdateTask extends UpdateTaskAdapter {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
-     */
     @Override
     public void perform(PerformParameters params) throws OXException {
         int cid = params.getContextId();
         Connection con = Database.getNoTimeout(cid, true);
         try {
             con.setAutoCommit(false);
-            fillPfid(con);
+            final String table = "prg_dates_members";
+            fillPfid(table, con);
             Column column = new Column("pfid", "INT(11) NOT NULL DEFAULT -2");
-            Tools.modifyColumns(con, PRG_DATES_MEMBERS, column);
-            if (Tools.hasPrimaryKey(con, PRG_DATES_MEMBERS)) {
-                Tools.dropPrimaryKey(con, PRG_DATES_MEMBERS);
+            Tools.modifyColumns(con, table, column);
+            if (Tools.hasPrimaryKey(con, table)) {
+                Tools.dropPrimaryKey(con, table);
             }
-            Tools.createPrimaryKey(con, PRG_DATES_MEMBERS, new String[] { "cid", "object_id", "member_uid", "pfid" });
+            Tools.createPrimaryKeyIfAbsent(con, table, new String[] { "cid", "object_id", "member_uid", "pfid" });
             con.commit();
         } catch (SQLException e) {
             DBUtils.rollback(con);
@@ -109,21 +104,17 @@ public class PrgDatesMembersPrimaryKeyUpdateTask extends UpdateTaskAdapter {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
-     */
     @Override
     public String[] getDependencies() {
         return new String[0];
     }
 
-    private void fillPfid(Connection con) throws SQLException {
+    private void fillPfid(final String table, Connection con) throws SQLException {
         PreparedStatement stmt = null;
         int oldPos, newPos;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT object_id, member_uid, confirm, reason, reminder, cid FROM " + PRG_DATES_MEMBERS + " WHERE pfid IS NULL FOR UPDATE");
+            stmt = con.prepareStatement("SELECT object_id, member_uid, confirm, reason, reminder, cid FROM " + table + " WHERE pfid IS NULL FOR UPDATE");
             rs = stmt.executeQuery();
             PreparedStatement stmt2 = null;
             try {
@@ -131,7 +122,7 @@ public class PrgDatesMembersPrimaryKeyUpdateTask extends UpdateTaskAdapter {
                     oldPos = 1;
                     StringBuilder sb = new StringBuilder();
                     int objectId = rs.getInt(oldPos++);
-                    sb.append("UPDATE " + PRG_DATES_MEMBERS + " SET pfid = -2 WHERE object_id = ? ");
+                    sb.append("UPDATE " + table + " SET pfid = -2 WHERE object_id = ? ");
                     int memberUid = rs.getInt(oldPos++);
                     sb.append("AND member_uid = ? ");
                     int confirm = rs.getInt(oldPos++);

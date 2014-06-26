@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -70,6 +70,7 @@ import com.openexchange.admin.soap.context.dataobjects.Credentials;
  *         &lt;element name="ctx" type="{http://dataobjects.soap.admin.openexchange.com/xsd}Context" minOccurs="0"/>
  *         &lt;element name="capsToAdd" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="capsToRemove" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="capsToDrop" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="auth" type="{http://dataobjects.rmi.admin.openexchange.com/xsd}Credentials" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
@@ -84,6 +85,7 @@ import com.openexchange.admin.soap.context.dataobjects.Credentials;
     "ctx",
     "capsToAdd",
     "capsToRemove",
+    "capsToDrop",
     "auth"
 })
 @XmlRootElement(name = "changeCapabilities")
@@ -102,6 +104,8 @@ public final class ChangeCapabilities {
     protected String capsToAdd;
     @XmlElement(nillable = true)
     protected String capsToRemove;
+    @XmlElement(nillable = true)
+    protected String capsToDrop;
     @XmlElement(nillable = true)
     protected Credentials auth;
 
@@ -143,6 +147,14 @@ public final class ChangeCapabilities {
 
     public void setCapsToRemove(String capsToRemove) {
         this.capsToRemove = capsToRemove;
+    }
+
+    public String getCapsToDrop() {
+        return capsToDrop;
+    }
+
+    public void setCapsToDrop(String capsToDrop) {
+        this.capsToDrop = capsToDrop;
     }
 
     /**

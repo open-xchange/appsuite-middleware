@@ -69,10 +69,12 @@ import javax.mail.Header;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetHeaders;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.IMAPMessageStorage;
+import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.services.Services;
 import com.openexchange.imap.threader.ThreadableCache.ThreadableCacheEntry;
 import com.openexchange.imap.threader.nntp.ThreadableImpl;
@@ -135,6 +137,21 @@ public final class Threadables {
         return b.booleanValue();
     }
 
+    static {
+        IMAPReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(final ConfigurationService configService) {
+                useCommonsNetThreader = null;
+            }
+
+            @Override
+            public Map<String, String[]> getConfigFileNames() {
+                return null;
+            }
+        });
+    }
+
     /**
      * Performs threading algorithm on specified {@code Threadable} instance.
      *
@@ -171,15 +188,15 @@ public final class Threadables {
      * @param imapFolder The IMAP folder
      * @param sorted Whether the returned <tt>Threadable</tt> is supposed to be thread-sorted
      * @param cache <code>true</code> to immediately return a possibly cached element; otherwise <code>false</code>
-     * @param limit The max. number of messages
+     * @param lookAhead The max. number of messages
      * @param accountId The account identifier
      * @param session The associated user session
      * @return The <tt>Threadable</tt> either from cache or newly generated
      * @throws MessagingException If <tt>Threadable</tt> cannot be returned for any reason
      */
-    public static ThreadableResult getThreadableFor(final IMAPFolder imapFolder, final boolean sorted, final boolean cache, final int limit, final int accountId, final Session session) throws MessagingException {
+    public static ThreadableResult getThreadableFor(final IMAPFolder imapFolder, final boolean sorted, final boolean cache, final int lookAhead, final int accountId, final Session session) throws MessagingException {
         if (!ThreadableCache.isThreadableCacheEnabled()) {
-            Threadable threadable = getAllThreadablesFrom(imapFolder, limit);
+            Threadable threadable = getAllThreadablesFrom(imapFolder, lookAhead);
             if (sorted) {
                 if (useCommonsNetThreader()) {
                     threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
@@ -196,7 +213,7 @@ public final class Threadables {
         synchronized (entry) {
             TLongCollection uids = null;
             if (null == entry.getThreadable() || sorted != entry.isSorted()) {
-                Threadable threadable = getAllThreadablesFrom(imapFolder, limit);
+                Threadable threadable = getAllThreadablesFrom(imapFolder, lookAhead);
                 if (sorted) {
                     if (useCommonsNetThreader()) {
                         threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
@@ -216,7 +233,7 @@ public final class Threadables {
                         @Override
                         public void run() {
                             try {
-                                Threadable threadable = getAllThreadablesFrom(imapFolder, limit);
+                                Threadable threadable = getAllThreadablesFrom(imapFolder, lookAhead);
                                 if (sorted) {
                                     if (useCommonsNetThreader()) {
                                         threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(
@@ -234,7 +251,7 @@ public final class Threadables {
                     ThreadPools.getThreadPool().submit(ThreadPools.trackableTask(task));
                     return new ThreadableResult((Threadable) retval.clone(), true);
                 }
-                Threadable threadable = getAllThreadablesFrom(imapFolder, limit);
+                Threadable threadable = getAllThreadablesFrom(imapFolder, lookAhead);
                 if (sorted) {
                     if (useCommonsNetThreader()) {
                         threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
@@ -316,7 +333,7 @@ public final class Threadables {
                 final String command;
                 final Response[] r;
                 {
-                    com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128).append("FETCH ");
+                    StringBuilder sb = new StringBuilder(128).append("FETCH ");
                     if (1 == messageCount) {
                         sb.append("1");
                     } else {
@@ -393,12 +410,12 @@ public final class Threadables {
      * Gets the <tt>Threadable</tt>s for given IMAP folder.
      *
      * @param imapFolder The IMAP folders
-     * @param limit The max. number of messages or <code>-1</code>
+     * @param lookAhead The max. number of messages or <code>-1</code>
      * @return The fetched <tt>Threadable</tt>s
      * @throws MessagingException If an error occurs
      */
-    public static Threadable getAllThreadablesFrom(final IMAPFolder imapFolder, final int limit) throws MessagingException {
-        return getAllThreadablesFrom(imapFolder, limit, false);
+    public static Threadable getAllThreadablesFrom(final IMAPFolder imapFolder, final int lookAhead) throws MessagingException {
+        return getAllThreadablesFrom(imapFolder, lookAhead, false);
     }
 
     /**
@@ -436,7 +453,7 @@ public final class Threadables {
                 final String command;
                 final Response[] r;
                 {
-                    com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128).append("FETCH ");
+                    StringBuilder sb = new StringBuilder(128).append("FETCH ");
                     if (1 == messageCount) {
                         sb.append("1");
                     } else {
@@ -669,12 +686,12 @@ public final class Threadables {
      * @return The resulting THREAD=REFERENCES string
      */
     public static String toThreadReferences(final Threadable threadable, final TIntSet filter) {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(256);
+        final StringBuilder sb = new StringBuilder(256);
         toThreadReferences0(threadable, filter, sb);
         return sb.toString();
     }
 
-    private static void toThreadReferences0(final Threadable threadable, final TIntSet filter, final com.openexchange.java.StringAllocator sb) {
+    private static void toThreadReferences0(final Threadable threadable, final TIntSet filter, final StringBuilder sb) {
         Threadable t = threadable;
         if (null == filter) {
             while (null != t) {

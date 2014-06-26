@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,7 +52,6 @@ package com.openexchange.tools.versit;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import com.openexchange.java.StringAllocator;
 
 /**
  * @author Viktor Pracht
@@ -148,7 +147,7 @@ public class StringScanner extends Scanner {
     private String unescape(String substring) {
         boolean escape = false;
         final int length = substring.length();
-        StringAllocator b = new StringAllocator(length);
+        StringBuilder b = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = substring.charAt(i);
             switch(c) {

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -56,6 +56,7 @@ import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import javax.servlet.http.Cookie;
@@ -74,6 +75,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.login.LoginRampUpService;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
@@ -84,6 +86,7 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link AutoLogin}
@@ -100,7 +103,8 @@ public class AutoLogin extends AbstractLoginRequestHandler {
      * Initializes a new {@link AutoLogin}.
      *
      */
-    public AutoLogin(LoginConfiguration conf) {
+    public AutoLogin(LoginConfiguration conf, Set<LoginRampUpService> rampUp) {
+        super(rampUp);
         this.conf = conf;
     }
 
@@ -112,6 +116,8 @@ public class AutoLogin extends AbstractLoginRequestHandler {
         Session session = null;
         try {
             if (!conf.isSessiondAutoLogin()) {
+                // Auto-login disabled per configuration.
+                // Try to perform a login using HTTP request/response to see if invocation signals that an auto-login should proceed afterwards
                 if (doAutoLogin(req, resp)) {
                     throw AjaxExceptionCodes.DISABLED_ACTION.create("autologin");
                 }
@@ -190,6 +196,8 @@ public class AutoLogin extends AbstractLoginRequestHandler {
                             }
                         }
 
+                        performRampUp(req, json, ServerSessionAdapter.valueOf(session));
+
                         // Set data
                         response.setData(json);
 
@@ -261,6 +269,9 @@ public class AutoLogin extends AbstractLoginRequestHandler {
         }
     }
 
+    /**
+     * @return a boolean value indicated if an auto login should proceed afterwards
+     */
     private boolean doAutoLogin(final HttpServletRequest req, final HttpServletResponse resp) throws IOException, OXException {
         return loginOperation(req, resp, new LoginClosure() {
 

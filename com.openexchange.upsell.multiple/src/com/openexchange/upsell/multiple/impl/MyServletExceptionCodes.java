@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,16 +50,17 @@
 package com.openexchange.upsell.multiple.impl;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link MyServletException}
  *
  *
  */
-public enum MyServletExceptionCodes implements OXExceptionCode {
+public enum MyServletExceptionCodes implements DisplayableOXExceptionCode {
 
 
     API_COMMUNICATION_ERROR("An interface error occurred. action: \"%1$s\" ,response: \"%2$s\" " , CATEGORY_ERROR, 1),
@@ -86,16 +87,34 @@ public enum MyServletExceptionCodes implements OXExceptionCode {
     private final int number;
 
     /**
-     * Default constructor.
-     *
-     * @param message message.
-     * @param category category.
-     * @param detailNumber detail number.
+     * Message displayed to the user
+     */
+    private String displayMessage;
+
+    /**
+     * Initializes a new {@link MyServletExceptionCodes}.
+     * 
+     * @param message
+     * @param category
+     * @param detailNumber
      */
     private MyServletExceptionCodes(final String message, final Category category, final int detailNumber) {
+        this(message, category, detailNumber, null);
+    }
+
+    /**
+     * Initializes a new {@link MyServletExceptionCodes}.
+     * 
+     * @param message
+     * @param category
+     * @param detailNumber
+     * @param displayMessage
+     */
+    private MyServletExceptionCodes(final String message, final Category category, final int detailNumber, final String displayMessage) {
         this.message = message;
         this.category = category;
-        number = detailNumber;
+        this.number = detailNumber;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -116,6 +135,14 @@ public enum MyServletExceptionCodes implements OXExceptionCode {
     @Override
     public int getNumber() {
         return number;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getDisplayMessage() {
+        return this.displayMessage;
     }
 
     @Override

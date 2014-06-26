@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -246,11 +246,7 @@ public interface ContactSwitcher {
 
     public Object numberofdistributionlists(Object... objects) throws OXException;
 
-    public Object numberoflinks(Object... objects) throws OXException;
-
     public Object distributionlist(Object... objects) throws OXException;
-
-    public Object links(Object... objects) throws OXException;
 
     public Object parentfolderid(Object... objects) throws OXException;
 

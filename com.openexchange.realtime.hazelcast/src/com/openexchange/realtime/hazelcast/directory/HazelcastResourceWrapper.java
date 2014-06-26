@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,7 +49,6 @@
 
 package com.openexchange.realtime.hazelcast.directory;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -81,7 +80,7 @@ public class HazelcastResourceWrapper {
     private final static String presence_priority = "presence_priority";
 
     private final static String routingInfo = "routingInfo";
-    
+
     public final static String eviction_timestamp = "eviction_timestamp";
 
     /**
@@ -91,11 +90,11 @@ public class HazelcastResourceWrapper {
      * @return the wrapping map
      * @throws RealtimeException if wrapping the HazelcastResource fails
      */
-    public static Map<String, Serializable> wrap(HazelcastResource hazelcastResource) {
+    public static Map<String, Object> wrap(HazelcastResource hazelcastResource) {
         if(hazelcastResource == null) {
             return null;
         }
-        HashMap<String, Serializable> wrap = new HashMap<String, Serializable>();
+        HashMap<String, Object> wrap = new HashMap<String, Object>();
 
         Presence presence = hazelcastResource.getPresence();
         if (presence != null) {
@@ -113,7 +112,7 @@ public class HazelcastResourceWrapper {
         return wrap;
     }
 
-    private static HashMap<String, Serializable> wrapPresence(HashMap<String, Serializable> wrap, Presence presence) {
+    private static HashMap<String, Object> wrapPresence(HashMap<String, Object> wrap, Presence presence) {
 
         ID from = presence.getFrom();
         wrap.put(presence_from, from.toString());
@@ -139,7 +138,7 @@ public class HazelcastResourceWrapper {
      * @param map the wrapped HazelcastResource
      * @return the unwrapped HazelcastResource POJO, or null if map was null
      */
-    public static HazelcastResource unwrap(Map<String, Serializable> map) {
+    public static HazelcastResource unwrap(Map<String, Object> map) {
         if(map == null) {
             return null;
         }
@@ -157,7 +156,7 @@ public class HazelcastResourceWrapper {
         return new HazelcastResource(presence, timestamp, member);
     }
 
-    private static Presence unwrapPresence(Map<String, Serializable> map) {
+    private static Presence unwrapPresence(Map<String, Object> map) {
 
         if(map.get(presence_from) == null) {
             //the resource didn't have a presence

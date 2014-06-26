@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -75,6 +75,7 @@ public class UserValues {
     private String draftsFolder;
     private String sendAddress;
     private Integer privateInfostoreFolder;
+    private Integer infostoreTrashFolder;
     private Locale locale;
     private int privateAppointmentFolder = -1;
     private int privateContactFolder = -1;
@@ -123,6 +124,13 @@ public class UserValues {
             privateInfostoreFolder = I(client.execute(new GetRequest(Tree.PrivateInfostoreFolder)).getInteger());
         }
         return privateInfostoreFolder.intValue();
+    }
+
+    public int getInfostoreTrashFolder() throws OXException, IOException, JSONException {
+        if (null == infostoreTrashFolder) {
+            infostoreTrashFolder = I(client.execute(new GetRequest(Tree.InfostoreTrashFolder)).getInteger());
+        }
+        return infostoreTrashFolder.intValue();
     }
 
     public String getSendAddress() throws OXException, IOException, JSONException {

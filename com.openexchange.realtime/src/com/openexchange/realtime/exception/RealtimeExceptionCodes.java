@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,21 +50,22 @@
 package com.openexchange.realtime.exception;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link RealtimeStanzaExceptionCodes} - Stanza error codes for the realtime framework.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public enum RealtimeExceptionCodes implements OXExceptionCode {
+public enum RealtimeExceptionCodes implements DisplayableOXExceptionCode {
     /*
      * Define Channel specific Codes first as generic codes should be able to reference them.
      */
-    
+
     // XMPP
-    //--- The following conditions are defined for use in stanza errors. http://xmpp.org/rfcs/rfc3920.html#stanzas 9.3.3 
+    //--- The following conditions are defined for use in stanza errors. http://xmpp.org/rfcs/rfc3920.html#stanzas 9.3.3
     /*
     <bad-request/> -- the sender has sent XML that is malformed or that cannot be processed (e.g., an IQ stanza that includes an unrecognized value of the 'type' attribute); the associated error type SHOULD be "modify".
     <conflict/> -- access cannot be granted because an existing resource or session exists with the same name or address; the associated error type SHOULD be "cancel".
@@ -90,51 +91,90 @@ public enum RealtimeExceptionCodes implements OXExceptionCode {
     <unexpected-request/> -- the recipient or server understood the request but was not expecting it at this time (e.g., the request was out of order); the associated error type SHOULD be "wait".
     */
     //--- elements from stanza error namespace http://xmpp.org/rfcs/rfc3920.html#def C.7.
-    /** "The client has sent a message that is malformed or cannot be processed: %1$s" */
-    STANZA_BAD_REQUEST(RealtimeExceptionMessages.STANZA_BAD_REQUEST_MSG, CATEGORY_USER_INPUT, 1),
-    STANZA_CONFILCT(RealtimeExceptionMessages.STANZA_CONFILCT_MSG, CATEGORY_SERVICE_DOWN, 2),
-    STANZA_FEATURE_NOT_IMPLEMENTED(RealtimeExceptionMessages.STANZA_FEATURE_NOT_IMPLEMENTED_MSG, CATEGORY_SERVICE_DOWN, 3),
-    STANZA_FORBIDDEN(RealtimeExceptionMessages.STANZA_FORBIDDEN_MSG, CATEGORY_SERVICE_DOWN, 4),
-    STANZA_GONE(RealtimeExceptionMessages.STANZA_GONE_MSG, CATEGORY_SERVICE_DOWN, 5),
-    /** The server could not process the stanza because of a misconfiguration or an otherwise-undefined internal server error: %1$s */
-    STANZA_INTERNAL_SERVER_ERROR(RealtimeExceptionMessages.STANZA_INTERNAL_SERVER_ERROR_MSG, CATEGORY_SERVICE_DOWN, 6),
-    STANZA_ITEM_NOT_FOUND(RealtimeExceptionMessages.STANZA_ITEM_NOT_FOUND_MSG, CATEGORY_SERVICE_DOWN, 7),
-    STANZA_JID_MALFORMED(RealtimeExceptionMessages.STANZA_JID_MALFORMED_MSG, CATEGORY_SERVICE_DOWN, 8),
-    STANZA_NOT_ACCEPTABLE(RealtimeExceptionMessages.STANZA_NOT_ACCEPTABLE_MSG, CATEGORY_SERVICE_DOWN, 9),
-    STANZA_NOT_AUTHORIZED(RealtimeExceptionMessages.STANZA_NOT_AUTHORIZED_MSG, CATEGORY_SERVICE_DOWN, 10),
-    STANZA_NOT_ALLOWED(RealtimeExceptionMessages.STANZA_NOT_ALLOWED_MSG, CATEGORY_SERVICE_DOWN, 11),
-    STANZA_PAYMENT_REQUIRED(RealtimeExceptionMessages.STANZA_PAYMENT_REQUIRED_MSG, CATEGORY_SERVICE_DOWN, 12),
-    STANZA_POLICY_VIOLATION(RealtimeExceptionMessages.STANZA_POLICY_VIOLATION_MSG, CATEGORY_SERVICE_DOWN, 13),
-    STANZA_RECIPIENT_UNAVAILABLE(RealtimeExceptionMessages.STANZA_RECIPIENT_UNAVAILABLE_MSG, CATEGORY_SERVICE_DOWN, 14),
-    STANZA_REDIRECT(RealtimeExceptionMessages.STANZA_REDIRECT_MSG, CATEGORY_SERVICE_DOWN, 15),
-    STANZA_REGISTRATION_REQUIRED(RealtimeExceptionMessages.STANZA_REGISTRATION_REQUIRED_MSG, CATEGORY_SERVICE_DOWN, 16),
-    STANZA_REMOTE_SERVER_NOT_FOUND(RealtimeExceptionMessages.STANZA_REMOTE_SERVER_NOT_FOUND_MSG, CATEGORY_SERVICE_DOWN, 17),
-    STANZA_REMOTE_SERVER_TIMEOUT(RealtimeExceptionMessages.STANZA_REMOTE_SERVER_TIMEOUT_MSG, CATEGORY_SERVICE_DOWN, 18),
-    STANZA_RESOURCE_CONSTRAINT(RealtimeExceptionMessages.STANZA_RESOURCE_CONSTRAINT_MSG, CATEGORY_SERVICE_DOWN, 19),
-    STANZA_SERVICE_UNAVAILABLE(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 20),
-    STANZA_SUBSCRIPTION_REQUIRED(RealtimeExceptionMessages.STANZA_SUBSCRIPTION_REQUIRED_MSG, CATEGORY_SERVICE_DOWN, 21),
-    STANZA_UNDEFINED_CONDITION(RealtimeExceptionMessages.STANZA_UNDEFINED_CONDITION_MSG, CATEGORY_SERVICE_DOWN, 22),
-    STANZA_UNEXPECTED_REQUEST(RealtimeExceptionMessages.STANZA_UNEXPECTED_REQUEST_MSG, CATEGORY_SERVICE_DOWN, 23),
 
-    // Atmosphere
-    
+    /** "The client has sent a message that is malformed or cannot be processed: %1$s" */
+    STANZA_BAD_REQUEST("The client has sent a message that is malformed or cannot be processed: %1$s", CATEGORY_USER_INPUT, 1, null),
+
+    STANZA_CONFILCT("", CATEGORY_SERVICE_DOWN, 2, null),
+
+    STANZA_FEATURE_NOT_IMPLEMENTED("", CATEGORY_SERVICE_DOWN, 3, null),
+
+    STANZA_FORBIDDEN("", CATEGORY_SERVICE_DOWN, 4, null),
+
+    STANZA_GONE("", CATEGORY_SERVICE_DOWN, 5, null),
+
+    /** The server could not process the stanza because of a misconfiguration or an otherwise-undefined internal server error: %1$s */
+    STANZA_INTERNAL_SERVER_ERROR("The server could not process the stanza because of a misconfiguration or an otherwise-undefined internal"
+        + " server error: %1$s", CATEGORY_SERVICE_DOWN, 6, null),
+
+    STANZA_ITEM_NOT_FOUND("", CATEGORY_SERVICE_DOWN, 7, null),
+
+    STANZA_JID_MALFORMED("", CATEGORY_SERVICE_DOWN, 8, null),
+
+    STANZA_NOT_ACCEPTABLE("", CATEGORY_SERVICE_DOWN, 9, null),
+
+    STANZA_NOT_AUTHORIZED("", CATEGORY_SERVICE_DOWN, 10, null),
+
+    STANZA_NOT_ALLOWED("", CATEGORY_SERVICE_DOWN, 11, null),
+
+    STANZA_PAYMENT_REQUIRED("", CATEGORY_SERVICE_DOWN, 12, null),
+
+    STANZA_POLICY_VIOLATION("", CATEGORY_SERVICE_DOWN, 13, null),
+
+    STANZA_RECIPIENT_UNAVAILABLE("", CATEGORY_SERVICE_DOWN, 14, null),
+
+    STANZA_REDIRECT("", CATEGORY_SERVICE_DOWN, 15, null),
+
+    STANZA_REGISTRATION_REQUIRED("", CATEGORY_SERVICE_DOWN, 16, null),
+
+    STANZA_REMOTE_SERVER_NOT_FOUND("", CATEGORY_SERVICE_DOWN, 17, null),
+
+    STANZA_REMOTE_SERVER_TIMEOUT("", CATEGORY_SERVICE_DOWN, 18, null),
+
+    STANZA_RESOURCE_CONSTRAINT("", CATEGORY_SERVICE_DOWN, 19, null),
+
+    /** The following needed service is missing: "%1$s" */
+    STANZA_SERVICE_UNAVAILABLE("The following needed service is missing: \"%1$s\"", CATEGORY_SERVICE_DOWN, 20, null),
+
+    STANZA_SUBSCRIPTION_REQUIRED("", CATEGORY_SERVICE_DOWN, 21, null),
+
+    STANZA_UNDEFINED_CONDITION("", CATEGORY_SERVICE_DOWN, 22, null),
+
+    STANZA_UNEXPECTED_REQUEST("", CATEGORY_SERVICE_DOWN, 23, null),
+
     // Generic (start with code 1000)
     /** No appropriate channel found for recipient %1$s with payload namespace %2$s */
-    NO_APPROPRIATE_CHANNEL(RealtimeExceptionMessages.NO_APPROPRIATE_CHANNEL, Category.EnumCategory.CONNECTIVITY, 1000, STANZA_INTERNAL_SERVER_ERROR, STANZA_INTERNAL_SERVER_ERROR),
+    NO_APPROPRIATE_CHANNEL("No appropriate channel found for recipient %1$s with payload namespace %2$s", CATEGORY_CONNECTIVITY, 1000,
+        null, STANZA_INTERNAL_SERVER_ERROR, STANZA_INTERNAL_SERVER_ERROR),
+
     /** The following needed service is missing: "%1$s" */
-    NEEDED_SERVICE_MISSING(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 1001, STANZA_INTERNAL_SERVER_ERROR, STANZA_INTERNAL_SERVER_ERROR),
+    NEEDED_SERVICE_MISSING("The following needed service is missing: \"%1$s\"", CATEGORY_SERVICE_DOWN, 1001, null,
+        STANZA_INTERNAL_SERVER_ERROR, STANZA_INTERNAL_SERVER_ERROR),
+
     /** Unexpected error: %1$s */
-    UNEXPECTED_ERROR(RealtimeExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1002, STANZA_INTERNAL_SERVER_ERROR, STANZA_INTERNAL_SERVER_ERROR),
+    UNEXPECTED_ERROR("Unexpected error: %1$s", CATEGORY_ERROR, 1002, null, STANZA_INTERNAL_SERVER_ERROR, STANZA_INTERNAL_SERVER_ERROR),
+
     /** Invalid ID: %1$s */
-    INVALID_ID(RealtimeExceptionMessages.INVALID_ID, CATEGORY_ERROR, 1003, STANZA_INTERNAL_SERVER_ERROR, STANZA_INTERNAL_SERVER_ERROR),
+    INVALID_ID("Invalid ID: %1$s", CATEGORY_ERROR, 1003, null, STANZA_INTERNAL_SERVER_ERROR, STANZA_INTERNAL_SERVER_ERROR),
+
     /** Resource not available. */
-    RESOURCE_NOT_AVAILABLE(RealtimeExceptionMessages.RESOURCE_NOT_AVAILABLE_MSG, CATEGORY_ERROR, 1004, STANZA_INTERNAL_SERVER_ERROR, STANZA_INTERNAL_SERVER_ERROR),
+    RESOURCE_NOT_AVAILABLE("Resource not available.", CATEGORY_ERROR, 1004, null, STANZA_INTERNAL_SERVER_ERROR,
+        STANZA_INTERNAL_SERVER_ERROR),
+
     /** Your session is invalid */
-    SESSION_INVALID(RealtimeExceptionMessages.SESSION_INVALID_MSG, CATEGORY_ERROR, 1005, STANZA_NOT_ACCEPTABLE, STANZA_NOT_ACCEPTABLE),
+    SESSION_INVALID("Your session is invalid.", CATEGORY_ERROR, 1005, RealtimeExceptionMessages.SESSION_INVALID_MSG,
+        STANZA_NOT_ACCEPTABLE, STANZA_NOT_ACCEPTABLE),
+
     /** Invalid sequence detected.*/
-    SEQUENCE_INVALID(RealtimeExceptionMessages.SEQUENCE_INVALID_MSG, CATEGORY_ERROR, 1006, STANZA_BAD_REQUEST, STANZA_BAD_REQUEST),
+    SEQUENCE_INVALID("The sent sequence is invalid.", CATEGORY_ERROR, 1006, null, STANZA_BAD_REQUEST, STANZA_BAD_REQUEST),
+
     /** The server has no state associated with this client. Please enrol first. */
-    STATE_MISSING(RealtimeExceptionMessages.STATE_MISSING_MSG, CATEGORY_ERROR, 1007, STANZA_BAD_REQUEST, STANZA_BAD_REQUEST)
+    STATE_MISSING("The server has no state associated with this client. Please enrol first.", CATEGORY_ERROR, 1007, null,
+        STANZA_BAD_REQUEST, STANZA_BAD_REQUEST),
+
+    /** You are no member of the GroupDispatcher: %1$s. Please join first. */
+    NOT_A_MEMBER("You are no member of the GroupDispatcher: %1$s. Please join first.", CATEGORY_ERROR, 1008,
+        RealtimeExceptionMessages.NOT_A_MEMBER_MSG, STANZA_BAD_REQUEST, STANZA_BAD_REQUEST)
     ;
 
     private int number;
@@ -142,20 +182,22 @@ public enum RealtimeExceptionCodes implements OXExceptionCode {
     private Category category;
 
     private String message;
-    
+
+    private String displayMessage;
+
     private Transformer transformer;
 
-    private RealtimeExceptionCodes(final String message, final Category category, final int detailNumber) {
-        this(message, category, detailNumber, null, null);
+    private RealtimeExceptionCodes(final String message, final Category category, final int detailNumber, String displayMessage) {
+        this(message, category, detailNumber, displayMessage, null, null);
     }
 
-    private RealtimeExceptionCodes(final String message, final Category category, final int detailNumber, RealtimeExceptionCodes atmosphere, RealtimeExceptionCodes xmpp) {
+    private RealtimeExceptionCodes(final String message, final Category category, final int detailNumber, String displayMessage, RealtimeExceptionCodes atmosphere, RealtimeExceptionCodes xmpp) {
         this.message = message;
         this.number = detailNumber;
         this.category = category;
-
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
         this.transformer = new Transformer(this, atmosphere == null ? this : atmosphere, xmpp == null ? this : xmpp);
-        
+
     }
 
     @Override
@@ -179,10 +221,15 @@ public enum RealtimeExceptionCodes implements OXExceptionCode {
     }
 
     @Override
+    public String getDisplayMessage() {
+        return displayMessage;
+    }
+
+    @Override
     public boolean equals(final OXException e) {
         return RealtimeExceptionFactory.getInstance().equals(this, e);
     }
-    
+
     public Transformer getTransformer() {
         return transformer;
     }
@@ -216,11 +263,11 @@ public enum RealtimeExceptionCodes implements OXExceptionCode {
     public RealtimeException create(final Throwable cause, final Object... args) {
         return RealtimeExceptionFactory.getInstance().create(this, cause, args);
     }
-    
+
     /**
      * Create a RealtimeException based on the code number of the RealtimeExceptionCode. Useful to instantiate a POJO from other
-     * representations. This POJO can then be tranformed to the appropriate channel representation. 
-     * 
+     * representations. This POJO can then be tranformed to the appropriate channel representation.
+     *
      * @param codeNumber The code number of the {@link RealtimeExceptionCodes}
      * @param cause the cause
      * @param args the log arguments
@@ -229,10 +276,10 @@ public enum RealtimeExceptionCodes implements OXExceptionCode {
     public static RealtimeException create(final int codeNumber, final Throwable cause, final Object... args) {
         return fromCodeNumber(codeNumber).create(cause, args);
     }
-    
+
     /**
      * Lookup RealtimeExceptionCode based in its number.
-     * 
+     *
      * @param wantedNumber the number of the exception code that we are looking for
      * @return the matching RealtimeExceptionCode
      * @throws IllegalStateException if no matching RealtimeExceptionCode can be found. All number must be matchable to

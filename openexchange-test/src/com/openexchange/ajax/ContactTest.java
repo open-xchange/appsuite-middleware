@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -60,7 +60,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.TimeZone;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -92,7 +91,6 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.test.OXTestToolkit;
 import com.openexchange.test.TestException;
@@ -112,7 +110,7 @@ public class ContactTest extends AbstractAJAXTest {
         Contact.COMMERCIAL_REGISTER, Contact.COMPANY, Contact.COUNTRY_BUSINESS, Contact.COUNTRY_HOME, Contact.COUNTRY_OTHER,
         Contact.DEPARTMENT, Contact.DISPLAY_NAME, Contact.DISTRIBUTIONLIST, Contact.EMAIL1, Contact.EMAIL2, Contact.EMAIL3,
         Contact.EMPLOYEE_TYPE, Contact.FAX_BUSINESS, Contact.FAX_HOME, Contact.FAX_OTHER, Contact.INFO, Contact.INSTANT_MESSENGER1,
-        Contact.INSTANT_MESSENGER2, Contact.IMAGE1, Contact.LINKS, Contact.MANAGER_NAME, Contact.MARITAL_STATUS, Contact.MIDDLE_NAME,
+        Contact.INSTANT_MESSENGER2, Contact.IMAGE1, Contact.MANAGER_NAME, Contact.MARITAL_STATUS, Contact.MIDDLE_NAME,
         Contact.NICKNAME, Contact.NOTE, Contact.NUMBER_OF_CHILDREN, Contact.NUMBER_OF_EMPLOYEE, Contact.POSITION,
         Contact.POSTAL_CODE_BUSINESS, Contact.POSTAL_CODE_HOME, Contact.POSTAL_CODE_OTHER, Contact.PRIVATE_FLAG, Contact.PROFESSION,
         Contact.ROOM_NUMBER, Contact.SALES_VOLUME, Contact.SPOUSE_NAME, Contact.STATE_BUSINESS, Contact.STATE_HOME, Contact.STATE_OTHER,
@@ -168,24 +166,6 @@ public class ContactTest extends AbstractAJAXTest {
         entry[2].setEntryID(contactEntry.getObjectID());
 
         contactObj.setDistributionList(entry);
-        return insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
-    }
-
-    protected int createContactWithLinks(final String title, final Contact link1, final Contact link2) throws Exception {
-        final Contact contactObj = new Contact();
-        contactObj.setSurName(title);
-        contactObj.setParentFolderID(contactFolderId);
-
-        final LinkEntryObject[] links = new LinkEntryObject[2];
-        links[0] = new LinkEntryObject();
-        links[0].setLinkID(link1.getObjectID());
-        links[0].setLinkDisplayname(link1.getDisplayName());
-        links[1] = new LinkEntryObject();
-        links[1].setLinkID(link2.getObjectID());
-        links[1].setLinkDisplayname(link2.getDisplayName());
-
-        contactObj.setLinks(links);
-
         return insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
     }
 
@@ -376,10 +356,6 @@ public class ContactTest extends AbstractAJAXTest {
             contactObj2.getDefaultAddress());
 
         OXTestToolkit.assertEqualsAndNotNull(
-            "links are not equals",
-            links2String(contactObj1.getLinks()),
-            links2String(contactObj2.getLinks()));
-        OXTestToolkit.assertEqualsAndNotNull(
             "distribution list is not equals",
             distributionlist2String(contactObj1.getDistributionList()),
             distributionlist2String(contactObj2.getDistributionList()));
@@ -503,21 +479,8 @@ public class ContactTest extends AbstractAJAXTest {
         contactObj.setParentFolderID(contactFolderId);
 
         final Contact link1 = createContactObject("link1");
-        final Contact link2 = createContactObject("link2");
         final int linkId1 = insertContact(getWebConversation(), link1, PROTOCOL + getHostName(), getSessionId());
         link1.setObjectID(linkId1);
-        final int linkId2 = insertContact(getWebConversation(), link2, PROTOCOL + getHostName(), getSessionId());
-        link2.setObjectID(linkId2);
-
-        final LinkEntryObject[] links = new LinkEntryObject[2];
-        links[0] = new LinkEntryObject();
-        links[0].setLinkID(link1.getObjectID());
-        links[0].setLinkDisplayname(link1.getDisplayName());
-        links[1] = new LinkEntryObject();
-        links[1].setLinkID(link2.getObjectID());
-        links[1].setLinkDisplayname(link2.getDisplayName());
-
-        contactObj.setLinks(links);
 
         final DistributionListEntryObject[] entry = new DistributionListEntryObject[2];
         entry[0] = new DistributionListEntryObject("displayname a", "a@a.de", DistributionListEntryObject.INDEPENDENT);
@@ -1517,11 +1480,6 @@ public class ContactTest extends AbstractAJAXTest {
                 contactObj.setUserField20(jsonArray.getString(pos));
             }
             break;
-        case Contact.LINKS:
-            if (!jsonArray.isNull(pos)) {
-                contactObj.setLinks(parseLinks(contactObj, jsonArray.getJSONArray(pos)));
-            }
-            break;
         case Contact.DISTRIBUTIONLIST:
             if (!jsonArray.isNull(pos)) {
                 contactObj.setDistributionList(parseDistributionList(contactObj, jsonArray.getJSONArray(pos)));
@@ -1536,21 +1494,6 @@ public class ContactTest extends AbstractAJAXTest {
             throw new Exception("missing field in mapping: " + field);
 
         }
-    }
-
-    private static LinkEntryObject[] parseLinks(final Contact contactObj, final JSONArray jsonArray) throws Exception {
-        final LinkEntryObject[] links = new LinkEntryObject[jsonArray.length()];
-        for (int a = 0; a < links.length; a++) {
-            links[a] = new LinkEntryObject();
-            final JSONObject entry = jsonArray.getJSONObject(a);
-            if (entry.has(ContactFields.ID)) {
-                links[a].setLinkID(DataParser.parseInt(entry, ContactFields.ID));
-            }
-
-            links[a].setLinkDisplayname(DataParser.parseString(entry, DistributionListFields.DISPLAY_NAME));
-        }
-
-        return links;
     }
 
     private static DistributionListEntryObject[] parseDistributionList(final Contact contactObj, final JSONArray jsonArray) throws Exception {
@@ -1576,28 +1519,6 @@ public class ContactTest extends AbstractAJAXTest {
         }
 
         return distributionlist;
-    }
-
-    private HashSet links2String(final LinkEntryObject[] linkEntryObject) throws Exception {
-        if (linkEntryObject == null) {
-            return null;
-        }
-
-        final HashSet hs = new HashSet();
-
-        for (int a = 0; a < linkEntryObject.length; a++) {
-            hs.add(link2String(linkEntryObject[a]));
-        }
-
-        return hs;
-    }
-
-    private String link2String(final LinkEntryObject linkEntryObject) throws Exception {
-        final StringBuffer sb = new StringBuffer();
-        sb.append("ID" + linkEntryObject.getLinkID());
-        sb.append("DISPLAYNAME" + linkEntryObject.getLinkDisplayname());
-
-        return sb.toString();
     }
 
     private HashSet distributionlist2String(final DistributionListEntryObject[] distributionListEntry) throws Exception {

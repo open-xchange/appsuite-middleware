@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -101,6 +101,11 @@ public final class OAuthConstants {
      * The argument name for session. <code>com.openexchange.session.Session</code>
      */
     public static final String ARGUMENT_SESSION = "session";
+
+    /**
+     * The argument name for current host name. <code>java.lang.String</code>
+     */
+    public static final String ARGUMENT_CURRENT_HOST = null;
 
     /*-
      * ------------------- URL parameters -------------------

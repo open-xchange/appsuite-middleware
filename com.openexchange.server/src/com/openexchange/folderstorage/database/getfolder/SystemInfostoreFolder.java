@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -178,6 +178,9 @@ public final class SystemInfostoreFolder {
                     }
                 } else if (fuid == FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID) {
                     subfolderIds.add(toArray(String.valueOf(fuid), sh.getString(altNames ? FolderStrings.SYSTEM_PUBLIC_FILES_FOLDER_NAME : FolderStrings.SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME)));
+                } else if (FolderObject.TRASH == fo.getType() && fo.isDefaultFolder()) {
+                    subfolderIds.add(toArray(String.valueOf(fuid), sh.getString(
+                        altNames ? FolderStrings.SYSTEM_TRASH_FILES_FOLDER_NAME : FolderStrings.SYSTEM_TRASH_INFOSTORE_FOLDER_NAME)));
                 } else {
                     subfolderIds.add(toArray(String.valueOf(fuid), fo.getFolderName()));
                 }

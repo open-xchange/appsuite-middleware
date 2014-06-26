@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -114,6 +114,18 @@ public interface MailAccountStorageService {
      * @throws OXException If the mail account cannot be returned
      */
     MailAccount getMailAccount(int id, int user, int cid) throws OXException;
+
+    /**
+     * Gets the mail account identified by specified ID.
+     *
+     * @param id The mail account ID
+     * @param user The user ID
+     * @param cid The context ID
+     * @param con The connection to use
+     * @return The mail account
+     * @throws OXException If the mail account cannot be returned
+     */
+    MailAccount getMailAccount(int id, int user, int cid, Connection con) throws OXException;
 
     /**
      * Gets the mail accounts belonging to specified user in given context.

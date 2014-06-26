@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,33 +51,35 @@ package com.openexchange.indexedSearch.json;
 
 import com.openexchange.exception.Category;
 import com.openexchange.exception.Category.EnumCategory;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link IndexedSearchExceptionCodes} - The error code for index-based search module.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum IndexedSearchExceptionCodes implements OXExceptionCode {
+public enum IndexedSearchExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An unexpected error occurred: %1$s
      */
-    UNEXPECTED_ERROR(IndexedSearchExceptionMessages.UNEXPECTED_ERROR, Category.CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR("An unexpected error occurred: %1$s", Category.CATEGORY_ERROR, 1, null),
     /**
      * A JSON error occurred: %1$s
      */
-    JSON_ERROR(IndexedSearchExceptionMessages.JSON_ERROR, EnumCategory.ERROR, 2),
+    JSON_ERROR("A JSON error occurred: %1$s", EnumCategory.ERROR, 2, null),
     /**
      * Index-based search is not supported for module: %1$s
      */
-    MODULE_NOT_SUPPORTED(IndexedSearchExceptionMessages.MODULE_NOT_SUPPORTED, EnumCategory.ERROR, 3),
+    MODULE_NOT_SUPPORTED("Index-based search is not supported for module: %1$s", EnumCategory.ERROR, 3, null),
     /**
      * There is no search handler for field %1$s.
      */
-    UNKNOWN_HANDLER(IndexedSearchExceptionMessages.UNKNOWN_HANDLER, EnumCategory.USER_INPUT, 4),
+    UNKNOWN_HANDLER("There is no search handler for field %1$s.", EnumCategory.USER_INPUT, 4,
+        IndexedSearchExceptionMessages.UNKNOWN_HANDLER),
 
     ;
 
@@ -91,12 +93,15 @@ public enum IndexedSearchExceptionCodes implements OXExceptionCode {
     private final int number;
 
     private final String message;
+    
+    private String displayMessage;
 
 
-    private IndexedSearchExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private IndexedSearchExceptionCodes(final String message, final Category category, final int detailNumber, String displayMessage) {
         this.message = message;
         number = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -117,6 +122,11 @@ public enum IndexedSearchExceptionCodes implements OXExceptionCode {
     @Override
     public int getNumber() {
         return number;
+    }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override

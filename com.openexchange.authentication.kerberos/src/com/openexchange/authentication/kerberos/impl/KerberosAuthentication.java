@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,7 +49,8 @@
 
 package com.openexchange.authentication.kerberos.impl;
 
-import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS;
+import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_USER_MAPPING;
+import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_CONTEXT_MAPPING;
 import static com.openexchange.authentication.kerberos.impl.ConfigurationProperty.PROXY_DELIMITER;
 import static com.openexchange.authentication.kerberos.impl.ConfigurationProperty.PROXY_USER;
 import java.util.List;
@@ -128,14 +129,14 @@ public class KerberosAuthentication implements AuthenticationService {
             try {
                 principal = kerberosService.authenticate(uid, loginInfo.getPassword());
             } catch (OXException e) {
-                LOG.error("", e.getCause());
+                LOG.error(e.getMessage(), e);
                 throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
             }
         }
         final String[] splitted = split(principal.getName());
         final int ctxId = contextService.getContextId(splitted[0]);
         if (ContextStorage.NOT_FOUND == ctxId) {
-            throw INVALID_CREDENTIALS.create();
+            throw INVALID_CREDENTIALS_MISSING_CONTEXT_MAPPING.create(splitted[0]);
         }
         final Context ctx = contextService.getContext(ctxId);
         final int userId;
@@ -147,7 +148,7 @@ public class KerberosAuthentication implements AuthenticationService {
             }
         } catch (OXException e) {
             if (LdapExceptionCode.USER_NOT_FOUND.equals(e)) {
-                throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
+                throw INVALID_CREDENTIALS_MISSING_USER_MAPPING.create(splitted[1]);
             }
             throw e;
         }

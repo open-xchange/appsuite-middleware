@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -60,6 +60,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -110,6 +111,7 @@ public class APIResponseRenderer implements ResponseRenderer {
     public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
         final Boolean plainJson = (Boolean) result.getParameter(PLAIN_JSON);
         final Response response = (Response) result.getResultObject();
+        response.setContinuationUUID(result.getContinuationUuid());
         if (parseBoolParameter(INCLUDE_STACK_TRACE_ON_ERROR, request) ) {
             response.setIncludeStackTraceOnError(true);
         }
@@ -202,6 +204,7 @@ public class APIResponseRenderer implements ResponseRenderer {
                         callback = PATTERN_QUOTE.matcher(callback).replaceAll("$1\\\\\"");
                     }
                 }
+                callback = AJAXUtility.sanitizeParam(callback);
                 final PrintWriter writer = resp.getWriter();
                 writer.write(JS_FRAGMENT_PART1);
                 writer.write(callback);
@@ -220,7 +223,7 @@ public class APIResponseRenderer implements ResponseRenderer {
                  */
             } else if (req.getParameter(JSONP) != null) {
                 resp.setContentType("text/javascript");
-                final String call = req.getParameter(JSONP);
+                final String call = AJAXUtility.sanitizeParam(req.getParameter(JSONP));
                 // Write: <call> + "(" + <json> + ")"
                 final PrintWriter writer = resp.getWriter();
                 writer.write(call);
@@ -238,6 +241,8 @@ public class APIResponseRenderer implements ResponseRenderer {
                 LOG.error("", ioe);
             }
         } catch (final IOException e) {
+            LOG.error("", e);
+        } catch (final IllegalStateException e) {
             LOG.error("", e);
         }
     }

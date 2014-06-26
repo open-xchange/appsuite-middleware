@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -54,6 +54,7 @@ import java.util.Hashtable;
 import javax.servlet.ServletException;
 import org.apache.cxf.Bus;
 import org.apache.cxf.BusFactory;
+import org.apache.cxf.common.logging.LogUtils;
 import org.apache.cxf.staxutils.StaxUtils;
 import org.apache.cxf.transport.servlet.CXFNonSpringServlet;
 import org.osgi.framework.BundleContext;
@@ -83,6 +84,16 @@ public class CXFActivator extends HousekeepingActivator {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CXFActivator.class);
         try {
             log.info("Starting Bundle: com.openexchange.soap.cxf");
+            // Set jdk.xml.entityExpansionLimit
+            {
+                final int defaulEntityExpansionLimit = 128000;
+                final int entityExpansionLimit = getService(ConfigurationService.class).getIntProperty("com.openexchange.soap.cxf.entityExpansionLimit", defaulEntityExpansionLimit);
+                System.setProperty("jdk.xml.entityExpansionLimit", Integer.toString(entityExpansionLimit < 0 ? defaulEntityExpansionLimit : entityExpansionLimit));
+            }
+            // Set logger class
+            //LogUtils.setLoggerClass(com.openexchange.soap.cxf.logger.Slf4jLogger.class);
+            LogUtils.setLoggerClass(org.apache.cxf.common.logging.Slf4jLogger.class);
+            // Continue start-up
             final BundleContext context = this.context;
             final String alias = "/webservices";
             final String alias2 = "/servlet/axis2/services";

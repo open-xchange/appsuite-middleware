@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -60,6 +60,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
@@ -440,25 +441,13 @@ public final class Tools {
                 final Connection wcon = databaseService.getWritable(contextId);
                 try {
                     storageService.updateMailAccount(mad, attributes, userId, contextId, serverSession, wcon, false);
-                    final MailAccount[] accounts = storageService.getUserMailAccounts(userId, contextId, wcon);
-                    for (final MailAccount macc : accounts) {
-                        if (macc.getId() == accountId) {
-                            return macc;
-                        }
-                    }
-                    return null;
+                    return storageService.getMailAccount(accountId, userId, contextId, con);
                 } finally {
                     databaseService.backWritable(contextId, wcon);
                 }
             }
             storageService.updateMailAccount(mad, attributes, userId, contextId, serverSession, con, false);
-            final MailAccount[] accounts = storageService.getUserMailAccounts(userId, contextId, con);
-            for (final MailAccount macc : accounts) {
-                if (macc.getId() == accountId) {
-                    return macc;
-                }
-            }
-            return null;
+            return storageService.getMailAccount(accountId, userId, contextId, con);
         } catch (final OXException e) {
             /*
              * Checking full names failed
@@ -611,14 +600,25 @@ public final class Tools {
      * @throws OXException If separator character retrieval fails
      */
     public static char getSeparator(final int accountId, final ServerSession session) throws OXException {
-        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access = null;
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = MailAccess.getInstance(session, accountId);
+
+        return getSeparator(mailAccess);
+    }
+
+    /**
+     * Gets the separator character from associated MailAccess.
+     * 
+     * @param mailAccess - {@link MailAccess} to get the separator from.
+     * @return The separator character
+     * @throws OXException If separator character retrieval fails
+     */
+    public static char getSeparator(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
         try {
-            access = MailAccess.getInstance(session, accountId);
-            access.connect(false);
-            return access.getFolderStorage().getFolder("INBOX").getSeparator();
+            mailAccess.connect(false);
+            return mailAccess.getFolderStorage().getFolder("INBOX").getSeparator();
         } finally {
-            if (null != access) {
-                access.close(true);
+            if (null != mailAccess) {
+                mailAccess.close(true);
             }
         }
     }
@@ -631,10 +631,9 @@ public final class Tools {
      * @return The extracted name or <code>null</code>
      */
     public static String getName(final String fullName, final char separator) {
-        if (isEmpty(fullName)) {
+        if (Strings.isEmpty(fullName)) {
             return null;
         }
         return fullName.substring(fullName.lastIndexOf(separator) + 1);
     }
-
 }

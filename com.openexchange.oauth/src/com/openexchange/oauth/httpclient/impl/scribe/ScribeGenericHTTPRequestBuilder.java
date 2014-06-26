@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,7 +49,6 @@
 
 package com.openexchange.oauth.httpclient.impl.scribe;
 
-import java.text.MessageFormat;
 import java.util.Map;
 import java.util.TreeMap;
 import org.apache.commons.httpclient.URIException;
@@ -247,7 +246,7 @@ public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericReque
         } catch (final RuntimeException e) {
             final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ScribeGenericHTTPRequestBuilder.class);
             logger.warn("Associated OAuth \"{} ({})\" account misses token information.", account.getDisplayName(), account.getId());
-            throw OAuthExceptionCodes.INVALID_ACCOUNT.create(e, new Object[0]);
+            throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(e, account.getDisplayName(), account.getId());
         }
     }
 

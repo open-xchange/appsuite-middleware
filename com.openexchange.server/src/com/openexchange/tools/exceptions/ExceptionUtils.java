@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -118,7 +118,7 @@ public class ExceptionUtils {
                     MARKER + "The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating." + MARKER,
                     t);
             } else {
-                final com.openexchange.java.StringAllocator logBuilder = new com.openexchange.java.StringAllocator(512);
+                final StringBuilder logBuilder = new StringBuilder(512);
                 final Map<String, String> sorted = new TreeMap<String, String>();
                 for (final Map.Entry<String, String> entry : taskProperties.entrySet()) {
                     final String propertyName = entry.getKey();
@@ -143,6 +143,6 @@ public class ExceptionUtils {
     }
 
     private static String surroundWithMarker(final String message) {
-        return new com.openexchange.java.StringAllocator(message.length() + 40).append(MARKER).append(message).append(MARKER).toString();
+        return new StringBuilder(message.length() + 40).append(MARKER).append(message).append(MARKER).toString();
     }
 }

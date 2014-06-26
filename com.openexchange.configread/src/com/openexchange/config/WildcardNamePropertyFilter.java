@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -94,7 +94,7 @@ public class WildcardNamePropertyFilter implements PropertyFilter {
      * @return An appropriate regular expression ready for being used in a {@link Pattern pattern}
      */
     private static String wildcardToRegex(final String wildcard) {
-        final com.openexchange.java.StringAllocator s = new com.openexchange.java.StringAllocator(wildcard.length());
+        final StringBuilder s = new StringBuilder(wildcard.length());
         s.append('^');
         final int len = wildcard.length();
         for (int i = 0; i < len; i++) {

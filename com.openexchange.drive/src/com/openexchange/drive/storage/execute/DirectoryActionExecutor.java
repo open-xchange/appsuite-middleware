@@ -210,11 +210,20 @@ public class DirectoryActionExecutor extends BatchActionExecutor<DirectoryVersio
     }
 
     private void remove(AbstractAction<DirectoryVersion> action) throws OXException {
-        if (DriveConstants.EMPTY_MD5.equals(action.getVersion().getChecksum())) {
+        if (session.getStorage().hasTrashFolder()) {
+            /*
+             * move to trash if available
+             */
+            String folderID = session.getStorage().deleteFolder(action.getVersion().getPath(), false);
+            session.getChecksumStore().removeDirectoryChecksum(new FolderID(folderID));
+            if (false == DriveConstants.EMPTY_MD5.equals(action.getVersion().getChecksum())) {
+                session.getChecksumStore().removeFileChecksumsInFolder(new FolderID(folderID));
+            }
+        } else if (DriveConstants.EMPTY_MD5.equals(action.getVersion().getChecksum())) {
             /*
              * just delete empty directory
              */
-            String folderID = session.getStorage().deleteFolder(action.getVersion().getPath());
+            String folderID = session.getStorage().deleteFolder(action.getVersion().getPath(), true);
             session.getChecksumStore().removeDirectoryChecksum(new FolderID(folderID));
         } else if (session.hasTempFolder()) {
             /*
@@ -243,7 +252,7 @@ public class DirectoryActionExecutor extends BatchActionExecutor<DirectoryVersio
                     /*
                      * identical folder already in trash, hard-delete the directory
                      */
-                    FolderID deletedFolderID = new FolderID(session.getStorage().deleteFolder(action.getVersion().getPath()));
+                    FolderID deletedFolderID = new FolderID(session.getStorage().deleteFolder(action.getVersion().getPath(), true));
                     session.getChecksumStore().removeDirectoryChecksum(deletedFolderID);
                     session.getChecksumStore().removeFileChecksumsInFolder(deletedFolderID);
                 }
@@ -280,25 +289,19 @@ public class DirectoryActionExecutor extends BatchActionExecutor<DirectoryVersio
                     session.getChecksumStore().removeFileChecksums(checksumsToRemove);
                 }
                 if (0 < filesToRemove.size()) {
-                    long sequenceNumber = 0;
-                    List<String> ids = new ArrayList<String>(filesToRemove.size());
-                    for (File file : filesToRemove) {
-                        sequenceNumber = Math.max(sequenceNumber, file.getSequenceNumber());
-                        ids.add(file.getId());
-                    }
-                    session.getStorage().getFileAccess().removeDocument(ids, sequenceNumber);
+                    session.getStorage().deleteFiles(filesToRemove, true);
                 }
                 /*
                  * delete (empty) directory
                  */
-                String folderID = session.getStorage().deleteFolder(action.getVersion().getPath());
+                String folderID = session.getStorage().deleteFolder(action.getVersion().getPath(), true);
                 session.getChecksumStore().removeDirectoryChecksum(new FolderID(folderID));
             }
         } else {
             /*
              * no temp folder available, hard-delete directory + contents
              */
-            String folderID = session.getStorage().deleteFolder(action.getVersion().getPath());
+            String folderID = session.getStorage().deleteFolder(action.getVersion().getPath(), true);
             session.getChecksumStore().removeDirectoryChecksum(new FolderID(folderID));
             session.getChecksumStore().removeFileChecksumsInFolder(new FolderID(folderID));
         }
@@ -314,10 +317,13 @@ public class DirectoryActionExecutor extends BatchActionExecutor<DirectoryVersio
             if (false == Action.REMOVE.equals(action.getAction())) {
                 throw new IllegalStateException("Can't perform action " + action + " on server");
             }
-            /*
-             * check if folder should be hard-deleted or moved to trash
-             */
-            if (DriveConstants.EMPTY_MD5.equals(action.getVersion().getChecksum()) || false == session.hasTempFolder() ||
+            if (session.getStorage().hasTrashFolder()) {
+                /*
+                 * move to trash if available
+                 */
+                String folderID = session.getStorage().deleteFolder(action.getVersion().getPath(), false);
+                removedFolderIDs.add(new FolderID(folderID));
+            } else if (DriveConstants.EMPTY_MD5.equals(action.getVersion().getChecksum()) || false == session.hasTempFolder() ||
                 false == mayMove(action.getVersion().getPath(), DriveConstants.TEMP_PATH)) {
                 /*
                  * just delete empty directory
@@ -341,7 +347,7 @@ public class DirectoryActionExecutor extends BatchActionExecutor<DirectoryVersio
                     }
                 } else {
                     /*
-                     * identical folder already in trash, hard-delete the directory
+                     * identical folder already in temp folder, hard-delete the directory
                      */
                     String folderID = session.getStorage().deleteFolder(action.getVersion().getPath());
                     removedFolderIDs.add(new FolderID(folderID));

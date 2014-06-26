@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -128,6 +128,10 @@ public enum AjaxExceptionCodes implements DisplayableOXExceptionCode {
      * Bad request. The server is unable to handle the request.
      */
     BAD_REQUEST("Bad request. The server is unable to handle the request.", MESSAGE, Category.CATEGORY_ERROR, 20),
+    /**
+     * Bad request. %1$s
+     */
+    BAD_REQUEST_CUSTOM("Bad request. %1$s", MESSAGE, Category.CATEGORY_ERROR, 20),
     /**
      * Unknown AJAX action %1$s in module %2$s.
      */

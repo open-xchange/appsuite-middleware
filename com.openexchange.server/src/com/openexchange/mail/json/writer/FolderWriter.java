@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -382,7 +382,7 @@ public final class FolderWriter {
                      * Put value
                      */
                     final String value =
-                        folder.isRootFolder() ? "" : new com.openexchange.java.StringAllocator(16).append('(').append(folder.getMessageCount()).append('/').append(
+                        folder.isRootFolder() ? "" : new StringBuilder(16).append('(').append(folder.getMessageCount()).append('/').append(
                             folder.getUnreadMessageCount()).append(')').toString();
                     putter.put(FolderFields.SUMMARY, value);
                 } catch (final JSONException e) {

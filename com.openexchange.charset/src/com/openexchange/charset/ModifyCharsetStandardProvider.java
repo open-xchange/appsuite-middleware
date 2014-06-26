@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -60,6 +60,8 @@ import java.nio.charset.spi.CharsetProvider;
  */
 public final class ModifyCharsetStandardProvider {
 
+    private static volatile Field standardProviderField;
+
     /**
      * Initializes a new {@link ModifyCharsetStandardProvider}.
      */
@@ -81,6 +83,7 @@ public final class ModifyCharsetStandardProvider {
          */
         final Field standardProviderField = java.nio.charset.Charset.class.getDeclaredField("standardProvider");
         standardProviderField.setAccessible(true);
+        ModifyCharsetStandardProvider.standardProviderField = standardProviderField;
         /*
          * Backup old charset provider
          */
@@ -96,7 +99,7 @@ public final class ModifyCharsetStandardProvider {
              * Leave unchanged since fall-back charset "CP50220" is not support by JVM
              */
             org.slf4j.LoggerFactory.getLogger(ModifyCharsetStandardProvider.class).warn(
-                new com.openexchange.java.StringAllocator("Charset \"CP50220\" is not supported by JVM \"").append(System.getProperty("java.vm.vendor")).append(" v").append(
+                new StringBuilder("Charset \"CP50220\" is not supported by JVM \"").append(System.getProperty("java.vm.vendor")).append(" v").append(
                     System.getProperty("java.vm.version")).append("\". Japanese encoding \"ISO-2022-JP\" not supported ! ! !").toString());
         }
         try {
@@ -106,7 +109,7 @@ public final class ModifyCharsetStandardProvider {
              * Leave unchanged since fall-back charset "WINDOWS-1252" is not support by JVM
              */
             org.slf4j.LoggerFactory.getLogger(ModifyCharsetStandardProvider.class).warn(
-                new com.openexchange.java.StringAllocator("Charset \"WINDOWS-1252\" is not supported by JVM \"").append(System.getProperty("java.vm.vendor")).append(" v").append(
+                new StringBuilder("Charset \"WINDOWS-1252\" is not supported by JVM \"").append(System.getProperty("java.vm.vendor")).append(" v").append(
                     System.getProperty("java.vm.version")).append("\".").toString());
         }
         try {
@@ -116,7 +119,7 @@ public final class ModifyCharsetStandardProvider {
              * Leave unchanged since fall-back charset "WINDOWS-1252" is not support by JVM
              */
             org.slf4j.LoggerFactory.getLogger(ModifyCharsetStandardProvider.class).warn(
-                new com.openexchange.java.StringAllocator("Charset \"WINDOWS-1252\" is not supported by JVM \"").append(System.getProperty("java.vm.vendor")).append(" v").append(
+                new StringBuilder("Charset \"WINDOWS-1252\" is not supported by JVM \"").append(System.getProperty("java.vm.vendor")).append(" v").append(
                     System.getProperty("java.vm.version")).append("\".").toString());
         }
         if (null == charsetProvider) {
@@ -134,19 +137,20 @@ public final class ModifyCharsetStandardProvider {
      * Restores field <code>java.nio.charset.Charset.standardProvider</code>
      *
      * @param provider The {@link CharsetProvider} instance to restore to
-     * @throws NoSuchFieldException If field "standardProvider" does not exist
      * @throws IllegalAccessException If field "standardProvider" is not accessible
      */
-    public static void restoreCharsetExtendedProvider(final CharsetProvider provider) throws NoSuchFieldException, IllegalAccessException {
+    public static void restoreCharsetExtendedProvider(final CharsetProvider provider) throws IllegalAccessException {
         /*
          * Restore java.nio.charset.Charset class
          */
-        final Field extendedProviderField = java.nio.charset.Charset.class.getDeclaredField("standardProvider");
-        extendedProviderField.setAccessible(true);
-        /*
-         * Assign previously remembered charset provider
-         */
-        extendedProviderField.set(null, provider);
+        final Field standardProviderField = ModifyCharsetStandardProvider.standardProviderField;
+        if (null != standardProviderField) {
+            /*
+             * Assign previously remembered charset provider
+             */
+            standardProviderField.set(null, provider);
+            ModifyCharsetStandardProvider.standardProviderField = null;
+        }
     }
 
 }

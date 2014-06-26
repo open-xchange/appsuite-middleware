@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -67,6 +67,7 @@ import com.openexchange.session.Session;
  * RTEventSubscription#handle takes an RTEvent and retransmits it to the interested client via the RT messaging system.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class RTEventSubscription implements RTListener {
 
@@ -78,6 +79,18 @@ public class RTEventSubscription implements RTListener {
     private final Session session;
     private final Map<String, String> parameters;
 
+    /**
+     * Initializes a new {@link RTEventSubscription} e.g. mail:new
+     * 
+     * @param namespace The namespace of the subscription e.g. "mail".
+     * @param eventName The name identifying the event in it's namespace
+     * @param selector The selector the client chose to associate with this {@link RTEventSubscription} to easily distinguish incoming
+     *            messages on the client side
+     * @param id The {@link ID} of the subscribing client
+     * @param session The active session used by the client
+     * @param parameters Subscription parameters
+     * @param services The needed ServiceLookup
+     */
     public RTEventSubscription(String namespace, String eventName, String selector, ID id, Session session, Map<String, String> parameters, ServiceLookup services) {
         super();
         this.namespace = namespace;
@@ -121,24 +134,27 @@ public class RTEventSubscription implements RTListener {
      * {
      *   "selector": $selector,
      *   "element": "message",
-     *   "payloads": [{
-     *    "element": "event",
-     *    "data": [{
-     *        "element": "name",
-     *        "data": $namespaceEventName,
-     *        "namespace": "event"
-     *      }, {
-     *        "element": "data",
-     *        "data": $dataWithTheGivenFormatTransformedToJSON
-     *        ,
-     *        "namespace": "event"
-     *     }],
-     *    "namespace": "event"
-     *    }],
+     *   "payloads": [
+     *     {
+     *       "namespace": "event"
+     *       "element": "event",
+     *       "data": [
+     *         {
+     *           "namespace": "event"
+     *           "element": "name",
+     *           "data": $namespaceEventName,
+     *         },
+     *         {
+     *           "namespace": "event",
+     *           "element": "data",
+     *           "data": $dataWithTheGivenFormatTransformedToJSON
+     *         }
+     *       ],
+     *     }
+     *   ],
      *   "from": $id,
      *   "to": $id
-     *    }
-
+     * }
      * 
      */
     @Override

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -899,7 +899,7 @@ public final class FacebookMessagingUtility {
 
         @Override
         public String toString() {
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(256).append("( charSequence=");
+            final StringBuilder sb = new StringBuilder(256).append("( charSequence=");
             if (null == charSequence) {
                 sb.append("<not-available>");
             } else {
@@ -1502,7 +1502,7 @@ public final class FacebookMessagingUtility {
      * @return An appropriate regular expression ready for being used in a {@link java.util.regex.Pattern pattern}
      */
     public static String wildcardToRegex(final String wildcard) {
-        final com.openexchange.java.StringAllocator s = new com.openexchange.java.StringAllocator(wildcard.length());
+        final StringBuilder s = new StringBuilder(wildcard.length());
         s.append('^');
         final int len = wildcard.length();
         for (int i = 0; i < len; i++) {
@@ -1533,7 +1533,7 @@ public final class FacebookMessagingUtility {
         if (arr == null || arr.length <= 0) {
             return null;
         }
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(arr.length * 8);
+        final StringBuilder sb = new StringBuilder(arr.length * 8);
         sb.append('(');
         sb.append(arr[0]);
         for (int a = 1; a < arr.length; a++) {

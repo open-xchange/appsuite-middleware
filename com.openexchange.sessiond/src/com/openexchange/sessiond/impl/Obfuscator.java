@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,7 +51,6 @@ package com.openexchange.sessiond.impl;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
@@ -68,7 +67,7 @@ import com.openexchange.sessionstorage.StoredSession;
 public class Obfuscator {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessionImpl.class);
-    private static final String[] WRAPPED_PARMETERS = { Session.PARAM_ALTERNATIVE_ID, Session.PARAM_CAPABILITIES };
+    private static final String[] WRAPPED_PARMETERS = { Session.PARAM_ALTERNATIVE_ID };
 
     private final String obfuscationKey;
 

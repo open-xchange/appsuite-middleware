@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,7 +53,7 @@ import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link OXCalendarExceptionMessage}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
@@ -206,5 +206,10 @@ public class OXCalendarExceptionMessage implements LocalizableStrings {
      * An external participant with email address %1$s is already contained. Please remove duplicate participant and retry.
      */
     public static final String DUPLICATE_EXTERNAL_PARTICIPANT_MSG = "An external participant with the E-Mail address %1$s is already included. Please remove participant duplicate and retry.";
+
+    /**
+     * Moving a recurring appointment to another folder is not supported.
+     */
+    public static final String RECURRING_FOLDER_MOVE_MSG = "Moving a recurring appointment to another folder is not supported.";
 
 }

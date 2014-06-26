@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -115,7 +115,7 @@ public final class PooledMailAccess implements Delayed {
 
     @Override
     public String toString() {
-        final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(32);
+        final StringBuilder builder = new StringBuilder(32);
         builder.append("PooledMailAccess [timeoutStamp=").append(timeoutStamp).append(", ");
         if (mailAccess != null) {
             builder.append("mailAccess=").append(mailAccess);

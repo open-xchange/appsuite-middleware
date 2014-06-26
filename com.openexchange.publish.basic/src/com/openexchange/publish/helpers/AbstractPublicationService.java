@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -101,7 +101,14 @@ public abstract class AbstractPublicationService implements PublicationService {
 
     @Override
     public void delete(final Publication publication) throws OXException {
-        checkPermission(Permission.DELETE, publicationForPermissionCheck(publication));
+        // Check delete permission
+        {
+            final Publication loadedPublication = publicationForPermissionCheck(publication);
+            if (null != loadedPublication) {
+                checkPermission(Permission.DELETE, loadedPublication);
+            }
+        }
+        // Continue delete operation
         beforeDelete(publication);
         STORAGE.forgetPublication(publication);
         afterDelete(publication);
@@ -184,10 +191,9 @@ public abstract class AbstractPublicationService implements PublicationService {
     @Override
     public Publication load(final Context ctx, final int publicationId) throws OXException {
         final Publication publication = loadInternally(ctx, publicationId);
-        if(publication != null) {
+        if (publication != null) {
             modifyOutgoing(publication);
         }
-
         return publication;
     }
 
@@ -211,9 +217,11 @@ public abstract class AbstractPublicationService implements PublicationService {
 
     private Publication publicationForPermissionCheck(final Publication publication) throws OXException {
         final Publication loaded = load(publication.getContext(), publication.getId());
-        loaded.setUserId(publication.getUserId());
-        if (null != publication.getEntityId()) {
-            loaded.setEntityId(publication.getEntityId());
+        if (null != loaded) {
+            loaded.setUserId(publication.getUserId());
+            if (null != publication.getEntityId()) {
+                loaded.setEntityId(publication.getEntityId());
+            }
         }
         return loaded;
     }

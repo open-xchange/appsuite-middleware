@@ -61,7 +61,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobExceptionCodes;
 import com.openexchange.jslob.JSlobId;
@@ -248,7 +247,7 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
         final Cache cache = optCache();
         if (null != cache) {
             for (final String serviceId : DBJSlobStorageActivcator.SERVICE_IDS) {
-                cache.invalidateGroup(new StringAllocator(serviceId).append('@').append(userId).append('@').append(contextId).toString());
+                cache.invalidateGroup(new StringBuilder(serviceId).append('@').append(userId).append('@').append(contextId).toString());
             }
         }
     }
@@ -294,7 +293,7 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
     }
 
     private String groupName(final JSlobId id) {
-        return new StringAllocator(id.getServiceId()).append('@').append(id.getUser()).append('@').append(id.getContext()).toString();
+        return new StringBuilder(id.getServiceId()).append('@').append(id.getUser()).append('@').append(id.getContext()).toString();
     }
 
     @Override

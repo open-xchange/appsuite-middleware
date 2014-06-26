@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -86,32 +86,11 @@ public class RealtimeExceptionMessages implements LocalizableStrings {
     public static final String STANZA_SUBSCRIPTION_REQUIRED_MSG = "";
     public static final String STANZA_UNDEFINED_CONDITION_MSG = "";
     public static final String STANZA_UNEXPECTED_REQUEST_MSG = "";
-    
-    // Generic (start with code 1000)
-    /** No appropriate channel found for recipient %1$s with payload namespace %2$s */
-    public static final String NO_APPROPRIATE_CHANNEL = "No appropriate channel found for recipient %1$s with payload namespace %2$s";
 
-    /** The following needed service is missing: \"%1$s\" */
-    public static final String NEEDED_SERVICE_MISSING_MSG = "The following needed service is missing: \"%1$s\"";
-
-    // Unexpected error: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "Unexpected error: %1$s";
-
-    /** Invalid ID: %1$s */
-    public static final String INVALID_ID = "Invalid ID: %1$s";
-
-    /** Resource not available. */
-    public static final String RESOURCE_NOT_AVAILABLE_MSG = "Resource not available.";
-    
     /** Your session is invalid.*/
     public static final String SESSION_INVALID_MSG = "Your session is invalid.";
-    
-    /** The sent sequence is invalid.*/
-    public static final String SEQUENCE_INVALID_MSG = "The sent sequence is invalid.";
-    
-    /** The server has no state associated with this client. Please enrol first. */
-    public static final String STATE_MISSING_MSG = "The server has no state associated with this client. Please enrol first.";
-    
-    
+
+    /** You are no member of the GroupDispatcher: %1$s. Please join first. */
+    public static final String NOT_A_MEMBER_MSG = "You are no member of the GroupDispatcher: %1$s. Please join first.";
 
 }

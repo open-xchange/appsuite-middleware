@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -80,17 +80,6 @@ public class NewTest extends AbstractContactTest {
         contactEntry.setObjectID(contactId);
 
         createContactWithDistributionList("testNewWithDistributionList", contactEntry);
-    }
-
-    public void testNewWithLinks() throws Exception {
-        final Contact link1 = createContactObject("link1");
-        final Contact link2 = createContactObject("link2");
-        final int linkId1 = insertContact(link1);
-        link1.setObjectID(linkId1);
-        final int linkId2 = insertContact(link2);
-        link2.setObjectID(linkId2);
-
-        createContactWithLinks("testNewWithLinks", link1, link2);
     }
 
     public void testNewContactWithAttachment() throws Exception {

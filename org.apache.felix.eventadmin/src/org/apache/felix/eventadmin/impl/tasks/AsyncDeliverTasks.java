@@ -21,7 +21,6 @@ package org.apache.felix.eventadmin.impl.tasks;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.felix.eventadmin.impl.handler.EventHandlerProxy;
@@ -130,26 +129,27 @@ public class AsyncDeliverTasks
 
     private final class TaskExecuter implements Runnable
     {
-        private final List<EventTask> m_tasks = new LinkedList<EventTask>();
+        private final LinkedList<EventTask> m_tasks = new LinkedList<EventTask>();
 
         private final Object m_key;
 
         public TaskExecuter(final Collection<EventHandlerProxy> tasks, final Event event, final Object key)
         {
             m_key = key;
-            m_tasks.add(new EventTask(tasks, event));
+            m_tasks.addLast(new EventTask(tasks, event));
         }
 
         @Override
         public void run()
         {
+            final Thread currentThread = Thread.currentThread();
             boolean running;
             do
             {
                 EventTask eventTask = null;
                 synchronized ( m_tasks )
                 {
-                    eventTask = m_tasks.remove(0);
+                    eventTask = m_tasks.removeFirst();
                 }
                 m_deliver_task.execute(eventTask.tasks, eventTask.event, true);
                 if (deliveredEvents.incrementAndGet() < 0L) {
@@ -163,14 +163,14 @@ public class AsyncDeliverTasks
                         m_running_threads.remove(m_key);
                     }
                 }
-            } while ( running );
+            } while ( running && !currentThread.isInterrupted() );
         }
 
         public void add(final Collection<EventHandlerProxy> tasks, final Event event)
         {
             synchronized ( m_tasks )
             {
-                m_tasks.add(new EventTask(tasks, event));
+                m_tasks.addLast(new EventTask(tasks, event));
             }
         }
     }
@@ -190,15 +190,13 @@ public class AsyncDeliverTasks
     public final class Measurement {
 
         private final long timestamp;
+        private final long measuredPostedEvents;
+        private final long measuredDeliveredEvents;
 
-        private final long postedEvents;
-
-        private final long deliveredEvents;
-
-        public Measurement(long postedEvents, long deliveredEvents) {
+        Measurement(long postedEvents, long deliveredEvents) {
             super();
-            this.postedEvents = postedEvents;
-            this.deliveredEvents = deliveredEvents;
+            this.measuredPostedEvents = postedEvents;
+            this.measuredDeliveredEvents = deliveredEvents;
             this.timestamp = System.currentTimeMillis();
         }
 
@@ -213,14 +211,14 @@ public class AsyncDeliverTasks
          * Gets the total number of events that have been enqueued via {@link EventAdmin#postEvent(Event)}.
          */
         public long getPostedEvents() {
-            return postedEvents;
+            return measuredPostedEvents;
         }
 
         /**
          * Gets the total number of events that have already been delivered.
          */
         public long getDeliveredEvents() {
-            return deliveredEvents;
+            return measuredDeliveredEvents;
         }
     }
 

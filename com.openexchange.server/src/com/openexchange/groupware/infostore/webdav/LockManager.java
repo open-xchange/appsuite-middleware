@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,23 +51,22 @@ package com.openexchange.groupware.infostore.webdav;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.session.Session;
 import com.openexchange.tx.TransactionAware;
 
 public interface LockManager extends TransactionAware{
+
 	public static enum Scope {EXCLUSIVE, SHARED}
 	public static enum Type {WRITE}
 
 	public static final int INFINITE = -1;
 
-	List<Lock> findLocks(int id, Context context, User userObject) throws OXException;
+	List<Lock> findLocks(int id, Session session) throws OXException;
 
-	void unlock(int lockId, Context ctx, User user) throws OXException;
+	void unlock(int lockId, Session session) throws OXException;
 
-	void removeAll(int id, Context context, User userObject) throws OXException;
+	void removeAll(int id, Session session) throws OXException;
 
-	void insertLock(int entity, Lock lock, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+	void insertLock(int entity, Lock lock, Session session) throws OXException;
 
 }

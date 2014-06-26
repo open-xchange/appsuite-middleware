@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -55,7 +55,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
-import com.openexchange.realtime.json.JSONExceptionMessage;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.payload.PayloadElement;
@@ -64,9 +63,9 @@ import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link StanzaBuilder} - Abstract StanzaBuilder class. StanzaBuilders take incoming AtmosphereRequest and are responsible for building the
+ * {@link StanzaBuilder} - Abstract StanzaBuilder class. StanzaBuilders take incoming Request and are responsible for building the
  * appropriate Stanza Objects from them. Tis includes filling the Stanza with basic attributes from the JSONObject transported in the
- * AtmosphereRequest and transforming payload arrays found in the JSON Object into PayloadTrees without actually transforming any Payload
+ * Request and transforming payload arrays found in the JSON Object into PayloadTrees without actually transforming any Payload
  * data.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
@@ -114,7 +113,7 @@ public abstract class StanzaBuilder<T extends Stanza> {
         if (json.has("to")) {
             String defaultContext = null;
             if (session != null) {
-                defaultContext = session.getContext().getContextId() + "";
+                defaultContext = Integer.toString(session.getContext().getContextId());
             }
             stanza.setTo(new ID(json.optString("to"), defaultContext));
         }
@@ -125,19 +124,19 @@ public abstract class StanzaBuilder<T extends Stanza> {
             stanza.setId(json.optString("id"));
         }
     }
-    
+
     private void selector() {
         if (json.has("selector")) {
             stanza.setSelector(json.optString("selector"));
         }
     }
-    
+
     private void tracer() {
         if (json.has("tracer")) {
             stanza.setTracer(json.optString("tracer"));
         }
     }
-    
+
     private void sequence() {
         if (json.has("seq")) {
             stanza.setSequenceNumber(json.optLong("seq"));
@@ -204,7 +203,7 @@ public abstract class StanzaBuilder<T extends Stanza> {
      * @param payload The payload data
      * @return the PayloadTreeNode with the filled PayloadElement and possible children attached.
      * @throws RealtimeException For payloads with broken syntax
-     * @throws JSONException 
+     * @throws JSONException
      */
     private PayloadTreeNode payloadToPayloadTreeNode(JSONObject payload) throws RealtimeException {
         PayloadTreeNode node = new PayloadTreeNode();
@@ -218,7 +217,7 @@ public abstract class StanzaBuilder<T extends Stanza> {
             elementName = payload.getString("element");
         } catch (JSONException e) {
             RealtimeException realtimeException = RealtimeExceptionCodes.STANZA_BAD_REQUEST.create(String.format(
-                JSONExceptionMessage.MISSING_KEY_MSG,
+                "Obligatory key \"%1$s\" is missing from the Stanza",
                 "element"));
             throw realtimeException;
         }
@@ -226,7 +225,7 @@ public abstract class StanzaBuilder<T extends Stanza> {
             data = payload.get("data");
         } catch (JSONException e) {
             RealtimeException realtimeException = RealtimeExceptionCodes.STANZA_BAD_REQUEST.create(String.format(
-                JSONExceptionMessage.MISSING_KEY_MSG,
+                "Obligatory key \"%1$s\" is missing from the Stanza",
                 "data"));
             throw realtimeException;
         }
@@ -279,7 +278,7 @@ public abstract class StanzaBuilder<T extends Stanza> {
                 node.addChild(payloadToPayloadTreeNode(jsonObject));
             } catch (JSONException e) {
                 RealtimeExceptionCodes.STANZA_BAD_REQUEST.create(String.format(
-                    JSONExceptionMessage.ERROR_WHILE_BUILDING_MSG,
+                    "Error while building Stanza: \"%1$s\"",
                     "JSONObject expected"));
             }
         }

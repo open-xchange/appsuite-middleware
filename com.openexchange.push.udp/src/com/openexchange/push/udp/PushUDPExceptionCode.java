@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,71 +51,77 @@
 package com.openexchange.push.udp;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
-public enum PushUDPExceptionCode implements OXExceptionCode {
+public enum PushUDPExceptionCode implements DisplayableOXExceptionCode {
     /**
      * Push UDP Exception.
      */
-    PUSH_UDP_EXCEPTION(PushUDPExceptionMessage.PUSH_UDP_EXCEPTION_MSG, 1, CATEGORY_ERROR),
+    PUSH_UDP_EXCEPTION("Push UDP Exception.", 1, CATEGORY_ERROR, null),
     /**
      * Missing Push UDP configuration.
      */
-    MISSING_CONFIG(PushUDPExceptionMessage.MISSING_CONFIG_MSG, 2, CATEGORY_CONFIGURATION),
+    MISSING_CONFIG("Missing Push UDP configuration.", 2, CATEGORY_CONFIGURATION, null),
     /**
      * User ID is not a number: %1$s.
      */
-    USER_ID_NAN(PushUDPExceptionMessage.USER_ID_NAN_MSG, 3, CATEGORY_ERROR),
+    USER_ID_NAN("User ID is not a number: %1$s.", 3, CATEGORY_ERROR, null),
     /**
      * Context ID is not a number: %1$s.
      */
-    CONTEXT_ID_NAN(PushUDPExceptionMessage.CONTEXT_ID_NAN_MSG, 4, CATEGORY_ERROR),
+    CONTEXT_ID_NAN("Context ID is not a number: %1$s.", 4, CATEGORY_ERROR, null),
     /**
      * Magic bytes are not a number: %1$s.
      */
-    MAGIC_NAN(PushUDPExceptionMessage.MAGIC_NAN_MSG, 5, CATEGORY_ERROR),
+    MAGIC_NAN("Magic bytes are not a number: %1$s.", 5, CATEGORY_ERROR, null),
     /**
      * Invalid Magic bytes: %1$s.
      */
-    INVALID_MAGIC(PushUDPExceptionMessage.INVALID_MAGIC_MSG, 6, CATEGORY_ERROR),
+    INVALID_MAGIC("Invalid Magic bytes: %1$s.", 6, CATEGORY_ERROR, null),
     /**
      * Folder ID is not a number: %1$s.
      */
-    FOLDER_ID_NAN(PushUDPExceptionMessage.FOLDER_ID_NAN_MSG, 7, CATEGORY_ERROR),
+    FOLDER_ID_NAN("Folder ID is not a number: %1$s.", 7, CATEGORY_ERROR, null),
     /**
      * Module is not a number: %1$s.
      */
-    MODULE_NAN(PushUDPExceptionMessage.MODULE_NAN_MSG, 8, CATEGORY_ERROR),
+    MODULE_NAN("Module is not a number: %1$s.", 8, CATEGORY_ERROR, null),
     /**
      * Port is not a number: %1$s.
      */
-    PORT_NAN(PushUDPExceptionMessage.PORT_NAN_MSG, 9, CATEGORY_ERROR),
+    PORT_NAN("Port is not a number: %1$s.", 9, CATEGORY_ERROR, null),
     /**
      * Request type is not a number: %1$s.
      */
-    TYPE_NAN(PushUDPExceptionMessage.TYPE_NAN_MSG, 10, CATEGORY_ERROR),
+    TYPE_NAN("Request type is not a number: %1$s.", 10, CATEGORY_ERROR, null),
     /**
      * Length is not a number: %1$s.
      */
-    LENGTH_NAN(PushUDPExceptionMessage.LENGTH_NAN_MSG, 11, CATEGORY_ERROR),
+    LENGTH_NAN("Length is not a number: %1$s.", 11, CATEGORY_ERROR, null),
     /**
      * Invalid user IDs: %1$s.
      */
-    INVALID_USER_IDS(PushUDPExceptionMessage.INVALID_USER_IDS_MSG, 12, CATEGORY_ERROR),
+    INVALID_USER_IDS("Invalid user IDs: %1$s.", 12, CATEGORY_ERROR, null),
     /**
      * Unknown request type: %1$s.
      */
-    INVALID_TYPE(PushUDPExceptionMessage.INVALID_TYPE_MSG, 13, CATEGORY_ERROR),
+    INVALID_TYPE("Unknown request type: %1$s.", 13, CATEGORY_ERROR, null),
     /**
      * Missing payload in datagram package.
      */
-    MISSING_PAYLOAD(PushUDPExceptionMessage.MISSING_PAYLOAD_MSG, 14, CATEGORY_ERROR),
+    MISSING_PAYLOAD("Missing payload in datagram package.", 14, CATEGORY_ERROR, null),
     /**
      * No UDP channel is configured.
      */
-    NO_CHANNEL(PushUDPExceptionMessage.NO_CHANNEL_MSG, 15, CATEGORY_ERROR);
+    NO_CHANNEL("No UDP channel is configured.", 15, CATEGORY_ERROR, null),
+    /**
+     * Unable to resolve the specified hostname '%1$s' to an IP address.
+     */
+    UNRESOLVABLE_HOSTNAME("Unable to resolve the specified hostname '%1$s' to an IP address.", 16, CATEGORY_ERROR, null);
+    ;
 
     /**
      * Message of the exception.
@@ -131,6 +137,8 @@ public enum PushUDPExceptionCode implements OXExceptionCode {
      * Detail number of the exception.
      */
     private final int detailNumber;
+    
+    private String displayMessage;
 
     /**
      * Default constructor.
@@ -139,10 +147,11 @@ public enum PushUDPExceptionCode implements OXExceptionCode {
      * @param category category.
      * @param detailNumber detail number.
      */
-    private PushUDPExceptionCode(final String message, final int detailNumber, final Category category) {
+    private PushUDPExceptionCode(final String message, final int detailNumber, final Category category, String displayMessage) {
         this.message = message;
         this.category = category;
         this.detailNumber = detailNumber;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -163,6 +172,11 @@ public enum PushUDPExceptionCode implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override

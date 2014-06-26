@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.mockito.MockitoAnnotations;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccountDescription;
+import com.openexchange.mailaccount.json.fields.MailAccountFields;
 
 /**
  * {@link MailAccountParserTest}
@@ -43,6 +44,7 @@ public class MailAccountParserTest {
         this.mailAccountDescription.setId(-1);
         this.mailAccountDescription.setLogin(imapLogin);
         this.mailAccountDescription.setPassword(imapPassword);
+        this.mailAccountDescription.addTransportProperty(MailAccountFields.TRANSPORT_AUTH, Boolean.toString(true));
     }
 
     @Test
@@ -53,7 +55,7 @@ public class MailAccountParserTest {
 
         Assert.assertEquals(transportLogin, mailAccountDescription.getTransportLogin());
         Assert.assertEquals(null, mailAccountDescription.getTransportPassword());
-        Assert.assertEquals(2, attributes.size());
+        Assert.assertEquals(1, attributes.size());
     }
 
     @Test
@@ -64,7 +66,7 @@ public class MailAccountParserTest {
 
         Assert.assertEquals(null, mailAccountDescription.getTransportLogin());
         Assert.assertEquals(transportPassword, mailAccountDescription.getTransportPassword());
-        Assert.assertEquals(2, attributes.size());
+        Assert.assertEquals(1, attributes.size());
     }
 
     @Test
@@ -87,6 +89,17 @@ public class MailAccountParserTest {
         Assert.assertEquals(null, mailAccountDescription.getTransportLogin());
         Assert.assertEquals(null, mailAccountDescription.getTransportPassword());
         Assert.assertEquals(2, attributes.size());
+    }
+
+    @Test
+    public void testParseTransportCredentials_nullvalues() throws Exception {
+        json = new JSONObject("{\"transport_login\":null,\"transport_password\":null,\"unified_inbox_enabled\":false,\"transport_credentials\":false,\"login\":\"ewaldbartkowiak@gmail.com\",\"mail_server\":\"imap.googlemail.com\",\"transport_server\":\"smtp.googlemail.com\",\"mail_port\":993,\"transport_port\":465,\"mail_protocol\":\"imap\",\"transport_protocol\":\"smtp\",\"mail_secure\":true,\"transport_secure\":true,\"config_source\":\"ISPDB\",\"primary_address\":\"ewaldbartkowiak@gmail.com\",\"password\":\"myPassword\",\"personal\":\"ewaldbartkowiak@gmail.com\",\"name\":\"ewaldbartkowiak@gmail.com\"}");
+
+        MailAccountParser.getInstance().parseTransportCredentials(mailAccountDescription, json, attributes);
+
+        Assert.assertEquals(null, mailAccountDescription.getTransportLogin());
+        Assert.assertEquals(null, mailAccountDescription.getTransportPassword());
+        Assert.assertEquals(0, attributes.size());
     }
 
     @Test
@@ -117,9 +130,9 @@ public class MailAccountParserTest {
 
         MailAccountParser.getInstance().parseTransportCredentials(mailAccountDescription, json, attributes);
 
-        Assert.assertEquals(imapLogin, mailAccountDescription.getTransportLogin());
-        Assert.assertEquals(imapPassword, mailAccountDescription.getTransportPassword());
-        Assert.assertEquals(2, attributes.size());
+        Assert.assertEquals(null, mailAccountDescription.getTransportLogin());
+        Assert.assertEquals(null, mailAccountDescription.getTransportPassword());
+        Assert.assertEquals(0, attributes.size());
     }
 
     @Test
@@ -130,7 +143,7 @@ public class MailAccountParserTest {
 
         Assert.assertEquals(null, mailAccountDescription.getTransportLogin());
         Assert.assertEquals(transportPassword, mailAccountDescription.getTransportPassword());
-        Assert.assertEquals(2, attributes.size());
+        Assert.assertEquals(1, attributes.size());
     }
 
     @Test
@@ -141,6 +154,6 @@ public class MailAccountParserTest {
 
         Assert.assertEquals(transportLogin, mailAccountDescription.getTransportLogin());
         Assert.assertEquals(null, mailAccountDescription.getTransportPassword());
-        Assert.assertEquals(2, attributes.size());
+        Assert.assertEquals(1, attributes.size());
     }
 }

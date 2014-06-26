@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -62,7 +62,6 @@ import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
-import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.user.json.field.DistributionListField;
 import com.openexchange.user.json.field.UserField;
@@ -123,9 +122,6 @@ public final class UserParser {
             }
             if (userJSONObject.has(UserField.DISTRIBUTIONLIST.getName())) {
                 parseDistributionList(contact, userJSONObject);
-            }
-            if (userJSONObject.has(UserField.LINKS.getName())) {
-                parseLinks(contact, userJSONObject);
             }
 
             if (userJSONObject.has(UserField.CATEGORIES.getName())) {
@@ -201,21 +197,6 @@ public final class UserParser {
             distributionlist[a].setEmailfield(parseInt(entry, DistributionListField.MAIL_FIELD.getName()));
         }
         oxobject.setDistributionList(distributionlist);
-    }
-
-    private static void parseLinks(final Contact oxobject, final JSONObject jsonobject) throws JSONException {
-        final JSONArray jlinks = jsonobject.getJSONArray(UserField.LINKS.getName());
-        final LinkEntryObject[] links = new LinkEntryObject[jlinks.length()];
-        for (int a = 0; a < links.length; a++) {
-            links[a] = new LinkEntryObject();
-            final JSONObject entry = jlinks.getJSONObject(a);
-            if (entry.has(DataFields.ID)) {
-                links[a].setLinkID(parseInt(entry, UserField.ID.getName()));
-            }
-
-            links[a].setLinkDisplayname(parseString(entry, UserField.DISPLAY_NAME.getName()));
-        }
-        oxobject.setLinks(links);
     }
 
     /*-
@@ -1332,7 +1313,7 @@ public final class UserParser {
         try {
             return Integer.parseInt(tmp);
         } catch (final NumberFormatException exc) {
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(32).append("Attribute \"");
+            final StringBuilder sb = new StringBuilder(32).append("Attribute \"");
             sb.append(name).append("\" is not a number: ").append(tmp);
             throw new JSONException(sb.toString());
         }
@@ -1358,7 +1339,7 @@ public final class UserParser {
         try {
             return new Date(Long.parseLong(tmp));
         } catch (final NumberFormatException e) {
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(64).append("Attribute \"");
+            final StringBuilder sb = new StringBuilder(64).append("Attribute \"");
             sb.append(name).append("\" does not denote date's milliseconds since January 1, 1970, 00:00:00 GMT: ").append(tmp);
             throw new JSONException(sb.toString());
         }

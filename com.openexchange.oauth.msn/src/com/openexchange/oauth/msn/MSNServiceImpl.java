@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -247,7 +247,7 @@ public class MSNServiceImpl implements MSNService {
     		JSONObject metadata = new JSONObject(account.getSecret());
     		callback = metadata.getString("callback");
     	} catch (JSONException x) {
-    		throw OAuthExceptionCodes.INVALID_ACCOUNT.create();
+    		throw OAuthExceptionCodes.INVALID_ACCOUNT.create(account.getDisplayName(), account.getId());
     	}
     	String accessToken = "";
 

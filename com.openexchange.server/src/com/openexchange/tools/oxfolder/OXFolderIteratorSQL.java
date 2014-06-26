@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -85,7 +85,6 @@ import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -130,6 +129,8 @@ public final class OXFolderIteratorSQL {
     private static final int PRIVATE = FolderObject.PRIVATE;
 
     private static final int PUBLIC = FolderObject.PUBLIC;
+
+    private static final int TRASH = FolderObject.TRASH;
 
     private static final int SHARED = FolderObject.SHARED;
 
@@ -1323,9 +1324,7 @@ public final class OXFolderIteratorSQL {
      * @throws OXException If module's visible public folders that are not visible in hierarchic tree-view cannot be determined
      */
     public static boolean hasVisibleFoldersNotSeenInTreeView(final int module, final int userId, final int[] groups, final UserPermissionBits permissionBits, final Context ctx, final Connection readCon) throws OXException {
-        final StringBuilder condBuilder = new StringBuilder(32).append("AND (ot.type = ").append(PUBLIC);
-        condBuilder.append(") AND (ot.module = ").append(module);
-        condBuilder.append(')');
+        final StringBuilder condBuilder = new StringBuilder(32).append("AND (ot.type IN (").append(PUBLIC).append(',').append(TRASH).append("))");
         Connection rc = readCon;
         boolean closeReadCon = false;
         PreparedStatement stmt = null;
@@ -1339,7 +1338,7 @@ public final class OXFolderIteratorSQL {
             /*
              * Statement to select all user-visible public folders
              */
-            stmt = rc.prepareStatement(getSQLUserVisibleFolders("ot.fuid, ot.parent", // fuid, parent, ...
+            stmt = rc.prepareStatement(getSQLUserVisibleFolders("ot.fuid, ot.parent, ot.module", // fuid, parent, ...
                 permissionIds(userId, groups, ctx),
                 StringCollection.getSqlInString(permissionBits.getAccessibleModules()),
                 condBuilder.toString(),
@@ -1359,10 +1358,12 @@ public final class OXFolderIteratorSQL {
                 return false;
             }
             final TIntIntMap fuid2parent = new TIntIntHashMap(128);
+            final TIntIntMap fuid2module = new TIntIntHashMap(128);
             final TIntSet fuids = new TIntHashSet(128);
             do {
                 final int fuid = rs.getInt(1);
                 fuid2parent.put(fuid, rs.getInt(2));
+                fuid2module.put(fuid, rs.getInt(3));
                 fuids.add(fuid);
             } while (rs.next());
             closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
@@ -1371,8 +1372,9 @@ public final class OXFolderIteratorSQL {
              */
             for (final TIntIntIterator iterator = fuid2parent.iterator(); iterator.hasNext();) {
                 iterator.advance();
+                final int fuid = iterator.key();
                 final int parent = iterator.value();
-                if (parent >= MIN_FOLDER_ID && !fuids.contains(parent)) {
+                if (parent >= MIN_FOLDER_ID && !fuids.contains(parent) && (module == fuid2module.get(fuid))) {
                     return true;
                 }
             }
@@ -1998,7 +2000,7 @@ public final class OXFolderIteratorSQL {
                 FolderObjectIterator.getFieldsForSQL(STR_OT),
                 permissionIds(userId, memberInGroups, ctx),
                 StringCollection.getSqlInString(accessibleModules),
-                new StringAllocator("AND (ot.module = ").append(module).append(')').toString(),
+                new StringBuilder("AND (ot.module = ").append(module).append(')').toString(),
                 getSubfolderOrderBy(STR_OT));
         final Connection readCon;
         final boolean closeReadCon = (readConArg == null);
@@ -2031,6 +2033,7 @@ public final class OXFolderIteratorSQL {
             closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(t, Integer.valueOf(contextId));
         }
+
         try {
             return new FolderObjectIterator(rs, stmt, false, ctx, readCon, closeReadCon);
         } catch (final OXException e) {

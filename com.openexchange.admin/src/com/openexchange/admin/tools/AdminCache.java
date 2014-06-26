@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -68,7 +68,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
@@ -222,26 +222,32 @@ public class AdminCache {
         return named_access_combinations;
     }
 
+    /**
+     * @deprecated use {@link #getNamedAccessCombination(String, boolean)}
+     */
+    @Deprecated
     public synchronized UserModuleAccess getNamedAccessCombination(String name) {
-        return named_access_combinations.get(name);
+        return getNamedAccessCombination(name, true);
+    }
+
+    public synchronized UserModuleAccess getNamedAccessCombination(String name, boolean contextAdmin) {
+        UserModuleAccess retval = named_access_combinations.get(name);
+        if (!contextAdmin) {
+            // publicFolderEditable can only be applied to the context administrator.
+            retval.setPublicFolderEditable(false);
+        }
+        return retval;
     }
 
     public synchronized boolean existsNamedAccessCombination(String name) {
         return named_access_combinations.containsKey(name);
     }
 
-    public synchronized String getNameForAccessCombination(UserModuleAccess access_combination) {
-        if(named_access_combinations.containsValue(access_combination)){
-            Iterator<String> names = named_access_combinations.keySet().iterator();
-            String retval = null;
-            while(names.hasNext()){
-                String combi_name = names.next();
-                if(named_access_combinations.get(combi_name).equals(access_combination)){
-                    retval =  combi_name;
-                    break;
-                }
+    public synchronized String getNameForAccessCombination(final UserModuleAccess access_combination) {
+        for (final Entry<String, UserModuleAccess> entry : named_access_combinations.entrySet()) {
+            if (entry.getValue().equals(access_combination)) {
+                return entry.getKey();
             }
-            return retval;
         }
         return null;
     }
@@ -279,9 +285,11 @@ public class AdminCache {
                 UserModuleAccess us = new UserModuleAccess();
                 us.disableAll();
                 us.setGlobalAddressBookDisabled(false); // by default this is enabled.
-                String[] modules = predefined_modules.split(",");
+                String[] modules = predefined_modules.split(" *, *");
                 for (String module : modules) {
-                    if (!module_method_mapping.containsKey(module)) {
+                    module = module.trim();
+                    Method meth = module_method_mapping.get(module);
+                    if (null == meth) {
                         log.error("Predefined combination \"{}\" contains invalid module \"{}\" ", predefined_combination_name, module);
                         // AS DEFINED IN THE CONTEXT WIDE ACCES SPECIFICAION ,
                         // THE SYSTEM WILL STOP IF IT FINDS AN INVALID
@@ -290,7 +298,6 @@ public class AdminCache {
                         // TODO: Lets stop the admin daemon
                         throw new OXGenericException("Invalid access combinations found in config file!");
                     }
-                    Method meth = module_method_mapping.get(module);
                     try {
                         meth.invoke(us, true);
                     } catch (IllegalArgumentException e) {
@@ -709,5 +716,9 @@ public class AdminCache {
             isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    public void reloadMasterCredentials(ConfigurationService configService) throws OXGenericException {
+        readMasterCredentials(configService);
     }
 }

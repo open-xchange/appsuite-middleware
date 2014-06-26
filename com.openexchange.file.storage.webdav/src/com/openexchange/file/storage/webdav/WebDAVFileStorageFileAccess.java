@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -101,6 +101,8 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
 import com.openexchange.file.storage.FileTimedResult;
+import com.openexchange.file.storage.search.FieldCollectorVisitor;
+import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.file.storage.webdav.workarounds.LiberalUnLockMethod;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
@@ -190,6 +192,16 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         rootUri = checkFolderId(((String) account.getConfiguration().get(WebDAVConstants.WEBDAV_URL)).trim());
         this.accountAccess = accountAccess;
         lockTokenMap = new ConcurrentHashMap<LockTokenKey, String>();
+    }
+
+
+    /**
+     * Gets the root URI.
+     *
+     * @return The root URI
+     */
+    public String getRootUri() {
+        return rootUri;
     }
 
     /**
@@ -777,6 +789,11 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
 
     @Override
     public List<IDTuple> removeDocument(final List<IDTuple> ids, final long sequenceNumber) throws OXException {
+        return removeDocument(ids, sequenceNumber, false);
+    }
+
+    @Override
+    public List<IDTuple> removeDocument(final List<IDTuple> ids, final long sequenceNumber, boolean hardDelete) throws OXException {
         try {
             final List<IDTuple> ret = new ArrayList<IDTuple>(ids.size());
             for (final IDTuple idTuple : ids) {
@@ -968,7 +985,15 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         return new FileTimedResult(getFileList(folderId, fields));
     }
 
-    private List<File> getFileList(final String folderId, final List<Field> fields) throws OXException {
+    /**
+     * Gets the file listing for specified folder
+     *
+     * @param folderId The folder identifier
+     * @param fields The fields to fill
+     * @return The file listing
+     * @throws OXException If listing fails
+     */
+    public List<File> getFileList(final String folderId, final List<Field> fields) throws OXException {
         try {
             /*
              * Check
@@ -1098,6 +1123,124 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
     }
 
     @Override
+    public SearchIterator<File> search(List<String> folderIds, final SearchTerm<?> searchTerm, final List<Field> fields, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
+        final List<File> results;
+        {
+            final FieldCollectorVisitor fieldCollector = new FieldCollectorVisitor(Field.ID, Field.FOLDER_ID);
+            searchTerm.visit(fieldCollector);
+
+            final List<Field> fieldz = new ArrayList<Field>(fields);
+            fieldz.addAll(fieldCollector.getFields());
+
+            final WebDAVSearchVisitor visitor = new WebDAVSearchVisitor(fieldz, this);
+            searchTerm.visit(visitor);
+            results = visitor.getResults();
+        }
+        return getSortedRangeFrom(results, sort, order, start, end);
+    }
+
+    /**
+     * Recursively searches using given term.
+     *
+     * @param term The term
+     * @param folderId The folder identifier to start with
+     * @param fields The field to fill
+     * @param results The result
+     * @throws OXException If search fails
+     */
+    public void recursiveSearchFile(final SearchTerm<?> term, final String folderId, final List<Field> fields, final List<File> results) throws OXException {
+        try {
+            /*
+             * Check
+             */
+            final URI uri = new URI(folderId, true);
+            final DavMethod propFindMethod = new PropFindMethod(folderId, DavConstants.PROPFIND_ALL_PROP, DavConstants.DEPTH_1);
+            try {
+                initMethod(folderId, null, propFindMethod);
+                client.executeMethod(propFindMethod);
+                /*
+                 * Check if request was successfully executed
+                 */
+                propFindMethod.checkSuccess();
+                /*
+                 * Get MultiStatus response
+                 */
+                final MultiStatus multiStatus = propFindMethod.getResponseBodyAsMultiStatus();
+                /*
+                 * Find MultiStatus for specified folder URI
+                 */
+                final URI tmp = new URI(folderId, true);
+                final MultiStatusResponse[] multiStatusResponses = multiStatus.getResponses();
+                for (final MultiStatusResponse multiStatusResponse : multiStatusResponses) {
+                    /*
+                     * Get the DAV property set for 200 (OK) status
+                     */
+                    final DavPropertySet propertySet = multiStatusResponse.getProperties(HttpServletResponse.SC_OK);
+                    final String href = getHref(multiStatusResponse.getHref(), propertySet);
+                    tmp.setEscapedPath(href);
+                    if (uri.equals(tmp)) {
+                        if (null == propertySet || propertySet.isEmpty()) {
+                            throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(
+                                folderId,
+                                account.getId(),
+                                WebDAVConstants.ID,
+                                Integer.valueOf(session.getUserId()),
+                                Integer.valueOf(session.getContextId()));
+                        }
+                        /*
+                         * Check for collection
+                         */
+                        if (!href.endsWith(SLASH)) {
+                            /*
+                             * Not a collection
+                             */
+                            throw WebDAVFileStorageExceptionCodes.NOT_A_FOLDER.create(folderId);
+                        }
+                    } else {
+                        /*
+                         * Check for collection
+                         */
+                        if (href.endsWith(SLASH)) {
+                            /*
+                             * A directory
+                             */
+                            recursiveSearchFile(term, tmp.toString(), fields, results);
+                        } else {
+                            /*
+                             * File
+                             */
+                            final WebDAVFileStorageFile davFile = new WebDAVFileStorageFile(folderId, extractFileName(href), session.getUserId(), rootUri).parseDavPropertySet(propertySet, fields);
+                            if (term.matches(davFile)) {
+                                results.add(davFile);
+                            }
+                        }
+                    }
+                }
+            } finally {
+                closeHttpMethod(propFindMethod);
+            }
+        } catch (final OXException e) {
+            throw e;
+        } catch (final HttpException e) {
+            throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
+        } catch (final IOException e) {
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (final DavException e) {
+            if (HttpServletResponse.SC_NOT_FOUND ==  e.getErrorCode()) {
+                throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(
+                    folderId,
+                    account.getId(),
+                    WebDAVConstants.ID,
+                    Integer.valueOf(session.getUserId()),
+                    Integer.valueOf(session.getContextId()));
+            }
+            throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
+        } catch (final Exception e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
     public SearchIterator<File> search(final String pattern, final List<Field> fields, final String folderId, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
         final List<File> results;
         if (ALL_FOLDERS == folderId) {
@@ -1121,6 +1264,11 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                 }
             }
         }
+        return getSortedRangeFrom(results, sort, order, start, end);
+    }
+
+
+    private SearchIterator<File> getSortedRangeFrom(final List<File> results, final Field sort, final SortDirection order, final int start, final int end) {
         /*
          * Empty?
          */

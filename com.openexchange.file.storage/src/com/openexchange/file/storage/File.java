@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,6 +50,7 @@
 package com.openexchange.file.storage;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
@@ -356,6 +357,31 @@ public interface File {
             }
         }
 
+        public static List<Field> get(final Collection<String> keys) {
+            if (keys == null) {
+                return Collections.emptyList();
+            }
+            final List<Field> retval = new ArrayList<Field>(keys.size());
+            for (final String key : keys) {
+                retval.add(get(key));
+            }
+            return retval;
+        }
+
+        public static Field get(final int number) {
+            return byNumber.get(number);
+        }
+
+        public static List<Field> get(final int[] numbers) {
+            final List<Field> fields = new ArrayList<Field>(numbers.length);
+            for (int number : numbers) {
+                Field field = byNumber.get(number);
+                if (field != null) {
+                    fields.add(field);
+                }
+            }
+            return fields;
+        }
 
     }
 }

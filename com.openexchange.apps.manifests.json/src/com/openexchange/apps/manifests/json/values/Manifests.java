@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -55,6 +55,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.apps.manifests.ComputedServerConfigValueService;
 import com.openexchange.apps.manifests.json.AllAction;
+import com.openexchange.apps.manifests.json.osgi.ServerConfigServicesLookup;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -68,19 +69,21 @@ public class Manifests implements ComputedServerConfigValueService {
 
     private final JSONArray manifests;
     private final ServiceLookup services;
+    private ServerConfigServicesLookup registry;
 
 
-    public Manifests(ServiceLookup services, JSONArray manifests) {
+    public Manifests(ServiceLookup services, JSONArray manifests, ServerConfigServicesLookup registry) {
         super();
         this.services = services;
         this.manifests = manifests;
+        this.registry = registry;
     }
 
     @Override
     public void addValue(JSONObject serverConfig, AJAXRequestData request,
         ServerSession session) throws OXException, JSONException {
 
-        serverConfig.put("manifests", AllAction.getManifests(session, manifests, services));
+        serverConfig.put("manifests", AllAction.getManifests(session, manifests, services, registry));
 
     }
 

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -63,7 +63,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.json.JSONException;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.exception.RealtimeException;
@@ -72,6 +74,7 @@ import com.openexchange.realtime.json.protocol.RTClientState;
 import com.openexchange.realtime.json.protocol.RTProtocol;
 import com.openexchange.realtime.json.protocol.StanzaTransmitter;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.IDManager;
 import com.openexchange.realtime.packet.Message;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.StanzaSequenceGate;
@@ -87,6 +90,7 @@ public class RTProtocolTest {
     long nextSequence = -1;
     
     RTProtocol protocol = new RTProtocolImpl() {
+        @Override
         public void emptyBuffer(RTClientState state, StanzaTransmitter transmitter) {
             bufferEmptied = true;
         };
@@ -95,6 +99,16 @@ public class RTProtocolTest {
     RTClientState state;
     StanzaTransmitter transmitter;
     StanzaSequenceGate gate = null;
+    
+    @BeforeClass
+    public static void setUp() {
+        ID.ID_MANAGER_REF.set(new IDManager());
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        ID.ID_MANAGER_REF.set(null);
+    }
     
     @Before
     public void setup() {
@@ -312,9 +326,10 @@ public class RTProtocolTest {
     
     /**
      * Resetting sequence numbers
+     * @throws RealtimeException 
      */
     @Test
-    public void clientsCanResetTheirSequenceNumbering() {
+    public void clientsCanResetTheirSequenceNumbering() throws RealtimeException {
         protocol.nextSequence(new ID("test://user1@1") , 12, gate, state);
         assertEquals(12, nextSequence);
     }

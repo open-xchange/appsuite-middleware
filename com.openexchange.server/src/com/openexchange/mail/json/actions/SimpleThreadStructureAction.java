@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -274,11 +274,11 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                     fromToIndices = new int[] { start, end };
                 }
             }
-            final long max = req.getMax();
+            final long lookAhead = req.getMax();
             final boolean includeSent = req.optBool("includeSent", false);
-            final boolean unseen = req.optBool("unseen", false);
+            final boolean ignoreSeen = req.optBool("unseen", false);
             final boolean ignoreDeleted = !req.optBool("deleted", true);
-            if (unseen || ignoreDeleted) {
+            if (ignoreSeen || ignoreDeleted) {
                 // Ensure flags is contained in provided columns
                 final int fieldFlags = MailListField.FLAGS.getField();
                 boolean found = false;
@@ -310,7 +310,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
              */
             final long start = System.currentTimeMillis();
             final int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
-            if (!unseen && !ignoreDeleted) {
+            if (!ignoreSeen && !ignoreDeleted) {
                 final List<List<MailMessage>> mails =
                     mailInterface.getAllSimpleThreadStructuredMessages(
                         folderId,
@@ -319,11 +319,11 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                         sortCol,
                         orderDir,
                         columns,
-                        fromToIndices, max);
+                        fromToIndices, lookAhead);
                 return new AJAXRequestResult(ThreadedStructure.valueOf(mails), "mail");
             }
             List<List<MailMessage>> mails =
-                mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, false, sortCol, orderDir, columns, null, max);
+                mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, false, sortCol, orderDir, columns, null, lookAhead);
             boolean cached = false;
             int more = -1;
             if (mails instanceof PropertizedList) {
@@ -340,15 +340,15 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                 foundUnseen = false;
                 for (final Iterator<MailMessage> tmp = list.iterator(); tmp.hasNext();) {
                     final MailMessage message = tmp.next();
-                    if (null == message || (ignoreDeleted && message.isDeleted())) {
-                        // Ignore mail marked for deletion
+                    if (discardMail(message, false, ignoreDeleted)) {
+                        // Ignore mail
                         tmp.remove();
                     } else {
                         // Check if unseen
                         foundUnseen |= !message.isSeen();
                     }
                 }
-                if (unseen && !foundUnseen) {
+                if (ignoreSeen && !foundUnseen) {
                     iterator.remove();
                 }
             }

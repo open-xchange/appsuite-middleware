@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -168,13 +168,6 @@ public interface Session {
     public static final String PARAM_COUNTER = "com.openexchange.session.counter".intern();
 
     /**
-     * The parameter for client capabilities.
-     *
-     * @type <code>java.util.List&lt;String&gt;</code>
-     */
-    public static final String PARAM_CAPABILITIES = "session.clientCapabilities".intern();
-
-    /**
      * The parameter for optional alternative identifier.
      *
      * @type <code>java.lang.String</code>
@@ -282,9 +275,14 @@ public interface Session {
     public String getUserlogin();
 
     /**
-     * Gets the full login incl. context information; e.g <code>test@foo</code>
-     *
-     * @return The full login
+     * Gets the full login information including user and context information; e.g <code>firstname.lastname@domain.tld</code>. The user
+     * entered this information into the login field on the login screen. Beware that this highly depends on the behavior of the installed
+     * {@link AuthenticationService} what information is available here and how context and user specific information is separated. You can
+     * not rely on a separating char like '@'.
+     * Beware that in single sign on (SSO) environments, this information may not be available. Kerberos uses tickets to authenticate some
+     * user and SAML uses cookies. If such a mechanism is used by the {@link AuthenticationService} no full login information will be
+     * available and this method returns <code>null</code>.
+     * @return The full login information if it is available, otherwise <code>null</code>.
      */
     public String getLogin();
 

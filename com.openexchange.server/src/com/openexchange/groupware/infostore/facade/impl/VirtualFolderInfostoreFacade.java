@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -174,6 +174,11 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
 
     @Override
     public int[] removeDocument(final int[] ids, final long date, final ServerSession session) {
+        return ids;
+    }
+
+    @Override
+    public int[] moveDocuments(ServerSession session, int ids[], long sequenceNumber, String targetFolderID, boolean adjustFilenamesAsNeeded) throws OXException {
         return ids;
     }
 

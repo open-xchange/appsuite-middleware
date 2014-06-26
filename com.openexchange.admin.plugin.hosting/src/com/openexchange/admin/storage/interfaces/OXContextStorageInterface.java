@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -192,15 +192,25 @@ public abstract class OXContextStorageInterface {
     public abstract void changeQuota(Context ctx, List<String> modules, long quota, Credentials auth) throws StorageException;
 
     /**
+     * Gets the current capabilities for denoted context.
+     *
+     * @param ctx The context
+     * @return The current capabilities
+     * @throws StorageException If retrieving capabilities fails
+     */
+    public abstract Set<String> getCapabilities(Context ctx) throws StorageException;
+
+    /**
      * Changes specified context's capabilities.
      *
      * @param ctx The context
      * @param capsToAdd The capabilities to add
      * @param capsToRemove The capabilities to remove
+     * @param capsToDrop The capabilities to drop; e.g. clean from storage
      * @param auth The credentials
      * @throws StorageException
      */
-    public abstract void changeCapabilities(Context ctx, Set<String> capsToAdd, Set<String> capsToRemove, Credentials auth) throws StorageException;
+    public abstract void changeCapabilities(Context ctx, Set<String> capsToAdd, Set<String> capsToRemove, Set<String> capsToDrop, Credentials auth) throws StorageException;
 
     /**
      * @param ctx

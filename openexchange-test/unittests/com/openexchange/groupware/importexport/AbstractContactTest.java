@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -62,8 +62,10 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import com.openexchange.calendar.CalendarSql;
+import com.openexchange.contact.storage.rdb.internal.RdbContactStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
@@ -350,6 +352,8 @@ public class AbstractContactTest {
     public static Importer imp;
     public Format defaultFormat;
 
+    protected final RdbContactStorage contactStorage;
+
     public static int createTestFolder(final int type, final ServerSession sessObj,final Context ctx, final String folderTitle) throws OXException, OXException {
         final User user = UserStorage.getInstance().getUser(sessObj.getUserId(), ctx);
         final FolderObject fo = new FolderObject();
@@ -408,6 +412,7 @@ public class AbstractContactTest {
 
     public AbstractContactTest() {
         super();
+        this.contactStorage = new RdbContactStorage();
     }
 
     protected List<ImportResult> importStuff(final String csv) throws OXException, UnsupportedEncodingException{
@@ -420,18 +425,23 @@ public class AbstractContactTest {
     }
 
     protected boolean existsEntry(final int entryNumber) throws OXException {
-        final RdbContactSQLImpl contactSql = new RdbContactSQLImpl(sessObj);
-        try {
-            final Contact co = contactSql.getObjectById(entryNumber, folderId);
-            return co != null;
-        } catch (final OXException e) {
-            return false;
-        }
+        return null != contactStorage.get(sessObj, String.valueOf(folderId), String.valueOf(entryNumber),
+            new ContactField[] { ContactField.OBJECT_ID });
     }
 
     protected Contact getEntry(final int entryNumber) throws OXException, OXException {
-        final RdbContactSQLImpl contactSql = new RdbContactSQLImpl(sessObj);
-        return contactSql.getObjectById(entryNumber, folderId);
+        return contactStorage.get(sessObj, String.valueOf(folderId), String.valueOf(entryNumber), ContactField.values());
+    }
+
+    /**
+     * Gets the number of contacts found in the supplied folder ID, assuming that the user is allowed to read all objects in the folder.
+     *
+     * @param folderID The ID of the parent folder
+     * @return The number of contacts
+     * @throws OXException
+     */
+    protected int getNumberOfContacts(int folderID) throws OXException {
+        return contactStorage.count(sessObj, String.valueOf(folderID), true);
     }
 
     protected List<String> _folders(){

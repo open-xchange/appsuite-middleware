@@ -49,7 +49,6 @@
 
 package com.openexchange.caching;
 
-import java.io.Serializable;
 
 /**
  * {@link CacheKeyService} - The service to provide cache keys.
@@ -65,24 +64,24 @@ public interface CacheKeyService {
      * @param objectId The object ID
      * @return The new instance of {@link CacheKey}
      */
-    public CacheKey newCacheKey(int contextId, int objectId);
+    CacheKey newCacheKey(int contextId, int objectId);
 
     /**
-     * Creates a new instance of {@link CacheKey} consisting of specified context ID and serializable object.
+     * Creates a new instance of {@link CacheKey} consisting of specified context ID and key object.
      *
      * @param contextId The context ID
-     * @param obj The serializable object
+     * @param obj The key object
      * @return new instance of {@link CacheKey}
      */
-    public CacheKey newCacheKey(int contextId, Serializable obj);
+    CacheKey newCacheKey(int contextId, String obj);
 
     /**
-     * Creates a new instance of {@link CacheKey} consisting of specified context ID and serializable objects.
+     * Creates a new instance of {@link CacheKey} consisting of specified context ID and key objects.
      *
      * @param contextId The context ID
-     * @param objs The serializable objects
+     * @param objs The key objects
      * @return new instance of {@link CacheKey}
      */
-    public CacheKey newCacheKey(int contextId, Serializable... objs);
+    CacheKey newCacheKey(int contextId, String... objs);
 
 }

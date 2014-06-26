@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,20 +52,21 @@ package com.openexchange.realtime.hazelcast.cleanup;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Member;
-import com.hazelcast.core.MultiTask;
 import com.openexchange.exception.OXException;
+import com.openexchange.management.ManagementAware;
+import com.openexchange.management.ManagementObject;
 import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
 import com.openexchange.realtime.cleanup.LocalRealtimeCleanup;
-import com.openexchange.realtime.hazelcast.Services;
+import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.hazelcast.directory.HazelcastResourceDirectory;
+import com.openexchange.realtime.hazelcast.management.GlobalRealtimeCleanupMBean;
+import com.openexchange.realtime.hazelcast.management.GlobalRealtimeCleanupManagement;
+import com.openexchange.realtime.hazelcast.osgi.Services;
 import com.openexchange.realtime.packet.ID;
 
 /**
@@ -73,10 +74,11 @@ import com.openexchange.realtime.packet.ID;
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class GlobalRealtimeCleanupImpl implements GlobalRealtimeCleanup {
+public class GlobalRealtimeCleanupImpl implements GlobalRealtimeCleanup, ManagementAware<GlobalRealtimeCleanupMBean> {
 
     private static final Logger LOG = LoggerFactory.getLogger(GlobalRealtimeCleanupImpl.class);
     private final HazelcastResourceDirectory hazelcastResourceDirectory;
+    private final GlobalRealtimeCleanupManagement management;
 
     /**
      * Initializes a new {@link GlobalRealtimeCleanupImpl}.
@@ -85,6 +87,7 @@ public class GlobalRealtimeCleanupImpl implements GlobalRealtimeCleanup {
     public GlobalRealtimeCleanupImpl(HazelcastResourceDirectory hazelcastResourceDirectory) {
         super();
         this.hazelcastResourceDirectory = hazelcastResourceDirectory;
+        management = new GlobalRealtimeCleanupManagement(this, hazelcastResourceDirectory);
     }
 
     @Override
@@ -99,28 +102,32 @@ public class GlobalRealtimeCleanupImpl implements GlobalRealtimeCleanup {
             LOG.error("Unable to remove {} from ResourceDirectory.", id, oxe);
         }
 
-        //Do the local cleanup via a simple service call
-        LocalRealtimeCleanup localRealtimeCleanup = Services.getService(LocalRealtimeCleanup.class);
-        localRealtimeCleanup.cleanForId(id);
+        // Do the local cleanup via a simple service call
+        LocalRealtimeCleanup localRealtimeCleanup = Services.optService(LocalRealtimeCleanup.class);
+        if (localRealtimeCleanup == null) {
+            LOG.error(
+                "Unable to start local cleanup. Shutting down?",
+                RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(LocalRealtimeCleanup.class));
+        } else {
+            localRealtimeCleanup.cleanForId(id);
+        }
 
         //Remote cleanup via distributed MultiTask to remaining members of the cluster
         HazelcastInstance hazelcastInstance;
         try {
             hazelcastInstance = HazelcastAccess.getHazelcastInstance();
             Member localMember = HazelcastAccess.getLocalMember();
-            ExecutorService executorService = hazelcastInstance.getExecutorService();
             Set<Member> clusterMembers = new HashSet<Member>(hazelcastInstance.getCluster().getMembers());
             if(!clusterMembers.remove(localMember)) {
                 LOG.warn("Couldn't remove local member from cluster members.");
             }
             if(!clusterMembers.isEmpty()) {
-                MultiTask<Void> cleanUpTask = new MultiTask<Void>(new CleanupDispatcher(id), clusterMembers);
-                executorService.execute(cleanUpTask);
+                hazelcastInstance.getExecutorService("default").submitToMembers(new CleanupDispatcher(id), clusterMembers);
             } else {
                 LOG.debug("No other cluster members besides the local member. No further clean up necessary.");
             }
         } catch (Exception e) {
-            LOG.error("Unable to cleanup for {}.", id, e);
+            LOG.error("Failed to issue remote cleanup for {}.", id, e);
         }
     }
 
@@ -128,10 +135,15 @@ public class GlobalRealtimeCleanupImpl implements GlobalRealtimeCleanup {
     public Collection<ID> removeFromResourceDirectory(ID id) throws OXException {
         return hazelcastResourceDirectory.remove(id).keySet();
     }
-    
+
     @Override
     public Collection<ID> removeFromResourceDirectory(Collection<ID> ids) throws OXException {
         return hazelcastResourceDirectory.remove(ids).keySet();
+    }
+
+    @Override
+    public ManagementObject<GlobalRealtimeCleanupMBean> getManagementObject() {
+        return management;
     }
 
 }

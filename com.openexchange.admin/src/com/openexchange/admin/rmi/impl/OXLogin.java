@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,10 +50,7 @@
 package com.openexchange.admin.rmi.impl;
 
 import java.rmi.RemoteException;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.rmi.OXLoginInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -65,6 +62,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.services.PluginInterfaces;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 
@@ -75,14 +73,14 @@ import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
  */
 public class OXLogin extends OXCommonImpl implements OXLoginInterface {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXLogin.class);
+    private final static org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OXLogin.class);
 
-    private BundleContext context = null;
+    private final BundleContext context;
 
     public OXLogin(final BundleContext context) throws RemoteException, StorageException {
         super();
         this.context = context;
-        log.info("Class loaded: {}", this.getClass().getName());
+        LOGGER.info("Class loaded: {}", this.getClass().getName());
     }
 
     @Override
@@ -117,20 +115,13 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
 
         User[] retusers = oxu.getData(ctx, new User[] { retval });
 
-        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
-        for (final Bundle bundle : bundles) {
-            final String bundlename = bundle.getSymbolicName();
-            if (Bundle.ACTIVE == bundle.getState()) {
-                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
-                if (null != servicereferences) {
-                    for (final ServiceReference servicereference : servicereferences) {
-                        final Object property = servicereference.getProperty("name");
-                        if (null != property && property.toString().equalsIgnoreCase("oxuser")) {
-                            final OXUserPluginInterface oxuserplugin = (OXUserPluginInterface) this.context.getService(servicereference);
-                            log.debug("Calling getData for plugin: {}", bundlename);
-                            retusers = oxuserplugin.getData(ctx, retusers, auth);
-                        }
-                    }
+        // Trigger plugin extensions
+        {
+            final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+            if (null != pluginInterfaces) {
+                for (final OXUserPluginInterface oxuserplugin : pluginInterfaces.getUserPlugins().getServiceList()) {
+                    LOGGER.debug("Calling getData for plugin: {}", oxuserplugin.getClass().getName());
+                    retusers = oxuserplugin.getData(ctx, retusers, auth);
                 }
             }
         }
@@ -146,7 +137,7 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
                 throw new DatabaseUpdateException("Database is locked or is now beeing updated, please try again later");
             }
         } catch (StorageException e) {
-            log.error("Error running updateprocess",e);
+            LOGGER.error("Error running updateprocess",e);
             throw new DatabaseUpdateException(e.toString());
         }
     }

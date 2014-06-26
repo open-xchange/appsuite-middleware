@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,7 +50,6 @@
 package com.openexchange.realtime.directory;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -113,33 +112,22 @@ public abstract class DefaultResourceDirectory implements ResourceDirectory {
 
     @Override
     public IDMap<Resource> remove(ID id) throws OXException {
-        return notifyRemoved(doRemove(id), true);
+        return notifyRemoved(doRemove(id));
     }
     
-    
-    public IDMap<Resource> removeWithoutDisposeEvent(ID id) throws OXException {
-        return notifyRemoved(doRemove(id), false);
-    }
 
     @Override
     public IDMap<Resource> remove(Collection<ID> ids) throws OXException {
-        return notifyRemoved(doRemove(ids), true);
+        return notifyRemoved(doRemove(ids));
     }
 
     protected void notifyAdded(ID id, Resource addedResource) {
-        id.trigger(Events.ADD, this);
         for (ChangeListener listener : listeners) {
             listener.added(id, addedResource);
         }
     }
 
     private void notifyUpdated(ID id, Resource updatedResource, Resource previousResource) {
-        Map<String, Object> event = new HashMap<String, Object>();
-        event.put("updated", updatedResource);
-        event.put("previous", previousResource);
-        
-        id.trigger(Events.UPDATE, this, event);
-
         for (ChangeListener listener : listeners) {
             listener.updated(id, updatedResource, previousResource);
         }
@@ -149,15 +137,11 @@ public abstract class DefaultResourceDirectory implements ResourceDirectory {
      * Notify registered ChangeListeners about the removal of Resources from the ResourceDirectory.
      * 
      * @param removedResources The Resources that were removed
-     * @param triggerDispose True if the ID.Events.DISPOSE event should be triggered on the ID that is associated with the Resource
      * @return the IDMap with removed Resources
      */
-    private IDMap<Resource> notifyRemoved(IDMap<Resource> removedResources, boolean triggerDispose) {
+    private IDMap<Resource> notifyRemoved(IDMap<Resource> removedResources) {
         for (ChangeListener listener : listeners) {
             for (Entry<ID, Resource> entry : removedResources.entrySet()) {
-                if (triggerDispose) {
-                    entry.getKey().trigger(ID.Events.DISPOSE, this);
-                }
                 listener.removed(entry.getKey(), entry.getValue());
             }
         }

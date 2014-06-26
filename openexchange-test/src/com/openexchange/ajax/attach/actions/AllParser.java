@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -84,7 +84,7 @@ public class AllParser extends AbstractAJAXParser<AllResponse> {
             metadata.setFilename(json.getString(3));
             metadata.setFilesize(json.getLong(4));
             metadata.setFileMIMEType(json.getString(5));
-            metadata.setRtfFlag(json.getBoolean(6));
+            metadata.setRtfFlag(Boolean.parseBoolean(json.getString(6)));
             attachments.add(metadata);
         }
         res.setAttachments(attachments);

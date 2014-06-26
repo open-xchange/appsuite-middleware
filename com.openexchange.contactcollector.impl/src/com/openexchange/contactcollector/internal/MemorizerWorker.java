@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -454,15 +454,17 @@ public final class MemorizerWorker {
     }
 
     private static boolean isEnabled(final Session session) {
-        Boolean enabled = null;
-        boolean enabledRight = false;
         try {
-            enabled = ServerUserSetting.getInstance().isContactCollectionEnabled(session.getContextId(), session.getUserId());
-            enabledRight = ServerSessionAdapter.valueOf(session).getUserPermissionBits().isCollectEmailAddresses();
+            if (!ServerSessionAdapter.valueOf(session).getUserPermissionBits().isCollectEmailAddresses()) {
+                return false;
+            }
+
+            Boolean enabled = ServerUserSetting.getInstance().isContactCollectionEnabled(session.getContextId(), session.getUserId());
+            return enabled != null && enabled.booleanValue();
         } catch (final OXException e) {
             LOG.error("", e);
         }
-        return enabledRight && enabled != null && enabled.booleanValue();
+        return false;
     }
 
     private static int getFolderId(final Session session) {
@@ -511,7 +513,7 @@ public final class MemorizerWorker {
         final String val = MimeUtility.unfold(value);
         final Matcher m = ENC_PATTERN.matcher(val);
         if (m.find()) {
-            final com.openexchange.java.StringAllocator sa = new com.openexchange.java.StringAllocator(val.length());
+            final StringBuilder sa = new StringBuilder(val.length());
             int lastMatch = 0;
             do {
                 sa.append(val.substring(lastMatch, m.start()));

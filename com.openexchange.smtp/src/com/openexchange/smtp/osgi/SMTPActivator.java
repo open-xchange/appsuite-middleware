@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -54,12 +54,14 @@ import java.util.Hashtable;
 import javax.activation.MailcapCommandMap;
 import org.osgi.framework.BundleActivator;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.smtp.SMTPProvider;
+import com.openexchange.smtp.SmtpReloadable;
 import com.openexchange.smtp.services.Services;
 import com.openexchange.threadpool.ThreadPoolService;
 
@@ -88,12 +90,16 @@ public final class SMTPActivator extends HousekeepingActivator {
     public void startBundle() throws Exception {
         try {
             Services.setServiceLookup(this);
+
             trackService(HostnameService.class);
             track(MailcapCommandMap.class, new MailcapServiceTracker(context));
             openTrackers();
+
             final Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
             dictionary.put("protocol", SMTPProvider.PROTOCOL_SMTP.toString());
             registerService(TransportProvider.class, SMTPProvider.getInstance(), dictionary);
+
+            registerService(Reloadable.class, SmtpReloadable.getInstance());
         } catch (final Throwable t) {
             LOG.error("", t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);

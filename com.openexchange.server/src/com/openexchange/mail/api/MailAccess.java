@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -98,6 +98,22 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     private static final long serialVersionUID = -2580495494392812083L;
 
     private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailAccess.class);
+
+    // --------------------------------------------------------------------------------------------------------------------------------- //
+
+    static final class FastThrowable extends Throwable {
+
+        FastThrowable() {
+            super("tracked mail connection usage");
+        }
+
+        @Override
+        public synchronized Throwable fillInStackTrace() {
+            return this;
+        }
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------------- //
 
     /*-
      * ############### MEMBERS ###############
@@ -466,6 +482,33 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     }
 
     /**
+     * Closes specified <tt>MailAccess</tt> instance with the attempt to put it into cache for subsequent reuse.
+     *
+     * @param mailAccess The <tt>MailAccess</tt> instance to close
+     * @since v7.6.0
+     */
+    public static void closeInstance(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) {
+        closeInstance(mailAccess, true);
+    }
+
+    /**
+     * Closes specified <tt>MailAccess</tt> instance.
+     *
+     * @param mailAccess The <tt>MailAccess</tt> instance to close
+     * @param put2Cache true to try to put this mail connection into cache; otherwise false
+     * @since v7.6.0
+     */
+    public static void closeInstance(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, final boolean put2Cache) {
+        if (null != mailAccess) {
+            try {
+                mailAccess.close(put2Cache);
+            } catch (Exception e) {
+                LOG.error("Failed to close MailAccess instance", e);
+            }
+        }
+    }
+
+    /**
      * Increments the global access counter.
      * <p>
      * <b>Does nothing at all since v6.20.</b>
@@ -544,6 +587,12 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      */
     public boolean ping() throws OXException {
         try {
+            if (MailProperties.getInstance().isEnforceSecureConnection()) {
+                final MailConfig mailConfig = getMailConfig();
+                if (!mailConfig.isSecure()) {
+                    throw MailExceptionCode.NON_SECURE_DENIED.create(mailConfig.getServer());
+                }
+            }
             connect0(false);
             close(false);
             return true;
@@ -677,7 +726,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     @Override
     public void close() {
-        try { close(true); } catch (final Exception x) { /**/ }
+        try { close(true); } catch (final Exception x) { LOG.debug("Error while closing MailAccess instance.", x); }
     }
 
     /**
@@ -798,7 +847,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                      * Only possibility to get the current working position of a thread. This is only called if a thread is caught by
                      * MailAccessWatcher.
                      */
-                    final Throwable thr = new Throwable();
+                    final Throwable thr = new FastThrowable();
                     thr.setStackTrace(trace);
                     log.info(sBuilder.toString(), thr);
                 }
@@ -857,7 +906,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     @Override
     public String toString() {
-        final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(256);
+        final StringBuilder builder = new StringBuilder(256);
         builder.append("{ MailAccess [accountId=").append(accountId).append(", cached=").append(cached).append(", ");
         if (provider != null) {
             builder.append("provider=").append(provider).append(", ");

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,10 +53,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.json.JSONArray;
-import org.json.JSONObject;
 import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.FolderUpdatesResponse;
@@ -66,14 +64,11 @@ import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.folder.actions.UpdatesRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.AbstractUpdatesRequest.Ignore;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
-import com.openexchange.ajax.framework.CommonUpdatesRequest;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
-import com.openexchange.ajax.framework.AbstractUpdatesRequest.Ignore;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.search.Order;
 import com.openexchange.server.impl.OCLPermission;
 
 /**
@@ -269,7 +264,6 @@ public class AbstractFolderTest extends AbstractAJAXSession {
         CONTACT(3, Folder.MODULE_CONTACT),
         UNBOUND(4, Folder.MODULE_UNBOUND),
         SYSTEM_MODULE(5, Folder.MODULE_SYSTEM),
-        PROJECT(6, Folder.MODULE_PROJECT),
         MAIL(7, Folder.MODULE_MAIL),
         INFOSTORE(8, Folder.MODULE_INFOSTORE),
         MESSAGING(13, Folder.MODULE_MESSAGING),

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,10 +52,19 @@ package com.openexchange.http.deferrer;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * A {@link CustomRedirectURLDetermination} can use any criterium to determine a useful redirect URL. Useful in the most restricted callback scenarios
+ * A {@link CustomRedirectURLDetermination} can use any criteria to determine a useful redirect URL. Useful in the most restricted callback
+ * scenarios
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 public interface CustomRedirectURLDetermination {
-	public String getURL(HttpServletRequest req);
+
+    /**
+     * Gets the call-back URL for specified HTTP request.
+     *
+     * @param req The HTTP request
+     * @return The associated call-back URL or <code>null</code>
+     */
+    String getURL(HttpServletRequest req);
 }

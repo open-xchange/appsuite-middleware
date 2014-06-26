@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -77,6 +77,9 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
 
     // Invalid URL \"%1$s\". Please correct the value and try again.
     public static final String INVALID_URL_MSG = "Invalid URL \"%1$s\". Please correct the value and try again.";
+
+    // The allowed quota is reached. Please delete some items in order to store new ones.
+    public static final String QUOTA_REACHED_MSG = "The allowed quota is reached. Please delete some items in order to store new ones.";
 
     /**
      * Initializes a new {@link OXExceptionMessages}.

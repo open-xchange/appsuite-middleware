@@ -2,17 +2,14 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Indexing Service Implementation Bundle
 Bundle-SymbolicName: com.openexchange.service.indexing.impl
-Bundle-Version: 7.4.2
+Bundle-Version: 7.6.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-BuddyPolicy: registered
 Eclipse-RegisterBuddy: com.hazelcast
-Import-Package: com.hazelcast.cluster,
- com.hazelcast.config,
+Import-Package: com.hazelcast.config,
  com.hazelcast.core,
  com.hazelcast.query,
- com.hazelcast.util,
- com.hazelcast.util.concurrent,
  com.openexchange.config,
  com.openexchange.config.cascade,
  com.openexchange.context,

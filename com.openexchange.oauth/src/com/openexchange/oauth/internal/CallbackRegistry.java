@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -89,11 +89,13 @@ public class CallbackRegistry implements CustomRedirectURLDetermination, Runnabl
     /**
      * Adds given call-back URL and token pair.
      *
-     * @param callbackUrl The call-back URL
      * @param token The token
+     * @param callbackUrl The associated call-back URL
      */
-    public void add(final String callbackUrl, final String token) {
-        tokenMap.put(token, new UrlAndStamp(callbackUrl, System.currentTimeMillis()));
+    public void add(final String token, final String callbackUrl) {
+        if (null != token && null != callbackUrl) {
+            tokenMap.put(token, new UrlAndStamp(callbackUrl, System.currentTimeMillis()));
+        }
     }
 
     @Override

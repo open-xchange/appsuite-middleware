@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,8 +53,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.halo.HaloContactDataSource;
-import com.openexchange.halo.HaloContactImageSource;
 import com.openexchange.halo.HaloContactQuery;
+import com.openexchange.halo.linkedin.helpers.LinkedinPlusChecker;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.linkedin.LinkedInService;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
@@ -69,6 +69,8 @@ import com.openexchange.tools.session.ServerSession;
 public abstract class AbstractLinkedinDataSource implements HaloContactDataSource {
 
     protected final ServiceLookup serviceLookup;
+
+    private LinkedinPlusChecker plusChecker;
 
     /**
      * Initializes a new {@link AbstractLinkedinDataSource}.
@@ -93,20 +95,26 @@ public abstract class AbstractLinkedinDataSource implements HaloContactDataSourc
         return serviceLookup.getService(OAuthService.class);
     }
 
-    @Override
-    public String getId() {
-        return "com.openexchange.halo.linkedIn:fullProfile";
+    public void setPlusChecker(LinkedinPlusChecker plusChecker) {
+        this.plusChecker = plusChecker;
     }
 
-    @Override
-    public boolean isAvailable(final ServerSession session) throws OXException {
-        final int uid = session.getUserId();
-        final int cid = session.getContextId();
+    protected boolean hasAccount(ServerSession session) throws OXException {
+        int uid = session.getUserId();
+        int cid = session.getContextId();
         if (getOauthService().getMetaDataRegistry().containsService(LinkedInService.SERVICE_ID, uid, cid)) {
             return !getOauthService().getAccounts(LinkedInService.SERVICE_ID, session, uid, cid).isEmpty();
         }
 
         return false;
+    }
+
+    protected boolean hasPlusFeatures(ServerSession session) throws OXException {
+        if (plusChecker == null) {
+            return false;
+        }
+
+        return plusChecker.hasPlusFeatures(session);
     }
 
     @Override

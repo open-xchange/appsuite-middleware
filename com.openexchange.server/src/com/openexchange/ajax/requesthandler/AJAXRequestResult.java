@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -56,6 +56,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.UUID;
 import org.json.JSONValue;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.annotation.Nullable;
@@ -93,27 +94,27 @@ public class AJAXRequestResult {
     public static final AJAXRequestResult EMPTY_REQUEST_RESULT = new AJAXRequestResult() {
 
         @Override
-        public void setResultObject(final Object resultObject) {
+        public void setResultObject(final @Nullable Object resultObject) {
             throw new UnsupportedOperationException("Method not allowed for empty AJAX request result.");
         }
 
         @Override
-        public void setResultObject(final Object object, final String format) {
+        public void setResultObject(final @Nullable Object object, final @Nullable String format) {
             throw new UnsupportedOperationException("Method not allowed for empty AJAX request result.");
         }
 
         @Override
-        public void setFormat(final String format) {
+        public void setFormat(final @Nullable String format) {
             throw new UnsupportedOperationException("Method not allowed for empty AJAX request result.");
         }
 
         @Override
-        public void setTimestamp(final Date timestamp) {
+        public void setTimestamp(final @Nullable Date timestamp) {
             throw new UnsupportedOperationException("Method not allowed for empty AJAX request result.");
         }
 
         @Override
-        public void setHeader(final String header, final String value) {
+        public void setHeader(final String header, final @Nullable String value) {
             throw new UnsupportedOperationException("Method not allowed for empty AJAX request result.");
         }
 
@@ -128,22 +129,22 @@ public class AJAXRequestResult {
         }
 
         @Override
-        public AJAXRequestResult setType(final ResultType resultType) {
+        public @NonNull AJAXRequestResult setType(final ResultType resultType) {
             throw new UnsupportedOperationException("Method not allowed for empty AJAX request result.");
         }
 
         @Override
-        public AJAXRequestResult addWarnings(final java.util.Collection<OXException> warnings) {
+        public @NonNull AJAXRequestResult addWarnings(final @Nullable java.util.Collection<OXException> warnings) {
             throw new UnsupportedOperationException("Method not allowed for empty AJAX request result.");
         }
 
         @Override
-        public void setParameter(final String name, final Object value) {
+        public void setParameter(final String name, final @Nullable Object value) {
             throw new UnsupportedOperationException("Method not allowed for empty AJAX request result.");
         };
 
         @Override
-        public void setResponseProperty(final String name, final Object value) {
+        public void setResponseProperty(final String name, final @Nullable Object value) {
             throw new UnsupportedOperationException("Method not allowed for empty AJAX request result.");
         };
 
@@ -179,7 +180,7 @@ public class AJAXRequestResult {
         /**
          * The special result directly responded to client.
          */
-        DIRECT, 
+        DIRECT,
         /**
          * The request went to a resource that could not be found
          */
@@ -214,6 +215,12 @@ public class AJAXRequestResult {
     private @Nullable OXException exception;
 
     private long duration;
+
+    /**
+     * Signals whether the data provided by this response is not yet finished or final, but rather reflects an intermediate state and the
+     * client is supposed to request again to get full results.
+     */
+    private @Nullable UUID continuationUuid;
 
     /**
      * Initializes a new {@link AJAXRequestResult} with data and time stamp set to <code>null</code>.
@@ -276,6 +283,26 @@ public class AJAXRequestResult {
             this.resultObject = resultObject;
         }
         expires = -1;
+    }
+
+    /**
+     * Sets the continuation UUID
+     *
+     * @param continuationUuid The continuation UUID to set
+     * @return A reference to this
+     */
+    public AJAXRequestResult setContinuationUuid(final @Nullable UUID continuationUuid) {
+        this.continuationUuid = continuationUuid;
+        return this;
+    }
+
+    /**
+     * Gets the continuation UUID
+     *
+     * @return The continuation UUID or <code>null</code>
+     */
+    public @Nullable  UUID getContinuationUuid() {
+        return continuationUuid;
     }
 
     /**
@@ -646,7 +673,7 @@ public class AJAXRequestResult {
     @Override
     public String toString() {
         final Collection<OXException> thisWarnings = warnings;
-        return new com.openexchange.java.StringAllocator(34).append(super.toString()).append(" resultObject=").append(resultObject).append(", timestamp=").append(
+        return new StringBuilder(34).append(super.toString()).append(" resultObject=").append(resultObject).append(", timestamp=").append(
             timestamp).append(" warnings=").append(null == thisWarnings ? "<none>" : thisWarnings.toString()).toString();
     }
 
@@ -661,10 +688,20 @@ public class AJAXRequestResult {
         setFormat(format);
     }
 
+    /**
+     * Sets the exception that is supposed to be logged by dispatcher
+     *
+     * @param exception The exception to log
+     */
     public void setException(final @Nullable OXException exception) {
         this.exception = exception;
     }
 
+    /**
+     * Gets the optional exception that is supposed to be logged by dispatcher
+     *
+     * @return The exception to log or <code>null</code>
+     */
     public @Nullable OXException getException() {
         return exception;
     }

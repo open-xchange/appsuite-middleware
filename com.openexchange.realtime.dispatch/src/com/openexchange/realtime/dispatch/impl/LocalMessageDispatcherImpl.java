@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -56,10 +56,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.Channel;
-import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.dispatch.DispatchExceptionCode;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
 import com.openexchange.realtime.dispatch.management.ManagementHouseKeeper;
+import com.openexchange.realtime.dispatch.osgi.RealtimeJanitors;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
@@ -70,6 +70,7 @@ import com.openexchange.realtime.util.StanzaSequenceGate;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class LocalMessageDispatcherImpl implements LocalMessageDispatcher {
 
@@ -110,6 +111,7 @@ public class LocalMessageDispatcherImpl implements LocalMessageDispatcher {
                 }
             }
         };
+        RealtimeJanitors.getInstance().addJanitor(gate);
         ManagementHouseKeeper.getInstance().addManagementObject(gate.getManagementObject());
     }
 
@@ -138,8 +140,4 @@ public class LocalMessageDispatcherImpl implements LocalMessageDispatcher {
         channels.remove(channel.getProtocol());
     }
 
-    @Override
-    public RealtimeJanitor getGate() {
-        return gate;
-    }
 }

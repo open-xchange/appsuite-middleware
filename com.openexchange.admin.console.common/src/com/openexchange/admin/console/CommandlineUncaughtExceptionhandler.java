@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -74,7 +74,7 @@ final class CommandlineUncaughtExceptionhandler implements UncaughtExceptionHand
          * Gather thread information
          */
         final Map<Thread, StackTraceElement[]> stackMap = Thread.getAllStackTraces();
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(256);
+        final StringBuilder sb = new StringBuilder(256);
         final String lineSeparator = System.getProperty("line.separator");
         for (final Thread thread : stackMap.keySet()) {
             sb.append(thread.getName()).append(" ID:").append(thread.getId());
@@ -86,7 +86,7 @@ final class CommandlineUncaughtExceptionhandler implements UncaughtExceptionHand
         System.err.println(sb.toString());
     }
 
-    private static void appendStackTrace(final StackTraceElement[] trace, final com.openexchange.java.StringAllocator sb, final String lineSeparator) {
+    private static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb, final String lineSeparator) {
         if (null == trace) {
             sb.append("<missing stack trace>\n");
             return;

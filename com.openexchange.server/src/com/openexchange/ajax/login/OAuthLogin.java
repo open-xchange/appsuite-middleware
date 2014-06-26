@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,6 +51,7 @@ package com.openexchange.ajax.login;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Set;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -62,6 +63,7 @@ import net.oauth.server.OAuthServlet;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.OXException;
+import com.openexchange.login.LoginRampUpService;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
@@ -83,7 +85,8 @@ public class OAuthLogin extends AbstractLoginRequestHandler {
      * 
      * @param login
      */
-    public OAuthLogin(LoginConfiguration conf) {
+    public OAuthLogin(LoginConfiguration conf, Set<LoginRampUpService> rampUp) {
+        super(rampUp);
         this.conf = conf;
     }
 
@@ -137,7 +140,7 @@ public class OAuthLogin extends AbstractLoginRequestHandler {
             }
 
             private void handleException(final Exception e, final HttpServletRequest request, final HttpServletResponse response, final boolean sendBody) throws IOException, ServletException {
-                final com.openexchange.java.StringAllocator realm = new com.openexchange.java.StringAllocator(32).append((request.isSecure()) ? "https://" : "http://");
+                final StringBuilder realm = new StringBuilder(32).append((request.isSecure()) ? "https://" : "http://");
                 realm.append(request.getLocalName());
                 OAuthServlet.handleException(response, e, realm.toString(), sendBody);
             }

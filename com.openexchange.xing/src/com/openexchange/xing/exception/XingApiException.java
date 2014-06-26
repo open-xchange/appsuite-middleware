@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,6 +53,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.json.JSONObject;
+import com.openexchange.xing.util.JSONCoercion;
 
 /**
  * {@link XingApiException} - As specified <a href="https://dev.xing.com/docs#error-responses">here</a>.
@@ -78,7 +79,7 @@ public class XingApiException extends XingException {
         for (Entry<String, Object> entry : errorObject.entrySet()) {
             final String name = entry.getKey();
             if (!"message".equals(name) && !"error_name".equals(name)) {
-                properties.put(name, entry.getValue());
+                properties.put(name, JSONCoercion.coerceToNative(entry.getValue()));
             }
         }
     }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -93,7 +93,6 @@ import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadFileImpl;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.Charsets;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
@@ -370,8 +369,8 @@ public final class MessageParser {
             TimeZoneUtils.getTimeZone(UserStorage.getInstance().getUser(
                 session.getUserId(),
                 ContextStorage.getStorageContext(session.getContextId())).getTimeZone()),
-            session,
-            accountId);
+                session,
+                accountId);
     }
 
     /**
@@ -421,7 +420,7 @@ public final class MessageParser {
                         final TextBodyMailPart part = provider.getNewTextBodyPart(sContent);
                         final String contentType = parseContentType(tmp.getString(CONTENT_TYPE));
                         part.setContentType(contentType);
-                        if (contentType.startsWith("text/plain") && tmp.hasAndNotNull("raw") && tmp.getBoolean("raw")) {
+                        if (contentType.startsWith("text/plain") && tmp.optBoolean("raw", false)) {
                             part.setPlainText(sContent);
                         }
                         transportMail.setContentType(part.getContentType());
@@ -536,7 +535,7 @@ public final class MessageParser {
                 String value = jsonObj.getString(fromKey);
                 final int endPos;
                 if ('[' == value.charAt(0) && (endPos = value.indexOf(']', 1)) < value.length()) {
-                    value = new com.openexchange.java.StringAllocator(32).append("\"[").append(value.substring(1, endPos)).append("]\"").append(value.substring(endPos+1)).toString();
+                    value = new StringBuilder(32).append("\"[").append(value.substring(1, endPos)).append("]\"").append(value.substring(endPos+1)).toString();
                 }
                 mail.addFrom(parseAddressList(value, true, true));
             } catch (final AddressException e) {
@@ -785,19 +784,19 @@ public final class MessageParser {
             final JSONObject attachment = attachmentArray.getJSONObject(i);
             final String seqId =
                 attachment.hasAndNotNull(MailListField.ID.getKey()) ? attachment.getString(MailListField.ID.getKey()) : null;
-            if (seqId == null || seqId.startsWith(FILE_PREFIX, 0)) {
+                if (seqId == null || seqId.startsWith(FILE_PREFIX, 0)) {
+                    /*
+                     * A file reference
+                     */
+                    continue NextAttachment;
+                }
                 /*
-                 * A file reference
+                 * If MSGREF is defined in attachment itself, the MSGREF's mail is meant to be attached and not a nested attachment
                  */
-                continue NextAttachment;
-            }
-            /*
-             * If MSGREF is defined in attachment itself, the MSGREF's mail is meant to be attached and not a nested attachment
-             */
-            if (!attachment.hasAndNotNull(MailJSONField.MSGREF.getKey())) {
-                final Object cid = attachment.opt(MailJSONField.CID.getKey());
-                groupedSeqIDs.put(seqId, null == cid ? "" : cid.toString());
-            }
+                if (!attachment.hasAndNotNull(MailJSONField.MSGREF.getKey())) {
+                    final Object cid = attachment.opt(MailJSONField.CID.getKey());
+                    groupedSeqIDs.put(seqId, null == cid ? "" : cid.toString());
+                }
         }
         /*
          * Now load them by message reference
@@ -828,7 +827,7 @@ public final class MessageParser {
     }
 
     private static void handleMultipleRefs(final TransportProvider provider, final Session session, final MailPath parentMsgRef, final Set<String> contentIds, final boolean prepare4Transport, final Map<String, String> groupedSeqIDs, final Map<String, ReferencedMailPart> retval, final MailAccess<?, ?> access) throws OXException {
-        final MailPath pMsgRef = prepareMsgref(parentMsgRef);
+        final MailPath pMsgRef = /*prepareMsgref(*/parentMsgRef/*)*/;
         MailMessage referencedMail = access.getMessageStorage().getMessage(pMsgRef.getFolder(), pMsgRef.getMailID(), false);
         if (null == referencedMail) {
             throw MailExceptionCode.REFERENCED_MAIL_NOT_FOUND.create(pMsgRef.getMailID(), pMsgRef.getFolder());
@@ -1007,7 +1006,7 @@ public final class MessageParser {
     }
 
     private static InternetAddress getEmailAddress(final String addrStr) {
-        if (isEmpty(addrStr)) {
+        if (com.openexchange.java.Strings.isEmpty(addrStr)) {
             return null;
         }
         try {
@@ -1053,26 +1052,13 @@ public final class MessageParser {
         return msgref;
     }
 
-    /** Check for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
     /** ASCII-wise to lower-case */
     private static String toLowerCase(final CharSequence chars) {
         if (null == chars) {
             return null;
         }
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,11 +53,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.FullPrimaryKeySupportService;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.update.Tools;
 
 /**
@@ -67,15 +65,6 @@ import com.openexchange.tools.update.Tools;
  */
 public class CreateGenconfTablesTask implements UpdateTask {
 
-    private static final String STRING_TABLE_CREATE = "CREATE TABLE `genconf_attributes_strings` ( "+
-   "`cid` INT4 unsigned NOT NULL,"+
-   "`id` INT4 unsigned NOT NULL,"+
-   "`name` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,"+
-   "`value` varchar(256) COLLATE utf8_unicode_ci DEFAULT NULL,"+
-   "`uuid` BINARY(16) DEFAULT NULL,"+
-   "KEY (`cid`,`id`,`name`)"+
-   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
     private static final String STRING_TABLE_CREATE_PRIMARY_KEY = "CREATE TABLE `genconf_attributes_strings` ( "+
         "`cid` INT4 unsigned NOT NULL,"+
         "`id` INT4 unsigned NOT NULL,"+
@@ -86,15 +75,6 @@ public class CreateGenconfTablesTask implements UpdateTask {
         "KEY (`cid`,`id`,`name`)"+
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
-    private static final String BOOL_TABLE_CREATE = "CREATE TABLE `genconf_attributes_bools` ("+
-    "`cid` INT4 unsigned NOT NULL,"+
-   "`id` INT4 unsigned NOT NULL,"+
-   "`name` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,"+
-   "`value` tinyint(1) COLLATE utf8_unicode_ci DEFAULT NULL,"+
-   "`uuid` BINARY(16) DEFAULT NULL,"+
-   "KEY (`cid`,`id`,`name`)"+
-   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
     private static final String BOOL_TABLE_CREATE_PRIMARY_KEY = "CREATE TABLE `genconf_attributes_bools` ("+
         "`cid` INT4 unsigned NOT NULL,"+
        "`id` INT4 unsigned NOT NULL,"+
@@ -128,20 +108,11 @@ public class CreateGenconfTablesTask implements UpdateTask {
         Connection con = null;
         try {
             con = Database.getNoTimeout(contextId, true);
-            FullPrimaryKeySupportService fullPrimaryKeySupportService = ServerServiceRegistry.getInstance().getService(FullPrimaryKeySupportService.class);
             if(!Tools.tableExists(con, "genconf_attributes_strings")) {
-                if (fullPrimaryKeySupportService.isFullPrimaryKeySupported()) {
-                    Tools.exec(con, STRING_TABLE_CREATE_PRIMARY_KEY);
-                } else {
-                    Tools.exec(con, STRING_TABLE_CREATE);
-                }
+                Tools.exec(con, STRING_TABLE_CREATE_PRIMARY_KEY);
             }
             if(!Tools.tableExists(con, "genconf_attributes_bools")) {
-                if (fullPrimaryKeySupportService.isFullPrimaryKeySupported()) {
-                    Tools.exec(con, BOOL_TABLE_CREATE_PRIMARY_KEY);
-                } else {
-                    Tools.exec(con, BOOL_TABLE_CREATE);
-                }
+                Tools.exec(con, BOOL_TABLE_CREATE_PRIMARY_KEY);
             }
             if(!Tools.tableExists(con, "sequence_genconf")) {
                 Tools.exec(con, SEQUENCE_TABLE_CREATE);

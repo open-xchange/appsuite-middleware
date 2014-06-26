@@ -63,14 +63,61 @@ public class EditFileAction extends AbstractFileAction {
 
     private int sortKey;
 
+    /**
+     * Initializes a new {@link EditFileAction}.
+     *
+     * @param file The (old) file version
+     * @param newFile The new file version
+     * @param comparison The underlying synchronization comparison this action resulted from
+     * @param path The path of the parent directory where the action should be executed
+     */
     public EditFileAction(FileVersion file, FileVersion newFile, ThreeWayComparison<FileVersion> comparison, String path) {
         this(file, newFile, comparison, path, 0);
     }
 
+    /**
+     * Initializes a new {@link EditFileAction}.
+     *
+     * @param file The (old) file version
+     * @param newFile The new file version
+     * @param comparison The underlying synchronization comparison this action resulted from
+     * @param path The path of the parent directory where the action should be executed
+     * @param sortKey The sort key, or <code>0</code> if not applicable
+     */
     public EditFileAction(FileVersion file, FileVersion newFile, ThreeWayComparison<FileVersion> comparison, String path, int sortKey) {
+        this(file, newFile, comparison, path, sortKey, true);
+    }
+
+    /**
+     * Initializes a new {@link EditFileAction}.
+     *
+     * @param file The (old) file version
+     * @param newFile The new file version
+     * @param comparison The underlying synchronization comparison this action resulted from
+     * @param path The path of the parent directory where the action should be executed
+     * @param acknowledge <code>false</code> to not perform an implicit acknowledgment, or <code>true</code> for the default behavior
+     */
+    public EditFileAction(FileVersion file, FileVersion newFile, ThreeWayComparison<FileVersion> comparison, String path, boolean acknowledge) {
+        this(file, newFile, comparison, path, 0, acknowledge);
+    }
+
+    /**
+     * Initializes a new {@link EditFileAction}.
+     *
+     * @param file The (old) file version
+     * @param newFile The new file version
+     * @param comparison The underlying synchronization comparison this action resulted from
+     * @param path The path of the parent directory where the action should be executed
+     * @param sortKey The sort key, or <code>0</code> if not applicable
+     * @param acknowledge <code>false</code> to not perform an implicit acknowledgment, or <code>true</code> for the default behavior
+     */
+    public EditFileAction(FileVersion file, FileVersion newFile, ThreeWayComparison<FileVersion> comparison, String path, int sortKey, boolean acknowledge) {
         super(file, newFile, comparison);
         this.sortKey = sortKey;
         parameters.put(PARAMETER_PATH, path);
+        if (false == acknowledge) {
+            parameters.put(PARAMETER_ACKNOWLEDGE, Boolean.valueOf(acknowledge));
+        }
     }
 
     @Override

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -260,7 +260,7 @@ public class ContactTestManager implements TestManager {
             this.newAction(contacts[i]);
         }
     }
-    
+
     /**
      * Create multiple contacts via a multiple request
      */
@@ -611,7 +611,7 @@ public class ContactTestManager implements TestManager {
             }
             final Contact contactObject = new Contact();
             getContactParser().parse(contactObject, jsonObject);
-            
+
             if (null != contactObject.getImage1()) {
             	final String image1 = new String(contactObject.getImage1());
             	if (0 < image1.length() && image1.contains("image")) {
@@ -623,8 +623,8 @@ public class ContactTestManager implements TestManager {
                     } catch (final Exception e) {
                         // Ignore possible error during download attempt
                     }
-            	}            	
-            }            
+            	}
+            }
             contacts.add(contactObject);
         }
         return contacts;
@@ -728,7 +728,6 @@ final class ContactMapping extends TestCase {
             put(ContactFields.INSTANT_MESSENGER1, Contact.INSTANT_MESSENGER1);
             put(ContactFields.INSTANT_MESSENGER2, Contact.INSTANT_MESSENGER2);
             put(ContactFields.LAST_NAME, Contact.SUR_NAME);
-            put(ContactFields.LINKS, Contact.LINKS);
             put(ContactFields.MANAGER_NAME, Contact.MANAGER_NAME);
             put(ContactFields.MARITAL_STATUS, Contact.MARITAL_STATUS);
             put(ContactFields.MARK_AS_DISTRIBUTIONLIST, Contact.MARK_AS_DISTRIBUTIONLIST);
@@ -737,7 +736,6 @@ final class ContactMapping extends TestCase {
             put(ContactFields.NUMBER_OF_CHILDREN, Contact.NUMBER_OF_CHILDREN);
             put(ContactFields.NUMBER_OF_DISTRIBUTIONLIST, Contact.NUMBER_OF_DISTRIBUTIONLIST);
             put(ContactFields.NUMBER_OF_EMPLOYEE, Contact.NUMBER_OF_EMPLOYEE);
-            put(ContactFields.NUMBER_OF_LINKS, Contact.NUMBER_OF_LINKS);
             put(ContactFields.POSITION, Contact.POSITION);
             put(ContactFields.POSTAL_CODE_BUSINESS, Contact.POSTAL_CODE_BUSINESS);
             put(ContactFields.POSTAL_CODE_HOME, Contact.POSTAL_CODE_HOME);

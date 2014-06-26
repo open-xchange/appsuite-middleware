@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -54,20 +54,26 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.kerberos.KerberosService;
 import com.openexchange.osgi.Tools;
 
+/**
+ * Registers the service tracker that waits for the {@link ConfigrationService} and then registers the {@link KerberosService}.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
 public class KDCActivator implements BundleActivator {
 
     private final Stack<ServiceTracker<?, ?>> trackers = new Stack<ServiceTracker<?, ?>>();
 
-	@Override
+    @Override
     public void start(BundleContext context) {
-		trackers.push(new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class.getName(), new KerberosServiceRegisterer(context)));
-		Tools.open(trackers);
-	}
+        trackers.push(new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class.getName(), new KerberosServiceRegisterer(context)));
+        Tools.open(trackers);
+    }
 
-	@Override
+    @Override
     public void stop(BundleContext context) {
-	    Tools.close(trackers);
-	}
+        Tools.close(trackers);
+    }
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -62,9 +62,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
-
 import junit.framework.Assert;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -87,7 +85,6 @@ import org.apache.http.impl.cookie.BasicClientCookie2;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
@@ -184,9 +181,12 @@ public class Executor extends Assert {
             break;
         case PUT:
             final HttpPut httpPut = new HttpPut(urlString + getURLParameter(session, request, false));
-            final ByteArrayEntity entity = new ByteArrayEntity(createBodyBytes(request.getBody()));
-            entity.setContentType("text/javascript; charset=UTF-8");
-            httpPut.setEntity(entity);
+            Object body = request.getBody();
+            if (null != body) {
+                final ByteArrayEntity entity = new ByteArrayEntity(createBodyBytes(body));
+                entity.setContentType("text/javascript; charset=UTF-8");
+                httpPut.setEntity(entity);
+            }
             httpRequest = httpPut;
             break;
         default:

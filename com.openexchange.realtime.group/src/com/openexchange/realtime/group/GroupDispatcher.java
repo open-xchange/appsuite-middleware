@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,6 +51,7 @@ package com.openexchange.realtime.group;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -61,6 +62,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import com.google.common.base.Optional;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.Component;
 import com.openexchange.realtime.Component.EvictionPolicy;
@@ -70,13 +72,14 @@ import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.group.commands.LeaveCommand;
 import com.openexchange.realtime.group.osgi.GroupServiceRegistry;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.IDEventHandler;
 import com.openexchange.realtime.packet.Message;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.realtime.util.ActionHandler;
+import com.openexchange.realtime.util.Duration;
+import com.openexchange.realtime.util.ElementPath;
 import com.openexchange.server.ServiceExceptionCode;
 
 /**
@@ -86,13 +89,15 @@ import com.openexchange.server.ServiceExceptionCode;
  * the introspection magic.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
+
 public class GroupDispatcher implements ComponentHandle {
 
     /** The logger constant. */
-    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GroupDispatcher.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GroupDispatcher.class);
 
-    public static final AtomicReference<GroupManager> GROUPMANAGER_REF = new AtomicReference<GroupManager>();
+    public static final AtomicReference<DistributedGroupManager> GROUPMANAGER_REF = new AtomicReference<DistributedGroupManager>();
 
     /** The collection of IDs that might be concurrently accessed */
     private final AtomicReference<Set<ID>> idsRef = new AtomicReference<Set<ID>>(Collections.<ID> emptySet());
@@ -127,35 +132,9 @@ public class GroupDispatcher implements ComponentHandle {
      */
     public GroupDispatcher(ID id, ActionHandler handler) {
         super();
-        groupId = id;
+        this.groupId = id;
         this.handler = handler;
         final AtomicReference<Set<ID>> idsRef = this.idsRef;
-        id.on(ID.Events.DISPOSE, new IDEventHandler() {
-
-            @Override
-            public void handle(String event, ID id, Object source, Map<String, Object> properties) {
-                try {
-                    if (!isDisposed) {
-                        isDisposed = true;
-                     // Find any valid member identifier
-                        ID memberId = null;
-                        if (properties != null) {
-                            memberId = (ID) properties.get("id");
-                        }
-                        if (null == memberId) {
-                            final Set<ID> ids = idsRef.get();
-                            memberId = ids.isEmpty() ? null : ids.iterator().next();
-                        }
-                        if (memberId == null) {
-                            memberId = id;
-                        }
-                        onDispose(memberId != null ? memberId : id);
-                    }
-                } catch (OXException e) {
-                    LOG.error("", e);
-                }
-            }
-        });
     }
 
     /**
@@ -181,36 +160,63 @@ public class GroupDispatcher implements ComponentHandle {
      * @throws OXException
      */
     protected void processStanza(Stanza stanza) throws OXException {
-        if (handler == null || !handler.callMethod(this, stanza)) {
-            defaultAction(stanza);
+        ID sender = stanza.getFrom();
+        if (isWhitelisted(sender) || isMember(sender)) {
+            if (handler == null || !handler.callMethod(this, stanza)) {
+                defaultAction(stanza);
+            }
+        } else {
+            LOG.error("Refusing to send to GroupDispatcher as sender {} is no member of the GroupDispatcher {}", stanza.getFrom(), groupId);
+            send(new NotMember(groupId, sender, stanza.getSelector()));
         }
     }
 
-    private boolean handleGroupCommand(Stanza stanza) throws OXException {
-        PayloadElement payload = stanza.getPayload();
-        if (payload == null) {
+    /**
+     * Check if the sender is whitelisted iow. always allowed to send {@link Stanza}s to {@ GroupDispatcher}s although he isn't a member.
+     * @param sender The sender of the {@link Stanza}
+     * @return true if the user is always allowed to send e.g. is a synthetic component from an internal context
+     */
+    protected boolean isWhitelisted(ID sender) {
+        if(
+            sender != null 
+            && sender.isInternal()
+          ) {
             return true;
         }
-
-        if (payload.getElementName().equals("ping") && payload.getNamespace().equals("group")) {
-            return true; // Discard, this was just to reset the timeout
-        }
-
-        Object data = payload.getData();
-        if (GroupCommand.class.isInstance(data)) {
-            ((GroupCommand) data).perform(stanza, this);
-            return true;
-        }
-
         return false;
     }
 
+    private boolean handleGroupCommand(Stanza stanza) throws OXException {
+        Optional<GroupCommand> groupCommand = stanza.getSinglePayload(new ElementPath("group", "command"), GroupCommand.class);
+        
+        if (!groupCommand.isPresent()) {
+            return false;
+        }
+
+        groupCommand.get().perform(stanza, this);
+        return true;
+    }
+
+    /**
+     * Send a copy of a {@link Stanza} {@link Stanza} to all members of this group excluding a given set of users.
+     * 
+     * @param stanza The stanza to send 
+     * @param inResponseTo The stanza we are responding to
+     * @param excluded The {@link Set} of users to be excluded when sending
+     * @throws OXException
+     */
     public void relayToAll(Stanza stanza, ID... excluded) throws OXException {
         relayToAll(stanza, null, excluded);
     }
 
     /**
-     * Send a copy of the stanza to all members of this group, excluding the ones provided as the rest of the arguments.
+     * Send a copy of a {@link Stanza} as response to another {@link Stanza} to all members of this group excluding a given set of users. "As
+     * response" means we add a special tracer and the log messages of the {@link Stanza} we are responding to.
+     * 
+     * @param stanza The stanza to send
+     * @param inResponseTo The stanza we are responding to
+     * @param excluded The {@link Set} of users to be excluded when sending
+     * @throws OXException
      */
     public void relayToAll(Stanza stanza, Stanza inResponseTo, ID... excluded) throws OXException {
         MessageDispatcher dispatcher = GroupServiceRegistry.getInstance().getService(MessageDispatcher.class);
@@ -235,18 +241,33 @@ public class GroupDispatcher implements ComponentHandle {
     }
 
     /**
-     * Relay this message to all except the original sender ("from") of the stanza.
+     * Send a copy of a {@link Stanza} to all members of this group excluding the client that sent the this {@link Stanza}.
+     * 
+     * @param stanza
+     * @throws OXException
      */
     public void relayToAllExceptSender(Stanza stanza) throws OXException {
         relayToAll(stanza, stanza.getFrom());
     }
 
+    /**
+     * Send a copy of a {@link Stanza} as response to another {@link Stanza} to all members of this group excluding the client that sent
+     * this {@link Stanza}.
+     * 
+     * @param stanza The stanza to send 
+     * @param inResponseTo The stanza we are responding to
+     * @throws OXException
+     */
     public void relayToAllExceptSender(Stanza stanza, Stanza inResponseTo) throws OXException {
         relayToAll(stanza, inResponseTo, stanza.getFrom());
     }
 
     /**
-     * Relay this message just to a specific receiver
+     * Send a {@link Stanza} to just one specific recipient
+     * 
+     * @param stanza The {@link Stanza} to send
+     * @param id The {@link ID} of the recipient
+     * @throws OXException
      */
     public void relayToID(Stanza stanza, ID id) throws OXException {
         MessageDispatcher dispatcher = GroupServiceRegistry.getInstance().getService(MessageDispatcher.class);
@@ -275,16 +296,17 @@ public class GroupDispatcher implements ComponentHandle {
      *
      * @param id The id of the client joining the the Group
      * @param stamp The selector used in the Stanza to join the group
+     * @throws OXException 
      */
-    public void join(ID id, String stamp) {
+    public void join(ID id, String stamp, Stanza stanza) throws OXException {
         if (idsRef.get().contains(id)) {
             LOG.info("{} is already a member of {}.", id, groupId);
             return;
         }
 
-        beforeJoin(id);
+        beforeJoin(id, stanza);
 
-        if (!mayJoin(id)) {
+        if (!mayJoin(id, stanza)) {
             LOG.info("{} is already a member of {}.", id, groupId);
             return;
         }
@@ -306,18 +328,17 @@ public class GroupDispatcher implements ComponentHandle {
         LOG.debug("{} is joining {},", id, groupId);
 
         stamps.put(id, stamp);
-        id.on(ID.Events.DISPOSE, LEAVE);
         if (first) {
-            firstJoined(id);
+            firstJoined(id, stanza);
         }
         if (added) {
-            GroupManager groupManager = GROUPMANAGER_REF.get();
+            DistributedGroupManager groupManager = GROUPMANAGER_REF.get();
             if(groupManager == null) {
                 LOG.error("GroupManager reference unset.");
             } else {
                 groupManager.add(id, groupId);
             }
-            onJoin(id);
+            onJoin(id, stanza);
         }
     }
 
@@ -325,12 +346,10 @@ public class GroupDispatcher implements ComponentHandle {
      * Leave the group by sending this stanza: { element: "message", to: "synthetic.componentName://roomID", session:
      * "da86ae8fc93340d389c51a1d92d6e997" payloads: [ { namespace: 'group', element: 'command', data: 'leave' } ], }
      */
-    public void leave(ID id) throws OXException {
-        beforeLeave(id);
+    public void leave(ID id, Stanza stanza) throws OXException {
+        beforeLeave(id, stanza);
 
         LOG.debug("{} is leaving {}", id, groupId);
-
-        id.off("dispose", LEAVE);
 
         // Perform a compare-and-set to atomically remove
         boolean removed = false;
@@ -348,21 +367,21 @@ public class GroupDispatcher implements ComponentHandle {
         stamps.remove(id);
 
         if (removed) {
-            GroupManager groupManager = GROUPMANAGER_REF.get();
+            DistributedGroupManager groupManager = GROUPMANAGER_REF.get();
             if (groupManager == null) {
                 LOG.error("GroupManager reference unset.");
             } else {
                 groupManager.remove(id, groupId);
             }
-            onLeave(id);
+            onLeave(id, stanza);
         }
 
         if (empty) {
             Map<String, Object> properties = new HashMap<String, Object>();
             properties.put("id", id);
-            onDispose(id);
+            onDispose(id, stanza);
             isDisposed = true;
-            boolean isDisposable = groupId.dispose(this, properties);
+            boolean isDisposable = groupId.isDisposable();
             /*
              * If nobody vetoed the disposal of this GroupDispatcher we have to issue a cluster wide cleanup to remove entries from
              * StanzaSequenceGate instances
@@ -390,7 +409,9 @@ public class GroupDispatcher implements ComponentHandle {
      * and uses the GroupDispatchers current sequence number for sending this Stanza.
      */
     public void stamp(Stanza s) {
-        s.setSelector(getStamp(s.getTo()));
+        if (s.getSelector() == null || s.getSelector().equals(Stanza.DEFAULT_SELECTOR)) {
+            s.setSelector(getStamp(s.getTo()));
+        }
         s.setSequencePrincipal(groupId);
         s.setSequenceNumber(sequenceNumber.getAndIncrement());
     }
@@ -405,6 +426,7 @@ public class GroupDispatcher implements ComponentHandle {
     /**
      * Get the id of this group
      */
+    @Override
     public ID getId() {
         return groupId;
     }
@@ -433,13 +455,13 @@ public class GroupDispatcher implements ComponentHandle {
      * Makes a copy of the payload in the stanza and puts it into the copy
      */
     protected void copyPayload(Stanza stanza, Stanza copy) throws OXException {
-        List<PayloadTree> copyList = new ArrayList<PayloadTree>(stanza.getPayloads().size());
-        for (PayloadTree tree : stanza.getPayloads()) {
+        List<PayloadTree> copyList = new ArrayList<PayloadTree>(stanza.getPayloadTrees().size());
+        for (PayloadTree tree : stanza.getPayloadTrees()) {
             copyList.add(tree.internalClone());
         }
         copy.setPayloads(copyList);
     }
-
+    
     /**
      * Subclasses can override this method to determine whether a potential participant is allowed to join this group.
      *
@@ -447,20 +469,35 @@ public class GroupDispatcher implements ComponentHandle {
      * @return true, if the participant may join this group, false otherwise
      * @see ID#toSession()
      */
+    
+    protected boolean mayJoin(ID id, Stanza stanza) {
+        return mayJoin(id);
+    }
+
     protected boolean mayJoin(ID id) {
         return true;
     }
-
+    
     /**
      * Callback that is called before an ID joins the group. Override this to be notified of a member about to join the group.
      */
+    protected void beforeJoin(ID id, Stanza stanza) {
+        beforeJoin(id);
+    }
+    
     protected void beforeJoin(ID id) {
         // Empty method
     }
+    
+    
 
     /**
      * Callback that is called after a new member has joined the group.
      */
+    protected void onJoin(ID id, Stanza stanza) {
+        onJoin(id);
+    }
+    
     protected void onJoin(ID id) {
         // Empty method
     }
@@ -468,6 +505,10 @@ public class GroupDispatcher implements ComponentHandle {
     /**
      * Callback for when the first user joined
      */
+    protected void firstJoined(ID id, Stanza stanza) {
+        firstJoined(id);
+    }
+    
     protected void firstJoined(ID id) {
 
     }
@@ -475,6 +516,10 @@ public class GroupDispatcher implements ComponentHandle {
     /**
      * Callback that is called before a member leaves the group
      */
+    protected void beforeLeave(ID id, Stanza stanza) {
+        beforeLeave(id);
+    }
+    
     protected void beforeLeave(ID id) {
         // Empty method
     }
@@ -482,6 +527,10 @@ public class GroupDispatcher implements ComponentHandle {
     /**
      * Callback that is called after a member left the group
      */
+    protected void onLeave(ID id, Stanza stanza) {
+        onLeave(id);
+    }
+    
     protected void onLeave(ID id) {
         // Empty method
     }
@@ -493,6 +542,10 @@ public class GroupDispatcher implements ComponentHandle {
      * @param id
      * @throws OXException
      */
+    protected void onDispose(ID id, Stanza stanza) throws OXException {
+        onDispose(id);
+    }
+    
     protected void onDispose(ID id) throws OXException {
         // Empty method
     }
@@ -504,17 +557,25 @@ public class GroupDispatcher implements ComponentHandle {
         LOG.error("Couldn't find matching handler for {}. \nUse default", stanza);
     }
 
-    private final IDEventHandler LEAVE = new IDEventHandler() {
-
-        @Override
-        public void handle(String event, ID id, Object source, Map<String, Object> properties) {
-            try {
-                leave(id);
-            } catch (OXException e) {
-                LOG.error("Error while handling LEAVE for ID:{}", id, e);
-            }
-        }
-    };
+    /**
+     * Handle notifications about inactivity durations of members.
+     * Override this method to handle notifications in your GroupDispatcher specialization.
+     * <code>
+     * <pre>
+     * Optional<ID> inactiveClient = stanza.getSinglePayload(new ElementPath("com.openexchange.realtime", "client"), ID.class);
+     * Optional<Duration> inactivityDuration = stanza.getSinglePayload(new ElementPath("com.openexchange.realtime.client", "inactivity"), Duration.class);
+     *
+     * if (inactiveClient.isPresent() && inactivityDuration.isPresent()) {
+     *      LOG.info("User {} was inactive for {} ", inactiveClient.get(), inactivityDuration.get());
+     * }
+     * </pre>
+     * </code>
+     *  
+     * @param stanza The Stanza containing the inactive client identified by {@link ElementPath} 'com.openexchange.realtime.client' and the {@link Duration} of inactivity identified by 
+     * 'com.openexchange.realtime.client.inactivity'. 
+     * @throws OXException
+     */
+    public void handleInactivityNotice(Stanza stanza) throws OXException {}
 
     @Override
     public boolean shouldBeDoneInGlobalThread(Stanza stanza) {
@@ -549,8 +610,22 @@ public class GroupDispatcher implements ComponentHandle {
     }
 
     @Override
-    public ID getID() {
-        return groupId;
+    public void dispose() {
+        try {
+          if (!isDisposed) {
+              isDisposed = true;
+           // Find any valid member identifier
+              ID memberId = null;
+              final Set<ID> ids = idsRef.get();
+              memberId = ids.isEmpty() ? null : ids.iterator().next();
+              if (memberId == null) {
+                  memberId = groupId;
+              }
+              onDispose(memberId);
+          }
+      } catch (OXException e) {
+          LOG.error("", e);
+      }
     }
 
 }

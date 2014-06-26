@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -79,6 +79,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.mail.json.actions.AbstractMailAction;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
@@ -337,6 +338,21 @@ public class AJAXRequestData {
     }
 
     /**
+     * Checks if this AJAX request data has access to <code>HttpServletResponse</code> instance; thus offering support for:
+     * <ul>
+     * <li> {@link #optOutputStream()} </li>
+     * <li> {@link #optWriter()} </li>
+     * <li> {@link #setCharacterEncoding(String)} </li>
+     * <ul>
+     * <p>
+     *
+     * @return <code>true</code> if available; otherwise <code>false</code>
+     */
+    public boolean isHttpServletResponseAvailable() {
+        return null != httpServletResponse;
+    }
+
+    /**
      * Returns a {@link OutputStream} suitable for writing binary data in the response. The servlet container does not encode the
      * binary data.
      * <p>
@@ -349,10 +365,8 @@ public class AJAXRequestData {
      * @see #optWriter()
      */
     public @Nullable OutputStream optOutputStream() throws IOException {
-        if (null != httpServletResponse) {
-            return httpServletResponse.getOutputStream();
-        }
-        return null;
+        final HttpServletResponse httpResponse = httpServletResponse;
+        return null == httpResponse ? null : httpResponse.getOutputStream();
     }
 
     /**
@@ -373,10 +387,8 @@ public class AJAXRequestData {
      * @see #setCharacterEncoding
      */
     public @Nullable PrintWriter optWriter() throws IOException {
-        if (null != httpServletResponse) {
-            return httpServletResponse.getWriter();
-        }
-        return null;
+        final HttpServletResponse httpResponse = httpServletResponse;
+        return null == httpResponse ? null : httpResponse.getWriter();
     }
 
     /**
@@ -730,7 +742,7 @@ public class AJAXRequestData {
             throw new NullPointerException("name is null");
         }
         final String value = params.get(name);
-        if (isEmpty(value)) {
+        if (com.openexchange.java.Strings.isEmpty(value)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
         }
         return value;
@@ -794,13 +806,26 @@ public class AJAXRequestData {
     public @NonNull <T> T getParameter(final @Nullable String name, final @NonNull Class<T> coerceTo) throws OXException {
         final String value = getParameter(name);
         try {
-            return ServerServiceRegistry.getInstance().getService(StringParser.class).parse(value, coerceTo);
+            final StringParser parser = ServerServiceRegistry.getInstance().getService(StringParser.class);
+            if (null == parser) {
+                if (int.class.equals(coerceTo) || Integer.class.equals(coerceTo)) {
+                    return (T) Integer.valueOf(value);
+                }
+                if (long.class.equals(coerceTo) || Long.class.equals(coerceTo)) {
+                    return (T) Long.valueOf(value);
+                }
+                if (boolean.class.equals(coerceTo) || Boolean.class.equals(coerceTo)) {
+                    return (T) Boolean.valueOf(value);
+                }
+                throw ServiceExceptionCode.absentService(StringParser.class);
+            }
+            return parser.parse(value, coerceTo);
         } catch (final RuntimeException e) {
             /*
              * Auto-unboxing may lead to NullPointerExceptions or NumberFormatExceptions if e.g. null or "Hello" should be coerced to an
              * integer value. Handle RuntimeException here to cover all possible non-declarable exceptions.
              */
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, null == value ? "null" : value);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, name, value);
         }
     }
 
@@ -1002,7 +1027,7 @@ public class AJAXRequestData {
      * @param value The header value
      */
     public void setHeader(final @Nullable String header, final @Nullable String value) {
-        if (!isEmpty(header)) {
+        if (!com.openexchange.java.Strings.isEmpty(header)) {
             if (null == value) {
                 headers.remove(header);
             } else {
@@ -1380,19 +1405,6 @@ public class AJAXRequestData {
      */
     public Map<String, Object> getProperties() {
         return Collections.unmodifiableMap(properties);
-    }
-
-    /** Check for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     /**

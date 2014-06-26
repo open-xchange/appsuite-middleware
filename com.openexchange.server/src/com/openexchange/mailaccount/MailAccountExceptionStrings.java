@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -123,6 +123,9 @@ public final class MailAccountExceptionStrings implements LocalizableStrings {
 
     // The given host name "%1$s" is not allowed.
     public static final String BLACKLISTED_SERVER_MSG_DISPLAY = "The given host name \"%1$s\" is not allowed.";
+
+    // The protocol must not changed from %1$s to %2$s
+    public static final String PROTOCOL_CHANGE_MSG_DISPLAY = "The protocol must not changed from %1$s to %2$s.";
 
     /**
      * Initializes a new {@link MailAccountExceptionStrings}.

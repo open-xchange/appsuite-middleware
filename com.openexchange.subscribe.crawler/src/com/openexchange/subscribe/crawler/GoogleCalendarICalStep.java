@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -105,7 +105,7 @@ public class GoogleCalendarICalStep extends AbstractStep<CalendarDataObject[], U
             ZipEntry entry;
             ICalParser iCalParser = workflow.getActivator().getICalParser();
             while ((entry = zis.getNextEntry()) != null) {
-                LOG.info("Extracting: {}", entry);
+                LOG.debug("Extracting: {}", entry);
                 int count;
                 byte data[] = new byte[buflen];
                 // write the files to the disk

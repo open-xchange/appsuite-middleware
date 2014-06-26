@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,29 +50,32 @@
 package com.openexchange.realtime.handle;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link HandleExceptionCode}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public enum HandleExceptionCode implements OXExceptionCode {
+public enum HandleExceptionCode implements DisplayableOXExceptionCode {
 
     /** Could not send directed Presence to resource: %1$s */
-    DIRECT_PRESENCE_FAILED(HandleExceptionMessage.DIRECT_PRESENCE_FAILED_MSG, CATEGORY_ERROR, 1)
+    DIRECT_PRESENCE_FAILED("Could not send directed Presence to resource: %1$s", CATEGORY_ERROR, 1, null)
     ;
 
     private final String message;
     private final int number;
     private final Category category;
+    private String displayMessage;
 
-    private HandleExceptionCode(final String message, final Category category, final int detailNumber) {
+    private HandleExceptionCode(final String message, final Category category, final int detailNumber, String displayMessage) {
         this.message = message;
         number = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -91,8 +94,13 @@ public enum HandleExceptionCode implements OXExceptionCode {
     }
 
     @Override
+    public String getDisplayMessage() {
+        return displayMessage;
+    }
+
+    @Override
     public String getPrefix() {
-        return "ATMOSPHERE";
+        return "RT_HANDLE";
     }
 
     @Override

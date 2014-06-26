@@ -51,7 +51,6 @@ package com.openexchange.caching.internal;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import java.io.Serializable;
 import org.junit.Test;
 import com.openexchange.caching.CacheKey;
 
@@ -72,7 +71,7 @@ public class CacheKeyImplTest {
     @Test
     public final void testSameHashCode() {
         final CacheKey key1 = new CacheKeyImpl(424242669, "teststring");
-        final CacheKey key2 = new CacheKeyImpl(424242669, new Serializable[] { "teststring" });
+        final CacheKey key2 = new CacheKeyImpl(424242669, new String[] { "teststring" });
         assertEquals("Generated hashes are not the same.", key1.hashCode(), key2.hashCode());
     }
 
@@ -82,7 +81,7 @@ public class CacheKeyImplTest {
     @Test
     public final void testEqualsObject() {
         final CacheKey key1 = new CacheKeyImpl(424242669, "teststring");
-        final CacheKey key2 = new CacheKeyImpl(424242669, new Serializable[] { "teststring" });
+        final CacheKey key2 = new CacheKeyImpl(424242669, new String[] { "teststring" });
         assertTrue("Equals failes when using different constructors.", key1.equals(key2));
         assertTrue("Equals failes when using different constructors.", key2.equals(key1));
     }

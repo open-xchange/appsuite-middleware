@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -60,30 +60,81 @@ import java.io.InputStream;
  */
 public interface ImageTransformationService {
 
-	/**
-	 * Initializes a new {@link ImageTransformations} working on the supplied source image.
-	 *
-	 * @param sourceImage The source image to use
-	 * @return A new {@link ImageTransformations} instance for the image
-	 */
+    // ----------------------------------------------------------------------------------------------------------- //
+
+    /**
+     * Initializes a new {@link ImageTransformations} working on the supplied source image considering calling {@link Thread} as source.
+     * <p>
+     * This is the same as calling <code>transfom(BufferedImage, Object)</code> with latter parameter set to <code>null</code>, thus calling
+     * {@link Thread} is referenced as source.
+     *
+     * @param sourceImage The source image to use
+     * @return A new {@link ImageTransformations} instance for the image
+     * @see #transfom(BufferedImage, Object)
+     */
     ImageTransformations transfom(BufferedImage sourceImage);
+
+    /**
+     * Initializes a new {@link ImageTransformations} working on the supplied source image.
+     *
+     * @param sourceImage The source image to use
+     * @param source The source for this invocation; if <code>null</code> calling {@link Thread} is referenced as source
+     * @return A new {@link ImageTransformations} instance for the image
+     */
+    ImageTransformations transfom(BufferedImage sourceImage, Object source);
+
+    // ----------------------------------------------------------------------------------------------------------- //
+
+    /**
+     * Initializes a new {@link ImageTransformations} working on the supplied source image stream considering calling {@link Thread} as
+     * source.
+     * <p>
+     * This is the same as calling <code>transfom(InputStream, Object)</code> with latter parameter set to <code>null</code>, thus calling
+     * {@link Thread} is referenced as source.
+     *
+     * @param imageStream The source image stream to use
+     * @return A new {@link ImageTransformations} instance for the stream
+     * @throws IOException If an I/O error occurs
+     * @see #transfom(InputStream, Object)
+     */
+    ImageTransformations transfom(InputStream imageStream) throws IOException;
 
     /**
      * Initializes a new {@link ImageTransformations} working on the supplied source image stream.
      *
      * @param imageStream The source image stream to use
+     * @param source The source for this invocation; if <code>null</code> calling {@link Thread} is referenced as source
      * @return A new {@link ImageTransformations} instance for the stream
-     * @throws IOException
+     * @throws IOException If an I/O error occurs
      */
-    ImageTransformations transfom(InputStream imageStream) throws IOException;
+    ImageTransformations transfom(InputStream imageStream, Object source) throws IOException;
+
+    // ----------------------------------------------------------------------------------------------------------- //
+
+    /**
+     * Initializes a new {@link ImageTransformations} working on the supplied source image data considering calling {@link Thread} as
+     * source.
+     * <p>
+     * This is the same as calling <code>transfom(byte[], Object)</code> with latter parameter set to <code>null</code>, thus calling
+     * {@link Thread} is referenced as source.
+     *
+     * @param sourceImage The source image data to use
+     * @return A new {@link ImageTransformations} instance for the image
+     * @throws IOException If an I/O error occurs
+     * @see #transfom(byte[], Object)
+     */
+    ImageTransformations transfom(byte[] imageData) throws IOException;
 
     /**
      * Initializes a new {@link ImageTransformations} working on the supplied source image data.
      *
      * @param sourceImage The source image data to use
+     * @param source The source for this invocation; if <code>null</code> calling {@link Thread} is referenced as source
      * @return A new {@link ImageTransformations} instance for the image
-     * @throws IOException
+     * @throws IOException If an I/O error occurs
      */
-    ImageTransformations transfom(byte[] imageData) throws IOException;
+    ImageTransformations transfom(byte[] imageData, Object source) throws IOException;
+
+    // ----------------------------------------------------------------------------------------------------------- //
 
 }

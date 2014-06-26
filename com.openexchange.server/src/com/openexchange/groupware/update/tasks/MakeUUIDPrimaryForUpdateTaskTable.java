@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -91,7 +91,7 @@ public class MakeUUIDPrimaryForUpdateTaskTable extends UpdateTaskAdapter {
             AddUUIDForUpdateTaskTable.fillUUIDs(con, progress);
 
             Tools.modifyColumns(con, "updateTask", new Column("uuid", "BINARY(16) NOT NULL"));
-            Tools.createPrimaryKey(con, "updateTask", new String[] { "cid", "uuid" });
+            Tools.createPrimaryKeyIfAbsent(con, "updateTask", new String[] { "cid", "uuid" });
             con.commit();
         } catch (SQLException e) {
             rollback(con);
@@ -107,7 +107,7 @@ public class MakeUUIDPrimaryForUpdateTaskTable extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[] { AddUUIDForUpdateTaskTable.class.getName() };
+        return new String[] { AddUUIDForUpdateTaskTable.class.getName(), DropDuplicateEntryFromUpdateTaskTable.class.getName() };
     }
 
     private static int getTotalRows(Connection con) throws SQLException {

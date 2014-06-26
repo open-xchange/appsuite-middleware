@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -185,7 +185,7 @@ public final class HttpManagersInit implements Initialization {
         if ('/' == servletPath.charAt(0)) {
             return servletPath;
         }
-        return new com.openexchange.java.StringAllocator(servletPath.length() + 1).append('/').append(servletPath).toString();
+        return new StringBuilder(servletPath.length() + 1).append('/').append(servletPath).toString();
     }
 
     private static Map<Object, Object> getPropertiesFromFile(final File f) throws IOException {

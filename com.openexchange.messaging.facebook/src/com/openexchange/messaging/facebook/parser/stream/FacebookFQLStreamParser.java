@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,7 +51,6 @@ package com.openexchange.messaging.facebook.parser.stream;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -773,7 +772,7 @@ public final class FacebookFQLStreamParser {
                 /*
                  * Start replacing with href
                  */
-                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(content.length());
+                final StringBuilder sb = new StringBuilder(content.length());
                 int lastMatch = 0;
                 do {
                     sb.append(content.substring(lastMatch, imgMatcher.start()));
@@ -795,7 +794,7 @@ public final class FacebookFQLStreamParser {
         "(?:src=\"([^\"]*)\")|(?:src='([^']*)')|(?:src=[^\"']([^\\s>]*))",
         Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-    private static void replaceWithSrcAttribute(final String imgTag, final com.openexchange.java.StringAllocator sb) {
+    private static void replaceWithSrcAttribute(final String imgTag, final StringBuilder sb) {
         final Matcher srcMatcher = SRC_PATTERN.matcher(imgTag);
         if (srcMatcher.find()) {
             /*

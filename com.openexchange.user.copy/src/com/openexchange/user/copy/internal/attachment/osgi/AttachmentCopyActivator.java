@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -69,11 +69,13 @@ public class AttachmentCopyActivator implements BundleActivator {
         super();
     }
 
+    @Override
     public void start(final BundleContext context) throws Exception {
         tracker = new ServiceTracker<QuotaFileStorageFactory, QuotaFileStorageFactory>(context, QuotaFileStorageFactory.class, new AttachmentCopyRegisterer(context));
         tracker.open();
     }
 
+    @Override
     public void stop(final BundleContext context) throws Exception {
         tracker.close();
     }

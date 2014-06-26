@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -66,7 +66,6 @@ import com.openexchange.dataretention.csv.CSVFile;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 
 /**
  * {@link AbstractWriteTask} - Abstract write task containing triggered {@link #run()} method, but delegating concrete CSV line creation to
@@ -267,7 +266,7 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
      */
     protected static final String escape(final String string) {
         final int length = string.length();
-        final StringAllocator sb = new StringAllocator(length + 8);
+        final StringBuilder sb = new StringBuilder(length + 8);
         for (int i = 0; i < length; i++) {
             final char c = string.charAt(i);
             if (',' == c || ';' == c || '"' == c || '\\' == c) {

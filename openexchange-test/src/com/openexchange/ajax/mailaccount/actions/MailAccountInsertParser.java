@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -71,7 +71,9 @@ public class MailAccountInsertParser extends AbstractAJAXParser<MailAccountInser
     protected MailAccountInsertResponse createResponse(final Response response) throws JSONException {
         final MailAccountInsertResponse resp = new MailAccountInsertResponse(response);
         final JSONObject account = (JSONObject) response.getData();
-        resp.setId(account.getInt("id"));
+        if (null != account) {
+            resp.setId(account.getInt("id"));
+        }
         return resp;
     }
 

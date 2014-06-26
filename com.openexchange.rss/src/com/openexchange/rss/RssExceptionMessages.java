@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -61,6 +61,12 @@ public final class RssExceptionMessages implements LocalizableStrings {
 
     // Invalid RSS URL -- No or not well-formed XML content provided by URL: %1$s
     public static final String INVALID_RSS_MSG = "Invalid RSS URL or not well-formed XML content provided by URL: %1$s";
+
+    // HTTP error %1$s while loading RSS feed from URL: %2$s.
+    public static final String RSS_HTTP_ERROR_MSG = "HTTP error %1$s while loading RSS feed from URL: %2$s.";
+
+    // Timeout while reading the RSS feed from URL: %1$s
+    public static final String TIMEOUT_ERROR_MSG = "Timeout while reading the RSS feed from URL: %1$s";
 
     /**
      * Initializes a new {@link RssExceptionMessages}.

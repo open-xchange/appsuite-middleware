@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -143,7 +143,7 @@ public final class MailId implements SortableId {
 
     @Override
     public String toString() {
-        return new com.openexchange.java.StringAllocator(32).append("{folderId=").append(fullName).append(", ordinal=").append(ordinal).append('}').toString();
+        return new StringBuilder(32).append("{folderId=").append(fullName).append(", ordinal=").append(ordinal).append('}').toString();
     }
 
 }

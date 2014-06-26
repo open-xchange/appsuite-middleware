@@ -49,7 +49,7 @@ public class FolderLockManagerTest extends FolderTestCase{
 	@Override
 	public void tearDown() throws Exception {
 		for(final int id : unlock) {
-			lockManager.unlock(id, ctx, user);
+			lockManager.unlock(id, session);
 		}
 		lockManager.commit();
 		lockManager.finish();
@@ -130,7 +130,7 @@ public class FolderLockManagerTest extends FolderTestCase{
 		final int lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, 0, "Me", ctx, user);
 		unlock.add(lockId);
 
-		lockManager.unlock(lockId, ctx, user);
+		lockManager.unlock(lockId, session);
 
 		final List<FolderLock> locks =  lockManager.findFolderLocks(entity, ctx, user);
 		assertTrue(locks.isEmpty());

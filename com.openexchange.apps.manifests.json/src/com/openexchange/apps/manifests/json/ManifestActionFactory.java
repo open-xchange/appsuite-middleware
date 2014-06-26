@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -70,7 +70,7 @@ public class ManifestActionFactory implements AJAXActionServiceFactory {
 
     public ManifestActionFactory(ServiceLookup services, JSONArray manifests, ServerConfigServicesLookup registry) {
         super();
-        all = new AllAction(services, manifests);
+        all = new AllAction(services, manifests, registry);
         config = new ConfigAction(services, manifests, registry);
     }
 

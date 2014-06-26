@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -57,6 +57,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.java.Strings;
@@ -260,15 +261,11 @@ public class Contact extends CommonObject {
 
     public static final int USERFIELD20 = 590;
 
-    public static final int LINKS = 591;
-
     public static final int DISTRIBUTIONLIST = 592;
 
     public static final int CONTEXTID = 593;
 
     public static final int NUMBER_OF_DISTRIBUTIONLIST = 594;
-
-    public static final int CONTACT_NUMBER_OF_LINKS = 595;
 
     public static final int NUMBER_OF_IMAGES = 596;
 
@@ -304,16 +301,16 @@ public class Contact extends CommonObject {
     /**
      * Additional fields for kana based search in japanese environments.
      */
-    public static final int YOMI_FIRST_NAME = 610;
-    public static final int YOMI_LAST_NAME = 611;
-    public static final int YOMI_COMPANY = 612;
+    public static final int YOMI_FIRST_NAME = 616;
+    public static final int YOMI_LAST_NAME = 617;
+    public static final int YOMI_COMPANY = 618;
 
     /**
      * Additional fields for Outlook address fields.
      */
-    public static final int ADDRESS_HOME = 613;
-    public static final int ADDRESS_BUSINESS = 614;
-    public static final int ADDRESS_OTHER = 615;
+    public static final int ADDRESS_HOME = 619;
+    public static final int ADDRESS_BUSINESS = 620;
+    public static final int ADDRESS_OTHER = 621;
 
     /**
      * Sorted array of fields belonging to business address.
@@ -354,9 +351,9 @@ public class Contact extends CommonObject {
         TELEPHONE_CALLBACK, TELEPHONE_CAR, TELEPHONE_COMPANY, TELEPHONE_HOME1, TELEPHONE_HOME2, FAX_HOME, CELLULAR_TELEPHONE1,
         CELLULAR_TELEPHONE2, TELEPHONE_OTHER, FAX_OTHER, EMAIL1, EMAIL2, EMAIL3, URL, TELEPHONE_ISDN, TELEPHONE_PAGER, TELEPHONE_PRIMARY,
         TELEPHONE_RADIO, TELEPHONE_TELEX, TELEPHONE_TTYTDD, INSTANT_MESSENGER1, INSTANT_MESSENGER2, TELEPHONE_IP, TELEPHONE_ASSISTANT,
-        COMPANY, IMAGE1, USERFIELD01, USERFIELD02, USERFIELD03, USERFIELD04, USERFIELD05, USERFIELD06, USERFIELD07, USERFIELD08,
+        COMPANY, IMAGE1, IMAGE1_CONTENT_TYPE, USERFIELD01, USERFIELD02, USERFIELD03, USERFIELD04, USERFIELD05, USERFIELD06, USERFIELD07, USERFIELD08,
         USERFIELD09, USERFIELD10, USERFIELD11, USERFIELD12, USERFIELD13, USERFIELD14, USERFIELD15, USERFIELD16, USERFIELD17, USERFIELD18,
-        USERFIELD19, USERFIELD20, LINKS, DISTRIBUTIONLIST, YOMI_FIRST_NAME, YOMI_LAST_NAME, YOMI_COMPANY, ADDRESS_BUSINESS, ADDRESS_HOME,
+        USERFIELD19, USERFIELD20, DISTRIBUTIONLIST, YOMI_FIRST_NAME, YOMI_LAST_NAME, YOMI_COMPANY, ADDRESS_BUSINESS, ADDRESS_HOME,
         ADDRESS_OTHER, UID
     };
     public static final int[] ALL_COLUMNS = com.openexchange.tools.arrays.Arrays.addUniquely(CONTENT_COLUMNS, new int[] {
@@ -364,7 +361,7 @@ public class Contact extends CommonObject {
         INTERNAL_USERID,
         // Produces error: missing field in mapping: 593 (ContactWriter.java:603)// CONTEXTID,
         NUMBER_OF_DISTRIBUTIONLIST,
-        CONTACT_NUMBER_OF_LINKS, // NUMBER_OF_IMAGES,
+        // NUMBER_OF_IMAGES,
         // IMAGE_LAST_MODIFIED, FILE_AS,
         // Produces a MySQLDataException// ATTACHMENT,
         // IMAGE1_CONTENT_TYPE, MARK_AS_DISTRIBUTIONLIST,
@@ -576,7 +573,7 @@ public class Contact extends CommonObject {
 
     protected Date image_last_modified;
 
-    protected volatile int number_of_images;
+    protected AtomicInteger number_of_images = new AtomicInteger();
 
     protected String file_as;
 
@@ -797,8 +794,6 @@ public class Contact extends CommonObject {
     protected boolean b_internal_userId;
 
     protected boolean b_image_last_modified;
-
-    protected LinkEntryObject[] links;
 
     protected boolean b_file_as;
 
@@ -1154,7 +1149,7 @@ public class Contact extends CommonObject {
     }
 
     public int getNumberOfImages() {
-        return number_of_images;
+        return number_of_images.get();
     }
 
     public String getUserField01() {
@@ -1237,21 +1232,12 @@ public class Contact extends CommonObject {
         return userfield20;
     }
 
-    @Override
-    public int getNumberOfLinks() {
-        return number_of_links;
-    }
-
     public int getNumberOfDistributionLists() {
         return number_of_dlists;
     }
 
     public DistributionListEntryObject[] getDistributionList() {
         return dlists;
-    }
-
-    public LinkEntryObject[] getLinks() {
-        return links;
     }
 
     public int getContextId() {
@@ -1763,7 +1749,7 @@ public class Contact extends CommonObject {
         this.image1 = image1;
         b_containsImage = true;
         b_image1 = true;
-        number_of_images = number_of_images + 1;
+        number_of_images.incrementAndGet();
     }
 
     public void setImageContentType(final String imageContentType) {
@@ -1772,13 +1758,7 @@ public class Contact extends CommonObject {
     }
 
     public void setNumberOfImages(final int number_of_images) {
-        this.number_of_images = number_of_images;
-    }
-
-    @Override
-    public void setNumberOfLinks(final int number_of_links) {
-        this.number_of_links = number_of_links;
-        b_number_of_links = true;
+        this.number_of_images.set(number_of_images);
     }
 
     public void setNumberOfDistributionLists(final int listsize) {
@@ -1799,12 +1779,6 @@ public class Contact extends CommonObject {
         number_of_dlists = dleo.length;
         b_number_of_dlists = true;
         markAsDistributionlist();
-    }
-
-    public void setLinks(final LinkEntryObject[] links) {
-        this.links = links;
-        number_of_links = links.length;
-        b_number_of_links = true;
     }
 
     public void setContextId(final int cid) {
@@ -2242,7 +2216,7 @@ public class Contact extends CommonObject {
         image1 = null;
         b_containsImage = false;
         b_image1 = false;
-        number_of_images = 0;
+        number_of_images.set(0);
     }
 
     public void removeImageContentType() {
@@ -2350,13 +2324,6 @@ public class Contact extends CommonObject {
         b_userfield20 = false;
     }
 
-    @Override
-    public void removeNumberOfLinks() {
-        links = null;
-        number_of_links = 0;
-        b_number_of_links = false;
-    }
-
     public void removeNumberOfDistributionLists() {
         dlists = null;
         number_of_dlists = 0;
@@ -2367,12 +2334,6 @@ public class Contact extends CommonObject {
         dlists = null;
         number_of_dlists = 0;
         b_number_of_dlists = false;
-    }
-
-    public void removeLinks() {
-        links = null;
-        b_number_of_links = false;
-        number_of_links = 0;
     }
 
     public void removeMarkAsDistributionlist() {
@@ -2799,19 +2760,6 @@ public class Contact extends CommonObject {
         return bImageContentType;
     }
 
-    public boolean containsLinks() {
-        return (links != null);
-    }
-
-    @Override
-    public boolean containsNumberOfLinks() {
-        return b_number_of_links;
-    }
-
-    public int getSizeOfLinks() {
-        return number_of_links;
-    }
-
     public boolean containsNumberOfDistributionLists() {
         return b_number_of_dlists;
     }
@@ -3058,11 +3006,6 @@ public class Contact extends CommonObject {
 
         if ((!containsInternalUserId() && other.containsInternalUserId()) || (containsInternalUserId() && other.containsInternalUserId() && getInternalUserId() != other.getInternalUserId())) {
             differingFields.add(I(INTERNAL_USERID));
-        }
-
-        if ((!containsLinks() && other.containsLinks()) || (containsLinks() && other.containsLinks() && getLinks() != other.getLinks() && (getLinks() == null || !getLinks().equals(
-            other.getLinks())))) {
-            differingFields.add(I(LINKS));
         }
 
         if ((!containsManagerName() && other.containsManagerName()) || (containsManagerName() && other.containsManagerName() && getManagerName() != other.getManagerName() && (getManagerName() == null || !getManagerName().equals(
@@ -3517,9 +3460,6 @@ public class Contact extends CommonObject {
         case URL:
             setURL((String) value);
             break;
-        case LINKS:
-            setLinks((LinkEntryObject[]) value);
-            break;
         case NUMBER_OF_EMPLOYEE:
             setNumberOfEmployee((String) value);
             break;
@@ -3733,9 +3673,6 @@ public class Contact extends CommonObject {
         case NUMBER_OF_DISTRIBUTIONLIST:
             setNumberOfDistributionLists( ( (Integer) value ).intValue() );
             break;
-        case CONTACT_NUMBER_OF_LINKS:
-            setNumberOfLinks( ((Integer) value).intValue() );
-            break;
         case USE_COUNT:
             setUseCount(((Integer) value).intValue());
             break;
@@ -3826,8 +3763,6 @@ public class Contact extends CommonObject {
             return getTelephoneIP();
         case URL:
             return getURL();
-        case LINKS:
-            return getLinks();
         case NUMBER_OF_EMPLOYEE:
             return getNumberOfEmployee();
         case POSTAL_CODE_OTHER:
@@ -3970,8 +3905,6 @@ public class Contact extends CommonObject {
             return getDistributionList();
         case NUMBER_OF_DISTRIBUTIONLIST:
             return Integer.valueOf( getNumberOfDistributionLists() );
-        case CONTACT_NUMBER_OF_LINKS:
-            return Integer.valueOf( getNumberOfLinks() );
         case USE_COUNT:
             return Integer.valueOf(getUseCount());
         case YOMI_FIRST_NAME:
@@ -4055,8 +3988,6 @@ public class Contact extends CommonObject {
             return containsTelephoneIP();
         case URL:
             return containsURL();
-        case LINKS:
-            return containsLinks();
         case NUMBER_OF_EMPLOYEE:
             return containsNumberOfEmployee();
         case POSTAL_CODE_OTHER:
@@ -4199,8 +4130,6 @@ public class Contact extends CommonObject {
             return containsDistributionLists();
         case NUMBER_OF_DISTRIBUTIONLIST:
             return containsNumberOfDistributionLists();
-        case CONTACT_NUMBER_OF_LINKS:
-            return containsNumberOfLinks();
         case NUMBER_OF_IMAGES:
             return containsImage1();
         case USE_COUNT:
@@ -4312,9 +4241,6 @@ public class Contact extends CommonObject {
             break;
         case URL:
             removeURL();
-            break;
-        case LINKS:
-            removeLinks();
             break;
         case NUMBER_OF_EMPLOYEE:
             removeNumberOfEmployee();
@@ -4528,9 +4454,6 @@ public class Contact extends CommonObject {
             break;
         case NUMBER_OF_DISTRIBUTIONLIST:
             removeNumberOfDistributionLists();
-            break;
-        case CONTACT_NUMBER_OF_LINKS:
-            removeNumberOfLinks();
             break;
         case USE_COUNT:
             removeUseCount();

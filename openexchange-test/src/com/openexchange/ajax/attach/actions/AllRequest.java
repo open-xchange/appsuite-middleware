@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,6 +50,8 @@
 package com.openexchange.ajax.attach.actions;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.attach.AttachmentTools;
@@ -77,6 +79,14 @@ public class AllRequest extends AbstractAttachmentRequest<AllResponse> {
         this.sort = sort;
         this.order = order;
     }
+    
+    public AllRequest(final CommonObject obj, final int[] columns) {
+        super();
+        this.obj = obj;
+        this.columns = columns;
+        this.sort = -1;
+        this.order = null;
+    }
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
@@ -85,15 +95,19 @@ public class AllRequest extends AbstractAttachmentRequest<AllResponse> {
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-        return new Parameter[] {
-            new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL),
-            new Parameter(AJAXServlet.PARAMETER_ATTACHEDID, obj.getObjectID()),
-            new Parameter(AJAXServlet.PARAMETER_FOLDERID, obj.getParentFolderID()),
-            new Parameter(AJAXServlet.PARAMETER_MODULE, AttachmentTools.determineModule(obj)),
-            new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns),
-            new Parameter(AJAXServlet.PARAMETER_SORT, sort),
-            new Parameter(AJAXServlet.PARAMETER_ORDER, order.toString())
-        };
+        List<Parameter> parameters = new ArrayList<Parameter>();
+        parameters.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL));
+        parameters.add(new Parameter(AJAXServlet.PARAMETER_ATTACHEDID, obj.getObjectID()));
+        parameters.add(new Parameter(AJAXServlet.PARAMETER_FOLDERID, obj.getParentFolderID()));
+        parameters.add(new Parameter(AJAXServlet.PARAMETER_MODULE, AttachmentTools.determineModule(obj)));
+        parameters.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
+
+        if (sort > 0) {
+            parameters.add(new Parameter(AJAXServlet.PARAMETER_SORT, sort));
+            parameters.add(new Parameter(AJAXServlet.PARAMETER_ORDER, order.toString()));
+        }
+        
+        return parameters.toArray(new Parameter[parameters.size()]);
     }
 
     @Override

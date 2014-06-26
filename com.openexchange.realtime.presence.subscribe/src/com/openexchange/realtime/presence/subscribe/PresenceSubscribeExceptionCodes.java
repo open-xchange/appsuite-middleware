@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,18 +50,19 @@
 package com.openexchange.realtime.presence.subscribe;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link PresenceSubscribeExceptionCodes} - Error codes for message dispatcher.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public enum PresenceSubscribeExceptionCodes implements OXExceptionCode {
+public enum PresenceSubscribeExceptionCodes implements DisplayableOXExceptionCode {
     /** Invalid context ID. Couldn't find context for: %1$s */
-    INVALID_CONTEXT_ID(PresenceSubscribeExceptionMessages.INVALID_CONTEXT_ID, CATEGORY_ERROR, 1),
+    INVALID_CONTEXT_ID("Invalid context ID. Couldn't find context for: %1$s", CATEGORY_ERROR, 1, null),
     ;
 
     private int number;
@@ -70,10 +71,13 @@ public enum PresenceSubscribeExceptionCodes implements OXExceptionCode {
 
     private String message;
 
-    private PresenceSubscribeExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private String displayMessage;
+
+    private PresenceSubscribeExceptionCodes(final String message, final Category category, final int detailNumber, String displayMessage) {
         this.message = message;
         this.number = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -88,12 +92,17 @@ public enum PresenceSubscribeExceptionCodes implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "RT";
+        return "RT_PRESENCE_SUBSCRIBE";
     }
 
     @Override
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override

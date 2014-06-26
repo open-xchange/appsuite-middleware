@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -65,7 +65,6 @@ import java.util.regex.Pattern;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.Order;
-import com.openexchange.java.StringAllocator;
 
 /**
  * Utilities for database resource handling.
@@ -307,7 +306,7 @@ public final class DBUtils {
         if (length <= 0) {
             return sql;
         }
-        final StringAllocator retval = new StringAllocator(sql);
+        final StringBuilder retval = new StringBuilder(sql);
         retval.append('?');
         for (int i = 1; i < length; i++) {
             retval.append(",?");

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -57,7 +57,7 @@ import java.io.Serializable;
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class ElementPath implements Serializable {
+public class ElementPath implements Serializable, Comparable<ElementPath> {
 
     private static final long serialVersionUID = -3227354270593651700L;
 
@@ -65,6 +65,13 @@ public class ElementPath implements Serializable {
 
     private String element = "";
 
+    /**
+     * Initializes a new {@link ElementPath} structured after Javas Package.Class namespace scheme
+     * <code>PathRoot.PathNode1.PathNode2.Element</code>.
+     * 
+     * @param namespace The namespace containing elements e.g. "PathRoot.PathNode1.PathNode2" 
+     * @param element The name of the element within the namespace e.g. "Element"
+     */
     public ElementPath(String namespace, String element) {
         if (namespace != null) {
             this.namespace = namespace;
@@ -159,6 +166,11 @@ public class ElementPath implements Serializable {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public int compareTo(ElementPath other) {
+        return getElementPath().compareTo(other.getElementPath());
     }
 
 }

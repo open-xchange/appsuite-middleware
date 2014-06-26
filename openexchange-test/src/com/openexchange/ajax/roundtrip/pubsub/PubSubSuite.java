@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -64,7 +64,7 @@ public class PubSubSuite {
     }
 
     public static final Test suite() {
-        TestSuite suite = new TestSuite();
+        TestSuite suite = new TestSuite("com.openexchange.ajax.roundtrip.pubsub.PubSubSuite");
 
         suite.addTestSuite(DoNotDuplicateEmptyContactsTest.class);
         suite.addTestSuite(DoNotLoseContactsWhenPublishingAndSubscribing.class);

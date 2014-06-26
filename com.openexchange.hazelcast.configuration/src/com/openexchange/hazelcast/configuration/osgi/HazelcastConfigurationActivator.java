@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -56,6 +56,7 @@ import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.hazelcast.configuration.internal.AddNodeUtilCommandProvider;
 import com.openexchange.hazelcast.configuration.internal.HazelcastConfigurationServiceImpl;
 import com.openexchange.hazelcast.configuration.internal.Services;
+import com.openexchange.hazelcast.serialization.DynamicPortableFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.tools.strings.StringParser;
 
@@ -77,13 +78,13 @@ public class HazelcastConfigurationActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class, StringParser.class };
+        return new Class[] { ConfigurationService.class, StringParser.class, DynamicPortableFactory.class};
     }
 
     @Override
     protected void startBundle() throws Exception {
         Services.set(this);
-        HazelcastConfigurationServiceImpl configService = new HazelcastConfigurationServiceImpl(context);
+        HazelcastConfigurationServiceImpl configService = new HazelcastConfigurationServiceImpl();
         registerService(HazelcastConfigurationService.class, configService);
         registerService(CommandProvider.class, new AddNodeUtilCommandProvider(configService));
     }

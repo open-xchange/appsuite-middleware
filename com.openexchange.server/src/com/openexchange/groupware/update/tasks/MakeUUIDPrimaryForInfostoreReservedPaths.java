@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -71,24 +71,22 @@ import com.openexchange.tools.update.Tools;
  */
 public class MakeUUIDPrimaryForInfostoreReservedPaths extends UpdateTaskAdapter {
 
-    private static final String TABLE = "infostoreReservedPaths";
-
-    private static final String COLUMN = "uuid";
-
     @Override
     public void perform(PerformParameters params) throws OXException {
         ProgressState progress = params.getProgressState();
         Connection connection = Database.getNoTimeout(params.getContextId(), true);
         try {
             DBUtils.startTransaction(connection);
-            progress.setTotal(getTotalRows(connection));
-            if (!Tools.columnExists(connection, TABLE, COLUMN)) {
-                throw UpdateExceptionCodes.COLUMN_NOT_FOUND.create(COLUMN, TABLE);
+            final String table = "infostoreReservedPaths";
+            final String column = "uuid";
+            progress.setTotal(getTotalRows(table, connection));
+            if (!Tools.columnExists(connection, table, column)) {
+                throw UpdateExceptionCodes.COLUMN_NOT_FOUND.create(column, table);
             }
 
-            AddUUIDForInfostoreReservedPaths.fillUUIDs(connection, TABLE, progress);
-            Tools.modifyColumns(connection, TABLE, new Column(COLUMN, "BINARY(16) NOT NULL"));
-            Tools.createPrimaryKey(connection, TABLE, new String[] { "cid", COLUMN });
+            AddUUIDForInfostoreReservedPaths.fillUUIDs(connection, table, progress);
+            Tools.modifyColumns(connection, table, new Column(column, "BINARY(16) NOT NULL"));
+            Tools.createPrimaryKeyIfAbsent(connection, table, new String[] { "cid", column });
             connection.commit();
         } catch (SQLException e) {
             DBUtils.rollback(connection);
@@ -104,13 +102,13 @@ public class MakeUUIDPrimaryForInfostoreReservedPaths extends UpdateTaskAdapter 
         return new String[] { "com.openexchange.groupware.update.tasks.AddUUIDForInfostoreReservedPaths" };
     }
 
-    private int getTotalRows(Connection con) throws SQLException {
+    private int getTotalRows(String table, Connection con) throws SQLException {
         Statement stmt = null;
         ResultSet rs = null;
         int rows = 0;
         try {
             stmt = con.createStatement();
-            rs = stmt.executeQuery("SELECT COUNT(*) FROM " + TABLE + " WHERE uuid IS NULL");
+            rs = stmt.executeQuery("SELECT COUNT(*) FROM " + table + " WHERE uuid IS NULL");
             while (rs.next()) {
                 rows += rs.getInt(1);
             }

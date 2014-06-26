@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -58,7 +58,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.copy.UserCopyExceptionCodes;
 
@@ -83,9 +85,9 @@ public class GenconfCopyTool {
     private static final String INSERT_ATTRIBUTES =
         "INSERT INTO " +
             "genconf_attributes_#TYPE# " +
-            "(cid, id, name, value) " +
+            "(cid, id, name, value, uuid) " +
         "VALUES " +
-            "(?, ?, ?, ?)";
+            "(?, ?, ?, ?, ?)";
 
 
     public static void writeAttributesToDB(final List<ConfAttribute> attributes, final Connection con, final int id, final int cid, final int type) throws OXException {
@@ -103,6 +105,7 @@ public class GenconfCopyTool {
                 } else {
                     setStringOrNull(i++, stmt, attribute.getValue());
                 }
+                stmt.setBytes(i++, UUIDs.toByteArray(UUID.randomUUID()));
 
                 stmt.addBatch();
             }

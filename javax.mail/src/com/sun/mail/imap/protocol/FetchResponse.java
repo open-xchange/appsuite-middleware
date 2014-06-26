@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -102,16 +102,17 @@ public class FetchResponse extends IMAPResponse {
 	return items[index];
     }
 
-    public Item getItem(Class c) {
+    public <T extends Item> T getItem(Class<T> c) {
 	for (int i = 0; i < items.length; i++) {
 	    if (c.isInstance(items[i]))
-		return items[i];
+		return c.cast(items[i]);
 	}
 
 	return null;
     }
 
-    public static Item getItem(Response[] r, int msgno, Class c) {
+    public static <T extends Item> T getItem(Response[] r, int msgno,
+				Class<T> c) {
 	if (r == null)
 	    return null;
 
@@ -125,14 +126,14 @@ public class FetchResponse extends IMAPResponse {
 	    FetchResponse f = (FetchResponse)r[i];
 	    for (int j = 0; j < f.items.length; j++) {
 		if (c.isInstance(f.items[j]))
-		    return f.items[j];
+		    return c.cast(f.items[j]);
 	    }
 	}
 
 	return null;
     }
 
-    public static Item getItem(Response[] r, Class c) {
+    public static <T extends Item> T getItem(Response[] r, Class<T> c) {
         if (r == null)
             return null;
 
@@ -144,7 +145,7 @@ public class FetchResponse extends IMAPResponse {
             final FetchResponse f = (FetchResponse) r[i];
             for (int j = 0; j < f.items.length; j++) {
                 if (c.isInstance(f.items[j])) {
-                    return f.items[j];
+                    return c.cast(f.items[j]);
                 }
             }
         }
@@ -174,7 +175,7 @@ public class FetchResponse extends IMAPResponse {
 	    throw new ParsingException(
 		"error in FETCH parsing, missing '(' at index " + index);
 
-	Vector v = new Vector();
+	List<Item> v = new ArrayList<Item>();
 	Item i = null;
 	do {
 	    index++; // skip '(', or SPACE
@@ -185,15 +186,14 @@ public class FetchResponse extends IMAPResponse {
 
 	    i = parseItem();
 	    if (i != null)
-		v.addElement(i);
+		v.add(i);
 	    else if (!parseExtensionItem())
 		throw new ParsingException(
 		"error in FETCH parsing, unrecognized item at index " + index);
 	} while (buffer[index] != ')');
 
 	index++; // skip ')'
-	items = new Item[v.size()];
-	v.copyInto(items);
+	items = v.toArray(new Item[v.size()]);
     }
 
     /**
@@ -239,6 +239,20 @@ public class FetchResponse extends IMAPResponse {
 	case 'U': case 'u':
 	    if (match(UID.name))
 		return new UID(this);
+	    break;
+    case 'X': case 'x':
+        {
+            if (match(X_REAL_UID.name)) {
+                return new X_REAL_UID(this);
+            }
+            if (match(X_MAILBOX.name)) {
+                return new X_MAILBOX(this);
+            }
+        }
+        break;
+	case 'M': case 'm':
+	    if (match(MODSEQ.name))
+		return new MODSEQ(this);
 	    break;
 	default: 
 	    break;

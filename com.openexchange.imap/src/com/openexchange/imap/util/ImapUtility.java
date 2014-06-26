@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,7 +52,6 @@ package com.openexchange.imap.util;
 import java.util.Locale;
 import javax.mail.MessagingException;
 import javax.mail.Store;
-import com.openexchange.java.StringAllocator;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 
@@ -81,7 +80,7 @@ public final class ImapUtility {
         if (null == imapFolder) {
             return info;
         }
-        final StringAllocator sb = new StringAllocator(info);
+        final StringBuilder sb = new StringBuilder(info);
         sb.append(" (folder=\"").append(imapFolder.getFullName()).append('"');
         final Store store = imapFolder.getStore();
         if (null != store) {
@@ -100,7 +99,7 @@ public final class ImapUtility {
      * @return The command with optional information appended
      */
     public static String appendCommandInfo(final String info, final String fullName, final String store) {
-        final StringAllocator sb = new StringAllocator(info);
+        final StringBuilder sb = new StringBuilder(info);
         boolean parenthesis = true;
         if (!isEmpty(fullName)) {
             sb.append(" (folder=\"").append(fullName).append('"');

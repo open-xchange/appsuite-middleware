@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -100,7 +100,7 @@ public final class CachingFileStorageAccountStorage implements FileStorageAccoun
      * @return The new cache key
      */
     protected static CacheKey newCacheKey(final CacheService cacheService, final String serviceId, final int id, final int user, final int cid) {
-        return cacheService.newCacheKey(cid, serviceId, Integer.valueOf(id), Integer.valueOf(user));
+        return cacheService.newCacheKey(cid, serviceId, String.valueOf(id), String.valueOf(user));
     }
 
     /*-
@@ -233,7 +233,7 @@ public final class CachingFileStorageAccountStorage implements FileStorageAccoun
     public void cleanUp(final FileStorageService parentService, final String secret, final Session session) throws OXException {
         delegatee.cleanUp(parentService, secret, session);
     }
-    
+
     public void removeUnrecoverableItems(final FileStorageService parentService, final String secret, final Session session) throws OXException {
         delegatee.removeUnrecoverableItems(parentService, secret, session);
     }

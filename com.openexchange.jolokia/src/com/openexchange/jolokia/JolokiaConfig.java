@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -128,8 +128,8 @@ public class JolokiaConfig implements Initialization {
         // jolokia properties
         this.jolokiaServletName = configService.getProperty("com.openexchange.jolokia.servlet.name", "/monitoring/jolokia");
         this.jolokiaStart = configService.getBoolProperty("com.openexchange.jolokia.start", false);
-        this.user = configService.getProperty("com.openexchange.jolokia.user");
-        this.password = configService.getProperty("com.openexchange.jolokia.password");
+        this.user = configService.getProperty("com.openexchange.jolokia.user","");
+        this.password = configService.getProperty("com.openexchange.jolokia.password","");
         this.restrictToLocalhost = configService.getBoolProperty("com.openexchange.jolokia.restrict.to.localhost", true);
         
         // only allow Jolokia to be started if user and password are set by admin
@@ -159,8 +159,17 @@ public class JolokiaConfig implements Initialization {
         }
 
 
-        pConfig.put(ConfigKey.MAX_OBJECTS.getKeyValue(), configService.getProperty("com.openexchange.jolokia.maxObjects", "0"));
-        pConfig.put(ConfigKey.MAX_DEPTH.getKeyValue(), configService.getProperty("com.openexchange.jolokia.maxDepth", "0"));
+        
+        final String maxObjects = configService.getProperty("com.openexchange.jolokia.maxObjects", "0");
+        if (null != maxObjects) {
+            pConfig.put(ConfigKey.MAX_OBJECTS.getKeyValue(), maxObjects);
+        }
+        
+        final String maxDepth = configService.getProperty("com.openexchange.jolokia.maxDepth", "0");
+        if (null != maxDepth) {
+            pConfig.put(ConfigKey.MAX_DEPTH.getKeyValue(), maxDepth);
+        }
+        
 
     }
 

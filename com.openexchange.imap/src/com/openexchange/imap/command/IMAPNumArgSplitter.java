@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -283,7 +283,7 @@ public final class IMAPNumArgSplitter {
         }
         int prev = numbers.get(0);
         boolean contiguous = false;
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(size << 2);
+        final StringBuilder sb = new StringBuilder(size << 2);
         sb.append(prev);
         for (int i = 1; i < size; i++) {
             final int current = numbers.get(i);
@@ -328,7 +328,7 @@ public final class IMAPNumArgSplitter {
         }
         long prev = numbers.getQuick(0);
         boolean contiguous = false;
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(size << 2);
+        final StringBuilder sb = new StringBuilder(size << 2);
         sb.append(prev);
         for (int i = 1; i < size; i++) {
             final long current = numbers.getQuick(i);
@@ -356,13 +356,13 @@ public final class IMAPNumArgSplitter {
     private static String[] split(final Tokenizer tokenizer, final int length) {
         final int initCap = (length / MAX_IMAP_COMMAND_LENGTH_WITH_DEFAULT_CONSUMED);
         final List<String> tmp = new ArrayList<String>(initCap == 0 ? 10 : initCap);
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(MAX_IMAP_COMMAND_LENGTH_WITH_DEFAULT_CONSUMED);
+        final StringBuilder sb = new StringBuilder(MAX_IMAP_COMMAND_LENGTH_WITH_DEFAULT_CONSUMED);
         sb.append(tokenizer.getNext(0));
         for (int i = 1; i < length; i++) {
             final String sUid = tokenizer.getNext(i);
             if (sb.length() + sUid.length() + 1 > MAX_IMAP_COMMAND_LENGTH_WITH_DEFAULT_CONSUMED) {
                 tmp.add(sb.toString());
-                sb.reinitTo(0);
+                sb.setLength(0);
             } else {
                 sb.append(',');
             }

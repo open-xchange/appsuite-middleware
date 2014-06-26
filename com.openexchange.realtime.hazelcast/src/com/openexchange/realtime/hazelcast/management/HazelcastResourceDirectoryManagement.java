@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,7 +49,6 @@
 
 package com.openexchange.realtime.hazelcast.management;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -72,7 +71,7 @@ public class HazelcastResourceDirectoryManagement extends ManagementObject<Hazel
 
     private ObjectName objectName = null;
     private final HazelcastResourceDirectory resourceDirectory;
-    
+
     /**
      * Initializes a new {@link RealtimeConfigManagement}.
      * @param mbeanInterface
@@ -101,9 +100,9 @@ public class HazelcastResourceDirectoryManagement extends ManagementObject<Hazel
 
     /**
      * Get the mapping of general IDs to full IDs e.g. marc.arens@premium <-> ox://marc.arens@premium/random.
-     * 
+     *
      * @return the map used for mapping general IDs to full IDs.
-     * @throws OXException if the HazelcastInstance is missing. 
+     * @throws OXException if the HazelcastInstance is missing.
      */
     @Override
     public Map<String, List<String>> getIDMapping() throws OXException {
@@ -118,18 +117,18 @@ public class HazelcastResourceDirectoryManagement extends ManagementObject<Hazel
 
     /**
      * Get the mapping of full IDs to the Resource e.g. ox://marc.arens@premuim/random <-> ResourceMap.
-     * 
+     *
      * @return the map used for mapping full IDs to ResourceMaps.
      * @throws OXException if the map couldn't be fetched from hazelcast
      */
     @Override
-    public Map<String, Map<String, Serializable>> getResourceMapping() throws OXException {
-        IMap<String,Map<String,Serializable>> resourceMapping = resourceDirectory.getResourceMapping();
-        Map<String,Map<String,Serializable>> jmxMap = new HashMap<String,Map<String,Serializable>>(resourceMapping.size());
-        for (Map.Entry<String, Map<String, Serializable>> entry : resourceMapping.entrySet()) {
+    public Map<String, Map<String, Object>> getResourceMapping() throws OXException {
+        IMap<String,Map<String,Object>> resourceMapping = resourceDirectory.getResourceMapping();
+        Map<String,Map<String,Object>> jmxMap = new HashMap<String,Map<String,Object>>(resourceMapping.size());
+        for (Map.Entry<String, Map<String, Object>> entry : resourceMapping.entrySet()) {
             String concreteID = entry.getKey();
-            Map<String, Serializable> resourceMap = entry.getValue();
-            Serializable routingInfo = resourceMap.get("routingInfo");
+            Map<String, Object> resourceMap = entry.getValue();
+            Object routingInfo = resourceMap.get("routingInfo");
             if(routingInfo!=null) {
                 resourceMap.put("routingInfo", routingInfo.toString());
             }
@@ -137,6 +136,6 @@ public class HazelcastResourceDirectoryManagement extends ManagementObject<Hazel
         }
         return jmxMap;
     }
-    
+
 
 }

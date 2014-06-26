@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,13 +49,19 @@
 
 package com.openexchange.admin.osgi;
 
+import java.util.HashMap;
+import java.util.Map;
+import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.impl.BasicAuthenticator;
+import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.auth.Authenticator;
 import com.openexchange.auth.Credentials;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 
 
@@ -65,7 +71,9 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.4.2
  */
-public final class AuthenticatorImpl implements Authenticator {
+public final class AuthenticatorImpl implements Authenticator, Reloadable {
+
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AuthenticatorImpl.class);
 
     /**
      * Initializes a new {@link AuthenticatorImpl}.
@@ -125,6 +133,25 @@ public final class AuthenticatorImpl implements Authenticator {
             oxe.setStackTrace(e.getStackTrace());
             throw oxe;
         }
+    }
+
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        try {
+            AdminCache cache = AdminDaemon.getCache();
+            cache.reloadMasterCredentials(configService);
+            cache.reinitAccessCombinations();
+        } catch (Exception e) {
+            log.error("Error reloading admin configuration", e);
+        }
+    }
+
+    @Override
+    public Map<String, String[]> getConfigFileNames() {
+        Map<String, String[]> map = new HashMap<String, String[]>(2);
+        map.put("mpasswd", new String[] {"all properties in file"});
+        map.put("ModuleAccessDefinitions.properties", new String[] {"all properties in file"});
+        return map;
     }
 
 }

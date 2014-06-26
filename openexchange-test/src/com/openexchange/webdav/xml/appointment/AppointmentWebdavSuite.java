@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -55,15 +55,15 @@ import com.openexchange.webdav.xml.appointment.recurrence.RecurrenceTestSuite;
 
 public class AppointmentWebdavSuite {
 
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
-		tests.addTestSuite(ConfirmTest.class);
-		tests.addTestSuite(DeleteTest.class);
-		tests.addTestSuite(ListTest.class);
-		tests.addTestSuite(NewTest.class);
-		tests.addTestSuite(UpdateTest.class );
-		tests.addTest(RecurrenceTestSuite.suite());
-		tests.addTest(AppointmentBugTestSuite.suite());
-		return tests;
-	}
+    public static Test suite() {
+        final TestSuite tests = new TestSuite("com.openexchange.webdav.xml.appointment.AppointmentWebdavSuite");
+        tests.addTestSuite(ConfirmTest.class);
+        tests.addTestSuite(DeleteTest.class);
+        tests.addTestSuite(ListTest.class);
+        tests.addTestSuite(NewTest.class);
+        tests.addTestSuite(UpdateTest.class );
+        tests.addTest(RecurrenceTestSuite.suite());
+        tests.addTest(AppointmentBugTestSuite.suite());
+        return tests;
+    }
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -68,261 +68,264 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 
 public class TransactionallyCachingCalendar implements AppointmentSQLInterface {
-	private final AppointmentSQLInterface delegate;
-	private final Map<Integer, CalendarDataObject> cached = new HashMap<Integer, CalendarDataObject>();
+    private final AppointmentSQLInterface delegate;
+    private final Map<Integer, CalendarDataObject> cached = new HashMap<Integer, CalendarDataObject>();
 
-	public TransactionallyCachingCalendar(CalendarSql calendarSql) {
-		this.delegate = calendarSql;
-	}
+    public TransactionallyCachingCalendar(CalendarSql calendarSql) {
+        this.delegate = calendarSql;
+    }
 
-	@Override
+    @Override
     public void setIncludePrivateAppointments(boolean include) {
-		delegate.setIncludePrivateAppointments(include);
-	}
+        delegate.setIncludePrivateAppointments(include);
+    }
 
-	@Override
+    @Override
     public boolean getIncludePrivateAppointments() {
-		return delegate.getIncludePrivateAppointments();
-	}
+        return delegate.getIncludePrivateAppointments();
+    }
 
-	@Override
+    @Override
     public SearchIterator<Appointment> getAppointmentsBetweenInFolder(
-			int folderId, int[] cols, Date start, Date end, int orderBy,
-			Order order) throws com.openexchange.exception.OXException,
-			SQLException {
-		return delegate.getAppointmentsBetweenInFolder(folderId, cols, start,
-				end, orderBy, order);
-	}
+        int folderId, int[] cols, Date start, Date end, int orderBy,
+        Order order) throws com.openexchange.exception.OXException,
+        SQLException {
+        return delegate.getAppointmentsBetweenInFolder(folderId, cols, start,
+            end, orderBy, order);
+    }
 
-	@Override
+    @Override
     public SearchIterator<Appointment> getAppointmentsBetweenInFolder(
-			int folderId, int[] cols, Date start, Date end, int from, int to,
-			int orderBy, Order orderDir)
-			throws com.openexchange.exception.OXException, SQLException {
-		return delegate.getAppointmentsBetweenInFolder(folderId, cols, start,
-				end, from, to, orderBy, orderDir);
-	}
+        int folderId, int[] cols, Date start, Date end, int from, int to,
+        int orderBy, Order orderDir)
+            throws com.openexchange.exception.OXException, SQLException {
+        return delegate.getAppointmentsBetweenInFolder(folderId, cols, start,
+            end, from, to, orderBy, orderDir);
+    }
 
-	@Override
+    @Override
     public boolean[] hasAppointmentsBetween(Date start, Date end)
-			throws com.openexchange.exception.OXException {
-		return delegate.hasAppointmentsBetween(start, end);
-	}
+        throws com.openexchange.exception.OXException {
+        return delegate.hasAppointmentsBetween(start, end);
+    }
 
-	@Override
+    @Override
     public List<Appointment> getAppointmentsWithExternalParticipantBetween(
-			String email, int[] cols, Date start, Date end, int orderBy,
-			Order order) throws com.openexchange.exception.OXException {
-		return delegate.getAppointmentsWithExternalParticipantBetween(email,
-				cols, start, end, orderBy, order);
-	}
+        String email, int[] cols, Date start, Date end, int orderBy,
+        Order order) throws com.openexchange.exception.OXException {
+        return delegate.getAppointmentsWithExternalParticipantBetween(email,
+            cols, start, end, orderBy, order);
+    }
 
-	@Override
+    @Override
     public List<Appointment> getAppointmentsWithUserBetween(User user,
-			int[] cols, Date start, Date end, int orderBy, Order order)
-			throws com.openexchange.exception.OXException {
-		return delegate.getAppointmentsWithUserBetween(user, cols, start, end,
-				orderBy, order);
-	}
+        int[] cols, Date start, Date end, int orderBy, Order order)
+            throws com.openexchange.exception.OXException {
+        return delegate.getAppointmentsWithUserBetween(user, cols, start, end,
+            orderBy, order);
+    }
 
-	@Override
+    @Override
     public SearchIterator<Appointment> getModifiedAppointmentsInFolder(int fid,
-			int[] cols, Date since)
-			throws com.openexchange.exception.OXException {
-		return delegate.getModifiedAppointmentsInFolder(fid, cols, since);
-	}
+        int[] cols, Date since)
+            throws com.openexchange.exception.OXException {
+        return delegate.getModifiedAppointmentsInFolder(fid, cols, since);
+    }
 
-	@Override
+    @Override
     public SearchIterator<Appointment> getModifiedAppointmentsBetween(
-			int userId, Date start, Date end, int[] cols, Date since,
-			int orderBy, Order orderDir)
-			throws com.openexchange.exception.OXException, SQLException {
-		return delegate.getModifiedAppointmentsBetween(userId, start, end,
-				cols, since, orderBy, orderDir);
-	}
+        int userId, Date start, Date end, int[] cols, Date since,
+        int orderBy, Order orderDir)
+            throws com.openexchange.exception.OXException, SQLException {
+        return delegate.getModifiedAppointmentsBetween(userId, start, end,
+            cols, since, orderBy, orderDir);
+    }
 
-	@Override
+    @Override
     public SearchIterator<Appointment> getModifiedAppointmentsInFolder(int fid,
-			Date start, Date end, int[] cols, Date since)
-			throws com.openexchange.exception.OXException, SQLException {
-		return delegate.getModifiedAppointmentsInFolder(fid, start, end, cols,
-				since);
-	}
+        Date start, Date end, int[] cols, Date since)
+            throws com.openexchange.exception.OXException, SQLException {
+        return delegate.getModifiedAppointmentsInFolder(fid, start, end, cols,
+            since);
+    }
 
-	@Override
+    @Override
     public SearchIterator<Appointment> getDeletedAppointmentsInFolder(
-			int folderId, int[] cols, Date since)
-			throws com.openexchange.exception.OXException, SQLException {
-		return delegate.getDeletedAppointmentsInFolder(folderId, cols, since);
-	}
+        int folderId, int[] cols, Date since)
+            throws com.openexchange.exception.OXException, SQLException {
+        return delegate.getDeletedAppointmentsInFolder(folderId, cols, since);
+    }
 
-	@Override
-	public void deleteAppointmentObject(CalendarDataObject appointmentObject,
-			int inFolder, Date clientLastModified, boolean checkPermissions)
-			throws OXException, SQLException {
-		cached.remove(appointmentObject.getObjectID());
-		delegate.deleteAppointmentObject(appointmentObject, inFolder, clientLastModified, checkPermissions);
-
-	}
-
-	@Override
-    public SearchIterator<Appointment> getAppointmentsByExtendedSearch(
-			AppointmentSearchObject searchObject, int orderBy, Order orderDir,
-			int[] cols) throws com.openexchange.exception.OXException,
-			SQLException {
-		return delegate.getAppointmentsByExtendedSearch(searchObject, orderBy,
-				orderDir, cols);
-	}
-
-	@Override
-    public SearchIterator<Appointment> searchAppointments(
-			AppointmentSearchObject searchObj, int orderBy, Order orderDir,
-			int[] cols) throws com.openexchange.exception.OXException {
-		return delegate.searchAppointments(searchObj, orderBy, orderDir, cols);
-	}
-
-	@Override
-	public CalendarDataObject getObjectById(int objectId) throws OXException, SQLException {
-		CalendarDataObject cachedAppointment = cached.get(objectId);
-		if (cachedAppointment != null) {
-			return cachedAppointment.clone();
-		}
-		CalendarDataObject loaded = delegate.getObjectById(objectId);
-		cached.put(objectId, loaded);
-		return loaded;
-	}
-
-	@Override
-    public CalendarDataObject getObjectById(int objectId, int inFolder)
-			throws com.openexchange.exception.OXException, SQLException {
-		return delegate.getObjectById(objectId, inFolder);
-	}
-
-	@Override
-    public SearchIterator<Appointment> getObjectsById(
-			int[][] objectIdAndInFolder, int[] cols)
-			throws com.openexchange.exception.OXException {
-		return delegate.getObjectsById(objectIdAndInFolder, cols);
-	}
-
-	@Override
-    public Appointment[] insertAppointmentObject(CalendarDataObject cdao)
-			throws com.openexchange.exception.OXException {
-		return delegate.insertAppointmentObject(cdao);
-	}
-
-	@Override
-    public Appointment[] updateAppointmentObject(CalendarDataObject cdao,
-			int inFolder, Date clientLastModified)
-			throws com.openexchange.exception.OXException {
-		cached.remove(cdao.getObjectID());
-		return delegate.updateAppointmentObject(cdao, inFolder,
-				clientLastModified);
-	}
-
-	@Override
-	public Appointment[] updateAppointmentObject(CalendarDataObject cdao,
-			int inFolder, Date clientLastModified, boolean checkPermissions)
-			throws OXException {
-		cached.remove(cdao.getObjectID());
-		return delegate.updateAppointmentObject(cdao, inFolder, clientLastModified, checkPermissions);
-	}
-
-	@Override
+    @Override
     public void deleteAppointmentObject(CalendarDataObject appointmentObject,
-			int inFolder, Date clientLastModified)
-			throws com.openexchange.exception.OXException, SQLException {
-		delegate.deleteAppointmentObject(appointmentObject, inFolder,
-				clientLastModified);
-	}
+        int inFolder, Date clientLastModified, boolean checkPermissions)
+            throws OXException, SQLException {
+        cached.remove(appointmentObject.getObjectID());
+        delegate.deleteAppointmentObject(appointmentObject, inFolder, clientLastModified, checkPermissions);
 
-	@Override
+    }
+
+    @Override
+    public SearchIterator<Appointment> searchAppointments(
+        AppointmentSearchObject searchObj, int orderBy, Order orderDir,
+        int[] cols) throws com.openexchange.exception.OXException {
+        return delegate.searchAppointments(searchObj, orderBy, orderDir, cols);
+    }
+
+    @Override
+    public CalendarDataObject getObjectById(int objectId) throws OXException, SQLException {
+        CalendarDataObject cachedAppointment = cached.get(objectId);
+        if (cachedAppointment != null) {
+            return cachedAppointment.clone();
+        }
+        CalendarDataObject loaded = delegate.getObjectById(objectId);
+        cached.put(objectId, loaded);
+        return loaded;
+    }
+
+    @Override
+    public CalendarDataObject getObjectById(int objectId, int inFolder)
+        throws com.openexchange.exception.OXException, SQLException {
+        return delegate.getObjectById(objectId, inFolder);
+    }
+
+    @Override
+    public SearchIterator<Appointment> getObjectsById(
+        int[][] objectIdAndInFolder, int[] cols)
+            throws com.openexchange.exception.OXException {
+        return delegate.getObjectsById(objectIdAndInFolder, cols);
+    }
+
+    @Override
+    public Appointment[] insertAppointmentObject(CalendarDataObject cdao)
+        throws com.openexchange.exception.OXException {
+        return delegate.insertAppointmentObject(cdao);
+    }
+
+    @Override
+    public Appointment[] updateAppointmentObject(CalendarDataObject cdao,
+        int inFolder, Date clientLastModified)
+            throws com.openexchange.exception.OXException {
+        cached.remove(cdao.getObjectID());
+        return delegate.updateAppointmentObject(cdao, inFolder,
+            clientLastModified);
+    }
+
+    @Override
+    public Appointment[] updateAppointmentObject(CalendarDataObject cdao,
+        int inFolder, Date clientLastModified, boolean checkPermissions)
+            throws OXException {
+        cached.remove(cdao.getObjectID());
+        return delegate.updateAppointmentObject(cdao, inFolder, clientLastModified, checkPermissions);
+    }
+
+    @Override
+    public void deleteAppointmentObject(CalendarDataObject appointmentObject,
+        int inFolder, Date clientLastModified)
+            throws com.openexchange.exception.OXException, SQLException {
+        delegate.deleteAppointmentObject(appointmentObject, inFolder,
+            clientLastModified);
+    }
+
+    @Override
     public void deleteAppointmentsInFolder(int inFolder)
-			throws com.openexchange.exception.OXException, SQLException {
-		cached.clear();
-		delegate.deleteAppointmentsInFolder(inFolder);
-	}
+        throws com.openexchange.exception.OXException, SQLException {
+        cached.clear();
+        delegate.deleteAppointmentsInFolder(inFolder);
+    }
 
-	@Override
+    @Override
     public void deleteAppointmentsInFolder(int inFolder, Connection writeCon)
-			throws com.openexchange.exception.OXException, SQLException {
-		cached.clear();
-		delegate.deleteAppointmentsInFolder(inFolder, writeCon);
-	}
+        throws com.openexchange.exception.OXException, SQLException {
+        cached.clear();
+        delegate.deleteAppointmentsInFolder(inFolder, writeCon);
+    }
 
-	@Override
+    @Override
     public boolean checkIfFolderContainsForeignObjects(int user_id, int inFolder)
-			throws com.openexchange.exception.OXException, SQLException {
-		return delegate.checkIfFolderContainsForeignObjects(user_id, inFolder);
-	}
+        throws com.openexchange.exception.OXException, SQLException {
+        return delegate.checkIfFolderContainsForeignObjects(user_id, inFolder);
+    }
 
-	@Override
+    @Override
     public boolean checkIfFolderContainsForeignObjects(int user_id,
-			int inFolder, Connection readCon)
-			throws com.openexchange.exception.OXException, SQLException {
-		return delegate.checkIfFolderContainsForeignObjects(user_id, inFolder,
-				readCon);
-	}
+        int inFolder, Connection readCon)
+            throws com.openexchange.exception.OXException, SQLException {
+        return delegate.checkIfFolderContainsForeignObjects(user_id, inFolder,
+            readCon);
+    }
 
-	@Override
+    @Override
     public boolean isFolderEmpty(int uid, int fid)
-			throws com.openexchange.exception.OXException, SQLException {
-		return delegate.isFolderEmpty(uid, fid);
-	}
+        throws com.openexchange.exception.OXException, SQLException {
+        return delegate.isFolderEmpty(uid, fid);
+    }
 
-	@Override
+    @Override
     public boolean isFolderEmpty(int uid, int fid, Connection readCon)
-			throws com.openexchange.exception.OXException, SQLException {
-		return delegate.isFolderEmpty(uid, fid, readCon);
-	}
+        throws com.openexchange.exception.OXException, SQLException {
+        return delegate.isFolderEmpty(uid, fid, readCon);
+    }
 
-	@Override
-    public Date setUserConfirmation(int object_id, int folderId, int user_id,
-			int confirm, String confirm_message)
-			throws com.openexchange.exception.OXException {
-		cached.remove(object_id);
-		return delegate.setUserConfirmation(object_id, folderId, user_id,
-				confirm, confirm_message);
-	}
+    @Override
+    public Date setUserConfirmation(int objectId, int folderId, int userId,
+        int confirm, String confirmMessage)
+            throws com.openexchange.exception.OXException {
+        cached.remove(objectId);
+        return delegate.setUserConfirmation(objectId, folderId, userId,
+            confirm, confirmMessage);
+    }
 
-	@Override
-    public Date setExternalConfirmation(int oid, int folderId, String mail,
-			int confirm, String message)
-			throws com.openexchange.exception.OXException {
-		cached.remove(oid);
-		return delegate.setExternalConfirmation(oid, folderId, mail, confirm,
-				message);
-	}
+    @Override
+    public Date setExternalConfirmation(int objectId, int folderId, String mail,
+        int confirm, String message)
+            throws com.openexchange.exception.OXException {
+        cached.remove(objectId);
+        return delegate.setExternalConfirmation(objectId, folderId, mail, confirm,
+            message);
+    }
 
-	@Override
+    @Override
+    public CalendarDataObject setUserConfirmation(final int objectId, final int folderId, final int optOccurrenceId, final int userId, final int confirm, final String confirmMessage) throws OXException {
+        cached.remove(objectId);
+        return delegate.setUserConfirmation(objectId, folderId, optOccurrenceId, userId, confirm, confirmMessage);
+    }
+
+    @Override
+    public CalendarDataObject setExternalConfirmation(final int objectId, final int folderId, final int optOccurrenceId, final String mail, final int confirm, final String message) throws OXException {
+        cached.remove(objectId);
+        return delegate.setExternalConfirmation(objectId, folderId, optOccurrenceId, mail, confirm, message);
+    }
+
+    @Override
     public long attachmentAction(int folderId, int objectId, int userId,
-			Session session, Context c, int numberOfAttachments)
-			throws com.openexchange.exception.OXException {
-		cached.remove(objectId);
-		return delegate.attachmentAction(folderId, objectId, userId, session, c,
-				numberOfAttachments);
-	}
+        Session session, Context c, int numberOfAttachments)
+            throws com.openexchange.exception.OXException {
+        cached.remove(objectId);
+        return delegate.attachmentAction(folderId, objectId, userId, session, c,
+            numberOfAttachments);
+    }
 
-	@Override
+    @Override
     public SearchIterator<Appointment> getFreeBusyInformation(int id, int type,
-			Date start, Date end) throws com.openexchange.exception.OXException {
-		return delegate.getFreeBusyInformation(id, type, start, end);
-	}
+        Date start, Date end) throws com.openexchange.exception.OXException {
+        return delegate.getFreeBusyInformation(id, type, start, end);
+    }
 
-	@Override
+    @Override
     public SearchIterator<Appointment> getActiveAppointments(int user_uid,
-			Date start, Date end, int[] cols)
-			throws com.openexchange.exception.OXException {
-		return delegate.getActiveAppointments(user_uid, start, end, cols);
-	}
+        Date start, Date end, int[] cols)
+            throws com.openexchange.exception.OXException {
+        return delegate.getActiveAppointments(user_uid, start, end, cols);
+    }
 
-	@Override
+    @Override
     public SearchIterator<Appointment> getAppointmentsBetween(int user_uid,
-			Date start, Date end, int[] cols, int orderBy, Order order)
-			throws com.openexchange.exception.OXException, SQLException {
-		return delegate.getAppointmentsBetween(user_uid, start, end, cols,
-				orderBy, order);
-	}
+        Date start, Date end, int[] cols, int orderBy, Order order)
+            throws com.openexchange.exception.OXException, SQLException {
+        return delegate.getAppointmentsBetween(user_uid, start, end, cols,
+            orderBy, order);
+    }
 
     @Override
     public SearchIterator<Appointment> getAppointmentsBetween(Date start, Date end, int cols[], int orderBy, Order order) throws OXException, SQLException {
@@ -331,21 +334,21 @@ public class TransactionallyCachingCalendar implements AppointmentSQLInterface {
 
     @Override
     public int resolveUid(String uid)
-            throws com.openexchange.exception.OXException {
+        throws com.openexchange.exception.OXException {
         return delegate.resolveUid(uid);
     }
 
     @Override
     public int resolveFilename(String filename)
-            throws com.openexchange.exception.OXException {
+        throws com.openexchange.exception.OXException {
         return delegate.resolveFilename(filename);
     }
 
-	@Override
+    @Override
     public int getFolder(int objectId)
-			throws com.openexchange.exception.OXException {
-		return delegate.getFolder(objectId);
-	}
+        throws com.openexchange.exception.OXException {
+        return delegate.getFolder(objectId);
+    }
 
     /* (non-Javadoc)
      * @see com.openexchange.api2.AppointmentSQLInterface#count(int)

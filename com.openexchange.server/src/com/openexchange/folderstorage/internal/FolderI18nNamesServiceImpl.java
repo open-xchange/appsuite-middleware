@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -120,10 +120,10 @@ public final class FolderI18nNamesServiceImpl implements FolderI18nNamesService 
         identifiers.add(FolderStrings.SYSTEM_INFOSTORE_FOLDER_NAME);
         identifiers.add(FolderStrings.SYSTEM_LDAP_FOLDER_NAME);
         identifiers.add(FolderStrings.SYSTEM_OX_FOLDER_NAME);
-        identifiers.add(FolderStrings.SYSTEM_OX_PROJECT_FOLDER_NAME);
         identifiers.add(FolderStrings.SYSTEM_PRIVATE_FOLDER_NAME);
         identifiers.add(FolderStrings.SYSTEM_PUBLIC_FOLDER_NAME);
         identifiers.add(FolderStrings.SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME);
+        identifiers.add(FolderStrings.SYSTEM_TRASH_INFOSTORE_FOLDER_NAME);
         identifiers.add(FolderStrings.SYSTEM_SHARED_FOLDER_NAME);
         identifiers.add(FolderStrings.SYSTEM_USER_INFOSTORE_FOLDER_NAME);
         identifiers.add(FolderStrings.VIRTUAL_LIST_CALENDAR_FOLDER_NAME);
@@ -133,6 +133,7 @@ public final class FolderI18nNamesServiceImpl implements FolderI18nNamesService 
         identifiers.add(FolderStrings.SYSTEM_FILES_FOLDER_NAME);
         identifiers.add(FolderStrings.SYSTEM_USER_FILES_FOLDER_NAME);
         identifiers.add(FolderStrings.SYSTEM_PUBLIC_FILES_FOLDER_NAME);
+        identifiers.add(FolderStrings.SYSTEM_TRASH_FILES_FOLDER_NAME);
         identifiers.add(FolderStrings.VIRTUAL_LIST_FILES_FOLDER_NAME);
     }
 
@@ -189,7 +190,7 @@ public final class FolderI18nNamesServiceImpl implements FolderI18nNamesService 
             return;
         }
         for (final String line : text.split("\r?\n")) {
-            if (!isEmpty(line) && '#' != line.charAt(0)) {
+            if (!com.openexchange.java.Strings.isEmpty(line) && '#' != line.charAt(0)) {
                 for (final String value : line.split(" *, *")) {
                     processValue(value);
                 }
@@ -198,7 +199,7 @@ public final class FolderI18nNamesServiceImpl implements FolderI18nNamesService 
     }
 
     private void processValue(final String value) {
-        if (isEmpty(value)) {
+        if (com.openexchange.java.Strings.isEmpty(value)) {
             return;
         }
         String val = value.trim();
@@ -211,23 +212,10 @@ public final class FolderI18nNamesServiceImpl implements FolderI18nNamesService 
                 return;
             }
             val = val.substring(1, mlen);
-            if (isEmpty(val)) {
+            if (com.openexchange.java.Strings.isEmpty(val)) {
                 return;
             }
         }
         i18nNames.put(val, val);
     }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

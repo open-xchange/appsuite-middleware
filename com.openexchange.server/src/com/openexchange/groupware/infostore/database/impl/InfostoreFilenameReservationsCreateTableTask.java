@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -54,12 +54,10 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.MessageFormat;
 import com.openexchange.database.AbstractCreateTableImpl;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
-import com.openexchange.groupware.update.FullPrimaryKeySupportService;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.TaskAttributes;
@@ -76,33 +74,23 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class InfostoreFilenameReservationsCreateTableTask extends AbstractCreateTableImpl implements UpdateTaskV2 {
 
-    private final FullPrimaryKeySupportService fullPrimaryKeySupportService;
-
     /**
      *
      */
     private static final String INFOSTORE_RESERVED_PATHS = "infostoreReservedPaths";
 
-    public InfostoreFilenameReservationsCreateTableTask(FullPrimaryKeySupportService service) {
-        this.fullPrimaryKeySupportService = service;
+    public InfostoreFilenameReservationsCreateTableTask() {
+        super();
     }
 
     private String getTableSQL() {
-        if (fullPrimaryKeySupportService.isFullPrimaryKeySupported()) {
-            return "CREATE TABLE infostoreReservedPaths (" +
+        return "CREATE TABLE infostoreReservedPaths (" +
                 " cid INT4 unsigned NOT NULL," +
                 " folder INT4 unsigned NOT NULL, " +
                 " name VARCHAR(767) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, " +
                 " uuid BINARY(16) NOT NULL, " +
                 " PRIMARY KEY (cid, uuid) " +
                 ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
-        }
-        return "CREATE TABLE infostoreReservedPaths (" +
-        " cid INT4 unsigned NOT NULL," +
-        " folder INT4 unsigned NOT NULL, " +
-        " name VARCHAR(767) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, " +
-        " uuid BINARY(16) DEFAULT NULL " +
-        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     }
 
     @Override

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,10 +51,14 @@ package com.openexchange.secret.osgi;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import org.osgi.framework.Constants;
+import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.secret.SecretEncryptionFactoryService;
@@ -74,9 +78,11 @@ import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SecretActivator extends HousekeepingActivator {
+public class SecretActivator extends HousekeepingActivator implements Reloadable {
 
     private volatile WhiteboardSecretService whiteboardSecretService;
+
+    private final static String[] PROPERTIES = new String[] {"all properties in file"};
 
     public SecretActivator() {
         super();
@@ -90,6 +96,34 @@ public class SecretActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         final ConfigurationService configurationService = getService(ConfigurationService.class);
+        reinit(configurationService, false);
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        TokenBasedSecretService.RANDOM.set("unknown");
+        final WhiteboardSecretService whiteboardSecretService = this.whiteboardSecretService;
+        if (null != whiteboardSecretService) {
+            whiteboardSecretService.close();
+            this.whiteboardSecretService = null;
+        }
+        super.stopBundle();
+    }
+
+    @Override
+    public void reloadConfiguration(final ConfigurationService configurationService) {
+        reinit(configurationService, true);
+    }
+
+    private void reinit(final ConfigurationService configurationService, final boolean performShutDown) {
+        final Logger logger = org.slf4j.LoggerFactory.getLogger(SecretActivator.class);
+        if (performShutDown) {
+            try {
+                stopBundle();
+            } catch (final Exception e) {
+                logger.warn("Secret module could not be shut down.", e);
+            }
+        }
         /*
          * Initialize plain SessionSecretService
          */
@@ -172,16 +206,19 @@ public class SecretActivator extends HousekeepingActivator {
         final CryptoService crypto = getService(CryptoService.class);
         final CryptoSecretEncryptionFactoryService service = new CryptoSecretEncryptionFactoryService(crypto, whiteboardSecretService, tokenList);
         registerService(SecretEncryptionFactoryService.class, service);
+        /*
+         * Register Reloadable (again)
+         */
+        registerService(Reloadable.class, this);
+
+        logger.info("(Re-)Initialized 'com.openexchange.secret' bundle.");
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        TokenBasedSecretService.RANDOM.set("unknown");
-        final WhiteboardSecretService whiteboardSecretService = this.whiteboardSecretService;
-        if (null != whiteboardSecretService) {
-            whiteboardSecretService.close();
-        }
-        super.stopBundle();
+    public Map<String, String[]> getConfigFileNames() {
+        Map<String, String[]> map = new HashMap<String, String[]>(1);
+        map.put("secret.properties", PROPERTIES);
+        return map;
     }
 
 }

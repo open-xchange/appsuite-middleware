@@ -70,7 +70,6 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 
 /**
@@ -142,11 +141,12 @@ public class ChecksumProvider {
      * @throws OXException
      */
     public static List<DirectoryChecksum> getChecksums(SyncSession session, List<String> folderIDs) throws OXException {
-        StringAllocator trace = session.isTraceEnabled() ? new StringAllocator("Directory checksums:\n") : null;
+        StringBuilder trace = session.isTraceEnabled() ? new StringBuilder("Directory checksums:\n") : null;
         List<FolderID> fids = new ArrayList<FolderID>(folderIDs.size());
         for (String folderID : folderIDs) {
             fids.add(new FolderID(folderID));
         }
+        int userID = session.getServerSession().getUserId();
         List<DirectoryChecksum> checksums;
         if (false == session.getStorage().supportsFolderSequenceNumbers()) {
             if (null != trace) {
@@ -155,7 +155,7 @@ public class ChecksumProvider {
             checksums = calculateDirectoryChecksums(session, fids);
         } else {
             checksums = new ArrayList<DirectoryChecksum>(folderIDs.size());
-            List<DirectoryChecksum> storedChecksums = session.getChecksumStore().getDirectoryChecksums(fids);
+            List<DirectoryChecksum> storedChecksums = session.getChecksumStore().getDirectoryChecksums(userID, fids);
             List<DirectoryChecksum> updatedChecksums = new ArrayList<DirectoryChecksum>();
             List<DirectoryChecksum> newChecksums = new ArrayList<DirectoryChecksum>();
             Map<String, Long> sequenceNumbers = session.getStorage().getSequenceNumbers(folderIDs);
@@ -180,7 +180,7 @@ public class ChecksumProvider {
                         }
                     }
                 } else {
-                    directoryChecksum = new DirectoryChecksum(folderID, sequenceNumber, calculateMD5(session, folderID));
+                    directoryChecksum = new DirectoryChecksum(userID, folderID, sequenceNumber, calculateMD5(session, folderID));
                     if (null != trace) {
                         trace.append(" Newly calculated: ").append(directoryChecksum).append('\n');
                     }
@@ -217,13 +217,13 @@ public class ChecksumProvider {
     private static List<DirectoryChecksum> calculateDirectoryChecksums(SyncSession session, List<FolderID> folderIDs) throws OXException {
         List<DirectoryChecksum> checksums = new ArrayList<DirectoryChecksum>(folderIDs.size());
         for (FolderID folderID : folderIDs) {
-            checksums.add(new DirectoryChecksum(folderID, -1, calculateMD5(session, folderID)));
+            checksums.add(new DirectoryChecksum(session.getServerSession().getUserId(), folderID, -1, calculateMD5(session, folderID)));
         }
         return checksums;
     }
 
     private static String calculateMD5(SyncSession session, FolderID folderID) throws OXException {
-        StringAllocator trace = session.isTraceEnabled() ? new StringAllocator("File checksums in folder " + folderID + ":\n") : null;
+        StringBuilder trace = session.isTraceEnabled() ? new StringBuilder("File checksums in folder " + folderID + ":\n") : null;
         String checksum;
         List<File> filesInFolder = session.getStorage().getFilesInFolder(folderID.toUniqueID());
         if (null == filesInFolder || 0 == filesInFolder.size()) {
