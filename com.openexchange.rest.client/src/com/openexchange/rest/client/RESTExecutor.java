@@ -295,7 +295,6 @@ public class RESTExecutor {
             final int statusCode = response.getStatusLine().getStatusCode();
 
             if (false == expectedStatusCodes.contains(statusCode)) {
-                // This will throw the right thing: either a XingServerException or a XingProxyException
                 parseAsJSON(response, expectedStatusCodes);
             }
             return response;
@@ -334,9 +333,6 @@ public class RESTExecutor {
                 bin = new BufferedReader(in, 16384);
                 bin.mark(16384);
                 result = JSONObject.parse(bin);
-                /*
-                 * if (result.isObject()) { checkForError(result.toObject()); }
-                 */
             }
         } catch (final IOException e) {
             throw RESTExceptionCodes.IO_EXCEPTION.create(e);
