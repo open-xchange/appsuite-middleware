@@ -192,7 +192,7 @@ public class FilestoreDataMover implements Callable<Void> {
                 ctx.setFilestoreId(dstStore.getId());
                 oxcox.changeStorageData(ctx);
                 final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
-                Cache cache = cacheService.getCache("filestore");
+                Cache cache = cacheService.getCache("Filestore");
                 cache.clear();
                 oxcox.enable(ctx);
             } catch (OXException e) {
