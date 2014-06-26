@@ -92,6 +92,7 @@ import org.jsoup.Jsoup;
 import org.owasp.esapi.codecs.HTMLEntityCodec;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.html.HtmlSanitizeResult;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.HtmlServices;
 import com.openexchange.html.internal.jericho.JerichoParser;
@@ -538,16 +539,17 @@ public final class HtmlServiceImpl implements HtmlService {
      */
     @Override
     public String sanitize(final String htmlContent, final String optConfigName, final boolean dropExternalImages, final boolean[] modified, final String cssPrefix) {
-        return sanitize(htmlContent, optConfigName, dropExternalImages, modified, cssPrefix, -1);
+        return sanitize(htmlContent, optConfigName, dropExternalImages, modified, cssPrefix, -1).getContent();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public String sanitize(final String htmlContent, final String optConfigName, final boolean dropExternalImages, final boolean[] modified, final String cssPrefix, final int maxContentSize) {
+    public HtmlSanitizeResult sanitize(final String htmlContent, final String optConfigName, final boolean dropExternalImages, final boolean[] modified, final String cssPrefix, final int maxContentSize) {
+        HtmlSanitizeResult htmlSanitizeResult = new HtmlSanitizeResult(htmlContent);
         if (isEmpty(htmlContent)) {
-            return htmlContent;
+            return htmlSanitizeResult;
         }
         try {
             String html = htmlContent;
@@ -576,7 +578,8 @@ public final class HtmlServiceImpl implements HtmlService {
                 if (dropExternalImages && null != modified) {
                     modified[0] |= handler.isImageURLFound();
                 }
-                html = handler.getHTML();
+                htmlSanitizeResult.setContent(handler.getHTML());
+                htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
             } catch (final ParsingDeniedException e) {
                 LOG.warn("HTML content will be returned un-white-listed. Reason: " + e.getMessage(), e);
             }
@@ -589,10 +592,11 @@ public final class HtmlServiceImpl implements HtmlService {
             }
             // Replace HTML entities
             html = keepUnicodeForEntities(html);
-            return html;
+            htmlSanitizeResult.setContent(html);
+            return htmlSanitizeResult;
         } catch (final RuntimeException e) {
             LOG.warn("HTML content will be returned un-sanitized. Reason: "+e.getMessage(), e);
-            return htmlContent;
+            return htmlSanitizeResult;
         }
     }
 
@@ -841,14 +845,23 @@ public final class HtmlServiceImpl implements HtmlService {
      * {@inheritDoc}
      */
     @Override
-    public String htmlFormat(final String plainText, final boolean withQuote, final String commentId, int maxContentSize) {
-        String retval = PATTERN_CRLF.matcher(escape(plainText, withQuote, commentId)).replaceAll(HTML_BR);
-        if (maxContentSize > 0) {
-            int endOfSentence = retval.indexOf('.', maxContentSize) + 1;
-            retval = retval.substring(0, endOfSentence);
+    public HtmlSanitizeResult htmlFormat(final String plainText, final boolean withQuote, final String commentId, int maxContentSize) {
+        String content = PATTERN_CRLF.matcher(escape(plainText, withQuote, commentId)).replaceAll(HTML_BR);
+        HtmlSanitizeResult htmlSanitizeResult = new HtmlSanitizeResult(content);
+
+        if (!(maxContentSize >= 10000) && !(maxContentSize <= 0)) {
+            maxContentSize = 10000;
         }
-        retval = keepUnicodeForEntities(retval);
-        return retval;
+
+        if ((maxContentSize > 0) && (maxContentSize < content.length())) {
+            int endOfSentence = content.indexOf('.', maxContentSize) + 1;
+            content = content.substring(0, endOfSentence);
+            htmlSanitizeResult.setTruncated(true);
+        }
+        content = keepUnicodeForEntities(content);
+        htmlSanitizeResult.setContent(content);
+
+        return htmlSanitizeResult;
     }
 
     /**
@@ -856,7 +869,7 @@ public final class HtmlServiceImpl implements HtmlService {
      */
     @Override
     public String htmlFormat(final String plainText, final boolean withQuote, final String commentId) {
-        return htmlFormat(plainText, withQuote, commentId, -1);
+        return htmlFormat(plainText, withQuote, commentId, -1).getContent();
     }
 
     /**

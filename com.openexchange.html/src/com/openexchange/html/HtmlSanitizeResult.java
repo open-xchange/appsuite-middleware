@@ -49,36 +49,78 @@
 
 package com.openexchange.html;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.html.internal.Bug27708Test;
-import com.openexchange.html.internal.HtmlServiceImplTest;
-import com.openexchange.html.internal.css.Bug30114Test;
-import com.openexchange.html.internal.css.CSSMatcherTest;
-import com.openexchange.html.internal.jericho.handler.FilterJerichoHandlerTest;
 
 /**
- * Test suite for all integrated unit tests of the HTMLService implementation.
- *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * Contains the result information (e. g. content, truncated) of sanitizing HTML emails based on the provided information.
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.6.1
  */
-@RunWith(Suite.class)
-@SuiteClasses({ 
-    Bug26237Test.class, 
-    Bug26611Test.class, 
-    Bug27335Test.class, 
-    Bug27708Test.class, 
-    CSSMatcherTest.class, 
-    Bug30114Test.class, 
-    Bug31826Test.class, 
-    ConformHtmlTest.class,
-    HtmlServiceImplTest.class,
-    FilterJerichoHandlerTest.class
-})
-public class UnitTests {
+public class HtmlSanitizeResult {
 
-    private UnitTests() {
-        super();
+    /**
+     * Content of the mail to display
+     */
+    private String content;
+
+    /**
+     * Marker if the mail was truncated
+     */
+    private boolean truncated;
+
+    /**
+     * Initializes a new {@link HtmlSanitizeResult}.
+     * 
+     * @param content
+     */
+    public HtmlSanitizeResult(String content) {
+        this(content, false);
+    }
+
+    /**
+     * Initializes a new {@link HtmlSanitizeResult}.
+     * 
+     * @param content
+     * @param truncated
+     */
+    public HtmlSanitizeResult(String content, boolean truncated) {
+        this.content = content;
+        this.truncated = truncated;
+    }
+
+    /**
+     * Gets the content
+     * 
+     * @return The content
+     */
+    public String getContent() {
+        return content;
+    }
+
+    /**
+     * Sets the content
+     * 
+     * @param content The content to set
+     */
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    /**
+     * Gets the truncated
+     * 
+     * @return The truncated
+     */
+    public boolean isTruncated() {
+        return truncated;
+    }
+
+    /**
+     * Sets the truncated
+     * 
+     * @param truncated The truncated to set
+     */
+    public void setTruncated(boolean truncated) {
+        this.truncated = truncated;
     }
 }

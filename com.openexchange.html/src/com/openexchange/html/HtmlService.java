@@ -50,6 +50,8 @@
 package com.openexchange.html;
 
 
+
+
 /**
  * {@link HtmlService} - The HTML service provides several methods concerning processing of HTML content.
  *
@@ -130,10 +132,10 @@ public interface HtmlService {
      * @param dropExternalImages Whether to drop image URLs
      * @param modified A <code>boolean</code> array with length <code>1</code> to store modified status
      * @param cssPrefix The optional CSS prefix
-     * @param maxContentSize maximum number of bytes that is will be returned for content. '<=0' means unlimited.
-     * @return The sanitized HTML content
+     * @param maxContentSize maximum number of bytes that is will be returned for content. '<=0' means unlimited. Below 10000 will be ignor
+     * @return {@link HtmlSanitizeResult} with the content and additional information, e. g. if the content was truncated
      */
-    String sanitize(String htmlContent, String optConfigName, boolean dropExternalImages, boolean[] modified, String cssPrefix, int maxContentSize);
+    HtmlSanitizeResult sanitize(String htmlContent, String optConfigName, boolean dropExternalImages, boolean[] modified, String cssPrefix, int maxContentSize);
 
     /**
      * Sanitizes specified HTML content.
@@ -168,9 +170,9 @@ public interface HtmlService {
      * @param commentId The identifier wrapped in a comment prepended to each formatted URL:<br>
      *            <code>"&lt;!--" + &lt;<i>comment</i>&gt; + " " + <i>&lt;anchor-tag&gt;</i> + "--&gt;"</code>
      * @param maxContentSize maximum number of bytes that is will be returned for content. '<=0' means unlimited.
-     * @return properly escaped HTML content
+     * @return {@link HtmlSanitizeResult} with the content and additional information, e. g. if the content was truncated
      */
-    String htmlFormat(String plainText, boolean withQuote, String commentId, int maxContentSize);
+    HtmlSanitizeResult htmlFormat(String plainText, boolean withQuote, String commentId, int maxContentSize);
 
     /**
      * Formats plain text to HTML by escaping HTML special characters e.g. <code>&quot;&lt;&quot;</code> is converted to

@@ -196,7 +196,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
     private int depth;
 
     /**
-     * The max. content size.
+     * The max. content size (-1 or >=10000)
      */
     private int maxContentSize;
 
@@ -261,13 +261,18 @@ public final class FilterJerichoHandler implements JerichoHandler {
     }
 
     /**
-     * Sets the max. content size
+     * Sets the max. content size. <= 0 means unlimited, <10000 will be set to 10000.
      * 
      * @param maxContentSize The max. content size to set
      * @return This handler with new behavior applied
      */
     public FilterJerichoHandler setMaxContentSize(final int maxContentSize) {
-        this.maxContentSize = maxContentSize;
+        if ((maxContentSize >= 10000) || (maxContentSize <= 0)) {
+            this.maxContentSize = maxContentSize;
+        } else {
+            this.maxContentSize = 10000;
+        }
+
         this.maxContentSizeExceeded = false;
         return this;
     }
@@ -281,6 +286,15 @@ public final class FilterJerichoHandler implements JerichoHandler {
     public FilterJerichoHandler setCssPrefix(final String cssPrefix) {
         this.cssPrefix = cssPrefix;
         return this;
+    }
+
+    /**
+     * Returns if maxContentSize is exceeded
+     * 
+     * @return true, if exceeded, otherwise false
+     */
+    public boolean isMaxContentSizeExceeded() {
+        return maxContentSizeExceeded;
     }
 
     /**
@@ -820,7 +834,6 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 cssBuffer.setLength(0);
                 if (dropExternalImages) {
                     imageURLFound |= checkCSS(cssBuffer.append(checkedCSS), IMAGE_STYLE_MAP, null, false);
-                    // imageURLFound |= checkCSS(cssBuffer.append(checkedCSS), IMAGE_STYLE_MAP, true, false);
                     checkedCSS = cssBuffer.toString();
                     cssBuffer.setLength(0);
                 }

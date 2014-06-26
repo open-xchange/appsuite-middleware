@@ -193,12 +193,12 @@ public class SimHtmlService implements HtmlService {
     }
 
     @Override
-    public String sanitize(String htmlContent, String optConfigName, boolean dropExternalImages, boolean[] modified, String cssPrefix, int maxContentSize) {
+    public HtmlSanitizeResult sanitize(String htmlContent, String optConfigName, boolean dropExternalImages, boolean[] modified, String cssPrefix, int maxContentSize) {
         return htmlService.sanitize(htmlContent, optConfigName, dropExternalImages, modified, cssPrefix, maxContentSize);
     }
 
     @Override
-    public String htmlFormat(String plainText, boolean withQuote, String commentId, int maxContentSize) {
+    public HtmlSanitizeResult htmlFormat(String plainText, boolean withQuote, String commentId, int maxContentSize) {
         return htmlService.htmlFormat(plainText, withQuote, commentId, maxContentSize);
     }
 }

@@ -57,8 +57,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -79,6 +77,7 @@ import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
+import com.openexchange.html.HtmlSanitizeResult;
 import com.openexchange.html.HtmlService;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.java.AllocatingStringWriter;
@@ -119,7 +118,7 @@ public final class HtmlProcessing {
      * @see #formatContentForDisplay(String, String, boolean, Session, MailPath, UserSettingMail, boolean[], DisplayMode)
      * @return The formatted content
      */
-    public static String formatTextForDisplay(final String content, final UserSettingMail usm, final DisplayMode mode, final int maxContentSize) {
+    public static HtmlSanitizeResult formatTextForDisplay(final String content, final UserSettingMail usm, final DisplayMode mode, final int maxContentSize) {
         return formatContentForDisplay(content, null, false, null, null, usm, null, mode, false, maxContentSize);
     }
 
@@ -133,7 +132,7 @@ public final class HtmlProcessing {
      * @return The formatted content
      */
     public static String formatTextForDisplay(final String content, final UserSettingMail usm, final DisplayMode mode) {
-        return formatTextForDisplay(content, usm, mode, -1);
+        return formatTextForDisplay(content, usm, mode, -1).getContent();
     }
 
     /**
@@ -151,7 +150,7 @@ public final class HtmlProcessing {
      * @return The formatted content
      */
     public static String formatHTMLForDisplay(final String content, final String charset, final Session session, final MailPath mailPath, final UserSettingMail usm, final boolean[] modified, final DisplayMode mode, final boolean embedded) {
-        return formatHTMLForDisplay(content, charset, session, mailPath, usm, modified, mode, embedded, -1);
+        return formatHTMLForDisplay(content, charset, session, mailPath, usm, modified, mode, embedded, -1).getContent();
     }
 
     /**
@@ -170,7 +169,7 @@ public final class HtmlProcessing {
      * @see #formatContentForDisplay(String, String, boolean, Session, MailPath, UserSettingMail, boolean[], DisplayMode)
      * @return The formatted content
      */
-    public static String formatHTMLForDisplay(final String content, final String charset, final Session session, final MailPath mailPath, final UserSettingMail usm, final boolean[] modified, final DisplayMode mode, final boolean embedded, final int maxContentSize) {
+    public static HtmlSanitizeResult formatHTMLForDisplay(final String content, final String charset, final Session session, final MailPath mailPath, final UserSettingMail usm, final boolean[] modified, final DisplayMode mode, final boolean embedded, final int maxContentSize) {
         return formatContentForDisplay(content, charset, true, session, mailPath, usm, modified, mode, embedded, maxContentSize);
     }
 
@@ -205,81 +204,70 @@ public final class HtmlProcessing {
      * @param maxContentSize maximum number of bytes that is will be returned for content. '<=0' means unlimited.
      * @return The formatted content
      */
-    public static String formatContentForDisplay(final String content, final String charset, final boolean isHtml, final Session session, final MailPath mailPath, final UserSettingMail usm, final boolean[] modified, final DisplayMode mode, final boolean embedded, final int maxContentSize) {
-        String retval = null;
+    public static HtmlSanitizeResult formatContentForDisplay(final String content, final String charset, final boolean isHtml, final Session session, final MailPath mailPath, final UserSettingMail usm, final boolean[] modified, final DisplayMode mode, final boolean embedded, final int maxContentSize) {
+        HtmlSanitizeResult retval = new HtmlSanitizeResult(content);
         final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
         if (isHtml) {
             if (DisplayMode.RAW.equals(mode)) {
-                retval = content;
+                retval.setContent(content);
             } else {
+                retval.setContent(htmlService.dropScriptTagsInHeader(content));
 
-                retval = htmlService.dropScriptTagsInHeader(content);
                 if (DisplayMode.MODIFYABLE.isIncluded(mode) && usm.isDisplayHtmlInlineContent()) {
                     final boolean externalImagesAllowed = usm.isAllowHTMLImages();
                     // Resolve <base> tags
-                    retval = htmlService.checkBaseTag(retval, externalImagesAllowed);
+                    retval.setContent(htmlService.checkBaseTag(retval.getContent(), externalImagesAllowed));
                     final String cssPrefix = null == mailPath ? null : (embedded ? "ox-" + getHash(mailPath.toString(), 10) : null);
                     if (useSanitize()) {
                         // No need to generate well-formed HTML
                         if (externalImagesAllowed) {
-                            retval = htmlService.sanitize(retval, null, false, null, cssPrefix, maxContentSize);
+                            retval = htmlService.sanitize(retval.getContent(), null, false, null, cssPrefix, maxContentSize);
                         } else {
-                            retval = htmlService.sanitize(retval, null, true, modified, cssPrefix, maxContentSize);
+                            retval = htmlService.sanitize(retval.getContent(), null, true, modified, cssPrefix, maxContentSize);
                         }
                     } else {
-                        retval = htmlService.getConformHTML(retval, charset == null ? CHARSET_US_ASCII : charset, false);
+                        retval.setContent(htmlService.getConformHTML(retval.getContent(), charset == null ? CHARSET_US_ASCII : charset, false));
                         /*
                          * Filter according to white-list
                          */
-                        retval = htmlService.filterWhitelist(retval);
+                        retval.setContent(htmlService.filterWhitelist(retval.getContent()));
                         if (externalImagesAllowed) {
                             /*
                              * TODO: Does not work reliably by now
                              */
                             // retval = htmlService.checkExternalImages(retval);
                         } else {
-                            retval = htmlService.filterExternalImages(retval, modified);
+                            retval.setContent(htmlService.filterExternalImages(retval.getContent(), modified));
                         }
                     }
                     /*
                      * Filter inlined images
                      */
                     if (mailPath != null && session != null) {
-                        retval = filterInlineImages(retval, session, mailPath);
+                        retval.setContent(filterInlineImages(retval.getContent(), session, mailPath));
                     }
                     if (embedded) {
                         /*
                          * Replace <body> with <div>
                          */
-                        retval = replaceBody(retval, cssPrefix);
+                        retval.setContent(replaceBody(retval.getContent(), cssPrefix));
                     }
                 }
-
-                // dumpToFile(retval, "~/Desktop/html-processed.html");
             }
         } else {
-            retval = content;
             if (DisplayMode.MODIFYABLE.isIncluded(mode)) {
                 if (DisplayMode.DISPLAY.equals(mode)) {
-                    retval = htmlService.formatURLs(retval, COMMENT_ID);
-                    retval = htmlService.htmlFormat(retval, true, COMMENT_ID, maxContentSize);
+                    retval.setContent(htmlService.formatURLs(retval.getContent(), COMMENT_ID));
+                    retval = htmlService.htmlFormat(retval.getContent(), true, COMMENT_ID, maxContentSize);
                     if (usm.isUseColorQuote()) {
-                        retval = replaceHTMLSimpleQuotesForDisplay(retval);
+                        retval.setContent(replaceHTMLSimpleQuotesForDisplay(retval.getContent()));
                     }
                 } else {
-                    retval = htmlService.htmlFormat(retval, true, null, maxContentSize);
+                    retval = htmlService.htmlFormat(retval.getContent(), true, null, maxContentSize);
                 }
             }
         }
         return retval;
-    }
-
-    private static String getMarkerFor(final Session session) throws URISyntaxException {
-        final StringBuilder sb = new StringBuilder(64);
-        sb.append(Strings.getLineSeparator());
-        sb.append("<!-- ").append(new URI("ox", session.getLogin(), "open-xchange.com", 57462, null, null, null).toString()).append(" -->");
-        sb.append(Strings.getLineSeparator());
-        return sb.toString();
     }
 
     private static volatile Boolean useSanitize;

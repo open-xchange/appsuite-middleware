@@ -93,7 +93,8 @@ import org.junit.runners.Suite.SuiteClasses;
     com.openexchange.login.internal.format.CompositeLoginFormatterTest.class,
     com.openexchange.user.UserServiceInterceptorRegistryTest.class,
     com.openexchange.groupware.infostore.search.impl.ToMySqlQueryVisitorTest.class,
-    com.openexchange.mailaccount.json.parser.MailAccountParserTest.class
+    com.openexchange.mailaccount.json.parser.MailAccountParserTest.class,
+    com.openexchange.mail.text.HtmlProcessingTest.class
 })
 public class UnitTests {
 

@@ -47,38 +47,50 @@
  *
  */
 
-package com.openexchange.html;
+package com.openexchange.mail.text;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.html.internal.Bug27708Test;
-import com.openexchange.html.internal.HtmlServiceImplTest;
-import com.openexchange.html.internal.css.Bug30114Test;
-import com.openexchange.html.internal.css.CSSMatcherTest;
-import com.openexchange.html.internal.jericho.handler.FilterJerichoHandlerTest;
+import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
+
 
 /**
- * Test suite for all integrated unit tests of the HTMLService implementation.
+ * {@link HtmlProcessingTest}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.6.1
  */
-@RunWith(Suite.class)
-@SuiteClasses({ 
-    Bug26237Test.class, 
-    Bug26611Test.class, 
-    Bug27335Test.class, 
-    Bug27708Test.class, 
-    CSSMatcherTest.class, 
-    Bug30114Test.class, 
-    Bug31826Test.class, 
-    ConformHtmlTest.class,
-    HtmlServiceImplTest.class,
-    FilterJerichoHandlerTest.class
-})
-public class UnitTests {
+public class HtmlProcessingTest {
 
-    private UnitTests() {
-        super();
+    /**
+     * @throws java.lang.Exception
+     */
+    @Before
+    public void setUp() throws Exception {
     }
+
+    /**
+     * Test method for {@link com.openexchange.mail.text.HtmlProcessing#formatTextForDisplay(java.lang.String, com.openexchange.mail.usersetting.UserSettingMail, com.openexchange.mail.utils.DisplayMode, int)}.
+     */
+    @Test
+    public void testFormatTextForDisplayStringUserSettingMailDisplayModeInt() {
+        fail("Not yet implemented");
+    }
+
+    /**
+     * Test method for {@link com.openexchange.mail.text.HtmlProcessing#formatHTMLForDisplay(java.lang.String, java.lang.String, com.openexchange.session.Session, com.openexchange.mail.MailPath, com.openexchange.mail.usersetting.UserSettingMail, boolean[], com.openexchange.mail.utils.DisplayMode, boolean, int)}.
+     */
+    @Test
+    public void testFormatHTMLForDisplayStringStringSessionMailPathUserSettingMailBooleanArrayDisplayModeBooleanInt() {
+        fail("Not yet implemented");
+    }
+
+    /**
+     * Test method for {@link com.openexchange.mail.text.HtmlProcessing#formatContentForDisplay(java.lang.String, java.lang.String, boolean, com.openexchange.session.Session, com.openexchange.mail.MailPath, com.openexchange.mail.usersetting.UserSettingMail, boolean[], com.openexchange.mail.utils.DisplayMode, boolean, int)}.
+     */
+    @Test
+    public void testFormatContentForDisplay() {
+        fail("Not yet implemented");
+    }
+
 }
