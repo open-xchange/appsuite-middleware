@@ -52,7 +52,7 @@ package com.openexchange.index.solr.internal;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.Properties;
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.apache.commons.io.FileUtils;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;

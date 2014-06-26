@@ -49,8 +49,8 @@
 
 package com.openexchange.admin.rmi;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.rmi.Naming;
 import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;

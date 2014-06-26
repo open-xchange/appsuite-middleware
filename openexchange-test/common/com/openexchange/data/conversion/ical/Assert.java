@@ -56,7 +56,7 @@ import java.util.TimeZone;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class Assert extends junit.framework.Assert {
+public class Assert extends org.junit.Assert {
 
     /**
      * Prevent instantiation.

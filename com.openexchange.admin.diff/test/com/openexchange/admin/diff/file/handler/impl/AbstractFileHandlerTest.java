@@ -51,7 +51,7 @@ package com.openexchange.admin.diff.file.handler.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;

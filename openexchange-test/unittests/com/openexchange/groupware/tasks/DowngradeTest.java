@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.tasks;
 
-import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.util.Iterator;
 import junit.framework.AssertionFailedError;
@@ -58,6 +57,7 @@ import com.mysql.jdbc.AssertionFailedException;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
@@ -75,8 +75,8 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
-import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.setuptools.TestConfig;
+import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 
 /**
@@ -166,7 +166,7 @@ public class DowngradeTest extends TestCase {
     }
 
     public void testRemovePrivateTasks() throws OXException, OXException,
-        OXException {
+    OXException {
         final int folderId = FolderToolkit.getStandardTaskFolder(user.getId(),
             ctx);
         final Task task = Create.createWithDefaults(folderId, "DowngradeTest");
@@ -178,7 +178,7 @@ public class DowngradeTest extends TestCase {
     }
 
     public void testRemovePublicTask() throws OXException, OXException,
-        OXException {
+    OXException {
         final FolderObject folder = createPublicFolder();
         final int folderId = folder.getObjectID();
         final Task task = Create.createWithDefaults(folderId, "DowngradeTest");

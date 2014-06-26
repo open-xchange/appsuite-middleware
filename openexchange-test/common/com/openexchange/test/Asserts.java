@@ -85,7 +85,7 @@ public class Asserts {
             equalize(cal1, cal2, Calendar.MONTH);
         }
 
-        junit.framework.Assert.assertEquals(message, cal1.getTime(), cal2.getTime());
+        org.junit.Assert.assertEquals(message, cal1.getTime(), cal2.getTime());
     }
 
     private static void equalize(Calendar c1, Calendar c2, int field){

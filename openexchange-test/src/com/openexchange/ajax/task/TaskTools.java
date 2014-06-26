@@ -54,7 +54,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.TimeZone;
 import javax.servlet.http.HttpServletResponse;
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;

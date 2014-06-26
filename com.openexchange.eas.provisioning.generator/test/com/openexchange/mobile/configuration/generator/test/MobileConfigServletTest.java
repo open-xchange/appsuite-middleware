@@ -1,6 +1,6 @@
 package com.openexchange.mobile.configuration.generator.test;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.SimConfigurationService;

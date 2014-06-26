@@ -17,7 +17,7 @@ package org.quartz;
 
 import java.util.Date;
 import java.util.List;
-import junit.framework.Assert;
+import org.junit.Assert;
 import junit.framework.TestCase;
 import org.quartz.Trigger.TriggerState;
 import org.quartz.impl.JobDetailImpl;

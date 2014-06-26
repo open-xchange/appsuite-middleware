@@ -50,7 +50,7 @@
 package com.openexchange.ajax.attach;
 
 import static com.openexchange.ajax.framework.AJAXClient.User.User1;
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 import java.io.ByteArrayInputStream;
 import java.util.TimeZone;
 import org.junit.After;

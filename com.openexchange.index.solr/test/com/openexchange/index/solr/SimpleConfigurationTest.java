@@ -53,7 +53,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.util.List;
 import java.util.Set;
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 import com.openexchange.index.solr.internal.querybuilder.Configuration;
 import com.openexchange.index.solr.internal.querybuilder.SimpleConfiguration;

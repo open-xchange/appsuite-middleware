@@ -55,7 +55,7 @@ import static com.openexchange.index.solr.internal.LuceneQueryTools.catenateQuer
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.index.memory.MemoryIndex;
 import org.apache.lucene.queryParser.QueryParser;
