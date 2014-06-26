@@ -69,8 +69,8 @@ public class WebAuthSession extends AbstractSession {
     }
 
     /**
-     * Creates a new web auth session with the given app key pair and access type. The session will be linked to the account corresponding
-     * to the given access token pair.
+     * Creates a new web auth session with the given app key pair and access token pair. The session will be linked to the account
+     * corresponding to the given access token pair.
      */
     public WebAuthSession(AppKeyPair appKeyPair, AccessTokenPair accessTokenPair) {
         super(appKeyPair, accessTokenPair);
