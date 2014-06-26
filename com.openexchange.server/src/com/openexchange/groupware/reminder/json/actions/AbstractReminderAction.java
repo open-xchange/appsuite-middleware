@@ -282,9 +282,7 @@ public abstract class AbstractReminderAction implements AJAXActionService {
 
             recurringResults = recColl.calculateRecurring(calendarDataObject, reminder.getDate().getTime(), until.getTime(), 0);
         } catch (final OXException e) {
-            LOG.error(
-                "Can't calculate next recurrence for appointment " + reminder.getTargetId() + " in context " + session.getContextId(),
-                e);
+            LOG.error("Can''t calculate next recurrence for appointment {} in context {}", reminder.getTargetId(), session.getContextId(), e);
             return null;
         }
         if (null == recurringResults || recurringResults.size() == 0) {
