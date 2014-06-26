@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.0,com.openexchange.mailmapping"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.0,com.openexchange.rest.services"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.0,com.openexchange.rest.services.configuration"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.0,com.openexchange.rest.services.database"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.0,com.openexchange.rest.services.html"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.0,com.openexchange.rest.services.users.mailMapping"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mailmapping"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.rest.services"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.rest.services.configuration"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.rest.services.database"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.rest.services.html"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.rest.services.users.mailMapping"/>
 </provider>
 </psf>
