@@ -1,3 +1,15 @@
+open-xchange-file-storage-cifs (7.6.1-0) unstable; urgency=medium
+
+  * prepare for 7.6.1
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Thu, 26 Jun 2014 11:39:44 +0200
+
+open-xchange-file-storage-cifs (7.6.1-0) unstable; urgency=medium
+
+  * prepare for 7.6.1
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Thu, 26 Jun 2014 11:39:13 +0200
+
 open-xchange-file-storage-cifs (7.6.0-7) stable; urgency=low
 
   * Seventh candidate for 7.6.0 release

@@ -6,7 +6,7 @@ BuildRequires:  ant-nodeps
 BuildRequires:  open-xchange-core
 BuildRequires:  java-devel >= 1.6.0
 Version:        @OXVERSION@
-%define         ox_release 5
+%define         ox_release 0
 %define         ox_release 7
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
@@ -57,6 +57,8 @@ ox_set_property com.openexchange.capability.drive false /opt/open-xchange/etc/dr
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Thu Jun 26 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+prepare for 7.6.1
 * Mon Jun 23 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Seventh candidate for 7.6.0 release
 * Fri Jun 20 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>

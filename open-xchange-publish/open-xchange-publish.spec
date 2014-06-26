@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 7
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -59,6 +59,8 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc microf
 %config(noreplace) /opt/open-xchange/templates/*
 
 %changelog
+* Thu Jun 26 2014 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.6.1
 * Mon Jun 23 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Seventh candidate for 7.6.0 release
 * Fri Jun 20 2014 Marcus Klein <marcus.klein@open-xchange.com>
