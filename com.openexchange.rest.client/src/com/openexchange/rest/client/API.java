@@ -121,4 +121,14 @@ public abstract class API<S extends Session> {
     public static int getVersion() {
         throw new IllegalStateException("Subclass must implement and hence shadow this method.");
     }
+
+    /**
+     * Get the user agent
+     * 
+     * @return The user agent
+     * @throws IllegalStateException if the subclass of <b>this</b> class does not implement and hence shadow/hide this method
+     */
+    public static String getUserAgent() {
+        throw new IllegalStateException("Subclass must implement and hence shadow this method.");
+    }
 }
