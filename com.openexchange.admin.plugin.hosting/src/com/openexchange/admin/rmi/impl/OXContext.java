@@ -1067,7 +1067,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 if (rsyncEnabled) {
                     fsdm = new FilestoreDataMover(src.toString(), dst.toString(), ctx, dst_filestore, true);
                 } else {
-                    fsdm = new FilestoreDataMover(sourceURI.toString() + src.toString(), destURI.toString(), ctx, dst_filestore, false);
+                    fsdm = new FilestoreDataMover(sourceURI.toString() + "/" + ctxdir, destURI.toString(), ctx, dst_filestore, false);
                 }
                 return TaskManager.getInstance().addJob(fsdm, "movefilestore", "move context " + ctx.getIdAsString() + " to filestore " + dst_filestore.getId(), ctx.getId());
             } catch (final StorageException e) {

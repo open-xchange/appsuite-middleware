@@ -176,13 +176,13 @@ public class FilestoreDataMover implements Callable<Void> {
                     String newFile = dstStorage.saveNewFile(is);
                     if (null != newFile) {
                         fileMapping.put(file, newFile);
-                        log.error(file + " -> " + newFile);
+                        log.info("Copied file " + file + " to " + newFile);
                     }
                 }
             } catch (OXException e) {
-                throw new StorageException(e.toString());
+                throw new StorageException(e);
             } catch (URISyntaxException e) {
-                throw new StorageException(e.toString());
+                throw new StorageException(e);
             }
             TaskManager.getInstance().addJob(new FilestoreLocationUpdater(fileMapping, ctx.getId()), "movefilestore", "update file_store_location", ctx.getId());
             try {
@@ -196,7 +196,7 @@ public class FilestoreDataMover implements Callable<Void> {
                 cache.clear();
                 oxcox.enable(ctx);
             } catch (OXException e) {
-                throw new StorageException(e.toString());
+                throw new StorageException(e);
             }
         }
     }
