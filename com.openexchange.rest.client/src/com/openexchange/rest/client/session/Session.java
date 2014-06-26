@@ -54,6 +54,9 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import com.openexchange.exception.OXException;
+import com.openexchange.rest.client.session.pair.AccessTokenPair;
+import com.openexchange.rest.client.session.pair.AppKeyPair;
+import com.openexchange.rest.client.session.pair.ConsumerPair;
 
 /**
  * {@link Session}
@@ -113,6 +116,13 @@ public interface Session {
      * @return The currently logged in user's access token and secret.
      */
     public AccessTokenPair getAccessTokenPair();
+
+    /**
+     * Returns the consumer key/secret pair
+     * 
+     * @return The consumer key/secret pair
+     */
+    public ConsumerPair getConsumerPair();
 
     /**
      * Describes a proxy.
