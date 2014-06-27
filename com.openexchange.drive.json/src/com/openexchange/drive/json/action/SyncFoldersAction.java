@@ -56,11 +56,13 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveService;
-import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.SyncResult;
+import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.drive.json.internal.Services;
 import com.openexchange.drive.json.json.JsonDirectoryVersion;
 import com.openexchange.drive.json.json.JsonDriveAction;
+import com.openexchange.drive.json.pattern.JsonDirectoryPattern;
+import com.openexchange.drive.json.pattern.JsonFilePattern;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -75,7 +77,7 @@ public class SyncFoldersAction extends AbstractDriveAction {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SyncFoldersAction.class);
 
     @Override
-    public AJAXRequestResult doPerform(AJAXRequestData requestData, DriveSession session) throws OXException {
+    public AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
         /*
          * get request data
          */
@@ -92,6 +94,15 @@ public class SyncFoldersAction extends AbstractDriveAction {
         try {
             originalVersions = JsonDirectoryVersion.deserialize(dataObject.optJSONArray("originalVersions"));
             clientVersions = JsonDirectoryVersion.deserialize(dataObject.optJSONArray("clientVersions"));
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
+        /*
+         * extract file- and directory exclusions if present
+         */
+        try {
+            session.setDirectoryExclusions(JsonDirectoryPattern.deserialize(dataObject.optJSONArray("directoryExclusions")));
+            session.setFileExclusions(JsonFilePattern.deserialize(dataObject.optJSONArray("fileExclusions")));
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }

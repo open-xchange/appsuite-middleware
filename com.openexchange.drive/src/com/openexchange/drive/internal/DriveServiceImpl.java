@@ -58,6 +58,7 @@ import java.util.List;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DirectoryMetadata;
+import com.openexchange.drive.DirectoryPattern;
 import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveClientVersion;
@@ -69,6 +70,7 @@ import com.openexchange.drive.DriveQuota;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.DriveSettings;
+import com.openexchange.drive.FilePattern;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.SyncResult;
 import com.openexchange.drive.actions.AbstractAction;
@@ -83,6 +85,8 @@ import com.openexchange.drive.checksum.FileChecksum;
 import com.openexchange.drive.comparison.Change;
 import com.openexchange.drive.comparison.DirectoryVersionMapper;
 import com.openexchange.drive.comparison.FileVersionMapper;
+import com.openexchange.drive.comparison.FilteringDirectoryVersionMapper;
+import com.openexchange.drive.comparison.FilteringFileVersionMapper;
 import com.openexchange.drive.comparison.ServerDirectoryVersion;
 import com.openexchange.drive.comparison.ServerFileVersion;
 import com.openexchange.drive.internal.tracking.SyncTracker;
@@ -283,7 +287,7 @@ public class DriveServiceImpl implements DriveService {
     @Override
     public IFileHolder download(DriveSession session, String path, FileVersion fileVersion, long offset, long length) throws OXException {
         DriveVersionValidator.validateFileVersion(fileVersion);
-        SyncSession driveSession = new SyncSession(session);
+        SyncSession syncSession = new SyncSession(session);
         LOG.debug("Handling download: file version: {}, offset: {}, length: {}", fileVersion, offset, length);
         /*
          * track sync result to represent the download as performed by client
@@ -297,12 +301,12 @@ public class DriveServiceImpl implements DriveService {
         };
         action.getParameters().put(DriveAction.PARAMETER_OFFSET, Long.valueOf(offset));
         action.getParameters().put(DriveAction.PARAMETER_LENGTH, Long.valueOf(length));
-        new SyncTracker(driveSession).track(new IntermediateSyncResult<FileVersion>(
+        new SyncTracker(syncSession).track(new IntermediateSyncResult<FileVersion>(
             Collections.<AbstractAction<FileVersion>>emptyList(), Collections.<AbstractAction<FileVersion>>singletonList(action)), path);
         /*
          * return file holder for download
          */
-        return new DownloadHelper(driveSession).perform(path, fileVersion, offset, length);
+        return new DownloadHelper(syncSession).perform(path, fileVersion, offset, length);
     }
 
     @Override
@@ -312,9 +316,9 @@ public class DriveServiceImpl implements DriveService {
         if (null != originalVersion) {
             DriveVersionValidator.validateFileVersion(originalVersion);
         }
-        SyncSession driveSession = new SyncSession(session);
-        if (driveSession.isTraceEnabled()) {
-            driveSession.trace("Handling upload: original version: " + originalVersion + ", new version: " + newVersion +
+        SyncSession syncSession = new SyncSession(session);
+        if (syncSession.isTraceEnabled()) {
+            syncSession.trace("Handling upload: original version: " + originalVersion + ", new version: " + newVersion +
                 ", offset: " + offset + ", total length: " + totalLength +
                 ", created: " + (null != created ? DriveConstants.LOG_DATE_FORMAT.get().format(created) : "") +
                 ", modified: " + (null != modified ? DriveConstants.LOG_DATE_FORMAT.get().format(modified) : ""));
@@ -322,12 +326,12 @@ public class DriveServiceImpl implements DriveService {
         IntermediateSyncResult<FileVersion> syncResult = new IntermediateSyncResult<FileVersion>();
         File createdFile = null;
         try {
-            createdFile = new UploadHelper(driveSession).perform(path, originalVersion, newVersion, uploadStream, contentType, offset, totalLength, created, modified);
+            createdFile = new UploadHelper(syncSession).perform(path, originalVersion, newVersion, uploadStream, contentType, offset, totalLength, created, modified);
         } catch (OXException e) {
             LOG.warn("Got exception during upload ({})\nSession: {}, path: {}, original version: {}, new version: {}, offset: {}, total length: {}",
-                e.getMessage(), driveSession, path, originalVersion, newVersion, offset, totalLength);
+                e.getMessage(), syncSession, path, originalVersion, newVersion, offset, totalLength);
             if (DriveUtils.indicatesQuotaExceeded(e)) {
-                syncResult.addActionsForClient(DriveUtils.handleQuotaExceeded(driveSession, e, path, originalVersion, newVersion));
+                syncResult.addActionsForClient(DriveUtils.handleQuotaExceeded(syncSession, e, path, originalVersion, newVersion));
             } else if ("IFO-0100".equals(e.getErrorCode())) {
                 /*
                  * database fields (filename/title/comment?) too long - put into quarantine to prevent repeated errors
@@ -341,27 +345,27 @@ public class DriveServiceImpl implements DriveService {
             /*
              * store checksum, invalidate parent directory checksum
              */
-            FileChecksum fileChecksum = driveSession.getChecksumStore().insertFileChecksum(new FileChecksum(
+            FileChecksum fileChecksum = syncSession.getChecksumStore().insertFileChecksum(new FileChecksum(
                 DriveUtils.getFileID(createdFile), createdFile.getVersion(), createdFile.getSequenceNumber(), newVersion.getChecksum()));
-            driveSession.getChecksumStore().removeDirectoryChecksum(new FolderID(createdFile.getFolderId()));
+            syncSession.getChecksumStore().removeDirectoryChecksum(new FolderID(createdFile.getFolderId()));
             /*
              * check if created file still equals uploaded one
              */
             ServerFileVersion createdVersion = new ServerFileVersion(createdFile, fileChecksum);
             if (newVersion.getName().equals(createdFile.getFileName())) {
-                syncResult.addActionForClient(new AcknowledgeFileAction(driveSession, originalVersion, createdVersion, null, path));
+                syncResult.addActionForClient(new AcknowledgeFileAction(syncSession, originalVersion, createdVersion, null, path));
             } else {
                 syncResult.addActionForClient(new EditFileAction(newVersion, createdVersion, null, path));
             }
         }
-        if (driveSession.isTraceEnabled()) {
-            driveSession.trace(syncResult);
+        if (syncSession.isTraceEnabled()) {
+            syncSession.trace(syncResult);
         }
         /*
          * track & return sync result
          */
-        syncResult = new SyncTracker(driveSession).track(syncResult, path);
-        return new DefaultSyncResult<FileVersion>(syncResult.getActionsForClient(), driveSession.getDiagnosticsLog());
+        syncResult = new SyncTracker(syncSession).track(syncResult, path);
+        return new DefaultSyncResult<FileVersion>(syncResult.getActionsForClient(), syncSession.getDiagnosticsLog());
     }
 
     @Override
@@ -379,6 +383,8 @@ public class DriveServiceImpl implements DriveService {
         settings.setQuota(new DriveQuotaImpl(quota, syncSession.getLinkGenerator().getQuotaLink()));
         settings.setHelpLink(syncSession.getLinkGenerator().getHelpLink());
         settings.setServerVersion(com.openexchange.version.Version.getInstance().getVersionString());
+        settings.setMinApiVersion(String.valueOf(DriveConfig.getInstance().getMinApiVersion()));
+        settings.setSupportedApiVersion(String.valueOf(DriveConstants.SUPPORTED_API_VERSION));
         return settings;
     }
 
@@ -412,13 +418,13 @@ public class DriveServiceImpl implements DriveService {
 
     @Override
     public DirectoryMetadata getDirectoryMetadata(DriveSession session, String path) throws OXException {
-        SyncSession driveSession = new SyncSession(session);
-        String folderID = driveSession.getStorage().getFolderID(path);
-        List<DirectoryChecksum> checksums = ChecksumProvider.getChecksums(driveSession, Arrays.asList(new String[] { folderID }));
+        SyncSession syncSession = new SyncSession(session);
+        String folderID = syncSession.getStorage().getFolderID(path);
+        List<DirectoryChecksum> checksums = ChecksumProvider.getChecksums(syncSession, Arrays.asList(new String[] { folderID }));
         if (null == checksums || 0 == checksums.size()) {
             throw DriveExceptionCodes.PATH_NOT_FOUND.create(path);
         }
-        return new DefaultDirectoryMetadata(driveSession, new ServerDirectoryVersion(path, checksums.get(0)));
+        return new DefaultDirectoryMetadata(syncSession, new ServerDirectoryVersion(path, checksums.get(0)));
     }
 
     private static IntermediateSyncResult<DirectoryVersion> syncDirectories(SyncSession session, List<? extends DirectoryVersion> originalVersions,
@@ -426,7 +432,13 @@ public class DriveServiceImpl implements DriveService {
         /*
          * map directories
          */
-        DirectoryVersionMapper mapper = new DirectoryVersionMapper(originalVersions, clientVersions, serverVersions);
+        List<DirectoryPattern> directoryExclusions = session.getDriveSession().getDirectoryExclusions();
+        DirectoryVersionMapper mapper;
+        if (null == directoryExclusions || 0 == directoryExclusions.size()) {
+            mapper = new DirectoryVersionMapper(originalVersions, clientVersions, serverVersions);
+        } else {
+            mapper = new FilteringDirectoryVersionMapper(directoryExclusions, originalVersions, clientVersions, serverVersions);
+        }
         if (session.isTraceEnabled()) {
             StringBuilder allocator = new StringBuilder("Directory versions mapped to:\n");
             allocator.append(mapper).append('\n');
@@ -448,7 +460,13 @@ public class DriveServiceImpl implements DriveService {
         /*
          * map files
          */
-        FileVersionMapper mapper = new FileVersionMapper(originalVersions, clientVersions, serverVersions);
+        List<FilePattern> fileExclusions = session.getDriveSession().getFileExclusions();
+        FileVersionMapper mapper;
+        if (null == fileExclusions || 0 == fileExclusions.size()) {
+            mapper = new FileVersionMapper(originalVersions, clientVersions, serverVersions);
+        } else {
+            mapper = new FilteringFileVersionMapper(path, fileExclusions, originalVersions, clientVersions, serverVersions);
+        }
         if (session.isTraceEnabled()) {
             StringBuilder allocator = new StringBuilder("File versions in directory " + path + " mapped to:\n");
             allocator.append(mapper).append('\n');

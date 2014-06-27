@@ -49,115 +49,19 @@
 
 package com.openexchange.drive;
 
-
 /**
- * {@link DriveSettings}
+ * {@link DirectoryPattern}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DriveSettings {
-
-    private String helpLink;
-    private String serverVersion;
-    private DriveQuota quota;
-    private String supportedApiVersion;
-    private String minApiVersion;
+public interface DirectoryPattern {
 
     /**
-     * Initializes a new {@link DriveSettings}.
-     */
-    public DriveSettings() {
-        super();
-    }
-
-    /**
-     * Gets the helpLink
+     * Gets a value indicating whether the pattern matches the supplied directory path, relative to the root folder.
      *
-     * @return The helpLink
+     * @param path The path of the directory to check
+     * @return <code>true</code> if it matches, <code>false</code>, otherwise
      */
-    public String getHelpLink() {
-        return helpLink;
-    }
-
-    /**
-     * Sets the helpLink
-     *
-     * @param helpLink The helpLink to set
-     */
-    public void setHelpLink(String helpLink) {
-        this.helpLink = helpLink;
-    }
-
-    /**
-     * Gets the quota
-     *
-     * @return The quota
-     */
-    public DriveQuota getQuota() {
-        return quota;
-    }
-
-    /**
-     * Sets the quota
-     *
-     * @param quota The quota to set
-     */
-    public void setQuota(DriveQuota quota) {
-        this.quota = quota;
-    }
-
-    /**
-     * Sets the server version
-     *
-     * @param serverVersion The server version to set
-     */
-    public void setServerVersion(String serverVersion) {
-        this.serverVersion = serverVersion;
-    }
-
-    /**
-     * Gets the server version
-     *
-     * @return The server version
-     */
-    public String getServerVersion() {
-        return serverVersion;
-    }
-
-    /**
-     * Gets the supportedApiVersion
-     *
-     * @return The supportedApiVersion
-     */
-    public String getSupportedApiVersion() {
-        return supportedApiVersion;
-    }
-
-    /**
-     * Sets the supportedApiVersion
-     *
-     * @param supportedApiVersion The supportedApiVersion to set
-     */
-    public void setSupportedApiVersion(String supportedApiVersion) {
-        this.supportedApiVersion = supportedApiVersion;
-    }
-
-    /**
-     * Gets the minApiVersion
-     *
-     * @return The minApiVersion
-     */
-    public String getMinApiVersion() {
-        return minApiVersion;
-    }
-
-    /**
-     * Sets the minApiVersion
-     *
-     * @param minApiVersion The minApiVersion to set
-     */
-    public void setMinApiVersion(String minApiVersion) {
-        this.minApiVersion = minApiVersion;
-    }
+    boolean matches(String path);
 
 }

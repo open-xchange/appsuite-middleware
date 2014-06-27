@@ -47,54 +47,28 @@
  *
  */
 
-package com.openexchange.drive.json.action;
-
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.drive.json.internal.DefaultDriveSession;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-
+package com.openexchange.drive.json.pattern;
 
 /**
- * {@link UpdateTokenAction}
+ * {@link PatternType}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class UpdateTokenAction extends AbstractDriveAction {
+public enum PatternType {
 
-    @Override
-    protected boolean requiresRootFolderID() {
-        return false;
-    }
+    /**
+     * An exact pattern, matching the file- or directory version literally
+     */
+    EXACT,
 
-    @Override
-    public AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
-        /*
-         * get parameters
-         */
-        String token = requestData.getParameter("token");
-        if (Strings.isEmpty(token)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("token");
-        }
-        String newToken = requestData.getParameter("newToken");
-        if (Strings.isEmpty(newToken)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("newToken");
-        }
-        String serviceID = requestData.getParameter("service");
-        if (Strings.isEmpty(serviceID)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("service");
-        }
-        /*
-         * update token
-         */
-        getSubscriptionStore().updateToken(session.getServerSession(), serviceID, token, newToken);
-        /*
-         * return empty json object to indicate success
-         */
-        return new AJAXRequestResult(new JSONObject(0), "json");
-    }
+    /**
+     * A simple pattern allowing to use the common wildcards <code>*</code> and <code>?</code>to match file- and directory versions
+     */
+    GLOB,
+
+    /**
+     * A pattern compatible with the java regular expression syntax
+     */
+    REGEX
 
 }

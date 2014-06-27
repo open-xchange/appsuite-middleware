@@ -129,20 +129,21 @@ public interface DirectoryChecksumStore {
      *
      * @param userID The user ID
      * @param folderID The folder ID to get the checksum for
+     * @param view The view of the directory, or <code>0</code> for the default view
      * @return The checksum, or <code>null</code> if not found
      * @throws OXException
      */
-    DirectoryChecksum getDirectoryChecksum(int userID, FolderID folderID) throws OXException;
+    DirectoryChecksum getDirectoryChecksum(int userID, FolderID folderID, int view) throws OXException;
 
     /**
      * Gets the directory checksums of multiple folders.
      *
      * @param userID The user ID
      * @param folderIDs The folder IDs to get the checksum for
+     * @param view The view of the directory, or <code>0</code> for the default view
      * @return The found checksums
      * @throws OXException
      */
-    List<DirectoryChecksum> getDirectoryChecksums(int userID, List<FolderID> folderIDs) throws OXException;
+    List<DirectoryChecksum> getDirectoryChecksums(int userID, List<FolderID> folderIDs, int view) throws OXException;
 
 }
-

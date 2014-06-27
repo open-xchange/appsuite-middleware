@@ -56,7 +56,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveService;
-import com.openexchange.drive.DriveSession;
+import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.drive.json.internal.Services;
 import com.openexchange.drive.json.json.JsonFileVersion;
 import com.openexchange.exception.OXException;
@@ -75,7 +75,7 @@ public class DownloadAction extends AbstractDriveAction {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DownloadAction.class);
 
     @Override
-    public AJAXRequestResult doPerform(AJAXRequestData requestData, DriveSession session) throws OXException {
+    public AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
         try {
             /*
              * no limits for download

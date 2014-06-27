@@ -90,6 +90,7 @@ public class SQL {
             "uuid BINARY(16) NOT NULL," +
             "cid INT4 UNSIGNED NOT NULL," +
             "user INT4 UNSIGNED DEFAULT NULL," +
+            "view INT NOT NULL DEFAULT 0," +
             "folder VARCHAR(512) NOT NULL," +
             "sequence BIGINT(20) DEFAULT NULL," +
             "etag VARCHAR(255) DEFAULT NULL," +
@@ -110,7 +111,8 @@ public class SQL {
             new DriveCreateTableTask(),
             new DirectoryChecksumsAddUserAndETagColumnTask(),
             new DirectoryChecksumsReIndexTask(),
-            new FileChecksumsReIndexTask()
+            new FileChecksumsReIndexTask(),
+            new DirectoryChecksumsAddViewColumnTask()
         };
     };
 
@@ -171,8 +173,8 @@ public class SQL {
         "WHERE cid=? AND checksum=UNHEX(?);";
 
     public static final String INSERT_DIRECTORY_CHECKSUM_STMT =
-        "INSERT INTO directoryChecksums (uuid,cid,user,folder,sequence,etag,checksum) " +
-        "VALUES (UNHEX(?),?,?,REVERSE(?),?,?,UNHEX(?));";
+        "INSERT INTO directoryChecksums (uuid,cid,user,view,folder,sequence,etag,checksum) " +
+        "VALUES (UNHEX(?),?,?,?,REVERSE(?),?,?,UNHEX(?));";
 
     public static final String UPDATE_DIRECTORY_CHECKSUM_STMT =
         "UPDATE directoryChecksums SET folder=REVERSE(?),sequence=?,etag=?,checksum=UNHEX(?) " +
@@ -189,9 +191,8 @@ public class SQL {
     /**
      * DELETE FROM fileChecksums
      * WHERE cid=? AND REVERSE(folder) IN (...);"
-     * @throws OXException
      */
-    public static final String DELETE_FILE_CHECKSUMS_IN_FOLDER_STMT(int length) throws OXException {
+    public static final String DELETE_FILE_CHECKSUMS_IN_FOLDER_STMT(int length) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("DELETE FROM fileChecksums WHERE cid=? AND folder");
         return appendPlaceholders(stringBuilder, length).append(';').toString();
@@ -200,9 +201,8 @@ public class SQL {
     /**
      * DELETE FROM directoryChecksums
      * WHERE cid=? AND folder IN (?,?,...);"
-     * @throws OXException
      */
-    public static final String DELETE_DIRECTORY_CHECKSUMS_STMT(int length) throws OXException {
+    public static final String DELETE_DIRECTORY_CHECKSUMS_STMT(int length) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("DELETE FROM directoryChecksums WHERE cid=? AND folder");
         return appendPlaceholders(stringBuilder, length).append(';').toString();
@@ -210,14 +210,13 @@ public class SQL {
 
     /**
      * SELECT LOWER(HEX(uuid)),REVERSE(folder),sequence,etag,LOWER(HEX(checksum)) FROM directoryChecksums
-     * WHERE cid=? AND user=? AND folder IN (?,?,...);"
-     * @throws OXException
+     * WHERE cid=? AND user=? AND folder IN (?,?,...) AND view=?;"
      */
-    public static final String SELECT_DIRECTORY_CHECKSUMS_STMT(int length) throws OXException {
+    public static final String SELECT_DIRECTORY_CHECKSUMS_STMT(int length) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("SELECT LOWER(HEX(uuid)),REVERSE(folder),sequence,etag,LOWER(HEX(checksum)) FROM directoryChecksums ");
         stringBuilder.append("WHERE cid=? AND user=? AND folder");
-        return appendPlaceholders(stringBuilder, length).append(';').toString();
+        return appendPlaceholders(stringBuilder, length).append(" AND view=?;").toString();
     }
 
     /**
@@ -275,7 +274,6 @@ public class SQL {
 
     public static String escape(String value) throws OXException {
         if (null == value) {
-            //System.out.println(value);
             return null;
         }
         try {

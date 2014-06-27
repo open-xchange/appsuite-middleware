@@ -51,8 +51,10 @@ package com.openexchange.drive.internal;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.openexchange.drive.DirectoryPattern;
 import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.DriveExceptionCodes;
+import com.openexchange.drive.FilePattern;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.actions.AbstractAction;
 import com.openexchange.drive.actions.DownloadFileAction;
@@ -135,14 +137,14 @@ public class DriveUtils {
         if (DriveConstants.TEMP_PATH.equalsIgnoreCase(path)) {
             return true; // no temp path
         }
-//        List<DirectoryFilter> excludedDirectories = session.getDriveSession().getExcludedDirectories();
-//        if (null != excludedDirectories && 0 < excludedDirectories.size()) {
-//            for (DirectoryFilter excludedDirectory : excludedDirectories) {
-//                if (excludedDirectory.matches(path)) {
-//                    return true; // no (client-side) excluded paths
-//                }
-//            }
-//        }
+        List<DirectoryPattern> directoryExclusions = session.getDriveSession().getDirectoryExclusions();
+        if (null != directoryExclusions && 0 < directoryExclusions.size()) {
+            for (DirectoryPattern pattern : directoryExclusions) {
+                if (pattern.matches(path)) {
+                    return true; // no (client-side) excluded paths
+                }
+            }
+        }
         if (session.getStorage().hasTrashFolder()) {
             FileStorageFolder trashFolder = session.getStorage().getTrashFolder();
             String trashPath = session.getStorage().getPath(trashFolder.getId());
@@ -190,14 +192,14 @@ public class DriveUtils {
         if (DriveConfig.getInstance().getExcludedFilenamesPattern().matcher(fileName).matches()) {
             return true; // no (server-side) excluded files
         }
-//        List<FileFilter> excludedFiles = session.getDriveSession().getExcludedFiles();
-//        if (null != excludedFiles && 0 < excludedFiles.size()) {
-//            for (FileFilter excludedFile : excludedFiles) {
-//                if (excludedFile.matches(path, fileName)) {
-//                    return true; // no (client-side) excluded files
-//                }
-//            }
-//        }
+        List<FilePattern> fileExclusions = session.getDriveSession().getFileExclusions();
+        if (null != fileExclusions && 0 < fileExclusions.size()) {
+            for (FilePattern pattern : fileExclusions) {
+                if (pattern.matches(path, fileName)) {
+                    return true; // no (client-side) excluded files
+                }
+            }
+        }
         return false;
     }
 

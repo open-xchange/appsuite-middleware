@@ -47,54 +47,60 @@
  *
  */
 
-package com.openexchange.drive.json.action;
+package com.openexchange.drive.checksum.rdb;
 
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.drive.json.internal.DefaultDriveSession;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.rollback;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.drive.internal.DriveServiceLookup;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link UpdateTokenAction}
+ * {@link DirectoryChecksumsAddViewColumnTask}
+ *
+ * Adds the column <code>view INT NOT NULL DEFAULT 0</code> to the <code>directoryChecksums</code> table.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class UpdateTokenAction extends AbstractDriveAction {
+public class DirectoryChecksumsAddViewColumnTask extends UpdateTaskAdapter {
 
     @Override
-    protected boolean requiresRootFolderID() {
-        return false;
+    public String[] getDependencies() {
+        return new String[] { DirectoryChecksumsReIndexTask.class.getName() };
     }
 
     @Override
-    public AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
-        /*
-         * get parameters
-         */
-        String token = requestData.getParameter("token");
-        if (Strings.isEmpty(token)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("token");
+    public void perform(PerformParameters params) throws OXException {
+        int contextID = params.getContextId();
+        DatabaseService dbService = DriveServiceLookup.getService(DatabaseService.class);
+        Connection connection = dbService.getForUpdateTask(contextID);
+        boolean committed = false;
+        try {
+            connection.setAutoCommit(false);
+            Tools.checkAndAddColumns(connection, "directoryChecksums", new Column("view", "INT NOT NULL DEFAULT 0"));
+            connection.commit();
+            committed = true;
+        } catch (SQLException e) {
+            rollback(connection);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            rollback(connection);
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            autocommit(connection);
+            if (committed) {
+                dbService.backForUpdateTask(contextID, connection);
+            } else {
+                dbService.backForUpdateTaskAfterReading(contextID, connection);
+            }
         }
-        String newToken = requestData.getParameter("newToken");
-        if (Strings.isEmpty(newToken)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("newToken");
-        }
-        String serviceID = requestData.getParameter("service");
-        if (Strings.isEmpty(serviceID)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("service");
-        }
-        /*
-         * update token
-         */
-        getSubscriptionStore().updateToken(session.getServerSession(), serviceID, token, newToken);
-        /*
-         * return empty json object to indicate success
-         */
-        return new AJAXRequestResult(new JSONObject(0), "json");
     }
 
 }

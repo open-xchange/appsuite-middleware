@@ -154,13 +154,14 @@ public class ChecksumProvider {
             }
             checksums = calculateDirectoryChecksums(session, fids);
         } else {
+            int view = session.getExclusionFilterHash();
             checksums = new ArrayList<DirectoryChecksum>(folderIDs.size());
-            List<DirectoryChecksum> storedChecksums = session.getChecksumStore().getDirectoryChecksums(userID, fids);
+            List<DirectoryChecksum> storedChecksums = session.getChecksumStore().getDirectoryChecksums(userID, fids, view);
             List<DirectoryChecksum> updatedChecksums = new ArrayList<DirectoryChecksum>();
             List<DirectoryChecksum> newChecksums = new ArrayList<DirectoryChecksum>();
             Map<String, Long> sequenceNumbers = session.getStorage().getSequenceNumbers(folderIDs);
             for (FolderID folderID : fids) {
-                DirectoryChecksum directoryChecksum = find(storedChecksums, folderID);
+                DirectoryChecksum directoryChecksum = find(storedChecksums, folderID, view);
                 Long value = sequenceNumbers.get(folderID.toUniqueID());
                 long sequenceNumber = null != value ? value.longValue() : 0;
                 if (null != directoryChecksum) {
@@ -180,7 +181,7 @@ public class ChecksumProvider {
                         }
                     }
                 } else {
-                    directoryChecksum = new DirectoryChecksum(userID, folderID, sequenceNumber, calculateMD5(session, folderID));
+                    directoryChecksum = new DirectoryChecksum(userID, folderID, sequenceNumber, calculateMD5(session, folderID), view);
                     if (null != trace) {
                         trace.append(" Newly calculated: ").append(directoryChecksum).append('\n');
                     }
@@ -215,9 +216,10 @@ public class ChecksumProvider {
     }
 
     private static List<DirectoryChecksum> calculateDirectoryChecksums(SyncSession session, List<FolderID> folderIDs) throws OXException {
+        int view = session.getExclusionFilterHash();
         List<DirectoryChecksum> checksums = new ArrayList<DirectoryChecksum>(folderIDs.size());
         for (FolderID folderID : folderIDs) {
-            checksums.add(new DirectoryChecksum(session.getServerSession().getUserId(), folderID, -1, calculateMD5(session, folderID)));
+            checksums.add(new DirectoryChecksum(session.getServerSession().getUserId(), folderID, -1, calculateMD5(session, folderID), view));
         }
         return checksums;
     }
@@ -323,9 +325,17 @@ public class ChecksumProvider {
         return null;
     }
 
-    private static DirectoryChecksum find(Collection<? extends DirectoryChecksum> checksums, FolderID folderID) {
+    /**
+     * Looks up the checksum matching the supplied folder ID and view.
+     *
+     * @param checksums The checksums to search in
+     * @param folderID The folder ID to match
+     * @param view The view to match
+     * @return The checksum, or <code>null</code> if not found
+     */
+    private static DirectoryChecksum find(Collection<? extends DirectoryChecksum> checksums, FolderID folderID, int view) {
         for (DirectoryChecksum checksum : checksums) {
-            if (checksum.getFolderID().equals(folderID)) {
+            if (checksum.getFolderID().equals(folderID) && checksum.getView() == view) {
                 return checksum;
             }
         }

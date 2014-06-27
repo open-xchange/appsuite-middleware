@@ -58,8 +58,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.drive.DriveFileField;
 import com.openexchange.drive.DriveFileMetadata;
-import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.FileVersion;
+import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.drive.json.json.DriveFieldMapper;
 import com.openexchange.drive.json.json.JsonFileVersion;
 import com.openexchange.exception.OXException;
@@ -75,7 +75,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 public class FileMetadataAction extends AbstractDriveAction {
 
     @Override
-    public AJAXRequestResult doPerform(AJAXRequestData requestData, DriveSession session) throws OXException {
+    public AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
         try {
             /*
              * get parameters
