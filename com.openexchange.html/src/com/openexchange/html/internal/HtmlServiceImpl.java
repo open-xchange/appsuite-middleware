@@ -583,16 +583,17 @@ public final class HtmlServiceImpl implements HtmlService {
             } catch (final ParsingDeniedException e) {
                 LOG.warn("HTML content will be returned un-white-listed. Reason: " + e.getMessage(), e);
             }
+            String content = htmlSanitizeResult.getContent();
             // Repetitive sanitizing until no further replacement/changes performed
             final boolean[] sanitized = new boolean[] { true };
             while (sanitized[0]) {
                 sanitized[0] = false;
                 // Start sanitizing round
-                html = SaneScriptTags.saneScriptTags(html, sanitized);
+                content = SaneScriptTags.saneScriptTags(content, sanitized);
             }
             // Replace HTML entities
-            html = keepUnicodeForEntities(html);
-            htmlSanitizeResult.setContent(html);
+            content = keepUnicodeForEntities(content);
+            htmlSanitizeResult.setContent(content);
             return htmlSanitizeResult;
         } catch (final RuntimeException e) {
             LOG.warn("HTML content will be returned un-sanitized. Reason: "+e.getMessage(), e);
