@@ -51,7 +51,6 @@ package com.openexchange.realtime.group;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -336,7 +335,7 @@ public class GroupDispatcher implements ComponentHandle {
             if(groupManager == null) {
                 LOG.error("GroupManager reference unset.");
             } else {
-                groupManager.add(id, groupId);
+                groupManager.add(new SelectorChoice(id , groupId, stamp));
             }
             onJoin(id, stanza);
         }
@@ -371,7 +370,7 @@ public class GroupDispatcher implements ComponentHandle {
             if (groupManager == null) {
                 LOG.error("GroupManager reference unset.");
             } else {
-                groupManager.remove(id, groupId);
+                groupManager.remove(new SelectorChoice(id, groupId, getStamp(id)));
             }
             onLeave(id, stanza);
         }

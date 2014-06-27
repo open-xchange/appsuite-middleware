@@ -101,8 +101,8 @@ public class CleanupMemberShipListener implements MembershipListener {
 
     @Override
     public void memberRemoved(MembershipEvent membershipEvent) {
-        Member member = membershipEvent.getMember();
-        String uuid = member.getUuid();
+        Member memberToClean = membershipEvent.getMember();
+        String uuid = memberToClean.getUuid();
         try {
             IMap<String, CleanupStatus> cleanupMapping = getCleanupMapping();
             cleanupMapping.lock(uuid);
@@ -110,10 +110,10 @@ public class CleanupMemberShipListener implements MembershipListener {
                 CleanupStatus cleanupStatus = cleanupMapping.get(uuid);
                 // is somebody already cleaning up for him?
                 if (!cleanupStarted(cleanupStatus)) {
-                    LOG.info("Starting cleanup for member {} with IP {}", member.getUuid(), member.getInetSocketAddress());
-                    cleanupStatus = new CleanupStatus(HazelcastAccess.getLocalMember());
+                    LOG.info("Starting cleanup for member {} with IP {}", memberToClean.getUuid(), memberToClean.getInetSocketAddress());
+                    cleanupStatus = new CleanupStatus(HazelcastAccess.getLocalMember(), memberToClean);
                     //do actual cleanup
-                    IDMap<HazelcastResource> resourcesOfMember = directory.getResourcesOfMember(member);
+                    IDMap<HazelcastResource> resourcesOfMember = directory.getResourcesOfMember(memberToClean);
                     LOG.debug("Found the following resources to clean up: {}", resourcesOfMember);
                     for (Entry<ID, HazelcastResource> entry : resourcesOfMember.entrySet()) {
                         ID id = entry.getKey();
@@ -129,12 +129,12 @@ public class CleanupMemberShipListener implements MembershipListener {
                         "Cleanup was already started: {}", cleanupStatus);
                 }
             } catch (Exception e) {
-                LOG.error("Failed to start cleanup after member {} with IP {} left the cluster", uuid, member.getInetSocketAddress());
+                LOG.error("Failed to start cleanup after member {} with IP {} left the cluster", uuid, memberToClean.getInetSocketAddress());
             } finally {
                 cleanupMapping.unlock(uuid);
             }
         } catch (OXException oxe) {
-            LOG.error("Failed to start cleanup after member {} with IP {} left the cluster", uuid, member.getInetSocketAddress());
+            LOG.error("Failed to start cleanup after member {} with IP {} left the cluster", uuid, memberToClean.getInetSocketAddress());
         }
     }
 

@@ -53,7 +53,6 @@ import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.group.commands.LeaveStanza;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.threadpool.AbstractTask;
-import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadRenamer;
 
 

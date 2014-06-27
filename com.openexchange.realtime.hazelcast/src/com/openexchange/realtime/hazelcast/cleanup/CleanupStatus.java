@@ -63,119 +63,148 @@ public class CleanupStatus implements Serializable {
 
     private static final long serialVersionUID = 411907049966171587L;
 
-    private String cleaningNodeId;
+    private String cleaningMemberId, memberToCleanId;
 
-    private InetSocketAddress cleaningNodeAddress;
+    private InetSocketAddress cleaningMemberAddress, memberToCleanAddress;
 
-    private long cleaningStartTime;
-
-    private long cleaningFinishTime;
+    private long cleaningStartTime, cleaningFinishTime;
 
     /**
      * Initializes a new {@link CleanupStatus}.
      * 
      * @param cleaningMember The member that started the cleanup.
+     * @param memberToClean The member that left the cluster.
      */
-    public CleanupStatus(Member cleaningMember) {
+    public CleanupStatus(Member cleaningMember, Member memberToClean) {
         super();
-        this.cleaningNodeId = cleaningMember.getUuid();
-        this.cleaningNodeAddress = cleaningMember.getInetSocketAddress();
+        this.cleaningMemberId = cleaningMember.getUuid();
+        this.cleaningMemberAddress = cleaningMember.getInetSocketAddress();
+        this.memberToCleanId = memberToClean.getUuid();
+        this.memberToCleanAddress = memberToClean.getInetSocketAddress();
         this.cleaningStartTime = System.currentTimeMillis();
         this.cleaningFinishTime = -1;
     }
 
-    
     /**
-     * Gets the cleaningNodeId
-     *
-     * @return The cleaningNodeId
+     * Gets the cleaningMemberId
+     * 
+     * @return The cleaningMemberId
      */
-    public String getCleaningNodeId() {
-        return cleaningNodeId;
+    public String getCleaningMemberId() {
+        return cleaningMemberId;
     }
 
-    
     /**
-     * Sets the cleaningNodeId
-     *
-     * @param cleaningNodeId The cleaningNodeId to set
+     * Sets the cleaningMemberId
+     * 
+     * @param cleaningMemberId The cleaningMemberId to set
      */
-    public void setCleaningNodeId(String cleaningNodeId) {
-        this.cleaningNodeId = cleaningNodeId;
+    public void setCleaningMemberId(String cleaningMemberId) {
+        this.cleaningMemberId = cleaningMemberId;
     }
 
-    
     /**
-     * Gets the cleaningNodeAddress
-     *
-     * @return The cleaningNodeAddress
+     * Gets the memberToCleanId
+     * 
+     * @return The memberToCleanId
      */
-    public InetSocketAddress getCleaningNodeAddress() {
-        return cleaningNodeAddress;
+    public String getMemberToCleanId() {
+        return memberToCleanId;
     }
 
-    
     /**
-     * Sets the cleaningNodeAddress
-     *
-     * @param cleaningNodeAddress The cleaningNodeAddress to set
+     * Sets the memberToCleanId
+     * 
+     * @param memberToCleanId The memberToCleanId to set
      */
-    public void setCleaningNodeAddress(InetSocketAddress cleaningNodeAddress) {
-        this.cleaningNodeAddress = cleaningNodeAddress;
+    public void setMemberToCleanId(String memberToCleanId) {
+        this.memberToCleanId = memberToCleanId;
     }
 
-    
+    /**
+     * Gets the cleaningMemberAddress
+     * 
+     * @return The cleaningMemberAddress
+     */
+    public InetSocketAddress getCleaningMemberAddress() {
+        return cleaningMemberAddress;
+    }
+
+    /**
+     * Sets the cleaningMemberAddress
+     * 
+     * @param cleaningMemberAddress The cleaningMemberAddress to set
+     */
+    public void setCleaningMemberAddress(InetSocketAddress cleaningMemberAddress) {
+        this.cleaningMemberAddress = cleaningMemberAddress;
+    }
+
+    /**
+     * Gets the memberToCleanAddress
+     * 
+     * @return The memberToCleanAddress
+     */
+    public InetSocketAddress getMemberToCleanAddress() {
+        return memberToCleanAddress;
+    }
+
+    /**
+     * Sets the memberToCleanAddress
+     * 
+     * @param memberToCleanAddress The memberToCleanAddress to set
+     */
+    public void setMemberToCleanAddress(InetSocketAddress memberToCleanAddress) {
+        this.memberToCleanAddress = memberToCleanAddress;
+    }
+
     /**
      * Gets the cleaningStartTime
-     *
+     * 
      * @return The cleaningStartTime i milliseconds
      */
     public long getCleaningStartTime() {
         return cleaningStartTime;
     }
 
-    
     /**
      * Sets the cleaningStartTime
-     *
+     * 
      * @param cleaningStartTime The cleaningStartTime to set in milliseconds.
      */
     public void setCleaningStartTime(long cleaningStartTime) {
         this.cleaningStartTime = cleaningStartTime;
     }
 
-    
     /**
      * Gets the cleaningFinishTime
-     *
+     * 
      * @return The cleaningFinishTime in milliseconds, -1 if not finished.
      */
     public long getCleaningFinishTime() {
         return cleaningFinishTime;
     }
 
-    
     /**
      * Sets the cleaningFinishTime
-     *
+     * 
      * @param cleaningFinishTime The cleaningFinishTime to set in milliseconds.
      */
     public void setCleaningFinishTime(long cleaningFinishTime) {
         this.cleaningFinishTime = cleaningFinishTime;
     }
 
-
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + (int) (cleaningFinishTime ^ (cleaningFinishTime >>> 32));
-        result = prime * result + ((cleaningNodeAddress == null) ? 0 : cleaningNodeAddress.hashCode());
-        result = prime * result + ((cleaningNodeId == null) ? 0 : cleaningNodeId.hashCode());
+        result = prime * result + ((cleaningMemberAddress == null) ? 0 : cleaningMemberAddress.hashCode());
+        result = prime * result + ((cleaningMemberId == null) ? 0 : cleaningMemberId.hashCode());
         result = prime * result + (int) (cleaningStartTime ^ (cleaningStartTime >>> 32));
+        result = prime * result + ((memberToCleanAddress == null) ? 0 : memberToCleanAddress.hashCode());
+        result = prime * result + ((memberToCleanId == null) ? 0 : memberToCleanId.hashCode());
         return result;
     }
-
 
     @Override
     public boolean equals(Object obj) {
@@ -188,24 +217,36 @@ public class CleanupStatus implements Serializable {
         CleanupStatus other = (CleanupStatus) obj;
         if (cleaningFinishTime != other.cleaningFinishTime)
             return false;
-        if (cleaningNodeAddress == null) {
-            if (other.cleaningNodeAddress != null)
+        if (cleaningMemberAddress == null) {
+            if (other.cleaningMemberAddress != null)
                 return false;
-        } else if (!cleaningNodeAddress.equals(other.cleaningNodeAddress))
+        } else if (!cleaningMemberAddress.equals(other.cleaningMemberAddress))
             return false;
-        if (cleaningNodeId == null) {
-            if (other.cleaningNodeId != null)
+        if (cleaningMemberId == null) {
+            if (other.cleaningMemberId != null)
                 return false;
-        } else if (!cleaningNodeId.equals(other.cleaningNodeId))
+        } else if (!cleaningMemberId.equals(other.cleaningMemberId))
             return false;
         if (cleaningStartTime != other.cleaningStartTime)
+            return false;
+        if (memberToCleanAddress == null) {
+            if (other.memberToCleanAddress != null)
+                return false;
+        } else if (!memberToCleanAddress.equals(other.memberToCleanAddress))
+            return false;
+        if (memberToCleanId == null) {
+            if (other.memberToCleanId != null)
+                return false;
+        } else if (!memberToCleanId.equals(other.memberToCleanId))
             return false;
         return true;
     }
 
     @Override
     public String toString() {
-        return "CleanupStatus [cleaningNodeId=" + cleaningNodeId + ", cleaningNodeAddress=" + cleaningNodeAddress + ", cleaningStartTime=" + cleaningStartTime + ", cleaningFinishTime=" + cleaningFinishTime + "]";
+        return "CleanupStatus [cleaningMemberId=" + cleaningMemberId + ", memberToCleanId=" + memberToCleanId
+             + ", cleaningMemberAddress=" + cleaningMemberAddress + ", memberToCleanAddress=" + memberToCleanAddress 
+             + ", cleaningStartTime=" + cleaningStartTime + ", cleaningFinishTime=" + cleaningFinishTime + "]";
     }
 
 }

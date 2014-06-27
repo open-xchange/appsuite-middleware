@@ -49,7 +49,7 @@
 
 package com.openexchange.realtime.hazelcast.group;
 
-import static com.openexchange.realtime.hazelcast.serialization.PortableID.p;
+import static com.openexchange.realtime.hazelcast.serialization.PortableID.pID;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -66,12 +66,14 @@ import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.group.DistributedGroupManager;
 import com.openexchange.realtime.group.InactivityNotice;
+import com.openexchange.realtime.group.StampedGroup;
 import com.openexchange.realtime.group.commands.LeaveCommand;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.hazelcast.management.DistributedGroupManagerMBean;
 import com.openexchange.realtime.hazelcast.management.DistributedGroupManagerManagement;
 import com.openexchange.realtime.hazelcast.osgi.Services;
 import com.openexchange.realtime.hazelcast.serialization.PortableID;
+import com.openexchange.realtime.hazelcast.serialization.PortableStampedGroup;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.synthetic.SyntheticChannel;
@@ -124,18 +126,19 @@ public class DistributedGroupManagerImpl implements ManagementAware<DistributedG
         return cleaner;
     }
 
-    public boolean add(ID client, ID group) throws OXException {
+    public boolean add(ID client, StampedGroup stampedGroup) throws OXException {
         Validate.notNull(client, "Client must not be null");
-        Validate.notNull(group, "Group must not be null");
-        return getClientToGroupsMapping().put(p(client), p(group));
+        Validate.notNull(stampedGroup, "Stamped group must not be null");
+        return getClientToGroupsMapping().put(pID(client), new PortableStampedGroup(stampedGroup));
     }
 
     public Collection<ID> remove(ID client) throws OXException {
         Validate.notNull(client, "ID must not be null");
-        Collection<ID> removedGroups = getClientToGroupsMapping().remove(p(client));
-        LOG.debug("Removed client to group association {} <-> {}", client, removedGroups, !removedGroups.isEmpty());
-        sendLeave(client, removedGroups);
-        return removedGroups;
+        Collection<PortableStampedGroup> removedGroups = getClientToGroupsMapping().remove(pID(client));
+        Set<ID> groups = removeStamp(removedGroups);
+        LOG.debug("Removed client to group association {} <-> {}", client, groups, !groups.isEmpty());
+        sendLeave(client, groups);
+        return groups;
     }
 
     /**
@@ -158,21 +161,28 @@ public class DistributedGroupManagerImpl implements ManagementAware<DistributedG
         }
     }
 
-    public boolean remove(ID client, ID group) throws OXException {
+    public boolean remove(ID client, StampedGroup stampedGroup) throws OXException {
         Validate.notNull(client, "Client must not be null");
-        Validate.notNull(group, "Group must not be null");
-        boolean removed = getClientToGroupsMapping().remove(p(client), p(group));
-        LOG.info("Removed client to group association {} <-> {}: {}", client, group, removed);
+        Validate.notNull(stampedGroup, "StampedGroup must not be null");
+        boolean removed = getClientToGroupsMapping().remove(pID(client), new PortableStampedGroup(stampedGroup));
+        LOG.info("Removed client to group association {} <-> {}: {}", client, stampedGroup.getGroupID(), removed);
         return removed;
     }
 
     public Set<ID> getGroups(ID id) throws OXException {
         Validate.notNull(id, "ID must not be null");
-        return new HashSet<ID>(getClientToGroupsMapping().get(p(id)));
+        Collection<PortableStampedGroup> stampedGroups = getClientToGroupsMapping().get(pID(id));
+        HashSet<ID> groups = new HashSet<ID>(stampedGroups.size());
+        for (PortableStampedGroup portableStampedGroup : stampedGroups) {
+            groups.add(portableStampedGroup.getGroupID());
+        }
+        return groups;
     }
 
     public Set<ID> getMembers(ID id) throws OXException {
-        throw new UnsupportedOperationException("Not implemented, yet.");
+        Validate.notNull(id, "ID must not be null");
+        HashSet<ID> members = new HashSet<ID>(getGroupToMembersMapping().get(pID(id)));
+        return members;
     }
 
     public void setInactivity(ID id, Duration duration) throws OXException {
@@ -203,9 +213,17 @@ public class DistributedGroupManagerImpl implements ManagementAware<DistributedG
     private void cleanupForSyntheticId(ID id) {
         /*
          * - Find clients that are member of this group
-         * - Remove every client <-> group mapping 
+         * - Remove every client <-> group mapping
+         * - Inform client by sending a NotMember Exception 
          */
         LOG.debug("Cleanup for synthetic id {}", id);
+        try {
+            Set<ID> members = getMembers(id);
+            //find matching client <-> stampedgroup mappings
+            getClientToGroupsMapping().
+        } catch (OXException e) {
+            LOG.error("Error while cleaning for ID {}", id, e);
+        }
     }
 
     private void cleanupForClientId(ID id) {
@@ -223,7 +241,7 @@ public class DistributedGroupManagerImpl implements ManagementAware<DistributedG
      * 
      * @return A {@link MultiMap} of one client to many groups
      */
-    private MultiMap<ID, ID> getClientToGroupsMapping() throws OXException {
+    private MultiMap<ID, PortableStampedGroup> getClientToGroupsMapping() throws OXException {
         HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
         return hazelcast.getMultiMap(client_map);
     }
@@ -241,6 +259,14 @@ public class DistributedGroupManagerImpl implements ManagementAware<DistributedG
     @Override
     public ManagementObject<DistributedGroupManagerMBean> getManagementObject() {
         return managementObject;
+    }
+
+    private Set<ID> removeStamp(Collection<? extends StampedGroup> stampedGroups) {
+        Set<ID> groups = new HashSet<ID>(stampedGroups.size());
+        for (StampedGroup stampedGroup : stampedGroups) {
+            groups.add(stampedGroup.getGroupID());
+        }
+        return groups;
     }
 
 }

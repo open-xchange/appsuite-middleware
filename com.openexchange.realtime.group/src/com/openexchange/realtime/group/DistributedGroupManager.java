@@ -67,11 +67,11 @@ public interface DistributedGroupManager {
     /**
      * Adds a client <-> group mapping to this manager
      * 
-     * @param client The {@link ID} of the client that joined a group.
-     * @param group The {@link ID} of the group that client joined.
+     * @param selectorChoice The {@link SelectorChoice} containing the needed client, group and selector
      * @return True if the mapping was added to the manager, false otherwise.
+     * @throws IllegalStateException if any parameter is null
      */
-    boolean add(ID client, ID group)  throws OXException;
+    boolean add(SelectorChoice selectorChoice)  throws OXException;
 
     /**
      * Remove all client <-> group mappings for a given client {@link ID}.
@@ -80,15 +80,16 @@ public interface DistributedGroupManager {
      * @return A {@link Collection} of groups {@link ID}s that the client was member of
      */
     Collection<ID> remove(ID client)  throws OXException;
-    
+
     /**
      * Remove a single client <-> group mapping.
-     * 
-     * @param client The client {@link ID}.
+     *
+     * @param selectorChoice The {@link SelectorChoice} containing the needed client, group and selector
      * @return true if the client <-> group mapping was removed from the manager, false otherwise.
+     * @throws IllegalStateException if any parameter is null
      */
-    boolean remove(ID client, ID group) throws OXException;
-    
+    boolean remove(SelectorChoice selectorChoice) throws OXException;
+
     /**
      * Get the Groups that a given client is a member of.
      * @param id The client {@link ID}

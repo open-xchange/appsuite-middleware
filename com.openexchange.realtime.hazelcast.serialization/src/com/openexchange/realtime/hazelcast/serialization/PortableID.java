@@ -77,7 +77,7 @@ public class PortableID extends ID implements CustomPortable {
      * @param id The existing ID
      * @return the new PortableID
      */
-    public static PortableID p(ID id) {
+    public static PortableID pID(ID id) {
         return new PortableID(id);
     }
 

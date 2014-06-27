@@ -52,13 +52,17 @@ package com.openexchange.realtime.hazelcast.group;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -71,16 +75,18 @@ import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
+import com.openexchange.realtime.group.StampedGroup;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
+import com.openexchange.realtime.hazelcast.group.helper.DynamicPortableFactoryImpl;
 import com.openexchange.realtime.hazelcast.group.helper.MessageDispatcherMock;
-import com.openexchange.realtime.hazelcast.group.helper.PortableFactoryAdapter;
-import com.openexchange.realtime.hazelcast.serialization.PortableID;
+import com.openexchange.realtime.hazelcast.group.helper.SimServiceLookup;
+import com.openexchange.realtime.hazelcast.osgi.Services;
 import com.openexchange.realtime.hazelcast.serialization.PortableIDFactory;
+import com.openexchange.realtime.hazelcast.serialization.PortableStampedGroupFactory;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.Duration;
 import com.openexchange.realtime.util.IDMap;
-
 
 /**
  * {@link DistributedGroupManagerImplTest}
@@ -95,6 +101,7 @@ public class DistributedGroupManagerImplTest {
     private static HazelcastInstance hzInstance;
     private static ID user1, user2, user3;
     private static ID group1, group2, group3;
+    private static StampedGroup user1Group1, user1Group2, user1Group3, user2Group1, user2Group2, user2Group3, user3Group1, user3Group2, user3Group3;
     GlobalRealtimeCleanup grcMock;
     private static DistributedGroupManagerImpl groupManager;
     //Stanzas the messageDispatcher sent during the test
@@ -109,9 +116,20 @@ public class DistributedGroupManagerImplTest {
         group1 = new ID("group1@synthetic");
         group2 = new ID("group2@synthetic");
         group3 = new ID("group3@synthetic");
+        user1Group1 = new StampedGroup(group1,"user1Group1");
+        user1Group2 = new StampedGroup(group2,"user1Group2");
+        user1Group3 = new StampedGroup(group3,"user1Group3");
+        user2Group1 = new StampedGroup(group1,"user2Group1");
+        user2Group2 = new StampedGroup(group2,"user2Group2");
+        user2Group3 = new StampedGroup(group3,"user2Group3");
+        user3Group1 = new StampedGroup(group1,"user3Group1");
+        user3Group2 = new StampedGroup(group2,"user3Group2");
+        user3Group3 = new StampedGroup(group3,"user3Group3");
         Config config = new Config();
-        PortableFactoryAdapter portableIDFactory = new PortableFactoryAdapter(new PortableIDFactory());
-        config.getSerializationConfig().addPortableFactory(PortableID.FACTORY_ID, portableIDFactory);
+        DynamicPortableFactoryImpl dynamicPortableFactory = new DynamicPortableFactoryImpl();
+        dynamicPortableFactory.register(new PortableIDFactory());
+        dynamicPortableFactory.register(new PortableStampedGroupFactory());
+        config.getSerializationConfig().addPortableFactory(dynamicPortableFactory.FACTORY_ID, dynamicPortableFactory);
         hzInstance = Hazelcast.newHazelcastInstance(config);
         HazelcastAccess.setHazelcastInstance(hzInstance);
     }
@@ -122,6 +140,7 @@ public class DistributedGroupManagerImplTest {
         messageDispatcher  = new MessageDispatcherMock(sentStanzas);
         grcMock = mock(GlobalRealtimeCleanup.class);
         groupManager = new DistributedGroupManagerImpl(messageDispatcher, grcMock, CLIENT_MAP, GROUP_MAP);
+        Services.setServiceLookup(new SimServiceLookup());
     }
 
     /**
@@ -130,12 +149,7 @@ public class DistributedGroupManagerImplTest {
      */
     @Test
     public void testAdd() throws Exception {
-        groupManager.add(user1, group1);
-        groupManager.add(user1, group2);
-        groupManager.add(user2, group2);
-        groupManager.add(user1, group3);
-        groupManager.add(user2, group3);
-        groupManager.add(user3, group3);
+        fillGroupManager();
         Set<ID> groupsForUser1 = groupManager.getGroups(user1);
         Set<ID> groupsForUser2 = groupManager.getGroups(user2);
         Set<ID> groupsForUser3 = groupManager.getGroups(user3);
@@ -180,7 +194,7 @@ public class DistributedGroupManagerImplTest {
         fillGroupManager();
         Set<ID> groups = groupManager.getGroups(user1);
         assertEquals(3, groups.size());
-        boolean removed = groupManager.remove(user1, group3);
+        boolean removed = groupManager.remove(user1, user1Group3);
         assertTrue(removed);
         groups = groupManager.getGroups(user1);
         assertEquals(2, groups.size());
@@ -238,6 +252,11 @@ public class DistributedGroupManagerImplTest {
         assertEquals(2, durationMap.size());
         assertNull(durationMap.get(user1));
         assertTrue(groupManager.getGroups(user1).isEmpty());
+        LeaveCommandMatcher leaveMatcher = new LeaveCommandMatcher();
+        // The groupManager.cleanupForId(user1); sent a leave on behalf of user1 to all previously joined groups
+        for (Stanza stanza : getStanzas(user1, group1, group2, group3)) {
+            assertThat(stanza.getPayload(),leaveMatcher);
+        }
     }
 
     /**
@@ -258,18 +277,31 @@ public class DistributedGroupManagerImplTest {
     }
 
     private void fillGroupManager() throws Exception {
-        groupManager.add(user1, group1);
-        groupManager.add(user1, group2);
-        groupManager.add(user2, group2);
-        groupManager.add(user1, group3);
-        groupManager.add(user2, group3);
-        groupManager.add(user3, group3);
+        groupManager.add(user1, user1Group1);
+        groupManager.add(user1, user1Group2);
+        groupManager.add(user2, user2Group2);
+        groupManager.add(user1, user1Group3);
+        groupManager.add(user2, user2Group3);
+        groupManager.add(user3, user3Group3);
     }
 
     private void setInactivities() throws Exception {
         groupManager.setInactivity(user1, Duration.TEN_SECONDS);
         groupManager.setInactivity(user2, Duration.THIRTY_SECONDS);
         groupManager.setInactivity(user3, Duration.ONE_MINUTE);
+    }
+
+    private Set<Stanza> getStanzas(ID from, ID... to) {
+        List<ID> recipients = Arrays.asList(to);
+        Set<Stanza> stanzas = new HashSet<Stanza>();
+        Iterator<Stanza> iterator = sentStanzas.values().iterator();
+        while(iterator.hasNext()) {
+            Stanza next = iterator.next();
+            if(from.equals(next.getFrom()) && recipients.contains(next.getTo())) {
+                stanzas.add(next);
+            }
+        }
+        return stanzas;
     }
 
 }
