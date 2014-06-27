@@ -62,7 +62,7 @@ import com.openexchange.rest.client.session.Session;
  */
 public abstract class API<S extends Session> {
 
-    private final S session;
+    protected final S session;
 
     /**
      * Initializes a new {@link API}.

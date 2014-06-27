@@ -56,7 +56,6 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
-import java.util.Map;
 import javax.net.ssl.SSLException;
 import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.codec.EncoderException;
@@ -78,7 +77,6 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONInputStream;
 import org.json.JSONObject;
@@ -99,10 +97,6 @@ import com.openexchange.rest.client.session.Session.ProxyInfo;
  */
 public class RESTExecutor {
 
-    public static enum Method {
-        PUT, GET, POST, DELETE;
-    }
-
     private static final URLCodec URL_CODEC = new URLCodec(CharEncoding.UTF_8);
 
     /**
@@ -111,47 +105,37 @@ public class RESTExecutor {
     private RESTExecutor() {
         super();
     }
-
+    
     /**
      * Creates and sends a request to the REST API, and returns a {@link RequestAndResponse} containing the {@link HttpUriRequest} and
      * {@link HttpResponse}.
      * 
-     * @param method The HTTP {@link Method}
-     * @param host The host on which resides the REST API
-     * @param path The URL path starting with a '/'.
-     * @param apiVersion The optional API version to use. Or <code>-1</code> to ignore
-     * @param params Any URL parameters in a String array. with the even numbered elements the parameter names and odd numbered elements the
-     *            values, e.g. <code>new String[] {"path", "/Public", "locale", "en"}</code>.
-     * @param requestInformation The request's JSON object
-     * @param session The {@link Session} to use for this request.
-     * @param expectedStatusCodes The expected status code(s) on successful response
-     * @return A parsed JSON object, either a {@link Map} or a {@link JSONArray}
+     * @param restRequest The RESTRequest
+     * @param expectResponseBody Flag to indicate whether or not to expect a response body
+     * @return A {@link RESTResponse} encapsulating the status code, the {@link HttpResponse} and the optional response body as JSONObject
      * @throws OXException If the server responds with an error code, or if any network-related error occurs, or if the user has revoked
      *             access, or if any other unknown error occurs.
      */
-    public static RequestAndResponse streamRequest(final Method method, final String host, final String path, final int apiVersion, final String[] params, final JSONObject requestInformation, final Session session, final List<Integer> expectedStatusCodes) throws OXException {
+    public static RESTResponse streamRequest(final RESTRequest restRequest, final boolean expectResponseBody) throws OXException {
         final HttpRequestBase req;
-        switch (method) {
+        final String requestURL = buildURL(restRequest.getHost(), restRequest.getAPIVersion(), restRequest.getPath(), restRequest.getParams());
+        switch (restRequest.getMethod()) {
         case PUT: {
-            final HttpPut put = new HttpPut(buildURL(host, apiVersion, path, params));
+            final HttpPut put = new HttpPut(requestURL);
+            final JSONObject requestInformation = restRequest.getRequestBody();
             if (null != requestInformation) {
-                put.setEntity(new InputStreamEntity(
-                    new JSONInputStream(requestInformation, CharEncoding.UTF_8),
-                    -1L,
-                    ContentType.APPLICATION_JSON));
+                put.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, CharEncoding.UTF_8), -1L, ContentType.APPLICATION_JSON));
             }
             req = put;
         }
             break;
         case POST: {
-            final HttpPost post = new HttpPost(buildURL(host, apiVersion, path, params));
+            final HttpPost post = new HttpPost(requestURL);
+            final JSONObject requestInformation = restRequest.getRequestBody();
             if (null != requestInformation) {
                 try {
                     final int contentLength = requestInformation.toString().getBytes(CharEncoding.UTF_8).length;
-                    post.setEntity(new InputStreamEntity(
-                        new JSONInputStream(requestInformation, CharEncoding.UTF_8),
-                        contentLength,
-                        ContentType.APPLICATION_JSON));
+                    post.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, CharEncoding.UTF_8), contentLength, ContentType.APPLICATION_JSON));
                 } catch (UnsupportedEncodingException e) {
                     throw RESTExceptionCodes.UNSUPPORTED_ENCODING.create(CharEncoding.UTF_8);
                 }
@@ -160,18 +144,28 @@ public class RESTExecutor {
         }
             break;
         case GET:
-            req = new HttpGet(buildURL(host, apiVersion, path, params));
+            req = new HttpGet(requestURL);
             break;
         case DELETE:
-            req = new HttpDelete(buildURL(host, apiVersion, path, params));
+            req = new HttpDelete(requestURL);
             break;
         default:
-            throw RESTExceptionCodes.UNSUPPORTED_METHOD.create(method);
+            throw RESTExceptionCodes.UNSUPPORTED_METHOD.create(restRequest.getMethod());
         }
         // Sign request
-        session.sign(req);
-        final HttpResponse resp = execute(session, req, expectedStatusCodes);
-        return new RequestAndResponse(req, resp);
+        restRequest.getSession().sign(req);
+
+        final List<Integer> expectedStatusCodes = restRequest.getExpectedStatusCodes();
+        final HttpResponse resp = execute(restRequest.getSession(), req, -1, expectedStatusCodes);
+        final int statusCode = resp.getStatusLine().getStatusCode();
+        final RESTResponse restResponse = new RESTResponse(statusCode, resp);
+
+        if (expectResponseBody) {
+            final JSONValue json = parseAsJSON(restResponse.getResponse(), restRequest.getExpectedStatusCodes());
+            restResponse.setResponseBody(json);
+        }
+
+        return restResponse;
     }
 
     /**
@@ -228,20 +222,6 @@ public class RESTExecutor {
      * 
      * @param session The {@link Session} to use for this request.
      * @param req The request to execute.
-     * @param expectedStatusCodes The expected status code(s) on successful response
-     * @return An {@link HttpResponse}.
-     * @throws OXException If the server responds with an error code, or if any network-related error occurs, or if the user has revoked
-     *             access, or if any other unknown error occurs.
-     */
-    private static HttpResponse execute(final Session session, final HttpUriRequest req, final List<Integer> expectedStatusCodes) throws OXException {
-        return execute(session, req, -1, expectedStatusCodes);
-    }
-
-    /**
-     * Executes an {@link HttpUriRequest} with the given {@link Session} and returns an {@link HttpResponse}.
-     * 
-     * @param session The {@link Session} to use for this request.
-     * @param req The request to execute.
      * @param socketTimeoutOverrideMs If >= 0, the socket timeout to set on this request. Does nothing if set to a negative number.
      * @param expectedStatusCodes The expected status code(s) on successful response
      * @return An {@link HttpResponse}.
@@ -263,6 +243,8 @@ public class RESTExecutor {
         try {
             HttpResponse response = null;
             for (int retries = 0; response == null && retries < 5; retries++) {
+                // Maybe we don't need that workaround anymore, since we are operating with HttpClient 4.2.1 
+                
                 /*
                  * The try/catch is a workaround for a bug in the HttpClient libraries. It should be returning null instead when an error
                  * occurs. Fixed in HttpClient 4.1, but we're stuck with this for now. See:
@@ -292,18 +274,13 @@ public class RESTExecutor {
                 throw RESTExceptionCodes.IO_EXCEPTION.create("Apache HTTPClient encountered an error. No response, try again.");
             }
 
-            final int statusCode = response.getStatusLine().getStatusCode();
-
-            if (false == expectedStatusCodes.contains(statusCode)) {
-                parseAsJSON(response, expectedStatusCodes);
-            }
             return response;
         } catch (final SSLException e) {
-            throw RESTExceptionCodes.SSL_EXCEPTION.create(e);
+            throw RESTExceptionCodes.SSL_EXCEPTION.create(e.getMessage());
         } catch (final IOException e) {
-            throw RESTExceptionCodes.IO_EXCEPTION.create(e);
+            throw RESTExceptionCodes.IO_EXCEPTION.create(e.getMessage());
         } catch (final OutOfMemoryError e) {
-            throw RESTExceptionCodes.OOM_EXCEPTION.create(e);
+            throw RESTExceptionCodes.OOM_EXCEPTION.create(e.getMessage());
         }
     }
 
