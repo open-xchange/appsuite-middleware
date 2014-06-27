@@ -78,6 +78,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.filestore.FilestoreLocationUpdater;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.mail.mime.ContentDisposition;
@@ -101,7 +102,7 @@ import com.openexchange.tools.sql.DBUtils;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class RdbSnippetManagement implements SnippetManagement {
+public final class RdbSnippetManagement implements SnippetManagement, FilestoreLocationUpdater {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbSnippetManagement.class);
 
@@ -139,8 +140,11 @@ public final class RdbSnippetManagement implements SnippetManagement {
     }
 
     private final int contextId;
+
     private final int userId;
+
     private final Session session;
+
     private final boolean supportsAttachments;
 
     /**
@@ -158,7 +162,9 @@ public final class RdbSnippetManagement implements SnippetManagement {
         } else {
             boolean supportsAttachments;
             try {
-                final ComposedConfigProperty<Boolean> property = factory.getView(userId, contextId).property("com.openexchange.snippet.rdb.supportsAttachments", boolean.class);
+                final ComposedConfigProperty<Boolean> property = factory.getView(userId, contextId).property(
+                    "com.openexchange.snippet.rdb.supportsAttachments",
+                    boolean.class);
                 supportsAttachments = property.isDefined() ? property.get().booleanValue() : false;
             } catch (final Exception e) {
                 LOG.error("", e);
@@ -187,6 +193,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
     public static final class QuotaFileStorageStreamProvider implements DefaultAttachment.InputStreamProvider {
 
         private final String filestoreLocation;
+
         private final QuotaFileStorage fileStorage;
 
         /**
@@ -521,7 +528,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
                 }
             }
             // Store snippet
-            stmt = con.prepareStatement("INSERT INTO snippet (cid, user, id, accountId, displayName, module, type, shared, lastModified, refId, refType) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "+ReferenceType.GENCONF.getType()+")");
+            stmt = con.prepareStatement("INSERT INTO snippet (cid, user, id, accountId, displayName, module, type, shared, lastModified, refId, refType) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, " + ReferenceType.GENCONF.getType() + ")");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             stmt.setString(3, Integer.toString(id));
@@ -594,7 +601,10 @@ public final class RdbSnippetManagement implements SnippetManagement {
                 stmt.setLong(++pos, contextId);
                 stmt.setLong(++pos, userId);
                 stmt.setString(++pos, Integer.toString(id));
-                LOG.debug("Trying to perform SQL update query for attributes {} :\n{}", modifiableProperties, stmt.toString().substring(stmt.toString().indexOf(':') + 1));
+                LOG.debug(
+                    "Trying to perform SQL update query for attributes {} :\n{}",
+                    modifiableProperties,
+                    stmt.toString().substring(stmt.toString().indexOf(':') + 1));
                 stmt.executeUpdate();
                 closeSQLStuff(stmt);
                 stmt = null;
@@ -626,7 +636,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
                 {
                     ResultSet rs = null;
                     try {
-                        stmt = con.prepareStatement("SELECT refId FROM snippet WHERE cid=? AND user=? AND id=? AND refType="+ReferenceType.GENCONF.getType());
+                        stmt = con.prepareStatement("SELECT refId FROM snippet WHERE cid=? AND user=? AND id=? AND refType=" + ReferenceType.GENCONF.getType());
                         int pos = 0;
                         stmt.setLong(++pos, contextId);
                         stmt.setLong(++pos, userId);
@@ -862,7 +872,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
             {
                 ResultSet rs = null;
                 try {
-                    stmt = con.prepareStatement("SELECT refId FROM snippet WHERE cid=? AND user=? AND id=? AND refType="+ReferenceType.GENCONF.getType());
+                    stmt = con.prepareStatement("SELECT refId FROM snippet WHERE cid=? AND user=? AND id=? AND refType=" + ReferenceType.GENCONF.getType());
                     pos = 0;
                     stmt.setLong(++pos, contextId);
                     stmt.setLong(++pos, userId);
@@ -880,7 +890,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
                 storageService.delete(con, getContext(contextId), confId);
             }
             // Delete snippet
-            stmt = con.prepareStatement("DELETE FROM snippet WHERE cid=? AND user=? AND id=? AND refType="+ReferenceType.GENCONF.getType());
+            stmt = con.prepareStatement("DELETE FROM snippet WHERE cid=? AND user=? AND id=? AND refType=" + ReferenceType.GENCONF.getType());
             pos = 0;
             stmt.setLong(++pos, contextId);
             stmt.setLong(++pos, userId);
@@ -893,6 +903,18 @@ public final class RdbSnippetManagement implements SnippetManagement {
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
+    }
+
+    @Override
+    public void updateFilestoreLocation(Map<String, String> fileMapping, int ctxId, Connection con) throws SQLException {
+        PreparedStatement stmt = con.prepareStatement("UPDATE snippet SET refId = ? WHERE cid = ? AND refId = ?");
+        for (String old : fileMapping.keySet()) {
+            stmt.setString(1, fileMapping.get(old));
+            stmt.setInt(2, ctxId);
+            stmt.setString(3, old);
+            stmt.addBatch();
+        }
+        stmt.executeBatch();
     }
 
 }

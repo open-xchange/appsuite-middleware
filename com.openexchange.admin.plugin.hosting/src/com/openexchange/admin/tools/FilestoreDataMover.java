@@ -54,24 +54,29 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import org.apache.commons.io.FileUtils;
+import com.openexchange.admin.osgi.FilestoreLocationUpdaterRegistry;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.exceptions.ProgrammErrorException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
-import com.openexchange.admin.taskmanagement.TaskManager;
 import com.openexchange.admin.tools.ShellExecutor.ArrayOutput;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
+import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.filestore.FilestoreLocationUpdater;
 import com.openexchange.tools.file.FileStorage;
 
 /**
@@ -184,7 +189,22 @@ public class FilestoreDataMover implements Callable<Void> {
             } catch (URISyntaxException e) {
                 throw new StorageException(e);
             }
-            TaskManager.getInstance().addJob(new FilestoreLocationUpdater(fileMapping, ctx.getId()), "movefilestore", "update file_store_location", ctx.getId());
+
+            Connection con = null;
+            try {
+                con = Database.getNoTimeout(ctx.getId(), true);
+                List<FilestoreLocationUpdater> services = FilestoreLocationUpdaterRegistry.getInstance().getServices();
+                for (FilestoreLocationUpdater updater : services) {
+                    updater.updateFilestoreLocation(fileMapping, ctx.getId(), con);
+                }
+            } catch (OXException e) {
+                throw new StorageException(e);
+            } catch (SQLException e) {
+                throw new StorageException(e);
+            } finally {
+                Database.backNoTimeout(ctx.getId(), true, con);
+            }
+
             try {
                 if (null != srcStorage && null != srcFiles) {
                     srcStorage.deleteFiles(srcFiles.toArray(new String[srcFiles.size()]));
