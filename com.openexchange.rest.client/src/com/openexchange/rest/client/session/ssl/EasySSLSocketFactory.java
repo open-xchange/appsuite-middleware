@@ -57,7 +57,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.TrustManager;
 import org.apache.http.conn.ConnectTimeoutException;
-import org.apache.http.conn.scheme.SchemeSocketFactory;
+import org.apache.http.conn.scheme.SchemeLayeredSocketFactory;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 
@@ -66,7 +66,7 @@ import org.apache.http.params.HttpParams;
  * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class EasySSLSocketFactory implements SchemeSocketFactory {
+public class EasySSLSocketFactory implements SchemeLayeredSocketFactory {
 
     private static final EasySSLSocketFactory INSTANCE = new EasySSLSocketFactory();
 
@@ -133,5 +133,29 @@ public class EasySSLSocketFactory implements SchemeSocketFactory {
             }
         }
         return sslcontext;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        return obj != null && obj.getClass().equals(EasySSLSocketFactory.class);
+    }
+
+    @Override
+    public int hashCode() {
+        return EasySSLSocketFactory.class.hashCode();
+    }
+
+    @Override
+    public Socket createLayeredSocket(Socket socket, String host, int port, HttpParams params) throws IOException, UnknownHostException {
+        final int connTimeout = HttpConnectionParams.getConnectionTimeout(params);
+        final int soTimeout = HttpConnectionParams.getSoTimeout(params);
+        
+        final InetSocketAddress remoteAddress = new InetSocketAddress(host, port);
+        
+        final SSLSocket sslsock = (SSLSocket) (socket != null ? socket : createSocket(params));
+        sslsock.connect(remoteAddress, connTimeout);
+        sslsock.setSoTimeout(soTimeout);
+        
+        return sslsock;
     }
 }
