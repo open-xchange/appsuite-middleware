@@ -131,9 +131,7 @@ public final class RangeAction extends AbstractReminderAction {
                                 LOG.warn("Cannot load target object of this reminder.", e);
                                 reminderSql.deleteReminder(reminder.getTargetId(), user.getId(), reminder.getModule());
                             } else {
-                                LOG.error(
-                                    "Can not calculate recurrence of appointment " + reminder.getTargetId() + ':' + session.getContextId(),
-                                    e);
+                                LOG.error("Can not calculate recurrence of appointment {}{}{}", reminder.getTargetId(), ':', session.getContextId(), e);
                             }
                         }
                     }

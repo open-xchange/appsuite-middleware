@@ -320,9 +320,7 @@ public final class ReminderRequest {
                                 LOG.warn("Cannot load target object of this reminder.", e);
                                 reminderSql.deleteReminder(reminder.getTargetId(), userObj.getId(), reminder.getModule());
                             } else {
-                                LOG.error(
-                                    "Can not calculate recurrence of appointment " + reminder.getTargetId() + ':' + session.getContextId(),
-                                    e);
+                                LOG.error("Can not calculate recurrence of appointment {}{}{}", reminder.getTargetId(), ':', session.getContextId(), e);
                             }
                         }
                     }
@@ -413,9 +411,7 @@ public final class ReminderRequest {
 
             recurringResults = recColl.calculateRecurring(calendarDataObject, reminder.getDate().getTime(), until.getTime(), 0);
         } catch (final OXException e) {
-            LOG.error(
-                "Can't calculate next recurrence for appointment " + reminder.getTargetId() + " in context " + sessionObj.getContextId(),
-                e);
+            LOG.error("Can't calculate next recurrence for appointment {} in context {}", reminder.getTargetId(), sessionObj.getContextId(), e);
             return null;
         }
         if (null == recurringResults || recurringResults.size() == 0) {

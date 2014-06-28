@@ -1259,9 +1259,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 }
 
                 if (check_folder_id != cdao.getParentFolderID()) {
-                    LOG.error(
-                        "Object Not Found: " + "Object not found : uid:oid:fid:InFolder " + so.getUserId() + ':' + cdao.getObjectID() + ':' + cdao.getParentFolderID() + ':' + check_folder_id,
-                        new Throwable());
+                    LOG.error("Object Not Found: Object not found : uid:oid:fid:InFolder {}{}{}{}{}{}{}", so.getUserId(), ':', cdao.getObjectID(), ':', cdao.getParentFolderID(), ':', check_folder_id, new Throwable());
                     throw OXException.notFound("");
                 }
                 cdao.setActionFolder(check_folder_id);

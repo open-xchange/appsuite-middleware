@@ -240,7 +240,7 @@ public class Orchestration implements ReportService {
             if(!lock.tryLock(60, TimeUnit.MINUTES)) {
                 // Abort report
                 flushPending(contextReport.getUUID(), reportType);
-                LOG.error("Could not acquire merge lock! Aborting " + contextReport.getUUID() + " for type: " + reportType);
+                LOG.error("Could not acquire merge lock! Aborting {} for type: {}", contextReport.getUUID(), reportType);
             }
         } catch (InterruptedException e) {
             return;

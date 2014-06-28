@@ -427,7 +427,7 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
                          */
                         jsonObjects.remove(mailId);
                     } catch (final Exception e) {
-                        LOG.error("Text could not be extracted from: " + filler, e);
+                        LOG.error("Text could not be extracted from: {}", filler, e);
                         jsonObject.put(Constants.FIELD_BODY, "");
                     }
                 }

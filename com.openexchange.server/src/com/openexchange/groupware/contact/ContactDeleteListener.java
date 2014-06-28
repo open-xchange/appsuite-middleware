@@ -267,9 +267,7 @@ public final class ContactDeleteListener implements DeleteListener {
                         co.setObjectID(oid);
                         ec.delete(co);
                     } catch (final Exception e) {
-                        LOG.error(
-                            "Unable to trigger delete event for contact delete: id=" + co.getObjectID() + " cid=" + co.getContextId(),
-                            e);
+                        LOG.error("Unable to trigger delete event for contact delete: id={} cid={}", co.getObjectID(), co.getContextId(), e);
                     }
                 }
             }

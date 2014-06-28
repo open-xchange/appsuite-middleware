@@ -1505,9 +1505,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
                     cdao.setEndDate(new Date(rr.getEnd()));
                 }
             } catch (final OXException x) {
-                LOG.error(
-                    "Can not load appointment '" + cdao.getTitle() + "' with id " + cdao.getObjectID() + ":" + cdao.getContextID() + " due to invalid recurrence pattern",
-                    x);
+                LOG.error("Can not load appointment ''{}'' with id {}:{} due to invalid recurrence pattern",cdao.getTitle(),cdao.getObjectID(),cdao.getContextID(),x);
                 recoverForInvalidPattern(cdao);
             }
         }
@@ -2817,13 +2815,13 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
             }
         }
     }
-    
+
     private void setStartAndEndDate(CalendarDataObject target, CalendarDataObject source) throws OXException {
         if ((target.getRecurrenceDatePosition() != null || target.getRecurrencePosition() != 0) && target.getRecurrenceID() == 0) { //Create Exception
-            if (target.getStartDate() != null && target.getEndDate() != null) { 
+            if (target.getStartDate() != null && target.getEndDate() != null) {
                 return;
             }
-            
+
             CalendarDataObject clone = source.clone();
             if (target.containsRecurrencePosition()) {
                 clone.setRecurrencePosition(target.getRecurrencePosition());
