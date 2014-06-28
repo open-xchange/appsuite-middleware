@@ -77,7 +77,7 @@ public class ClusterUtils {
 
         for (int i = 0; i < tokens.length; i++) {
             try {
-                log.info("Moving node " + nodes[i] + " to token " + tokens[i]);
+                log.info("Moving node {} to token {}", nodes[i], tokens[i]);
                 np = new NodeProbe(nodes[i], 7199);
                 np.move(tokens[i].toString());
             } catch (IOException e) {
