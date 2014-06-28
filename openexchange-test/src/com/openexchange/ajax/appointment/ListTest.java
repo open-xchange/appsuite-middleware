@@ -53,7 +53,6 @@ import static com.openexchange.ajax.framework.ListIDs.l;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.ContactTest;
@@ -219,7 +218,7 @@ public class ListTest extends AppointmentTest {
             compareObject(appointmentObj, loadAppointment, newStartTime, newEndTime);
 
         } catch (final OXException exc) {
-            LOG.warn("Conflict Exception found. Maybe test result is wrong: " + exc);
+            LOG.warn("Conflict exception found. Maybe test result is wrong.", exc);
         } finally {
             if (objectId != 0) {
                 deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);

@@ -63,6 +63,7 @@ import java.security.PublicKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.text.MessageFormat;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
@@ -127,18 +128,18 @@ public class S3FileStorageFactory implements FileStorageFactoryCandidate {
     public S3FileStorage getFileStorage(URI uri) throws OXException {
         S3FileStorage storage = storages.get(uri);
         if (null == storage) {
-            LOG.debug("Initializing S3 client for " + uri);
+            LOG.debug("Initializing S3 client for {}", uri);
             /*
              * extract filestore ID from authority part of URI
              */
             String filestoreID = extractFilestoreID(uri);
-            LOG.debug("Using \"" + filestoreID + "\" as filestore ID.");
+            LOG.debug("Using \"{}\" as filestore ID.", filestoreID);
             /*
              * create client
              */
             AmazonS3Client client = initClient(filestoreID);
             String bucketName = initBucket(client, filestoreID);
-            LOG.debug("Using \"" + bucketName + "\" as bucket name.");
+            LOG.debug("Using \"{}\" as bucket name.", bucketName);
             S3FileStorage newStorage = new S3FileStorage(client, bucketName, extractFilestorePrefix(uri));
             storage = storages.putIfAbsent(uri, newStorage);
             if (null == storage) {

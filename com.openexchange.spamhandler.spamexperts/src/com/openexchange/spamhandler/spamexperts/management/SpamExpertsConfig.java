@@ -68,7 +68,7 @@ import com.openexchange.spamhandler.spamexperts.osgi.SpamExpertsServiceRegistry;
 public class SpamExpertsConfig implements Initialization {
 
     private static final SpamExpertsConfig instance = new SpamExpertsConfig();
-    
+
     private final AtomicBoolean started;
 
     private static final Logger LOG = LoggerFactory.getLogger(SpamExpertsConfig.class);
@@ -91,18 +91,18 @@ public class SpamExpertsConfig implements Initialization {
     private String imappassword;
     private String trainSpamFolder;
     private String trainHamFolder;
-    
+
     private String panelAdmin;
     private String panelAdminPw;
     private String panelApiUrl;
     private String panelApiAuthAttr;
     private String panelWebUiUrl;
     private String panelServlet;
-    
+
     public static SpamExpertsConfig getInstance() {
         return instance;
     }
-    
+
     /**
      * Initializes a new {@link SpamExpertsConfig}.
      */
@@ -137,92 +137,92 @@ public class SpamExpertsConfig implements Initialization {
         }
     }
 
-    
+
     public URLName getImapUrl() {
         return imapUrl;
     }
 
-    
+
     public void setImapUrl(URLName imapUrl) {
         this.imapUrl = imapUrl;
     }
 
-    
+
     public String getImapUser() {
         return imapUser;
     }
 
-    
+
     public void setImapUser(String imapUser) {
         this.imapUser = imapUser;
     }
 
-    
+
     public String getImappassword() {
         return imappassword;
     }
 
-    
+
     public void setImappassword(String imappassword) {
         this.imappassword = imappassword;
     }
 
-    
+
     public String getTrainSpamFolder() {
         return trainSpamFolder;
     }
 
-    
+
     public void setTrainSpamFolder(String trainSpamFolder) {
         this.trainSpamFolder = trainSpamFolder;
     }
 
-    
+
     public String getTrainHamFolder() {
         return trainHamFolder;
     }
 
-    
+
     public void setTrainHamFolder(String trainHamFolder) {
         this.trainHamFolder = trainHamFolder;
     }
 
-    
+
     public String getPanelAdmin() {
         return panelAdmin;
     }
 
-    
+
     public void setPanelAdmin(String panelAdmin) {
         this.panelAdmin = panelAdmin;
     }
 
-    
+
     public String getPanelAdminPw() {
         return panelAdminPw;
     }
 
-    
+
     public void setPanelAdminPw(String panelAdminPw) {
         this.panelAdminPw = panelAdminPw;
     }
 
-    
+
     public String getPanelApiUrl() {
         return panelApiUrl;
     }
 
-    
+
     public void setPanelApiUrl(String panelApiUrl) {
         this.panelApiUrl = panelApiUrl;
     }
 
-    
+
     public String getPanelApiAuthAttr() {
         return panelApiAuthAttr;
     }
 
-    
+
     public void setPanelApiAuthAttr(String panelApiAuthAttr) {
         this.panelApiAuthAttr = panelApiAuthAttr;
     }
@@ -233,23 +233,23 @@ public class SpamExpertsConfig implements Initialization {
             throw SpamExpertsExceptionCode.INVALID_URL.create(url);
         }
     }
-    
-    
+
+
     public String getPanelWebUiUrl() {
         return panelWebUiUrl;
     }
 
-    
+
     public void setPanelWebUiUrl(String panelWebUiUrl) {
         this.panelWebUiUrl = panelWebUiUrl;
     }
 
-    
+
     public String getPanelServlet() {
         return panelServlet;
     }
 
-    
+
     public void setPanelServlet(String panelServlet) {
         this.panelServlet = panelServlet;
     }
@@ -272,7 +272,7 @@ public class SpamExpertsConfig implements Initialization {
             LOG.error(e.getMessage(), e);
             throw SpamExpertsExceptionCode.INVALID_URL.create(iurl);
         }
-        
+
         imapUser = configService.getProperty(PROPERTY_IMAPUSER);
         if( null == imapUser || imapUser.length() == 0) {
             throw SpamExpertsExceptionCode.MISSING_CONFIG_OPTION.create(PROPERTY_IMAPUSER);
@@ -289,7 +289,7 @@ public class SpamExpertsConfig implements Initialization {
         if( null == trainSpamFolder || trainSpamFolder.length() == 0) {
             throw SpamExpertsExceptionCode.MISSING_CONFIG_OPTION.create(PROPERTY_TRAIN_SPAM_FOLDER);
         }
-        
+
         panelAdmin = configService.getProperty(PROPERTY_PANEL_API_ADMIN_USER);
         if( null == panelAdmin || panelAdmin.length() == 0) {
             throw SpamExpertsExceptionCode.MISSING_CONFIG_OPTION.create(PROPERTY_PANEL_API_ADMIN_USER);
@@ -325,7 +325,7 @@ public class SpamExpertsConfig implements Initialization {
         }
         panelServlet = configService.getProperty(PROPERTY_PANEL_SERVLET);
 
-        LOG.info("Using properties: " + instance.toString());
+        LOG.info("Using properties: {}", instance.toString());
     }
 
     @Override

@@ -52,6 +52,7 @@ package com.openexchange.ajax;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -105,7 +106,7 @@ import com.openexchange.tools.URLParameter;
 
 /**
  * {@link AppointmentTest}
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - added parseUserParticipants
  */
 public class AppointmentTest extends AbstractAJAXTest {
@@ -881,7 +882,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 
     private static void parseCols(final int[] cols, final JSONArray jsonArray, final Appointment appointmentObj, final TimeZone userTimeZone) throws JSONException, OXException {
         if (cols.length != jsonArray.length()) {
-            LOG.debug("expected cols: " + StringCollection.convertArray2String(cols) + " recieved cols: " + jsonArray.toString());
+            LOG.debug("expected cols: {} recieved cols: {}", StringCollection.convertArray2String(cols), jsonArray.toString());
         }
 
         assertEquals("compare array size with cols size", cols.length, jsonArray.length());

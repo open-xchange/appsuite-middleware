@@ -99,7 +99,7 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
                 ThreeWayComparison<DirectoryVersion> twc = new ThreeWayComparison<DirectoryVersion>();
                 twc.setClientVersion(clientVersion);
                 OXException e = DriveExceptionCodes.CONFLICTING_PATH.create(clientVersion.getPath());
-                LOG.warn("Client change refused due to case conflicting name: " + clientVersion, e);
+                LOG.warn("Client change refused due to case conflicting name: {}", clientVersion, e);
                 syncResult.addActionForClient(new ErrorDirectoryAction(null, clientVersion, twc, e, true, false));
             }
         }
@@ -111,7 +111,7 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
                 ThreeWayComparison<DirectoryVersion> twc = new ThreeWayComparison<DirectoryVersion>();
                 twc.setClientVersion(clientVersion);
                 OXException e = DriveExceptionCodes.CONFLICTING_PATH.create(clientVersion.getPath());
-                LOG.warn("Client change refused due to unicode conflicting name: " + clientVersion, e);
+                LOG.warn("Client change refused due to unicode conflicting name: {}", clientVersion, e);
                 syncResult.addActionForClient(new ErrorDirectoryAction(null, clientVersion, twc, e, true, false));
             }
         }
@@ -182,7 +182,7 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
                  */
                 result.addActionForClient(new SyncDirectoryAction(comparison.getServerVersion(), comparison));
                 OXException e = DriveExceptionCodes.NO_DELETE_DIRECTORY_PERMISSION.create(comparison.getServerVersion().getPath());
-                LOG.warn("Client change refused for " + comparison.getServerVersion(), e);
+                LOG.warn("Client change refused for {}", comparison.getServerVersion(), e);
                 result.addActionForClient(new ErrorDirectoryAction(
                     comparison.getClientVersion(), comparison.getServerVersion(), comparison, e, false, false));
                 return 2;
@@ -193,7 +193,7 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
                  * invalid path, indicate as error with quarantine flag
                  */
                 OXException e = DriveExceptionCodes.INVALID_PATH.create(comparison.getClientVersion().getPath());
-                LOG.warn("Client change refused due to invalid path: " + comparison.getClientVersion(), e);
+                LOG.warn("Client change refused due to invalid path: {}", comparison.getClientVersion(), e);
                 result.addActionForClient(new ErrorDirectoryAction(
                     null, comparison.getClientVersion(), comparison, e, true, false));
                 return 1;
@@ -202,7 +202,7 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
                  * ignored path, indicate as error with quarantine flag
                  */
                 OXException e = DriveExceptionCodes.IGNORED_PATH.create(comparison.getClientVersion().getPath());
-                LOG.warn("Client change refused due to ignored path: " + comparison.getClientVersion(), e);
+                LOG.warn("Client change refused due to ignored path: {}", comparison.getClientVersion(), e);
                 result.addActionForClient(new ErrorDirectoryAction(
                     null, comparison.getClientVersion(), comparison, e, true, false));
                 return 1;
@@ -219,7 +219,7 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
                      * not allowed, indicate as error with quarantine flag
                      */
                     OXException e = DriveExceptionCodes.NO_CREATE_DIRECTORY_PERMISSION.create(parentPath);
-                    LOG.warn("Client change refused due to missing permissions: " + comparison.getClientVersion(), e);
+                    LOG.warn("Client change refused due to missing permissions: {}", comparison.getClientVersion(), e);
                     result.addActionForClient(new ErrorDirectoryAction(
                         null, comparison.getClientVersion(), comparison, e, true, false));
                     return 1;
@@ -316,7 +316,7 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
                 return 1;
             } else {
                 OXException e = DriveExceptionCodes.NO_CREATE_DIRECTORY_PERMISSION.create(parentPath);
-                LOG.warn("Client change refused due to missing permissions: " + comparison.getClientVersion(), e);
+                LOG.warn("Client change refused due to missing permissions: {}", comparison.getClientVersion(), e);
                 result.addActionForClient(new ErrorDirectoryAction(
                     null, comparison.getClientVersion(), comparison, e, true, false));
                 return 1;

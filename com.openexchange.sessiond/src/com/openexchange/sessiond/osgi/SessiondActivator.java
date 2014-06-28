@@ -111,13 +111,13 @@ public final class SessiondActivator extends HousekeepingActivator {
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
         // Don't stop the sessiond
-        LOG.warn("Absent service: " + clazz.getName());
+        LOG.warn("Absent service: {}", clazz.getName());
         getServiceRegistry().removeService(clazz);
     }
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        LOG.info("Re-available service: " + clazz.getName());
+        LOG.info("Re-available service: {}", clazz.getName());
         getServiceRegistry().addService(clazz, getService(clazz));
     }
 

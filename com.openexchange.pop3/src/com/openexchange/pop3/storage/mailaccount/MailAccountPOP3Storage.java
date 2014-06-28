@@ -687,7 +687,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
                     }
                 } catch (final Exception e) {
                     final POP3Config pop3Config = pop3Access.getPOP3Config();
-                    LOG.warn("POP3 mailbox " + pop3Config.getServer() + " could not be expunged/closed for login " + pop3Config.getLogin(), e);
+                    LOG.warn("POP3 mailbox {} could not be expunged/closed for login {}", pop3Config.getServer(), pop3Config.getLogin(), e);
                 }
                 // Trashed UIDLs not needed anymore
                 if (doExpunge) {

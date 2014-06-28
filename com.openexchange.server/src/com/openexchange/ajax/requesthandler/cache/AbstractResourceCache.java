@@ -226,7 +226,7 @@ public abstract class AbstractResourceCache implements ResourceCache, EventHandl
             final String baseType = new ContentType(fileType.trim()).getBaseType();
             return baseType.length() > MAX_FILE_TYPE_LENGTH ? baseType.substring(0, MAX_FILE_TYPE_LENGTH) : baseType;
         } catch (final OXException e) {
-            LOG.warn("Could not parse file type: " + fileType, e);
+            LOG.warn("Could not parse file type: {}", fileType, e);
             return null;
         }
     }

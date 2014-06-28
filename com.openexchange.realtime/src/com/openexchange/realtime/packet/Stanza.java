@@ -63,6 +63,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import org.apache.commons.lang.Validate;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.openexchange.exception.OXException;
@@ -71,20 +72,19 @@ import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.realtime.util.ElementPath;
-import org.apache.commons.lang.Validate;
 
 /**
  * {@link Stanza} - Abstract information unit that can be send from one entity to another. Actual Data is held as leafs of a tree-like
  * structure identified by an ElementPath leading to that data. A Stanza can carry multiple of those trees, each again identified by an
  * Elementpath.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public abstract class Stanza implements Serializable {
 
     public static final String DEFAULT_SELECTOR = "default";
-    
+
     public static final ElementPath ERROR_PATH = new ElementPath("error");
 
     private static final long serialVersionUID = 1L;
@@ -389,7 +389,7 @@ public abstract class Stanza implements Serializable {
     }
 
     /**
-     * 
+     *
      * @param nodePaths
      * @return
      */
@@ -399,10 +399,10 @@ public abstract class Stanza implements Serializable {
     }
 
     /**
-     * Filter matching PayloadElements from a PayloadTree 
-     *  
+     * Filter matching PayloadElements from a PayloadTree
+     *
      * @param treePath The {@link ElementPath} identifying the PayloadTree
-     * @param nodePaths The {@link ElementPath} identifying the matching PayloadElements 
+     * @param nodePaths The {@link ElementPath} identifying the matching PayloadElements
      * @return
      */
     public Collection<PayloadElement> filterPayloadElementsFromTree(ElementPath treePath, ElementPath... nodePaths) {
@@ -412,7 +412,7 @@ public abstract class Stanza implements Serializable {
     }
 
     /**
-     * Filter matching PayloadElements 
+     * Filter matching PayloadElements
      * @param trees
      * @param nodePaths
      * @return
@@ -438,7 +438,7 @@ public abstract class Stanza implements Serializable {
      * Filter a single payload from this {@link Stanza} based only on the {@link ElementPath} of the wanted payload. This will search in all
      * of
      * this {@link Stanza}'s {@link PayloadTree}s.
-     * 
+     *
      * @param elementPath The {@link ElementPath} of the wanted payload
      * @param clazz The {@link Class} of the wanted Payload
      * @return An {@link Optional} containing the single Payload or an empty {@link Optional} if the Stanza did contain exactly one matching
@@ -451,7 +451,7 @@ public abstract class Stanza implements Serializable {
     /**
      * Filter a single Payload from this {@link Stanza}'s {@link PayloadTree} based on the {@link ElementPath}s of the wanted Payload and
      * the {@link PayloadTree} to search.
-     * 
+     *
      * @param treePath The {@link ElementPath} identifying a {@link PayloadTree} within this {@link Stanza} that should be searched
      * @param elementPath The {@link ElementPath} of the wanted Payload
      * @param clazz The {@link Class} of the wanted Payload
@@ -473,16 +473,14 @@ public abstract class Stanza implements Serializable {
         }
         int numResults = filteredPayloadElements.size();
         if (numResults != 1) {
-            LOG.debug("Was expecting a single " + elementPath + " payload but found " + numResults 
-                + " within the Stanza. Returning absent Optional instead.");
+            LOG.debug("Was expecting a single {} payload but found {} within the Stanza. Returning absent Optional instead.", elementPath, numResults);
             return retval;
         }
         Object data = filteredPayloadElements.iterator().next().getData();
         if (clazz.isInstance(data)) {
             retval = Optional.of(clazz.cast(data));
         } else {
-            LOG.warn("Was expecting a payload  of class " + clazz + " but found " + data == null ? "null" : data.getClass().getName() 
-                + " within the Stanza. Returning absent Optional instead.");
+            LOG.warn("Was expecting a payload  of class \"{}\", but found {} within the Stanza. Returning absent Optional instead.", clazz.getName(), data == null ? "null" : data.getClass().getName());
         }
         return retval;
     }

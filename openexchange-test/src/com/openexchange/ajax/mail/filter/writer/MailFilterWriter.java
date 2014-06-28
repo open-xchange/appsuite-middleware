@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.filter.writer;
 
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -146,7 +145,7 @@ public class MailFilterWriter extends DataWriter {
 				}
 				break;
 			default:
-				LOG.warn("missing field in mapping: " + field);
+				LOG.warn("missing field in mapping: {}", field);
 		}
 	}
 

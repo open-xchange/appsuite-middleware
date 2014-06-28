@@ -131,7 +131,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                     syncResult.addActionForClient(uploadAction);
                 } else {
                     OXException e = DriveExceptionCodes.NO_CREATE_FILE_PERMISSION.create(path);
-                    LOG.warn("Client upload not allowed for " + clientVersion, e);
+                    LOG.warn("Client upload not allowed for {}", clientVersion, e);
                     syncResult.addActionForClient(new ErrorFileAction(clientVersion, renamedVersion, null, path, e , true));
                 }
             }
@@ -144,7 +144,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                 ThreeWayComparison<FileVersion> twc = new ThreeWayComparison<FileVersion>();
                 twc.setClientVersion(clientVersion);
                 OXException e = DriveExceptionCodes.CONFLICTING_FILENAME.create(clientVersion.getName());
-                LOG.warn("Client upload not allowed due to unicode conflicts: " + clientVersion, e);
+                LOG.warn("Client upload not allowed due to unicode conflicts: {}", clientVersion, e);
                 syncResult.addActionForClient(new ErrorFileAction(null, clientVersion, twc, path, e, true));
             }
         }
@@ -211,7 +211,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                  * not allowed, let client re-download the file, indicate as error without quarantine flag
                  */
                 OXException e = DriveExceptionCodes.NO_DELETE_FILE_PERMISSION.create(comparison.getServerVersion().getName(), path);
-                LOG.warn("Client change refused for " + comparison.getServerVersion(), e);
+                LOG.warn("Client change refused for {}", comparison.getServerVersion(), e);
                 result.addActionForClient(new DownloadFileAction(session, comparison.getClientVersion(),
                     ServerFileVersion.valueOf(comparison.getServerVersion(), path, session), comparison, path));
                 result.addActionForClient(new ErrorFileAction(comparison.getClientVersion(), comparison.getServerVersion(), comparison,
@@ -254,7 +254,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                  * ... then mark that file as error (without quarantine)...
                  */
                 OXException e = DriveExceptionCodes.NO_MODIFY_FILE_PERMISSION.create(comparison.getServerVersion().getName(), path);
-                LOG.warn("Client change refused for " + comparison.getServerVersion(), e);
+                LOG.warn("Client change refused for {}", comparison.getServerVersion(), e);
                 result.addActionForClient(new ErrorFileAction(
                     comparison.getClientVersion(), comparison.getServerVersion(), comparison, path, e, false));
                 /*
@@ -368,7 +368,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                     result.addActionForClient(uploadAction);
                 } else {
                     OXException e = DriveExceptionCodes.NO_CREATE_FILE_PERMISSION.create(path);
-                    LOG.warn("Client upload not allowed for " + comparison.getClientVersion(), e);
+                    LOG.warn("Client upload not allowed for {}", comparison.getClientVersion(), e);
                     result.addActionForClient(new ErrorFileAction(
                         comparison.getClientVersion(), renamedVersion, comparison, path, e, true));
                 }

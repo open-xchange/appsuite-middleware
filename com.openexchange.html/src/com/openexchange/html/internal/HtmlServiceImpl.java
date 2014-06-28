@@ -581,7 +581,7 @@ public final class HtmlServiceImpl implements HtmlService {
                 htmlSanitizeResult.setContent(handler.getHTML());
                 htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
             } catch (final ParsingDeniedException e) {
-                LOG.warn("HTML content will be returned un-white-listed. Reason: " + e.getMessage(), e);
+                LOG.warn("HTML content will be returned un-white-listed.", e);
             }
             String content = htmlSanitizeResult.getContent();
             // Repetitive sanitizing until no further replacement/changes performed
@@ -596,7 +596,7 @@ public final class HtmlServiceImpl implements HtmlService {
             htmlSanitizeResult.setContent(content);
             return htmlSanitizeResult;
         } catch (final RuntimeException e) {
-            LOG.warn("HTML content will be returned un-sanitized. Reason: "+e.getMessage(), e);
+            LOG.warn("HTML content will be returned un-sanitized.", e);
             return htmlSanitizeResult;
         }
     }

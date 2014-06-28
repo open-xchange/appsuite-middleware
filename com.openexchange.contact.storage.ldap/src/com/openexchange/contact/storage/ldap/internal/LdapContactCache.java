@@ -315,7 +315,7 @@ public class LdapContactCache {
         private void refreshContacts() throws OXException {
             Cache cache = LdapServiceLookup.getService(CacheService.class).getCache(getRegionName());
             LOG.debug("Refreshing contacts.");
-            Date start = new Date();
+            long start = System.currentTimeMillis();
             int deleted = 0;
             int updated = 0;
             Date newLastModified = new Date(0);
@@ -344,9 +344,9 @@ public class LdapContactCache {
             }
             if (0 < updated || 0 < deleted) {
                 this.lastModified = newLastModified;
-                LOG.debug("Contacts refreshed, got {} modified and {} deleted contacts in {}ms.", updated, deleted, (new Date().getTime() - start.getTime()));
+                LOG.debug("Contacts refreshed, got {} modified and {} deleted contacts in {}ms.", updated, deleted, (System.currentTimeMillis() - start));
             } else {
-                LOG.debug("No changes detected, check took " + (new Date().getTime() - start.getTime()) + "ms.");
+                LOG.debug("No changes detected, check took {}ms.", (System.currentTimeMillis() - start));
             }
         }
 

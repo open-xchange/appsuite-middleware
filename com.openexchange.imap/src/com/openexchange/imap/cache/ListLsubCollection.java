@@ -455,9 +455,7 @@ final class ListLsubCollection {
                             }
                         } catch (final Exception e) {
                             // Swallow failed STATUS command
-                            org.slf4j.LoggerFactory.getLogger(ListLsubCollection.class).debug(
-                                "STATUS command failed for " + imapFolder.getStore().toString(),
-                                e);
+                            org.slf4j.LoggerFactory.getLogger(ListLsubCollection.class).debug("STATUS command failed for {}", imapFolder.getStore().toString(), e);
                         }
                     }
                 }
@@ -1314,9 +1312,7 @@ final class ListLsubCollection {
                         }
                     } catch (final Exception e) {
                         // Swallow failed STATUS command
-                        org.slf4j.LoggerFactory.getLogger(ListLsubCollection.class).debug(
-                            "STATUS command failed for " + imapFolder.getStore().toString(),
-                            e);
+                        org.slf4j.LoggerFactory.getLogger(ListLsubCollection.class).debug("STATUS command failed for {}", imapFolder.getStore().toString(), e);
                     }
                 }
             }
@@ -1334,9 +1330,7 @@ final class ListLsubCollection {
                         }
                     } catch (final Exception e) {
                         // Swallow failed ACL command
-                        org.slf4j.LoggerFactory.getLogger(ListLsubCollection.class).debug(
-                            "ACL/MYRIGHTS command failed for " + imapFolder.getStore().toString(),
-                            e);
+                        org.slf4j.LoggerFactory.getLogger(ListLsubCollection.class).debug("ACL/MYRIGHTS command failed for {}", imapFolder.getStore().toString(), e);
                     }
                 }
             }

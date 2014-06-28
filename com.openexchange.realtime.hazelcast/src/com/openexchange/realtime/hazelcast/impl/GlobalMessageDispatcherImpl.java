@@ -230,7 +230,7 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
      * directed at different nodes still work.Consider client0 and client1 being connected to node1 and client2 being connected to node2.
      * client0 wants to chat with client1 and client2 and sends messages with strictly ascending sequence numbers reaching node1 that he is
      * connected to:
-     * 
+     *
      * <pre>
      * Seq 0 delivered to client1 via node 1
      * Seq 1 delivered to client1 via node 1
@@ -255,10 +255,8 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
      */
     private void ensureSequence(Stanza stanza, Member receiver) throws OXException {
         if (stanza.getSequenceNumber() != -1) {
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("peerMapsPerID before ensuring Sequence: " + peerMapPerID);
-                LOG.debug("SequencePrincipal for peerMapPerID lookup is: " + stanza.getSequencePrincipal());
-            }
+            LOG.debug("peerMapsPerID before ensuring Sequence: {}", peerMapPerID);
+            LOG.debug("SequencePrincipal for peerMapPerID lookup is: {}", stanza.getSequencePrincipal());
             ConcurrentHashMap<String, AtomicLong> peerMap = peerMapPerID.get(stanza.getSequencePrincipal());
             if (peerMap == null) {
                 peerMap = new ConcurrentHashMap<String, AtomicLong>();
@@ -274,19 +272,13 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
                 AtomicLong otherNextNumber = peerMap.putIfAbsent(receiver.getUuid(), nextNumber);
                 nextNumber = (otherNextNumber != null) ? otherNextNumber : nextNumber;
                 if(otherNextNumber != null) {
-                    if(LOG.isDebugEnabled()) {
-                        LOG.debug("Found other nextNumber to use for receiver: {}, nextNumber {}", receiver.getUuid(), otherNextNumber);
-                    }
+                    LOG.debug("Found other nextNumber to use for receiver: {}, nextNumber {}", receiver.getUuid(), otherNextNumber);
                     nextNumber = otherNextNumber;
                 }
-                if(LOG.isDebugEnabled()) {
-                    LOG.debug("nextNumber for receiver {} was null, adding nextNumber: {}", receiver.getUuid(), nextNumber);
-                }
+                LOG.debug("nextNumber for receiver {} was null, adding nextNumber: {}", receiver.getUuid(), nextNumber);
             }
             Long ensuredSequence = nextNumber.incrementAndGet() - 1;
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("Updating sequence number for {}: {}", receiver.getUuid(), ensuredSequence);
-            }
+            LOG.debug("Updating sequence number for {}: {}", receiver.getUuid(), ensuredSequence);
             stanza.setSequenceNumber(ensuredSequence);
             stanza.trace("Updating sequence number for " + receiver.getUuid() + ": " + ensuredSequence);
             if(LOG.isDebugEnabled()) {

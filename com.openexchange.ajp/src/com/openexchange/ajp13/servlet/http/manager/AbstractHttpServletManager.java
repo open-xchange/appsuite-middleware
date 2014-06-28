@@ -208,14 +208,10 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
                 try {
                     servletConstructor = servlet.getClass().getConstructor(CLASS_ARR);
                 } catch (final SecurityException e) {
-                    LOG.warn(
-                        "Default constructor could not be found for javax.servlet.SingleThreadModel servlet class: " + servlet.getClass().getName(),
-                        e);
+                    LOG.warn("Default constructor could not be found for javax.servlet.SingleThreadModel servlet class: {}", servlet.getClass().getName(), e);
                     servletConstructor = null;
                 } catch (final NoSuchMethodException e) {
-                    LOG.warn(
-                        "Default constructor could not be found for javax.servlet.SingleThreadModel servlet class: " + servlet.getClass().getName(),
-                        e);
+                    LOG.warn("Default constructor could not be found for javax.servlet.SingleThreadModel servlet class: {}", servlet.getClass().getName(), e);
                     servletConstructor = null;
                 }
                 final int servletPoolSize = AJPv13Config.getServletPoolSize();

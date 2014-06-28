@@ -129,7 +129,7 @@ public class DriveServiceImpl implements DriveService {
          */
         if (session.getApiVersion() < DriveConfig.getInstance().getMinApiVersion()) {
             OXException error = DriveExceptionCodes.CLIENT_OUTDATED.create();
-            LOG.warn("Client synchronization aborted for " + session, error);
+            LOG.warn("Client synchronization aborted for {}", session, error);
             List<AbstractAction<DirectoryVersion>> actionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>(1);
             actionsForClient.add(new ErrorDirectoryAction(null, null, null, error, false, true));
             return new DefaultSyncResult<DirectoryVersion>(actionsForClient, error.getLogMessage());
@@ -139,7 +139,7 @@ public class DriveServiceImpl implements DriveService {
             DriveClientVersion hardVersionLimit = DriveConfig.getInstance().getHardMinimumVersion(session.getClientType());
             if (0 > clientVersion.compareTo(hardVersionLimit)) {
                 OXException error = DriveExceptionCodes.CLIENT_VERSION_OUTDATED.create(clientVersion, hardVersionLimit);
-                LOG.warn("Client synchronization aborted for " + session, error);
+                LOG.warn("Client synchronization aborted for {}", session, error);
                 List<AbstractAction<DirectoryVersion>> actionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>(1);
                 actionsForClient.add(new ErrorDirectoryAction(null, null, null, error, false, true));
                 return new DefaultSyncResult<DirectoryVersion>(actionsForClient, error.getLogMessage());

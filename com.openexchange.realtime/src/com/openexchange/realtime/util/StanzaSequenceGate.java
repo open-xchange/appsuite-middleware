@@ -185,9 +185,7 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
                 threshold = new AtomicLong(0);
                 AtomicLong meantime = sequenceNumbers.putIfAbsent(stanza.getSequencePrincipal(), threshold);
                 if(meantime != null) {
-                    if(LOG.isDebugEnabled()) {
-                        LOG.debug("Found another number: " + meantime + "in the meantime for the SequencePrincipal: " + stanza.getSequencePrincipal());
-                    }
+                    LOG.debug("Found another number: {}in the meantime for the SequencePrincipal: {}", meantime, stanza.getSequencePrincipal());
                     threshold = meantime;
                 }
             }
@@ -314,7 +312,7 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
 
 
     public void freeResourcesFor(ID sequencePrincipal) {
-        LOG.debug("Freeing Ressources for SequencePrincipal: " + sequencePrincipal);
+        LOG.debug("Freeing Ressources for SequencePrincipal: {}", sequencePrincipal);
         sequenceNumbers.remove(sequencePrincipal);
         inboxes.remove(sequencePrincipal);
         notifyManagementSequenceNumbers();

@@ -146,7 +146,7 @@ public class Publisher implements Runnable {
         } catch (OXException e) {
             LOG.error("Unexpected error publising free/busy data", e);
         }
-        LOG.info("Publication cycle finished, " + ((new Date().getTime() - start) / 1000) + "s elapsed.");
+        LOG.info("Publication cycle finished, {}s elapsed.", ((System.currentTimeMillis() - start) / 1000));
     }
 
     /**
