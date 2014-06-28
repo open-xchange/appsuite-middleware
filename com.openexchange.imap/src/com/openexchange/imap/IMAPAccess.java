@@ -1347,8 +1347,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     @Override
     public String toString() {
-        if (null != imapStore) {
-            return imapStore.toString();
+        IMAPStore imapStore2 = imapStore;
+        if (null != imapStore2) {
+            return imapStore2.toString();
         }
         return "[not connected]";
     }
