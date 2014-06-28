@@ -54,10 +54,9 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.TimeZone;
 import javax.servlet.http.HttpServletResponse;
-import org.junit.Assert;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Assert;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
@@ -93,7 +92,7 @@ import com.openexchange.tools.URLParameter;
 
 /**
  * Utility class that contains all methods for making task requests to the server.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public final class TaskTools extends Assert {
@@ -122,7 +121,7 @@ public final class TaskTools extends Assert {
 
     /**
      * This method implements storing of a task through the AJAX interface.
-     * 
+     *
      * @param conversation WebConversation.
      * @param hostName Host name of the server.
      * @param sessionId Session identifier of the user.
@@ -162,7 +161,7 @@ public final class TaskTools extends Assert {
         final WebResponse resp = conversation.getResponse(req);
         assertEquals("Response code is not okay.", HttpServletResponse.SC_OK, resp.getResponseCode());
         final String body = resp.getText();
-        LOG.trace("Response body: " + body);
+        LOG.trace("Response body: {}", body);
         return Response.parse(body);
     }
 
@@ -254,7 +253,7 @@ public final class TaskTools extends Assert {
         final WebResponse resp = conversation.getResponse(req);
         assertEquals("Response code is not okay.", HttpServletResponse.SC_OK, resp.getResponseCode());
         final String body = resp.getText();
-        LOG.trace("Response body: " + body);
+        LOG.trace("Response body: {}", body);
         final Response response = Response.parse(body);
         assertFalse(response.getErrorMessage(), response.hasError());
         return response;
@@ -285,7 +284,7 @@ public final class TaskTools extends Assert {
         final WebResponse resp = conversation.getResponse(req);
         assertEquals("Response code is not okay.", HttpServletResponse.SC_OK, resp.getResponseCode());
         final String body = resp.getText();
-        LOG.trace("Response body: " + body);
+        LOG.trace("Response body: {}", body);
         final Response response = Response.parse(body);
         assertFalse(response.getErrorMessage(), response.hasError());
     }
@@ -297,7 +296,7 @@ public final class TaskTools extends Assert {
     /**
      * Extracts the identifier of an inserted task. This method can only be used with the reponse of the method
      * {@link #insertTask(WebConversation, String, String, Task)}.
-     * 
+     *
      * @param response Response object after inserting a task.
      * @return the identifier of the new inserted task.
      * @throws JSONException if the respone object doesn't contain the task identifier.

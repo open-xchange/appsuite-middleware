@@ -55,7 +55,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -126,7 +125,7 @@ public class AlwaysTest extends AbstractAJAXTest {
     }
 
     public void recListFolder(final String folderId, final String rights) throws IOException, SAXException, JSONException, OXException, OXException {
-        LOG.trace("Listing " + folderId);
+        LOG.trace("Listing {}", folderId);
         if (rights.length() > 0) {
             listMails(folderId, MAX);
         }

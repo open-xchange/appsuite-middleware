@@ -50,7 +50,6 @@
 package com.openexchange.ajax.config;
 
 import java.util.Arrays;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.GetResponse;
 import com.openexchange.ajax.config.actions.Tree;
@@ -76,7 +75,7 @@ public class AvailableModulesTest extends AbstractAJAXSession {
         final GetRequest request = new GetRequest(Tree.AvailableModules);
         final GetResponse response = getClient().execute(request);
         final Object[] array = response.getArray();
-        LOG.trace("Modules: " + Arrays.toString(array));
+        LOG.trace("Modules: {}", Arrays.toString(array));
         assertTrue("Got no modules from server.", array.length > 0);
     }
 }

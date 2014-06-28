@@ -62,7 +62,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
@@ -141,7 +140,7 @@ public class TasksTest extends AbstractAJAXTest {
 
         final int taskId = extractInsertId(insertTask(getWebConversation(),
             getHostName(), getSessionId(), task));
-        LOG.trace("Created delegated task: " + taskId);
+        LOG.trace("Created delegated task: {}", taskId);
 
         final Response response = getTask(getWebConversation(), getHostName(),
             getSessionId(), folderId, taskId);
@@ -183,11 +182,10 @@ public class TasksTest extends AbstractAJAXTest {
         task.setParentFolderID(folderId);
         task.setParticipants(firstParticipants);
 
-        LOG.trace("Creating delegated task with participants: "
-            + firstParticipants);
+        LOG.trace("Creating delegated task with participants: {}", firstParticipants);
         final int taskId = extractInsertId(insertTask(getWebConversation(),
             getHostName(), getSessionId(), task));
-        LOG.trace("Created delegated task: " + taskId);
+        LOG.trace("Created delegated task: {}", taskId);
         Response response = getTask(getWebConversation(), getHostName(),
             getSessionId(), folderId, taskId);
         Date lastModified = response.getTimestamp();
@@ -211,8 +209,7 @@ public class TasksTest extends AbstractAJAXTest {
         updatedTask.setTitle("Updated delegated task");
         updatedTask.setObjectID(taskId);
         updatedTask.setParticipants(secondParticipants);
-        LOG.trace("Updating delegated task with participants: "
-            + secondParticipants);
+        LOG.trace("Updating delegated task with participants: {}", secondParticipants);
         failOnError(updateTask(getWebConversation(), getHostName(),
             getSessionId(), folderId, updatedTask, lastModified));
         response = getTask(getWebConversation(), getHostName(),
@@ -323,7 +320,7 @@ public class TasksTest extends AbstractAJAXTest {
 
         final int taskId = extractInsertId(insertTask(getWebConversation(),
             getHostName(), getSessionId(), task));
-        LOG.trace("Created delegated task for confirmation: " + taskId);
+        LOG.trace("Created delegated task for confirmation: {}", taskId);
 
         confirmTask(getSecondWebConversation(), getHostName(),
             getSecondSessionId(), folderId2, taskId, Task.ACCEPT,
