@@ -385,13 +385,13 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                         oxgroup.create(ctx, grp, auth);
                         interfacelist.add(oxgroup);
                     } catch (final PluginException e) {
-                        LOGGER.error("Error while calling create for plugin: " + bundlename, e);
+                        LOGGER.error("Error while calling create for plugin: {}", bundlename, e);
                         LOGGER.info("Now doing rollback for everything until now...");
                         for (final OXGroupPluginInterface oxgroupinterface : interfacelist) {
                             try {
                                 oxgroupinterface.delete(ctx, new Group[] { grp }, auth);
                             } catch (final PluginException e1) {
-                                LOGGER.error("Error doing rollback for plugin: " + bundlename, e1);
+                                LOGGER.error("Error doing rollback for plugin: {}", bundlename, e1);
                             }
                         }
                         try {
@@ -514,9 +514,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                         oxgroup.delete(ctx, grp, auth);
                         interfacelist.add(oxgroup);
                     } catch (final PluginException e) {
-                        LOGGER.error(
-                                "Error while calling delete for plugin: "
-                                        + bundlename, e);
+                        LOGGER.error("Error while calling delete for plugin: {}", bundlename, e);
                         throw StorageException.wrapForRMI(e);
                     }
                 }

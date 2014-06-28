@@ -174,7 +174,7 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
         List<PayloadPerDevice> payloads = new ArrayList<PayloadPerDevice>(subscriptions.size());
         for (Subscription subscription : subscriptions) {
             if (null != pushTokenReference && subscription.matches(pushTokenReference)) {
-                LOG.trace("Skipping push notification for subscription: " + subscription);
+                LOG.trace("Skipping push notification for subscription: {}", subscription);
                 continue;
             }
             try {

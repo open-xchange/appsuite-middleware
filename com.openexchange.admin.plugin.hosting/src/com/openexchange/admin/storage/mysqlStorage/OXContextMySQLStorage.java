@@ -614,9 +614,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 revokeConfigdbMapping(contextserver2dbpool_backup, configdb_write_con, ctx.getId().intValue());
                 cache.resetPoolMappingForContext(ctx.getId().intValue());
             } catch (final Exception ecp) {
-                LOG.error(
-                    "!!!!!!WARNING!!!!! Could not revoke configdb entries for " + ctx.getId() + "!!!!!!WARNING!!! INFORM ADMINISTRATOR!!!!!!",
-                    ecp);
+                LOG.error("!!!!!!WARNING!!!!! Could not revoke configdb entries for {}!!!!!!WARNING!!! INFORM ADMINISTRATOR!!!!!!", ctx.getId(), ecp);
             }
 
             // enableContext() back
@@ -634,13 +632,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 revokeConfigdbMapping(contextserver2dbpool_backup, configdb_write_con, ctx.getId().intValue());
                 cache.resetPoolMappingForContext(ctx.getId().intValue());
             } catch (final SQLException ecp) {
-                LOG.error(
-                    "!!!!!!WARNING!!!!! Could not revoke configdb entries for " + ctx.getId() + "!!!!!!WARNING!!! INFORM ADMINISTRATOR!!!!!!",
-                    ecp);
+                LOG.error("!!!!!!WARNING!!!!! Could not revoke configdb entries for {}!!!!!!WARNING!!! INFORM ADMINISTRATOR!!!!!!", ctx.getId(), ecp);
             } catch (final PoolException ecp) {
-                LOG.error(
-                    "!!!!!!WARNING!!!!! Could not revoke configdb entries for " + ctx.getId() + "!!!!!!WARNING!!! INFORM ADMINISTRATOR!!!!!!",
-                    ecp);
+                LOG.error("!!!!!!WARNING!!!!! Could not revoke configdb entries for {}!!!!!!WARNING!!! INFORM ADMINISTRATOR!!!!!!", ctx.getId(), ecp);
             }
 
             // enableContext() back
@@ -649,9 +643,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             throw new StorageException(tde);
         } catch (final SQLException sql) {
             // enableContext back
-            LOG.error(
-                "SQL Error caught while moving data " + "for context " + ctx.getId() + " to target database " + target_database_id,
-                sql);
+            LOG.error("SQL Error caught while moving data for context {} to target database {}", ctx.getId(), target_database_id, sql);
             enable(ctx);
 
             // rollback

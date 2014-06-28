@@ -199,7 +199,7 @@ public class DriveServiceImpl implements DriveService {
                 DriveClientVersion softVersionLimit = DriveConfig.getInstance().getSoftMinimumVersion(session.getClientType());
                 if (0 > clientVersion.compareTo(softVersionLimit)) {
                     OXException error = DriveExceptionCodes.CLIENT_VERSION_UPDATE_AVAILABLE.create(clientVersion, softVersionLimit);
-                    LOG.trace("Client upgrade available for " + session, error);
+                    LOG.trace("Client upgrade available for {}", session, error);
                     syncResult.addActionForClient(new ErrorDirectoryAction(null, null, null, error, false, false));
                 }
             }

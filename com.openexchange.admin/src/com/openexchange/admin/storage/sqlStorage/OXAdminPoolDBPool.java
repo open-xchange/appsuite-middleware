@@ -283,7 +283,7 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
         try {
             return getService().getWritablePool(contextId);
         } catch (OXException e) {
-            log.error("Error getting the write pool identifier for context " + contextId + ".", e);
+            log.error("Error getting the write pool identifier for context {}.", contextId, e);
             throw new PoolException(e.getMessage());
         }
     }
@@ -293,7 +293,7 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
         try {
             return getService().getSchemaName(contextId);
         } catch (OXException e) {
-            log.error("Error getting the schema name for context " + contextId + ".", e);
+            log.error("Error getting the schema name for context {}.", contextId, e);
             throw new PoolException(e.getMessage());
         }
     }
