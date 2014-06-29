@@ -87,6 +87,7 @@ import javax.mail.Address;
 import javax.mail.BodyPart;
 import javax.mail.Header;
 import javax.mail.Message;
+import javax.mail.MessageRemovedException;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
@@ -151,6 +152,7 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
+import com.sun.mail.util.MessageRemovedIOException;
 
 /**
  * {@link MimeMessageUtility} - Utilities for MIME messages.
@@ -2227,21 +2229,42 @@ public final class MimeMessageUtility {
         if (null == contentType || !toLowerCase(contentType).startsWith("multipart/")) {
             return null;
         }
-        final Object content = part.getContent();
-        if (content instanceof Multipart) {
-            return (Multipart) content;
+        return multipartFrom(part, contentType);
+    }
+
+    /**
+     * Gets the multipart content from specified part known to hold a multipart content (w/o checking Content-Type header).
+     *
+     * @param part The part
+     * @return The multipart or <code>null</code>
+     * @throws MessagingException If a messaging error occurs
+     * @throws IOException If an I/O error occurs
+     */
+    public static Multipart multipartFrom(final Part part) throws MessagingException, IOException {
+        return multipartFrom(part, null);
+    }
+
+    private static Multipart multipartFrom(final Part part, final String contentType) throws MessagingException, IOException {
+        try {
+            final Object content = part.getContent();
+            if (content instanceof Multipart) {
+                return (Multipart) content;
+            }
+            if (content instanceof InputStream) {
+                return new MimeMultipart(new MessageDataSource((InputStream) content, null == contentType ? getHeader("Content-Type", null, part) : contentType));
+            }
+            if (content instanceof Message) {
+                return getMultipartContentFrom((Message) content);
+            }
+            if (content instanceof String) {
+                return new MimeMultipart(new MessageDataSource(Streams.newByteArrayInputStream(((String) content).getBytes(Charsets.ISO_8859_1)), null == contentType ? getHeader("Content-Type", null, part) : contentType));
+            }
+            LOG.warn("Unable to retrieve multipart content fromt part with Content-Type={}. Content signals to be {}.", null == contentType ? getHeader("Content-Type", null, part) : contentType, null == content ? "null" : content.getClass().getName());
+            return null;
+        } catch (MessageRemovedIOException e) {
+            String message = e.getMessage();
+            throw new MessageRemovedException(null == message ? "Message has been removed in the meantime" : message, e);
         }
-        if (content instanceof InputStream) {
-            return new MimeMultipart(new MessageDataSource((InputStream) content, contentType));
-        }
-        if (content instanceof Message) {
-            return getMultipartContentFrom((Message) content);
-        }
-        if (content instanceof String) {
-            return new MimeMultipart(new MessageDataSource(Streams.newByteArrayInputStream(((String) content).getBytes(Charsets.ISO_8859_1)), contentType));
-        }
-        LOG.warn("Unable to retrieve multipart content fromt part with Content-Type={}. Content signals to be {}.", contentType, null == content ? "null" : content.getClass().getName());
-        return null;
     }
 
     /**
