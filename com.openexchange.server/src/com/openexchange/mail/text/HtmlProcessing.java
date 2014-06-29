@@ -110,7 +110,7 @@ public final class HtmlProcessing {
 
     /**
      * Performs all the formatting for text content for a proper display according to specified user's mail settings.
-     * 
+     *
      * @param content The plain text content
      * @param usm The settings used for formatting content
      * @param mode The display mode
@@ -124,7 +124,7 @@ public final class HtmlProcessing {
 
     /**
      * Performs all the formatting for text content for a proper display according to specified user's mail settings.
-     * 
+     *
      * @param content The plain text content
      * @param usm The settings used for formatting content
      * @param mode The display mode
@@ -155,7 +155,7 @@ public final class HtmlProcessing {
 
     /**
      * Performs all the formatting for HTML content for a proper display according to specified user's mail settings.
-     * 
+     *
      * @param content The HTML content
      * @param charset The character encoding
      * @param session The session
@@ -189,7 +189,7 @@ public final class HtmlProcessing {
      * <li>Both inline and non-inline images found in HTML content are prepared according to settings if {@link DisplayMode#DISPLAY} is
      * given</li>
      * </ol>
-     * 
+     *
      * @param content The content
      * @param charset The character encoding (only needed by HTML content; may be <code>null</code> on plain text)
      * @param isHtml <code>true</code> if content is of type <code>text/html</code>; otherwise <code>false</code>
@@ -217,6 +217,7 @@ public final class HtmlProcessing {
                     final boolean externalImagesAllowed = usm.isAllowHTMLImages();
                     // Resolve <base> tags
                     retval.setContent(htmlService.checkBaseTag(retval.getContent(), externalImagesAllowed));
+                    // TODO: Use static string "o1p2e3n4-x5c6h7a8n9g0e" ?
                     final String cssPrefix = null == mailPath ? null : (embedded ? "ox-" + getHash(mailPath.toString(), 10) : null);
                     if (useSanitize()) {
                         // No need to generate well-formed HTML
