@@ -707,6 +707,10 @@ public class MimeMessageFiller {
         return "references".equals(lc) || "in-reply-to".equals(lc);
     }
 
+    private static final String HDR_MESSAGE_ID = MessageHeaders.HDR_MESSAGE_ID;
+    private static final String HDR_REFERENCES = MessageHeaders.HDR_REFERENCES;
+    private static final String HDR_IN_REPLY_TO = MessageHeaders.HDR_IN_REPLY_TO;
+
     /**
      * Sets the appropriate headers <code>In-Reply-To</code> and <code>References</code> in specified MIME message.
      * <p>
@@ -723,15 +727,15 @@ public class MimeMessageFiller {
              */
             return;
         }
-        final String pMsgId = referencedMail.getFirstHeader(MessageHeaders.HDR_MESSAGE_ID);
+        final String pMsgId = referencedMail.getFirstHeader(HDR_MESSAGE_ID);
         if (pMsgId != null) {
-            mimeMessage.setHeader(MessageHeaders.HDR_IN_REPLY_TO, pMsgId);
+            mimeMessage.setHeader(HDR_IN_REPLY_TO, pMsgId);
         }
         /*
          * Set References header field
          */
-        final String pReferences = referencedMail.getFirstHeader(MessageHeaders.HDR_REFERENCES);
-        final String pInReplyTo = referencedMail.getFirstHeader(MessageHeaders.HDR_IN_REPLY_TO);
+        final String pReferences = referencedMail.getFirstHeader(HDR_REFERENCES);
+        final String pInReplyTo = referencedMail.getFirstHeader(HDR_IN_REPLY_TO);
         final StringBuilder refBuilder = new StringBuilder();
         if (pReferences != null) {
             /*
@@ -752,13 +756,17 @@ public class MimeMessageFiller {
                 refBuilder.append(' ');
             }
             refBuilder.append(pMsgId);
-        }
-        if (refBuilder.length() > 0) {
             /*
              * If the parent has none of the "References:", "In-Reply-To:", or "Message-ID:" fields, then the new message will have no
              * "References:" field.
              */
-            mimeMessage.setHeader(MessageHeaders.HDR_REFERENCES, refBuilder.toString());
+            mimeMessage.setHeader(HDR_REFERENCES, refBuilder.toString());
+        } else if (refBuilder.length() > 0) {
+            /*
+             * If the parent has none of the "References:", "In-Reply-To:", or "Message-ID:" fields, then the new message will have no
+             * "References:" field.
+             */
+            mimeMessage.setHeader(HDR_REFERENCES, refBuilder.toString());
         }
     }
 
