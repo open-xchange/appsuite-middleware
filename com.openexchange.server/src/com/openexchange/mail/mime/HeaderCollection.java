@@ -143,7 +143,7 @@ public class HeaderCollection implements Serializable {
      * @param name The header name to check
      * @return The case-sensitive header name
      */
-    public static String caseSensitiveHeadreNameFor(final String name) {
+    public static String caseSensitiveHeaderNameFor(final String name) {
         final String cshn = CASE_SENSITIVE_LOOKUP.get(name.toLowerCase(ENGLISH));
         return null == cshn ? name : cshn;
     }
@@ -447,7 +447,7 @@ public class HeaderCollection implements Serializable {
              */
             return;
         }
-        final HeaderName headerName = HeaderName.valueOf(caseSensitiveHeadreNameFor(name));
+        final HeaderName headerName = HeaderName.valueOf(caseSensitiveHeaderNameFor(name));
         List<String> values = map.get(headerName);
         if (values == null) {
             values = new ArrayList<String>(2);
