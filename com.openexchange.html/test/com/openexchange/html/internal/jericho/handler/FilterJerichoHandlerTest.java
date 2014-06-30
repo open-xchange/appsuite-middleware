@@ -49,10 +49,16 @@
 
 package com.openexchange.html.internal.jericho.handler;
 
-import static org.junit.Assert.*;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+import com.openexchange.html.internal.HtmlServiceImpl;
+import com.openexchange.test.mock.MockUtils;
 
 /**
  * {@link FilterJerichoHandlerTest}
@@ -60,18 +66,51 @@ import org.junit.Test;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.1
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ HtmlServiceImpl.class })
 public class FilterJerichoHandlerTest {
 
-    /**
-     * @throws java.lang.Exception
-     */
+    @Mock
+    private HtmlServiceImpl htmlServiceImpl;
+
+    private FilterJerichoHandler filterJerichoHandler;
+
     @Before
     public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+        filterJerichoHandler = new FilterJerichoHandler(100000, htmlServiceImpl);
     }
 
     @Test
-    public void test() {
-        fail("Not yet implemented");
+    public void testSetMaxContentSize_infiniteWithMinusOne_setInfinite() {
+        filterJerichoHandler.setMaxContentSize(-1);
+
+        int valueFromField = (Integer)MockUtils.getValueFromField(filterJerichoHandler, "maxContentSize");
+        Assert.assertEquals(-1, valueFromField);
+    }
+
+    @Test
+    public void testSetMaxContentSize_infiniteWithMinusZero_setInfinite() {
+        filterJerichoHandler.setMaxContentSize(0);
+
+        int valueFromField = (Integer) MockUtils.getValueFromField(filterJerichoHandler, "maxContentSize");
+        Assert.assertEquals(0, valueFromField);
+    }
+
+    @Test
+    public void testSetMaxContentSize_lessThanMinimum_setMinimum10000() {
+        filterJerichoHandler.setMaxContentSize(555);
+
+        int valueFromField = (Integer) MockUtils.getValueFromField(filterJerichoHandler, "maxContentSize");
+        Assert.assertEquals(10000, valueFromField);
+    }
+
+    @Test
+    public void testSetMaxContentSize_validMaxSize_setMaxSize() {
+        filterJerichoHandler.setMaxContentSize(22222);
+
+        int valueFromField = (Integer) MockUtils.getValueFromField(filterJerichoHandler, "maxContentSize");
+        Assert.assertEquals(22222, valueFromField);
     }
 
 }
