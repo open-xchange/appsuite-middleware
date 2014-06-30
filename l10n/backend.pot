@@ -2573,19 +2573,19 @@ msgstr ""
 msgid "in mail text"
 msgstr ""
 
-#. Search in senders and recipients.
+#. Search for mails sent from or to ...
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:80
-msgid "Sender/Recipient"
+msgid "From/To"
 msgstr ""
 
-#. Search in for sender.
+#. Search for mails sent from ...
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:83
-msgid "Sender"
+msgid "From"
 msgstr ""
 
-#. Search in for recipient.
+#. Search for mails sent to ...
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:86
-msgid "Recipient"
+msgid "To"
 msgstr ""
 
 #. ------------------------- i18n strings for facet types -------------------------------------- //
