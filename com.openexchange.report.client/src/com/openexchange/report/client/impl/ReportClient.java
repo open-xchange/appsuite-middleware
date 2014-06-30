@@ -434,13 +434,9 @@ public class ReportClient extends AbstractJMXTools {
             put("CONTACTS", "access-contacts");
             put("DELEGATE_TASKS", "access-delegate-tasks");
             put("EDIT_PUBLIC_FOLDERS", "access-edit-public-folder");
-            put("FORUM", "access-forum");
             put("ICAL", "access-ical");
             put("INFOSTORE", "access-infostore");
-            put("PINBOARD_WRITE_ACCESS", "access-pinboard-write");
             put("READ_CREATE_SHARED_FOLDERS", "access-read-create-shared-Folders");
-            put("RSS_BOOKMARKS", "access-rss-bookmarks");
-            put("RSS_PORTAL", "access-rss-portal");
             put("SYNCML", "access-syncml");
             put("MOBILITY", "access-syncml");
             put("TASKS", "access-tasks");

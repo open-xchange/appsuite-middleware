@@ -80,14 +80,6 @@ public enum EnumComponent implements Component {
      */
     BOOKMARKS("BKM"),
     /**
-     * Module FORUM
-     */
-    FORUM("FOR"),
-    /**
-     * Module PINBOARD
-     */
-    PINBOARD("PIN"),
-    /**
      * Module MAIL
      */
     MAIL("MSG"),

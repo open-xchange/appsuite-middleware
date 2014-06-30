@@ -990,14 +990,10 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             final UserPermissionBits ubp = new UserPermissionBits(0, 0, null, ctx.getId().intValue());
             ubp.setCalendar(access.getCalendar());
             ubp.setContact(access.getContacts());
-            ubp.setForum(access.getForum());
             ubp.setFullPublicFolderAccess(access.getEditPublicFolders());
             ubp.setFullSharedFolderAccess(access.getReadCreateSharedFolders());
             ubp.setICal(access.getIcal());
             ubp.setInfostore(access.getInfostore());
-            ubp.setPinboardWriteAccess(access.getPinboardWrite());
-            ubp.setRSSBookmarks(access.getRssBookmarks());
-            ubp.setRSSPortal(access.getRssPortal());
             ubp.setSyncML(access.getSyncml());
             ubp.setTask(access.getTasks());
             ubp.setVCard(access.getVcard());

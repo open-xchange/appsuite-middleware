@@ -191,9 +191,7 @@ sub doRequest {
 
     my $modaccessFields = [
 			   "ical",
-			   "rssPortal",
 			   "delegateTask",
-			   "forum",
 			   "editPassword",
 			   "editPublicFolders",
 			   "vcard",
@@ -202,14 +200,12 @@ sub doRequest {
 			   "contacts",
 			   "tasks",
 			   "webmail",
-			   "pinboardWrite",
 			   "infostore",
 			   "webdavXml",
 			   "calendar",
 			   "editGroup",
 			   "syncml",
-			   "editResource",
-			   "rssBookmarks"
+			   "editResource"
 			  ];
     foreach my $user ( @soapuserarr ) {
       my $som_entry3 = 

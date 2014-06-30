@@ -64,19 +64,11 @@ public class UserModuleAccess {
 
     private Boolean editPublicFolders = true;
 
-    private Boolean forum = true;
-
     private Boolean ical = true;
 
     private Boolean infostore = true;
 
-    private Boolean PinboardWrite = true;
-
     private Boolean readCreateSharedFolders = true;
-
-    private Boolean RssBookmarks = true;
-
-    private Boolean RssPortal = true;
 
     private Boolean Syncml = true;
 
@@ -295,18 +287,6 @@ public class UserModuleAccess {
     public void setEditPublicFolders(final Boolean val) {
         this.editPublicFolders = val;
     }
-    /**
-     * Currently NOT in use!
-     */
-    public Boolean getForum() {
-        return forum;
-    }
-    /**
-     * Currently NOT in use!
-     */
-    public void setForum(final Boolean val) {
-        this.forum = val;
-    }
 
     public Boolean getIcal() {
         return ical;
@@ -323,18 +303,6 @@ public class UserModuleAccess {
     public void setInfostore(final Boolean val) {
         this.infostore = val;
     }
-    /**
-     * Currently NOT in use!
-     */
-    public Boolean getPinboardWrite() {
-        return PinboardWrite;
-    }
-    /**
-     * Currently NOT in use!
-     */
-    public void setPinboardWrite(final Boolean val) {
-        this.PinboardWrite = val;
-    }
 
     public Boolean getReadCreateSharedFolders() {
         return readCreateSharedFolders;
@@ -342,30 +310,6 @@ public class UserModuleAccess {
 
     public void setReadCreateSharedFolders(final Boolean val) {
         this.readCreateSharedFolders = val;
-    }
-    /**
-     * Currently NOT in use!
-     */
-    public Boolean getRssBookmarks() {
-        return RssBookmarks;
-    }
-    /**
-     * Currently NOT in use!
-     */
-    public void setRssBookmarks(final Boolean val) {
-        this.RssBookmarks = val;
-    }
-    /**
-     * Currently NOT in use!
-     */
-    public Boolean getRssPortal() {
-        return RssPortal;
-    }
-    /**
-     * Currently NOT in use!
-     */
-    public void setRssPortal(final Boolean val) {
-        this.RssPortal = val;
     }
 
     public Boolean getSyncml() {

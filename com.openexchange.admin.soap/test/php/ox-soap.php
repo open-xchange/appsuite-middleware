@@ -198,14 +198,9 @@ class UserModuleAccess{
     var $editPassword;
     var $editPublicFolders;
     var $editResource;
-    var $forum;
     var $ical;
     var $infostore;
-    var $pinboardWrite;
-    var $projects;
     var $readCreateSharedFolders;
-    var $rssBookmarks;
-    var $rssPortal;
     var $syncml;
     var $tasks;
     var $vcard;

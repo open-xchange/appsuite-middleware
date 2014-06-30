@@ -1,3 +1,7 @@
+* 2014-06-30 - lars.hoogestraat@open-xchange.com
+ 
+ - Fix for bug #33314: Removed access restrictions which are not used
+
 * 2014-06-25 - marcus.klein@open-xchange.com
 
  - Fix for bug 32860: Detect lousy clients writing always the same attribute values to the user object and avoid updating these values in

@@ -104,16 +104,6 @@ public class AllowAllUserConfigurationTest {
     }
 
     @Test
-    public void testHasForum() {
-        assertTrue(userPermission.hasForum());
-    }
-
-    @Test
-    public void testHasPinboardWriteAccess() {
-        assertTrue(userPermission.hasPinboardWriteAccess());
-    }
-
-    @Test
     public void testHasWebDAVXML() {
         assertTrue(userPermission.hasWebDAVXML());
     }
@@ -131,16 +121,6 @@ public class AllowAllUserConfigurationTest {
     @Test
     public void testHasVCard() {
         assertTrue(userPermission.hasVCard());
-    }
-
-    @Test
-    public void testHasRSSBookmarks() {
-        assertTrue(userPermission.hasRSSBookmarks());
-    }
-
-    @Test
-    public void testHasRSSPortal() {
-        assertTrue(userPermission.hasRSSPortal());
     }
 
     @Test

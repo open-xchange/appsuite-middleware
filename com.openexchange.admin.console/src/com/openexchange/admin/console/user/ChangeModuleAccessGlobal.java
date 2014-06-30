@@ -147,13 +147,9 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
         this.accessContactOption = setLongOpt(admp, OPT_ACCESS_CONTACTS,"on/off","Contact module access (Default is on)", true, required, extended);
         this.accessDelegateTasksOption = setLongOpt(admp, OPT_ACCESS_DELEGATE_TASKS,"on/off","Delegate tasks access (Default is off)", true, required, extended);
         this.accessEditPublicFolderOption = setLongOpt(admp, OPT_ACCESS_EDIT_PUBLIC_FOLDERS,"on/off","Edit public folder access (Default is off)", true, required, extended);
-        this.accessForumOption = setLongOpt(admp, OPT_ACCESS_FORUM,"on/off","Forum module access (Default is off)", true, required, extended);
         this.accessIcalOption = setLongOpt(admp, OPT_ACCESS_ICAL,"on/off","Ical module access (Default is off)", true, required, extended);
         this.accessInfostoreOption = setLongOpt(admp, OPT_ACCESS_INFOSTORE,"on/off","Infostore module access (Default is off)", true, required, extended);
-        this.accessPinboardWriteOption = setLongOpt(admp, OPT_ACCESS_PINBOARD_WRITE,"on/off","Pinboard write access (Default is off)", true, required, extended);
         this.accessReadCreateSharedFolderOption = setLongOpt(admp, OPT_ACCESS_READCREATE_SHARED_FOLDERS,"on/off","Read create shared folder access (Default is off)", true, required, extended);
-        this.accessRssBookmarkOption= setLongOpt(admp, OPT_ACCESS_RSS_BOOKMARKS,"on/off","RSS bookmarks access (Default is off)", true, required, extended);
-        this.accessRssPortalOption = setLongOpt(admp, OPT_ACCESS_RSS_PORTAL,"on/off","RSS portal access (Default is off)", true, required, extended);
         this.accessSyncmlOption = setLongOpt(admp, OPT_ACCESS_SYNCML,"on/off","Syncml access (Default is off)", true, required, extended);
         this.accessTasksOption = setLongOpt(admp, OPT_ACCESS_TASKS,"on/off","Tasks access (Default is off)", true, required, extended);
         this.accessVcardOption = setLongOpt(admp, OPT_ACCESS_VCARD,"on/off","Vcard access (Default is off)", true, required, extended);
@@ -233,13 +229,6 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
                 removeAccess.setEditPublicFolders(true);
             }
         }
-        if (parser.getOptionValue(accessForumOption) != null) {
-            if (accessOption2Boolean(parser, accessForumOption)) {
-                addAccess.setForum(true);
-            } else {
-                removeAccess.setForum(true);
-            }
-        }
         if (parser.getOptionValue(accessIcalOption) != null) {
             if (accessOption2Boolean(parser, accessIcalOption)) {
                 addAccess.setIcal(true);
@@ -254,32 +243,11 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
                 removeAccess.setInfostore(true);
             }
         }
-        if (parser.getOptionValue(accessPinboardWriteOption) != null) {
-            if (accessOption2Boolean(parser, accessPinboardWriteOption)) {
-                addAccess.setPinboardWrite(true);
-            } else {
-                removeAccess.setPinboardWrite(true);
-            }
-        }
         if (parser.getOptionValue(accessReadCreateSharedFolderOption) != null) {
             if (accessOption2Boolean(parser, accessReadCreateSharedFolderOption)) {
                 addAccess.setReadCreateSharedFolders(true);
             } else {
                 removeAccess.setReadCreateSharedFolders(true);
-            }
-        }
-        if (parser.getOptionValue(accessRssBookmarkOption) != null) {
-            if (accessOption2Boolean(parser, accessRssBookmarkOption)) {
-                addAccess.setRssBookmarks(true);
-            } else {
-                removeAccess.setRssBookmarks(true);
-            }
-        }
-        if (parser.getOptionValue(accessRssPortalOption) != null) {
-            if (accessOption2Boolean(parser, accessRssPortalOption)) {
-                addAccess.setRssPortal(true);
-            } else {
-                removeAccess.setRssPortal(true);
             }
         }
         if (parser.getOptionValue(accessSyncmlOption) != null) {

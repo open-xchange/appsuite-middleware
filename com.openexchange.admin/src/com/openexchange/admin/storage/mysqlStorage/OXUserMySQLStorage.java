@@ -2605,14 +2605,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             acc.setCalendar(user.hasPermission(UserConfiguration.CALENDAR));
             acc.setContacts(user.hasPermission(UserConfiguration.CONTACTS));
-            acc.setForum(user.hasPermission(UserConfiguration.FORUM));
             acc.setEditPublicFolders(user.hasPermission(UserConfiguration.EDIT_PUBLIC_FOLDERS));
             acc.setReadCreateSharedFolders(user.hasPermission(UserConfiguration.READ_CREATE_SHARED_FOLDERS));
             acc.setIcal(user.hasPermission(UserConfiguration.ICAL));
             acc.setInfostore(user.hasPermission(UserConfiguration.INFOSTORE));
-            acc.setPinboardWrite(user.hasPermission(UserConfiguration.PINBOARD_WRITE_ACCESS));
-            acc.setRssBookmarks(user.hasPermission(UserConfiguration.RSS_BOOKMARKS));
-            acc.setRssPortal(user.hasPermission(UserConfiguration.RSS_PORTAL));
             acc.setSyncml(user.hasPermission(UserConfiguration.MOBILITY));
             acc.setTasks(user.hasPermission(UserConfiguration.TASKS));
             acc.setVcard(user.hasPermission(UserConfiguration.VCARD));
@@ -2836,14 +2832,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             final UserPermissionBits user = RdbUserPermissionBitsStorage.adminLoadUserPermissionBits(userId, groups, ctx.getId().intValue(), writeCon);
             user.setCalendar(access.getCalendar());
             user.setContact(access.getContacts());
-            user.setForum(access.getForum());
             user.setFullPublicFolderAccess(access.getEditPublicFolders());
             user.setFullSharedFolderAccess(access.getReadCreateSharedFolders());
             user.setICal(access.getIcal());
             user.setInfostore(access.getInfostore());
-            user.setPinboardWriteAccess(access.getPinboardWrite());
-            user.setRSSBookmarks(access.getRssBookmarks());
-            user.setRSSPortal(access.getRssPortal());
             user.setSyncML(access.getSyncml());
             user.setTask(access.getTasks());
             user.setVCard(access.getVcard());

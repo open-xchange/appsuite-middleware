@@ -1611,9 +1611,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         if (namedAccessCombination.getEditResource()) {
             retval |= UserConfiguration.EDIT_RESOURCE;
         }
-        if (namedAccessCombination.getForum()) {
-            retval |= UserConfiguration.FORUM;
-        }
         if (namedAccessCombination.getIcal()) {
             retval |= UserConfiguration.ICAL;
         }
@@ -1629,20 +1626,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         if (namedAccessCombination.isOLOX20()) {
             retval |= UserConfiguration.OLOX20;
         }
-        if (namedAccessCombination.getPinboardWrite()) {
-            retval |= UserConfiguration.PINBOARD_WRITE_ACCESS;
-        }
         if (namedAccessCombination.isPublication()) {
             retval |= UserConfiguration.PUBLICATION;
         }
         if (namedAccessCombination.getReadCreateSharedFolders()) {
             retval |= UserConfiguration.READ_CREATE_SHARED_FOLDERS;
-        }
-        if (namedAccessCombination.getRssBookmarks()) {
-            retval |= UserConfiguration.RSS_BOOKMARKS;
-        }
-        if (namedAccessCombination.getRssPortal()) {
-            retval |= UserConfiguration.RSS_PORTAL;
         }
         if (namedAccessCombination.isSubscription()) {
             retval |= UserConfiguration.SUBSCRIPTION;

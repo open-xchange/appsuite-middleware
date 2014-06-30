@@ -78,19 +78,11 @@ public class UserModuleAccess implements Serializable, Cloneable {
 
     private boolean editPublicFolders = true;
 
-    private boolean forum = true;
-
     private boolean ical = true;
 
     private boolean infostore = true;
 
-    private boolean PinboardWrite = true;
-
     private boolean readCreateSharedFolders = true;
-
-    private boolean RssBookmarks = true;
-
-    private boolean RssPortal = true;
 
     private boolean Syncml = true;
 
@@ -154,13 +146,9 @@ public class UserModuleAccess implements Serializable, Cloneable {
         this.contacts = true;
         this.delegateTask = true;
         this.editPublicFolders = true;
-        this.forum = true;
         this.ical = true;
         this.infostore = true;
-        this.PinboardWrite = true;
         this.readCreateSharedFolders = true;
-        this.RssBookmarks = true;
-        this.RssPortal = true;
         this.Syncml = true;
         this.Tasks = true;
         this.Vcard = true;
@@ -189,13 +177,9 @@ public class UserModuleAccess implements Serializable, Cloneable {
         this.contacts = false;
         this.delegateTask = false;
         this.editPublicFolders = false;
-        this.forum = false;
         this.ical = false;
         this.infostore = false;
-        this.PinboardWrite = false;
         this.readCreateSharedFolders = false;
-        this.RssBookmarks = false;
-        this.RssPortal = false;
         this.Syncml = false;
         this.Tasks = false;
         this.Vcard = false;
@@ -383,18 +367,6 @@ public class UserModuleAccess implements Serializable, Cloneable {
     public void setEditPublicFolders(final boolean val) {
         this.editPublicFolders = val;
     }
-    /**
-     * Currently NOT in use!
-     */
-    public boolean getForum() {
-        return forum;
-    }
-    /**
-     * Currently NOT in use!
-     */
-    public void setForum(final boolean val) {
-        this.forum = val;
-    }
 
     public boolean getIcal() {
         return ical;
@@ -411,18 +383,6 @@ public class UserModuleAccess implements Serializable, Cloneable {
     public void setInfostore(final boolean val) {
         this.infostore = val;
     }
-    /**
-     * Currently NOT in use!
-     */
-    public boolean getPinboardWrite() {
-        return PinboardWrite;
-    }
-    /**
-     * Currently NOT in use!
-     */
-    public void setPinboardWrite(final boolean val) {
-        this.PinboardWrite = val;
-    }
 
     public boolean getReadCreateSharedFolders() {
         return readCreateSharedFolders;
@@ -430,30 +390,6 @@ public class UserModuleAccess implements Serializable, Cloneable {
 
     public void setReadCreateSharedFolders(final boolean val) {
         this.readCreateSharedFolders = val;
-    }
-    /**
-     * Currently NOT in use!
-     */
-    public boolean getRssBookmarks() {
-        return RssBookmarks;
-    }
-    /**
-     * Currently NOT in use!
-     */
-    public void setRssBookmarks(final boolean val) {
-        this.RssBookmarks = val;
-    }
-    /**
-     * Currently NOT in use!
-     */
-    public boolean getRssPortal() {
-        return RssPortal;
-    }
-    /**
-     * Currently NOT in use!
-     */
-    public void setRssPortal(final boolean val) {
-        this.RssPortal = val;
     }
 
     public boolean getSyncml() {
@@ -589,14 +525,8 @@ public class UserModuleAccess implements Serializable, Cloneable {
         result = prime * result + (GlobalAddressBookDisabled ? 1231 : 1237);
         result = prime * result + (MultipleMailAccounts ? 1231 : 1237);
         result = prime * result + (OLOX20 ? 1231 : 1237);
-        // Currently NOT in use!
-        // result = prime * result + (PinboardWrite ? 1231 : 1237);
         result = prime * result + (PublicFolderEditable ? 1231 : 1237);
         result = prime * result + (Publication ? 1231 : 1237);
-        // Currently NOT in use!
-        //result = prime * result + (RssBookmarks ? 1231 : 1237);
-        // Currently NOT in use!
-        // result = prime * result + (RssPortal ? 1231 : 1237);
         result = prime * result + (Subscription ? 1231 : 1237);
         result = prime * result + (Syncml ? 1231 : 1237);
         result = prime * result + (Tasks ? 1231 : 1237);
@@ -610,8 +540,6 @@ public class UserModuleAccess implements Serializable, Cloneable {
         result = prime * result + (delegateTask ? 1231 : 1237);
         result = prime * result + (deniedPortal ? 1231 : 1237);
         result = prime * result + (editPublicFolders ? 1231 : 1237);
-        // Currently NOT in use!
-        // result = prime * result + (forum ? 1231 : 1237);
         result = prime * result + (ical ? 1231 : 1237);
         result = prime * result + (infostore ? 1231 : 1237);
         result = prime * result + (readCreateSharedFolders ? 1231 : 1237);
@@ -654,33 +582,12 @@ public class UserModuleAccess implements Serializable, Cloneable {
         if (OLOX20 != other.OLOX20) {
             return false;
         }
-        // Currently NOT in use!
-        /*-
-         *
-        if (PinboardWrite != other.PinboardWrite) {
-            return false;
-        }
-        */
         if (PublicFolderEditable != other.PublicFolderEditable) {
             return false;
         }
         if (Publication != other.Publication) {
             return false;
         }
-        // Currently NOT in use!
-        /*-
-         *
-        if (RssBookmarks != other.RssBookmarks) {
-            return false;
-        }
-        */
-        // Currently NOT in use!
-        /*-
-         *
-        if (RssPortal != other.RssPortal) {
-            return false;
-        }
-        */
         if (Subscription != other.Subscription) {
             return false;
         }
@@ -720,13 +627,6 @@ public class UserModuleAccess implements Serializable, Cloneable {
         if (editPublicFolders != other.editPublicFolders) {
             return false;
         }
-        // Currently NOT in use!
-        /*-
-         *
-        if (forum != other.forum) {
-            return false;
-        }
-        */
         if (ical != other.ical) {
             return false;
         }
@@ -806,12 +706,6 @@ public class UserModuleAccess implements Serializable, Cloneable {
             disabled.setEditResource(true);
         }
 
-        if (forum) {
-            enabled.setForum(true);
-        } else {
-            disabled.setForum(true);
-        }
-
         if (GlobalAddressBookDisabled) {
             enabled.setGlobalAddressBookDisabled(true);
         } else {
@@ -842,12 +736,6 @@ public class UserModuleAccess implements Serializable, Cloneable {
             disabled.setOLOX20(true);
         }
 
-        if (PinboardWrite) {
-            enabled.setPinboardWrite(true);
-        } else {
-            disabled.setPinboardWrite(true);
-        }
-
         if (Publication) {
             enabled.setPublication(true);
         } else {
@@ -864,18 +752,6 @@ public class UserModuleAccess implements Serializable, Cloneable {
             enabled.setReadCreateSharedFolders(true);
         } else {
             disabled.setReadCreateSharedFolders(true);
-        }
-
-        if (RssBookmarks) {
-            enabled.setRssBookmarks(true);
-        } else {
-            disabled.setRssBookmarks(true);
-        }
-
-        if (RssPortal) {
-            enabled.setRssPortal(true);
-        } else {
-            disabled.setRssPortal(true);
         }
 
         if (Subscription) {
