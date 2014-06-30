@@ -82,11 +82,11 @@ public class Constants {
 
     final static String QUERY_LAST_YEAR = "last_year";
 
-    static final List<String> SENDER_FIELDS = asList(FIELD_FROM);
+    static final List<String> FROM_FIELDS = asList(FIELD_FROM);
 
-    static final List<String> RECIPIENT_FIELDS = Arrays.asList(new String[] { FIELD_TO, FIELD_CC });
+    static final List<String> TO_FIELDS = Arrays.asList(new String[] { FIELD_TO, FIELD_CC });
 
-    static final List<String> SENDER_AND_RECIPIENT_FIELDS = Arrays.asList(new String[] { FIELD_FROM, FIELD_TO, FIELD_CC });
+    static final List<String> FROM_AND_TO_FIELDS = Arrays.asList(new String[] { FIELD_FROM, FIELD_TO, FIELD_CC });
 
     static final List<String> FOLDERS_FIELDS = Arrays.asList(new String[] { FIELD_FOLDER });
 

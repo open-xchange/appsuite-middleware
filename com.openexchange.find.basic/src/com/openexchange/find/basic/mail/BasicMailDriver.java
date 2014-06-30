@@ -59,20 +59,20 @@ import static com.openexchange.find.basic.mail.Constants.FIELD_TO;
 import static com.openexchange.find.basic.mail.Constants.QUERY_LAST_MONTH;
 import static com.openexchange.find.basic.mail.Constants.QUERY_LAST_WEEK;
 import static com.openexchange.find.basic.mail.Constants.QUERY_LAST_YEAR;
-import static com.openexchange.find.basic.mail.Constants.RECIPIENT_FIELDS;
-import static com.openexchange.find.basic.mail.Constants.SENDER_AND_RECIPIENT_FIELDS;
-import static com.openexchange.find.basic.mail.Constants.SENDER_FIELDS;
+import static com.openexchange.find.basic.mail.Constants.TO_FIELDS;
+import static com.openexchange.find.basic.mail.Constants.FROM_AND_TO_FIELDS;
+import static com.openexchange.find.basic.mail.Constants.FROM_FIELDS;
 import static com.openexchange.find.common.CommonFacetType.GLOBAL;
 import static com.openexchange.find.facet.Facets.newSimpleBuilder;
 import static com.openexchange.find.mail.MailFacetType.CONTACTS;
 import static com.openexchange.find.mail.MailFacetType.MAIL_TEXT;
 import static com.openexchange.find.mail.MailFacetType.SUBJECT;
 import static com.openexchange.find.mail.MailFacetType.TIME;
+import static com.openexchange.find.mail.MailStrings.FACET_FROM;
+import static com.openexchange.find.mail.MailStrings.FACET_FROM_AND_TO;
 import static com.openexchange.find.mail.MailStrings.FACET_MAIL_TEXT;
-import static com.openexchange.find.mail.MailStrings.FACET_RECIPIENT;
-import static com.openexchange.find.mail.MailStrings.FACET_SENDER;
-import static com.openexchange.find.mail.MailStrings.FACET_SENDER_AND_RECIPIENT;
 import static com.openexchange.find.mail.MailStrings.FACET_SUBJECT;
+import static com.openexchange.find.mail.MailStrings.FACET_TO;
 import static com.openexchange.find.mail.MailStrings.LAST_MONTH;
 import static com.openexchange.find.mail.MailStrings.LAST_WEEK;
 import static com.openexchange.find.mail.MailStrings.LAST_YEAR;
@@ -333,9 +333,9 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
     private static FacetValue buildContactValue(String valueId, List<String> queries, DisplayItem item, ServerSession session) {
         return FacetValue.newBuilder(valueId)
             .withDisplayItem(item)
-            .addOption(Option.newInstance("all", FACET_SENDER_AND_RECIPIENT, Filter.of(SENDER_AND_RECIPIENT_FIELDS, queries)))
-            .addOption(Option.newInstance("sender", FACET_SENDER, Filter.of(SENDER_FIELDS, queries)))
-            .addOption(Option.newInstance("recipient", FACET_RECIPIENT, Filter.of(RECIPIENT_FIELDS, queries)))
+            .addOption(Option.newInstance("from", FACET_FROM, Filter.of(FROM_FIELDS, queries)))
+            .addOption(Option.newInstance("to", FACET_TO, Filter.of(TO_FIELDS, queries)))
+            .addOption(Option.newInstance("all", FACET_FROM_AND_TO, Filter.of(FROM_AND_TO_FIELDS, queries)))
             .build();
     }
 

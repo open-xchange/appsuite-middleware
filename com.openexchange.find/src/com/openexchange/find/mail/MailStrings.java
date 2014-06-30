@@ -76,14 +76,14 @@ public class MailStrings implements LocalizableStrings {
     // The 'user input' part is always prepended, please heed this in translations.
     public static final String FACET_MAIL_TEXT = "in mail text";
 
-    // Search in senders and recipients.
-    public static final String FACET_SENDER_AND_RECIPIENT = "Sender/Recipient";
+    // Search for mails sent from or to ...
+    public static final String FACET_FROM_AND_TO = "From/To";
 
-    // Search in for sender.
-    public static final String FACET_SENDER = "Sender";
+    // Search for mails sent from ...
+    public static final String FACET_FROM = "From";
 
-    // Search in for recipient.
-    public static final String FACET_RECIPIENT = "Recipient";
+    // Search for mails sent to ...
+    public static final String FACET_TO = "To";
 
     // Search criteria time
     public static final String FACET_TIME = "Time";

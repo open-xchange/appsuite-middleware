@@ -91,35 +91,47 @@ public class ContactDisplayItem extends DefaultDisplayItem {
     }
 
     private static String extractDefaultValue(Contact contact) {
-        String defaultValue = contact.getDisplayName();
-        if (Strings.isEmpty(defaultValue)) {
+        StringBuilder sb = new StringBuilder(64);
+        String displayName = contact.getDisplayName();
+        if (Strings.isEmpty(displayName)) {
             String surName = contact.getSurName();
             String givenName = contact.getGivenName();
             if (Strings.isEmpty(surName)) {
                 if (!Strings.isEmpty(givenName)) {
-                    defaultValue = givenName;
+                    sb.append(givenName);
                 }
             } else {
                 if (Strings.isEmpty(givenName)) {
-                    defaultValue = surName;
+                    sb.append(surName);
                 } else {
-                    defaultValue = surName + ", " + givenName;
+                    sb.append(surName).append(", ").append(givenName);
                 }
             }
-        }
-        if (Strings.isEmpty(defaultValue)) {
-            defaultValue = contact.getEmail1();
-        }
-        if (Strings.isEmpty(defaultValue)) {
-            defaultValue = contact.getEmail2();
-        }
-        if (Strings.isEmpty(defaultValue)) {
-            defaultValue = contact.getEmail3();
-        }
-        if (defaultValue == null) {
-            defaultValue = "";
+        } else {
+            sb.append(displayName);
         }
 
-        return defaultValue;
+        String primaryAddress = extractPrimaryMailAddress(contact);
+        if (primaryAddress != null) {
+            if (sb.length() == 0) {
+                sb.append(primaryAddress);
+            } else {
+                sb.append(" (").append(primaryAddress).append(')');
+            }
+        }
+
+        return sb.toString();
+    }
+
+    private static String extractPrimaryMailAddress(Contact contact) {
+        String address = contact.getEmail1();
+        if (Strings.isEmpty(address)) {
+            address = contact.getEmail2();
+        }
+        if (Strings.isEmpty(address)) {
+            address = contact.getEmail3();
+        }
+
+        return address;
     }
 }
