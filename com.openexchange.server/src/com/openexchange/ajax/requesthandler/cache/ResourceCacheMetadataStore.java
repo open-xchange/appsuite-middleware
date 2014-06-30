@@ -58,12 +58,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.filestore.FilestoreLocationUpdater;
 import com.openexchange.preview.PreviewExceptionCodes;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -76,7 +74,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ResourceCacheMetadataStore implements FilestoreLocationUpdater {
+public class ResourceCacheMetadataStore {
 
     private static final ResourceCacheMetadataStore INSTANCE = new ResourceCacheMetadataStore();
 
@@ -796,18 +794,6 @@ public class ResourceCacheMetadataStore implements FilestoreLocationUpdater {
         }
 
         return dbService;
-    }
-
-    @Override
-    public void updateFilestoreLocation(Map<String, String> fileMapping, int ctxId, Connection con) throws SQLException {
-        PreparedStatement stmt = con.prepareStatement("UPDATE preview SET refId = ? WHERE cid = ? AND refId = ?");
-        for (String old : fileMapping.keySet()) {
-            stmt.setString(1, fileMapping.get(old));
-            stmt.setInt(2, ctxId);
-            stmt.setString(3, old);
-            stmt.addBatch();
-        }
-        stmt.executeBatch();
     }
 
 }

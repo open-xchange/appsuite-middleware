@@ -61,7 +61,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import com.openexchange.database.provider.DBProvider;
@@ -70,7 +69,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.filestore.FilestoreLocationUpdater;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.infostore.DocumentMetadata;
@@ -93,7 +91,7 @@ import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 
-public class DatabaseImpl extends DBService implements FilestoreLocationUpdater {
+public class DatabaseImpl extends DBService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DatabaseImpl.class);
 
@@ -1671,15 +1669,4 @@ public class DatabaseImpl extends DBService implements FilestoreLocationUpdater 
         }
     }
 
-    @Override
-    public void updateFilestoreLocation(Map<String, String> fileMapping, int ctxId, Connection con) throws SQLException {
-        PreparedStatement stmt = con.prepareStatement("UPDATE infostore_document SET file_store_location = ? WHERE cid = ? AND file_store_location = ?");
-        for (String old : fileMapping.keySet()) {
-            stmt.setString(1, fileMapping.get(old));
-            stmt.setInt(2, ctxId);
-            stmt.setString(3, old);
-            stmt.addBatch();
-        }
-        stmt.executeBatch();
-    }
 }

@@ -49,17 +49,12 @@
 
 package com.openexchange.groupware.attach.impl;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 import com.google.common.base.Strings;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
-import com.openexchange.groupware.filestore.FilestoreLocationUpdater;
 
-public class AttachmentQueryCatalog implements FilestoreLocationUpdater {
+public class AttachmentQueryCatalog {
 
     private static final AttachmentField[] DB_FIELDS = {
         AttachmentField.CREATED_BY_LITERAL,
@@ -171,15 +166,4 @@ public class AttachmentQueryCatalog implements FilestoreLocationUpdater {
         return SELECT_NEWEST_CREATION_DATE;
     }
 
-    @Override
-    public void updateFilestoreLocation(Map<String, String> fileMapping, int ctxId, Connection con) throws SQLException {
-        PreparedStatement stmt = con.prepareStatement("UPDATE prg_attachment SET file_id = ? WHERE cid = ? AND file_id = ?");
-        for (String old : fileMapping.keySet()) {
-            stmt.setString(1, fileMapping.get(old));
-            stmt.setInt(2, ctxId);
-            stmt.setString(3, old);
-            stmt.addBatch();
-        }
-        stmt.executeBatch();
-    }
 }

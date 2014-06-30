@@ -78,7 +78,6 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.filestore.FilestoreLocationUpdater;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.mail.mime.ContentDisposition;
@@ -102,7 +101,7 @@ import com.openexchange.tools.sql.DBUtils;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class RdbSnippetManagement implements SnippetManagement, FilestoreLocationUpdater {
+public final class RdbSnippetManagement implements SnippetManagement {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbSnippetManagement.class);
 
@@ -903,18 +902,6 @@ public final class RdbSnippetManagement implements SnippetManagement, FilestoreL
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
-    }
-
-    @Override
-    public void updateFilestoreLocation(Map<String, String> fileMapping, int ctxId, Connection con) throws SQLException {
-        PreparedStatement stmt = con.prepareStatement("UPDATE snippet SET refId = ? WHERE cid = ? AND refId = ?");
-        for (String old : fileMapping.keySet()) {
-            stmt.setString(1, fileMapping.get(old));
-            stmt.setInt(2, ctxId);
-            stmt.setString(3, old);
-            stmt.addBatch();
-        }
-        stmt.executeBatch();
     }
 
 }
