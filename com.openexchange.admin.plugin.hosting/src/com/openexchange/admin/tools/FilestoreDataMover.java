@@ -47,28 +47,40 @@
  *
  */
 
-
 package com.openexchange.admin.tools;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
-
 import org.apache.commons.io.FileUtils;
-
+import com.openexchange.admin.osgi.FilestoreLocationUpdaterRegistry;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.exceptions.ProgrammErrorException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
 import com.openexchange.admin.tools.ShellExecutor.ArrayOutput;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheService;
+import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.filestore.FilestoreLocationUpdater;
+import com.openexchange.tools.file.FileStorage;
 
 /**
- *
  * @author d7
- *
  */
 public class FilestoreDataMover implements Callable<Void> {
 
@@ -82,9 +94,10 @@ public class FilestoreDataMover implements Callable<Void> {
 
     private Filestore dstStore = null;
 
+    private boolean rsyncEnabled = false;
+
     /**
      * @throws IOException
-     *
      */
     public FilestoreDataMover(final String src, final String dst, final Context ctx, final Filestore dstStore) throws IOException {
         this.src = src;
@@ -93,8 +106,15 @@ public class FilestoreDataMover implements Callable<Void> {
         this.dstStore = dstStore;
     }
 
+    public FilestoreDataMover(final String src, final String dst, final Context ctx, final Filestore dstStore, boolean rsyncEnabled) throws IOException {
+        this.src = src;
+        this.dst = dst;
+        this.ctx = ctx;
+        this.dstStore = dstStore;
+        this.rsyncEnabled = rsyncEnabled;
+    }
+
     /**
-     *
      * get Size as long (bytes) from the source dir
      *
      * @param source
@@ -105,13 +125,11 @@ public class FilestoreDataMover implements Callable<Void> {
     }
 
     /**
-     *
      * get the list of files to copy from the source dir
      *
      * @param source
      * @return
      */
-    @SuppressWarnings("unchecked")
     public ArrayList<String> getFileList(final String source) {
         final Collection<File> listFiles = FileUtils.listFiles(new File(source), null, true);
         final ArrayList<String> retval = new ArrayList<String>();
@@ -130,18 +148,77 @@ public class FilestoreDataMover implements Callable<Void> {
      * @throws ProgrammErrorException
      */
     public void copy() throws StorageException, IOException, InterruptedException, ProgrammErrorException {
-        if (new File(this.src).exists()) {
-            final ArrayOutput output = new ShellExecutor().executeprocargs(new String[] { "rsync", "-a", this.src, this.dst + '/'});
-            if (0 != output.exitstatus) {
-                throw new ProgrammErrorException("Wrong exit status. Exit status was: " + output.exitstatus + " Stderr was: \n" + output.errOutput.toString() + '\n' + "and stdout was: \n" + output.stdOutput.toString());
-            }
-            FileUtils.deleteDirectory(new File(this.src));
-        }
-
         final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-        ctx.setFilestoreId(dstStore.getId());
-        oxcox.changeStorageData(ctx);
-        oxcox.enable(ctx);
+        if (rsyncEnabled) {
+            if (new File(this.src).exists()) {
+                final ArrayOutput output = new ShellExecutor().executeprocargs(new String[] { "rsync", "-a", this.src, this.dst + '/' });
+                if (0 != output.exitstatus) {
+                    throw new ProgrammErrorException(
+                        "Wrong exit status. Exit status was: " + output.exitstatus + " Stderr was: \n" + output.errOutput.toString() + '\n' + "and stdout was: \n" + output.stdOutput.toString());
+                }
+                FileUtils.deleteDirectory(new File(this.src));
+            }
+            ctx.setFilestoreId(dstStore.getId());
+            oxcox.changeStorageData(ctx);
+            oxcox.enable(ctx);
+        } else {
+            FileStorage srcStorage = null;
+            FileStorage dstStorage = null;
+            Set<String> srcFiles = null;
+            Map<String, String> fileMapping = null;
+            try {
+                if (!src.endsWith("/")) {
+                    src = src + "/";
+                }
+                StringBuilder dstUri = new StringBuilder();
+                dstUri.append(dst).append("/").append(ctx.getId()).append("_ctx_store/");
+                srcStorage = FileStorage.getInstance(new URI(src));
+                dstStorage = FileStorage.getInstance(new URI(dstUri.toString()));
+                srcFiles = srcStorage.getFileList();
+                fileMapping = new HashMap<String, String>(srcFiles.size());
+                for (String file : srcFiles) {
+                    InputStream is = srcStorage.getFile(file);
+                    String newFile = dstStorage.saveNewFile(is);
+                    if (null != newFile) {
+                        fileMapping.put(file, newFile);
+                        log.info("Copied file " + file + " to " + newFile);
+                    }
+                }
+            } catch (OXException e) {
+                throw new StorageException(e);
+            } catch (URISyntaxException e) {
+                throw new StorageException(e);
+            }
+
+            Connection con = null;
+            try {
+                con = Database.getNoTimeout(ctx.getId(), true);
+                List<FilestoreLocationUpdater> services = FilestoreLocationUpdaterRegistry.getInstance().getServices();
+                for (FilestoreLocationUpdater updater : services) {
+                    updater.updateFilestoreLocation(fileMapping, ctx.getId(), con);
+                }
+            } catch (OXException e) {
+                throw new StorageException(e);
+            } catch (SQLException e) {
+                throw new StorageException(e);
+            } finally {
+                Database.backNoTimeout(ctx.getId(), true, con);
+            }
+
+            try {
+                if (null != srcStorage && null != srcFiles) {
+                    srcStorage.deleteFiles(srcFiles.toArray(new String[srcFiles.size()]));
+                }
+                ctx.setFilestoreId(dstStore.getId());
+                oxcox.changeStorageData(ctx);
+                final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+                Cache cache = cacheService.getCache("Filestore");
+                cache.clear();
+                oxcox.enable(ctx);
+            } catch (OXException e) {
+                throw new StorageException(e);
+            }
+        }
     }
 
     /**
@@ -151,7 +228,6 @@ public class FilestoreDataMover implements Callable<Void> {
      * @throws InterruptedException
      * @throws IOException
      * @throws ProgrammErrorException
-     *
      */
     @Override
     public Void call() throws StorageException, IOException, InterruptedException, ProgrammErrorException {
@@ -174,4 +250,5 @@ public class FilestoreDataMover implements Callable<Void> {
         }
         return null;
     }
+
 }

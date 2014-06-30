@@ -60,11 +60,13 @@ import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.groupware.filestore.FilestoreLocationUpdater;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.snippet.SnippetService;
+import com.openexchange.snippet.rdb.RdbSnippetFilestoreLocationUpdater;
 import com.openexchange.snippet.rdb.RdbSnippetService;
 import com.openexchange.snippet.rdb.Services;
 import com.openexchange.snippet.rdb.groupware.RdbSnippetCreateTableTask;
@@ -104,6 +106,12 @@ public class RdbSnippetActivator extends HousekeepingActivator {
             registerService(UpdateTaskProviderService.class.getName(), new DefaultUpdateTaskProviderService(createTableTask));
             registerService(CreateTableService.class, createTableTask);
             registerService(DeleteListener.class, new RdbSnippetDeleteListener());
+
+            /*
+             * Register filestore location updater for move context filestore
+             */
+            registerService(FilestoreLocationUpdater.class, new RdbSnippetFilestoreLocationUpdater());
+
             /*
              * Register
              */
@@ -119,6 +127,7 @@ public class RdbSnippetActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         super.stopBundle();
+        unregisterServices();
         Services.setServiceLookup(null);
     }
 }

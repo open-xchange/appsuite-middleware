@@ -47,47 +47,43 @@
  *
  */
 
-package com.openexchange.groupware.attach.osgi;
+package com.openexchange.groupware.attach;
 
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.groupware.attach.AttachmentFilestoreLocationUpdater;
-import com.openexchange.groupware.attach.json.AttachmentActionFactory;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Map;
 import com.openexchange.groupware.filestore.FilestoreLocationUpdater;
-import com.openexchange.quota.QuotaService;
-import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
+
 
 /**
- * {@link AttachmentActivator}
+ * {@link AttachmentFilestoreLocationUpdater}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since 7.6.0
  */
-public final class AttachmentActivator extends AJAXModuleActivator {
+public class AttachmentFilestoreLocationUpdater implements FilestoreLocationUpdater {
 
-    public AttachmentActivator() {
+    /**
+     * Initializes a new {@link AttachmentFilestoreLocationUpdater}.
+     */
+    public AttachmentFilestoreLocationUpdater() {
         super();
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.groupware.filestore.FilestoreLocationUpdater#updateFilestoreLocation(java.util.Map, int, java.sql.Connection)
+     */
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[0];
+    public void updateFilestoreLocation(Map<String, String> fileMapping, int ctxId, Connection con) throws SQLException {
+        PreparedStatement stmt = con.prepareStatement("UPDATE prg_attachment SET file_id = ? WHERE cid = ? AND file_id = ?");
+        for (String old : fileMapping.keySet()) {
+            stmt.setString(1, fileMapping.get(old));
+            stmt.setInt(2, ctxId);
+            stmt.setString(3, old);
+            stmt.addBatch();
+        }
+        stmt.executeBatch();
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        track(QuotaService.class, new QuotaServiceCustomizer(context));
-        openTrackers();
-
-        /*
-         * register attachment filestore location updater for move context filestore
-         */
-        registerService(FilestoreLocationUpdater.class, new AttachmentFilestoreLocationUpdater());
-
-        registerModule(new AttachmentActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "attachment");
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        unregisterServices();
-        cleanUp();
-    }
 }

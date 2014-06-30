@@ -323,6 +323,9 @@ public class S3FileStorageFactory implements FileStorageFactoryCandidate {
         while (0 < path.length() && '/' == path.charAt(0)) {
             path = path.substring(1);
         }
+        if (path.endsWith("/")) {
+            path = path.substring(0, path.length() - 1);
+        }
         Matcher matcher = CTX_STORE_PATTERN.matcher(path);
         if (false == matcher.matches()) {
             throw new IllegalArgumentException("Path does not match the expected pattern \"\\d+_ctx_store\"");

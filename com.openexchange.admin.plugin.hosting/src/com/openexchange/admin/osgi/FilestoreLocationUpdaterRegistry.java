@@ -47,47 +47,44 @@
  *
  */
 
-package com.openexchange.groupware.attach.osgi;
+package com.openexchange.admin.osgi;
 
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.groupware.attach.AttachmentFilestoreLocationUpdater;
-import com.openexchange.groupware.attach.json.AttachmentActionFactory;
+import java.util.ArrayList;
+import java.util.List;
 import com.openexchange.groupware.filestore.FilestoreLocationUpdater;
-import com.openexchange.quota.QuotaService;
-import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
+import com.openexchange.osgi.ServiceRegistry;
+
 
 /**
- * {@link AttachmentActivator}
+ * {@link FilestoreLocationUpdaterRegistry}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since 7.6.0
  */
-public final class AttachmentActivator extends AJAXModuleActivator {
+public class FilestoreLocationUpdaterRegistry extends ServiceRegistry {
 
-    public AttachmentActivator() {
-        super();
+    private static final FilestoreLocationUpdaterRegistry INSTANCE = new FilestoreLocationUpdaterRegistry();
+
+    private final List<FilestoreLocationUpdater> services;
+
+    /**
+     * Initializes a new {@link FilestoreLocationUpdaterRegistry}.
+     */
+    private FilestoreLocationUpdaterRegistry() {
+        super(4);
+        this.services = new ArrayList<FilestoreLocationUpdater>(4);
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[0];
+    public static FilestoreLocationUpdaterRegistry getInstance() {
+        return INSTANCE;
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        track(QuotaService.class, new QuotaServiceCustomizer(context));
-        openTrackers();
-
-        /*
-         * register attachment filestore location updater for move context filestore
-         */
-        registerService(FilestoreLocationUpdater.class, new AttachmentFilestoreLocationUpdater());
-
-        registerModule(new AttachmentActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "attachment");
+    public void addService(FilestoreLocationUpdater service) {
+        services.add(service);
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        unregisterServices();
-        cleanUp();
+    public List<FilestoreLocationUpdater> getServices() {
+        return services;
     }
+
 }

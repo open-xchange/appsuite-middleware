@@ -47,47 +47,47 @@
  *
  */
 
-package com.openexchange.groupware.attach.osgi;
+package com.openexchange.admin.osgi;
 
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.groupware.attach.AttachmentFilestoreLocationUpdater;
-import com.openexchange.groupware.attach.json.AttachmentActionFactory;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.groupware.filestore.FilestoreLocationUpdater;
-import com.openexchange.quota.QuotaService;
-import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
+
 
 /**
- * {@link AttachmentActivator}
+ * {@link FilestoreLocationUpdaterCustomizer}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since 7.6.0
  */
-public final class AttachmentActivator extends AJAXModuleActivator {
+public class FilestoreLocationUpdaterCustomizer implements ServiceTrackerCustomizer<FilestoreLocationUpdater, FilestoreLocationUpdater> {
 
-    public AttachmentActivator() {
+    private final BundleContext context;
+
+    /**
+     * Initializes a new {@link FilestoreLocationUpdaterCustomizer}.
+     */
+    public FilestoreLocationUpdaterCustomizer(BundleContext context) {
         super();
+        this.context = context;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[0];
+    public FilestoreLocationUpdater addingService(ServiceReference<FilestoreLocationUpdater> arg0) {
+        FilestoreLocationUpdater service = context.getService(arg0);
+        FilestoreLocationUpdaterRegistry.getInstance().addService(service);
+        return service;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        track(QuotaService.class, new QuotaServiceCustomizer(context));
-        openTrackers();
-
-        /*
-         * register attachment filestore location updater for move context filestore
-         */
-        registerService(FilestoreLocationUpdater.class, new AttachmentFilestoreLocationUpdater());
-
-        registerModule(new AttachmentActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "attachment");
+    public void modifiedService(ServiceReference<FilestoreLocationUpdater> arg0, FilestoreLocationUpdater arg1) {
+        // nothing to do
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        unregisterServices();
-        cleanUp();
+    public void removedService(ServiceReference<FilestoreLocationUpdater> arg0, FilestoreLocationUpdater arg1) {
+        context.ungetService(arg0);
     }
+
 }

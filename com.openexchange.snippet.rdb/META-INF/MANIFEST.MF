@@ -6,7 +6,8 @@ Bundle-Version: 7.6.1
 Bundle-Activator: com.openexchange.snippet.rdb.osgi.RdbSnippetActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.cache,
+Import-Package: com.openexchange.admin.tools,
+ com.openexchange.cache,
  com.openexchange.caching,
  com.openexchange.config.cascade,
  com.openexchange.context,
