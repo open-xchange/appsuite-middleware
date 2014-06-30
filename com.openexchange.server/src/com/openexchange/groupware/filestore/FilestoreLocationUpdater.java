@@ -47,47 +47,21 @@
  *
  */
 
-package com.openexchange.groupware.attach.osgi;
+package com.openexchange.groupware.filestore;
 
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.groupware.attach.AttachmentFilestoreLocationUpdater;
-import com.openexchange.groupware.attach.json.AttachmentActionFactory;
-import com.openexchange.groupware.filestore.FilestoreLocationUpdater;
-import com.openexchange.quota.QuotaService;
-import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Map;
+
 
 /**
- * {@link AttachmentActivator}
+ * {@link FilestoreLocationUpdater}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since 7.6.0
  */
-public final class AttachmentActivator extends AJAXModuleActivator {
+public interface FilestoreLocationUpdater {
 
-    public AttachmentActivator() {
-        super();
-    }
+    public void updateFilestoreLocation(Map<String, String> fileMapping, int ctxId, Connection con) throws SQLException;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[0];
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        track(QuotaService.class, new QuotaServiceCustomizer(context));
-        openTrackers();
-
-        /*
-         * register attachment filestore location updater for move context filestore
-         */
-        registerService(FilestoreLocationUpdater.class, new AttachmentFilestoreLocationUpdater());
-
-        registerModule(new AttachmentActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "attachment");
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        unregisterServices();
-        cleanUp();
-    }
 }

@@ -69,9 +69,11 @@ import com.openexchange.database.CreateTableService;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
+import com.openexchange.groupware.filestore.FilestoreLocationUpdater;
 import com.openexchange.groupware.impl.FolderLockManagerImpl;
 import com.openexchange.groupware.infostore.InfostoreAvailable;
 import com.openexchange.groupware.infostore.InfostoreFacades;
+import com.openexchange.groupware.infostore.database.InfostoreFilestoreLocationUpdater;
 import com.openexchange.groupware.infostore.database.impl.InfostoreFilenameReservationsCreateTableTask;
 import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
 import com.openexchange.groupware.infostore.webdav.LockCleaner;
@@ -116,6 +118,12 @@ public class InfostoreActivator implements BundleActivator {
 //            registrations.offer(
             registrations.offer(context.registerService(EventHandler.class, lockCleaner, serviceProperties));
             registrations.offer(context.registerService(EventHandler.class, propertyCleaner, serviceProperties));
+
+            /*
+             * Register infostore filestore location updater for move context filestore
+             */
+            registrations.offer(context.registerService(FilestoreLocationUpdater.class, new InfostoreFilestoreLocationUpdater(), null));
+
             this.registrations = registrations;
             /*
              * Service trackers

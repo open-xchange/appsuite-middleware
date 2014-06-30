@@ -1033,6 +1033,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             retval = oxcox.getData(ctx);
 
             final int srcStore_id = retval.getFilestoreId().intValue();
+            ctx.setFilestoreId(srcStore_id);
             if (srcStore_id == dst_filestore.getId().intValue()) {
                 throw new OXContextException("Src and dst store id is the same: " + dst_filestore);
             }
@@ -1051,9 +1052,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 final Filestore srcfilestore = oxu.getFilestore(srcStore_id);
                 URI sourceURI = new URI(srcfilestore.getUrl());
                 URI destURI = new URI(destFilestore.getUrl());
-                if (false == "file".equalsIgnoreCase(sourceURI.getScheme()) || false == "file".equalsIgnoreCase(destURI.getScheme())) {
-                    throw new StorageException("Only \"file\" filestores are currently supported.");
-                }
                 final StringBuilder src = builduppath(ctxdir, sourceURI);
                 final String dst = destURI.getPath();
                 final OXContextException contextException = new OXContextException("Unable to move filestore");
@@ -1064,7 +1062,13 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                     LOGGER.error("dst is null");
                     throw contextException;
                 }
-                final FilestoreDataMover fsdm = new FilestoreDataMover(src.toString(), dst.toString(), ctx, dst_filestore);
+                FilestoreDataMover fsdm = null;
+                boolean rsyncEnabled = "file".equalsIgnoreCase(sourceURI.getScheme()) && "file".equalsIgnoreCase(destURI.getScheme());
+                if (rsyncEnabled) {
+                    fsdm = new FilestoreDataMover(src.toString(), dst.toString(), ctx, dst_filestore, true);
+                } else {
+                    fsdm = new FilestoreDataMover(sourceURI.toString() + "/" + ctxdir, destURI.toString(), ctx, dst_filestore, false);
+                }
                 return TaskManager.getInstance().addJob(fsdm, "movefilestore", "move context " + ctx.getIdAsString() + " to filestore " + dst_filestore.getId(), ctx.getId());
             } catch (final StorageException e) {
                 throw new OXContextException(e);
@@ -1078,9 +1082,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         } catch (final NoSuchFilestoreException e) {
             LOGGER.error("", e);
             throw e;
-        /*} catch (final NoSuchReasonException e) {
-            log.error("", e);
-            throw e;*/
         } catch (final OXContextException e) {
             LOGGER.error("", e);
             throw e;
@@ -1149,7 +1150,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
     private StringBuilder builduppath(final String ctxdir, final URI uri) {
         final StringBuilder src = new StringBuilder(uri.getPath());
-        if (src.charAt(src.length()-1) != '/') {
+        if (src.length() == 0 || src.charAt(src.length()-1) != '/') {
             src.append('/');
         }
         src.append(ctxdir);
