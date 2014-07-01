@@ -70,6 +70,7 @@ import com.openexchange.ajax.user.actions.GetResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.Module;
 import com.openexchange.find.common.CommonFacetType;
+import com.openexchange.find.common.ContactDisplayItem;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.DefaultFacet;
 import com.openexchange.find.facet.Facet;
@@ -441,7 +442,7 @@ public class BasicMailTest extends AbstractFindTest {
     private void findContactsInValues(List<Contact> contacts, List<FacetValue> values) {
         for (Contact contact : contacts) {
             boolean found = false;
-            String contactDN = contact.getDisplayName();
+            String contactDN = ContactDisplayItem.extractDefaultValue(contact);
             for (FacetValue value : values) {
                 String valueDN = value.getDisplayItem().getDefaultValue();
                 if (contactDN.equals(valueDN)) {
@@ -518,7 +519,7 @@ public class BasicMailTest extends AbstractFindTest {
         GetRequest getRequest = new GetRequest(client.getValues().getUserId(), client.getValues().getTimeZone());
         GetResponse getResponse = client.execute(getRequest);
         Contact contact = getResponse.getContact();
-        FacetValue found = findByDisplayName(facets, contact.getDisplayName());
+        FacetValue found = findByDisplayName(facets, ContactDisplayItem.extractDefaultValue(contact));
         return found;
     }
 

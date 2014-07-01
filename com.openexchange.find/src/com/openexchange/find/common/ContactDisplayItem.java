@@ -90,7 +90,7 @@ public class ContactDisplayItem extends DefaultDisplayItem {
         return "ContactDisplayItem [contact=" + contact.getDisplayName() + "(" + contact.getObjectID() + ")]";
     }
 
-    private static String extractDefaultValue(Contact contact) {
+    public static String extractDefaultValue(Contact contact) {
         StringBuilder sb = new StringBuilder(64);
         String displayName = contact.getDisplayName();
         if (Strings.isEmpty(displayName)) {
