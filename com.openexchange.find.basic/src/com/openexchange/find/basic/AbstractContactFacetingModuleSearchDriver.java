@@ -60,6 +60,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.spi.AbstractModuleSearchDriver;
 import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.groupware.contact.helpers.ContactSimilarity;
 import com.openexchange.groupware.contact.helpers.UseCountComparator;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
@@ -287,6 +288,46 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
             }
         }
         return searchObject;
+    }
+
+    /**
+     * It's possible that a client limits the number of autocomplete items to X, but
+     * X + Y items are found that denote the same person (represented through multiple
+     * different contact objects). In that case the user is never able to search for a
+     * specific contact (resp. its mail address) as it will never appear in the response
+     * list. In that case we ignore the limit parameter and send out at least all contacts
+     * that refer to the same person.
+     *
+     * @param contacts The list of contacts, must have been requested with a limit greater than
+     * the requested limit.
+     * @param limit The requested limit.
+     */
+    private static List<Contact> ensureAllDuplicatesContained(List<Contact> contacts, int limit) {
+        if (contacts.size() <= limit) {
+            return contacts;
+        }
+
+        Contact former = null;
+        int lastEqual = 0;
+        for (int i = 0; i < contacts.size(); i++) {
+            Contact contact = contacts.get(i);
+            if (former == null) {
+                former = contact;
+                continue;
+            }
+
+            if (ContactSimilarity.areSimilar(former, contact)) {
+                lastEqual = i;
+            } else {
+                break;
+            }
+        }
+
+        if (lastEqual > (limit - 1)) {
+            return contacts.subList(0, lastEqual + 1);
+        }
+
+        return contacts.subList(0, limit);
     }
 
 }
