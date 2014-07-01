@@ -52,6 +52,7 @@ package com.openexchange.contacts.json.actions;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -95,14 +96,14 @@ public class ListAction extends ContactAction {
         for (int[] objectIdAndFolderId : objectIdsAndFolderIds) {
             String folderID = Integer.toString(objectIdAndFolderId[1]);
             if (false == ids.containsKey(folderID)) {
-            	ids.put(folderID, new ArrayList<String>());
+            	ids.put(folderID, new LinkedList<String>());
             }
             ids.get(folderID).add(Integer.toString(objectIdAndFolderId[0]));
         }
         /*
          * get contacts
          */
-        List<Contact> contacts = new ArrayList<Contact>();
+        List<Contact> contacts = new LinkedList<Contact>();
         Date lastModified = new Date(0);
         ContactField[] fields = request.getFields();
         for (final Entry<String, List<String>> entry : ids.entrySet()) {

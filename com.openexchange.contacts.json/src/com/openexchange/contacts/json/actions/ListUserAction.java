@@ -49,8 +49,8 @@
 
 package com.openexchange.contacts.json.actions;
 
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contacts.json.ContactRequest;
@@ -84,7 +84,7 @@ public class ListUserAction extends ContactAction {
 
     @Override
     protected AJAXRequestResult perform(ContactRequest request) throws OXException {
-        List<Contact> contacts = new ArrayList<Contact>();
+        List<Contact> contacts = new LinkedList<Contact>();
         Date lastModified = addContacts(contacts, getContactService().getUsers(
             request.getSession(), request.getUserIds(), request.getFields()), -1);
         return new AJAXRequestResult(contacts, lastModified, "contact");
