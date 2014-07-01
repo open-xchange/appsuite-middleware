@@ -356,6 +356,25 @@ public final class Tools {
     }
 
     /**
+     * Optionally parses a date from a HTTP date header.
+     *
+     * @param str The HTTP date header value
+     * @return The parsed time or <code>-1</code>
+     */
+    public static long optHeaderDate(final String str) {
+        if (null == str) {
+            return -1L;
+        }
+        synchronized (HEADER_DATEFORMAT) {
+            try {
+                return HEADER_DATEFORMAT.parse(str).getTime();
+            } catch (ParseException e) {
+                return -1L;
+            }
+        }
+    }
+
+    /**
      * HTTP header name containing the user agent.
      */
     public static final String HEADER_AGENT = "User-Agent";
