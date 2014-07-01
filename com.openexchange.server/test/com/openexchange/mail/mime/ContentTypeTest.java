@@ -50,7 +50,6 @@
 package com.openexchange.mail.mime;
 
 import junit.framework.TestCase;
-import com.openexchange.mail.mime.utils.MimeMessageUtility;
 
 
 /**
@@ -100,7 +99,7 @@ public class ContentTypeTest extends TestCase {
     public void testMalformedHeaderValue() {
         try {
             String hdr = "=?windows-1252?q?application/pdf; name=\"blatt8.pdf\"";
-            com.openexchange.mail.mime.ContentType contentType = new com.openexchange.mail.mime.ContentType(MimeMessageUtility.decodeMultiEncodedHeader(hdr));
+            com.openexchange.mail.mime.ContentType contentType = new com.openexchange.mail.mime.ContentType(hdr);
 
             assertEquals("Unexpected primary type", "application", contentType.getPrimaryType());
             assertEquals("Unexpected subtype", "pdf", contentType.getSubType());
