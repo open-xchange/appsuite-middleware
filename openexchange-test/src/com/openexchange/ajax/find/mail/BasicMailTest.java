@@ -439,6 +439,38 @@ public class BasicMailTest extends AbstractFindTest {
         assertTrue("document found", 0 == documents.size());
     }
 
+    public void testMailAddressNotDuplicatedInDisplayName() throws Exception {
+        FolderObject contactFolder = folderManager.generatePrivateFolder(
+            "findApiMailTestFolder_" + System.currentTimeMillis(),
+            FolderObject.CONTACT,
+            client.getValues().getPrivateContactFolder(),
+            client.getValues().getUserId());
+
+        contactFolder = folderManager.insertFolderOnServer(contactFolder);
+        Contact contact = contactManager.newAction(specificContact(null, "steffen.templin@open-xchange.com", "steffen.templin@open-xchange.com", contactFolder.getObjectID()));
+        String prefix = "ste";
+        List<Facet> facets = autocomplete(prefix);
+        Facet facet = findByType(MailFacetType.CONTACTS, facets);
+        assertNotNull("Contacts facet not found", facet);
+        List<FacetValue> values = ((DefaultFacet) facet).getValues();
+        assertTrue("Missing contacts in facets", values.size() > 0);
+
+        boolean found = false;
+        for (FacetValue value : values) {
+            if (contact.getSurName().equals(value.getDisplayItem().getDefaultValue())) {
+                found = true;
+            }
+
+            int i1 = value.getDisplayItem().getDefaultValue().indexOf(contact.getEmail1());
+            int i2 = value.getDisplayItem().getDefaultValue().lastIndexOf(contact.getEmail1());
+            if (i1 >= 0 && i2 >= 0 && i1 != i2) {
+                fail("Display name contains the mail address twice!");
+            }
+        }
+
+        assertTrue("Contact not found", found);
+    }
+
     private void findContactsInValues(List<Contact> contacts, List<FacetValue> values) {
         for (Contact contact : contacts) {
             boolean found = false;
@@ -530,6 +562,22 @@ public class BasicMailTest extends AbstractFindTest {
         contact.setGivenName(givenName);
         contact.setDisplayName(contact.getGivenName() + " " + contact.getSurName());
         contact.setEmail1(randomUID() + "@example.com");
+        contact.setUid(randomUID());
+        return contact;
+    }
+
+    protected Contact specificContact(String givenName, String surName, String mailAddress, int folderId) {
+        Contact contact = new Contact();
+        contact.setParentFolderID(folderId);
+        if (surName != null) {
+            contact.setSurName(surName);
+        }
+
+        if (givenName != null) {
+            contact.setGivenName(givenName);
+        }
+
+        contact.setEmail1(mailAddress);
         contact.setUid(randomUID());
         return contact;
     }

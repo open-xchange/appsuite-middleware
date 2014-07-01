@@ -115,7 +115,7 @@ public class ContactDisplayItem extends DefaultDisplayItem {
         if (primaryAddress != null) {
             if (sb.length() == 0) {
                 sb.append(primaryAddress);
-            } else {
+            } else if (sb.indexOf(primaryAddress) < 0) {
                 sb.append(" (").append(primaryAddress).append(')');
             }
         }
