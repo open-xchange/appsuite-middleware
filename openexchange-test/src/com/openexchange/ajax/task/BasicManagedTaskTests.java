@@ -51,7 +51,6 @@ package com.openexchange.ajax.task;
 
 import static com.openexchange.groupware.calendar.TimeTools.removeMilliseconds;
 import java.util.Date;
-import junit.framework.AssertionFailedError;
 import com.openexchange.groupware.tasks.Task;
 
 /**
@@ -122,11 +121,15 @@ public class BasicManagedTaskTests extends ManagedTaskTest {
         manager.insertTaskOnServer(task);
 
         manager.deleteTaskOnServer(task);
+        boolean fail = false;
         try {
             manager.getTaskFromServer(task);
-            fail("Should fail by not finding task");
-        } catch (AssertionFailedError e) {
+            fail = true;
+        } catch (AssertionError e) {
 
+        }
+        if (fail) {
+            fail("Should fail by not finding task");
         }
     }
 
