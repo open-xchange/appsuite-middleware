@@ -87,7 +87,6 @@ case "$1" in
     ;;
 
   status)
-  status)
     status_of_proc -p /var/run/open-xchange.pid $STARTSCRIPT "$NAME"
     exit $?
     ;;
