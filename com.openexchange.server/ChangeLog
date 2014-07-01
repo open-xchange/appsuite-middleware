@@ -1,3 +1,20 @@
+* 2014-06-11 - thorben.betten@open-xchange.com
+
+ - Fix for bug 33061: Ignore alternative HTML part nested inside multipart/related part if text-only is user's preference
+
+* 2014-06-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32974: Cancel running IMAP-IDLE listener in case context has been deleted in the meantime +
+                      Improved handling in ReplicationMonitor class to avoid default retry mechanism in case a "DBP-0021" (Transaction counter is missing) occurs
+
+* 2014-06-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32899: Let 'Capability' class implement java.io.Serializable marker interface
+
+* 2014-06-03 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 32865: Don't anticipate upcoming ACKNOWLEDGE for the new version of server-side executed EDIT action 
+
 * 2014-06-03 - marcus.klein@open-xchange.com
 
  - Fix for bug 32743: Property was added in a patch and according post installation scripting should be contained in a patch, too.
@@ -32,9 +49,21 @@
  - Fix for bug 30843: Introduced properties for IMAP, POP3, and SMTP to specify the SSL cipher suites that will be enabled for SSL connections
  - Fix for bug 32466: Ignore transport credentials on primary mail account update
  
+* 2014-05-07 - martin.schneider@open-xchange.com
+
+ - Fix for bug 32263: Set transport password instead of IMAP password for account update
+
 * 2014-05-07 - ioannis.chouklis@open-xchange.com
 
  -Fix for bug 31253: Escape the 'OK' literal at the beginning of each newline with '_OK_'
+
+* 2014-05-05 - lars.hoogestraat@open-xchange.com
+
+ - Fix for bug 32250: Changed yahoo api access to https further added error message on receiving invalid response
+
+* 2014-05-05 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 33066: Fall back to an empty JSON object on encountered exceptions during deserialization  
 
 * 2014-05-05 - thorben.betten@open-xchange.com
 

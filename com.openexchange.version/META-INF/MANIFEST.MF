@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.openexchange.version
 Bundle-Version: 7.4.2
 OXVersion: 7.4.2
 OXBuildDate: master-7.4.2
-OXRevision: 26
+OXRevision: 27
 Bundle-Activator: com.openexchange.version.osgi.VersionActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

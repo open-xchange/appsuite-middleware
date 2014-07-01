@@ -623,17 +623,8 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                 }
             }
         } catch (final OXException e) {
-            if ("PUSH".equals(e.getPrefix())) {
-                throw e;
-            }
-            // throw new PushException(e);
-            if ("ACC".equalsIgnoreCase(e.getPrefix()) && MailAccountExceptionCodes.NOT_FOUND.getNumber() == e.getCode()) {
-                /*
-                 * Missing mail account; drop listener
-                 */
-                LOG.debug("Missing (default) mail account for user {}. Stopping obsolete IMAP-IDLE listener.", userId);
-                return false;
-            }
+            launderOXException(e);
+            // Non-aborting OXException
             dropSessionRef("MSG".equals(e.getPrefix()) && (1001 == e.getCode() || 1000 == e.getCode()));
             sleep(errDelay, e);
         } catch (final MessagingException e) {
@@ -667,6 +658,22 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
             if (isDebugEnabled()) {
                 LOG.error("ERROR in IDLE'ing: {}", e1.getMessage(), e1);
             }
+        }
+    }
+
+    private void launderOXException(OXException e) throws OXException {
+        if (PushExceptionCodes.PREFIX.equals(e.getPrefix())) {
+            throw e;
+        }
+        if (MailAccountExceptionCodes.NOT_FOUND.equals(e)) {
+            /*
+             * Missing mail account; drop listener
+             */
+            LOG.debug("Missing (default) mail account for user {}. Stopping obsolete IMAP-IDLE listener.", userId);
+            throw e;
+        }
+        if ("DBP".equals(e.getPrefix())) {
+            throw e;
         }
     }
 
