@@ -32,6 +32,7 @@ if [ ! -f $OXCONFIG ]; then
     exit 0
 fi
 
+. /lib/lsb/init-functions
 . $OXFUNCTIONS
 . $OXCONFIG
 
@@ -86,12 +87,9 @@ case "$1" in
     ;;
 
   status)
-    echo -n "Checking for $DESC: "
-    if ox_daemon_status /var/run/open-xchange.pid ;then
-        echo "running."
-    else
-        echo "not running"
-    fi
+  status)
+    status_of_proc -p /var/run/open-xchange.pid $STARTSCRIPT "$NAME"
+    exit $?
     ;;
 
   *)
