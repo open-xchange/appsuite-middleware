@@ -1,23 +1,22 @@
 
 Name:           open-xchange-datamining
-BuildArch:	    noarch
+BuildArch:      noarch
 #!BuildIgnore:  post-build-checks
-BuildRequires: ant
-BuildRequires: ant-nodeps
-BuildRequires: open-xchange-core
-BuildRequires: java-devel >= 1.6.0
-Version:	@OXVERSION@
-%define		ox_release 0
-%define		ox_release 7
-Release:	%{ox_release}_<CI_CNT>.<B_CNT>
+BuildRequires:  ant
+BuildRequires:  ant-nodeps
+BuildRequires:  open-xchange-core
+BuildRequires:  java-devel >= 1.6.0
+Version:        @OXVERSION@
+%define         ox_release 0
+Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-URL:           http://www.open-xchange.com/
+URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        This bundle provides a datamining tool (described at http://oxpedia.org/wiki/index.php?title=Datamining)
-Autoreqprov:   no
-Requires:      open-xchange-core >= @OXVERSION@
+Autoreqprov:    no
+Requires:       open-xchange-core >= @OXVERSION@
 
 %description
 This bundle provides a datamining tool
@@ -58,6 +57,8 @@ prepare for 7.6.1
 Seventh candidate for 7.6.0 release
 * Fri Jun 20 2014 Karsten Will <karsten.will@open-xchange.com>
 Sixth release candidate for 7.6.0
+* Wed Jun 18 2014 Karsten Will <karsten.will@open-xchange.com>
+Build for patch 2014-06-30
 * Fri Jun 13 2014 Karsten Will <karsten.will@open-xchange.com>
 Fifth release candidate for 7.6.0
 * Fri Jun 13 2014 Karsten Will <karsten.will@open-xchange.com>

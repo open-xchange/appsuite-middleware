@@ -135,8 +135,7 @@ public enum OAuthExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * The OAuth authentication process has been canceled.
      */
-    CANCELED_BY_USER("The OAuth authentication process has been canceled.", CATEGORY_USER_INPUT, 16,
-        OAuthExceptionMessages.CANCELED_BY_USER_MSG),
+    CANCELED_BY_USER("The OAuth authentication process has been canceled.", CATEGORY_USER_INPUT, 16, OAuthExceptionMessages.CANCELED_BY_USER_MSG),
     /**
      * Could not get a valid response from the associated OAuth provider.
      */
@@ -144,9 +143,7 @@ public enum OAuthExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * There was a problem while creating a connection to the remote service.
      */
-    CONNECT_ERROR("There was a problem while creating a connection to the remote service.", CATEGORY_CONNECTIVITY, 18, OAuthExceptionMessages.CONNECT_ERROR_MSG),
-
-    ;
+    CONNECT_ERROR("There was a problem while creating a connection to the remote service.", CATEGORY_CONNECTIVITY, 18, OAuthExceptionMessages.CONNECT_ERROR_MSG);
 
     private final Category category;
     private final int number;

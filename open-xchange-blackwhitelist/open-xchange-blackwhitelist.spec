@@ -1,14 +1,13 @@
 
 Name:           open-xchange-blackwhitelist
 BuildArch:      noarch
-#!BuildIgnore: post-build-checks
+#!BuildIgnore:  post-build-checks
 BuildRequires:  ant
 BuildRequires:  ant-nodeps
 BuildRequires:  open-xchange-core >= @OXVERSION@
 BuildRequires:  java-devel >= 1.6.0
 Version:        @OXVERSION@
 %define         ox_release 0
-%define         ox_release 7
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -16,7 +15,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        JSON interface for some black/white list implementation
-Autoreqprov:   no
+Autoreqprov:    no
 Requires:       open-xchange-core >= @OXVERSION@
 
 %description
@@ -62,6 +61,8 @@ prepare for 7.6.1
 Seventh candidate for 7.6.0 release
 * Fri Jun 20 2014 Carsten Hoeger <choeger@open-xchange.com>
 Sixth release candidate for 7.6.0
+* Wed Jun 18 2014 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2014-06-30
 * Fri Jun 13 2014 Carsten Hoeger <choeger@open-xchange.com>
 Fifth release candidate for 7.6.0
 * Fri Jun 13 2014 Carsten Hoeger <choeger@open-xchange.com>

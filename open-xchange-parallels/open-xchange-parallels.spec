@@ -6,10 +6,9 @@ BuildRequires:  ant
 BuildRequires:  ant-nodeps
 BuildRequires:  open-xchange-admin
 BuildRequires:  java-devel >= 1.6.0
-Version:	@OXVERSION@
-%define		ox_release 0
-%define		ox_release 7
-Release:	%{ox_release}_<CI_CNT>.<B_CNT>
+Version:        @OXVERSION@
+%define         ox_release 0
+Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -83,6 +82,8 @@ prepare for 7.6.1
 Seventh candidate for 7.6.0 release
 * Fri Jun 20 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Sixth release candidate for 7.6.0
+* Wed Jun 18 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-06-30
 * Fri Jun 13 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Fifth release candidate for 7.6.0
 * Fri Jun 13 2014 Marcus Klein <marcus.klein@open-xchange.com>
