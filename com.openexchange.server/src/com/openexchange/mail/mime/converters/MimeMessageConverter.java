@@ -1935,7 +1935,7 @@ public final class MimeMessageConverter {
             {
                 final String[] tmp = mail.getHeader(CONTENT_TYPE);
                 if ((tmp != null) && (tmp.length > 0)) {
-                    mail.setContentType(tmp[0]);
+                    mail.setContentType(MimeMessageUtility.decodeMultiEncodedHeader(tmp[0]));
                 } else {
                     mail.setContentType(MimeTypes.MIME_DEFAULT);
                 }
@@ -1997,7 +1997,7 @@ public final class MimeMessageConverter {
             {
                 final String tmp = mail.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, null);
                 if ((tmp != null) && (tmp.length() > 0)) {
-                    mail.setContentDisposition(tmp);
+                    mail.setContentDisposition(MimeMessageUtility.decodeMultiEncodedHeader(tmp));
                 } else {
                     mail.setContentDisposition((String) null);
                 }
@@ -2242,7 +2242,7 @@ public final class MimeMessageConverter {
             {
                 final String[] contentTypeHdr = mailPart.getHeader(CONTENT_TYPE);
                 if (null != contentTypeHdr && contentTypeHdr.length > 0) {
-                    mailPart.setContentType(unfold(contentTypeHdr[0]));
+                    mailPart.setContentType(MimeMessageUtility.decodeMultiEncodedHeader(contentTypeHdr[0]));
                 }
             }
             {
@@ -2254,7 +2254,7 @@ public final class MimeMessageConverter {
             {
                 final String[] tmp = mailPart.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION);
                 if ((tmp != null) && (tmp.length > 0)) {
-                    mailPart.setContentDisposition(tmp[0]);
+                    mailPart.setContentDisposition(MimeMessageUtility.decodeMultiEncodedHeader(tmp[0]));
                 }
             }
             {
