@@ -2030,7 +2030,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
     }
 
     @Override
-    public void removeParticipant(final CalendarDataObject cdao, final int uid) throws OXException {
+    public void removeUserParticipant(final CalendarDataObject cdao, final int uid) throws OXException {
         final UserParticipant check[] = cdao.getUsers();
         if (check != null && check.length > 0) {
             final UserParticipant ret[] = new UserParticipant[check.length-1];
@@ -2051,7 +2051,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
     }
 
     @Override
-    public void removeUserParticipant(final CalendarDataObject cdao, final int uid) throws OXException {
+    public void removeParticipant(final CalendarDataObject cdao, final int uid) throws OXException {
         final Participant check[] = cdao.getParticipants();
         if (check != null && check.length > 0) {
             final Participant ret[] = new Participant[check.length-1];

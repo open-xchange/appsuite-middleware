@@ -152,9 +152,9 @@ public interface CalendarCollectionService {
      */
     public void checkAndFillIfUserIsUser(final CalendarDataObject cdao, final Participant p) throws OXException;
 
-    public void removeParticipant(final CalendarDataObject cdao, final int uid) throws OXException;
-
     public void removeUserParticipant(final CalendarDataObject cdao, final int uid) throws OXException;
+
+    public void removeParticipant(final CalendarDataObject cdao, final int uid) throws OXException;
 
     public Date getNextReminderDate(final int oid, final int fid, final Session so) throws OXException, SQLException;
 

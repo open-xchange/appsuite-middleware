@@ -4985,8 +4985,8 @@ public class CalendarMySQL implements CalendarSqlImp {
                         edao.removeDeleteExceptions();
                         edao.removeChangeExceptions();
                         edao.setChangeExceptions(new Date[] { calculated_exception });
-                        COLLECTION.removeParticipant(edao, uid);
                         COLLECTION.removeUserParticipant(edao, uid);
+                        COLLECTION.removeParticipant(edao, uid);
                         edao.setModifiedBy(uid);
                         edao.setRecurrenceID(edao.getObjectID());
                         edao.removeObjectID();
@@ -5046,7 +5046,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                             close_read = false;
                         }
                         // remove participant (update)
-                        COLLECTION.removeParticipant(edao, uid);
+                        COLLECTION.removeUserParticipant(edao, uid);
                         edao.setModifiedBy(uid);
                         final CalendarDataObject update = new CalendarDataObject();
                         update.setContext(ctx);
@@ -5150,7 +5150,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                             close_read = false;
                         }
                         // remove participant (update)
-                        COLLECTION.removeParticipant(edao, uid);
+                        COLLECTION.removeUserParticipant(edao, uid);
                         edao.setModifiedBy(uid);
                         final CalendarDataObject update = new CalendarDataObject();
                         update.setContext(ctx);

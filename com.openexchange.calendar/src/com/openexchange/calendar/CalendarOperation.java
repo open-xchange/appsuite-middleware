@@ -894,7 +894,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             up.setConfirm(CalendarObject.ACCEPT);
             recColl.checkAndFillIfUserIsParticipant(cdao, up);
             if (null != edao && FolderObject.SHARED == edao.getFolderType()) {
-                recColl.removeParticipant(cdao, edao.getSharedFolderOwner());
+                recColl.removeUserParticipant(cdao, edao.getSharedFolderOwner());
             }
         } else if (cdao.getFolderType() == FolderObject.SHARED) {
             if (cdao.containsParentFolderID()) {
@@ -911,8 +911,8 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             } else {
                 if (!recColl.checkIfUserIsParticipant(edao, up)) {
                     if (edao.getFolderType() == FolderObject.PRIVATE) {
-                        recColl.removeUserParticipant(cdao, uid);
                         recColl.removeParticipant(cdao, uid);
+                        recColl.removeUserParticipant(cdao, uid);
                     }
                     recColl.checkAndFillIfUserIsUser(cdao, up);
                     recColl.checkAndFillIfUserIsParticipant(cdao, up);

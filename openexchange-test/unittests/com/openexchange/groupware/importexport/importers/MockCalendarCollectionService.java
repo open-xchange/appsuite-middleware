@@ -931,7 +931,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#removeParticipant(com.openexchange.groupware.calendar.CalendarDataObject, int)
      */
     @Override
-    public void removeParticipant(CalendarDataObject cdao, int uid) throws OXException {
+    public void removeUserParticipant(CalendarDataObject cdao, int uid) throws OXException {
         // Nothing to do
 
     }
@@ -949,7 +949,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#removeUserParticipant(com.openexchange.groupware.calendar.CalendarDataObject, int)
      */
     @Override
-    public void removeUserParticipant(CalendarDataObject cdao, int uid) throws OXException {
+    public void removeParticipant(CalendarDataObject cdao, int uid) throws OXException {
         // Nothing to do
 
     }
