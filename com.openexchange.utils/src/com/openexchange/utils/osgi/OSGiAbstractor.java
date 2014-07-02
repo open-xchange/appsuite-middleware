@@ -910,8 +910,12 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
             serviceTracker.close();
         }
         serviceTrackers.clear();
-        registry.clearRegistry();
-        registry = null;
+
+        ServiceRegistry tmp = registry;
+        if (null != tmp) {
+            tmp.clearRegistry();
+            registry = null;
+        }
     }
 
     /**
