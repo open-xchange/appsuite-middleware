@@ -61,6 +61,7 @@ import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveFileField;
 import com.openexchange.drive.DriveSession;
+import com.openexchange.drive.DriveUtils;
 import com.openexchange.drive.FilePattern;
 import com.openexchange.drive.checksum.ChecksumProvider;
 import com.openexchange.drive.checksum.ChecksumStore;

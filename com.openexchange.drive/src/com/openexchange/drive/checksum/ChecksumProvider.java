@@ -62,7 +62,7 @@ import java.util.TreeSet;
 import jonelo.jacksum.algorithm.MD;
 import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.DriveExceptionCodes;
-import com.openexchange.drive.internal.DriveUtils;
+import com.openexchange.drive.DriveUtils;
 import com.openexchange.drive.internal.PathNormalizer;
 import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.exception.OXException;

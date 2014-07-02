@@ -47,20 +47,16 @@
  *
  */
 
-package com.openexchange.drive.internal;
+package com.openexchange.drive;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.drive.DirectoryPattern;
-import com.openexchange.drive.DriveConstants;
-import com.openexchange.drive.DriveExceptionCodes;
-import com.openexchange.drive.FilePattern;
-import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.actions.AbstractAction;
 import com.openexchange.drive.actions.DownloadFileAction;
 import com.openexchange.drive.actions.EditFileAction;
 import com.openexchange.drive.actions.ErrorFileAction;
 import com.openexchange.drive.comparison.ServerFileVersion;
+import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.management.DriveConfig;
 import com.openexchange.drive.storage.DriveStorage;
 import com.openexchange.drive.sync.RenameTools;
@@ -161,9 +157,8 @@ public class DriveUtils {
      *
      * @param fileName The filename to check
      * @return <code>true</code> if the filename is considered invalid, <code>false</code>, otherwise
-     * @throws OXException
      */
-    public static boolean isInvalidFileName(String fileName) throws OXException {
+    public static boolean isInvalidFileName(String fileName) {
         if (Strings.isEmpty(fileName)) {
             return true; // no empty filenames
         }
@@ -177,22 +172,38 @@ public class DriveUtils {
     }
 
     /**
-     * Gets a value indicating whether the supplied filename is ignored, i.e. it is excluded from synchronization by definition.
+     * Gets a value indicating whether the supplied filename is ignored, i.e. it is excluded from synchronization by definition. Only
+     * static / global exclusions are considered in this check.
      *
-     * @param session The sync session
-     * @param path The directory path, relative to the root directory
      * @param fileName The filename to check
      * @return <code>true</code> if the filename is considered to be ignored, <code>false</code>, otherwise
      * @throws OXException
      */
-    public static boolean isIgnoredFileName(SyncSession session, String path, String fileName) throws OXException {
+    public static boolean isIgnoredFileName(String fileName) throws OXException {
         if (fileName.endsWith(DriveConstants.FILEPART_EXTENSION)) {
             return true; // no temporary upload files
         }
         if (DriveConfig.getInstance().getExcludedFilenamesPattern().matcher(fileName).matches()) {
             return true; // no (server-side) excluded files
         }
-        List<FilePattern> fileExclusions = session.getDriveSession().getFileExclusions();
+        return false;
+    }
+
+    /**
+     * Gets a value indicating whether the supplied filename is ignored, i.e. it is excluded from synchronization by definition. Static /
+     * global exclusions are considered, as well as client-defined filters based on path and filename.
+     *
+     * @param session The drive session
+     * @param path The directory path, relative to the root directory
+     * @param fileName The filename to check
+     * @return <code>true</code> if the filename is considered to be ignored, <code>false</code>, otherwise
+     * @throws OXException
+     */
+    public static boolean isIgnoredFileName(DriveSession session, String path, String fileName) throws OXException {
+        if (isIgnoredFileName(fileName)) {
+            return true;
+        }
+        List<FilePattern> fileExclusions = session.getFileExclusions();
         if (null != fileExclusions && 0 < fileExclusions.size()) {
             for (FilePattern pattern : fileExclusions) {
                 if (pattern.matches(path, fileName)) {

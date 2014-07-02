@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Set;
 import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveExceptionCodes;
+import com.openexchange.drive.DriveUtils;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.actions.AcknowledgeFileAction;
 import com.openexchange.drive.actions.DownloadFileAction;
@@ -66,7 +67,6 @@ import com.openexchange.drive.comparison.Change;
 import com.openexchange.drive.comparison.ServerFileVersion;
 import com.openexchange.drive.comparison.ThreeWayComparison;
 import com.openexchange.drive.comparison.VersionMapper;
-import com.openexchange.drive.internal.DriveUtils;
 import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.internal.UploadHelper;
 import com.openexchange.drive.management.DriveConfig;
@@ -293,7 +293,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                     result.addActionForClient(new ErrorFileAction(null, comparison.getClientVersion(), comparison, path,
                         DriveExceptionCodes.INVALID_FILENAME.create(comparison.getClientVersion().getName()), true));
                     return 1;
-                } else if (DriveUtils.isIgnoredFileName(session, path, comparison.getClientVersion().getName())) {
+                } else if (DriveUtils.isIgnoredFileName(session.getDriveSession(), path, comparison.getClientVersion().getName())) {
                     /*
                      * ignored file, indicate as error with quarantine flag
                      */

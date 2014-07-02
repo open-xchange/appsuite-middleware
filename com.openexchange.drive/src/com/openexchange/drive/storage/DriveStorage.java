@@ -64,8 +64,8 @@ import java.util.Map;
 import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveStrings;
+import com.openexchange.drive.DriveUtils;
 import com.openexchange.drive.internal.DriveServiceLookup;
-import com.openexchange.drive.internal.DriveUtils;
 import com.openexchange.drive.internal.PathNormalizer;
 import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.management.DriveConfig;
@@ -578,7 +578,7 @@ public class DriveStorage {
                 @Override
                 protected boolean accept(String fileName) throws OXException {
                     return false == DriveUtils.isInvalidFileName(fileName) &&
-                        false == DriveUtils.isIgnoredFileName(session, path, fileName);
+                        false == DriveUtils.isIgnoredFileName(session.getDriveSession(), path, fileName);
                 }
             };
         }

@@ -64,7 +64,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.osgi.service.event.Event;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.drive.DriveConstants;
+import com.openexchange.drive.DriveUtils;
 import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.events.DriveEventPublisher;
 import com.openexchange.drive.events.DriveEventService;
@@ -178,8 +178,8 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
             return;
         }
         String fileName = (String)event.getProperty(FILE_NAME);
-        if (false == Strings.isEmpty(fileName) && fileName.endsWith(DriveConstants.FILEPART_EXTENSION)) {
-            LOG.trace("Skipping event processing for temporary file: {}", fileName);
+        if (false == Strings.isEmpty(fileName) && DriveUtils.isInvalidFileName(fileName)) {
+            LOG.trace("Skipping event processing for ignored file: {}", fileName);
             return;
         }
         /*
