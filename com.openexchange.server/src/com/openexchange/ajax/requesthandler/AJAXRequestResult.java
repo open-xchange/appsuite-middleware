@@ -395,8 +395,10 @@ public class AJAXRequestResult {
     /**
      * Gets the HTTP status code.
      * <p>
+     * <div style="background-color:#FFDDDD; padding:6px; margin:0px;">
      * <b>NOTE</b>:<br>
      * The value is only considered if type is set to {@link ResultType#HTTP_ERROR}.
+     * </div>
      *
      * @return The HTTP status code; 200 by default
      */
@@ -407,9 +409,11 @@ public class AJAXRequestResult {
     /**
      * Sets the HTTP status code.
      * <p>
+     * <div style="background-color:#FFDDDD; padding:6px; margin:0px;">
      * <b>NOTE</b>:<br>
      * The value is only considered if type is set to {@link ResultType#HTTP_ERROR}, thus type is automatically changed to
      * {@link ResultType#HTTP_ERROR}!
+     * </div>
      *
      * @param httpStatusCode The httpStatusCode to set
      * @return This result with status code and appropriate type applied
