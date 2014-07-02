@@ -154,4 +154,10 @@ public class UserExceptionMessage implements LocalizableStrings {
     // This is an internal exception to detect coding problems. A user will never see this exception.
     // %1$d is replaced with the number of users that attributes should be locked in the database for updating them.
     public static final String LOCKING_NOT_ALLOWED_DISPLAY = "Locking attributes of multiple users is not allowed. You tried to lock %1$d user's attributes.";
+
+    /**
+     * The entered password is illegal and can't be saved. Allowed characters are: %1$s
+     */
+    public final static String NOT_ALLOWED_PASSWORD_DISPLAY = "The entered password is illegal and can't be saved. Allowed characters are: %1$s";
+
 }

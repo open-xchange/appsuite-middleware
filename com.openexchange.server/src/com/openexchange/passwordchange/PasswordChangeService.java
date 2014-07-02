@@ -55,6 +55,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.authentication.AuthenticationService;
@@ -64,12 +65,14 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.server.ServiceExceptionCode;
@@ -168,6 +171,20 @@ public abstract class PasswordChangeService {
         property = service.getIntProperty("com.openexchange.passwordchange.maxLength", 0);
         if (property > 0 && len > property) {
             throw UserExceptionCode.INVALID_MAX_LENGTH.create(Integer.valueOf(property));
+        }
+        /*
+         * Check against "allowed" pattern if defined
+         */
+        String allowedPattern = service.getProperty("com.openexchange.passwordchange.allowedPattern");
+        if (false == Strings.isEmpty(allowedPattern)) {
+            try {
+                if (false == Pattern.matches(allowedPattern, event.getNewPassword())) {
+                    String allowedPatternHint = service.getProperty("com.openexchange.passwordchange.allowedPatternHint");
+                    throw UserExceptionCode.NOT_ALLOWED_PASSWORD.create(allowedPatternHint);
+                }
+            } catch (PatternSyntaxException e) {
+                throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "com.openexchange.passwordchange.allowedPattern");
+            }
         }
         /*
          * No validation of new password since admin daemon does no validation, too
