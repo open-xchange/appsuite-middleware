@@ -2064,8 +2064,8 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
                         throw OXCalendarExceptionCodes.UNABLE_TO_REMOVE_PARTICIPANT.create(uid);
                     }
                 }
-                cdao.setParticipants(ret);
             }
+            cdao.setParticipants(ret);
         } else {
             throw OXCalendarExceptionCodes.UNABLE_TO_REMOVE_PARTICIPANT_2.create(2);
         }

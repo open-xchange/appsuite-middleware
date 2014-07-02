@@ -360,6 +360,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             }
         });
         STATEMENT_FILLERS.put(Integer.valueOf(CalendarObject.RECURRENCE_ID), new StatementFiller() {
+            @Override
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao) throws OXException, SQLException {
                 if (cdao.getRecurrenceID() > 0) {
                     stmt.setInt(pos, cdao.getRecurrenceID());
@@ -390,6 +391,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             }
         });
         STATEMENT_FILLERS.put(Integer.valueOf(CalendarObject.RECURRENCE_POSITION), new StatementFiller() {
+            @Override
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao) throws OXException, SQLException {
                 if (cdao.getRecurrencePosition() >= 0) {
                     stmt.setInt(pos, cdao.getRecurrencePosition());
@@ -4986,7 +4988,16 @@ public class CalendarMySQL implements CalendarSqlImp {
                         edao.removeChangeExceptions();
                         edao.setChangeExceptions(new Date[] { calculated_exception });
                         COLLECTION.removeUserParticipant(edao, uid);
-                        COLLECTION.removeParticipant(edao, uid);
+                        try {
+                            COLLECTION.removeParticipant(edao, uid);
+                        } catch (OXException oe) {
+                            if (OXCalendarExceptionCodes.UNABLE_TO_REMOVE_PARTICIPANT == oe.getExceptionCode() ){
+                                // This can happen if the user is in the appointment by his group membership, therefore it is not
+                                // possible to remove the user by his id, as the group id is present in the Participant array.
+                            } else {
+                                throw oe;
+                            }
+                        }
                         edao.setModifiedBy(uid);
                         edao.setRecurrenceID(edao.getObjectID());
                         edao.removeObjectID();
