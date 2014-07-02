@@ -72,6 +72,7 @@ import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult.ResultType;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.annotation.Nullable;
@@ -316,18 +317,6 @@ public class DispatcherServlet extends SessionServlet {
     }
 
     /**
-     * The <code>ETag</code> result type.
-     */
-    private static final AJAXRequestResult.ResultType ETAG = AJAXRequestResult.ResultType.ETAG;
-
-    private static final AJAXRequestResult.ResultType NOT_FOUND = AJAXRequestResult.ResultType.NOT_FOUND;
-
-    /**
-     * The <code>direct</code> result type.
-     */
-    private static final AJAXRequestResult.ResultType DIRECT = AJAXRequestResult.ResultType.DIRECT;
-
-    /**
      * A set of those {@link OXExceptionCode} that should not be logged as <tt>ERROR</tt>, but as <tt>DEBUG</tt> only.
      */
     private static final Set<OXExceptionCode> IGNOREES = Collections.unmodifiableSet(new HashSet<OXExceptionCode>(Arrays.<OXExceptionCode> asList(OXFolderExceptionCode.NOT_EXISTS, MailExceptionCode.MAIL_NOT_FOUND)));
@@ -391,21 +380,30 @@ public class DispatcherServlet extends SessionServlet {
             /*
              * Check result's type
              */
-            if (ETAG.equals(result.getType())) {
-                httpResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-                final long expires = result.getExpires();
-                Tools.setETag(requestData.getETag(), expires > 0 ?  expires : -1L, httpResponse);
-                return;
-            }
-
-            if (NOT_FOUND.equals(result.getType())) {
-                httpResponse.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                return;
-            }
-
-            if (DIRECT.equals(result.getType())) {
-                // No further processing
-                return;
+            {
+                ResultType resultType = result.getType();
+                switch (resultType) {
+                case ETAG: {
+                    httpResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                    final long expires = result.getExpires();
+                    Tools.setETag(requestData.getETag(), expires > 0 ? expires : -1L, httpResponse);
+                    return;
+                }
+                case NOT_FOUND: {
+                    httpResponse.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    return;
+                }
+                case PRECONDITION_FAILED: {
+                    httpResponse.sendError(HttpServletResponse.SC_PRECONDITION_FAILED);
+                    return;
+                }
+                case DIRECT: {
+                    // No further processing
+                    return;
+                }
+                default:
+                    break;
+                }
             }
             /*-
              * A common result

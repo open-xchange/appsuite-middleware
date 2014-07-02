@@ -461,6 +461,13 @@ public class FileResponseRenderer implements ResponseRenderer {
                         Tools.setExpires(new Date(System.currentTimeMillis() + expires), resp);
                     }
                 }
+                /*
+                 * Last-Modified
+                 */
+                final String sLastModified = result.getHeader("Last-Modified");
+                if (null != sLastModified) {
+                    resp.setHeader("Last-Modified", sLastModified);
+                }
             }
             /*
              * Output binary content

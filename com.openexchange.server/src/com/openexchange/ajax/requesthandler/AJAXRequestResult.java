@@ -172,19 +172,25 @@ public class AJAXRequestResult {
         /**
          * A common request result which should be further processed.
          */
-        COMMON,
+        @NonNull COMMON,
         /**
          * An <i>ETag</i> request result.
          */
-        ETAG,
+        @NonNull ETAG,
         /**
          * The special result directly responded to client.
          */
-        DIRECT,
+        @NonNull DIRECT,
         /**
          * The request went to a resource that could not be found
          */
-        NOT_FOUND;
+        @NonNull NOT_FOUND,
+        /**
+         * 412 (precondition failed)
+         */
+        @NonNull PRECONDITION_FAILED,
+
+        ;
     }
 
     /**

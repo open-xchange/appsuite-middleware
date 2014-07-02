@@ -76,6 +76,7 @@ import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -304,7 +305,10 @@ public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficient
         return toDocument(fsFile);
     }
 
+    private static final String UNKNOWN_CS = "application/octet-stream";
+
     private Document toDocument(final java.io.File fsFile) {
+        String contentType = MimeType2ExtMap.getContentType(fsFile);
         return new Document() {
 
             @Override
@@ -316,7 +320,7 @@ public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficient
                 }
             }
 
-        }.setSize(fsFile.length()).setMimeType(null).setEtag("fs://" + fsFile.getAbsolutePath() +"/" + fsFile.lastModified());
+        }.setSize(fsFile.length()).setMimeType(UNKNOWN_CS.equals(contentType) ? null : contentType).setEtag("fs://" + fsFile.getAbsolutePath() +"/" + fsFile.lastModified()).setLastModified(fsFile.lastModified());
     }
 
     @Override

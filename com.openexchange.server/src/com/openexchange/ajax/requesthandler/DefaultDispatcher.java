@@ -72,6 +72,7 @@ import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.log.LogProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -174,12 +175,13 @@ public class DefaultDispatcher implements Dispatcher {
             if (action == null) {
                 throw AjaxExceptionCodes.UNKNOWN_ACTION_IN_MODULE.create(modifiedRequestData.getAction(), modifiedRequestData.getModule());
             }
-            /*
-             * Is it possible to serve request by ETag?
+            /*-
+             * Validate request headers for caching
              */
             {
+                // If-None-Match header should contain "*" or ETag. If so, then return 304.
                 final String eTag = modifiedRequestData.getETag();
-                if (null != eTag && (action instanceof ETagAwareAJAXActionService) && ((ETagAwareAJAXActionService) action).checkETag(eTag, modifiedRequestData, session)) {
+                if (null != eTag && (action instanceof ETagAwareAJAXActionService) && (("*".equals(eTag)) || ((ETagAwareAJAXActionService) action).checkETag(eTag, modifiedRequestData, session))) {
                     final AJAXRequestResult etagResult = new AJAXRequestResult();
                     etagResult.setType(AJAXRequestResult.ResultType.ETAG);
                     final long newExpires = modifiedRequestData.getExpires();
@@ -188,9 +190,46 @@ public class DefaultDispatcher implements Dispatcher {
                     }
                     return etagResult;
                 }
+
+                // If-Modified-Since header should be greater than LastModified. If so, then return 304.
+                // This header is ignored if any If-None-Match header is specified.
+                if (null == eTag && (action instanceof LastModifiedAwareAJAXActionService)) {
+                    final long lastModified = modifiedRequestData.getLastModified();
+                    if (lastModified >= 0 && ((LastModifiedAwareAJAXActionService) action).checkLastModified(lastModified + 1000, modifiedRequestData, session)) {
+                        final AJAXRequestResult etagResult = new AJAXRequestResult();
+                        etagResult.setType(AJAXRequestResult.ResultType.ETAG);
+                        final long newExpires = modifiedRequestData.getExpires();
+                        if (newExpires > 0) {
+                            etagResult.setExpires(newExpires);
+                        }
+                        return etagResult;
+                    }
+                }
+            }
+            /*-
+             * Validate request headers for resume
+             */
+            {
+                // If-Match header should contain "*" or ETag. If not, then return 412.
+                String ifMatch = modifiedRequestData.getHeader("If-Match");
+                if (ifMatch != null && (action instanceof ETagAwareAJAXActionService) && (("*".equals(ifMatch)) || ((ETagAwareAJAXActionService) action).checkETag(ifMatch, modifiedRequestData, session))) {
+                    final AJAXRequestResult failedResult = new AJAXRequestResult();
+                    failedResult.setType(AJAXRequestResult.ResultType.PRECONDITION_FAILED);
+                    return failedResult;
+                }
+
+                // If-Unmodified-Since header should be greater than LastModified. If not, then return 412.
+                if (action instanceof LastModifiedAwareAJAXActionService) {
+                    long ifUnmodifiedSince = Tools.optHeaderDate(modifiedRequestData.getHeader("If-Unmodified-Since"));
+                    if (ifUnmodifiedSince >= 0 && ((LastModifiedAwareAJAXActionService) action).checkLastModified(ifUnmodifiedSince + 1000, modifiedRequestData, session)) {
+                        final AJAXRequestResult failedResult = new AJAXRequestResult();
+                        failedResult.setType(AJAXRequestResult.ResultType.PRECONDITION_FAILED);
+                        return failedResult;
+                    }
+                }
             }
             /*
-             * Check for Action annotation
+             * Check for action annotation
              */
             if (modifiedRequestData.getFormat() == null) {
                 final DispatcherNotes actionMetadata = getActionMetadata(action);

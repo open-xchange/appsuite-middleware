@@ -53,12 +53,14 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.ajax.requesthandler.ETagAwareAJAXActionService;
+import com.openexchange.ajax.requesthandler.LastModifiedAwareAJAXActionService;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -67,7 +69,7 @@ import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
-import com.openexchange.java.Strings;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -81,7 +83,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "version", optional = true, description = "If present the infoitem data describes the given version. Otherwise the current version is returned"),
     @Parameter(name = "content_type", optional = true, description = "If present the response declares the given content_type in the Content-Type header.") }, responseDescription = "The raw byte data of the document. The response type for the HTTP Request is set accordingly to the defined mimetype for this infoitem or the content_type given.")
 @DispatcherNotes(defaultFormat = "file", allowPublicSession = true)
-public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXActionService {
+public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXActionService, LastModifiedAwareAJAXActionService {
 
     public static final String DOCUMENT = "com.openexchange.file.storage.json.DocumentAction.DOCUMENT";
 
@@ -113,7 +115,14 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
             }, document.getSize(), document.getMimeType(), document.getName());
 
             AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
-            result.setHeader("ETag", document.getEtag());
+            String etag = document.getEtag();
+            if (null != etag) {
+                result.setHeader("ETag", etag);
+            }
+            long lastModified = document.getLastModified();
+            if (lastModified > 0) {
+                result.setHeader("Last-Modified", Tools.formatHeaderDate(new Date(lastModified)));
+            }
             return result;
         }
 
@@ -137,6 +146,11 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
         AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
         createAndSetETag(fileMetadata, request, result);
 
+        Date lastModified = fileMetadata.getLastModified();
+        if (null != lastModified) {
+            result.setHeader("Last-Modified", Tools.formatHeaderDate(lastModified));
+        }
+
         return result;
     }
 
@@ -156,15 +170,32 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
         if (document != null) {
             requestData.setProperty(DOCUMENT, document);
             String etag = document.getEtag();
-            if (etag != null && etag.equals(clientETag)) {
-                return true;
-            } else {
-                return false;
-            }
+            return etag != null && etag.equals(clientETag);
         }
 
         final File fileMetadata = fileAccess.getFileMetadata(request.getId(), request.getVersion());
         return FileStorageUtility.getETagFor(fileMetadata).equals(clientETag);
+    }
+
+    @Override
+    public boolean checkLastModified(long clientLastModified, AJAXRequestData requestData, ServerSession session) throws OXException {
+        AJAXInfostoreRequest request = new AJAXInfostoreRequest(requestData, session);
+        IDBasedFileAccess fileAccess = request.getFileAccess();
+
+        final String id = request.getId();
+        final String version = request.getVersion();
+
+        final Document document = fileAccess.getDocumentAndMetadata(id, version);
+        if (document != null) {
+            requestData.setProperty(DOCUMENT, document);
+            long lastModified = document.getLastModified();
+            return lastModified > 0 ? false : clientLastModified > lastModified;
+        }
+
+        File fileMetadata = fileAccess.getFileMetadata(request.getId(), request.getVersion());
+
+        Date lastModified = fileMetadata.getLastModified();
+        return null == lastModified ? false : clientLastModified > lastModified.getTime();
     }
 
     @Override
@@ -173,19 +204,6 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
         if (eTag != null) {
             result.setHeader("ETag", eTag);
         }
-    }
-
-    /** Check for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
 }

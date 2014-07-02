@@ -68,6 +68,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.AJAXState;
+import com.openexchange.annotation.NonNull;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
@@ -106,9 +107,9 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     private final ServiceLookup services;
 
-    public static final int[] COLUMNS_ALL_ALIAS = new int[] { 600, 601 };
+    public static final @NonNull int[] COLUMNS_ALL_ALIAS = new int[] { 600, 601 };
 
-    public static final int[] COLUMNS_LIST_ALIAS = new int[] { 600, 601, 614, 602, 611, 603, 612, 607, 652, 610, 608, 102 };
+    public static final @NonNull int[] COLUMNS_LIST_ALIAS = new int[] { 600, 601, 614, 602, 611, 603, 612, 607, 652, 610, 608, 102 };
 
     /**
      * Initializes a new {@link AbstractMailAction}.

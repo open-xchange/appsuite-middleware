@@ -54,6 +54,7 @@ import static com.openexchange.mail.mime.MimeTypes.equalPrimaryTypes;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -71,6 +72,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.ajax.requesthandler.ETagAwareAJAXActionService;
+import com.openexchange.ajax.requesthandler.LastModifiedAwareAJAXActionService;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -101,6 +103,7 @@ import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.HashUtility;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -117,7 +120,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "save", description = "1 overwrites the defined mimetype for this attachment to force the download dialog, otherwise 0."),
     @Parameter(name = "filter", optional = true, description = "1 to apply HTML white-list filter rules if and only if requested attachment is of MIME type text/htm* AND parameter save is set to 0.") }, responseDescription = "The raw byte data of the document. The response type for the HTTP Request is set accordingly to the defined mimetype for this attachment, except the parameter save is set to 1.")
 @DispatcherNotes(allowPublicSession = true)
-public final class GetAttachmentAction extends AbstractMailAction implements ETagAwareAJAXActionService {
+public final class GetAttachmentAction extends AbstractMailAction implements ETagAwareAJAXActionService, LastModifiedAwareAJAXActionService {
 
     private static final class ReconnectingInputStreamClosure implements IFileHolder.InputStreamClosure {
 
@@ -190,6 +193,8 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
     private static final String PARAMETER_MAILATTCHMENT = Mail.PARAMETER_MAILATTCHMENT;
     private static final String PARAMETER_DELIVERY = Mail.PARAMETER_DELIVERY;
 
+    private final String lastModified;
+
     /**
      * Initializes a new {@link GetAttachmentAction}.
      *
@@ -197,6 +202,15 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
      */
     public GetAttachmentAction(final ServiceLookup services) {
         super(services);
+        lastModified = Tools.formatHeaderDate(new Date(309049200000L));
+    }
+
+    @Override
+    public boolean checkLastModified(long clientLastModified, AJAXRequestData request, ServerSession session) throws OXException {
+        /*
+         * Any Last-Modified is valid because an attachment cannot change
+         */
+        return clientLastModified > 0;
     }
 
     @Override
@@ -333,6 +347,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
              * Set ETag
              */
             setETag(getHash(folderPath, uid, imageContentId == null ? sequenceId : imageContentId), EXPIRES_MILLIS_YEAR, result);
+            result.setHeader("Last-Modified", lastModified);
             /*
              * Return result
              */

@@ -164,7 +164,7 @@ public class AJAXRequestData {
     /** The state reference */
     private @Nullable AJAXState state;
 
-    /** The eTag */
+    /** The eTag as parsed from <code>"If-None-Match"</code> request header */
     private @Nullable String eTag;
 
     /** The <code>User-Agent</code> value */
@@ -190,6 +190,9 @@ public class AJAXRequestData {
 
     /** The optional <code>HttpServletResponse</code> instance */
     private @Nullable HttpServletResponse httpServletResponse;
+
+    /** The request's last-modified time stamp as parsed from <code>"If-Modified-Since"</code> request header */
+    private @Nullable Long lastModified;
 
     /**
      * Initializes a new {@link AJAXRequestData}.
@@ -526,6 +529,50 @@ public class AJAXRequestData {
      */
     public void setExpires(final long expires) {
         this.expires = expires;
+    }
+
+    /**
+     * Gets the Last-Modified time taken from <code>"If-Modified-Since"</code> header.
+     * <p>
+     * <code>"If-Modified-Since"</code> header should be greater than server's last-modified time stamp. If so, then return 304.<br>
+     * This header is ignored if any <code>"If-None-Match"</code> header is specified.
+     *
+     * <pre>
+     * long ifModifiedSince = request.getDateHeader(&quot;If-Modified-Since&quot;);
+     * if (ifNoneMatch == null &amp;&amp; ifModifiedSince != -1 &amp;&amp; ifModifiedSince + 1000 &gt; lastModified) {
+     *     response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+     *     response.setHeader(&quot;ETag&quot;, eTag); // Required in 304.
+     *     response.setDateHeader(&quot;Expires&quot;, expires); // Postpone cache with 1 week.
+     *     return;
+     * }
+     * </pre>
+     *
+     * @return The Last-Modified time or <code>-1</code>
+     */
+    public long getLastModified() {
+        Long lastModified = this.lastModified;
+        if (null == lastModified) {
+            String ifModifiedSince = getHeader("If-Modified-Since");
+            if (null != ifModifiedSince) {
+                try {
+                    long time = Tools.parseHeaderDate(ifModifiedSince).getTime();
+                    lastModified = Long.valueOf(time);
+                    this.lastModified = lastModified;
+                } catch (Exception e) {
+                    // Ignore
+                }
+            }
+        }
+        return null == lastModified ? -1L : lastModified.longValue();
+    }
+
+    /**
+     * Sets the Last-Modified time
+     *
+     * @param lastModified The Last-Modified time to set
+     */
+    public void setLastModified(long lastModified) {
+        this.lastModified = lastModified < 0 ? null : Long.valueOf(lastModified);
     }
 
     /**
