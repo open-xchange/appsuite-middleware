@@ -412,7 +412,7 @@ public class AJAXRequestResult {
      * {@link ResultType#HTTP_ERROR}!
      *
      * @param httpStatusCode The httpStatusCode to set
-     * @return This result with statuc code and appropriate type applied
+     * @return This result with status code and appropriate type applied
      * @see #setType(ResultType)
      */
     public @NonNull AJAXRequestResult setHttpStatusCode(int httpStatusCode) {
