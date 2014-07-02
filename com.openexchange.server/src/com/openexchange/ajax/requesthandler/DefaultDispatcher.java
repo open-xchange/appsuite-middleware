@@ -61,6 +61,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.continuation.Continuation;
 import com.openexchange.continuation.ContinuationException;
@@ -214,7 +215,7 @@ public class DefaultDispatcher implements Dispatcher {
                 String ifMatch = modifiedRequestData.getHeader("If-Match");
                 if (ifMatch != null && (action instanceof ETagAwareAJAXActionService) && (("*".equals(ifMatch)) || ((ETagAwareAJAXActionService) action).checkETag(ifMatch, modifiedRequestData, session))) {
                     final AJAXRequestResult failedResult = new AJAXRequestResult();
-                    failedResult.setType(AJAXRequestResult.ResultType.PRECONDITION_FAILED);
+                    failedResult.setHttpStatusCode(HttpServletResponse.SC_PRECONDITION_FAILED);
                     return failedResult;
                 }
 
@@ -223,7 +224,7 @@ public class DefaultDispatcher implements Dispatcher {
                     long ifUnmodifiedSince = Tools.optHeaderDate(modifiedRequestData.getHeader("If-Unmodified-Since"));
                     if (ifUnmodifiedSince >= 0 && ((LastModifiedAwareAJAXActionService) action).checkLastModified(ifUnmodifiedSince + 1000, modifiedRequestData, session)) {
                         final AJAXRequestResult failedResult = new AJAXRequestResult();
-                        failedResult.setType(AJAXRequestResult.ResultType.PRECONDITION_FAILED);
+                        failedResult.setHttpStatusCode(HttpServletResponse.SC_PRECONDITION_FAILED);
                         return failedResult;
                     }
                 }

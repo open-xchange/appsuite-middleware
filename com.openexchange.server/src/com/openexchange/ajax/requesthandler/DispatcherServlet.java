@@ -389,12 +389,8 @@ public class DispatcherServlet extends SessionServlet {
                     Tools.setETag(requestData.getETag(), expires > 0 ? expires : -1L, httpResponse);
                     return;
                 }
-                case NOT_FOUND: {
-                    httpResponse.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                    return;
-                }
-                case PRECONDITION_FAILED: {
-                    httpResponse.sendError(HttpServletResponse.SC_PRECONDITION_FAILED);
+                case HTTP_ERROR: {
+                    httpResponse.sendError(result.getHttpStatusCode());
                     return;
                 }
                 case DIRECT: {
