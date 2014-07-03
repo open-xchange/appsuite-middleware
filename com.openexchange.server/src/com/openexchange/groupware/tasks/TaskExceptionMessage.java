@@ -127,5 +127,5 @@ public class TaskExceptionMessage implements LocalizableStrings {
 
     public static final String CONTAINS_NON_DIGITS_MSG = "Value \"%1$s\" of attribute \"%2$s\" contains non digit characters.";
 
-    public static final String INVALID_PRIORITY_MSG = "Priority is %d but mist be between 1 and 3.";
+    public static final String INVALID_PRIORITY_MSG = "Priority is %d but must be between 1 and 3.";
 }
