@@ -1,3 +1,7 @@
+* 2014-07-03 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 33424: Add mpasswd file to list of properties files
+
 * 2014-06-30 - lars.hoogestraat@open-xchange.com
  
  - Fix for bug #33314: Removed access restrictions which are not used
