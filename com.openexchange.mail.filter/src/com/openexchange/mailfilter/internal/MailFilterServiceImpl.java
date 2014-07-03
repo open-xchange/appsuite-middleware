@@ -226,13 +226,11 @@ public final class MailFilterServiceImpl implements MailFilterService {
                 if (null != activeScript) {
                     final String script = fixParsingError(sieveHandler.getScript(activeScript));
                     final RuleListAndNextUid rules = sieveTextFilter.readScriptFromString(script);
-                    final List<Rule> ruleList = rules.getRulelist();
-                    
-                    changeIncomingVacationRule(rule);
-                    ruleList.set(uid, rule);
-                    
                     final ClientRulesAndRequire clientRulesAndReq = sieveTextFilter.splitClientRulesAndRequire(rules.getRulelist(), null, rules.isError());
-
+                    final RuleAndPosition rightRule = getRightRuleForUniqueId(clientRulesAndReq.getRules(), uid);
+                    changeIncomingVacationRule(rightRule.getRule());
+                    clientRulesAndReq.getRules().set(rightRule.getPosition(), rule);
+                    
                     final String writeback = sieveTextFilter.writeback(clientRulesAndReq, new HashSet<String>(sieveHandler.getCapabilities().getSieve()));
                     log.debug("The following sieve script will be written:\n{}", writeback);
 
