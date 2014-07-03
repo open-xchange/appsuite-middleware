@@ -1173,7 +1173,13 @@ public final class MimeMessageUtility {
 
     private static final Pattern SPLITS = Pattern.compile(" *, *");
 
-    private static List<String> splitAddrs(final String addrs) {
+    /**
+     * Split address list
+     *
+     * @param addrs The address list
+     * @return The splitted addresses
+     */
+    public static List<String> splitAddrs(final String addrs) {
         if (isEmpty(addrs)) {
             return Collections.<String> emptyList();
         }
@@ -1308,7 +1314,16 @@ public final class MimeMessageUtility {
 
     private static final Pattern PATTERN_REPLACE = Pattern.compile("(\\.\\w+>?)(\\s*);(\\s*)");
 
-    private static String replaceWithComma(final String addressList) {
+    /**
+     * Sanitizes address list
+     *
+     * @param addressList The address list
+     * @return The sanitized address list
+     */
+    public static String replaceWithComma(final String addressList) {
+        if (null == addressList) {
+            return null;
+        }
         if (!checkReplaceWithComma()) {
             return addressList;
         }
