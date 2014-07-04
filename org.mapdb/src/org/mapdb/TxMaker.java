@@ -24,13 +24,13 @@ public class TxMaker {
         this.engine = engine;
     }
 
-    
+
     public DB makeTx(){
         return new DB(new TxEngine(engine));
     }
 
     public void close() {
-        if(engine==null)
+        if(engine!=null)
             engine.close();
     }
 
