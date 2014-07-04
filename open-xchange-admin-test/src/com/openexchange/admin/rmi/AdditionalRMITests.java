@@ -55,9 +55,9 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.util.Arrays;
 import java.util.List;
-import org.junit.Assert;
 import junit.framework.JUnit4TestAdapter;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -75,7 +75,7 @@ import com.openexchange.admin.user.copy.rmi.TestTool;
 
 /**
  * {@link AdditionalRMITests}
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
@@ -258,7 +258,7 @@ public class AdditionalRMITests extends AbstractRMITest {
     public void testCreateFirstUser() throws Exception {
         OXContextInterface conInterface = getContextInterface();
 
-        Context newContext = newContext("newContext", ((int) Math.random()) * 1000);
+        Context newContext = newContext("newContext", ((int) (Math.random() * 1000)));
 
         User newAdmin = newUser("new_admin", "secret", "New Admin", "New", "Admin", "newadmin@ox.invalid");
         try {
