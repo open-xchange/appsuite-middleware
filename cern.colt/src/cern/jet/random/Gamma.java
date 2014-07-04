@@ -1,9 +1,9 @@
 /*
 Copyright \ufffd 1999 CERN - European Organization for Nuclear Research.
-Permission to use, copy, modify, distribute and sell this software and its documentation for any purpose 
-is hereby granted without fee, provided that the above copyright notice appear in all copies and 
-that both that copyright notice and this permission notice appear in supporting documentation. 
-CERN makes no representations about the suitability of this software for any purpose. 
+Permission to use, copy, modify, distribute and sell this software and its documentation for any purpose
+is hereby granted without fee, provided that the above copyright notice appear in all copies and
+that both that copyright notice and this permission notice appear in supporting documentation.
+CERN makes no representations about the suitability of this software for any purpose.
 It is provided "as is" without expressed or implied warranty.
 */
 package cern.jet.random;
@@ -13,7 +13,7 @@ import cern.jet.stat.Probability;
 /**
  * Gamma distribution; <A HREF="http://wwwinfo.cern.ch/asdoc/shortwrupsdir/g106/top.html"> math definition</A>,
  * <A HREF="http://www.cern.ch/RD11/rkb/AN16pp/node96.html#SECTION000960000000000000000"> definition of gamma function</A>
- * and <A HREF="http://www.statsoft.com/textbook/glosf.html#Gamma Distribution"> animated definition</A>. 
+ * and <A HREF="http://www.statsoft.com/textbook/glosf.html#Gamma Distribution"> animated definition</A>.
  * <p>
  * <tt>p(x) = k * x^(alpha-1) * e^(-x/beta)</tt> with <tt>k = 1/(g(alpha) * b^a))</tt> and <tt>g(a)</tt> being the gamma function.
  * <p>
@@ -21,14 +21,14 @@ import cern.jet.stat.Probability;
  * <p>
  * Note: For a Gamma distribution to have the mean <tt>mean</tt> and variance <tt>variance</tt>, set the parameters as follows:
  * <pre>
- * alpha = mean*mean / variance; lambda = 1 / (variance / mean); 
+ * alpha = mean*mean / variance; lambda = 1 / (variance / mean);
  * </pre>
  * <p>
  * Instance methods operate on a user supplied uniform random number generator; they are unsynchronized.
  * <dt>
  * Static methods operate on a default uniform random number generator; they are synchronized.
  * <p>
- * <b>Implementation:</b> 
+ * <b>Implementation:</b>
  * <dt>
  * Method: Acceptance Rejection combined with Acceptance Complement.
  * <dt>
@@ -36,7 +36,7 @@ import cern.jet.stat.Probability;
  * CLHEP's implementation, in turn, is based on <tt>gds.c</tt> from the <A HREF="http://www.cis.tu-graz.ac.at/stat/stadl/random.html">C-RAND / WIN-RAND</A> library.
  * C-RAND's implementation, in turn, is based upon
  * <p>
- * J.H. Ahrens, U. Dieter (1974): Computer methods for sampling from gamma, beta, Poisson and binomial distributions, 
+ * J.H. Ahrens, U. Dieter (1974): Computer methods for sampling from gamma, beta, Poisson and binomial distributions,
  * Computing 12, 223-246.
  * <p>
  * and
@@ -47,7 +47,7 @@ import cern.jet.stat.Probability;
  * @author wolfgang.hoschek@cern.ch
  * @version 1.0, 09/24/99
  */
-public class Gamma extends AbstractContinousDistribution { 
+public class Gamma extends AbstractContinousDistribution {
 	protected double alpha;
 	protected double lambda;
 
@@ -71,6 +71,7 @@ public double cdf(double x) {
 /**
  * Returns a random number from the distribution.
  */
+@Override
 public double nextDouble() {
 	return nextDouble(alpha, lambda);
 }
@@ -101,7 +102,7 @@ public double nextDouble(double alpha, double lambda) {
  *                                                                *
  ******************************************************************/
  	double a = alpha;
-	double aa = -1.0, aaa = -1.0, 
+	double aa = -1.0, aaa = -1.0,
 		b=0.0, c=0.0, d=0.0, e, r, s=0.0, si=0.0, ss=0.0, q0=0.0,
 		q1 = 0.0416666664, q2 =  0.0208333723, q3 = 0.0079849875,
 		q4 = 0.0015746717, q5 = -0.0003349403, q6 = 0.0003340332,
@@ -118,8 +119,8 @@ public double nextDouble(double alpha, double lambda) {
 
 	// Check for invalid input values
 
-	if (a <= 0.0) throw new IllegalArgumentException(); 
-	if (lambda <= 0.0) new IllegalArgumentException(); 
+	if (a <= 0.0) throw new IllegalArgumentException();
+	if (lambda <= 0.0) throw new IllegalArgumentException();
 
 	if (a < 1.0) { // CASE A: Acceptance rejection algorithm gs
 		b = 1.0 + 0.36788794412 * a;              // Step 1
@@ -258,6 +259,7 @@ public static double staticNextDouble(double alpha, double lambda) {
 /**
  * Returns a String representation of the receiver.
  */
+@Override
 public String toString() {
 	return this.getClass().getName()+"("+alpha+","+lambda+")";
 }
