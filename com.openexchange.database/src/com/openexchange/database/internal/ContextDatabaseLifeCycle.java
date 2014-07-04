@@ -126,7 +126,6 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
     private ConnectionPool.Config getConfig(final ConnectionData data) {
         final ConnectionPool.Config retval = defaultPoolConfig.clone();
         retval.maxActive = data.max;
-        retval.minIdle = data.min;
         if (data.block) {
             retval.exhaustedAction = ExhaustedActions.BLOCK;
         } else {
