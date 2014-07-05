@@ -75,6 +75,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -161,15 +162,18 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
              */
             final Permission parentPermission = CalculatePermission.calculate(parent, this, ALL_ALLOWED);
             if (!parentPermission.isVisible()) {
-                throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
-                    getFolderInfo4Error(parent),
-                    getUserInfo4Error(),
-                    getContextInfo4Error());
+                throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(getFolderInfo4Error(parent), getUserInfo4Error(), getContextInfo4Error());
             }
-            final String cts = toCreate.getContentType().toString();
-            if ((FolderStorage.PUBLIC_ID.equals(parent.getID()) || PublicType.getInstance().equals(parent.getType())) && CONTENT_TYPE_MAIL.equals(
-                cts)) {
-                throw FolderExceptionErrorMessage.NO_PUBLIC_MAIL_FOLDER.create();
+            final String cts;
+            {
+                final ContentType contentType = toCreate.getContentType();
+                if (null == contentType) {
+                    throw AjaxExceptionCodes.MISSING_FIELD.create("module");
+                }
+                cts = contentType.toString();
+                if ((FolderStorage.PUBLIC_ID.equals(parent.getID()) || PublicType.getInstance().equals(parent.getType())) && CONTENT_TYPE_MAIL.equals(cts)) {
+                    throw FolderExceptionErrorMessage.NO_PUBLIC_MAIL_FOLDER.create();
+                }
             }
             /*
              * Check for duplicates for OLOX-covered folders

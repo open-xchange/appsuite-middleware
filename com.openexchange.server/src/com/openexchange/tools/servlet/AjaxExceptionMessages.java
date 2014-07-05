@@ -65,6 +65,7 @@ public final class AjaxExceptionMessages implements LocalizableStrings {
     public static final String CONFLICT = "The object has been changed in the meantime. Please reload the view and try again.";
     public static final String NO_IMAGE_FILE_MSG = "The file \"%1$s\" (\"%2$s\") can't be imported as image. Only image types (JPG, GIF, BMP or PNG) are supported.";
     public static final String MISSING_COOKIE_MSG = "The requested operation requires a valid session. Please login and try again.";
+    public static final String MISSING_FIELD_MSG = "Missing the following field in JSON data: %1$s";
 
     /**
      * Initializes a new {@link AjaxExceptionMessages}

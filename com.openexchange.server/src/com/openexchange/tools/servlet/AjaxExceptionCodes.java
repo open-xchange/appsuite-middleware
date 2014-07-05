@@ -162,7 +162,10 @@ public enum AjaxExceptionCodes implements DisplayableOXExceptionCode {
      * Cookie "%1$s" cannot be found because requests do not have any cookies. Please re-login.
      */
     MISSING_COOKIES("Cookie \"%1$s\" cannot be found because requests do not have any cookies. Please re-login.", AjaxExceptionMessages.MISSING_COOKIE_MSG, Category.CATEGORY_ERROR, 2), // Yapp, the same error code
-
+    /**
+     * Missing the following field in JSON data: %1$s
+     */
+    MISSING_FIELD("Missing the following field in JSON data: %1$s", AjaxExceptionMessages.MISSING_FIELD_MSG, Category.CATEGORY_ERROR, 2), // Yapp, the same error code
     ;
 
     public static final String PREFIX = "SVL";
