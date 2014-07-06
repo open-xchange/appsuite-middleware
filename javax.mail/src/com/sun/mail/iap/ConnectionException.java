@@ -81,6 +81,15 @@ public class ConnectionException extends ProtocolException {
 	this.p = p;
     }
 
+    /**
+     * Constructs an ConnectionException with the specified Response.
+     * @param r     the Response
+     */
+    public ConnectionException(Protocol p, Response r, Throwable cause) {
+    super(r, cause);
+    this.p = p;
+    }
+
     public Protocol getProtocol() {
 	return p;
     }

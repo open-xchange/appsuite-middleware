@@ -366,6 +366,10 @@ public class Protocol {
 	    throw new BadCommandException(response);
 	else if (response.isBYE()) {
 	    disconnect();
+	    Exception byeException = response.byeException;
+	    if (null != byeException) {
+	        throw new ConnectionException(this, response, byeException);
+        }
 	    throw new ConnectionException(this, response);
 	}
     }
