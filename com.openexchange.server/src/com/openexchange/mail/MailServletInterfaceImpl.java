@@ -786,9 +786,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final int accountId = argument.getAccountId();
         initConnection(accountId);
         final String fullName = argument.getFullname();
-
-
-
         final boolean mergeWithSent = includeSent && !mailAccess.getFolderStorage().getSentFolder().equals(fullName);
         final MailFields mailFields = new MailFields(MailField.getFields(fields));
         mailFields.add(MailField.toField(MailListField.getField(sortCol)));
