@@ -173,6 +173,15 @@ public class IMAPProtocol extends Protocol {
      * @see "RFC2060, section 6.1.1"
      */
     public void capability() throws ProtocolException {
+        capability(true);
+    }
+
+    /**
+     * CAPABILITY command.
+     *
+     * @see "RFC2060, section 6.1.1"
+     */
+    public void capability(boolean reparse) throws ProtocolException {
 	// Check CAPABILITY
 	final Response[] r = command("CAPABILITY", null);
 
@@ -180,8 +189,17 @@ public class IMAPProtocol extends Protocol {
         throw new ProtocolException(r[r.length-1].toString());
     }
 
-	capabilities = new HashMap<String, String>(10);
-	authmechs = new ArrayList<String>(5);
+	if (reparse) {
+	    capabilities = new HashMap<String, String>(10);
+	    authmechs = new ArrayList<String>(5);
+	} else {
+	    if (null == capabilities) {
+	        capabilities = new HashMap<String, String>(10);
+        }
+	    if (null == authmechs) {
+	        authmechs = new ArrayList<String>(5);
+        }
+	}
 	for (int i = 0, len = r.length; i < len; i++) {
 	    if (!(r[i] instanceof IMAPResponse)) {
             continue;
@@ -204,6 +222,14 @@ public class IMAPProtocol extends Protocol {
      * it and save the capabilities.
      */
     protected void setCapabilities(final Response r) {
+        setCapabilities(r, true);
+    }
+
+    /**
+     * If the response contains a CAPABILITY response code, extract
+     * it and save the capabilities.
+     */
+    protected void setCapabilities(final Response r, final boolean reparse) {
 	byte b;
 	while ((b = r.readByte()) > 0 && b != (byte)'[') {
         ;
@@ -216,8 +242,17 @@ public class IMAPProtocol extends Protocol {
 	if (!s.equalsIgnoreCase("CAPABILITY")) {
         return;
     }
-	capabilities = new HashMap<String, String>(10);
-	authmechs = new ArrayList<String>(5);
+	if (reparse) {
+	    capabilities = new HashMap<String, String>(10);
+	    authmechs = new ArrayList<String>(5);
+	} else {
+	    if (null == capabilities) {
+	        capabilities = new HashMap<String, String>(10);
+        }
+	    if (null == authmechs) {
+	        authmechs = new ArrayList<String>(5);
+        }
+	}
 	parseCapabilities(r);
     }
 
@@ -562,7 +597,7 @@ public class IMAPProtocol extends Protocol {
             logger.fine("AUTHENTICATE LOGIN command result: " + r);
         handleResult(r);
         // If the response includes a CAPABILITY response code, process it
-        setCapabilities(r);
+        setCapabilities(r, false);
         // if we get this far without an exception, we're authenticated
         authenticated = true;
     } finally {
@@ -676,7 +711,7 @@ public class IMAPProtocol extends Protocol {
             logger.fine("AUTHENTICATE PLAIN command result: " + r);
         handleResult(r);
         // If the response includes a CAPABILITY response code, process it
-        setCapabilities(r);
+        setCapabilities(r, false);
         // if we get this far without an exception, we're authenticated
         authenticated = true;
     } finally {
@@ -776,7 +811,7 @@ public class IMAPProtocol extends Protocol {
             logger.fine("AUTHENTICATE NTLM command result: " + r);
         handleResult(r);
         // If the response includes a CAPABILITY response code, process it
-        setCapabilities(r);
+        setCapabilities(r, false);
         // if we get this far without an exception, we're authenticated
         authenticated = true;
     } finally {

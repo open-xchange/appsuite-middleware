@@ -268,7 +268,7 @@ public class IMAPSaslAuthenticator implements SaslAuthenticator {
 
 	// Handle the final OK, NO, BAD or BYE response
 	pr.handleResult(r);
-	pr.setCapabilities(r);
+	pr.setCapabilities(r, false);
 
 	/*
 	 * If we're using the Novell Groupwise XGWTRUSTEDAPP mechanism
@@ -287,7 +287,7 @@ public class IMAPSaslAuthenticator implements SaslAuthenticator {
 	    // Handle result of this command
 	    pr.handleResult(responses[responses.length-1]);
 	    // If the response includes a CAPABILITY response code, process it
-	    pr.setCapabilities(responses[responses.length-1]);
+	    pr.setCapabilities(responses[responses.length-1], false);
 	}
 	return true;
     }

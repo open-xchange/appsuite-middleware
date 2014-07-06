@@ -939,7 +939,7 @@ public class IMAPStore extends Store
 	 */
 	if (p.hasCapability("__PRELOGIN__")) {
 	    try {
-		p.capability();
+		p.capability(false);
 	    } catch (ConnectionException cex) {
 		throw cex;	// rethrow connection failures
 		// XXX - assume connection has been closed
