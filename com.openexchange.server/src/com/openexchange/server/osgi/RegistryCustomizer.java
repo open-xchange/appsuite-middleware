@@ -62,7 +62,6 @@ import com.openexchange.server.services.ServerServiceRegistry;
 public class RegistryCustomizer<T> implements ServiceTrackerCustomizer<T,T> {
 
     private final BundleContext context;
-
     private final Class<T> clazz;
 
     /**
@@ -72,6 +71,7 @@ public class RegistryCustomizer<T> implements ServiceTrackerCustomizer<T,T> {
      * @param clazz The class of the service to register
      */
     public RegistryCustomizer(final BundleContext context, final Class<T> clazz) {
+        super();
         this.context = context;
         this.clazz = clazz;
     }
@@ -83,6 +83,14 @@ public class RegistryCustomizer<T> implements ServiceTrackerCustomizer<T,T> {
         return service;
     }
 
+    /**
+     * Hook to modify tracked service instance if needed.
+     * <p>
+     * By default the service is returned as-is.
+     *
+     * @param service The tracked service
+     * @return The possibly modified service
+     */
     protected T customize(final T service) {
         return service;
     }

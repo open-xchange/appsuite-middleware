@@ -161,6 +161,7 @@ import com.openexchange.login.LoginHandlerService;
 import com.openexchange.mail.MailCounterImpl;
 import com.openexchange.mail.MailIdleCounterImpl;
 import com.openexchange.mail.api.MailProvider;
+import com.openexchange.mail.api.unified.UnifiedViewService;
 import com.openexchange.mail.cache.MailAccessCacheEventListener;
 import com.openexchange.mail.cache.MailSessionEventHandler;
 import com.openexchange.mail.conversion.ICalMailPartDataSource;
@@ -566,6 +567,11 @@ public final class ServerActivator extends HousekeepingActivator {
          */
         track(FileStorageFactoryCandidate.class, new CompositeFileStorageFactory());
         track(ManagedFileManagement.class, new RegistryCustomizer<ManagedFileManagement>(context, ManagedFileManagement.class));
+
+        /*
+         * Track UnifiedViewService
+         */
+        track(UnifiedViewService.class, new RegistryCustomizer<UnifiedViewService>(context, UnifiedViewService.class));
 
         /*
          * User Service
