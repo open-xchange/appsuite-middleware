@@ -215,6 +215,11 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
 
     /**
      * Gets the classes of the services which need to be available to start this activator.
+     * <p>
+     * <div style="background-color:#FFDDDD; padding:6px; margin:0px;">
+     * <b>Note</b>: Listed services are supposed to be singleton services!<br>
+     * Please do not list such OSGi services that may get registered multiple times by different bundles.
+     * </div>
      *
      * @return The array of {@link Class} instances of needed services
      */
