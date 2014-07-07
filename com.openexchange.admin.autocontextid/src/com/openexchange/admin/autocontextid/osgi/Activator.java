@@ -75,7 +75,7 @@ public class Activator extends HousekeepingActivator {
             track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThreadExtended.cache.getPool()));
             openTrackers();
 
-            final Hashtable<String, String> props = new Hashtable<String, String>();
+            final Hashtable<String, String> props = new Hashtable<String, String>(2);
             props.put("name", "OXContext");
             LOG.info(OXContextPluginInterface.class.getName());
             registerService(OXContextPluginInterface.class, new OXAutoCIDContextImpl(), props);
