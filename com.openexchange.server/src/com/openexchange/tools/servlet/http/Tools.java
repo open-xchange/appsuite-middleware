@@ -138,7 +138,7 @@ public final class Tools {
         /*
          * Pattern for the HTTP header date format.
          */
-        HEADER_DATEFORMAT = new SimpleDateFormat("EEE',' dd MMMM yyyy HH:mm:ss z", Locale.ENGLISH);
+        HEADER_DATEFORMAT = new SimpleDateFormat("EEE',' dd MMM yyyy HH:mm:ss z", Locale.ENGLISH);
         HEADER_DATEFORMAT.setTimeZone(getTimeZone("GMT"));
         EXPIRES_DATE = HEADER_DATEFORMAT.format(new Date(799761600000L));
     }
