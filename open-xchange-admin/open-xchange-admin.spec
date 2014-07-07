@@ -159,6 +159,22 @@ if [ ${1:-0} -eq 2 ]; then
 	   rm -f $ptmp
 	fi 
 
+    # SoftwareChange_Request-2074
+    # -----------------------------------------------------------------------
+    pfile=/opt/open-xchange/etc/ModuleAccessDefinitions.properties
+    for key in rssbookmarks rssportal forum pinboardwrite; do
+        if grep -E $key $pfile > /dev/null; then
+            ptmp=${pfile}.$$
+        
+            sed -e "s;$key *,;;g" -e "s;, *$key;;g" $pfile > $ptmp
+        
+            if [ -s $ptmp ]; then
+                cp $ptmp $pfile
+            fi
+            rm -f $ptmp
+        fi 
+    done
+
     ox_update_permissions "/opt/open-xchange/etc/mpasswd" root:open-xchange 640
 fi
 
