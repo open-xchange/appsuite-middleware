@@ -104,6 +104,9 @@ public final class OAuthExceptionMessages implements LocalizableStrings {
     // The OAuth authentication process has been canceled.
     public static final String CANCELED_BY_USER_MSG = "The OAuth authentication process has been canceled.";
 
+    // Could not get a valid response from the associated OAuth provider.
+    public static final String NOT_A_VALID_RESPONSE_MSG = "Could not get a valid response from the associated OAuth provider.";
+
     /**
      * Initializes a new {@link OAuthExceptionMessages}.
      */
