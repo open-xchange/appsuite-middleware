@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 25
+%define        ox_release 26
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -52,6 +52,8 @@ ox_update_permissions /opt/open-xchange/etc/filestore-s3.properties root:open-xc
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Mon Jul 07 2014 Markus Wagner <markus.wagner@open-xchange.com>
+Build for patch 2014-07-14
 * Mon Jul 07 2014 Markus Wagner <markus.wagner@open-xchange.com>
 Build for patch 2014-07-07
 * Wed Jun 18 2014 Markus Wagner <markus.wagner@open-xchange.com>
