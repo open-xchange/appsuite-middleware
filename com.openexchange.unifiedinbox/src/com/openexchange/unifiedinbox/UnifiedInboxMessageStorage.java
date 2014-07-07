@@ -977,8 +977,9 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
     public MailMessage[] searchMessages(final UnifiedFullName fullName, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields, final Session session) throws OXException {
         int unifiedAccountId = Services.getService(UnifiedInboxManagement.class).getUnifiedINBOXAccountID(session);
 
-        final UserService userService = Services.getService(UserService.class);
-        Locale locale = userService.getUser(session.getUserId(), ctx).getLocale();
+        ContextService contextService = Services.getService(ContextService.class);
+        UserService userService = Services.getService(UserService.class);
+        Locale locale = userService.getUser(session.getUserId(), contextService.getContext(session.getContextId())).getLocale();
 
         return searchMessages(fullName.getFullName(), indexRange, sortField, order, searchTerm, fields, session, false, unifiedAccountId, locale);
     }
@@ -987,8 +988,9 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
     public MailMessage[] allMessages(UnifiedFullName fullName, MailField[] fields, Session session) throws OXException {
         int unifiedAccountId = Services.getService(UnifiedInboxManagement.class).getUnifiedINBOXAccountID(session);
 
-        final UserService userService = Services.getService(UserService.class);
-        Locale locale = userService.getUser(session.getUserId(), ctx).getLocale();
+        ContextService contextService = Services.getService(ContextService.class);
+        UserService userService = Services.getService(UserService.class);
+        Locale locale = userService.getUser(session.getUserId(), contextService.getContext(session.getContextId())).getLocale();
 
         return searchMessages(fullName.getFullName(), null, MailSortField.RECEIVED_DATE, OrderDirection.DESC, null, fields, session, false, unifiedAccountId, locale);
     }
