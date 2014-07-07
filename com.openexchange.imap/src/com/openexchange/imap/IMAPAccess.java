@@ -415,7 +415,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 try {
                     messageStorage.releaseResources();
                 } catch (final OXException e) {
-                    LOG.error("Error while closing IMAP message storage.", e);
+                    LOG.debug("Error while closing IMAP message storage.", e);
                 }
             }
             final IMAPStore imapStore = this.imapStore;
