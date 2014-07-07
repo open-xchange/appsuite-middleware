@@ -1,3 +1,7 @@
+* 2014-07-07 - thorben.betten@open-xchange.com
+
+ - Attempt to fix bug 33200: Clear preview cache asynchronously
+
 * 2014-07-03 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 33424: Add mpasswd file to list of properties files
