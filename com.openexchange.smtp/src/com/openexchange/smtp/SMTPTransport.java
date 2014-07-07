@@ -121,6 +121,7 @@ import com.openexchange.mail.mime.datasource.MimeMessageDataSource;
 import com.openexchange.mail.mime.filler.MimeMessageFiller;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
+import com.openexchange.mail.transport.MimeSupport;
 import com.openexchange.mail.transport.config.ITransportProperties;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.transport.config.TransportProperties;
@@ -145,7 +146,7 @@ import com.sun.mail.smtp.SMTPMessage;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SMTPTransport extends MailTransport {
+public final class SMTPTransport extends MailTransport implements MimeSupport {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SMTPTransport.class);
 
@@ -695,6 +696,41 @@ public final class SMTPTransport extends MailTransport {
         } finally {
             // Restore the ClassLoader
             // Thread.currentThread().setContextClassLoader(tcl);
+        }
+    }
+
+    @Override
+    public void sendMimeMessage(MimeMessage mimeMessage, Address[] allRecipients) throws OXException {
+        final SMTPConfig smtpConfig = getTransportConfig0();
+        try {
+            /*
+             * Check recipients
+             */
+            final Address[] recipients = allRecipients == null ? mimeMessage.getAllRecipients() : allRecipients;
+            processAddressHeader(mimeMessage);
+            final boolean poisoned = checkRecipients(recipients);
+            if (poisoned) {
+                saveChangesSafe(mimeMessage);
+            } else {
+                try {
+                    final long start = System.currentTimeMillis();
+                    final Transport transport = getSMTPSession().getTransport(SMTP);
+                    try {
+                        connectTransport(transport, smtpConfig);
+                        saveChangesSafe(mimeMessage);
+                        transport(mimeMessage, recipients, transport, smtpConfig);
+                        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                    } catch (final javax.mail.AuthenticationFailedException e) {
+                        throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
+                    } finally {
+                        transport.close();
+                    }
+                } catch (final MessagingException e) {
+                    throw MimeMailException.handleMessagingException(e, smtpConfig, session);
+                }
+            }
+        } catch (final MessagingException e) {
+            throw MimeMailException.handleMessagingException(e, smtpConfig, session);
         }
     }
 
