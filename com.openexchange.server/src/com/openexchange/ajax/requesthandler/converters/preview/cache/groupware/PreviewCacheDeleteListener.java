@@ -55,10 +55,16 @@ import java.sql.SQLException;
 import org.slf4j.Logger;
 import com.openexchange.ajax.requesthandler.cache.ResourceCache;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.ResourceCacheMBeanImpl;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.ThreadRenamer;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -80,13 +86,41 @@ public class PreviewCacheDeleteListener implements DeleteListener {
         if (event.getType() == DeleteEvent.TYPE_USER) {
             deleteUserEntriesFromDB(event, writeCon);
         } else if (event.getType() == DeleteEvent.TYPE_CONTEXT) {
-            deleteContextEntriesFromDB(event, writeCon);
+            final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+            if (null == dbService) {
+                deleteContextEntries(event.getContext().getContextId(), writeCon);
+                return;
+            }
+
+            // Perform the two steps asynchronously
+            final int contextId = event.getContext().getContextId();
+            AbstractTask<Void> task = new AbstractTask<Void>() {
+
+                @Override
+                public void setThreadName(ThreadRenamer threadRenamer) {
+                    threadRenamer.renamePrefix("PreviewCacheDeleteListener-");
+                }
+
+                @Override
+                public Void call() throws OXException {
+                    // Cleanse by instance
+                    deleteContextEntries(contextId, null);
+
+                    // Cleanse database content
+                    Connection con = dbService.getWritable(contextId);
+                    try {
+                        deleteFromDB(contextId, writeCon);
+                        return null;
+                    } finally {
+                        dbService.backWritable(contextId, con);
+                    }
+                }
+            };
+            ThreadPools.getThreadPool().submit(task, CallerRunsBehavior.<Void> getInstance());
         }
     }
 
-    private void deleteContextEntriesFromDB(final DeleteEvent event, final Connection writeCon) throws OXException {
-        final int contextId = event.getContext().getContextId();
-
+    protected void deleteContextEntries(final int contextId, final Connection writeCon) throws OXException {
         // Cleanse by instance
         final ResourceCache resourceCache = ResourceCacheMBeanImpl.CACHE_REF.get();
         if (null != resourceCache) {
@@ -98,6 +132,12 @@ public class PreviewCacheDeleteListener implements DeleteListener {
             }
         }
 
+        if (null != writeCon) {
+            deleteFromDB(contextId, writeCon);
+        }
+    }
+
+    protected void deleteFromDB(final int contextId, final Connection writeCon) throws OXException {
         // DB cleansing
         PreparedStatement stmt = null;
         try {
