@@ -65,7 +65,6 @@ import gnu.trove.set.hash.TIntHashSet;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -1393,7 +1392,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  */
                 {
                     final int length = mails.length;
-                    final List<MailMessage> msgList = new ArrayList<MailMessage>(length);
+                    final List<MailMessage> msgList = new LinkedList<MailMessage>();
                     for (int i = 0; i < length; i++) {
                         final MailMessage tmp = mails[i];
                         if (null != tmp) {
@@ -1401,7 +1400,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         }
                     }
                     Collections.sort(msgList, new MailMessageComparator(effectiveSortField, order == OrderDirection.DESC, getLocale()));
-                    final MailMessage[] tmp = msgList.toArray(new MailMessage[0]);
+                    final MailMessage[] tmp = msgList.toArray(new MailMessage[msgList.size()]);
                     mailMessages = applyIndexRange(tmp, indexRange);
                 }
             } else {
@@ -1411,7 +1410,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Fetch (possibly) filtered and sorted sequence numbers
                  */
                 if (body) {
-                    final List<MailMessage> list = new ArrayList<MailMessage>(finalIds.length);
+                    final List<MailMessage> list = new LinkedList<MailMessage>();
                     final Message[] messages = imapFolder.getMessages(finalIds);
                     imapFolder.fetch(messages, FETCH_PROFILE_ENVELOPE_UID);
                     for (final Message message : messages) {
@@ -1684,7 +1683,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         // Comparator
         final MailMessageComparator threadComparator = COMPARATOR_DESC;
         // Sort
-        List<List<MailMessage>> list = new ArrayList<List<MailMessage>>(conversations.size());
+        List<List<MailMessage>> list = new LinkedList<List<MailMessage>>();
         for (final Conversation conversation : conversations) {
             list.add(conversation.getMessages(threadComparator));
         }
@@ -1732,9 +1731,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
         } else {
             if (body) {
-                List<List<MailMessage>> newlist = new ArrayList<List<MailMessage>>(list.size());
+                List<List<MailMessage>> newlist = new LinkedList<List<MailMessage>>();
                 for (List<MailMessage> conversation : list) {
-                    List<MailMessage> newconversation = new ArrayList<MailMessage>(conversation.size());
+                    List<MailMessage> newconversation = new LinkedList<MailMessage>();
                     for (MailMessage mailMessage : conversation) {
                         newconversation.add(getMessage(mailMessage.getFolder(), mailMessage.getMailId(), false));
                     }
@@ -1792,7 +1791,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
             final MailMessageComparator threadComparator = COMPARATOR_DESC;
             // Sort
-            list = new ArrayList<List<MailMessage>>(conversations.size());
+            list = new LinkedList<List<MailMessage>>();
             for (final Conversation conversation : conversations) {
                 list.add(conversation.getMessages(threadComparator));
             }
@@ -1869,9 +1868,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
             // Fill selected chunk
             if (body) {
-                List<List<MailMessage>> newlist = new ArrayList<List<MailMessage>>(list.size());
+                List<List<MailMessage>> newlist = new LinkedList<List<MailMessage>>();
                 for (List<MailMessage> conversation : list) {
-                    List<MailMessage> newconversation = new ArrayList<MailMessage>(conversation.size());
+                    List<MailMessage> newconversation = new LinkedList<MailMessage>();
                     for (MailMessage mailMessage : conversation) {
                         newconversation.add(getMessage(mailMessage.getFolder(), mailMessage.getMailId(), false));
                     }
@@ -2042,7 +2041,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Output as flat list
                  */
-                final List<MailMessage> flatList = new ArrayList<MailMessage>(mapping.size());
+                final List<MailMessage> flatList = new LinkedList<MailMessage>();
                 if (usedFields.contains(MailField.ACCOUNT_NAME) || usedFields.contains(MailField.FULL)) {
                     for (final MailMessage mail : flatList) {
                         setAccountInfo(mail);
@@ -2113,7 +2112,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             /*
              * Output as flat list
              */
-            final List<MailMessage> flatList = new ArrayList<MailMessage>(msgs.length);
+            final List<MailMessage> flatList = new LinkedList<MailMessage>();
             ThreadSortUtil.toFlatList(structuredList, flatList);
             return flatList.toArray(new MailMessage[flatList.size()]);
         } catch (final MessagingException e) {
@@ -2722,10 +2721,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 try {
                     if (hasUIDPlus) {
                         // Perform append expecting APPENUID response code
-                        retval = longs2uids(checkAndConvertAppendUID(imapFolder.appendUIDMessages(filteredMsgs.toArray(new Message[0]))));
+                        retval = longs2uids(checkAndConvertAppendUID(imapFolder.appendUIDMessages(filteredMsgs.toArray(new Message[filteredMsgs.size()]))));
                     } else {
                         // Perform simple append
-                        imapFolder.appendMessages(filteredMsgs.toArray(new Message[0]));
+                        imapFolder.appendMessages(filteredMsgs.toArray(new Message[filteredMsgs.size()]));
                     }
                 } catch (final MessagingException e) {
                     final Exception nextException = e.getNextException();
@@ -2897,10 +2896,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 try {
                     if (hasUIDPlus) {
                         // Perform append expecting APPENUID response code
-                        retval = checkAndConvertAppendUID(imapFolder.appendUIDMessages(filteredMsgs.toArray(new Message[0])));
+                        retval = checkAndConvertAppendUID(imapFolder.appendUIDMessages(filteredMsgs.toArray(new Message[filteredMsgs.size()])));
                     } else {
                         // Perform simple append
-                        imapFolder.appendMessages(filteredMsgs.toArray(new Message[0]));
+                        imapFolder.appendMessages(filteredMsgs.toArray(new Message[filteredMsgs.size()]));
                     }
                 } catch (final MessagingException e) {
                     final Exception nextException = e.getNextException();
@@ -3956,7 +3955,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             return Collections.emptyList();
         }
         final int length = elements.length;
-        final List<E> list = new ArrayList<E>(length);
+        final List<E> list = new LinkedList<E>();
         for (int i = 0; i < length; i++) {
             final E elem = elements[i];
             if (null != elem) {
