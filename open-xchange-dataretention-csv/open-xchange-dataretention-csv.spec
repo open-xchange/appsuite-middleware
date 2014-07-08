@@ -2,7 +2,6 @@
 Name:           open-xchange-dataretention-csv
 BuildArch:      noarch
 #!BuildIgnore:  post-build-checks
-BuildRequires:  ant
 BuildRequires:  ant-nodeps
 BuildRequires:  open-xchange-core
 BuildRequires:  java-devel >= 1.6.0
@@ -51,6 +50,8 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc datare
 %config(noreplace) /opt/open-xchange/etc/dataretention.properties
 
 %changelog
+* Tue Jul 01 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-07-07
 * Thu Jun 26 2014 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.6.1
 * Mon Jun 23 2014 Marcus Klein <marcus.klein@open-xchange.com>

@@ -2,7 +2,6 @@
 Name:           open-xchange-datamining
 BuildArch:      noarch
 #!BuildIgnore:  post-build-checks
-BuildRequires:  ant
 BuildRequires:  ant-nodeps
 BuildRequires:  open-xchange-core
 BuildRequires:  java-devel >= 1.6.0
@@ -51,6 +50,8 @@ GLOBIGNORE='*'
 /opt/open-xchange/sbin/*
 
 %changelog
+* Tue Jul 01 2014 Karsten Will <karsten.will@open-xchange.com>
+Build for patch 2014-07-07
 * Thu Jun 26 2014 Karsten Will <karsten.will@open-xchange.com>
 prepare for 7.6.1
 * Mon Jun 23 2014 Karsten Will <karsten.will@open-xchange.com>

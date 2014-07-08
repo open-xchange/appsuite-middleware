@@ -373,8 +373,8 @@ public class S3FileStorage implements FileStorage {
     /**
      * Gets metadata for an existing file.
      *
-     * @param key The key of the file
-     * @return The metadata
+     * @param key The (full) key for the new file; no additional prefix will be prepended implicitly
+     * @return The upload ID for the multipart upload
      * @throws OXException
      */
     private ObjectMetadata getMetadata(String key) throws OXException {

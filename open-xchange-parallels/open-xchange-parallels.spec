@@ -2,7 +2,6 @@
 Name:           open-xchange-parallels
 BuildArch:      noarch
 #!BuildIgnore:  post-build-checks
-BuildRequires:  ant
 BuildRequires:  ant-nodeps
 BuildRequires:  open-xchange-admin
 BuildRequires:  java-devel >= 1.6.0
@@ -15,7 +14,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        Extensions for integration with Parallels
-Autoreqprov:   no
+Autoreqprov:    no
 Requires:       open-xchange-admin-soap >= @OXVERSION@
 Requires:       open-xchange-spamhandler
 Provides:       open-xchange-authentication
@@ -76,6 +75,8 @@ fi
 %doc com.openexchange.parallels/ChangeLog
 
 %changelog
+* Tue Jul 01 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-07-07
 * Thu Jun 26 2014 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.6.1
 * Mon Jun 23 2014 Marcus Klein <marcus.klein@open-xchange.com>
