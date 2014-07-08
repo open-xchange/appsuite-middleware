@@ -307,11 +307,16 @@ public abstract class MailServletInterface implements Closeable {
     public abstract MailPart getMessageAttachment(String folder, String msgUID, String attachmentPosition, boolean displayVersion) throws OXException;
 
     /**
+     * Returns all (file) attachments from denoted message
+     */
+    public abstract List<MailPart> getAllMessageAttachments(final String folder, final String msgUID) throws OXException;
+
+    /**
      * Returns message's attachments as a ZIP file backed by returned managed file instance.
      *
      * @param folder The folder
      * @param msgUID The message ID
-     * @param attachmentPositions The attachment positions
+     * @param attachmentPositions The attachment positions or <code>null</code> to consider all file/non-inline attachments
      * @return A ZIP file backed by returned managed file instance
      * @throws OXException If an error occurs
      */

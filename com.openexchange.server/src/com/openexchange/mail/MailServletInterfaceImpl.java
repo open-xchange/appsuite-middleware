@@ -1351,6 +1351,23 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
+    public List<MailPart> getAllMessageAttachments(final String folder, final String msgUID) throws OXException {
+        final FullnameArgument argument = prepareMailFolderParam(folder);
+        final int accountId = argument.getAccountId();
+        initConnection(accountId);
+        final String fullName = argument.getFullname();
+
+        MailMessage message = mailAccess.getMessageStorage().getMessage(folder, fullName, false);
+        if (null == message) {
+            throw MailExceptionCode.MAIL_NOT_FOUND.create(msgUID, fullName);
+        }
+
+        NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();
+        new MailMessageParser().setInlineDetectorBehavior(true).parseMailMessage(message, handler);
+        return handler.getNonInlineParts();
+    }
+
+    @Override
     public ManagedFile getMessages(final String folder, final String[] msgIds) throws OXException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
@@ -1488,9 +1505,15 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         /*
          * Get parts
          */
-        final MailPart[] parts = new MailPart[attachmentPositions.length];
-        for (int i = 0; i < parts.length; i++) {
-            parts[i] = mailAccess.getMessageStorage().getAttachment(fullName, msgUID, attachmentPositions[i]);
+        final MailPart[] parts;
+        if (null == attachmentPositions) {
+            List<MailPart> l = getAllMessageAttachments(folder, msgUID);
+            parts = l.toArray(new MailPart[l.size()]);
+        } else {
+            parts = new MailPart[attachmentPositions.length];
+            for (int i = 0; i < parts.length; i++) {
+                parts[i] = mailAccess.getMessageStorage().getAttachment(fullName, msgUID, attachmentPositions[i]);
+            }
         }
         /*
          * Store them temporary to files
