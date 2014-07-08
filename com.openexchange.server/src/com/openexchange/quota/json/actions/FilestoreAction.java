@@ -47,51 +47,51 @@
  *
  */
 
-package com.openexchange.quota.json;
+package com.openexchange.quota.json.actions;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import org.osgi.framework.BundleContext;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.annotations.Module;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.quota.json.actions.GetAction;
+import com.openexchange.quota.json.QuotaAJAXRequest;
 import com.openexchange.server.ServiceLookup;
 
+
 /**
- * {@link QuotaActionFactory}
+ * {@link FilestoreAction}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Module(name = "quota", description = "The quota module allows accesssing information about the use and quota of the filestore/mailstorage.")
-public class QuotaActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AJAXActionService> actions;
+@Action(method = RequestMethod.GET, name = "filestore", description = "Get the filestore usage data", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
+}, responseDescription = "A JSON Object containing the fields \"use\" and \"quota\". \"use\" represents the uploaded files sizes sum and the field \"quota\" represents the maximum.")
+public final class FilestoreAction extends AbstractQuotaAction {
 
     /**
-     * Initializes a new {@link QuotaActionFactory}.
-     *
-     * @param services The service look-up
+     * Initializes a new {@link FilestoreAction}.
+     * @param services
      */
-    public QuotaActionFactory(final ServiceLookup services, final BundleContext context) {
-        super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(5);
-        GetAction getAction = new com.openexchange.quota.json.actions.GetAction(context);
-        actions.put("get", getAction);
-        actions.put("GET", getAction);
-        actions.put("filestore", new com.openexchange.quota.json.actions.FilestoreAction(services));
-        actions.put("mail", new com.openexchange.quota.json.actions.MailAction(services));
+    public FilestoreAction(final ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
+    protected AJAXRequestResult perform(final QuotaAJAXRequest req) throws OXException, JSONException {
+        if (req.getFsException() != null) {
+            throw req.getFsException();
+        }
+        final long use = req.getQfs().getUsage();
+        final long quota = req.getQfs().getQuota();
+        final JSONObject data = new JSONObject();
+        data.put("quota", quota);
+        data.put("use", use);
+        /*
+         * Return JSON object
+         */
+        return new AJAXRequestResult(data, "json");
     }
 
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
-    }
 }

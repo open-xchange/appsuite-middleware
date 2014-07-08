@@ -57,8 +57,8 @@ import java.util.Stack;
  * A {@link QuotaAndUsage} encapsulates storage and object quotas and their current
  * usages for a certain account in a certain module. Whether a quota is defined at
  * all is indicated by the {@link #hasObjectQuota()} and {@link #hasStorageQuota()}
- * methods.
- *
+ * methods.<br>
+ * <br>
  * Instances of {@link QuotaAndUsage} are created with the builder pattern. Two different
  * builders exists to construct either a single {@link QuotaAndUsage} or a list of several
  * ones, belonging to different accounts. See {@link QuotaAndUsage#newBuilder(String, String)}

@@ -49,49 +49,158 @@
 
 package com.openexchange.quota.json.actions;
 
+import java.util.List;
+import java.util.Locale;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONValue;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.quota.json.QuotaAJAXRequest;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.i18n.I18nService;
+import com.openexchange.quota.usage.QuotaAndUsage;
+import com.openexchange.quota.usage.QuotaAndUsageProvider;
+import com.openexchange.quota.usage.QuotaAndUsageService;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link GetAction}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.6.1
  */
-@Action(method = RequestMethod.GET, name = "filestore", description = "Get the filestore usage data", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
-}, responseDescription = "A JSON Object containing the fields \"use\" and \"quota\". \"use\" represents the uploaded files sizes sum and the field \"quota\" represents the maximum.")
-public final class GetAction extends AbstractQuotaAction {
+public class GetAction implements AJAXActionService {
 
-    /**
-     * Initializes a new {@link GetAction}.
-     * @param services
-     */
-    public GetAction(final ServiceLookup services) {
-        super(services);
+    private final BundleContext context;
+
+    public GetAction(BundleContext context) {
+        super();
+        this.context = context;
     }
 
     @Override
-    protected AJAXRequestResult perform(final QuotaAJAXRequest req) throws OXException, JSONException {
-        if (req.getFsException() != null) {
-            throw req.getFsException();
+    public AJAXRequestResult perform(AJAXRequestData req, ServerSession session) throws OXException {
+        String module = req.getParameter("module");
+        String accountID = req.getParameter("account");
+
+        ServiceReference<QuotaAndUsageService> qausRef = context.getServiceReference(QuotaAndUsageService.class);
+        if (qausRef == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(QuotaAndUsageService.class.getName());
+        } else {
+            QuotaAndUsageService quotaAndUsageService = context.getService(qausRef);
+            try {
+                if (quotaAndUsageService == null) {
+                    throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(QuotaAndUsageService.class.getName());
+                } else {
+                    JSONValue result = performRequest(quotaAndUsageService, session, module, accountID);
+                    return new AJAXRequestResult(result, "json");
+                }
+            } catch (JSONException e) {
+                throw AjaxExceptionCodes.JSON_ERROR.create(e);
+            } finally {
+                if (qausRef != null & quotaAndUsageService != null) {
+                    context.ungetService(qausRef);
+                }
+            }
         }
-        final long use = req.getQfs().getUsage();
-        final long quota = req.getQfs().getQuota();
-        final JSONObject data = new JSONObject();
-        data.put("quota", quota);
-        data.put("use", use);
-        /*
-         * Return JSON object
-         */
-        return new AJAXRequestResult(data, "json");
+    }
+
+    private JSONValue performRequest(QuotaAndUsageService quotaAndUsageService, ServerSession session, String module, String accountID) throws JSONException, OXException {
+        if (module == null) {
+            JSONObject allQuotas = new JSONObject();
+            for (QuotaAndUsageProvider provider : quotaAndUsageService.getAllProviders()) {
+                List<QuotaAndUsage> quotasAndUsages = provider.getFor(session);
+                JSONArray jQuotas = buildQuotasJSON(quotasAndUsages);
+                if (!jQuotas.isEmpty()) {
+                    JSONObject jProvider = new JSONObject();
+                    jProvider.put("display_name", localize(provider.getDisplayName(), session));
+                    jProvider.put("accounts", jQuotas);
+                    allQuotas.put(provider.getModuleID(), jProvider);
+                }
+            }
+
+            return allQuotas;
+        } else {
+            QuotaAndUsageProvider provider = quotaAndUsageService.getProvider(module);
+            if (provider == null) {
+                throw AjaxExceptionCodes.BAD_REQUEST_CUSTOM.create("No provider exists for module '" + module + "'.");
+            }
+
+            if (accountID == null) {
+                return buildQuotasJSON(provider.getFor(session));
+            } else {
+                QuotaAndUsage quotaAndUsage = provider.getFor(session, accountID);
+                if (quotaAndUsage == null) {
+                    throw AjaxExceptionCodes.BAD_REQUEST_CUSTOM.create("No account '" + accountID + "' exists for module '" + module + "'.");
+                }
+
+                return buildQuotaJSON(quotaAndUsage);
+            }
+        }
+    }
+
+    private String localize(String str, ServerSession session) throws OXException {
+        String localized = null;
+        try {
+            for (ServiceReference<I18nService> ref : context.getServiceReferences(I18nService.class, null)) {
+                Locale locale = (Locale) ref.getProperty(I18nService.LANGUAGE);
+                if (locale != null && locale.equals(session.getUser().getLocale())) {
+                    I18nService i18nService = context.getService(ref);
+                    if (i18nService != null) {
+                        localized = i18nService.getLocalized(str);
+                        context.ungetService(ref);
+                        break;
+                    }
+                }
+            }
+        } catch (InvalidSyntaxException e) {
+            throw new OXException(e);
+        }
+
+        if (localized == null) {
+            return str;
+        }
+
+        return localized;
+    }
+
+    private static JSONArray buildQuotasJSON(List<QuotaAndUsage> quotasAndUsages) throws JSONException {
+        JSONArray jQuotas = new JSONArray();
+        for (QuotaAndUsage quotaAndUsage : quotasAndUsages) {
+            JSONObject jQuota = buildQuotaJSON(quotaAndUsage);
+            if (jQuota != null) {
+                jQuotas.put(jQuota);
+            }
+        }
+
+        return jQuotas;
+    }
+
+    private static JSONObject buildQuotaJSON(QuotaAndUsage quotaAndUsage) throws JSONException {
+        if (quotaAndUsage.hasStorageQuota() || quotaAndUsage.hasObjectQuota()) {
+            JSONObject jQuota = new JSONObject();
+            jQuota.put("account_id", quotaAndUsage.getAccountID());
+            jQuota.put("account_name", quotaAndUsage.getAccountName());
+            if (quotaAndUsage.hasStorageQuota()) {
+                jQuota.put("quota", quotaAndUsage.getMaxStorage());
+                jQuota.put("use", quotaAndUsage.getUsedStorage());
+            }
+
+            if (quotaAndUsage.hasObjectQuota()) {
+                jQuota.put("countquota", quotaAndUsage.getMaxObjects());
+                jQuota.put("countuse", quotaAndUsage.getUsedObjects());
+            }
+
+            return jQuota;
+        }
+
+        return null;
     }
 
 }
