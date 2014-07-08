@@ -75,10 +75,6 @@ import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
-import com.openexchange.quota.QuotaService;
-import com.openexchange.quota.QuotaType;
-import com.openexchange.quota.Resource;
-import com.openexchange.quota.ResourceDescription;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
@@ -196,18 +192,9 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * check quota restrictions
              */
-            QuotaService quotaService = RdbServiceLookup.getService(QuotaService.class);
-            if (null != quotaService) {
-                Quota quota = quotaService.getQuotaFor(Resource.CONTACT, ResourceDescription.getEmptyResourceDescription(), session);
-                if (null != quota) {
-                    long quotaValue = quota.getQuota(QuotaType.AMOUNT);
-                    if (0 < quotaValue) {
-                        final long used = executor.count(connection, Table.CONTACTS, contextID);
-                        if (quotaValue <= used) {
-                            throw QuotaExceptionCodes.QUOTA_EXCEEDED_CONTACTS.create(used, quotaValue);
-                        }
-                    }
-                }
+            Quota quota = RdbContactQuotaProvider.getAmountQuota(serverSession, executor, connection);
+            if (null != quota && 0 < quota.getLimit() && 1 + quota.getUsage() > quota.getLimit()) {
+                throw QuotaExceptionCodes.QUOTA_EXCEEDED_CONTACTS.create(quota.getUsage(), quota.getLimit());
             }
             /*
              * prepare insert

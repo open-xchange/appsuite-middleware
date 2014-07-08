@@ -47,43 +47,57 @@
  *
  */
 
-package com.openexchange.quota.osgi;
+package com.openexchange.quota;
 
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.quota.QuotaProvider;
-import com.openexchange.quota.QuotaService;
-import com.openexchange.quota.internal.QuotaProviderTracker;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
 
 /**
- * {@link QuotaActivator}
+ * {@link DefaultAccountQuota} - Represents a quota restriction.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class QuotaActivator extends HousekeepingActivator {
+public class DefaultAccountQuota implements AccountQuota {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(QuotaActivator.class);
+    private final EnumMap<QuotaType, Quota> quotas;
+    private final String accountName;
+    private final String accountID;
 
-    /**
-     * Initializes a new {@link QuotaActivator}.
-     */
-    public QuotaActivator() {
+    public DefaultAccountQuota(String accountID, String accountName) {
         super();
+        this.accountID = accountID;
+        this.accountName = accountName;
+        this.quotas = new EnumMap<QuotaType, Quota>(QuotaType.class);
+    }
+
+    public DefaultAccountQuota addQuota(Quota quota) {
+        quotas.put(quota.getType(), quota);
+        return this;
+    }
+
+    public DefaultAccountQuota addQuota(final QuotaType type, final long limit, final long usage) {
+        return addQuota(new Quota(type, limit, usage));
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+    public List<Quota> getAll() {
+        return new ArrayList<Quota>(quotas.values());
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        LOG.info("Starting bundle {}", context.getBundle().getSymbolicName());
+    public Quota getQuota(QuotaType type) {
+        return quotas.get(type);
+    }
 
-        QuotaProviderTracker multiTalent = new QuotaProviderTracker(context);
-        track(QuotaProvider.class, multiTalent);
-        openTrackers();
+    @Override
+    public String getAccountName() {
+        return accountName;
+    }
 
-        registerService(QuotaService.class, multiTalent);
+    @Override
+    public String getAccountID() {
+        return accountID;
     }
 
 }

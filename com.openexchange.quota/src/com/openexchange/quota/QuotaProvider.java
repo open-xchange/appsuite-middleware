@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,43 +47,60 @@
  *
  */
 
-package com.openexchange.quota.osgi;
+package com.openexchange.quota;
 
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.quota.QuotaProvider;
-import com.openexchange.quota.QuotaService;
-import com.openexchange.quota.internal.QuotaProviderTracker;
+import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
+
 
 /**
- * {@link QuotaActivator}
+ * A {@link QuotaProvider} must be implemented by every module that wants
+ * to contribute to the general {@link QuotaAndUsageService}.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.6.1
  */
-public final class QuotaActivator extends HousekeepingActivator {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(QuotaActivator.class);
+public interface QuotaProvider {
 
     /**
-     * Initializes a new {@link QuotaActivator}.
+     * Gets the id of the corresponding module. A modules id must always be
+     * unique.
+     *
+     * @return The modules id; never <code>null</code>.
      */
-    public QuotaActivator() {
-        super();
-    }
+    String getModuleID();
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
-    }
+    /**
+     * Gets the modules name that may be displayed within a client application.
+     * The name should be localizable, that means it should be a valid key for
+     * the I18nService.
+     *
+     * @return The name, never <code>null</code>.
+     */
+    String getDisplayName();
 
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("Starting bundle {}", context.getBundle().getSymbolicName());
+    /**
+     * Gets the quota and usage for a session-specific user and a given account.
+     *
+     * @param session The session, never <code>null</code>.
+     * @param account The id of a possible account for the user within this module,
+     *  never <code>null</code>.
+     * @return The quota and usage. Will be <code>null</code> if no account
+     *  exists for the given id.
+     * @throws OXException If an error occurs while calculating quota and usage.
+     */
+    AccountQuota getFor(Session session, String accountID) throws OXException;
 
-        QuotaProviderTracker multiTalent = new QuotaProviderTracker(context);
-        track(QuotaProvider.class, multiTalent);
-        openTrackers();
-
-        registerService(QuotaService.class, multiTalent);
-    }
+    /**
+     * Gets the quota and usage for all accounts for the session-specific
+     * user within this module.
+     *
+     * @param session The session, never <code>null</code>.
+     * @return A list of quotas and usages. Never <code>null</code> but possibly
+     *  empty, if no account exists.
+     * @throws OXException If an error occurs while calculating quota and usage.
+     */
+    List<AccountQuota> getFor(Session session) throws OXException;
 
 }

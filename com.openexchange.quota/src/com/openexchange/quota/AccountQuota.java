@@ -47,43 +47,23 @@
  *
  */
 
-package com.openexchange.quota.osgi;
+package com.openexchange.quota;
 
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.quota.QuotaProvider;
-import com.openexchange.quota.QuotaService;
-import com.openexchange.quota.internal.QuotaProviderTracker;
+import java.util.List;
 
 /**
- * {@link QuotaActivator}
+ * {@link AccountQuota} - Represents a quota restriction.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class QuotaActivator extends HousekeepingActivator {
+public interface AccountQuota {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(QuotaActivator.class);
+    List<Quota> getAll();
 
-    /**
-     * Initializes a new {@link QuotaActivator}.
-     */
-    public QuotaActivator() {
-        super();
-    }
+    Quota getQuota(QuotaType type);
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
-    }
+    String getAccountName();
 
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("Starting bundle {}", context.getBundle().getSymbolicName());
-
-        QuotaProviderTracker multiTalent = new QuotaProviderTracker(context);
-        track(QuotaProvider.class, multiTalent);
-        openTrackers();
-
-        registerService(QuotaService.class, multiTalent);
-    }
+    String getAccountID();
 
 }

@@ -54,7 +54,7 @@ package com.openexchange.quota;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Quota {
+public class Quota {
 
     /**
      * The quota value for unlimited.
@@ -62,11 +62,51 @@ public interface Quota {
     public static final long UNLIMITED = -1L;
 
     /**
-     * Gets the quota for specified type.
-     *
-     * @param type The quota type
-     * @return The quota restriction or {@link #UNLIMITED}
+     * Represents an unlimited quota of type {@link QuotaType#AMOUNT}.
      */
-    long getQuota(QuotaType type);
+    public static final Quota UNLIMITED_AMOUNT = new Quota(QuotaType.AMOUNT, UNLIMITED, 0);
+
+    /**
+     * Represents an unlimited quota of type {@link QuotaType#SIZE}.
+     */
+    public static final Quota UNLIMITED_SIZE = new Quota(QuotaType.SIZE, UNLIMITED, 0);
+
+    private final QuotaType type;
+    private final long usage;
+    private final long limit;
+
+    public Quota(QuotaType type, long limit, long usage) {
+        super();
+        this.type = type;
+        this.limit = limit;
+        this.usage = usage;
+    }
+
+    /**
+     * Gets the usage
+     *
+     * @return The usage
+     */
+    public long getUsage() {
+        return usage;
+    }
+
+    /**
+     * Gets the type
+     *
+     * @return The type
+     */
+    public QuotaType getType() {
+        return type;
+    }
+
+    /**
+     * Gets the limit
+     *
+     * @return The limit
+     */
+    public long getLimit() {
+        return limit;
+    }
 
 }

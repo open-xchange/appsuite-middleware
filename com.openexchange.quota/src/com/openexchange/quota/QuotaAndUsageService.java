@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,43 +47,41 @@
  *
  */
 
-package com.openexchange.quota.osgi;
+package com.openexchange.quota;
 
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.quota.QuotaProvider;
-import com.openexchange.quota.QuotaService;
-import com.openexchange.quota.internal.QuotaProviderTracker;
+import java.util.List;
+
 
 /**
- * {@link QuotaActivator}
+ * Open-Xchange consists of a set of modules that serve user requests.
+ * Every module that allows users to store data provides a certain
+ * amount of storage and a certain number of objects that it will handle
+ * for each user. In other words, every module has user-specific quotas
+ * for storage and objects. Those quotas may be set by definition or
+ * by configuration and can even be unlimited. The responsibility to
+ * enforce quotas lies within the modules themselves, but they can announce
+ * their quotas via this service. That enables a client to provide a
+ * combined overview over all quotas. Each module that wants to contribute
+ * to this service has to implement a {@link QuotaProvider}.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.6.1
  */
-public final class QuotaActivator extends HousekeepingActivator {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(QuotaActivator.class);
+public interface QuotaAndUsageService {
 
     /**
-     * Initializes a new {@link QuotaActivator}.
+     * Gets all currently known {@link QuotaProvider}s.
+     *
+     * @return A list of providers. Never <code>null</code> but possibly empty.
      */
-    public QuotaActivator() {
-        super();
-    }
+    List<QuotaProvider> getAllProviders();
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("Starting bundle {}", context.getBundle().getSymbolicName());
-
-        QuotaProviderTracker multiTalent = new QuotaProviderTracker(context);
-        track(QuotaProvider.class, multiTalent);
-        openTrackers();
-
-        registerService(QuotaService.class, multiTalent);
-    }
+    /**
+     * Gets the provider for a specific module, if available.
+     *
+     * @param moduleID The modules unique identifier.
+     * @return The modules provider or <code>null</code>, if unknown.
+     */
+    QuotaProvider getProvider(String moduleID);
 
 }

@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.contact.storage.rdb
 Bundle-Version: 7.6.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.contact,
+Import-Package: com.openexchange.config.cascade,
+ com.openexchange.contact,
  com.openexchange.contact.storage,
  com.openexchange.context,
  com.openexchange.database,
@@ -31,6 +32,7 @@ Import-Package: com.openexchange.contact,
  com.openexchange.mail.usersetting,
  com.openexchange.osgi,
  com.openexchange.quota,
+ com.openexchange.quota.groupware,
  com.openexchange.search,
  com.openexchange.server,
  com.openexchange.server.impl,
