@@ -47,49 +47,80 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast.group;
+package com.openexchange.realtime.hazelcast.serialization;
 
-import com.openexchange.realtime.dispatch.MessageDispatcher;
-import com.openexchange.realtime.group.commands.LeaveStanza;
+import java.io.IOException;
+import com.hazelcast.nio.serialization.PortableReader;
+import com.hazelcast.nio.serialization.PortableWriter;
+import com.openexchange.hazelcast.serialization.CustomPortable;
+import com.openexchange.realtime.group.SelectorChoice;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.threadpool.AbstractTask;
-import com.openexchange.threadpool.ThreadRenamer;
-
 
 /**
- * {@link SendLeaveTask} Asynchronously send a leave 
- *
+ * {@link PortableSelectorChoice} - A {@link SelectorChoice} implementation that can efficiently be serialized via Hazelcast's Portable
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.1
  */
-public class SendLeaveTask extends AbstractTask<Void> {
+public class PortableSelectorChoice extends SelectorChoice implements CustomPortable {
 
-    private MessageDispatcher messageDispatcher;
-    private ID client;
-    private ID group;
+    /** The unique portable class ID of the {@link PortableStampedGroup} */
+    public static final int CLASS_ID = 6;
+    private static final String CLIENT_ID = "clientID";
+    private static final String GROUP_ID = "groupID";
+    private static final String SELECTOR = "selector";
 
     /**
-     * Initializes a new {@link SendLeaveTask}.
-     * @param messageDispatcher The {@link MessageDispatcher} to use for executing the leave
-     * @param client The leaving client
-     * @param group The group left by the client
+     * Initializes a new {@link PortableSelectorChoice}.
      */
-    public SendLeaveTask(MessageDispatcher messageDispatcher, ID client, ID group) {
+    protected PortableSelectorChoice() {
         super();
-        this.messageDispatcher = messageDispatcher;
-        this.client = client;
-        this.group = group;
+    }
+
+    /**
+     * Initializes a new {@link PortableSelectorChoice}.
+     * 
+     * @param clientId
+     * @param groupId
+     * @param selector
+     */
+    public PortableSelectorChoice(ID clientId, ID groupId, String selector) {
+        super(clientId, groupId, selector);
+    }
+
+    /**
+     * Initializes a new {@link PortableSelectorChoice}.
+     * 
+     * @param selectorChoice
+     */
+    public PortableSelectorChoice(SelectorChoice selectorChoice) {
+        super(selectorChoice);
     }
 
     @Override
-    public void setThreadName(ThreadRenamer threadRenamer) {
-        threadRenamer.renamePrefix("SendLeave");
+    public void writePortable(PortableWriter writer) throws IOException {
+        writer.writePortable(CLIENT_ID, new PortableID(client));
+        writer.writePortable(GROUP_ID, new PortableID(group));
+        writer.writeUTF(SELECTOR, selector);
     }
 
     @Override
-    public Void call() throws Exception {
-        messageDispatcher.send(new LeaveStanza(client, group));
-        return null;
+    public void readPortable(PortableReader reader) throws IOException {
+        PortableID pCID = reader.readPortable(CLIENT_ID);
+        PortableID pGID = reader.readPortable(GROUP_ID);
+        client = pCID;
+        group = pGID;
+        selector = reader.readUTF(SELECTOR);
+    }
+
+    @Override
+    public int getFactoryId() {
+        return FACTORY_ID;
+    }
+
+    @Override
+    public int getClassId() {
+        return CLASS_ID;
     }
 
 }

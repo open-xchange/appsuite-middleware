@@ -47,34 +47,34 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast.management;
+package com.openexchange.realtime.hazelcast.group.helper;
 
-import java.util.List;
-import java.util.Map;
-import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link DistributedGroupManagerMBean}
+ * {@link SimServiceLookup}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.x.y
  */
-public interface DistributedGroupManagerMBean {
+public class SimServiceLookup implements ServiceLookup {
 
-    /**
-     * Get the mapping of general client IDs to SelectorChoices.
-     *
-     * @return the map
-     * @throws OXException if the HazelcastInstance is missing.
-     */
-    public Map<String, List<String>> getClientMapping() throws OXException;
+    private DumbThreadPool dumbThreadPool = new DumbThreadPool();
+    
+    @Override
+    public <S> S getService(Class<? extends S> clazz) {
+        if(clazz.isInstance(dumbThreadPool)) {
+            return (S)dumbThreadPool;
+        } else {
+            return null;
+        }
+    }
 
-    /**
-     * Get the mapping of group IDs to member SelectorCjoices
-     *
-     * @return the map 
-     * @throws OXException if the HazelcastInstance is missing.
-     */
-    public Map<String, List<String>> getGroupMapping() throws OXException;
+    @Override
+    public <S> S getOptionalService(Class<? extends S> clazz) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

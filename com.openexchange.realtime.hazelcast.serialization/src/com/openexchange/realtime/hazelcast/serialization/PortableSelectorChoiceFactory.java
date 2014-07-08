@@ -47,34 +47,28 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast.management;
+package com.openexchange.realtime.hazelcast.serialization;
 
-import java.util.List;
-import java.util.Map;
-import com.openexchange.exception.OXException;
+import com.hazelcast.nio.serialization.Portable;
+import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 
 
 /**
- * {@link DistributedGroupManagerMBean}
+ * {@link PortableSelectorChoiceFactory}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
- * @since 7.x.y
+ * @since 7.6.1
  */
-public interface DistributedGroupManagerMBean {
+public class PortableSelectorChoiceFactory implements CustomPortableFactory {
 
-    /**
-     * Get the mapping of general client IDs to SelectorChoices.
-     *
-     * @return the map
-     * @throws OXException if the HazelcastInstance is missing.
-     */
-    public Map<String, List<String>> getClientMapping() throws OXException;
+    @Override
+    public Portable create() {
+        return new PortableSelectorChoice();
+    }
 
-    /**
-     * Get the mapping of group IDs to member SelectorCjoices
-     *
-     * @return the map 
-     * @throws OXException if the HazelcastInstance is missing.
-     */
-    public Map<String, List<String>> getGroupMapping() throws OXException;
+    @Override
+    public int getClassId() {
+        return PortableSelectorChoice.CLASS_ID;
+    }
+
 }

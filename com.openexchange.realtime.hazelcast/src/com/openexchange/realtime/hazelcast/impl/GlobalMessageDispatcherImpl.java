@@ -77,6 +77,7 @@ import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.hazelcast.Utils;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.hazelcast.channel.StanzaDispatcher;
+import com.openexchange.realtime.hazelcast.directory.HazelcastResourceDirectory;
 import com.openexchange.realtime.hazelcast.osgi.Services;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
@@ -92,11 +93,11 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GlobalMessageDispatcherImpl.class);
 
-    private final ResourceDirectory directory;
+    private final HazelcastResourceDirectory directory;
 
     private ResponseChannel channel = null;
 
-    public GlobalMessageDispatcherImpl(ResourceDirectory directory) {
+    public GlobalMessageDispatcherImpl(HazelcastResourceDirectory directory) {
         super();
         this.directory = directory;
         this.channel = new ResponseChannel(directory);
@@ -171,7 +172,7 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
             stanza.trace("Deliver locally");
             Map<ID, OXException> sent = Services.getService(LocalMessageDispatcher.class).send(stanza, localIds);
             if (Utils.shouldResend(sent, stanza)) {
-                resend(stanza);
+                resend(stanza, true);
                 //return empty map of exceptions when resending
                 return exceptions;
             }
@@ -197,7 +198,7 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
                 Thread.currentThread().interrupt();
                 throw RealtimeExceptionCodes.UNEXPECTED_ERROR.create(e, "Execution interrupted");
             } catch (ExecutionException e) {
-                resend(stanza);
+                resend(stanza, Utils.shouldRemove(directory, stanza, e));
                 throw ThreadPools.launderThrowable(e, OXException.class);
             }
         }
@@ -214,8 +215,11 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
      * @param stanza The Stanza to resend
      * @throws OXException
      */
-    private void resend(Stanza stanza) throws OXException {
-        directory.remove(stanza.getTo());
+    private void resend(Stanza stanza, boolean remove) throws OXException {
+        IDMap<Resource> idMap = directory.get(stanza.getTo());
+        if(remove) {
+            directory.remove(stanza.getTo());
+        }
         send(stanza);
     }
 

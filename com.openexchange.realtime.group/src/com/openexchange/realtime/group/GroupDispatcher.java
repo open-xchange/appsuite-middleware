@@ -335,7 +335,7 @@ public class GroupDispatcher implements ComponentHandle {
             if(groupManager == null) {
                 LOG.error("GroupManager reference unset.");
             } else {
-                groupManager.add(new SelectorChoice(id , groupId, stamp));
+                groupManager.addChoice(new SelectorChoice(id , groupId, stamp));
             }
             onJoin(id, stanza);
         }
@@ -363,17 +363,18 @@ public class GroupDispatcher implements ComponentHandle {
             empty = ids.isEmpty();
         } while (!idsRef.compareAndSet(expected, ids));
 
-        stamps.remove(id);
 
         if (removed) {
             DistributedGroupManager groupManager = GROUPMANAGER_REF.get();
             if (groupManager == null) {
                 LOG.error("GroupManager reference unset.");
             } else {
-                groupManager.remove(new SelectorChoice(id, groupId, getStamp(id)));
+                groupManager.removeChoice(new SelectorChoice(id, groupId, getStamp(id)));
             }
             onLeave(id, stanza);
         }
+
+        stamps.remove(id);
 
         if (empty) {
             Map<String, Object> properties = new HashMap<String, Object>();

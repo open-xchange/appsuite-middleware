@@ -69,8 +69,34 @@ import com.openexchange.realtime.util.IDMap;
 /**
  * {@link CleanupMemberShipListener} - Reacts to a member removal by cleaning up resources that have been located on that member.
  * 
+ * <p><img src="doc-files/CleanupActivity.png"/></p>
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.0
+ */
+/*
+ * @startuml doc-files/CleanupActivity.png
+ * (*) -> "Member leaves the Cluster"
+ * -> "Try to get cluster
+ * wide cleanup lock"
+ * 
+ * -> "Get cleanup status 
+ * from global cleanup map"
+ * 
+ * if "Some other node already did cleanup" then
+ *   -->[true] (*)
+ * else 
+ *   -->[false] "Get resources from member
+ *   that left the cluster"
+ *   --> "Issue global realtime cleanup
+ *   for each found resource"
+ *   --> "Put new CleanupStatus into
+ *   global cleanup map"
+ *   -->"Release global cleanup lock"
+ *   --> (*)
+ * endif
+ * 
+ * @enduml
  */
 public class CleanupMemberShipListener implements MembershipListener {
 
@@ -109,7 +135,7 @@ public class CleanupMemberShipListener implements MembershipListener {
             try {
                 CleanupStatus cleanupStatus = cleanupMapping.get(uuid);
                 // is somebody already cleaning up for him?
-                if (!cleanupStarted(cleanupStatus)) {
+                if (!cleanupDone(cleanupStatus)) {
                     LOG.info("Starting cleanup for member {} with IP {}", memberToClean.getUuid(), memberToClean.getInetSocketAddress());
                     cleanupStatus = new CleanupStatus(HazelcastAccess.getLocalMember(), memberToClean);
                     //do actual cleanup
@@ -138,21 +164,31 @@ public class CleanupMemberShipListener implements MembershipListener {
         }
     }
 
-    public IMap<String, CleanupStatus> getCleanupMapping() throws OXException {
+    private IMap<String, CleanupStatus> getCleanupMapping() throws OXException {
         HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
         return hazelcast.getMap(cleanupLockMapName);
     }
 
     /**
-     * Check the distributed memberCleanup map for a lock indicating that some other member has already started cleaning up.
+     * Check the distributed memberCleanup map for a status indicating that some other member has already finished cleaning up.
      * 
      * @param member may be null
-     * @return true if member is not null and 
+     * @return true if member is not null, the cleanup was finished during the last run and the last run was not more than 5 minutes ago
      */
-    private boolean cleanupStarted(CleanupStatus cleanupInfo) {
-        if(cleanupInfo!= null) {
-            //TODO: Additionally check how long ago the cleanup was finished and decide to return true or false depending on the duration
-            return true;
+    private boolean cleanupDone(CleanupStatus cleanupStatus) {
+        if(cleanupStatus!= null) {
+            long cleaningFinishTime = cleanupStatus.getCleaningFinishTime();
+            if(cleaningFinishTime == -1) {
+                //the cleanup wasn't finished
+                return false;
+            }
+            long diff = System.currentTimeMillis() - cleaningFinishTime;
+            if(diff > 300000) {
+                //the last cleanup was more than 5 minutes ago, clean again!
+                return false;
+            } else {
+                return true;
+            }
         }
         return false;
     }

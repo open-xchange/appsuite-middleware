@@ -149,11 +149,10 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
         registerService(Channel.class, globalDispatcher.getChannel());
         registerService(GlobalRealtimeCleanup.class, globalCleanup);
         addService(GlobalRealtimeCleanup.class, globalCleanup);
-        
 
         String client_map = discoverMapName(config, "rtClientMapping-");
         String group_map = discoverMapName(config, "rtGroupMapping-");
-        final DistributedGroupManagerImpl distributedGroupManager = new DistributedGroupManagerImpl(globalDispatcher, globalCleanup, client_map, group_map);
+        final DistributedGroupManagerImpl distributedGroupManager = new DistributedGroupManagerImpl(globalDispatcher, client_map, group_map);
         cleanerRegistrationId = directory.addResourceMappingEntryListener(distributedGroupManager.getCleaner(), true);
 
         registerService(DistributedGroupManager.class, distributedGroupManager);

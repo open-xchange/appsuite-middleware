@@ -74,6 +74,7 @@ fi
 %dir /opt/open-xchange/etc/
 %config(noreplace) /opt/open-xchange/etc/hazelcast/rtCleanupLock.properties
 %config(noreplace) /opt/open-xchange/etc/hazelcast/rtClientMapping.properties
+%config(noreplace) /opt/open-xchange/etc/hazelcast/rtGroupMapping.properties
 %config(noreplace) /opt/open-xchange/etc/hazelcast/rtIDMapping.properties
 %config(noreplace) /opt/open-xchange/etc/hazelcast/rtResourceDirectory.properties
 %config(noreplace) /opt/open-xchange/etc/hazelcast/rtStanzaStorage.properties

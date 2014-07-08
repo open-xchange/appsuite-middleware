@@ -47,34 +47,38 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast.management;
+package com.openexchange.realtime.hazelcast.group;
 
-import java.util.List;
-import java.util.Map;
-import com.openexchange.exception.OXException;
-
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import com.openexchange.realtime.exception.RealtimeException;
+import com.openexchange.realtime.payload.PayloadElement;
 
 /**
- * {@link DistributedGroupManagerMBean}
- *
+ * {@link NotMemberMatcher}
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
- * @since 7.x.y
+ * @since 7.6.1
  */
-public interface DistributedGroupManagerMBean {
+public class NotMemberMatcher extends BaseMatcher<PayloadElement> {
 
-    /**
-     * Get the mapping of general client IDs to SelectorChoices.
-     *
-     * @return the map
-     * @throws OXException if the HazelcastInstance is missing.
-     */
-    public Map<String, List<String>> getClientMapping() throws OXException;
+    private static final String ERROR = "error";
 
-    /**
-     * Get the mapping of group IDs to member SelectorCjoices
-     *
-     * @return the map 
-     * @throws OXException if the HazelcastInstance is missing.
-     */
-    public Map<String, List<String>> getGroupMapping() throws OXException;
+    private static final int CODE = 1008;
+
+    @Override
+    public boolean matches(Object item) {
+        if (PayloadElement.class.isInstance(item)) {
+            PayloadElement incoming = PayloadElement.class.cast(item);
+            RealtimeException re = (RealtimeException) incoming.getData();
+            return ERROR.equals(incoming.getElementName()) && CODE == re.getCode();
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public void describeTo(Description description) {
+    }
+
 }

@@ -49,40 +49,43 @@
 
 package com.openexchange.realtime.hazelcast.group;
 
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.hazelcast.config.Config;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
+import com.jayway.awaitility.Awaitility;
 import com.openexchange.exception.OXException;
+import com.openexchange.hazelcast.serialization.DynamicPortableFactory;
 import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
-import com.openexchange.realtime.group.StampedGroup;
+import com.openexchange.realtime.group.SelectorChoice;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.hazelcast.group.helper.DynamicPortableFactoryImpl;
 import com.openexchange.realtime.hazelcast.group.helper.MessageDispatcherMock;
 import com.openexchange.realtime.hazelcast.group.helper.SimServiceLookup;
 import com.openexchange.realtime.hazelcast.osgi.Services;
 import com.openexchange.realtime.hazelcast.serialization.PortableIDFactory;
-import com.openexchange.realtime.hazelcast.serialization.PortableStampedGroupFactory;
+import com.openexchange.realtime.hazelcast.serialization.PortableSelectorChoiceFactory;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.Duration;
@@ -101,7 +104,7 @@ public class DistributedGroupManagerImplTest {
     private static HazelcastInstance hzInstance;
     private static ID user1, user2, user3;
     private static ID group1, group2, group3;
-    private static StampedGroup user1Group1, user1Group2, user1Group3, user2Group1, user2Group2, user2Group3, user3Group1, user3Group2, user3Group3;
+    private static SelectorChoice user1Group1, user1Group2, user1Group3, user2Group1, user2Group2, user2Group3, user3Group1, user3Group2, user3Group3;
     GlobalRealtimeCleanup grcMock;
     private static DistributedGroupManagerImpl groupManager;
     //Stanzas the messageDispatcher sent during the test
@@ -116,20 +119,20 @@ public class DistributedGroupManagerImplTest {
         group1 = new ID("group1@synthetic");
         group2 = new ID("group2@synthetic");
         group3 = new ID("group3@synthetic");
-        user1Group1 = new StampedGroup(group1,"user1Group1");
-        user1Group2 = new StampedGroup(group2,"user1Group2");
-        user1Group3 = new StampedGroup(group3,"user1Group3");
-        user2Group1 = new StampedGroup(group1,"user2Group1");
-        user2Group2 = new StampedGroup(group2,"user2Group2");
-        user2Group3 = new StampedGroup(group3,"user2Group3");
-        user3Group1 = new StampedGroup(group1,"user3Group1");
-        user3Group2 = new StampedGroup(group2,"user3Group2");
-        user3Group3 = new StampedGroup(group3,"user3Group3");
+        user1Group1 = new SelectorChoice(user1, group1, "user1Group1");
+        user1Group2 = new SelectorChoice(user1, group2, "user1Group2");
+        user1Group3 = new SelectorChoice(user1, group3, "user1Group3");
+        user2Group1 = new SelectorChoice(user2, group1, "user2Group1");
+        user2Group2 = new SelectorChoice(user2, group2, "user2Group2");
+        user2Group3 = new SelectorChoice(user2, group3, "user2Group3");
+        user3Group1 = new SelectorChoice(user3, group1, "user3Group1");
+        user3Group2 = new SelectorChoice(user3, group2, "user3Group2");
+        user3Group3 = new SelectorChoice(user3, group3, "user3Group3");
         Config config = new Config();
         DynamicPortableFactoryImpl dynamicPortableFactory = new DynamicPortableFactoryImpl();
         dynamicPortableFactory.register(new PortableIDFactory());
-        dynamicPortableFactory.register(new PortableStampedGroupFactory());
-        config.getSerializationConfig().addPortableFactory(dynamicPortableFactory.FACTORY_ID, dynamicPortableFactory);
+        dynamicPortableFactory.register(new PortableSelectorChoiceFactory());
+        config.getSerializationConfig().addPortableFactory(DynamicPortableFactory.FACTORY_ID, dynamicPortableFactory);
         hzInstance = Hazelcast.newHazelcastInstance(config);
         HazelcastAccess.setHazelcastInstance(hzInstance);
     }
@@ -138,8 +141,7 @@ public class DistributedGroupManagerImplTest {
     public void setUp() {
         sentStanzas = HashMultimap.create();
         messageDispatcher  = new MessageDispatcherMock(sentStanzas);
-        grcMock = mock(GlobalRealtimeCleanup.class);
-        groupManager = new DistributedGroupManagerImpl(messageDispatcher, grcMock, CLIENT_MAP, GROUP_MAP);
+        groupManager = new DistributedGroupManagerImpl(messageDispatcher, CLIENT_MAP, GROUP_MAP);
         Services.setServiceLookup(new SimServiceLookup());
     }
 
@@ -150,9 +152,9 @@ public class DistributedGroupManagerImplTest {
     @Test
     public void testAdd() throws Exception {
         fillGroupManager();
-        Set<ID> groupsForUser1 = groupManager.getGroups(user1);
-        Set<ID> groupsForUser2 = groupManager.getGroups(user2);
-        Set<ID> groupsForUser3 = groupManager.getGroups(user3);
+        Collection<? extends SelectorChoice> groupsForUser1 = groupManager.getGroups(user1);
+        Collection<? extends SelectorChoice> groupsForUser2 = groupManager.getGroups(user2);
+        Collection<? extends SelectorChoice> groupsForUser3 = groupManager.getGroups(user3);
         assertEquals(3, groupsForUser1.size());
         assertEquals(2, groupsForUser2.size());
         assertEquals(1, groupsForUser3.size());
@@ -160,29 +162,29 @@ public class DistributedGroupManagerImplTest {
     }
 
     /**
-     * Test method for {@link com.openexchange.realtime.hazelcast.group.DistributedGroupManagerImpl#remove(com.openexchange.realtime.packet.ID)}.
+     * Test method for {@link com.openexchange.realtime.hazelcast.group.DistributedGroupManagerImpl#removeClient(com.openexchange.realtime.packet.ID)}.
      * @throws Exception 
      */
     @Test
     public void testRemoveID() throws Exception {
         fillGroupManager();
-        Collection<ID> removedGroupsForUser1 = groupManager.remove(user1);
+        Collection<? extends SelectorChoice> removedGroupsForUser1 = groupManager.removeClient(user1);
         assertEquals(3, removedGroupsForUser1.size());
-        assertTrue(removedGroupsForUser1.containsAll(Arrays.asList(group1, group2, group3)));
-        Set<ID> groupsForUser1 = groupManager.getGroups(user1);
-        assertEquals(Collections.EMPTY_SET, groupsForUser1);
+        assertTrue(removedGroupsForUser1.containsAll(Arrays.asList(user1Group1, user1Group2, user1Group3)));
+        Collection<? extends SelectorChoice> groupsForUser1 = groupManager.getGroups(user1);
+        assertEquals(0, groupsForUser1.size());
 
-        Collection<ID> removedGroupsForUser2 = groupManager.remove(user2);
+        Collection<? extends SelectorChoice> removedGroupsForUser2 = groupManager.removeClient(user2);
         assertEquals(2, removedGroupsForUser2.size());
-        assertTrue(removedGroupsForUser2.containsAll(Arrays.asList(group2, group3)));
-        Set<ID> groupsForUser2 = groupManager.getGroups(user2);
-        assertEquals(Collections.EMPTY_SET, groupsForUser2);
+        assertTrue(removedGroupsForUser2.containsAll(Arrays.asList(user2Group2, user2Group3)));
+        Collection<? extends SelectorChoice> groupsForUser2 = groupManager.getGroups(user2);
+        assertEquals(0, groupsForUser2.size());
 
-        Collection<ID> removedGroupsForUser3 = groupManager.remove(user3);
+        Collection<? extends SelectorChoice> removedGroupsForUser3 = groupManager.removeClient(user3);
         assertEquals(1, removedGroupsForUser3.size());
-        assertTrue(removedGroupsForUser3.contains(group3));
-        Set<ID> groupsForUser3 = groupManager.getGroups(user3);
-        assertEquals(Collections.EMPTY_SET, groupsForUser3);
+        assertTrue(removedGroupsForUser3.contains(user3Group3));
+        Collection<? extends SelectorChoice> groupsForUser3 = groupManager.getGroups(user3);
+        assertEquals(0, groupsForUser3.size());
     }
 
     /**
@@ -192,29 +194,105 @@ public class DistributedGroupManagerImplTest {
     @Test
     public void testRemoveIDID() throws Exception {
         fillGroupManager();
-        Set<ID> groups = groupManager.getGroups(user1);
+        Collection<? extends SelectorChoice> groups = groupManager.getGroups(user1);
         assertEquals(3, groups.size());
-        boolean removed = groupManager.remove(user1, user1Group3);
+        boolean removed = groupManager.removeChoice(user1Group3);
         assertTrue(removed);
         groups = groupManager.getGroups(user1);
         assertEquals(2, groups.size());
-        assertTrue(groups.containsAll(Arrays.asList(group1, group2)));
+        assertTrue(groups.containsAll(Arrays.asList(user1Group1, user1Group2)));
     }
 
     /**
      * Test method for {@link com.openexchange.realtime.hazelcast.group.DistributedGroupManagerImpl#getGroups(com.openexchange.realtime.packet.ID)}.
+     * @throws Exception 
      */
-    @Test @Ignore
-    public void testGetGroups() {
-        fail("Not yet implemented");
+    @Test
+    public void testGetGroups() throws Exception {
+        fillGroupManager();
+        Collection<? extends SelectorChoice> groups = groupManager.getGroups(user1);
+        assertEquals(3, groups.size());
+        groups = groupManager.getGroups(user2);
+        assertEquals(2, groups.size());
+        groups = groupManager.getGroups(user3);
+        assertEquals(1, groups.size());
+
+        groupManager.removeClient(user1);
+        groups = groupManager.getGroups(user1);
+        assertEquals(0, groups.size());
+        groups = groupManager.getGroups(user2);
+        assertEquals(2, groups.size());
+        groups = groupManager.getGroups(user3);
+        assertEquals(1, groups.size());
+
+        groupManager.removeClient(user2);
+        groups = groupManager.getGroups(user1);
+        assertEquals(0, groups.size());
+        groups = groupManager.getGroups(user2);
+        assertEquals(0, groups.size());
+        groups = groupManager.getGroups(user3);
+        assertEquals(1, groups.size());
+
+        groupManager.removeClient(user3);
+        groups = groupManager.getGroups(user1);
+        assertEquals(0, groups.size());
+        groups = groupManager.getGroups(user2);
+        assertEquals(0, groups.size());
+        groups = groupManager.getGroups(user3);
+        assertEquals(0, groups.size());
     }
 
     /**
      * Test method for {@link com.openexchange.realtime.hazelcast.group.DistributedGroupManagerImpl#getMembers(com.openexchange.realtime.packet.ID)}.
+     * 
+     * Only tests if the leave command was sent to the GroupDispatcher as no actual Message and GroupDispatchers are used in this test.
+     * 
+     * @throws Exception 
      */
-    @Test @Ignore
-    public void testGetMembers() {
-        fail("Not yet implemented");
+    @Test
+    public void testGetMembers() throws Exception {
+        fillGroupManager();
+
+        Collection<? extends SelectorChoice> members = groupManager.getMembers(group1);
+        assertEquals(1, members.size());
+        members = groupManager.getMembers(group2);
+        assertEquals(2, members.size());
+        members = groupManager.getMembers(group3);
+        assertEquals(3, members.size());
+        LeaveCommandMatcher leaveMatcher = new LeaveCommandMatcher();
+
+        groupManager.removeClient(user1);
+        Awaitility.await().atMost(com.jayway.awaitility.Duration.FIVE_SECONDS).until(numStanzasReceived(), greaterThanOrEqualTo(3));
+        Set<Stanza> stanzas = getStanzas(user1, group1);
+        assertThat(stanzas.size(), is(1));
+        assertThat(stanzas.iterator().next().getPayload(), leaveMatcher);
+        stanzas = getStanzas(user1, group2);
+        assertThat(stanzas.size(), is(1));
+        assertThat(stanzas.iterator().next().getPayload(), leaveMatcher);
+        stanzas = getStanzas(user1, group3);
+        assertThat(stanzas.size(), is(1));
+        assertThat(stanzas.iterator().next().getPayload(), leaveMatcher);
+        
+        groupManager.removeClient(user2);
+        Awaitility.await().atMost(com.jayway.awaitility.Duration.FIVE_SECONDS).until(numStanzasReceived(), greaterThanOrEqualTo(5));
+        stanzas = getStanzas(user2, group1);
+        assertThat(stanzas.size(), is(0));
+        stanzas = getStanzas(user2, group2);
+        assertThat(stanzas.size(), is(1));
+        assertThat(stanzas.iterator().next().getPayload(), leaveMatcher);
+        stanzas = getStanzas(user2, group3);
+        assertThat(stanzas.size(), is(1));
+        assertThat(stanzas.iterator().next().getPayload(), leaveMatcher);
+        
+        groupManager.removeClient(user3);
+        Awaitility.await().atMost(com.jayway.awaitility.Duration.FIVE_SECONDS).until(numStanzasReceived(), greaterThanOrEqualTo(6));
+        stanzas = getStanzas(user3, group1);
+        assertThat(stanzas.size(), is(0));
+        stanzas = getStanzas(user3, group2);
+        assertThat(stanzas.size(), is(0));
+        stanzas = getStanzas(user3, group3);
+        assertThat(stanzas.size(), is(1));
+        assertThat(stanzas.iterator().next().getPayload(), leaveMatcher);
     }
 
     /**
@@ -227,7 +305,7 @@ public class DistributedGroupManagerImplTest {
         groupManager.setInactivity(user1, Duration.TEN_SECONDS);
         IDMap<Duration> durationMap = getDurationMap();
         assertEquals(1, durationMap.size());
-        assertEquals(3, sentStanzas.size());
+        Awaitility.await().atMost(com.jayway.awaitility.Duration.FIVE_SECONDS).until(numStanzasReceived(), equalTo(3));
         Collection<Stanza> collection1 = sentStanzas.removeAll(group1);
         Collection<Stanza> collection2 = sentStanzas.removeAll(group2);
         Collection<Stanza> collection3 = sentStanzas.removeAll(group3);
@@ -235,6 +313,16 @@ public class DistributedGroupManagerImplTest {
         assertEquals(1, collection2.size());
         assertEquals(1, collection3.size());
         assertTrue(sentStanzas.isEmpty());
+    }
+
+    private Callable<Integer> numStanzasReceived() {
+        return new Callable<Integer>() {
+
+            @Override
+            public Integer call() throws Exception {
+                return sentStanzas.size();
+            }
+        };
     }
 
     /**
@@ -258,6 +346,32 @@ public class DistributedGroupManagerImplTest {
             assertThat(stanza.getPayload(),leaveMatcher);
         }
     }
+    
+    /**
+     * Test method for {@link com.openexchange.realtime.hazelcast.group.DistributedGroupManagerImpl#cleanupForId(com.openexchange.realtime.packet.ID)}.
+     * @throws Exception 
+     */
+    @Test
+    public void testCleanupForSyntheticId() throws Exception {
+        fillGroupManager();
+        //Remove the group
+        groupManager.removeGroup(group3);
+        assertTrue(groupManager.getMembers(group3).isEmpty());
+        NotMemberMatcher notMemberMatcher = new NotMemberMatcher();
+        Awaitility.await().atMost(com.jayway.awaitility.Duration.TEN_SECONDS).until(numStanzasReceived(), equalTo(3));
+        // .. and assert that all previous members are informed about the removal of the group
+        Set<Stanza> stanzas = getStanzas(group3, user1);
+        assertThat(stanzas.size(), is(1));
+        assertThat(stanzas.iterator().next().getPayload(), notMemberMatcher);
+        stanzas = getStanzas(group3, user2);
+        assertThat(stanzas.size(), is(1));
+        assertThat(stanzas.iterator().next().getPayload(), notMemberMatcher);
+        stanzas = getStanzas(group3, user3);
+        assertThat(stanzas.size(), is(1));
+        assertThat(stanzas.iterator().next().getPayload(), notMemberMatcher);
+    }
+    
+    
 
     /**
      * Test method for {@link com.openexchange.realtime.hazelcast.group.DistributedGroupManagerImpl#getManagementObject()}.
@@ -276,21 +390,35 @@ public class DistributedGroupManagerImplTest {
         return idMap;
     }
 
+    /**
+     * Adds the following mappings
+     * <ul>
+     * <li>user1 -> {group1, group2, group3}</li>
+     * <li>user2 -> {group2, group3}</li>
+     * <li>user3 -> {group3}</li>
+     * </ul>
+     * <ul>
+     * <li>group1 -> {user1}</li>
+     * <li>group2 -> {user1, user2}</li>
+     * <li>group3 -> {user1, user2, user3}</li>
+     * </ul>
+     * @throws Exception
+     */
     private void fillGroupManager() throws Exception {
-        groupManager.add(user1, user1Group1);
-        groupManager.add(user1, user1Group2);
-        groupManager.add(user2, user2Group2);
-        groupManager.add(user1, user1Group3);
-        groupManager.add(user2, user2Group3);
-        groupManager.add(user3, user3Group3);
+        groupManager.addChoice(user1Group1);
+        groupManager.addChoice(user1Group2);
+        groupManager.addChoice(user2Group2);
+        groupManager.addChoice(user1Group3);
+        groupManager.addChoice(user2Group3);
+        groupManager.addChoice(user3Group3);
     }
 
-    private void setInactivities() throws Exception {
-        groupManager.setInactivity(user1, Duration.TEN_SECONDS);
-        groupManager.setInactivity(user2, Duration.THIRTY_SECONDS);
-        groupManager.setInactivity(user3, Duration.ONE_MINUTE);
-    }
-
+    /**
+     * Get Stanzas sent from ID to ID
+     * @param from
+     * @param to
+     * @return Stanzas sent from ID to ID
+     */
     private Set<Stanza> getStanzas(ID from, ID... to) {
         List<ID> recipients = Arrays.asList(to);
         Set<Stanza> stanzas = new HashSet<Stanza>();

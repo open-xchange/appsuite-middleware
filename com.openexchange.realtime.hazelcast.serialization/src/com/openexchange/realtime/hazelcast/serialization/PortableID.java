@@ -72,16 +72,6 @@ public class PortableID extends ID implements CustomPortable {
     public static final int CLASS_ID = 5;
 
     /**
-     * Wrap an existing ID in a PortableID.
-     * 
-     * @param id The existing ID
-     * @return the new PortableID
-     */
-    public static PortableID pID(ID id) {
-        return new PortableID(id);
-    }
-
-    /**
      * Initializes a new {@link PortableID}.
      * @param id
      */

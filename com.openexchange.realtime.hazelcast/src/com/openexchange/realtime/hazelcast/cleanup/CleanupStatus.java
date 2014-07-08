@@ -54,7 +54,8 @@ import java.net.InetSocketAddress;
 import com.hazelcast.core.Member;
 
 /**
- * {@link CleanupStatus} - Holds data about a cluster wide cleanup for c.o.realtime.hazelcast resources.
+ * {@link CleanupStatus} - Holds data about a cluster wide cleanup for c.o.realtime.hazelcast resources that can be used to decide if a
+ * cleanup was already started. Additionally it holds data about who performed the cleanup at what time.
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.0

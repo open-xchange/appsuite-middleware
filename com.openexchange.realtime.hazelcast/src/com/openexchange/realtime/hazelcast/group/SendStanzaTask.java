@@ -47,34 +47,54 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast.management;
+package com.openexchange.realtime.hazelcast.group;
 
-import java.util.List;
-import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.dispatch.MessageDispatcher;
+import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadRenamer;
 
 
 /**
- * {@link DistributedGroupManagerMBean}
+ * {@link SendStanzaTask}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
- * @since 7.x.y
+ * @since 7.6.1
  */
-public interface DistributedGroupManagerMBean {
+public class SendStanzaTask extends AbstractTask<Void> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SendStanzaTask.class);
+    private MessageDispatcher messageDispatcher;
+    private Stanza stanza;
 
     /**
-     * Get the mapping of general client IDs to SelectorChoices.
-     *
-     * @return the map
-     * @throws OXException if the HazelcastInstance is missing.
+     * Initializes a new {@link SendLeaveTask}.
+     * @param messageDispatcher The {@link MessageDispatcher} to use for executing the leave
+     * @param client The leaving client
+     * @param group The group left by the client
      */
-    public Map<String, List<String>> getClientMapping() throws OXException;
+    public SendStanzaTask(MessageDispatcher messageDispatcher, Stanza stanza) {
+        super();
+        this.messageDispatcher = messageDispatcher;
+        this.stanza = stanza;
+    }
 
-    /**
-     * Get the mapping of group IDs to member SelectorCjoices
-     *
-     * @return the map 
-     * @throws OXException if the HazelcastInstance is missing.
-     */
-    public Map<String, List<String>> getGroupMapping() throws OXException;
+    @Override
+    public void setThreadName(ThreadRenamer threadRenamer) {
+        threadRenamer.renamePrefix("SendStanza-"+stanza.getClass().getSimpleName());
+    }
+
+    @Override
+    public Void call() throws Exception {
+        try {
+            messageDispatcher.send(stanza);
+        } catch (OXException oxe) {
+            LOG.error("Failed to send LeaveStanza from {} to {}.", stanza.getFrom(), stanza.getTo(), oxe);
+        }
+        return null;
+    }
+
 }
