@@ -7,10 +7,12 @@ Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.amazonaws,
  com.amazonaws.auth,
+ com.amazonaws.handlers,
  com.amazonaws.regions,
  com.amazonaws.services.s3,
  com.amazonaws.services.s3.internal,
  com.amazonaws.services.s3.model,
+ com.amazonaws.util,
  com.openexchange.ajax.container,
  com.openexchange.cache.dynamic,
  com.openexchange.config,
