@@ -37,6 +37,16 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %post
 . /opt/open-xchange/lib/oxfunctions.sh
 ox_update_permissions /opt/open-xchange/etc/filestore-s3.properties root:open-xchange 640
+if [ ${1:-0} -eq 2 ]; then
+    # only when updating
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+    PFILE=/opt/open-xchange/etc/filestore-s3.properties
+
+    # SoftwareChange_Request-2061
+    ox_add_property com.openexchange.filestore.s3.[filestoreID].bucketName "" $PFILE
+    ox_add_property com.openexchange.filestore.s3.[filestoreID].pathStyleAccess true $PFILE
+fi
 
 %clean
 %{__rm} -rf %{buildroot}
