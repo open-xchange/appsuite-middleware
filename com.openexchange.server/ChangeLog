@@ -1,3 +1,9 @@
+* 2014-07-07 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 33412: Use larger chunks when performing multipart uploads to S3 stores
+ - Fix for bug 33422: Made the setting "com.openexchange.filestore.s3.[filestoreID].pathStyleAccess" officially available in the 
+                      configuration file "filestore-s3.properties"  
+
 * 2014-07-07 - thorben.betten@open-xchange.com
 
  - Attempt to fix bug 33200: Clear preview cache asynchronously
