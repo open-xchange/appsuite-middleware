@@ -92,6 +92,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.java.Streams;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -373,6 +374,15 @@ public final class MimeSnippetManagement implements SnippetManagement {
             final DefaultAttachment attachment = new DefaultAttachment();
             attachment.setContentDisposition(contentDisposition == null ? null : contentDisposition.toString());
             attachment.setContentType(contentType.toString());
+
+            header = part.getHeader(MessageHeaders.HDR_CONTENT_ID, null);
+            if (null != header) {
+                if (header.startsWith("<")) {
+                    header = header.substring(1, header.length() - 1);
+                }
+                attachment.setContentId(header);
+            }
+
             attachment.setSize(part.getSize());
             header = part.getHeader("attachmentid", null);
             if (null != header) {
@@ -911,6 +921,11 @@ public final class MimeSnippetManagement implements SnippetManagement {
             attachmentId = UUID.randomUUID().toString();
         }
         bodyPart.setHeader("attachmentid", attachmentId);
+        header = attachment.getContentId();
+        if (null == header) {
+            header = "<" + UUIDs.getUnformattedString(UUID.randomUUID()) + ">";
+        }
+        bodyPart.setHeader(MessageHeaders.HDR_CONTENT_ID, header.startsWith("<") ? header : "<" + header + ">");
         /*
          * Force base64 encoding
          */

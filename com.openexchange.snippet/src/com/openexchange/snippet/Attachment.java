@@ -82,6 +82,13 @@ public interface Attachment {
     String getContentDisposition();
 
     /**
+     * Gets the <code>Content-Id</code> according to RFC 822.
+     *
+     * @return The <code>Content-Id</code> value or <code>null</code>
+     */
+    String getContentId();
+
+    /**
      * Gets the attachment's size if known.
      *
      * @return The size or <code>-1</code> if unknown
