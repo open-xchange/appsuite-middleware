@@ -97,9 +97,6 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.quota.QuotaService;
-import com.openexchange.quota.QuotaType;
-import com.openexchange.quota.Resource;
-import com.openexchange.quota.ResourceDescription;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -167,17 +164,12 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         final boolean newAttachment = attachment.getId() == NEW || attachment.getId() == 0;
 
         if (newAttachment) {
-            // Check if over quota
-            final QuotaService quotaService = QUOTA_SERVICE_REF.get();
-            if (null != quotaService) {
-                final Quota quota = quotaService.getQuotaFor(Resource.ATTACHMENT, ResourceDescription.getEmptyResourceDescription(), session);
-                final long amount = quota.getQuota(QuotaType.AMOUNT);
-                if (amount > 0) {
-                    final long numberOfAttachments = countAttachmentsInContext(ctx.getContextId());
-                    if (numberOfAttachments + 1 > amount) {
-                        throw QuotaExceptionCodes.QUOTA_EXCEEDED_ATTACHMENTS.create(Long.valueOf(numberOfAttachments), Long.valueOf(amount));
-                    }
-                }
+            // Check quota
+            Quota amountQuota = AttachmentQuotaProvider.getAmountQuota(session);
+            long limit = amountQuota.getLimit();
+            long usage = amountQuota.getUsage();
+            if (limit > 0 && amountQuota.getUsage() >= limit) {
+                throw QuotaExceptionCodes.QUOTA_EXCEEDED_CALENDAR.create(usage, limit);
             }
         }
 

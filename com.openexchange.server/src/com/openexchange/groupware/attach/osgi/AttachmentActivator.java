@@ -51,8 +51,10 @@ package com.openexchange.groupware.attach.osgi;
 
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.groupware.attach.AttachmentFilestoreLocationUpdater;
+import com.openexchange.groupware.attach.impl.AttachmentQuotaProvider;
 import com.openexchange.groupware.attach.json.AttachmentActionFactory;
 import com.openexchange.groupware.filestore.FilestoreLocationUpdater;
+import com.openexchange.quota.QuotaProvider;
 import com.openexchange.quota.QuotaService;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 
@@ -81,7 +83,7 @@ public final class AttachmentActivator extends AJAXModuleActivator {
          * register attachment filestore location updater for move context filestore
          */
         registerService(FilestoreLocationUpdater.class, new AttachmentFilestoreLocationUpdater());
-
+        registerService(QuotaProvider.class, new AttachmentQuotaProvider());
         registerModule(new AttachmentActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "attachment");
     }
 

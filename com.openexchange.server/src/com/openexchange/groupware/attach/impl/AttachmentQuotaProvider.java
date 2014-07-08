@@ -47,16 +47,17 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.internal;
+package com.openexchange.groupware.attach.impl;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.contact.storage.rdb.sql.Executor;
-import com.openexchange.contact.storage.rdb.sql.Table;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.quota.AccountQuota;
 import com.openexchange.quota.DefaultAccountQuota;
@@ -65,58 +66,62 @@ import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.quota.QuotaType;
 import com.openexchange.quota.groupware.ConfiguredRestriction;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
+
 /**
- * {@link RdbContactQuotaProvider}
+ * {@link AttachmentQuotaProvider}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.6.1
  */
-public class RdbContactQuotaProvider implements QuotaProvider {
+public class AttachmentQuotaProvider implements QuotaProvider {
 
-    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbContactQuotaProvider.class);
-
-    private static final String MODULE_ID = "contact";
-
-    public RdbContactQuotaProvider() {
-        super();
-    }
+    private static final String MODULE_ID = "attachment";
 
     @Override
     public String getModuleID() {
-        return "contact";
+        return MODULE_ID;
     }
 
     @Override
     public String getDisplayName() {
-        return "Contacts";
+        return "Attachments"; // TODO: localize
     }
 
-    static Quota getAmountQuota(Session session, Executor executor, Connection connection) throws SQLException, OXException {
-        long limit = ConfiguredRestriction.getAmountLimit(session, MODULE_ID,
-            RdbServiceLookup.getService(ConfigViewFactory.class), connection);
-        if (Quota.UNLIMITED == limit) {
-            return Quota.UNLIMITED_AMOUNT;
+    static Quota getAmountQuota(Session session) throws OXException {
+        DatabaseService dbService = ServerServiceRegistry.getServize(DatabaseService.class, true);
+        Connection connection = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            connection = dbService.getReadOnly(session.getContextId());
+            long limit = ConfiguredRestriction.getAmountLimit(session, MODULE_ID,
+                ServerServiceRegistry.getServize(ConfigViewFactory.class, true), connection);
+            if (Quota.UNLIMITED == limit) {
+                return Quota.UNLIMITED_AMOUNT;
+            }
+
+            stmt = connection.prepareStatement("SELECT count(id) FROM prg_attachment WHERE cid=?");
+            stmt.setInt(1, session.getContextId());
+            rs = stmt.executeQuery();
+            long usage = rs.next() ? rs.getLong(1) : 0;
+            return new Quota(QuotaType.AMOUNT, limit, usage);
+        } catch (SQLException e) {
+            throw QuotaExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+            if (null != connection) {
+                dbService.backReadOnly(session.getContextId(), connection);
+            }
         }
-        long usage = executor.count(connection, Table.CONTACTS, session.getContextId());
-        return new Quota(QuotaType.AMOUNT, limit, usage);
     }
 
     @Override
     public AccountQuota getFor(Session session, String accountID) throws OXException {
         if ("0".equals(accountID)) {
-            DatabaseService dbService = RdbServiceLookup.getService(DatabaseService.class);
-            Connection connection = null;
-            try {
-                connection = dbService.getReadOnly(session.getContextId());
-                return new DefaultAccountQuota(accountID, getDisplayName()).addQuota(getAmountQuota(session, new Executor(), connection));
-            } catch (SQLException e) {
-                throw QuotaExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            } finally {
-                if (null != connection) {
-                    dbService.backReadOnly(session.getContextId(), connection);
-                }
-            }
+            return new DefaultAccountQuota(accountID, getDisplayName()).addQuota(getAmountQuota(session));
         } else {
             throw QuotaExceptionCodes.UNKNOWN_ACCOUNT.create(accountID, MODULE_ID);
         }
