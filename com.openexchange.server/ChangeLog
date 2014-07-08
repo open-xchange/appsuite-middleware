@@ -1,3 +1,7 @@
+* 2014-07-08 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32489: Exclude special messenger files and folders from drive synchronization
+
 * 2014-07-07 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 33412: Use larger chunks when performing multipart uploads to S3 stores

@@ -52,6 +52,7 @@ package com.openexchange.drive.checksum.events;
 import static com.openexchange.file.storage.FileStorageEventConstants.CREATE_TOPIC;
 import static com.openexchange.file.storage.FileStorageEventConstants.DELETE_FOLDER_TOPIC;
 import static com.openexchange.file.storage.FileStorageEventConstants.DELETE_TOPIC;
+import static com.openexchange.file.storage.FileStorageEventConstants.FILE_NAME;
 import static com.openexchange.file.storage.FileStorageEventConstants.UPDATE_FOLDER_TOPIC;
 import static com.openexchange.file.storage.FileStorageEventConstants.UPDATE_TOPIC;
 import java.util.ArrayList;
@@ -64,12 +65,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.drive.DriveClientType;
+import com.openexchange.drive.DriveUtils;
 import com.openexchange.drive.checksum.rdb.RdbChecksumStore;
 import com.openexchange.drive.internal.DriveServiceLookup;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventHelper;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
+import com.openexchange.java.Strings;
 import com.openexchange.server.Initialization;
 import com.openexchange.session.Session;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -171,6 +174,11 @@ public class DelayedChecksumEventListener implements EventHandler, Initializatio
                 String accountID = FileStorageEventHelper.extractAccountId(event);
                 String folderID = FileStorageEventHelper.extractFolderId(event);
                 String objectID = FileStorageEventHelper.extractObjectId(event);
+                String fileName = (String)event.getProperty(FILE_NAME);
+                if (false == Strings.isEmpty(fileName) && (DriveUtils.isInvalidFileName(fileName) || DriveUtils.isIgnoredFileName(fileName))) {
+                    LOG.trace("Skipping event processing for ignored file: {}", fileName);
+                    return;
+                }
                 /*
                  * enqueue invalidation
                  */

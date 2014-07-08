@@ -133,6 +133,9 @@ public class DriveUtils {
         if (DriveConstants.TEMP_PATH.equalsIgnoreCase(path)) {
             return true; // no temp path
         }
+        if (DriveConfig.getInstance().getExcludedDirectoriesPattern().matcher(path).matches()) {
+            return true; // no (server-side) excluded paths
+        }
         List<DirectoryPattern> directoryExclusions = session.getDriveSession().getDirectoryExclusions();
         if (null != directoryExclusions && 0 < directoryExclusions.size()) {
             for (DirectoryPattern pattern : directoryExclusions) {
@@ -177,9 +180,8 @@ public class DriveUtils {
      *
      * @param fileName The filename to check
      * @return <code>true</code> if the filename is considered to be ignored, <code>false</code>, otherwise
-     * @throws OXException
      */
-    public static boolean isIgnoredFileName(String fileName) throws OXException {
+    public static boolean isIgnoredFileName(String fileName) {
         if (fileName.endsWith(DriveConstants.FILEPART_EXTENSION)) {
             return true; // no temporary upload files
         }

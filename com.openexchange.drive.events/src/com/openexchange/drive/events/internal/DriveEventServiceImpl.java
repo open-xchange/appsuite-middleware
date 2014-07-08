@@ -178,7 +178,7 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
             return;
         }
         String fileName = (String)event.getProperty(FILE_NAME);
-        if (false == Strings.isEmpty(fileName) && DriveUtils.isInvalidFileName(fileName)) {
+        if (false == Strings.isEmpty(fileName) && (DriveUtils.isInvalidFileName(fileName) || DriveUtils.isIgnoredFileName(fileName))) {
             LOG.trace("Skipping event processing for ignored file: {}", fileName);
             return;
         }
