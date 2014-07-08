@@ -257,7 +257,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
     /**
      * Initializes a new {@link JsonMessageHandler}
-     * 
+     *
      * @param accountId The account ID
      * @param mailPath The unique mail path
      * @param mail The mail message to add JSON fields not set by message parser traversal
@@ -275,7 +275,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
     /**
      * Initializes a new {@link JsonMessageHandler}
-     * 
+     *
      * @param accountId The account ID
      * @param mailPath The unique mail path
      * @param mail The mail message to add JSON fields not set by message parser traversal
@@ -1431,9 +1431,9 @@ public final class JsonMessageHandler implements MailMessageHandler {
             jsonObject.put(CONTENT_TYPE, baseContentType);
             jsonObject.put(SIZE, len);
             jsonObject.put(DISPOSITION, Part.ATTACHMENT);
-            jsonObject.put(TRUNCATED, sanitizeResult.isTruncated());
             if ((null != sanitizeResult) && (sanitizeResult.getContent() != null)) {
                 jsonObject.put(CONTENT, sanitizeResult.getContent());
+                jsonObject.put(TRUNCATED, sanitizeResult.isTruncated());
             } else {
                 jsonObject.put(CONTENT, JSONObject.NULL);
             }
