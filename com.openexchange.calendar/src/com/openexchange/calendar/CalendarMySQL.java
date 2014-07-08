@@ -90,6 +90,7 @@ import com.openexchange.calendar.cache.CalendarVolatileCache;
 import com.openexchange.calendar.cache.CalendarVolatileCache.CacheType;
 import com.openexchange.calendar.storage.ParticipantStorage;
 import com.openexchange.calendar.storage.SQL;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
@@ -133,9 +134,6 @@ import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
-import com.openexchange.quota.QuotaService;
-import com.openexchange.quota.QuotaType;
-import com.openexchange.quota.Resource;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
@@ -1717,26 +1715,27 @@ public class CalendarMySQL implements CalendarSqlImp {
         return b ? 1 : 0;
     }
 
-    private void checkQuota(Session session) throws OXException {
+    private void checkQuota(Session session, Connection connection) throws OXException {
         ServiceLookup serviceLookup = SERVICES_REF.get();
         if (serviceLookup == null) {
             return;
         }
-        QuotaService quotaService = serviceLookup.getService(QuotaService.class);
-        if (null != quotaService) {
-            Quota quota = quotaService.getQuotaFor(Resource.CALENDAR, session);
-            long quotaValue = quota.getQuota(QuotaType.AMOUNT);
-            if (quotaValue > 0) {
-                long used = countAppointments(session);
-                if (used > 0 && used >= quotaValue) {
-                    throw QuotaExceptionCodes.QUOTA_EXCEEDED_CALENDAR.create(used, quotaValue);
-                }
-            }
+
+        ConfigViewFactory viewFactory = serviceLookup.getService(ConfigViewFactory.class);
+        if (viewFactory == null) {
+            return;
+        }
+
+        Quota amountQuota = CalendarQuotaProvider.getAmountQuota(session, connection, viewFactory, this);
+        long limit = amountQuota.getLimit();
+        long usage = amountQuota.getUsage();
+        if (limit > 0 && amountQuota.getUsage() >= limit) {
+            throw QuotaExceptionCodes.QUOTA_EXCEEDED_CALENDAR.create(usage, limit);
         }
     }
 
     private final CalendarDataObject[] insertAppointment0(final CalendarDataObject cdao, final Connection writecon, final Session so, final boolean notify) throws DataTruncation, SQLException, OXException, OXException {
-        checkQuota(so);
+        checkQuota(so, writecon);
 
         int i = 1;
         CalendarVolatileCache.getInstance().invalidateGroup(String.valueOf(cdao.getContextID()));
@@ -5711,17 +5710,24 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public int countAppointments(Session session) throws OXException {
-        SELECT select = new SELECT(new COUNT(ASTERISK)).FROM("prg_dates").WHERE(new EQUALS("cid", PLACEHOLDER));
-        List<Object> params = new ArrayList<Object>();
         Context ctx = Tools.getContext(session);
-        params.add(ctx.getContextId());
-
         Connection connection = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-
         try {
             connection = DBPool.pickup(ctx);
+            return countAppointments(connection, session);
+        } finally {
+            DBPool.push(ctx, connection);
+        }
+    }
+
+    int countAppointments(Connection connection, Session session) throws OXException {
+        SELECT select = new SELECT(new COUNT(ASTERISK)).FROM("prg_dates").WHERE(new EQUALS("cid", PLACEHOLDER));
+        List<Object> params = new ArrayList<Object>();
+        params.add(session.getContextId());
+
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
             stmt = new StatementBuilder().prepareStatement(connection, select, params);
             rs = stmt.executeQuery();
             if (rs.next()) {
@@ -5730,8 +5736,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         } catch (final SQLException e) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
         } finally {
-            DBUtils.closeResources(rs, stmt, null, true, ctx);
-            DBPool.push(ctx, connection);
+            DBUtils.closeSQLStuff(rs, stmt);
         }
 
         return 0;
