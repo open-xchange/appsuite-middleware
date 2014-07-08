@@ -68,7 +68,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-final class LoginResultImpl implements LoginResult {
+final public class LoginResultImpl implements LoginResult {
 
     private LoginRequest request;
     private Context context;

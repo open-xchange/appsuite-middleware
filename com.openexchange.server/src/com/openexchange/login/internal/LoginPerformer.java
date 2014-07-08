@@ -153,7 +153,7 @@ public final class LoginPerformer {
      * @return The login providing login information
      * @throws OXException If login fails
      */
-    private LoginResult doLogin(LoginRequest request, Map<String, Object> properties, LoginMethodClosure loginMethod) throws OXException {
+    public LoginResult doLogin(LoginRequest request, Map<String, Object> properties, LoginMethodClosure loginMethod) throws OXException {
         sanityChecks(request);
         final LoginResultImpl retval = new LoginResultImpl();
         retval.setRequest(request);

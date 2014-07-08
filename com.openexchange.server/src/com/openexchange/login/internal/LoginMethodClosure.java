@@ -57,7 +57,7 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-interface LoginMethodClosure {
+public interface LoginMethodClosure {
 
     Authenticated doAuthentication(LoginResultImpl retval) throws OXException;
 
