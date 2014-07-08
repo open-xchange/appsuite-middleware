@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Quota Usage
+Bundle-SymbolicName: com.openexchange.quota.usage
+Bundle-Version: 7.6.1
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.exception,
+ com.openexchange.osgi,
+ com.openexchange.session,
+ org.osgi.framework;version="1.7.0",
+ org.osgi.util.tracker;version="1.5.1",
+ org.slf4j;version="1.7.5"
+Export-Package: com.openexchange.quota.usage
+Bundle-Activator: com.openexchange.quota.usage.osgi.QuotaAndUsageActivator
