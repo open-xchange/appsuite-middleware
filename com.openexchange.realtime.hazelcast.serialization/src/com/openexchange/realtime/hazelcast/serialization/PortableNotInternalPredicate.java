@@ -47,29 +47,50 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast.group;
+package com.openexchange.realtime.hazelcast.serialization;
 
-import java.io.Serializable;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
+import com.hazelcast.nio.serialization.PortableReader;
+import com.hazelcast.nio.serialization.PortableWriter;
 import com.hazelcast.query.Predicate;
+import com.openexchange.hazelcast.serialization.CustomPortable;
 import com.openexchange.realtime.packet.ID;
 
 
 /**
- * {@link NotInternalPredicate} - Filter out events that only apply to internal {@link ID}s.
+ * {@link PortableNotInternalPredicate} - Filter out internal {@link ID}s.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
- * @since 7.6.0
+ * @since 7.6.1
  */
-public class NotInternalPredicate implements Predicate<String, Map<String,Object>>, Serializable {
+public class PortableNotInternalPredicate implements Predicate<String, Map<String,Object>>, CustomPortable{
 
-    private static final long serialVersionUID = 6986091892139577448L;
+    private static final long serialVersionUID = -4738251095093967960L;
+
+    public static final int CLASS_ID = 7;
 
     @Override
     public boolean apply(Entry<String, Map<String, Object>> event) {
         ID id = new ID(event.getKey());
         return !id.isInternal();
+    }
+
+    @Override
+    public void writePortable(PortableWriter writer) throws IOException {}
+
+    @Override
+    public void readPortable(PortableReader reader) throws IOException {}
+
+    @Override
+    public int getFactoryId() {
+        return FACTORY_ID;
+    }
+
+    @Override
+    public int getClassId() {
+        return CLASS_ID;
     }
 
 }

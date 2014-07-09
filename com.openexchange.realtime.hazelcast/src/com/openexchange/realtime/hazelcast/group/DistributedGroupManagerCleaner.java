@@ -57,6 +57,7 @@ import com.hazelcast.core.EntryEvent;
 import com.hazelcast.query.Predicate;
 import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.hazelcast.directory.ResourceMappingEntryListener;
+import com.openexchange.realtime.hazelcast.serialization.PortableNotInternalPredicate;
 import com.openexchange.realtime.packet.ID;
 
 
@@ -74,7 +75,7 @@ public class DistributedGroupManagerCleaner implements ResourceMappingEntryListe
     private RealtimeJanitor janitor;
     
     public DistributedGroupManagerCleaner(RealtimeJanitor janitor) {
-        notInternalPredicate = new NotInternalPredicate();
+        notInternalPredicate = new PortableNotInternalPredicate();
         this.janitor = janitor;
     }
 

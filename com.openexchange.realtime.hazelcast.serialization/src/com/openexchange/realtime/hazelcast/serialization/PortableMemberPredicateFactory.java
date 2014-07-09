@@ -47,38 +47,28 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast.directory;
+package com.openexchange.realtime.hazelcast.serialization;
 
-import java.net.InetSocketAddress;
-import java.util.Map;
-import java.util.Map.Entry;
-import com.hazelcast.query.Predicate;
+import com.hazelcast.nio.serialization.Portable;
+import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 
 
 /**
- * {@link MemberPredicate} - Filters resources that are located on a member node via a distributed query.
+ * {@link PortableMemberPredicateFactory}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
- * @since 7.6.0
+ * @since 7.6.1
  */
-public class MemberPredicate implements Predicate<String, Map<String, Object>> {
+public class PortableMemberPredicateFactory implements CustomPortableFactory {
 
-    private static final long serialVersionUID = -290310576848501442L;
-
-    private final InetSocketAddress memberAddress;
-
-    public MemberPredicate(InetSocketAddress memberAddress) {
-        this.memberAddress = memberAddress;
+    @Override
+    public Portable create() {
+        return new PortableMemberPredicate();
     }
 
     @Override
-    public boolean apply(Entry<String, Map<String, Object>> mapEntry) {
-        Map<String, Object> resourceMap = mapEntry.getValue();
-        if(resourceMap != null) {
-            HazelcastResource resource = HazelcastResourceWrapper.unwrap(resourceMap);
-            return memberAddress.equals(resource.getRoutingInfo().getInetSocketAddress());
-        }
-        return false;
+    public int getClassId() {
+        return PortableMemberPredicate.CLASS_ID;
     }
 
 }

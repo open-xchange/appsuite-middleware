@@ -70,7 +70,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.directory.Resource;
-import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
@@ -172,7 +171,7 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
             stanza.trace("Deliver locally");
             Map<ID, OXException> sent = Services.getService(LocalMessageDispatcher.class).send(stanza, localIds);
             if (Utils.shouldResend(sent, stanza)) {
-                resend(stanza, true);
+                resend(stanza);
                 //return empty map of exceptions when resending
                 return exceptions;
             }
@@ -198,7 +197,6 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
                 Thread.currentThread().interrupt();
                 throw RealtimeExceptionCodes.UNEXPECTED_ERROR.create(e, "Execution interrupted");
             } catch (ExecutionException e) {
-                resend(stanza, Utils.shouldRemove(directory, stanza, e));
                 throw ThreadPools.launderThrowable(e, OXException.class);
             }
         }
@@ -215,11 +213,7 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
      * @param stanza The Stanza to resend
      * @throws OXException
      */
-    private void resend(Stanza stanza, boolean remove) throws OXException {
-        IDMap<Resource> idMap = directory.get(stanza.getTo());
-        if(remove) {
-            directory.remove(stanza.getTo());
-        }
+    private void resend(Stanza stanza) throws OXException {
         send(stanza);
     }
 

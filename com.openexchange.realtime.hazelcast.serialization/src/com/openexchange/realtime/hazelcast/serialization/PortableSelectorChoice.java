@@ -64,10 +64,12 @@ import com.openexchange.realtime.packet.ID;
  */
 public class PortableSelectorChoice extends SelectorChoice implements CustomPortable {
 
-    /** The unique portable class ID of the {@link PortableStampedGroup} */
     public static final int CLASS_ID = 6;
+
     private static final String CLIENT_ID = "clientID";
+
     private static final String GROUP_ID = "groupID";
+
     private static final String SELECTOR = "selector";
 
     /**

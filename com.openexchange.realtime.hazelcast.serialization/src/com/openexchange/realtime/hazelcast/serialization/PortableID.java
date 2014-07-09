@@ -59,7 +59,7 @@ import com.openexchange.realtime.packet.IDComponentsParser.IDComponents;
 
 
 /**
- * {@link PortableID}
+ * {@link PortableID} A {@link ID} implementation that can efficiently be serialized via Hazelcast's Portable
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.0
@@ -68,7 +68,6 @@ public class PortableID extends ID implements CustomPortable {
 
     private static final long serialVersionUID = -6140097121581373922L;
     
-    /** The unique portable class ID of the {@link PortableResource} */
     public static final int CLASS_ID = 5;
 
     /**

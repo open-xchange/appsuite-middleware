@@ -47,56 +47,72 @@
  *
  */
 
+package com.openexchange.realtime.hazelcast.serialization;
 
-package com.openexchange.hazelcast.serialization;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.Map;
+import java.util.Map.Entry;
+import com.hazelcast.core.Member;
+import com.hazelcast.nio.serialization.PortableReader;
+import com.hazelcast.nio.serialization.PortableWriter;
+import com.hazelcast.query.Predicate;
+import com.openexchange.hazelcast.serialization.CustomPortable;
 
-import com.hazelcast.nio.serialization.Portable;
 
 /**
- * {@link CustomPortable}
+ * {@link MemberPredicate} - Filters resources that are located on a member node via a distributed query.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since 7.6.1
  */
-public interface CustomPortable extends Portable {
+public class PortableMemberPredicate implements Predicate<String, Map<String, Object>>, CustomPortable {
 
-    /**
-     * The identifier of the dynamic portable factory.<p/>
-     *
-     * Make sure to supply this identifier in the {@link #getFactoryId()} method.
-     */
-    static final int FACTORY_ID = DynamicPortableFactory.FACTORY_ID;
+    private static final long serialVersionUID = -3149448521057961502L;
 
-    /**
-     * Gets the ID of the dynamic portable factory.<p/>
-     *
-     * Make sure to supply {@link CustomPortable#FACTORY_ID} here.
-     *
-     * @return The factory ID.
-     */
+    public static final int CLASS_ID = 8;
+
+    private InetSocketAddress memberAddress;
+
+    public PortableMemberPredicate() {
+        super();
+    }
+
+    public PortableMemberPredicate(InetSocketAddress memberAddress) {
+        this.memberAddress = memberAddress;
+    }
+
     @Override
-    int getFactoryId();
+    public boolean apply(Entry<String, Map<String, Object>> mapEntry) {
+        Map<String, Object> resourceMap = mapEntry.getValue();
+        if(resourceMap != null) {
+            Member resourceMember = (Member) resourceMap.get("routingInfo");
+            return memberAddress.equals(resourceMember.getInetSocketAddress());
+        }
+        return false;
+    }
 
-    /**
-     * Gets the class ID of this portable implementation.<p/>
-     *
-     * Choose a not yet used arbitrary identifier <code>> 0</code> for your portable class here and ensure to return the same class ID in the
-     * corresponding {@link CustomPortableFactory#getClassId()} method.<p/>
-     *
-     * The following list gives an overview about the <b>already used</b> class IDs (add your IDs here):
-     * <ul>
-     * <li><code>  1</code>: com.openexchange.sessionstorage.hazelcast.portable.PortableSession</li>
-     * <li><code>  2</code>: com.openexchange.drive.events.ms.PortableDriveEvent</li>
-     * <li><code>  3</code>: com.openexchange.ms.internal.portable.PortableMessage</li>
-     * <li><code>  4</code>: com.openexchange.caching.events.ms.internal.PortableCacheEvent</li>
-     * <li><code>  5</code>: com.openexchange.realtime.hazelcast.serialization.PortableID</li>
-     * <li><code>  6</code>: com.openexchange.realtime.hazelcast.serialization.PortableSelectorChoice</li>
-     * <li><code>  7</code>: com.openexchange.realtime.hazelcast.serialization.PortableNotInternalPredicate</li>
-     * <li><code>  8</code>: com.openexchange.realtime.hazelcast.serialization.PortableMemberPredicate</li>
-     * </ul>
-     *
-     * @return The class ID
-     */
     @Override
-    int getClassId();
+    public void writePortable(PortableWriter writer) throws IOException {
+        writer.writeUTF("memberAddressHostname", memberAddress.getHostName());
+        writer.writeInt("memberAddressPort", memberAddress.getPort());
+    }
+
+    @Override
+    public void readPortable(PortableReader reader) throws IOException {
+        String hostname = reader.readUTF("memberAddressHostname");
+        int port = reader.readInt("memberAddressPort");
+        memberAddress = new InetSocketAddress(hostname, port);
+    }
+
+    @Override
+    public int getFactoryId() {
+        return FACTORY_ID;
+    }
+
+    @Override
+    public int getClassId() {
+        return CLASS_ID;
+    }
 
 }

@@ -47,56 +47,28 @@
  *
  */
 
-
-package com.openexchange.hazelcast.serialization;
+package com.openexchange.realtime.hazelcast.serialization;
 
 import com.hazelcast.nio.serialization.Portable;
+import com.openexchange.hazelcast.serialization.CustomPortableFactory;
+
 
 /**
- * {@link CustomPortable}
+ * {@link PortableNotInternalPredicateFactory}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since 7.6.1
  */
-public interface CustomPortable extends Portable {
+public class PortableNotInternalPredicateFactory implements CustomPortableFactory {
 
-    /**
-     * The identifier of the dynamic portable factory.<p/>
-     *
-     * Make sure to supply this identifier in the {@link #getFactoryId()} method.
-     */
-    static final int FACTORY_ID = DynamicPortableFactory.FACTORY_ID;
-
-    /**
-     * Gets the ID of the dynamic portable factory.<p/>
-     *
-     * Make sure to supply {@link CustomPortable#FACTORY_ID} here.
-     *
-     * @return The factory ID.
-     */
     @Override
-    int getFactoryId();
+    public Portable create() {
+        return new PortableNotInternalPredicate();
+    }
 
-    /**
-     * Gets the class ID of this portable implementation.<p/>
-     *
-     * Choose a not yet used arbitrary identifier <code>> 0</code> for your portable class here and ensure to return the same class ID in the
-     * corresponding {@link CustomPortableFactory#getClassId()} method.<p/>
-     *
-     * The following list gives an overview about the <b>already used</b> class IDs (add your IDs here):
-     * <ul>
-     * <li><code>  1</code>: com.openexchange.sessionstorage.hazelcast.portable.PortableSession</li>
-     * <li><code>  2</code>: com.openexchange.drive.events.ms.PortableDriveEvent</li>
-     * <li><code>  3</code>: com.openexchange.ms.internal.portable.PortableMessage</li>
-     * <li><code>  4</code>: com.openexchange.caching.events.ms.internal.PortableCacheEvent</li>
-     * <li><code>  5</code>: com.openexchange.realtime.hazelcast.serialization.PortableID</li>
-     * <li><code>  6</code>: com.openexchange.realtime.hazelcast.serialization.PortableSelectorChoice</li>
-     * <li><code>  7</code>: com.openexchange.realtime.hazelcast.serialization.PortableNotInternalPredicate</li>
-     * <li><code>  8</code>: com.openexchange.realtime.hazelcast.serialization.PortableMemberPredicate</li>
-     * </ul>
-     *
-     * @return The class ID
-     */
     @Override
-    int getClassId();
+    public int getClassId() {
+        return PortableNotInternalPredicate.CLASS_ID;
+    }
 
 }

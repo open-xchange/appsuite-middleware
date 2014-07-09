@@ -50,17 +50,10 @@
 package com.openexchange.realtime.hazelcast;
 
 import java.util.Map;
-import java.util.Set;
-import com.hazelcast.core.Member;
-import com.hazelcast.spi.exception.TargetNotMemberException;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.dispatch.DispatchExceptionCode;
-import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
-import com.openexchange.realtime.hazelcast.directory.HazelcastResourceDirectory;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.realtime.util.IDMap;
 
 
 /**
@@ -96,26 +89,6 @@ public class Utils {
             if ( DispatchExceptionCode.RESOURCE_OFFLINE.equals(oxexception)) {
                 return true;
             }
-        }
-        return false;
-    }
-
-    
-    public static boolean shouldRemove(HazelcastResourceDirectory directory, Stanza stanza, Exception e) throws OXException {
-        if(e.getCause() instanceof TargetNotMemberException) {
-            IDMap<Resource> idMap = directory.get(stanza.getTo());
-            Set<Member> members = HazelcastAccess.getHazelcastInstance().getCluster().getMembers();
-            if(idMap.isEmpty()) {
-                return false;
-            }
-            for (Resource resource : idMap.values()) {
-                Member routingInfo = (Member) resource.getRoutingInfo();
-                if(!members.contains(routingInfo)) {
-                    return true;
-                }
-            }
-            //current routinginfo is part of the cluster, don't remove
-            return false;
         }
         return false;
     }
