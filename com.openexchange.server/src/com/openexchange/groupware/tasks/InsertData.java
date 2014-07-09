@@ -57,6 +57,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -67,10 +69,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
-import com.openexchange.quota.QuotaService;
-import com.openexchange.quota.QuotaType;
-import com.openexchange.quota.Resource;
-import com.openexchange.quota.ResourceDescription;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 
@@ -81,7 +79,9 @@ import com.openexchange.session.Session;
  */
 public final class InsertData {
 
-    private static final AtomicReference<QuotaService> QUOTA_SERVICE_REF = new AtomicReference<QuotaService>();
+    private static final Logger LOG = LoggerFactory.getLogger(InsertData.class);
+
+    private static final AtomicReference<TaskQuotaProvider> QUOTA_PROVIDER_REF = new AtomicReference<TaskQuotaProvider>();
 
     private final Context ctx;
     private final User user;
@@ -101,13 +101,8 @@ public final class InsertData {
         this.task = task;
     }
 
-    /**
-     * Sets {@link QuotaService} reference to given instance.
-     *
-     * @param quotaService The {@link QuotaService} instance or <code>null</code>
-     */
-    public static void setQuotaService(QuotaService quotaService) {
-        QUOTA_SERVICE_REF.set(quotaService);
+    public static void setQuotaProvider(TaskQuotaProvider quotaProvider) {
+        QUOTA_PROVIDER_REF.set(quotaProvider);
     }
 
     void prepare(Session session) throws OXException {
@@ -134,15 +129,15 @@ public final class InsertData {
         }
 
         // Check if over quota
-        QuotaService quotaService = QUOTA_SERVICE_REF.get();
-        if (null != quotaService) {
-            Quota quota = quotaService.getQuotaFor(Resource.TASK, ResourceDescription.getEmptyResourceDescription(), session);
-            long amount = quota.getQuota(QuotaType.AMOUNT);
-            if (amount > 0) {
-                int numberOfTasks = storage.countTasks(ctx);
-                if (numberOfTasks + 1 > amount) {
-                    throw QuotaExceptionCodes.QUOTA_EXCEEDED_TASKS.create(numberOfTasks, amount);
-                }
+        TaskQuotaProvider quotaProvider = QUOTA_PROVIDER_REF.get();
+        if (quotaProvider == null) {
+            LOG.warn("No TaskQuotaProvider was set, a task will be created without quota check!");
+        } else {
+            Quota amountQuota = quotaProvider.getAmountQuota(session);
+            long limit = amountQuota.getLimit();
+            long usage = amountQuota.getUsage();
+            if (limit > 0 && usage >= limit) {
+                throw QuotaExceptionCodes.QUOTA_EXCEEDED_TASKS.create(usage, limit);
             }
         }
     }
