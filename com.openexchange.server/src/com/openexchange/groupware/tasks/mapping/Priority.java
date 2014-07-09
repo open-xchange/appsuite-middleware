@@ -95,7 +95,7 @@ public class Priority implements Mapper<Integer> {
 
     @Override
     public void toDB(PreparedStatement stmt, int pos, Task task) throws SQLException {
-        if (null == task.getActualDuration()) {
+        if (null == task.getPriority()) {
             stmt.setNull(pos, Types.INTEGER);
         } else {
             stmt.setInt(pos, i(task.getPriority()));

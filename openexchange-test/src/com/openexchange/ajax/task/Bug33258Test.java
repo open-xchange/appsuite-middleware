@@ -114,6 +114,10 @@ public final class Bug33258Test extends AbstractAJAXSession {
                 task.setLastModified(response.getTimestamp());
             }
             assertFalse("Priority value " + priority + " should work.", response.hasError());
+            GetResponse getResponse = client1.execute(new GetRequest(test));
+            test = getResponse.getTask(timeZone);
+            assertTrue("Task should contain a priority.", test.containsPriority());
+            assertEquals("Written priority should be equal to read one.", I(priority), test.getPriority());
         }
         for (int priority : new int[] { Task.LOW-1, Task.HIGH+1 }) {
             test.setPriority(I(priority));
