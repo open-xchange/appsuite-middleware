@@ -63,10 +63,18 @@ import com.openexchange.exception.OXException;
 public interface DistributedGroupManagerMBean {
 
     /**
-     * Get the mapping of general IDs to full IDs e.g. marc.arens@premium <-> ox://marc.arens@premium/random.
+     * Get the mapping of general client IDs to SelectorChoices.
      *
-     * @return the map used for mapping general IDs to full IDs.
+     * @return the map
      * @throws OXException if the HazelcastInstance is missing.
      */
     public Map<String, List<String>> getClientMapping() throws OXException;
+
+    /**
+     * Get the mapping of group IDs to member SelectorCjoices
+     *
+     * @return the map 
+     * @throws OXException if the HazelcastInstance is missing.
+     */
+    public Map<String, List<String>> getGroupMapping() throws OXException;
 }

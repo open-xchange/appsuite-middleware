@@ -61,6 +61,7 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.MultiMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementObject;
+import com.openexchange.realtime.group.SelectorChoice;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.packet.ID;
 
@@ -75,26 +76,39 @@ public class DistributedGroupManagerManagement extends ManagementObject<Distribu
 
     private ObjectName objectName;
     private String clientMapName;
+    private String groupMapName;
 
-    public DistributedGroupManagerManagement(String clientMapName) {
+    public DistributedGroupManagerManagement(String clientMapName, String groupMapName) {
         super(DistributedGroupManagerMBean.class);
         this.clientMapName = clientMapName;
+        this.groupMapName = groupMapName; 
     }
 
     @Override
     public Map<String, List<String>> getClientMapping() throws OXException {
+        MultiMap<ID, SelectorChoice> clientToGroupsMapping = getClientToGroupsMapping();
+        return createMapping(clientToGroupsMapping);
+    }
+    
+    @Override
+    public Map<String, List<String>> getGroupMapping() throws OXException {
+        MultiMap<ID, SelectorChoice> roupToMembersMapping = getGroupToMembersMapping();
+        return createMapping(roupToMembersMapping);
+    }
+    
+    private Map<String, List<String>> createMapping(MultiMap<ID, SelectorChoice> multimap) throws OXException {
         Map<String, List<String>> jmxMap = new HashMap<String, List<String>>();
-        MultiMap<ID, ID> clientToGroupsMapping = getClientToGroupsMapping();
-        Set<Entry<ID,ID>> entrySet = clientToGroupsMapping.entrySet();
-        for (Entry<ID, ID> entry : entrySet) {
-            String client = entry.getKey().toString();
-            String group = entry.getValue().toString();
-            List<String> groups = jmxMap.get(client);
-            if(groups == null) {
-                groups = new ArrayList<String>();
-                jmxMap.put(client, groups);
+        MultiMap<ID, SelectorChoice> incoming = multimap;
+        Set<Entry<ID,SelectorChoice>> entrySet = incoming.entrySet();
+        for (Entry<ID, SelectorChoice> entry : entrySet) {
+            String key = entry.getKey().toString();
+            String value = entry.getValue().toString();
+            List<String> collected = jmxMap.get(key);
+            if(collected == null) {
+                collected = new ArrayList<String>();
+                jmxMap.put(key, collected);
             }
-            groups.add(group);
+            collected.add(value);
         }
         return jmxMap;
     }
@@ -118,8 +132,18 @@ public class DistributedGroupManagerManagement extends ManagementObject<Distribu
      * 
      * @return A {@link MultiMap} of one client to many groups
      */
-    private MultiMap<ID, ID> getClientToGroupsMapping() throws OXException {
+    private MultiMap<ID, SelectorChoice> getClientToGroupsMapping() throws OXException {
         HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
         return hazelcast.getMultiMap(clientMapName);
+    }
+    
+    /**
+     * Get mapping of one group to many members
+     * 
+     * @return A {@link MultiMap} of one client to many groups
+     */
+    private MultiMap<ID, SelectorChoice> getGroupToMembersMapping() throws OXException {
+        HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
+        return hazelcast.getMultiMap(groupMapName);
     }
 }

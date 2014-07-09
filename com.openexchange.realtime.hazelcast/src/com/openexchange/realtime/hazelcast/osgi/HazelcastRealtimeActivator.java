@@ -70,12 +70,14 @@ import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.group.DistributedGroupManager;
 import com.openexchange.realtime.handle.StanzaStorage;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
+import com.openexchange.realtime.hazelcast.cleanup.CleanupMemberShipListener;
 import com.openexchange.realtime.hazelcast.cleanup.GlobalRealtimeCleanupImpl;
 import com.openexchange.realtime.hazelcast.directory.HazelcastResourceDirectory;
 import com.openexchange.realtime.hazelcast.group.DistributedGroupManagerImpl;
 import com.openexchange.realtime.hazelcast.impl.GlobalMessageDispatcherImpl;
 import com.openexchange.realtime.hazelcast.impl.HazelcastStanzaStorage;
 import com.openexchange.realtime.hazelcast.management.ManagementHouseKeeper;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 
 /**
@@ -93,7 +95,7 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { HazelcastInstance.class, LocalMessageDispatcher.class, ManagementService.class, TimerService.class,
-            LocalRealtimeCleanup.class };
+            LocalRealtimeCleanup.class, ThreadPoolService.class };
     }
 
     @Override
@@ -106,20 +108,6 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
 
         HazelcastInstance hazelcastInstance = getService(HazelcastInstance.class);
         HazelcastAccess.setHazelcastInstance(hazelcastInstance);
-
-        // either track Hazelcast for HazelcasAccess or get it via Services each time
-        track(HazelcastInstance.class, new SimpleRegistryListener<HazelcastInstance>() {
-
-            @Override
-            public void added(final ServiceReference<HazelcastInstance> ref, final HazelcastInstance hazelcastInstance) {
-                HazelcastAccess.setHazelcastInstance(hazelcastInstance);
-            }
-
-            @Override
-            public void removed(final ServiceReference<HazelcastInstance> ref, final HazelcastInstance hazelcastInstance) {
-                HazelcastAccess.setHazelcastInstance(null);
-            }
-        });
 
         Config config = hazelcastInstance.getConfig();
         String id_map = discoverMapName(config, "rtIDMapping-");
@@ -136,6 +124,10 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
         GlobalRealtimeCleanupImpl globalCleanup = new GlobalRealtimeCleanupImpl(directory);
         managementHouseKeeper.addManagementObject(globalCleanup.getManagementObject());
 
+        String lock_map = discoverMapName(config, "rtCleanupLock-");
+        CleanupMemberShipListener cleanupListener = new CleanupMemberShipListener(lock_map, directory, globalCleanup);
+        hazelcastInstance.getCluster().addMembershipListener(cleanupListener);
+
         track(Channel.class, new SimpleRegistryListener<Channel>() {
 
             @Override
@@ -149,7 +141,6 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
             }
         });
 
-        openTrackers();
         registerService(ResourceDirectory.class, directory, null);
         registerService(MessageDispatcher.class, globalDispatcher);
         addService(MessageDispatcher.class, globalDispatcher);
@@ -158,12 +149,12 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
         registerService(Channel.class, globalDispatcher.getChannel());
         registerService(GlobalRealtimeCleanup.class, globalCleanup);
         addService(GlobalRealtimeCleanup.class, globalCleanup);
-        
 
         String client_map = discoverMapName(config, "rtClientMapping-");
         String group_map = discoverMapName(config, "rtGroupMapping-");
-        DistributedGroupManagerImpl distributedGroupManager = new DistributedGroupManagerImpl(globalDispatcher, client_map, group_map);
+        final DistributedGroupManagerImpl distributedGroupManager = new DistributedGroupManagerImpl(globalDispatcher, client_map, group_map);
         cleanerRegistrationId = directory.addResourceMappingEntryListener(distributedGroupManager.getCleaner(), true);
+
         registerService(DistributedGroupManager.class, distributedGroupManager);
         managementHouseKeeper.addManagementObject(distributedGroupManager.getManagementObject());
 
@@ -173,6 +164,7 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
         } catch (OXException oxe) {
             LOG.error("Failed to expose ManagementObjects", oxe);
         }
+        openTrackers();
     }
 
     @Override

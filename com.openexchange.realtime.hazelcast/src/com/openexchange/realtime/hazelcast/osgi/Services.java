@@ -56,6 +56,7 @@ import com.openexchange.server.ServiceLookup;
  * {@link Services} - The static service lookup.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public final class Services {
 
@@ -90,7 +91,7 @@ public final class Services {
      * Gets the service of specified type
      *
      * @param clazz The service's class
-     * @return The service
+     * @return The service or null if absent
      * @throws IllegalStateException If an error occurs while returning the demanded service
      */
     public static <S extends Object> S getService(Class<? extends S> clazz) {

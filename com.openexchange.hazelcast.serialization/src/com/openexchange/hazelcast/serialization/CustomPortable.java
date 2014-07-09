@@ -89,6 +89,9 @@ public interface CustomPortable extends Portable {
      * <li><code>  3</code>: com.openexchange.ms.internal.portable.PortableMessage</li>
      * <li><code>  4</code>: com.openexchange.caching.events.ms.internal.PortableCacheEvent</li>
      * <li><code>  5</code>: com.openexchange.realtime.hazelcast.serialization.PortableID</li>
+     * <li><code>  6</code>: com.openexchange.realtime.hazelcast.serialization.PortableSelectorChoice</li>
+     * <li><code>  7</code>: com.openexchange.realtime.hazelcast.serialization.PortableNotInternalPredicate</li>
+     * <li><code>  8</code>: com.openexchange.realtime.hazelcast.serialization.PortableMemberPredicate</li>
      * </ul>
      *
      * @return The class ID

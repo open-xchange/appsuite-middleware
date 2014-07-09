@@ -51,6 +51,7 @@ package com.openexchange.realtime.hazelcast.directory;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -72,6 +73,7 @@ import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.hazelcast.management.HazelcastResourceDirectoryMBean;
 import com.openexchange.realtime.hazelcast.management.HazelcastResourceDirectoryManagement;
+import com.openexchange.realtime.hazelcast.serialization.PortableMemberPredicate;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.util.IDMap;
@@ -479,6 +481,32 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
      */
     public boolean removeResourceMappingEntryListener(String registrationId) throws OXException {
         return getResourceMapping().removeEntryListener(registrationId);
+    }
+
+    /**
+     * Find all Resources in this directory that are located on a given member node.
+     * 
+     * @param member The cluster member
+     * @return all Resources in this directory that are located on the given member node.
+     * @throws OXException
+     */
+    public IDMap<HazelcastResource> getResourcesOfMember(Member member)throws OXException {
+        IMap<String, Map<String, Object>> allResources = getResourceMapping();
+        PortableMemberPredicate memberPredicate = new PortableMemberPredicate(member.getInetSocketAddress());
+        Set<Entry<String,Map<String,Object>>> entrySet = allResources.entrySet(memberPredicate);
+        IDMap<HazelcastResource> foundIds = new IDMap<HazelcastResource>();
+        Iterator<Entry<String, Map<String, Object>>> iterator = entrySet.iterator();
+        while(iterator.hasNext()) {
+            try {
+                Entry<String, Map<String, Object>> next = iterator.next();
+                String key = next.getKey();
+                Map<String, Object> value = next.getValue();
+                foundIds.put(new ID(key), HazelcastResourceWrapper.unwrap(value));
+            } catch (Exception e) {
+                LOG.error("Couldn't add resource that was found for member {}", member, e);
+            }
+        }
+        return foundIds;
     }
 
 }

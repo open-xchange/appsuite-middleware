@@ -47,29 +47,28 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast.group;
+package com.openexchange.realtime.hazelcast.serialization;
 
-import java.io.Serializable;
-import java.util.Map;
-import java.util.Map.Entry;
-import com.hazelcast.query.Predicate;
-import com.openexchange.realtime.packet.ID;
+import com.hazelcast.nio.serialization.Portable;
+import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 
 
 /**
- * {@link NotInternalPredicate} - Filter out events that only apply to internal {@link ID}s.
+ * {@link PortableMemberPredicateFactory}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
- * @since 7.6.0
+ * @since 7.6.1
  */
-public class NotInternalPredicate implements Predicate<String, Map<String,Object>>, Serializable {
-
-    private static final long serialVersionUID = 6986091892139577448L;
+public class PortableMemberPredicateFactory implements CustomPortableFactory {
 
     @Override
-    public boolean apply(Entry<String, Map<String, Object>> event) {
-        ID id = new ID(event.getKey());
-        return !id.isInternal();
+    public Portable create() {
+        return new PortableMemberPredicate();
+    }
+
+    @Override
+    public int getClassId() {
+        return PortableMemberPredicate.CLASS_ID;
     }
 
 }

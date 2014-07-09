@@ -70,13 +70,13 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.directory.Resource;
-import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.hazelcast.Utils;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.hazelcast.channel.StanzaDispatcher;
+import com.openexchange.realtime.hazelcast.directory.HazelcastResourceDirectory;
 import com.openexchange.realtime.hazelcast.osgi.Services;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
@@ -92,11 +92,11 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GlobalMessageDispatcherImpl.class);
 
-    private final ResourceDirectory directory;
+    private final HazelcastResourceDirectory directory;
 
     private ResponseChannel channel = null;
 
-    public GlobalMessageDispatcherImpl(ResourceDirectory directory) {
+    public GlobalMessageDispatcherImpl(HazelcastResourceDirectory directory) {
         super();
         this.directory = directory;
         this.channel = new ResponseChannel(directory);
@@ -197,7 +197,6 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
                 Thread.currentThread().interrupt();
                 throw RealtimeExceptionCodes.UNEXPECTED_ERROR.create(e, "Execution interrupted");
             } catch (ExecutionException e) {
-                resend(stanza);
                 throw ThreadPools.launderThrowable(e, OXException.class);
             }
         }
@@ -215,7 +214,6 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
      * @throws OXException
      */
     private void resend(Stanza stanza) throws OXException {
-        directory.remove(stanza.getTo());
         send(stanza);
     }
 
