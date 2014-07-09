@@ -71,7 +71,6 @@ import com.openexchange.groupware.reminder.TargetService;
 import com.openexchange.java.Streams;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.quota.QuotaProvider;
-import com.openexchange.quota.QuotaService;
 
 /**
  * {@link CoreCalendarActivator}
@@ -89,7 +88,7 @@ public class CoreCalendarActivator extends HousekeepingActivator {
 
     @Override
     protected java.lang.Class<?>[] getNeededServices() {
-        return new Class<?>[] { CacheService.class, QuotaService.class, DatabaseService.class, ConfigViewFactory.class };
+        return new Class<?>[] { CacheService.class, DatabaseService.class, ConfigViewFactory.class };
     }
 
 

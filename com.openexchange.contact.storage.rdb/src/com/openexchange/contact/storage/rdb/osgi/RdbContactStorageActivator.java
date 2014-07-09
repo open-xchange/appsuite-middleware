@@ -66,7 +66,6 @@ import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.quota.QuotaProvider;
-import com.openexchange.quota.QuotaService;
 
 
 /**
@@ -87,7 +86,7 @@ public class RdbContactStorageActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, QuotaService.class, ContextService.class, ConfigViewFactory.class };
+        return new Class<?>[] { DatabaseService.class, ContextService.class, ConfigViewFactory.class };
     }
 
     @Override
