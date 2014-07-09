@@ -254,7 +254,7 @@ public class ASCIIUtility {
     public static byte[] getBytes(InputStream is) throws IOException {
 
 	int len;
-	int size = 1024;
+	int size = 8192;
 	byte [] buf;
 
 
