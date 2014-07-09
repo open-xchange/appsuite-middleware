@@ -215,13 +215,6 @@ public abstract class VersionMapper<T extends DriveVersion> implements Iterable<
         return comparison;
     }
 
-    private void check(String s) {
-
-
-//        Normalizer.isNormalized(src, form)
-
-    }
-
     @Override
     public String toString() {
         StringBuilder StringBuilder = new StringBuilder();
