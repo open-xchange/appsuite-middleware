@@ -128,10 +128,6 @@ public final class AttachAction extends SnippetAction {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("Not an upload request.");
         }
         final UploadEvent upload = requestData.getUploadEvent();
-        final String moduleParam = requestData.getParameter(AJAXServlet.PARAMETER_MODULE);
-        if (moduleParam == null) {
-            throw UploadException.UploadCode.MISSING_PARAM.create(AJAXServlet.PARAMETER_MODULE);
-        }
         final String fileTypeFilter = requestData.getParameter(AJAXServlet.PARAMETER_TYPE);
         if (fileTypeFilter == null) {
             throw UploadException.UploadCode.MISSING_PARAM.create(AJAXServlet.PARAMETER_TYPE);
