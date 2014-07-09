@@ -227,20 +227,22 @@ public class S3FileStorage implements FileStorage {
 
     @Override
     public Set<String> deleteFiles(String[] names) throws OXException {
-        DeleteObjectsRequest deleteRequest = new DeleteObjectsRequest(bucketName).withKeys(addPrefix(names));
-        try {
-            amazonS3.deleteObjects(deleteRequest);
-        } catch (MultiObjectDeleteException e) {
-            List<DeleteError> errors = e.getErrors();
-            if (null != errors && 0 < errors.size()) {
-                Set<String> notDeleted = new HashSet<String>();
-                for (DeleteError error : errors) {
-                    notDeleted.add(removePrefix(error.getKey()));
+        if (null != names && 0 < names.length) {
+            DeleteObjectsRequest deleteRequest = new DeleteObjectsRequest(bucketName).withKeys(addPrefix(names));
+            try {
+                amazonS3.deleteObjects(deleteRequest);
+            } catch (MultiObjectDeleteException e) {
+                List<DeleteError> errors = e.getErrors();
+                if (null != errors && 0 < errors.size()) {
+                    Set<String> notDeleted = new HashSet<String>();
+                    for (DeleteError error : errors) {
+                        notDeleted.add(removePrefix(error.getKey()));
+                    }
+                    return notDeleted;
                 }
-                return notDeleted;
+            } catch (AmazonClientException e) {
+                throw wrap(e);
             }
-        } catch (AmazonClientException e) {
-            throw wrap(e);
         }
         return Collections.emptySet();
     }
