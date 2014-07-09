@@ -64,22 +64,21 @@ package com.openexchange.quota;
 public interface AccountQuota {
 
     /**
-     * Gets the according accounts id.
+     * Gets the identifier of the associated account.
      *
-     * @return The id, never <code>null</code>
+     * @return The identifier, never <code>null</code>
      */
     String getAccountID();
 
     /**
-     * Gets the according accounts name.
+     * Gets the name of the associated account.
      *
      * @return The name, never <code>null</code>
      */
     String getAccountName();
 
     /**
-     * Returns whether a {@link Quota} can be obtained via {@link #getQuota(QuotaType)}
-     * for the given type.
+     * Checks whether a {@link Quota} can be obtained via {@link #getQuota(QuotaType)} for the given type.
      *
      * @param type The quota type.
      * @return <code>true</code> if the quota is available, otherwise <code>false</code>.
