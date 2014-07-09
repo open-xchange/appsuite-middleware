@@ -260,13 +260,13 @@ public class TaskTest extends CalendarObjectTest {
         assertFalse(object.contains(PRIORITY));
         assertFalse(object.containsPriority());
 
-        object.setPriority(-12);
+        object.setPriority(3);
         assertTrue(object.contains(PRIORITY));
         assertTrue(object.containsPriority());
-        assertEquals(-12, object.get(PRIORITY));
+        assertEquals(new Integer(3), object.get(PRIORITY));
 
-        object.set(PRIORITY,12);
-        assertEquals(12, object.getPriority());
+        object.set(PRIORITY, 3);
+        assertEquals(new Integer(3), object.getPriority());
 
         object.remove(PRIORITY);
         assertFalse(object.contains(PRIORITY));

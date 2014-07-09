@@ -121,17 +121,12 @@ public class UpdateRequest extends AbstractTaskRequest<UpdateResponse> {
         this.failOnError = failOnError;
     }
 
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public Object getBody() throws JSONException {
+    public JSONObject getBody() throws JSONException {
         final JSONObject json = convert(task, timeZone);
         if (removeFolderId) {
             json.remove(TaskFields.FOLDER_ID);
         }
-
         return json;
     }
 

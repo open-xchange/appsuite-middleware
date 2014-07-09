@@ -53,12 +53,15 @@ import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.util.TimeZone;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.task.actions.DeleteRequest;
+import com.openexchange.ajax.task.actions.GetRequest;
+import com.openexchange.ajax.task.actions.GetResponse;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
@@ -104,7 +107,7 @@ public final class Bug33258Test extends AbstractAJAXSession {
     public void testForVerifiedPriority() throws OXException, IOException, JSONException {
         Task test = TaskTools.valuesForUpdate(task);
         for (int priority : new int[] { Task.LOW, Task.NORMAL, Task.HIGH } ) {
-            test.setPriority(priority);
+            test.setPriority(I(priority));
             UpdateResponse response = client1.execute(new UpdateRequest(test, timeZone, false));
             if (!response.hasError()) {
                 test.setLastModified(response.getTimestamp());
@@ -113,7 +116,7 @@ public final class Bug33258Test extends AbstractAJAXSession {
             assertFalse("Priority value " + priority + " should work.", response.hasError());
         }
         for (int priority : new int[] { Task.LOW-1, Task.HIGH+1 }) {
-            test.setPriority(priority);
+            test.setPriority(I(priority));
             UpdateResponse response = client1.execute(new UpdateRequest(test, timeZone, false));
             if (!response.hasError()) {
                 test.setLastModified(response.getTimestamp());
@@ -121,6 +124,22 @@ public final class Bug33258Test extends AbstractAJAXSession {
             }
             assertTrue("Priority value " + priority + " should not work.", response.hasError());
             assertTrue("Did not get an exception about an invalid priority value.", response.getException().similarTo(TaskExceptionCode.INVALID_PRIORITY.create(I(priority))));
+        }
+        {
+            test.removePriority();
+            UpdateResponse response = client1.execute(new UpdateRequest(test, timeZone) {
+                @Override
+                public JSONObject getBody() throws JSONException {
+                    JSONObject json = super.getBody();
+                    json.put("priority", JSONObject.NULL);
+                    return json;
+                }
+            });
+            test.setLastModified(response.getTimestamp());
+            task.setLastModified(response.getTimestamp());
+            GetResponse getResponse = client1.execute(new GetRequest(test));
+            test = getResponse.getTask(timeZone);
+            assertFalse("Task should not contain a priority.", test.containsPriority());
         }
     }
 }

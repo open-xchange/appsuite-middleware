@@ -140,7 +140,7 @@ public class Bug11190Test extends AbstractAJAXSession {
         }
 
         @Override
-        public Object getBody() throws JSONException {
+        public JSONObject getBody() throws JSONException {
             JSONObject obj = (JSONObject) super.getBody();
             if (!getTask().containsDays() && getTask().containsDayInMonth()) {
                 obj.put(TaskFields.DAYS, JSONObject.NULL);

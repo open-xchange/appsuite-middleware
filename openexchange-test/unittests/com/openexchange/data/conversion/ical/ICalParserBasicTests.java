@@ -846,7 +846,7 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
     private void priorityTest(final int priority, final int expected) throws ConversionError {
         final String icalText = fixtures.vtodoWithSimpleProperties("PRIORITY", new Integer(priority).toString());
         final Task task = parseTask(icalText);
-        assertEquals("Invalid interpretation for priority "+priority, expected, task.getPriority());
+        assertEquals("Invalid interpretation for priority " + priority, expected, task.getPriority().intValue());
     }
 
     // Bug 10401

@@ -53,6 +53,7 @@ import static com.openexchange.groupware.tasks.StorageType.ACTIVE;
 import static com.openexchange.groupware.tasks.StorageType.DELETED;
 import static com.openexchange.groupware.tasks.StorageType.REMOVED;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.isTransactionRollbackException;
 import static com.openexchange.tools.sql.DBUtils.rollback;
@@ -403,9 +404,10 @@ public final class TaskLogic {
      * @throws OXException if task contains an invalid priority value.
      */
     private static void checkPriority(Task task) throws OXException {
-        if (task.containsPriority()) {
-            if (task.getPriority() < Task.LOW || task.getPriority() > Task.HIGH) {
-                throw TaskExceptionCode.INVALID_PRIORITY.create(I(task.getPriority()));
+        if (task.containsPriority() && null != task.getPriority()) {
+            int priority = i(task.getPriority());
+            if (priority < Task.LOW || priority > Task.HIGH) {
+                throw TaskExceptionCode.INVALID_PRIORITY.create(task.getPriority());
             }
         }
     }

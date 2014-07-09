@@ -138,7 +138,7 @@ public class TaskParser extends CalendarParser {
             }
         }
         if (json.has(TaskFields.PRIORITY)) {
-            taskobject.setPriority(parseInt(json, TaskFields.PRIORITY));
+            taskobject.setPriority(parseInteger(json, TaskFields.PRIORITY));
         }
         if (json.has(TaskFields.CURRENCY)) {
             taskobject.setCurrency(parseString(json, TaskFields.CURRENCY));

@@ -217,6 +217,45 @@ public abstract class DataParser {
         }
     }
 
+    public static Integer parseInteger(JSONObject json, final String name) throws OXException {
+        final String tmp;
+        try {
+            tmp = json.getString(name);
+        } catch (JSONException e) {
+            return null;
+        }
+        if (com.openexchange.java.Strings.isEmpty(tmp) || json.isNull(name) || "null".equalsIgnoreCase(tmp)) {
+            return null;
+        }
+        final Parsing parsing = new Parsing() {
+            @Override
+            public String getAttribute() {
+                return name;
+            }
+        };
+        // Check for non digit characters and give specialized exception for this.
+        if (!DIGITS.matcher(tmp).matches()) {
+            final OXException e = OXJSONExceptionCodes.CONTAINS_NON_DIGITS.create(tmp, name);
+            e.addProblematic(parsing);
+            throw e;
+        }
+        try {
+            return Integer.valueOf(tmp);
+        } catch (NumberFormatException e) {
+            // Check if it parses into a BigInteger.
+            try {
+                new BigInteger(tmp);
+                final OXException exc = OXJSONExceptionCodes.TOO_BIG_NUMBER.create(e, name);
+                exc.addProblematic(parsing);
+                throw exc;
+            } catch (final NumberFormatException e2) {
+                final OXException exc = OXJSONExceptionCodes.NUMBER_PARSING.create(e, tmp, name);
+                exc.addProblematic(parsing);
+                throw e;
+            }
+        }
+    }
+
     public static Date parseTime(final JSONObject jsonObj, final String name, final TimeZone timeZone) {
         final Date d = parseDate(jsonObj, name);
         if (d == null) {

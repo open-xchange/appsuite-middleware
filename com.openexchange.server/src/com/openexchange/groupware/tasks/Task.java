@@ -138,7 +138,7 @@ public class Task extends CalendarObject {
      */
     private Long actualDuration;
 
-    private int priority = 0;
+    private Integer priority = null;
 
     private int percentComplete = 0;
 
@@ -220,7 +220,7 @@ public class Task extends CalendarObject {
         return actualDuration;
     }
 
-    public int getPriority() {
+    public Integer getPriority() {
         return priority;
     }
 
@@ -292,7 +292,7 @@ public class Task extends CalendarObject {
         actualDurationSet = true;
     }
 
-    public void setPriority(final int priority) {
+    public void setPriority(Integer priority) {
         this.priority = priority;
         prioritySet = true;
     }
@@ -369,7 +369,7 @@ public class Task extends CalendarObject {
     }
 
     public void removePriority() {
-        priority = 0;
+        priority = null;
         prioritySet = false;
     }
 
@@ -491,7 +491,7 @@ public class Task extends CalendarObject {
 
         actualDuration = null;
 
-        priority = 0;
+        priority = null;
         percentComplete = 0;
 
         currency = null;
@@ -574,7 +574,7 @@ public class Task extends CalendarObject {
             setTargetCosts((BigDecimal) value);
             break;
         case PRIORITY:
-            setPriority(((Integer) value).intValue());
+            setPriority((Integer) value);
             break;
         case BILLING_INFORMATION:
             setBillingInformation((String) value);
@@ -620,7 +620,7 @@ public class Task extends CalendarObject {
         case TARGET_COSTS:
             return getTargetCosts();
         case PRIORITY:
-            return I(getPriority());
+            return getPriority();
         case BILLING_INFORMATION:
             return getBillingInformation();
         case ALARM:

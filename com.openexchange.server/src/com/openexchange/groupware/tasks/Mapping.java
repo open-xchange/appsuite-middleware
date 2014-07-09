@@ -73,6 +73,7 @@ import com.openexchange.groupware.tasks.mapping.ActualCosts;
 import com.openexchange.groupware.tasks.mapping.ActualDuration;
 import com.openexchange.groupware.tasks.mapping.Filename;
 import com.openexchange.groupware.tasks.mapping.ObjectID;
+import com.openexchange.groupware.tasks.mapping.Priority;
 import com.openexchange.groupware.tasks.mapping.RecurrenceCount;
 import com.openexchange.groupware.tasks.mapping.Status;
 import com.openexchange.groupware.tasks.mapping.TargetCosts;
@@ -549,49 +550,7 @@ public final class Mapping {
             }
         },
         Status.SINGLETON,
-        new Mapper<Integer>() {
-            @Override
-            public int getId() {
-                return Task.PRIORITY;
-            }
-            @Override
-            public boolean isSet(final Task task) {
-                return task.containsPriority();
-            }
-            @Override
-            public String getDBColumnName() {
-                return "priority";
-            }
-            @Override
-            public String getDisplayName() {
-                throw new UnsupportedOperationException();
-            }
-            @Override
-            public void toDB(final PreparedStatement stmt, final int pos,
-                final Task task) throws SQLException {
-                stmt.setInt(pos, task.getPriority());
-            }
-            @Override
-            public void fromDB(final ResultSet result, final int pos,
-                final Task task) throws SQLException {
-                final int priority = result.getInt(pos);
-                if (!result.wasNull()) {
-                    task.setPriority(priority);
-                }
-            }
-            @Override
-            public boolean equals(final Task task1, final Task task2) {
-                return task1.getPriority() == task2.getPriority();
-            }
-            @Override
-            public Integer get(final Task task) {
-                return Integer.valueOf(task.getPriority());
-            }
-            @Override
-            public void set(final Task task, final Integer value) {
-                task.setPriority(value.intValue());
-            }
-        },
+        Priority.SINGLETON,
         new Mapper<Integer>() {
             @Override
             public int getId() {
