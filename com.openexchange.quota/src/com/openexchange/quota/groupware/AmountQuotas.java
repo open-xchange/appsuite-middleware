@@ -123,6 +123,8 @@ public class AmountQuotas {
             }
         } catch (final SQLException e) {
             throw QuotaExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(stmt);
         }
     }
 
