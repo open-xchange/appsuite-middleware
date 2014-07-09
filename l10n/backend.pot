@@ -4413,6 +4413,11 @@ msgid ""
 "not look like a number."
 msgstr ""
 
+#. The module attachments
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/attach/impl/AttachmentStrings.java:62
+msgid "Attachments"
+msgstr ""
+
 #. *
 #. * Appointments must have at least one participant.
 #.
