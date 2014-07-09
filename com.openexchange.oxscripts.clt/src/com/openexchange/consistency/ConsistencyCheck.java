@@ -68,6 +68,58 @@ import javax.management.remote.JMXServiceURL;
  */
 public class ConsistencyCheck {
 
+    /**
+     * Used to identify if list is desired (listUnassigned or listMissing)
+     */
+    private static final String ACTION_LIST = "list";
+
+    /**
+     * Used to identify listUnassigned
+     */
+    private static final String ACTION_UNASSIGNED = "unassigned";
+
+    /**
+     * Used to identify listMissing
+     */
+    private static final String ACTION_MISSING = "missing";
+
+    private static final String ACTION_LIST_UNASSIGNED = "listUnassigned";
+
+    private static final String ACTION_LIST_MISSING = "listMissing";
+
+    private static final String ACTION_REPAIR = "repair";
+
+    private static final String ACTION_REPAIRCONFIGDB = "repairconfigdb";
+
+    private static final String ACTION_CHECKCONFIGDB = "checkconfigdb";
+
+    private static final String SOURCE_ALL = "all";
+
+    private static final String SOURCE_DATABASE = "database";
+
+    private static final String SOURCE_CONTEXT = "context";
+
+    private static final String SOURCE_FILESTORE = "filestore";
+
+    private static final String POLICY_MISSING_ENTRY_FOR_FILE = "missing_entry_for_file";
+
+    private static final String POLICY_MISSING_FILE_FOR_ATTACHMENT = "missing_file_for_attachment";
+
+    private static final String POLICY_MISSING_FILE_FOR_INFOITEM = "missing_file_for_infoitem";
+
+    private static final String POLICY_ACTION_DELETE = "delete";
+
+    private static final String POLICY_ACTION_CREATE_DUMMY = "create_dummy";
+
+    private static final String POLICY_ACTION_CREATE_ADMIN_INFOITEM = "create_admin_infoitem";
+
+    private static final String LOCALHOST = "localhost";
+
+    /**
+     * Main method used for checkconsistency clt
+     * 
+     * @param args - arguments provided by clt
+     */
     public static void main(final String[] args) {
         final SimpleLexer lexer = new SimpleLexer(args);
         final Configuration config = new Configuration();
@@ -82,23 +134,23 @@ public class ConsistencyCheck {
             }
             lexer.advance();
         } else {
-            config.setHost("localhost");
+            config.setHost(LOCALHOST);
         }
 
-        if(lexer.consume("repair")) {
-            config.setAction("repair");
-        } else if (lexer.consume("list")) {
-            if(lexer.consume("missing")) {
-                config.setAction("listMissing");
-            } else if (lexer.consume("unassigned")) {
-                config.setAction("listUnassigned");
+        if (lexer.consume(ACTION_REPAIR)) {
+            config.setAction(ACTION_REPAIR);
+        } else if (lexer.consume(ACTION_LIST)) {
+            if (lexer.consume(ACTION_MISSING)) {
+                config.setAction(ACTION_LIST_MISSING);
+            } else if (lexer.consume(ACTION_UNASSIGNED)) {
+                config.setAction(ACTION_LIST_UNASSIGNED);
             } else {
                 System.exit( dontKnowWhatToList() );
             }
-        } else if (lexer.consume("checkconfigdb")) {
-            config.setAction("checkconfigdb");
-        } else if (lexer.consume("repairconfigdb")) {
-            config.setAction("repairconfigdb");
+        } else if (lexer.consume(ACTION_CHECKCONFIGDB)) {
+            config.setAction(ACTION_CHECKCONFIGDB);
+        } else if (lexer.consume(ACTION_REPAIRCONFIGDB)) {
+            config.setAction(ACTION_REPAIRCONFIGDB);
         } else {
             System.exit( noaction() );
         }
@@ -106,24 +158,24 @@ public class ConsistencyCheck {
         lexer.noise("errors");
         lexer.noise("in");
 
-        if( !config.getAction().equals("checkconfigdb") && !config.getAction().equals("repairconfigdb") ) {
-            if(lexer.consume("database")) {
-                config.setSource("database");
+        if (!config.getAction().equals(ACTION_CHECKCONFIGDB) && !config.getAction().equals(ACTION_REPAIRCONFIGDB)) {
+            if (lexer.consume(SOURCE_DATABASE)) {
+                config.setSource(SOURCE_DATABASE);
                 if (! parseId(lexer, config)) {
                     System.exit( noid() );
                 }
-            } else if (lexer.consume("filestore")) {
-                config.setSource("filestore");
+            } else if (lexer.consume(SOURCE_FILESTORE)) {
+                config.setSource(SOURCE_FILESTORE);
                 if (! parseId(lexer, config)) {
                     System.exit( noid() );
                 }
-            } else if (lexer.consume("context")) {
-                config.setSource("context");
+            } else if (lexer.consume(SOURCE_CONTEXT)) {
+                config.setSource(SOURCE_CONTEXT);
                 if (! parseId(lexer, config)) {
                     System.exit( noid() );
                 }
-            } else if (lexer.consume("all") || lexer.consume("everywhere")) {
-                config.setSource("all");
+            } else if (lexer.consume(SOURCE_ALL)) {
+                config.setSource(SOURCE_ALL);
             } else {
                 System.exit( noproblemsource() );
             }
@@ -132,35 +184,35 @@ public class ConsistencyCheck {
             lexer.noise("policies");
 
             while(!lexer.eol()) {
-                if(lexer.consume("missing_file_for_infoitem")) {
+                if (lexer.consume(POLICY_MISSING_FILE_FOR_INFOITEM)) {
                     lexer.noise(":");
-                    if(lexer.consume("create_dummy")){
-                        config.addPolicy("missing_file_for_infoitem" , "create_dummy");
-                    } else if(lexer.consume("delete")) {
-                        config.addPolicy("missing_file_for_infoitem" , "delete");
+                    if(lexer.consume(POLICY_ACTION_CREATE_DUMMY)){
+                        config.addPolicy(POLICY_MISSING_FILE_FOR_INFOITEM, POLICY_ACTION_CREATE_DUMMY);
+                    } else if(lexer.consume(POLICY_ACTION_DELETE)) {
+                        config.addPolicy(POLICY_MISSING_FILE_FOR_INFOITEM, POLICY_ACTION_DELETE);
                     } else {
-                        System.exit( unknownAction("missing_file_for_infoitem", lexer.getCurrent(), "create_dummy, delete") );
+                        System.exit(unknownAction(POLICY_MISSING_FILE_FOR_INFOITEM, lexer.getCurrent(), POLICY_ACTION_CREATE_DUMMY, POLICY_ACTION_DELETE));
                     }
-                } else if (lexer.consume("missing_file_for_attachment")) {
+                } else if (lexer.consume(POLICY_MISSING_FILE_FOR_ATTACHMENT)) {
                     lexer.noise(":");
-                    if(lexer.consume("create_dummy")){
-                        config.addPolicy("missing_file_for_attachment" , "create_dummy");
-                    } else if(lexer.consume("delete")) {
-                        config.addPolicy("missing_file_for_attachment" , "delete");
+                    if(lexer.consume(POLICY_ACTION_CREATE_DUMMY)){
+                        config.addPolicy(POLICY_MISSING_FILE_FOR_ATTACHMENT, POLICY_ACTION_CREATE_DUMMY);
+                    } else if(lexer.consume(POLICY_ACTION_DELETE)) {
+                        config.addPolicy(POLICY_MISSING_FILE_FOR_ATTACHMENT, POLICY_ACTION_DELETE);
                     } else {
-                        System.exit( unknownAction("missing_file_for_infoitem", lexer.getCurrent(), "create_dummy, delete") );
+                        System.exit(unknownAction(POLICY_MISSING_FILE_FOR_INFOITEM, lexer.getCurrent(), POLICY_ACTION_CREATE_DUMMY, POLICY_ACTION_DELETE));
                     }
-                } else if (lexer.consume("missing_entry_for_file")) {
+                } else if (lexer.consume(POLICY_MISSING_ENTRY_FOR_FILE)) {
                     lexer.noise(":");
-                    if(lexer.consume("create_admin_infoitem")){
-                        config.addPolicy("missing_entry_for_file" , "create_admin_infoitem");
-                    } else if(lexer.consume("delete")) {
-                        config.addPolicy("missing_entry_for_file" , "delete");
+                    if (lexer.consume(POLICY_ACTION_CREATE_ADMIN_INFOITEM)) {
+                        config.addPolicy(POLICY_MISSING_ENTRY_FOR_FILE, POLICY_ACTION_CREATE_ADMIN_INFOITEM);
+                    } else if(lexer.consume(POLICY_ACTION_DELETE)) {
+                        config.addPolicy(POLICY_MISSING_ENTRY_FOR_FILE, POLICY_ACTION_DELETE);
                     } else {
-                        System.exit( unknownAction("missing_file_for_infoitem", lexer.getCurrent(), "create_admin_infoitem, delete") );
+                        System.exit(unknownAction(POLICY_MISSING_FILE_FOR_INFOITEM, lexer.getCurrent(), POLICY_ACTION_CREATE_ADMIN_INFOITEM, POLICY_ACTION_DELETE));
                     }
                 } else {
-                    System.exit( unknownCondition(lexer.getCurrent(), "missing_file_for_infoitem, missing_file_for_attachment, missing_entry_for_file") );
+                    System.exit(unknownCondition(lexer.getCurrent(), POLICY_MISSING_FILE_FOR_INFOITEM, POLICY_MISSING_FILE_FOR_ATTACHMENT, POLICY_MISSING_ENTRY_FOR_FILE));
                 }
             }
         }
@@ -172,9 +224,7 @@ public class ConsistencyCheck {
             x.printStackTrace();
             System.exit(1);
         }
-
     }
-
 
     private static boolean parseId(final SimpleLexer lexer, final Configuration config) {
         try {
@@ -187,17 +237,29 @@ public class ConsistencyCheck {
     }
 
     private static int dontKnowWhatToList() {
-        System.err.println("Please tell me what to list. Either list missing or list unassigned.");
+        System.err.println("Please tell me what to list. Either \"list missing\" or \"list unassigned\".");
         return 6;
     }
 
-    private static int unknownAction(final String condition, final String action, final String possibleActions) {
-        System.err.println("Unknown action "+action+" for condition "+condition+". I know only "+possibleActions);
+    private static int unknownAction(final String policy, final String action, final String... possibleActions) {
+        StringBuilder actions = new StringBuilder();
+
+        for (String possibleAction : possibleActions) {
+            actions.append("\"" + possibleAction + "\", ");
+        }
+
+        System.err.println("Unknown action \"" + action + "\" for policy \"" + policy + "\". I know only " + actions.toString());
         return 5;
     }
 
-    private static int unknownCondition(final String condition, final String possibleConditions) {
-        System.err.println("Unknown condition "+condition+" I know only about: "+possibleConditions);
+    private static int unknownCondition(final String condition, final String... possibleConditions) {
+        StringBuilder conditions = new StringBuilder();
+
+        for (String possibleCondition : possibleConditions) {
+            conditions.append("\"" + possibleCondition + "\", ");
+        }
+
+        System.err.println("Unknown condition \"" + condition + "\". I know only about: " + conditions.toString());
         return 4;
     }
 
@@ -207,16 +269,16 @@ public class ConsistencyCheck {
     }
 
     private static int noproblemsource() {
-        System.err.println("Please specify what to search for problems (either \"context [id]\" or \"filestore [id]\" or  \"database [id]\".");
+        System.err.println("Please specify what to search for problems (either \"context [id]\" or \"filestore [id]\" or \"database [id]\" or \"all\".");
         return 2;
     }
 
     private static int noaction() {
         final String ls = System.getProperty("line.separator");
         System.err.println("Please specify an action, either"+ls+"\"list missing\", \"list unassigned\", \"repair\", \"checkconfigdb\" or \"repairconfigdb\"" + ls +
-        		"You can also specify the hostname of the open-xchange server, optionally."+ls +
-        		"Example:" + ls +
-        		"checkconsistency in host 10.10.10.10 list missing [...]");
+            "You can also specify the hostname of the open-xchange server, optionally."+ls +
+            "Example:" + ls +
+            "checkconsistency in host 10.10.10.10 list missing [...]");
         return 1;
     }
 
@@ -325,13 +387,13 @@ public class ConsistencyCheck {
         }
 
         public void run() throws Exception {
-            if("listMissing".equals(action)) {
+            if (ACTION_LIST_MISSING.equals(action)) {
                 listMissing();
-            } else if ("listUnassigned".equals(action)) {
+            } else if (ACTION_LIST_UNASSIGNED.equals(action)) {
                 listUnassigned();
-            } else if ("checkconfigdb".equals(action)) {
+            } else if (ACTION_CHECKCONFIGDB.equals(action)) {
                 checkAndRepairConfigDB(false);
-            } else if ("repairconfigdb".equals(action)) {
+            } else if (ACTION_REPAIRCONFIGDB.equals(action)) {
                 checkAndRepairConfigDB(true);
             } else {
                 repair();
@@ -343,14 +405,14 @@ public class ConsistencyCheck {
             Map<Integer, List<String>> result = null;
             try {
                 connect();
-                if("database".equals(source)) {
+                if (SOURCE_DATABASE.equals(source)) {
                     result = consistency.listMissingFilesInDatabase(sourceId);
-                } else if ("filestore".equals(source)) {
+                } else if (SOURCE_FILESTORE.equals(source)) {
                     result = consistency.listMissingFilesInFilestore(sourceId);
-                } else if ("context".equals(source)) {
+                } else if (SOURCE_CONTEXT.equals(source)) {
                     result = new HashMap<Integer, List<String>>();
                     result.put(Integer.valueOf(sourceId), consistency.listMissingFilesInContext(sourceId));
-                } else if ("all".equals(source)) {
+                } else if (SOURCE_ALL.equals(source)) {
                     result = consistency.listAllMissingFiles();
                 }
             } finally {
@@ -362,18 +424,18 @@ public class ConsistencyCheck {
 
         private void repair() throws MBeanException, IOException, MalformedObjectNameException, NullPointerException {
             if(policies.isEmpty()) {
-                System.out.println("Nothing to be done. Please specify one or more resolver policies");
+                System.out.println("Please specify a policy (either \"missing_entry_for_file\" or \"missing_file_for_attachment\" or \"missing_file_for_infoitem\").");
                 return;
             }
             try {
                 connect();
-                if("database".equals(source)) {
+                if (SOURCE_DATABASE.equals(source)) {
                     consistency.repairFilesInDatabase(sourceId, getPolicyString());
-                } else if ("filestore".equals(source)) {
+                } else if (SOURCE_FILESTORE.equals(source)) {
                     consistency.repairFilesInFilestore(sourceId, getPolicyString());
-                } else if ("context".equals(source)) {
+                } else if (SOURCE_CONTEXT.equals(source)) {
                     consistency.repairFilesInContext(sourceId, getPolicyString());
-                } else if ("all".equals(source)) {
+                } else if (SOURCE_ALL.equals(source)) {
                     consistency.repairAllFiles(getPolicyString());
                 }
             } finally {
@@ -402,7 +464,7 @@ public class ConsistencyCheck {
 
         private void connect() throws IOException, MalformedObjectNameException, NullPointerException {
             final JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://"
-                    + host + ":" + port + "/server");
+                + host + ":" + port + "/server");
 
             jmxConnector = JMXConnectorFactory.connect(url, null);
 
@@ -438,14 +500,14 @@ public class ConsistencyCheck {
             Map<Integer, List<String>> result = null;
             try {
                 connect();
-                if("database".equals(source)) {
+                if (SOURCE_DATABASE.equals(source)) {
                     result = consistency.listUnassignedFilesInDatabase(sourceId);
-                } else if ("filestore".equals(source)) {
+                } else if (SOURCE_FILESTORE.equals(source)) {
                     result = consistency.listUnassignedFilesInFilestore(sourceId);
-                } else if ("context".equals(source)) {
+                } else if (SOURCE_CONTEXT.equals(source)) {
                     result = new HashMap<Integer, List<String>>();
                     result.put(Integer.valueOf(sourceId), consistency.listUnassignedFilesInContext(sourceId));
-                } else if ("all".equals(source)) {
+                } else if (SOURCE_ALL.equals(source)) {
                     result = consistency.listAllUnassignedFiles();
                 }
             } finally {
@@ -462,16 +524,12 @@ public class ConsistencyCheck {
             for(final Map.Entry<Integer, List<String>> entry : result.entrySet()) {
                 final int ctxId = entry.getKey().intValue();
                 final List<String> brokenFiles = entry.getValue();
-                System.out.println("I found "+brokenFiles.size()+" problems in context "+ctxId);
+                System.out.println("I found " + brokenFiles.size() + " problem(s) in context " + ctxId);
                 for (final String brokenFile : brokenFiles) {
                     System.out.println("\t"+brokenFile);
                 }
+                System.out.println("I found " + brokenFiles.size() + " problem(s) in context " + ctxId);
             }
         }
-
-
-
     }
-
-
 }
