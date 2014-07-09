@@ -128,6 +128,7 @@ import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.LocaleTools;
+import com.openexchange.quota.groupware.AmountQuotas;
 import com.openexchange.threadpool.CompletionFuture;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -2054,9 +2055,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     @Override
     public void changeQuota(final Context ctx, final List<String> modules, final long quota, final Credentials auth) throws StorageException {
         final int contextId = ctx.getId().intValue();
+
         // SQL resources
         Connection con = null;
-        PreparedStatement stmt = null;
         boolean rollback = false;
         boolean autocommit = false;
         try {
@@ -2064,46 +2065,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             con.setAutoCommit(false); // BEGIN
             autocommit = true;
             rollback = true;
-            for (final String module : modules) {
-                // Determine if already present
-                final boolean exists;
-                {
-                    stmt = con.prepareStatement("SELECT 1 FROM quota_context WHERE cid=? AND module=?");
-                    stmt.setInt(1, contextId);
-                    stmt.setString(2, module);
-                    ResultSet rs = stmt.executeQuery();
-                    exists = rs.next();
-                    Databases.closeSQLStuff(rs, stmt);
-                    stmt = null;
-                    rs = null;
-                }
-                // Insert/update row
-                if (exists) {
-                    if (quota < 0) {
-                        // Delete
-                        stmt = con.prepareStatement("DELETE FROM quota_context WHERE cid=? AND module=?");
-                        stmt.setInt(1, contextId);
-                        stmt.setString(2, module);
-                        stmt.executeUpdate();
-                    } else {
-                        // Update
-                        stmt = con.prepareStatement("UPDATE quota_context SET value=? WHERE cid=? AND module=?");
-                        stmt.setLong(1, quota <= 0 ? 0 : quota);
-                        stmt.setInt(2, contextId);
-                        stmt.setString(3, module);
-                        stmt.executeUpdate();
-                    }
-                } else {
-                    if (quota >= 0) {
-                        // Insert
-                        stmt = con.prepareStatement("INSERT INTO quota_context (cid, module, value) VALUES (?, ?, ?)");
-                        stmt.setInt(1, contextId);
-                        stmt.setString(2, module);
-                        stmt.setLong(3, quota <= 0 ? 0 : quota);
-                        stmt.executeUpdate();
-                    }
-                }
-            }
+            AmountQuotas.setLimit(contextId, modules, quota, con);
             con.commit(); // COMMIT
             rollback = false;
         } catch (final SQLException e) {
@@ -2112,8 +2074,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         } catch (final PoolException e) {
             LOG.error("Pool Error", e);
             throw new StorageException(e);
+        } catch (OXException e) {
+            LOG.error("Pool Error", e);
+            throw new StorageException(e);
         } finally {
-            Databases.closeSQLStuff(stmt);
             if (rollback) {
                 rollback(con);
             }

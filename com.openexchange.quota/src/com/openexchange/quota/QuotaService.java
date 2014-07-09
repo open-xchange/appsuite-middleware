@@ -53,11 +53,11 @@ import java.util.List;
 
 /**
  * Open-Xchange consists of a set of modules that serve user requests.
- * Every module that allows users to store data provides a certain
- * amount of storage and a certain number of objects that it will handle
- * for each user. In other words, every module has user-specific quotas
- * for storage and objects. Those quotas may be set by definition or
- * by configuration and can even be unlimited. The responsibility to
+ * Every module that allows users to store data may provide limits for a
+ * certain amount of storage and a certain number of items that it will handle
+ * for each user. In other words, every module can have user-specific quotas
+ * for storage size and items. Those quotas may be set by definition or
+ * by configuration and can also be unlimited. The responsibility to
  * enforce quotas lies within the modules themselves, but they can announce
  * their quotas via this service. That enables a client to provide a
  * combined overview over all quotas. Each module that wants to contribute

@@ -49,21 +49,33 @@
 
 package com.openexchange.quota;
 
-import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.List;
 
 /**
- * {@link DefaultAccountQuota} - Represents a quota restriction.
+ * {@link DefaultAccountQuota} - A default implementation of {@link AccountQuota}.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @see AccountQuota
+ * @see Quota
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.6.1
  */
 public class DefaultAccountQuota implements AccountQuota {
 
     private final EnumMap<QuotaType, Quota> quotas;
+
     private final String accountName;
+
     private final String accountID;
 
+    /**
+     * Initializes a new {@link DefaultAccountQuota}. The {@link #addQuota(Quota)} and
+     * {@link #addQuota(QuotaType, long, long)} methods can be used to construct a
+     * {@link DefaultAccountQuota} in a builder-style manner.
+     *
+     * @param accountID The according accounts id, never <code>null</code>.
+     * @param accountName The according accounts name, never <code>null</code>.
+     */
     public DefaultAccountQuota(String accountID, String accountName) {
         super();
         this.accountID = accountID;
@@ -71,23 +83,38 @@ public class DefaultAccountQuota implements AccountQuota {
         this.quotas = new EnumMap<QuotaType, Quota>(QuotaType.class);
     }
 
+    /**
+     * Adds the given quota. A quota must only be added once for
+     * every possible {@link QuotaType}.
+     *
+     * @see {@link Quota#UNLIMITED_AMOUNT}
+     * @see {@link Quota#UNLIMITED_SIZE}
+     * @param quota The quota, never <code>null</code>.
+     * @return This {@link DefaultAccountQuota} instance.
+     */
     public DefaultAccountQuota addQuota(Quota quota) {
         quotas.put(quota.getType(), quota);
         return this;
     }
 
+    /**
+     * Adds a new {@link Quota} instance for the given parameters. A quota must
+     * only be added once for every possible {@link QuotaType}.
+     *
+     * @see {@link Quota#UNLIMITED_AMOUNT}
+     * @see {@link Quota#UNLIMITED_SIZE}
+     * @param type The quota type, never <code>null</code>.
+     * @param limit The limit. Greater 0 or {@link Quota#UNLIMITED}.
+     * @param usage The current usage. Greater or equals 0.
+     * @return This {@link DefaultAccountQuota} instance.
+     */
     public DefaultAccountQuota addQuota(final QuotaType type, final long limit, final long usage) {
         return addQuota(new Quota(type, limit, usage));
     }
 
     @Override
-    public List<Quota> getAll() {
-        return new ArrayList<Quota>(quotas.values());
-    }
-
-    @Override
-    public Quota getQuota(QuotaType type) {
-        return quotas.get(type);
+    public String getAccountID() {
+        return accountID;
     }
 
     @Override
@@ -96,8 +123,13 @@ public class DefaultAccountQuota implements AccountQuota {
     }
 
     @Override
-    public String getAccountID() {
-        return accountID;
+    public boolean hasQuota(QuotaType type) {
+        return quotas.containsKey(type);
+    }
+
+    @Override
+    public Quota getQuota(QuotaType type) {
+        return quotas.get(type);
     }
 
 }

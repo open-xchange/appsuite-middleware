@@ -194,7 +194,6 @@ import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.preview.PreviewService;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
-import com.openexchange.quota.QuotaService;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.search.SearchService;
 import com.openexchange.secret.SecretEncryptionFactoryService;
@@ -278,7 +277,7 @@ public final class ServerActivator extends HousekeepingActivator {
         AppointmentSqlFactoryService.class, CalendarCollectionService.class, MessagingServiceRegistry.class, HtmlService.class,
         IDBasedFileAccessFactory.class, FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class,
         CryptoService.class, HttpService.class, SystemNameService.class, ImageTransformationService.class, ConfigViewFactory.class,
-        StringParser.class, PreviewService.class, TextXtractService.class, SecretEncryptionFactoryService.class, QuotaService.class,
+        StringParser.class, PreviewService.class, TextXtractService.class, SecretEncryptionFactoryService.class,
         SearchService.class };
 
     private static volatile BundleContext CONTEXT;

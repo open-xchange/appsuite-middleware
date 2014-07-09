@@ -62,7 +62,7 @@ import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.quota.QuotaType;
-import com.openexchange.quota.groupware.ConfiguredRestriction;
+import com.openexchange.quota.groupware.AmountQuotas;
 import com.openexchange.session.Session;
 
 
@@ -98,7 +98,7 @@ public class TaskQuotaProvider implements QuotaProvider {
         int contextID = session.getContextId();
         Connection connection = dbService.getReadOnly(contextID);
         try {
-            long limit = ConfiguredRestriction.getAmountLimit(session, MODULE_ID, viewFactory, connection);
+            long limit = AmountQuotas.getLimit(session, MODULE_ID, viewFactory, connection);
             if (limit == Quota.UNLIMITED) {
                 return Quota.UNLIMITED_AMOUNT;
             }

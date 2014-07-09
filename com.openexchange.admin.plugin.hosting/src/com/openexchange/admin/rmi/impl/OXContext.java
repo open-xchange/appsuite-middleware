@@ -101,7 +101,6 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.quota.Resource;
 import com.openexchange.tools.pipesnfilters.Filter;
 
 public class OXContext extends OXContextCommonImpl implements OXContextInterface {
@@ -121,21 +120,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         if (isEmpty(sModule)) {
             throw new InvalidDataException("No valid module specified.");
         }
-        final Set<String> modules;
-        {
-            final Resource[] resources = Resource.values();
-            final String[] mods = sModule.split(" *, *");
-            modules = new LinkedHashSet<String>(mods.length);
-            for (final String mod : mods) {
-                boolean found = false;
-                for (int i = 0; !found && i < resources.length; i++) {
-                    found = resources[i].getIdentifier().equalsIgnoreCase(mod);
-                }
-                if (!found) {
-                    throw new InvalidDataException("Unknown module: \"" + mod + "\" (known modules: " + Arrays.toString(Resource.allIdentifiers()) + ")");
-                }
-                modules.add(mod);
-            }
+
+        final String[] mods = sModule.split(" *, *");
+        final Set<String> modules = new LinkedHashSet<String>(mods.length);
+        for (final String mod : mods) {
+            modules.add(mod);
         }
 
         final Credentials auth = credentials == null ? new Credentials("", "") : credentials;

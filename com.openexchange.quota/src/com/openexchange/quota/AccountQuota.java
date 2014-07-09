@@ -49,21 +49,49 @@
 
 package com.openexchange.quota;
 
-import java.util.List;
 
 /**
- * {@link AccountQuota} - Represents a quota restriction.
+ * An {@link AccountQuota} instance encapsulates size and amount quotas and their
+ * current usages for a certain account in a certain module. {@link DefaultAccountQuota}
+ * can be used to create new instances.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @see DefaultAccountQuota
+ * @see QuotaType
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.6.1
  */
 public interface AccountQuota {
 
-    List<Quota> getAll();
+    /**
+     * Gets the according accounts id.
+     *
+     * @return The id, never <code>null</code>
+     */
+    String getAccountID();
 
-    Quota getQuota(QuotaType type);
-
+    /**
+     * Gets the according accounts name.
+     *
+     * @return The name, never <code>null</code>
+     */
     String getAccountName();
 
-    String getAccountID();
+    /**
+     * Returns whether a {@link Quota} can be obtained via {@link #getQuota(QuotaType)}
+     * for the given type.
+     *
+     * @param type The quota type.
+     * @return <code>true</code> if the quota is available, otherwise <code>false</code>.
+     */
+    boolean hasQuota(QuotaType type);
+
+    /**
+     * Gets the {@link Quota} for the given type.
+     *
+     * @param type The quota type.
+     * @return The quota or <code>null</code>, if not available.
+     */
+    Quota getQuota(QuotaType type);
 
 }

@@ -91,11 +91,11 @@ public class GetAction implements AJAXActionService {
         String module = req.getParameter("module");
         String accountID = req.getParameter("account");
 
-        ServiceReference<QuotaService> qausRef = context.getServiceReference(QuotaService.class);
-        if (qausRef == null) {
+        ServiceReference<QuotaService> quotaServiceRef = context.getServiceReference(QuotaService.class);
+        if (quotaServiceRef == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(QuotaService.class.getName());
         } else {
-            QuotaService quotaService = context.getService(qausRef);
+            QuotaService quotaService = context.getService(quotaServiceRef);
             try {
                 if (quotaService == null) {
                     throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(QuotaService.class.getName());
@@ -106,8 +106,8 @@ public class GetAction implements AJAXActionService {
             } catch (JSONException e) {
                 throw AjaxExceptionCodes.JSON_ERROR.create(e);
             } finally {
-                if (qausRef != null & quotaService != null) {
-                    context.ungetService(qausRef);
+                if (quotaServiceRef != null & quotaService != null) {
+                    context.ungetService(quotaServiceRef);
                 }
             }
         }
@@ -194,11 +194,11 @@ public class GetAction implements AJAXActionService {
         JSONObject jQuota = new JSONObject();
         jQuota.put("account_id", accountQuota.getAccountID());
         jQuota.put("account_name", accountQuota.getAccountName());
-        if (null != amountQuota) {
+        if (null != amountQuota && amountQuota.getLimit() > 0) {
             jQuota.put("countquota", amountQuota.getLimit());
             jQuota.put("countuse", amountQuota.getUsage());
         }
-        if (null != sizeQuota) {
+        if (null != sizeQuota && sizeQuota.getLimit() > 0) {
             jQuota.put("quota", sizeQuota.getLimit());
             jQuota.put("use", sizeQuota.getUsage());
         }

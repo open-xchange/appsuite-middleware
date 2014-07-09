@@ -53,6 +53,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -64,16 +67,66 @@ import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.session.Session;
 
 /**
- * {@link ConfiguredRestriction}
+ * {@link AmountQuotas} provides static helper methods for groupware modules
+ * that need to maintain quotas for item amounts.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.6.1
  */
-public class ConfiguredRestriction {
+public class AmountQuotas {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfiguredRestriction.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AmountQuotas.class);
 
-    public static long getAmountLimit(Session session, String moduleID, ConfigViewFactory configViewFactory, Connection connection) throws OXException {
+    public static void setLimit(int contextID, List<String> moduleIDs, long limit, Connection connection) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            for (final String module : moduleIDs) {
+                // Determine if already present
+                final boolean exists;
+                {
+                    stmt = connection.prepareStatement("SELECT 1 FROM quota_context WHERE cid=? AND module=?");
+                    stmt.setInt(1, contextID);
+                    stmt.setString(2, module);
+                    ResultSet rs = stmt.executeQuery();
+                    exists = rs.next();
+                    Databases.closeSQLStuff(rs, stmt);
+                    stmt = null;
+                    rs = null;
+                }
+                // Insert/update row
+                if (exists) {
+                    if (limit < 0) {
+                        // Delete
+                        stmt = connection.prepareStatement("DELETE FROM quota_context WHERE cid=? AND module=?");
+                        stmt.setInt(1, contextID);
+                        stmt.setString(2, module);
+                        stmt.executeUpdate();
+                    } else {
+                        // Update
+                        stmt = connection.prepareStatement("UPDATE quota_context SET value=? WHERE cid=? AND module=?");
+                        stmt.setLong(1, limit <= 0 ? 0 : limit);
+                        stmt.setInt(2, contextID);
+                        stmt.setString(3, module);
+                        stmt.executeUpdate();
+                    }
+                } else {
+                    if (limit >= 0) {
+                        // Insert
+                        stmt = connection.prepareStatement("INSERT INTO quota_context (cid, module, value) VALUES (?, ?, ?)");
+                        stmt.setInt(1, contextID);
+                        stmt.setString(2, module);
+                        stmt.setLong(3, limit <= 0 ? 0 : limit);
+                        stmt.executeUpdate();
+                    }
+                }
+            }
+        } catch (final SQLException e) {
+            throw QuotaExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    public static long getLimit(Session session, String moduleID, ConfigViewFactory configViewFactory, Connection connection) throws OXException {
         final Long quotaFromDB = getQuotaFromDB(connection, session.getContextId(), moduleID);
         if (null != quotaFromDB) {
             return quotaFromDB.longValue();
@@ -92,11 +145,11 @@ public class ConfiguredRestriction {
         }
     }
 
-    public static long getAmountLimit(Session session, String moduleID, ConfigViewFactory configViewFactory, DatabaseService dbService) throws OXException {
+    public static long getLimit(Session session, String moduleID, ConfigViewFactory configViewFactory, DatabaseService dbService) throws OXException {
         Connection connection = null;
         try {
             connection = dbService.getReadOnly(session.getContextId());
-            return getAmountLimit(session, moduleID, configViewFactory, connection);
+            return getLimit(session, moduleID, configViewFactory, connection);
         } finally {
             if (null != connection) {
                 dbService.backReadOnly(session.getContextId(), connection);

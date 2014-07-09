@@ -69,7 +69,7 @@ import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.quota.QuotaType;
-import com.openexchange.quota.groupware.ConfiguredRestriction;
+import com.openexchange.quota.groupware.AmountQuotas;
 import com.openexchange.session.Session;
 import com.openexchange.tools.file.external.QuotaFileStorage;
 import com.openexchange.tools.file.external.QuotaFileStorageFactory;
@@ -116,7 +116,7 @@ public class AttachmentQuotaProvider implements QuotaProvider {
         ResultSet rs = null;
         try {
             connection = dbService.getReadOnly(session.getContextId());
-            long limit = ConfiguredRestriction.getAmountLimit(session, MODULE_ID, viewFactory, connection);
+            long limit = AmountQuotas.getLimit(session, MODULE_ID, viewFactory, connection);
             if (Quota.UNLIMITED == limit) {
                 return Quota.UNLIMITED_AMOUNT;
             }

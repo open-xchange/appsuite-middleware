@@ -56,7 +56,7 @@ import com.openexchange.session.Session;
 
 /**
  * A {@link QuotaProvider} must be implemented by every module that wants
- * to contribute to the general {@link QuotaAndUsageService}.
+ * to contribute to the general {@link QuotaService}.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
@@ -86,9 +86,9 @@ public interface QuotaProvider {
      * @param session The session, never <code>null</code>.
      * @param account The id of a possible account for the user within this module,
      *  never <code>null</code>.
-     * @return The quota and usage. Will be <code>null</code> if no account
-     *  exists for the given id.
-     * @throws OXException If an error occurs while calculating quota and usage.
+     * @return The quota and usage, never <code>null</code>.
+     * @throws OXException If no account was found for the given id, {@link QuotaExceptionCodes.UNKNOWN_ACCOUNT}
+     * is thrown. Other exception codes denote ocurred errors while calculating quota and usage.
      */
     AccountQuota getFor(Session session, String accountID) throws OXException;
 

@@ -134,7 +134,7 @@ import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.java.Streams;
 import com.openexchange.quota.QuotaExceptionCodes;
-import com.openexchange.quota.groupware.ConfiguredRestriction;
+import com.openexchange.quota.groupware.AmountQuotas;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -338,7 +338,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
     @Override
     public com.openexchange.file.storage.Quota getFileQuota(ServerSession session) throws OXException {
-        long limit = ConfiguredRestriction.getAmountLimit(
+        long limit = AmountQuotas.getLimit(
             session,
             "filestorage",
             ServerServiceRegistry.getServize(ConfigViewFactory.class, true),

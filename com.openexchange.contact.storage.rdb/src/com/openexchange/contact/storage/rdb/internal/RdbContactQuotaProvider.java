@@ -64,7 +64,7 @@ import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.quota.QuotaType;
-import com.openexchange.quota.groupware.ConfiguredRestriction;
+import com.openexchange.quota.groupware.AmountQuotas;
 import com.openexchange.session.Session;
 
 /**
@@ -93,7 +93,7 @@ public class RdbContactQuotaProvider implements QuotaProvider {
     }
 
     static Quota getAmountQuota(Session session, Executor executor, Connection connection) throws SQLException, OXException {
-        long limit = ConfiguredRestriction.getAmountLimit(session, MODULE_ID,
+        long limit = AmountQuotas.getLimit(session, MODULE_ID,
             RdbServiceLookup.getService(ConfigViewFactory.class), connection);
         if (Quota.UNLIMITED == limit) {
             return Quota.UNLIMITED_AMOUNT;

@@ -61,7 +61,7 @@ import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.quota.QuotaType;
-import com.openexchange.quota.groupware.ConfiguredRestriction;
+import com.openexchange.quota.groupware.AmountQuotas;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -99,7 +99,7 @@ public class CalendarQuotaProvider implements QuotaProvider {
     }
 
     static Quota getAmountQuota(Session session, Connection connection, ConfigViewFactory viewFactory, CalendarMySQL calendarMySQL) throws OXException {
-        long limit = ConfiguredRestriction.getAmountLimit(session, MODULE_ID, viewFactory, connection);
+        long limit = AmountQuotas.getLimit(session, MODULE_ID, viewFactory, connection);
         if (limit == Quota.UNLIMITED) {
             return Quota.UNLIMITED_AMOUNT;
         } else {
