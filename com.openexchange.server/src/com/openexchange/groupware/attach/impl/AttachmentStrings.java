@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,43 +47,18 @@
  *
  */
 
-package com.openexchange.groupware.tasks.osgi;
+package com.openexchange.groupware.attach.impl;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.groupware.tasks.InsertData;
-import com.openexchange.quota.QuotaService;
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
- * {@link QuotaServiceCustomizer}
- *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.6.1
  */
-public final class QuotaServiceCustomizer implements ServiceTrackerCustomizer<QuotaService, QuotaService> {
+public class AttachmentStrings implements LocalizableStrings {
 
-    private final BundleContext context;
+    // The module attachments
+    static final String ATTACHMENTS = "Attachments";
 
-    public QuotaServiceCustomizer(BundleContext context) {
-        super();
-        this.context = context;
-    }
-
-    @Override
-    public QuotaService addingService(ServiceReference<QuotaService> reference) {
-        QuotaService quotaService = context.getService(reference);
-        InsertData.setQuotaService(quotaService);
-        return quotaService;
-    }
-
-    @Override
-    public void modifiedService(ServiceReference<QuotaService> reference, QuotaService quotaService) {
-        // Nothing to do.
-    }
-
-    @Override
-    public void removedService(ServiceReference<QuotaService> reference, QuotaService quotaService) {
-        InsertData.setQuotaService(null);
-        context.ungetService(reference);
-    }
 }

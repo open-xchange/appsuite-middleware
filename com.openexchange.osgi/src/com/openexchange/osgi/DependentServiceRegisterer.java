@@ -81,7 +81,7 @@ public class DependentServiceRegisterer<S> implements ServiceTrackerCustomizer<O
     private final Class<?>[] neededServices;
     private final Object[] foundServices;
 
-    private S registeredService;
+    protected S registeredService;
     private ServiceRegistration<?> registration;
 
     public DependentServiceRegisterer(BundleContext context, Class<S> serviceType, Class<? extends S> serviceClass, Dictionary<String, ?> properties, Class<?>... neededServices) {

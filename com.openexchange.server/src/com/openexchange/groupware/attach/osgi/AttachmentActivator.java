@@ -49,14 +49,20 @@
 
 package com.openexchange.groupware.attach.osgi;
 
+import org.osgi.framework.ServiceRegistration;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.context.ContextService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.attach.AttachmentFilestoreLocationUpdater;
+import com.openexchange.groupware.attach.impl.AttachmentBaseImpl;
 import com.openexchange.groupware.attach.impl.AttachmentQuotaProvider;
 import com.openexchange.groupware.attach.json.AttachmentActionFactory;
 import com.openexchange.groupware.filestore.FilestoreLocationUpdater;
+import com.openexchange.osgi.DependentServiceRegisterer;
 import com.openexchange.quota.QuotaProvider;
-import com.openexchange.quota.QuotaService;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
+import com.openexchange.tools.file.external.QuotaFileStorageFactory;
 
 /**
  * {@link AttachmentActivator}
@@ -76,15 +82,35 @@ public final class AttachmentActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        track(QuotaService.class, new QuotaServiceCustomizer(context));
-        openTrackers();
-
         /*
          * register attachment filestore location updater for move context filestore
          */
         registerService(FilestoreLocationUpdater.class, new AttachmentFilestoreLocationUpdater());
-        registerService(QuotaProvider.class, new AttachmentQuotaProvider());
         registerModule(new AttachmentActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "attachment");
+        DependentServiceRegisterer<QuotaProvider> quotaProviderRegisterer = new DependentServiceRegisterer<QuotaProvider>(
+            context,
+            QuotaProvider.class,
+            AttachmentQuotaProvider.class,
+            null,
+            DatabaseService.class,
+            ContextService.class,
+            ConfigViewFactory.class,
+            QuotaFileStorageFactory.class) {
+
+            @Override
+            protected void register() {
+                super.register();
+                AttachmentBaseImpl.setQuotaProvider((AttachmentQuotaProvider) registeredService);
+            }
+
+            @Override
+            protected void unregister(ServiceRegistration<?> unregister, Object service) {
+                AttachmentBaseImpl.setQuotaProvider(null);
+                super.unregister(unregister, service);
+            }
+        };
+        track(quotaProviderRegisterer.getFilter(), quotaProviderRegisterer);
+        openTrackers();
     }
 
     @Override

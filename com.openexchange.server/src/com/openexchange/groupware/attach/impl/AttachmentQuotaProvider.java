@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.attach.impl;
 
+import java.net.URI;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -56,9 +57,12 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.quota.AccountQuota;
 import com.openexchange.quota.DefaultAccountQuota;
 import com.openexchange.quota.Quota;
@@ -66,19 +70,35 @@ import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.quota.QuotaType;
 import com.openexchange.quota.groupware.ConfiguredRestriction;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.tools.file.external.QuotaFileStorage;
+import com.openexchange.tools.file.external.QuotaFileStorageFactory;
 
 
 /**
- * {@link AttachmentQuotaProvider}
- *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
 public class AttachmentQuotaProvider implements QuotaProvider {
 
     private static final String MODULE_ID = "attachment";
+
+    private final DatabaseService dbService;
+
+    private final ContextService contextService;
+
+    private final ConfigViewFactory viewFactory;
+
+    private final QuotaFileStorageFactory fsFactory;
+
+
+    public AttachmentQuotaProvider(DatabaseService dbService, ContextService contextService, ConfigViewFactory viewFactory, QuotaFileStorageFactory fsFactory) {
+        super();
+        this.dbService = dbService;
+        this.contextService = contextService;
+        this.viewFactory = viewFactory;
+        this.fsFactory = fsFactory;
+    }
 
     @Override
     public String getModuleID() {
@@ -87,18 +107,16 @@ public class AttachmentQuotaProvider implements QuotaProvider {
 
     @Override
     public String getDisplayName() {
-        return "Attachments"; // TODO: localize
+        return AttachmentStrings.ATTACHMENTS;
     }
 
-    static Quota getAmountQuota(Session session) throws OXException {
-        DatabaseService dbService = ServerServiceRegistry.getServize(DatabaseService.class, true);
+    Quota getAmountQuota(Session session) throws OXException {
         Connection connection = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
             connection = dbService.getReadOnly(session.getContextId());
-            long limit = ConfiguredRestriction.getAmountLimit(session, MODULE_ID,
-                ServerServiceRegistry.getServize(ConfigViewFactory.class, true), connection);
+            long limit = ConfiguredRestriction.getAmountLimit(session, MODULE_ID, viewFactory, connection);
             if (Quota.UNLIMITED == limit) {
                 return Quota.UNLIMITED_AMOUNT;
             }
@@ -118,10 +136,21 @@ public class AttachmentQuotaProvider implements QuotaProvider {
         }
     }
 
+    Quota getSizeQuota(Session session) throws OXException {
+        Context context = contextService.getContext(session.getContextId());
+        URI uri = FilestoreStorage.createURI(context);
+        QuotaFileStorage quotaFileStorage = fsFactory.getQuotaFileStorage(context, uri);
+        long limit = quotaFileStorage.getQuota();
+        long usage = quotaFileStorage.getUsage();
+        return new Quota(QuotaType.SIZE, limit, usage);
+    }
+
     @Override
     public AccountQuota getFor(Session session, String accountID) throws OXException {
         if ("0".equals(accountID)) {
-            return new DefaultAccountQuota(accountID, getDisplayName()).addQuota(getAmountQuota(session));
+            return new DefaultAccountQuota(accountID, getDisplayName())
+                .addQuota(getAmountQuota(session))
+                .addQuota(getSizeQuota(session));
         } else {
             throw QuotaExceptionCodes.UNKNOWN_ACCOUNT.create(accountID, MODULE_ID);
         }
