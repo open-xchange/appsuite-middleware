@@ -97,10 +97,10 @@ public class QuotaProviderTracker implements QuotaService, ServiceTrackerCustomi
         }
 
         String moduleID = provider.getModuleID();
-        LOG.info("Adding QuotaAndUsageProvider for module {}.", moduleID);
+        LOG.info("Adding QuotaProvider for module {}.", moduleID);
         QuotaProvider existing = providers.put(moduleID, provider);
         if (existing != null) {
-            LOG.warn("Detected a duplicate QuotaAndUsageProvider for module {}. Service {} ({}) was overwritten by {} ({})!",
+            LOG.warn("Detected a duplicate QuotaProvider for module {}. Service {} ({}) was overwritten by {} ({})!",
                 moduleID,
                 existing.toString(),
                 existing.getClass().getName(),
@@ -119,7 +119,7 @@ public class QuotaProviderTracker implements QuotaService, ServiceTrackerCustomi
     public void removedService(ServiceReference<QuotaProvider> reference, QuotaProvider provider) {
         String moduleID = provider.getModuleID();
         if (providers.remove(moduleID, provider)) {
-            LOG.info("Removed QuotaAndUsageProvider for module {}.", moduleID);
+            LOG.info("Removed QuotaProvider for module {}.", moduleID);
         }
     }
 
