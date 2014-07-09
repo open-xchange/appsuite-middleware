@@ -68,8 +68,6 @@ import com.openexchange.session.Session;
  */
 public class InfostoreFileStorageService implements FileStorageService {
 
-    private static final FileStorageService INSTANCE = new InfostoreFileStorageService();
-
     private InfostoreFacade infostore;
 
     private InfostoreSearchEngine search;
@@ -84,7 +82,7 @@ public class InfostoreFileStorageService implements FileStorageService {
 
     @Override
     public FileStorageAccountManager getAccountManager() {
-        return new InfostoreDefaultAccountManager();
+        return new InfostoreDefaultAccountManager(this);
     }
 
     @Override
@@ -105,10 +103,6 @@ public class InfostoreFileStorageService implements FileStorageService {
     @Override
     public DynamicFormDescription getFormDescription() {
         return new DynamicFormDescription();
-    }
-
-    public static FileStorageService getInstance() {
-        return INSTANCE;
     }
 
     // Override this for OSGi Lookup, use the setter in tests

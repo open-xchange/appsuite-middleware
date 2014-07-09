@@ -76,11 +76,14 @@ public class InfostoreDefaultAccountManager implements FileStorageAccountManager
 
         private static final long serialVersionUID = -4701429514008282005L;
 
+        private final InfostoreFileStorageService storageService;
+
         /**
          * Initializes a new {@link InfostoreDefaultAccountManager.FileStorageAccountImpl}.
          */
-        protected FileStorageAccountImpl() {
+        protected FileStorageAccountImpl(InfostoreFileStorageService storageService) {
             super();
+            this.storageService = storageService;
         }
 
         @Override
@@ -95,7 +98,7 @@ public class InfostoreDefaultAccountManager implements FileStorageAccountManager
 
         @Override
         public FileStorageService getFileStorageService() {
-            return InfostoreFileStorageService.getInstance();
+            return storageService;
         }
 
         @Override
@@ -111,7 +114,13 @@ public class InfostoreDefaultAccountManager implements FileStorageAccountManager
 
     public static final String DEFAULT_ID = "infostore";
 
-    private static final FileStorageAccount DEFAULT_ACCOUNT = new FileStorageAccountImpl();
+    private final FileStorageAccount defaultAccount;
+
+
+    public InfostoreDefaultAccountManager(InfostoreFileStorageService storageService) {
+        super();
+        defaultAccount = new FileStorageAccountImpl(storageService);
+    }
 
     @Override
     public String addAccount(final FileStorageAccount account, final Session session) throws OXException {
@@ -126,14 +135,14 @@ public class InfostoreDefaultAccountManager implements FileStorageAccountManager
     @Override
     public FileStorageAccount getAccount(final String id, final Session session) throws OXException {
         if(/*InfostoreFacades.isInfoStoreAvailable() && */(DEFAULT_ID.equals(id) || InfostoreDefaultAccountManager.DEFAULT_ID.equals(id))) {
-            return DEFAULT_ACCOUNT;
+            return defaultAccount;
         }
         throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(id, "com.openexchange.infostore");
     }
 
     @Override
     public List<FileStorageAccount> getAccounts(final Session session) throws OXException {
-        return Arrays.asList(DEFAULT_ACCOUNT);
+        return Arrays.asList(defaultAccount);
     }
 
     @Override
@@ -145,10 +154,10 @@ public class InfostoreDefaultAccountManager implements FileStorageAccountManager
     public void cleanUp(String secret, Session session) throws OXException {
         // Nothing to do
     }
-    
+
     @Override
     public void removeUnrecoverableItems(String secret, Session session) throws OXException {
-        // Nothing to do        
+        // Nothing to do
     }
 
     @Override

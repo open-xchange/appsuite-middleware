@@ -68,6 +68,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.ReuseReadConProvider;
@@ -131,11 +133,8 @@ import com.openexchange.index.IndexExceptionCodes;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.java.Streams;
-import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
-import com.openexchange.quota.QuotaService;
-import com.openexchange.quota.QuotaType;
-import com.openexchange.quota.Resource;
+import com.openexchange.quota.groupware.ConfiguredRestriction;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -339,18 +338,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
     @Override
     public com.openexchange.file.storage.Quota getFileQuota(ServerSession session) throws OXException {
-        long limit = com.openexchange.file.storage.Quota.UNLIMITED;
-        long usage = com.openexchange.file.storage.Quota.UNLIMITED;
-        QuotaService quotaService = ServerServiceRegistry.getInstance().getService(QuotaService.class);
-        if (null != quotaService) {
-            com.openexchange.quota.Quota quota = quotaService.getQuotaFor(Resource.INFOSTORE_FILES, session);
-            if (null != quota) {
-                limit = quota.getQuota(QuotaType.AMOUNT);
-                if (com.openexchange.file.storage.Quota.UNLIMITED != limit) {
-                    usage = getUsedQuota(session.getContext());
-                }
-            }
-        }
+        long limit = ConfiguredRestriction.getAmountLimit(
+            session,
+            "filestorage",
+            ServerServiceRegistry.getServize(ConfigViewFactory.class, true),
+            ServerServiceRegistry.getServize(DatabaseService.class, true));
+        long usage = getUsedQuota(session.getContext());
         return new com.openexchange.file.storage.Quota(limit, usage, com.openexchange.file.storage.Quota.Type.FILE);
     }
 
@@ -554,19 +547,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 throw InfostoreExceptionCodes.NO_CREATE_PERMISSION.create();
             }
 
-            // Check quota
-            {
-                final QuotaService quotaService = ServerServiceRegistry.getInstance().getService(QuotaService.class);
-                if (null != quotaService) {
-                    final Quota quota = quotaService.getQuotaFor(Resource.INFOSTORE_FILES, session);
-                    final long quotaValue = quota.getQuota(QuotaType.AMOUNT);
-                    if (quotaValue > 0) {
-                        final long used = getUsedQuota(context);
-                        if (used > 0 && used >= quotaValue) {
-                            throw QuotaExceptionCodes.QUOTA_EXCEEDED_FILES.create(used, quotaValue);
-                        }
-                    }
-                }
+            com.openexchange.file.storage.Quota storageQuota = getFileQuota(session);
+            long limit = storageQuota.getLimit();
+            long usage = storageQuota.getUsage();
+            if (limit > 0 && usage >= limit) {
+                throw QuotaExceptionCodes.QUOTA_EXCEEDED_FILES.create(usage, limit);
             }
 
             setDefaults(document);

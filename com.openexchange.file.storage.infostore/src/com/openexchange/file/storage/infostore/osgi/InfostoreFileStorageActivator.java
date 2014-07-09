@@ -57,7 +57,6 @@ import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.quota.QuotaService;
 
 
 /**
@@ -70,7 +69,7 @@ public class InfostoreFileStorageActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { InfostoreFacade.class, InfostoreSearchEngine.class, FolderService.class,
-            ContentTypeDiscoveryService.class, QuotaService.class };
+            ContentTypeDiscoveryService.class };
     }
 
     @Override
