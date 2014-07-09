@@ -50,7 +50,6 @@
 package com.openexchange.filestore.s3.internal;
 
 import static com.openexchange.filestore.s3.internal.S3ExceptionCode.wrap;
-
 import java.io.InputStream;
 import java.io.SequenceInputStream;
 import java.util.ArrayList;
@@ -63,7 +62,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
-
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.Request;
 import com.amazonaws.handlers.RequestHandler;
@@ -130,12 +128,12 @@ public class S3FileStorage implements FileStorage {
         this.bucketName = bucketName;
         this.prefix = prefix;
         amazonS3.addRequestHandler(new RequestHandler() {
-			
+
 			@Override
 			public void beforeRequest(Request<?> request) {
 				// nothing to do
 			}
-			
+
 			@Override
 			public void afterResponse(Request<?> request, Object response,
 					TimingInfo timingInfo) {
@@ -148,7 +146,7 @@ public class S3FileStorage implements FileStorage {
 					}
 				}
 			}
-			
+
 			@Override
 			public void afterError(Request<?> request, Exception e) {
 				// nothing to do
@@ -259,20 +257,22 @@ public class S3FileStorage implements FileStorage {
 
     @Override
     public Set<String> deleteFiles(String[] names) throws OXException {
-        DeleteObjectsRequest deleteRequest = new DeleteObjectsRequest(bucketName).withKeys(addPrefix(names));
-        try {
-            amazonS3.deleteObjects(deleteRequest);
-        } catch (MultiObjectDeleteException e) {
-            List<DeleteError> errors = e.getErrors();
-            if (null != errors && 0 < errors.size()) {
-                Set<String> notDeleted = new HashSet<String>();
-                for (DeleteError error : errors) {
-                    notDeleted.add(removePrefix(error.getKey()));
+        if (null != names && 0 < names.length) {
+            DeleteObjectsRequest deleteRequest = new DeleteObjectsRequest(bucketName).withKeys(addPrefix(names));
+            try {
+                amazonS3.deleteObjects(deleteRequest);
+            } catch (MultiObjectDeleteException e) {
+                List<DeleteError> errors = e.getErrors();
+                if (null != errors && 0 < errors.size()) {
+                    Set<String> notDeleted = new HashSet<String>();
+                    for (DeleteError error : errors) {
+                        notDeleted.add(removePrefix(error.getKey()));
+                    }
+                    return notDeleted;
                 }
-                return notDeleted;
+            } catch (AmazonClientException e) {
+                throw wrap(e);
             }
-        } catch (AmazonClientException e) {
-            throw wrap(e);
         }
         return Collections.emptySet();
     }
