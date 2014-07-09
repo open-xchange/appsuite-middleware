@@ -734,6 +734,19 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
         }
     }
 
+    /**
+     * Gets the connected SMTP transport.
+     *
+     * @return The connected SMTP transport
+     * @throws OXException If an error occurs
+     * @throws MessagingException If a messaging error occurs
+     */
+    public com.sun.mail.smtp.SMTPTransport getSmtpTransport() throws OXException, MessagingException {
+        final com.sun.mail.smtp.SMTPTransport transport = (com.sun.mail.smtp.SMTPTransport) getSMTPSession().getTransport(SMTP);
+        connectTransport(transport, getTransportConfig0());
+        return transport;
+    }
+
     @Override
     public MailMessage sendMailMessage(final ComposedMailMessage composedMail, final ComposeType sendType, final Address[] allRecipients) throws OXException {
         final SMTPConfig smtpConfig = getTransportConfig0();

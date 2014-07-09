@@ -68,4 +68,5 @@ Import-Package: com.openexchange.ajax.container,
  org.slf4j
 Bundle-Activator: com.openexchange.smtp.osgi.SMTPActivator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Export-Package: com.openexchange.smtp.config
+Export-Package: com.openexchange.smtp,
+ com.openexchange.smtp.config
