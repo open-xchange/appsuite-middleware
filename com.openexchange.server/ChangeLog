@@ -1,3 +1,7 @@
+* 2014-07-09 - marc.arens@open-xchange.com
+
+ - Fix for bug 27301: A MembershipListener recognizes a leaving hazelcast node and triggers a cleanup for its resources
+ 
 * 2014-07-09 - martin.schneider@open-xchange.com
 
  - Fix for bug 33201: improved output if parameter is missing
