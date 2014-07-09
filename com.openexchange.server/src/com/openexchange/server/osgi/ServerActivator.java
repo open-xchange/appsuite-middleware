@@ -160,6 +160,7 @@ import com.openexchange.login.BlockingLoginHandlerService;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.mail.MailCounterImpl;
 import com.openexchange.mail.MailIdleCounterImpl;
+import com.openexchange.mail.MailQuotaProvider;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.api.unified.UnifiedViewService;
 import com.openexchange.mail.cache.MailAccessCacheEventListener;
@@ -194,6 +195,7 @@ import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.preview.PreviewService;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
+import com.openexchange.quota.QuotaProvider;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.search.SearchService;
 import com.openexchange.secret.SecretEncryptionFactoryService;
@@ -607,8 +609,9 @@ public final class ServerActivator extends HousekeepingActivator {
 
         registerService(ContextService.class, ServerServiceRegistry.getInstance().getService(ContextService.class, true));
         // Register mail stuff
+        MailServiceImpl mailService = new MailServiceImpl();
         {
-            registerService(MailService.class, new MailServiceImpl());
+            registerService(MailService.class, mailService);
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, MailSessionEventHandler.getTopics());
             registerService(EventHandler.class, new MailSessionEventHandler(), serviceProperties);
@@ -645,9 +648,12 @@ public final class ServerActivator extends HousekeepingActivator {
         registerService(CreateTableService.class, new CreateMailAccountTables());
         registerService(CreateTableService.class, new CreateIDSequenceTable());
         // TODO: Register server's mail account storage here until its encapsulated in an own bundle
-        registerService(MailAccountStorageService.class, ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class));
+        MailAccountStorageService mailAccountStorageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+        registerService(MailAccountStorageService.class, mailAccountStorageService);
         // TODO: Register server's Unified Mail management here until its encapsulated in an own bundle
         registerService(UnifiedInboxManagement.class, ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class));
+        // TODO: Register server's Unified Mail management here until its encapsulated in an own bundle
+        registerService(QuotaProvider.class, new MailQuotaProvider(mailAccountStorageService, mailService));
         // Register ID generator
         registerService(IDGeneratorService.class, ServerServiceRegistry.getInstance().getService(IDGeneratorService.class));
         /*
