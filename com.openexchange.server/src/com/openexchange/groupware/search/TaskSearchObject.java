@@ -71,20 +71,18 @@ public class TaskSearchObject extends CalendarSearchObject {
 
     private int status = NO_STATUS;
 
-    private int priority = NO_PRIORITY;
-    
     private Set<Integer> stateFilters;
-    
+
     private boolean seriesFilter;
-    
+
     private boolean singleOccurrenceFilter;
-    
+
     private Set<String> externalParticipants;
-    
+
     private int start;
-    
+
     private int size;
-    
+
     /**
      * This array contains 2 values between them the task ends. If the task has
      * no end date it won't appear if the range is defined.
@@ -93,14 +91,6 @@ public class TaskSearchObject extends CalendarSearchObject {
 
     public TaskSearchObject() {
         super();
-    }
-
-    public int getPriority() {
-        return priority;
-    }
-
-    public void setPriority(final int priority) {
-        this.priority = priority;
     }
 
     public int getStatus() {
