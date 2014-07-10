@@ -1413,10 +1413,13 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             final Task task = (Task) newObj;
             final Task oldTask = (Task) oldObj;
             {
-                final int priority = task.getPriority();
-                try {
-                    renderMap.put(new TaskPriorityReplacement(priority).setChanged(oldTask == null ? false : priority != oldTask.getPriority()));
-                } catch (final IllegalArgumentException e) {
+                final Integer priority = task.getPriority();
+                final Integer oldPriority = oldTask == null ? null : oldTask.getPriority();
+                if (null != priority) {
+                    TaskPriorityReplacement replacement = new TaskPriorityReplacement(priority.intValue());
+                    renderMap.put(replacement);
+                    replacement.setChanged(oldTask == null ? false : !priority.equals(oldPriority));
+                } else {
                     renderMap.put(TaskPriorityReplacement.emptyTaskPriorityReplacement());
                 }
             }
