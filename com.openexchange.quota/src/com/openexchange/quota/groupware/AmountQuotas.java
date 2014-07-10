@@ -78,6 +78,16 @@ public class AmountQuotas {
 
     private static final Logger LOG = LoggerFactory.getLogger(AmountQuotas.class);
 
+    /**
+     * Adjusts the quota amount limit for the given modules in the database. Existing limits for a module are overwritten, or new limits
+     * are stored if not yet defined.
+     *
+     * @param contextID The context ID
+     * @param moduleIDs The module IDs to set the limit in the database for
+     * @param limit The limit to set
+     * @param connection A writable connection to the database
+     * @throws OXException
+     */
     public static void setLimit(int contextID, List<String> moduleIDs, long limit, Connection connection) throws OXException {
         PreparedStatement stmt = null;
         try {
@@ -128,6 +138,17 @@ public class AmountQuotas {
         }
     }
 
+    /**
+     * Gets the configured amount limit in a specific module for the supplied session's user. The value is either retrieved directly from
+     * the database, or, if not defined there, through the user's configuration view.
+     *
+     * @param session The session
+     * @param moduleID The module ID
+     * @param configViewFactory A reference to the config view factory
+     * @param connection An open database connection
+     * @return The limit or {@link Quota#UNLIMITED} if no amount quota is defined
+     * @throws OXException
+     */
     public static long getLimit(Session session, String moduleID, ConfigViewFactory configViewFactory, Connection connection) throws OXException {
         final Long quotaFromDB = getQuotaFromDB(connection, session.getContextId(), moduleID);
         if (null != quotaFromDB) {
@@ -147,6 +168,17 @@ public class AmountQuotas {
         }
     }
 
+    /**
+     * Gets the configured amount limit in a specific module for the supplied session's user. The value is either retrieved directly from
+     * the database, or, if not defined there, through the user's configuration view.
+     *
+     * @param session The session
+     * @param moduleID The module ID
+     * @param configViewFactory A reference to the config view factory
+     * @param dbService A reference to the database service
+     * @return The limit or {@link Quota#UNLIMITED} if no amount quota is defined
+     * @throws OXException
+     */
     public static long getLimit(Session session, String moduleID, ConfigViewFactory configViewFactory, DatabaseService dbService) throws OXException {
         Connection connection = null;
         try {
@@ -182,6 +214,13 @@ public class AmountQuotas {
         } finally {
             Databases.closeSQLStuff(rs, stmt);
         }
+    }
+
+    /**
+     * Initializes a new {@link AmountQuotas}.
+     */
+    private AmountQuotas() {
+        super();
     }
 
 }
