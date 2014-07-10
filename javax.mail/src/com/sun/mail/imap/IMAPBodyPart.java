@@ -488,4 +488,14 @@ public class IMAPBodyPart extends MimeBodyPart implements ReadableMime {
         }
         return new MessagingException(bex.getMessage(), bex);
     }
+
+    /**
+     * Gets the section identifier.
+     *
+     * @return The section identifier
+     */
+    public String getSectionId() {
+        return sectionId;
+    }
+    
 }

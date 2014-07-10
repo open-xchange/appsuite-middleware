@@ -338,12 +338,16 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
     @Override
     public com.openexchange.file.storage.Quota getFileQuota(ServerSession session) throws OXException {
-        long limit = AmountQuotas.getLimit(
+        long limit = com.openexchange.file.storage.Quota.UNLIMITED;
+        long usage = com.openexchange.file.storage.Quota.UNLIMITED;
+        limit = AmountQuotas.getLimit(
             session,
-            "filestorage",
+            "infostore",
             ServerServiceRegistry.getServize(ConfigViewFactory.class, true),
             ServerServiceRegistry.getServize(DatabaseService.class, true));
-        long usage = getUsedQuota(session.getContext());
+        if (com.openexchange.file.storage.Quota.UNLIMITED != limit) {
+            usage = getFileStorage(session.getContext()).getUsage();
+        }
         return new com.openexchange.file.storage.Quota(limit, usage, com.openexchange.file.storage.Quota.Type.FILE);
     }
 
