@@ -746,7 +746,14 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
 
     @Override
     public Quota getStorageQuota(final String folderId) throws OXException {
-        return Quota.getUnlimitedQuota(Quota.Type.STORAGE);
+        try {
+            SmbFile rootFolder = getSmbFile(rootUrl);
+            long freeSpace = rootFolder.getDiskFreeSpace();
+            long totalCapacity = rootFolder.length();
+            return new Quota(totalCapacity, totalCapacity - freeSpace, Quota.Type.STORAGE);
+        } catch (IOException e) {
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        }
     }
 
     @Override
@@ -758,7 +765,16 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
     public Quota[] getQuotas(final String folder, final Type[] types) throws OXException {
         final Quota[] ret = new Quota[types.length];
         for (int i = 0; i < ret.length; i++) {
-            ret[i] = Quota.getUnlimitedQuota(types[i]);
+            switch(types[i]) {
+            case FILE:
+                ret[i] = getFileQuota(folder);
+                break;
+            case STORAGE:
+                ret[i] = getStorageQuota(folder);
+                break;
+            default:
+                throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create(types[i]);
+            }
         }
         return ret;
     }
