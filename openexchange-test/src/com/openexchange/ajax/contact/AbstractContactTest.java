@@ -91,6 +91,7 @@ import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
 import com.openexchange.ajax.parser.DataParser;
+import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.Contact;
@@ -609,8 +610,11 @@ public class AbstractContactTest extends AbstractAJAXSession {
         InputStream inputStream = null;
         try {
             final AJAXSession ajaxSession = getSession();
-            System.out.println("MS for debugging. Client values: " + client.toString() + ". Used hostname: " + hostname);
-            final HttpGet httpRequest = new HttpGet((null == protocol ? "http" : protocol) + "://" + (hostname == null ? "localhost" : hostname) + imageUrl);
+
+            String ajaxConfigHostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
+            System.out.println("MS for debugging. Client values: " + client.toString() + ".\nUsed hostname: " + ajaxConfigHostname);
+            final HttpGet httpRequest = new HttpGet((null == protocol ? "http" : protocol) + "://" + (ajaxConfigHostname == null ? "localhost" : ajaxConfigHostname) + imageUrl);
+
             final HttpResponse httpResponse = ajaxSession.getHttpClient().execute(httpRequest);
             inputStream = httpResponse.getEntity().getContent();
             final int len = 8192;
