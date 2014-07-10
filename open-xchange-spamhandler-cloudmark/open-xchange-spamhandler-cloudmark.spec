@@ -62,6 +62,8 @@ fi
 %doc com.openexchange.spamhandler.cloudmark/ChangeLog
 
 %changelog
+* Mon Jul 07 2014 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
+Build for patch 2014-07-07
 * Tue Jul 01 2014 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
 Build for patch 2014-07-07
 * Thu Jun 26 2014 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
