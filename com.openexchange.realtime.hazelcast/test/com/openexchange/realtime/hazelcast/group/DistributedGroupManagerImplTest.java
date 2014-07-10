@@ -51,13 +51,11 @@ package com.openexchange.realtime.hazelcast.group;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
@@ -147,7 +145,7 @@ public class DistributedGroupManagerImplTest {
 
     /**
      * Test method for {@link com.openexchange.realtime.hazelcast.group.DistributedGroupManagerImpl#add(com.openexchange.realtime.packet.ID, com.openexchange.realtime.packet.ID)}.
-     * @throws OXException 
+     * @throws OXException
      */
     @Test
     public void testAdd() throws Exception {
@@ -163,7 +161,7 @@ public class DistributedGroupManagerImplTest {
 
     /**
      * Test method for {@link com.openexchange.realtime.hazelcast.group.DistributedGroupManagerImpl#removeClient(com.openexchange.realtime.packet.ID)}.
-     * @throws Exception 
+     * @throws Exception
      */
     @Test
     public void testRemoveID() throws Exception {
@@ -189,7 +187,7 @@ public class DistributedGroupManagerImplTest {
 
     /**
      * Test method for {@link com.openexchange.realtime.hazelcast.group.DistributedGroupManagerImpl#remove(com.openexchange.realtime.packet.ID, com.openexchange.realtime.packet.ID)}.
-     * @throws Exception 
+     * @throws Exception
      */
     @Test
     public void testRemoveIDID() throws Exception {
@@ -205,7 +203,7 @@ public class DistributedGroupManagerImplTest {
 
     /**
      * Test method for {@link com.openexchange.realtime.hazelcast.group.DistributedGroupManagerImpl#getGroups(com.openexchange.realtime.packet.ID)}.
-     * @throws Exception 
+     * @throws Exception
      */
     @Test
     public void testGetGroups() throws Exception {
@@ -247,7 +245,7 @@ public class DistributedGroupManagerImplTest {
      * 
      * Only tests if the leave command was sent to the GroupDispatcher as no actual Message and GroupDispatchers are used in this test.
      * 
-     * @throws Exception 
+     * @throws Exception
      */
     @Test
     public void testGetMembers() throws Exception {
@@ -264,40 +262,40 @@ public class DistributedGroupManagerImplTest {
         groupManager.removeClient(user1);
         Awaitility.await().atMost(com.jayway.awaitility.Duration.FIVE_SECONDS).until(numStanzasReceived(), greaterThanOrEqualTo(3));
         Set<Stanza> stanzas = getStanzas(user1, group1);
-        assertThat(stanzas.size(), is(1));
+        assertEquals(stanzas.size(), 1);
         assertThat(stanzas.iterator().next().getPayload(), leaveMatcher);
         stanzas = getStanzas(user1, group2);
-        assertThat(stanzas.size(), is(1));
+        assertEquals(stanzas.size(), 1);
         assertThat(stanzas.iterator().next().getPayload(), leaveMatcher);
         stanzas = getStanzas(user1, group3);
-        assertThat(stanzas.size(), is(1));
+        assertEquals(stanzas.size(), 1);
         assertThat(stanzas.iterator().next().getPayload(), leaveMatcher);
-        
+
         groupManager.removeClient(user2);
         Awaitility.await().atMost(com.jayway.awaitility.Duration.FIVE_SECONDS).until(numStanzasReceived(), greaterThanOrEqualTo(5));
         stanzas = getStanzas(user2, group1);
-        assertThat(stanzas.size(), is(0));
+        assertEquals(stanzas.size(), 0);
         stanzas = getStanzas(user2, group2);
-        assertThat(stanzas.size(), is(1));
+        assertEquals(stanzas.size(), 1);
         assertThat(stanzas.iterator().next().getPayload(), leaveMatcher);
         stanzas = getStanzas(user2, group3);
-        assertThat(stanzas.size(), is(1));
+        assertEquals(stanzas.size(), 1);
         assertThat(stanzas.iterator().next().getPayload(), leaveMatcher);
-        
+
         groupManager.removeClient(user3);
         Awaitility.await().atMost(com.jayway.awaitility.Duration.FIVE_SECONDS).until(numStanzasReceived(), greaterThanOrEqualTo(6));
         stanzas = getStanzas(user3, group1);
-        assertThat(stanzas.size(), is(0));
+        assertEquals(stanzas.size(), 0);
         stanzas = getStanzas(user3, group2);
-        assertThat(stanzas.size(), is(0));
+        assertEquals(stanzas.size(), 0);
         stanzas = getStanzas(user3, group3);
-        assertThat(stanzas.size(), is(1));
+        assertEquals(stanzas.size(), 1);
         assertThat(stanzas.iterator().next().getPayload(), leaveMatcher);
     }
 
     /**
      * Test method for {@link com.openexchange.realtime.hazelcast.group.DistributedGroupManagerImpl#setInactivity(com.openexchange.realtime.packet.ID, com.openexchange.realtime.util.Duration)}.
-     * @throws Exception 
+     * @throws Exception
      */
     @Test
     public void testSetInactivity() throws Exception {
@@ -327,7 +325,7 @@ public class DistributedGroupManagerImplTest {
 
     /**
      * Test method for {@link com.openexchange.realtime.hazelcast.group.DistributedGroupManagerImpl#cleanupForId(com.openexchange.realtime.packet.ID)}.
-     * @throws Exception 
+     * @throws Exception
      */
     @Test
     public void testCleanupForId() throws Exception {
@@ -346,10 +344,10 @@ public class DistributedGroupManagerImplTest {
             assertThat(stanza.getPayload(),leaveMatcher);
         }
     }
-    
+
     /**
      * Test method for {@link com.openexchange.realtime.hazelcast.group.DistributedGroupManagerImpl#cleanupForId(com.openexchange.realtime.packet.ID)}.
-     * @throws Exception 
+     * @throws Exception
      */
     @Test
     public void testCleanupForSyntheticId() throws Exception {
@@ -361,17 +359,15 @@ public class DistributedGroupManagerImplTest {
         Awaitility.await().atMost(com.jayway.awaitility.Duration.TEN_SECONDS).until(numStanzasReceived(), equalTo(3));
         // .. and assert that all previous members are informed about the removal of the group
         Set<Stanza> stanzas = getStanzas(group3, user1);
-        assertThat(stanzas.size(), is(1));
+        assertEquals(stanzas.size(), 1);
         assertThat(stanzas.iterator().next().getPayload(), notMemberMatcher);
         stanzas = getStanzas(group3, user2);
-        assertThat(stanzas.size(), is(1));
+        assertEquals(stanzas.size(), 1);
         assertThat(stanzas.iterator().next().getPayload(), notMemberMatcher);
         stanzas = getStanzas(group3, user3);
-        assertThat(stanzas.size(), is(1));
+        assertEquals(stanzas.size(), 1);
         assertThat(stanzas.iterator().next().getPayload(), notMemberMatcher);
     }
-    
-    
 
     /**
      * Test method for {@link com.openexchange.realtime.hazelcast.group.DistributedGroupManagerImpl#getManagementObject()}.
