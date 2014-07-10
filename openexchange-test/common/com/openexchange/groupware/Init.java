@@ -84,6 +84,9 @@ import com.openexchange.charset.CustomCharsetProviderInit;
 import com.openexchange.charset.ModifyCharsetExtendedProvider;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ConfigurationServiceHolder;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.impl.ConfigCascade;
+import com.openexchange.config.cascade.impl.InMemoryConfigProvider;
 import com.openexchange.config.internal.ConfigurationImpl;
 import com.openexchange.config.internal.filewatcher.FileWatcher;
 import com.openexchange.configuration.ServerConfig;
@@ -183,6 +186,7 @@ import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.external.FileStorageFactory;
 import com.openexchange.tools.file.internal.CompositeFileStorageFactory;
 import com.openexchange.tools.file.internal.DBQuotaFileStorageFactory;
+import com.openexchange.tools.strings.BasicTypesStringParser;
 import com.openexchange.user.UserService;
 import com.openexchange.user.UserServiceInterceptor;
 import com.openexchange.user.UserServiceInterceptorRegistry;
@@ -356,6 +360,7 @@ public final class Init {
         startVersionBundle();
         startAndInjectIDGeneratorService();
         startAndInjectConfigBundle();
+        startAndInjectConfigViewFactory();
         startAndInjectThreadPoolBundle();
         startAndInjectBasicServices();
         startAndInjectHTMLService();
@@ -414,6 +419,17 @@ public final class Init {
 
         services.put(CapabilityService.class, c);
         TestServiceRegistry.getInstance().addService(CapabilityService.class, c);
+    }
+
+    private static void startAndInjectConfigViewFactory() {
+        ConfigCascade cascade = new ConfigCascade();
+        cascade.setProvider("server", new InMemoryConfigProvider());
+        cascade.setProvider("context", new InMemoryConfigProvider());
+        cascade.setProvider("user", new InMemoryConfigProvider());
+        cascade.setSearchPath("user", "context", "server");
+        cascade.setStringParser(new BasicTypesStringParser());
+        services.put(ConfigViewFactory.class, cascade);
+        TestServiceRegistry.getInstance().addService(ConfigViewFactory.class, cascade);
     }
 
     private static void startVersionBundle() throws Exception {
