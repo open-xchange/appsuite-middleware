@@ -63,6 +63,8 @@ fi
 
 
 %changelog
+* Thu Jul 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-07-15
 * Tue Jul 01 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-07-07
 * Mon Jun 23 2014 Marcus Klein <marcus.klein@open-xchange.com>

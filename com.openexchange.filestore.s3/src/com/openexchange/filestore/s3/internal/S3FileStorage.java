@@ -50,12 +50,8 @@
 package com.openexchange.filestore.s3.internal;
 
 import static com.openexchange.filestore.s3.internal.S3ExceptionCode.wrap;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.security.DigestInputStream;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.io.SequenceInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -79,14 +75,15 @@ import com.amazonaws.services.s3.model.MultiObjectDeleteException.DeleteError;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PartETag;
+import com.amazonaws.services.s3.model.PutObjectResult;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.model.UploadPartRequest;
+import com.amazonaws.services.s3.model.UploadPartResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.tools.encoding.Base64;
 import com.openexchange.tools.file.external.FileStorage;
 import com.openexchange.tools.file.external.FileStorageCodes;
 
@@ -100,9 +97,9 @@ public class S3FileStorage implements FileStorage {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(S3FileStorage.class);
 
     /**
-     * The size of the in-memory buffer for uploads to use.
+     * The delimiter character to separate the prefix from the keys
      */
-    private static final int UPLOAD_BUFFER_SIZE = 1024 * 1024 * 2; // 2 MiB
+    private static final String DELIMITER = "/";
 
     /**
      * The delimiter character to separate the prefix from the keys
@@ -136,57 +133,39 @@ public class S3FileStorage implements FileStorage {
     @Override
     public String saveNewFile(InputStream file) throws OXException {
         /*
-         * prepare upload
+         * perform chunked upload as needed
          */
         String key = generateKey(true);
-        DigestInputStream digestStream = null;
+        ChunkedUpload chunkedUpload = null;
+        UploadChunk chunk = null;
         try {
-            byte[] buffer = new byte[UPLOAD_BUFFER_SIZE];
-            digestStream = new DigestInputStream(file, MessageDigest.getInstance("MD5"));
-            /*
-             * fill first buffer from stream
-             */
-            int read = fillBuffer(digestStream, buffer);
-            if (read < UPLOAD_BUFFER_SIZE) {
+            chunkedUpload = new ChunkedUpload(file);
+            chunk = chunkedUpload.next();
+            if (false == chunkedUpload.hasNext()) {
                 /*
                  * whole file fits into buffer (this includes a zero byte file), upload directly
                  */
-                int length = -1 == read ? 0 : read;
-                byte[] digest = digestStream.getMessageDigest().digest();
-                ByteArrayInputStream bais = null;
-                try {
-                    bais = new ByteArrayInputStream(buffer, 0, length);
-                    ObjectMetadata metadata = new ObjectMetadata();
-                    metadata.setContentLength(length);
-                    metadata.setContentMD5(Base64.encode(digest));
-                    amazonS3.putObject(bucketName, key, bais, metadata);
-                } finally {
-                    Streams.close(bais);
-                }
+                uploadSingle(key, chunk);
             } else {
                 /*
                  * upload in multipart chunks to provide the correct content length
                  */
-                String uploadID = initiateMultipartUpload(key);
+                String uploadID = amazonS3.initiateMultipartUpload(new InitiateMultipartUploadRequest(bucketName, key)).getUploadId();
                 boolean completed = false;
                 try {
                     List<PartETag> partETags = new ArrayList<PartETag>();
                     int partNumber = 1;
-                    do {
-                        byte[] digest = digestStream.getMessageDigest().digest();
-                        ByteArrayInputStream bais = null;
-                        try {
-                            bais = new ByteArrayInputStream(buffer, 0, read);
-                            UploadPartRequest request = new UploadPartRequest().withBucketName(bucketName).withKey(key).withUploadId(uploadID)
-                                .withInputStream(bais).withPartSize(read).withPartNumber(partNumber++).withMD5Digest(Base64.encode(digest));
-                            partETags.add(amazonS3.uploadPart(request).getPartETag());
-                        } finally {
-                            Streams.close(bais);
-                        }
-                    } while (-1 != (read = fillBuffer(digestStream, buffer)));
                     /*
-                     * complete upload
+                     * upload n-1 parts
                      */
+                    do {
+                        partETags.add(uploadPart(key, uploadID, partNumber++, chunk, false).getPartETag());
+                        chunk = chunkedUpload.next();
+                    } while (chunkedUpload.hasNext());
+                    /*
+                     * upload last part & complete upload
+                     */
+                    partETags.add(uploadPart(key, uploadID, partNumber++, chunk, true).getPartETag());
                     amazonS3.completeMultipartUpload(new CompleteMultipartUploadRequest(bucketName, key, uploadID, partETags));
                     completed = true;
                 } finally {
@@ -199,16 +178,10 @@ public class S3FileStorage implements FileStorage {
                     }
                 }
             }
-            return removePrefix(key);
-        } catch (NoSuchAlgorithmException e) {
-            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
-        } catch (IOException e) {
-            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
-        } catch (AmazonClientException e) {
-            throw wrap(e);
         } finally {
-            Streams.close(digestStream);
+            Streams.close(chunk, chunkedUpload);
         }
+        return removePrefix(key);
     }
 
     @Override
@@ -259,20 +232,22 @@ public class S3FileStorage implements FileStorage {
 
     @Override
     public Set<String> deleteFiles(String[] names) throws OXException {
-        DeleteObjectsRequest deleteRequest = new DeleteObjectsRequest(bucketName).withKeys(addPrefix(names));
-        try {
-            amazonS3.deleteObjects(deleteRequest);
-        } catch (MultiObjectDeleteException e) {
-            List<DeleteError> errors = e.getErrors();
-            if (null != errors && 0 < errors.size()) {
-                Set<String> notDeleted = new HashSet<String>();
-                for (DeleteError error : errors) {
-                    notDeleted.add(removePrefix(error.getKey()));
+        if (null != names && 0 < names.length) {
+            DeleteObjectsRequest deleteRequest = new DeleteObjectsRequest(bucketName).withKeys(addPrefix(names));
+            try {
+                amazonS3.deleteObjects(deleteRequest);
+            } catch (MultiObjectDeleteException e) {
+                List<DeleteError> errors = e.getErrors();
+                if (null != errors && 0 < errors.size()) {
+                    Set<String> notDeleted = new HashSet<String>();
+                    for (DeleteError error : errors) {
+                        notDeleted.add(removePrefix(error.getKey()));
+                    }
+                    return notDeleted;
                 }
-                return notDeleted;
+            } catch (AmazonClientException e) {
+                throw wrap(e);
             }
-        } catch (AmazonClientException e) {
-            throw wrap(e);
         }
         return Collections.emptySet();
     }
@@ -323,74 +298,35 @@ public class S3FileStorage implements FileStorage {
          * http://ceph.com/docs/next/radosgw/s3/#features-support
          */
         /*
-         * prepare temporary file for append operation
+         * get existing object
          */
         String key = addPrefix(name);
-        String tempKey = generateKey(true);
-        String uploadID = initiateMultipartUpload(key);
-        boolean completed = false;
+        S3Object s3Object = getObject(key);
+        long currentLength = s3Object.getObjectMetadata().getContentLength();
+        if (currentLength != offset) {
+            throw FileStorageCodes.INVALID_OFFSET.create(Long.valueOf(offset), name, Long.valueOf(currentLength));
+        }
+        /*
+         * append both streams at temporary location
+         */
+        String tempName = null;
+        SequenceInputStream inputStream = null;
         try {
-            /*
-             * upload existing data as first part
-             */
-            List<PartETag> partETags = new ArrayList<PartETag>();
-            InputStream inputStream = null;
-            try {
-                inputStream = getObject(key).getObjectContent();
-                UploadPartRequest request = new UploadPartRequest().withBucketName(bucketName).withKey(tempKey).withUploadId(uploadID)
-                    .withInputStream(inputStream).withPartSize(offset).withPartNumber(1 + partETags.size());
-                partETags.add(amazonS3.uploadPart(request).getPartETag());
-            } finally {
-                Streams.close(inputStream);
-            }
-            /*
-             * append new data to multipart
-             */
-            DigestInputStream digestStream = null;
-            try {
-                byte[] buffer = new byte[UPLOAD_BUFFER_SIZE];
-                int read;
-                digestStream = new DigestInputStream(file, MessageDigest.getInstance("MD5"));
-                while (-1 != (read = fillBuffer(digestStream, buffer))) {
-                    byte[] digest = digestStream.getMessageDigest().digest();
-                    ByteArrayInputStream bais = null;
-                    try {
-                        bais = new ByteArrayInputStream(buffer, 0, read);
-                        UploadPartRequest request = new UploadPartRequest().withBucketName(bucketName).withKey(tempKey).withUploadId(uploadID)
-                            .withInputStream(bais).withPartSize(read).withPartNumber(1 + partETags.size()).withMD5Digest(Base64.encode(digest));
-                        partETags.add(amazonS3.uploadPart(request).getPartETag());
-                    } finally {
-                        Streams.close(bais);
-                    }
-                }
-            } catch (NoSuchAlgorithmException e) {
-                throw FileStorageCodes.IOERROR.create(e, e.getMessage());
-            } catch (IOException e) {
-                throw FileStorageCodes.IOERROR.create(e, e.getMessage());
-            } finally {
-                Streams.close(digestStream);
-            }
-            /*
-             * complete upload
-             */
-            amazonS3.completeMultipartUpload(new CompleteMultipartUploadRequest(bucketName, tempKey, uploadID, partETags));
-            completed = true;
-            /*
-             * replace old file, cleanup
-             */
+            inputStream = new SequenceInputStream(s3Object.getObjectContent(), file);
+            tempName = saveNewFile(inputStream);
+        } finally {
+            Streams.close(inputStream);
+        }
+        /*
+         * replace old file, cleanup
+         */
+        try {
+            String tempKey = addPrefix(tempName);
             amazonS3.copyObject(bucketName, tempKey, bucketName, key);
             amazonS3.deleteObject(bucketName, tempKey);
             return getMetadata(key).getContentLength();
         } catch (AmazonClientException e) {
             throw wrap(e, key);
-        } finally {
-            if (false == completed) {
-                try {
-                    amazonS3.abortMultipartUpload(new AbortMultipartUploadRequest(bucketName, tempKey, uploadID));
-                } catch (AmazonClientException e) {
-                    LOG.warn("Error aborting multipart upload", e);
-                }
-            }
         }
     }
 
@@ -442,25 +378,10 @@ public class S3FileStorage implements FileStorage {
     }
 
     /**
-     * Initiates a new multipart upload for a file with the supplied key.
+     * Gets metadata for an existing file.
      *
      * @param key The (full) key for the new file; no additional prefix will be prepended implicitly
      * @return The upload ID for the multipart upload
-     * @throws OXException
-     */
-    private String initiateMultipartUpload(String key) throws OXException {
-        try {
-            return amazonS3.initiateMultipartUpload(new InitiateMultipartUploadRequest(bucketName, key)).getUploadId();
-        } catch (AmazonClientException e) {
-            throw wrap(e, key);
-        }
-    }
-
-    /**
-     * Gets metadata for an existing file.
-     *
-     * @param key The key of the file
-     * @return The metadata
      * @throws OXException
      */
     private ObjectMetadata getMetadata(String key) throws OXException {
@@ -553,27 +474,42 @@ public class S3FileStorage implements FileStorage {
     }
 
     /**
-     * Reads up as many bytes as possible from the supplied input stream into the buffer. Repeated reads are made until either the buffer
-     * is filled completely, or the end of the stream is reached.
+     * Puts a single upload chunk to amazon s3.
      *
-     * @param inputStream the stream to read from
-     * @param buffer The buffer to fill
-     * @return The number of bytes read into the buffer, or <code>-1</code> if there is no more data because the end of the stream has
-     *         been reached.
-     * @throws IOException
+     * @param key The object key
+     * @param chunk The chunk to store
+     * @return The put object result passed from the client
      */
-    private static int fillBuffer(InputStream inputStream, byte[] buffer) throws IOException {
-        int offset = 0;
-        boolean eof = false;
-        do {
-            int read = inputStream.read(buffer, offset, buffer.length - offset);
-            if (-1 == read) {
-                eof = true;
-            } else {
-                offset += read;
-            }
-        } while (offset < buffer.length && false == eof);
-        return eof && 0 == offset ? -1 : offset;
+    private PutObjectResult uploadSingle(String key, UploadChunk chunk) throws OXException {
+        try {
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentLength(chunk.getSize());
+            metadata.setContentMD5(chunk.getMD5Digest());
+            return amazonS3.putObject(bucketName, key, chunk.getData(), metadata);
+        } finally {
+            Streams.close(chunk);
+        }
+    }
+
+    /**
+     * Uploads a single part of a multipart upload.
+     *
+     * @param key The key to store
+     * @param uploadID the upload ID
+     * @param partNumber The part number of the chunk
+     * @param chunk the chunk to store
+     * @param lastPart <code>true</code> if this is the last part, <code>false</code>, otherwise
+     * @return The put object result passed from the client
+     */
+    private UploadPartResult uploadPart(String key, String uploadID, int partNumber, UploadChunk chunk, boolean lastPart) throws OXException  {
+        try {
+            UploadPartRequest request = new UploadPartRequest().withBucketName(bucketName).withKey(key).withUploadId(uploadID)
+                .withInputStream(chunk.getData()).withPartSize(chunk.getSize()).withPartNumber(partNumber++).withLastPart(lastPart)
+                .withMD5Digest(chunk.getMD5Digest());
+            return amazonS3.uploadPart(request);
+        } finally {
+            Streams.close(chunk);
+        }
     }
 
 }
