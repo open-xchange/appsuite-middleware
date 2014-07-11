@@ -1,3 +1,7 @@
+* 2014-07-11 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 33478: Run AttachmentCleaner without delay
+
 * 2014-07-11 - thorben.betten@open-xchange.com
 
  - Fix for bug 33522: Wrong table was referenced in SQL statement to prepare table "user_attribute" to have UUID as primary key
