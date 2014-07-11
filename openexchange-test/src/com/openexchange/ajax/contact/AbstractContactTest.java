@@ -79,7 +79,6 @@ import com.openexchange.ajax.contact.action.UpdateRequest;
 import com.openexchange.ajax.contact.action.UpdateResponse;
 import com.openexchange.ajax.contact.action.UpdatesRequest;
 import com.openexchange.ajax.fields.DistributionListFields;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.AbstractUpdatesRequest.Ignore;
@@ -91,7 +90,6 @@ import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
 import com.openexchange.ajax.parser.DataParser;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.Contact;
@@ -233,8 +231,6 @@ public class AbstractContactTest extends AbstractAJAXSession {
 
     protected int userId = 0;
 
-    protected AJAXClient client;
-
     protected TimeZone tz;
 
     /**
@@ -249,7 +245,6 @@ public class AbstractContactTest extends AbstractAJAXSession {
     protected void setUp() throws Exception {
         super.setUp();
 
-        client = getClient();
         contactFolderId = client.getValues().getPrivateContactFolder();
         userId = client.getValues().getUserId();
         tz = client.getValues().getTimeZone();
@@ -611,10 +606,8 @@ public class AbstractContactTest extends AbstractAJAXSession {
         try {
             final AJAXSession ajaxSession = getSession();
 
-            String ajaxConfigHostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
-            System.out.println("MS for debugging. Client values: " + client.toString() + ".\nUsed hostname: " + ajaxConfigHostname);
-            final HttpGet httpRequest = new HttpGet((null == protocol ? "http" : protocol) + "://" + (ajaxConfigHostname == null ? "localhost" : ajaxConfigHostname) + imageUrl);
-
+            System.out.println("MS for debugging. Client values: " + client.toString() + ".\n");
+            final HttpGet httpRequest = new HttpGet((null == protocol ? "http" : protocol) + "://" + (hostname == null ? "localhost" : hostname) + imageUrl);
             final HttpResponse httpResponse = ajaxSession.getHttpClient().execute(httpRequest);
             inputStream = httpResponse.getEntity().getContent();
             final int len = 8192;

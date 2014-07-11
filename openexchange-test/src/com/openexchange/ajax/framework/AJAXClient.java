@@ -99,6 +99,14 @@ public class AJAXClient {
             }
             login += "@" + context;
         }
+        if (hostname == null) {
+            this.hostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
+        }
+
+        if (protocol == null) {
+            this.protocol = AJAXConfig.getProperty(AJAXConfig.Property.PROTOCOL);
+        }
+
         final String password = AJAXConfig.getProperty(user.getPassword());
         if (null == password) {
             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(user.getPassword().getPropertyName());
