@@ -1,3 +1,29 @@
+* 2014-07-11 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 33478: Run AttachmentCleaner without delay
+
+* 2014-07-11 - thorben.betten@open-xchange.com
+
+ - Fix for bug 33522: Wrong table was referenced in SQL statement to prepare table "user_attribute" to have UUID as primary key
+ - Fix for bug 33525: Use a more unique name for added index to not conflict with MySQL bug http://bugs.mysql.com/bug.php?id=61146
+                      (that is fix with >= MySQL 5.6.3)
+
+* 2014-07-09 - marc.arens@open-xchange.com
+
+ - Fix for bug 27301: A MembershipListener recognizes a leaving hazelcast node and triggers a cleanup for its resources
+ 
+* 2014-07-09 - martin.schneider@open-xchange.com
+
+ - Fix for bug 33201: improved output if parameter is missing
+
+* 2014-07-09 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 33485: Don't attempt to delete an empty list of files
+
+* 2014-07-08 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32489: Exclude special messenger files and folders from drive synchronization
+
 * 2014-07-07 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 33412: Use larger chunks when performing multipart uploads to S3 stores
