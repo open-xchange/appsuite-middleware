@@ -122,7 +122,7 @@ public class S3FileStorage implements FileStorage {
         this.amazonS3 = amazonS3;
         this.bucketName = bucketName;
         this.prefix = prefix;
-        LOG.info("S3 file storage initialized for \"" + bucketName + "/" + prefix + DELIMITER + "\"");
+        LOG.info("S3 file storage initialized for \"{}/{}{}\"", bucketName, prefix, DELIMITER);
     }
 
     @Override
