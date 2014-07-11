@@ -54,6 +54,7 @@ import gnu.trove.list.array.TIntArrayList;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.event.impl.AppointmentEventInterface;
 import com.openexchange.event.impl.ContactEventInterface;
+import com.openexchange.event.impl.NoDelayEventInterface;
 import com.openexchange.event.impl.TaskEventInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -67,7 +68,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
-public class AttachmentCleaner implements AppointmentEventInterface, TaskEventInterface, ContactEventInterface {
+public class AttachmentCleaner implements AppointmentEventInterface, TaskEventInterface, ContactEventInterface, NoDelayEventInterface {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AttachmentCleaner.class);
 
