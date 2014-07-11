@@ -130,7 +130,7 @@ public class MakeUUIDPrimaryForUserAttributeTable extends UpdateTaskAdapter {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT cid, HEX(uuid) FROM user_setting_server GROUP BY cid, uuid HAVING count(*) > 1");
+            stmt = con.prepareStatement("SELECT cid, HEX(uuid) FROM user_attribute GROUP BY cid, uuid HAVING count(*) > 1");
             rs = stmt.executeQuery();
 
             if (!rs.next()) {
