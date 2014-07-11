@@ -101,11 +101,6 @@ public class S3FileStorage implements FileStorage {
      */
     private static final String DELIMITER = "/";
 
-    /**
-     * The delimiter character to separate the prefix from the keys
-     */
-    private static final String DELIMITER = "/";
-
     private final AmazonS3Client amazonS3;
     private final String bucketName;
     private final String prefix;
