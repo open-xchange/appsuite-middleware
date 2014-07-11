@@ -84,10 +84,10 @@ public class AddMD5SumIndexForInfostoreDocumentTable extends UpdateTaskAdapter {
             startTransaction(con);
             rollback = true;
             if (null == Tools.existsIndex(con, "infostore_document", new String[] { "cid", "file_md5sum"})) {
-                Tools.createIndex(con, "infostore_document", "md5sum", new String[] { "cid", "file_md5sum"}, false);
+                Tools.createIndex(con, "infostore_document", "md5sumIndex", new String[] { "cid", "file_md5sum"}, false);
             }
             if (null == Tools.existsIndex(con, "del_infostore_document", new String[] { "cid", "file_md5sum"})) {
-                Tools.createIndex(con, "del_infostore_document", "md5sum", new String[] { "cid", "file_md5sum"}, false);
+                Tools.createIndex(con, "del_infostore_document", "md5sumIndex", new String[] { "cid", "file_md5sum"}, false);
             }
             con.commit();
             rollback = false;

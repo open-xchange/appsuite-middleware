@@ -1,6 +1,8 @@
 * 2014-07-11 - thorben.betten@open-xchange.com
 
  - Fix for bug 33522: Wrong table was referenced in SQL statement to prepare table "user_attribute" to have UUID as primary key
+ - Fix for bug 33525: Use a more unique name for added index to not conflict with MySQL bug http://bugs.mysql.com/bug.php?id=61146
+                      (that is fix with >= MySQL 5.6.3)
 
 * 2014-07-09 - marc.arens@open-xchange.com
 
