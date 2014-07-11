@@ -419,7 +419,11 @@ Authors:
 %doc README.TXT
 
 %changelog
+* Thu Jul 10 2014 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2014-07-15
 * Mon Jul 07 2014 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2014-07-07
+* Tue Jul 01 2014 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2014-07-07
 * Tue Jul 01 2014 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2014-07-07

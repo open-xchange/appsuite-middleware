@@ -4,6 +4,12 @@ open-xchange-push-mailnotify (7.6.1-0) unstable; urgency=medium
 
  -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 26 Jun 2014 11:40:00 +0200
 
+open-xchange-push-mailnotify (7.6.0-9) stable; urgency=low
+
+  * Build for patch 2014-07-15
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 10 Jul 2014 12:17:23 +0200
+
 open-xchange-push-mailnotify (7.6.0-8) stable; urgency=low
 
   * Build for patch 2014-07-07
