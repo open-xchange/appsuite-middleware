@@ -122,6 +122,7 @@ public final class InterfaceTests {
         tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.oauth.OAuthTests.class));
         tests.addTestSuite(com.openexchange.test.resourcecache.ResourceCacheTest.class);
         tests.addTest(FindTestSuite.suite());
+        tests.addTest(com.openexchange.ajax.quota.QuotaTestSuite.suite());
         // Needs to be disabled as associated test suite requires a frontend package, which is currently not available
         // tests.addTest(ManifestsTestSuite.suite());
         return tests;
