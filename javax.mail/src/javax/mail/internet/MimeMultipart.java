@@ -184,7 +184,7 @@ public class MimeMultipart extends Multipart {
      * Default constructor. An empty MimeMultipart object
      * is created. Its content type is set to "multipart/mixed".
      * A unique boundary string is generated and this string is
-     * setup as the "boundary" parameter for the 
+     * setup as the "boundary" parameter for the
      * <code>contentType</code> field. <p>
      *
      * MimeBodyParts may be added later.
@@ -196,7 +196,7 @@ public class MimeMultipart extends Multipart {
     /**
      * Construct a MimeMultipart object of the given subtype.
      * A unique boundary string is generated and this string is
-     * setup as the "boundary" parameter for the 
+     * setup as the "boundary" parameter for the
      * <code>contentType</code> field.
      * Calls the {@link #initializeProperties} method.<p>
      *
@@ -211,7 +211,7 @@ public class MimeMultipart extends Multipart {
     /**
      * Construct a MimeMultipart object of the given subtype.
      * A unique boundary string is generated and this string is
-     * setup as the "boundary" parameter for the 
+     * setup as the "boundary" parameter for the
      * <code>contentType</code> field.
      * Calls the {@link #initializeProperties} method.<p>
      *
@@ -277,7 +277,7 @@ public class MimeMultipart extends Multipart {
     }
 
     /**
-     * Constructs a MimeMultipart object and its bodyparts from the 
+     * Constructs a MimeMultipart object and its bodyparts from the
      * given DataSource. <p>
      *
      * This constructor handles as a special case the situation where the
@@ -285,7 +285,7 @@ public class MimeMultipart extends Multipart {
      * method just invokes the superclass (i.e., Multipart) constructor
      * that takes a MultipartDataSource object. <p>
      *
-     * Otherwise, the DataSource is assumed to provide a MIME multipart 
+     * Otherwise, the DataSource is assumed to provide a MIME multipart
      * byte stream.  The <code>parsed</code> flag is set to false.  When
      * the data for the body parts are needed, the parser extracts the
      * "boundary" parameter from the content type of this DataSource,
@@ -348,9 +348,9 @@ public class MimeMultipart extends Multipart {
      * @param	subtype		Subtype
      * @exception	MessagingException for failures
      */
-    public synchronized void setSubType(String subtype) 
+    public synchronized void setSubType(String subtype)
 			throws MessagingException {
-	ContentType cType = new ContentType(contentType);	
+	ContentType cType = new ContentType(contentType);
 	cType.setSubType(subtype);
 	contentType = cType.toString();
     }
@@ -372,21 +372,21 @@ public class MimeMultipart extends Multipart {
      * @return		the Part
      * @exception       MessagingException if no such BodyPart exists
      */
-    public synchronized BodyPart getBodyPart(int index) 
+    public synchronized BodyPart getBodyPart(int index)
 			throws MessagingException {
 	parse();
 	return super.getBodyPart(index);
     }
 
     /**
-     * Get the MimeBodyPart referred to by the given ContentID (CID). 
+     * Get the MimeBodyPart referred to by the given ContentID (CID).
      * Returns null if the part is not found.
      *
      * @param  CID 	the ContentID of the desired part
      * @return          the Part
      * @exception	MessagingException for failures
      */
-    public synchronized BodyPart getBodyPart(String CID) 
+    public synchronized BodyPart getBodyPart(String CID)
 			throws MessagingException {
 	parse();
 
@@ -395,7 +395,7 @@ public class MimeMultipart extends Multipart {
 	   MimeBodyPart part = (MimeBodyPart)getBodyPart(i);
 	   String s = part.getContentID();
 	   if (s != null && s.equals(CID))
-		return part;    
+		return part;
 	}
 	return null;
     }
@@ -434,7 +434,7 @@ public class MimeMultipart extends Multipart {
     }
 
     /**
-     * Adds a Part to the multipart.  The BodyPart is appended to 
+     * Adds a Part to the multipart.  The BodyPart is appended to
      * the list of existing Parts.
      *
      * @param  part  The Part to be appended
@@ -443,7 +443,7 @@ public class MimeMultipart extends Multipart {
      *			of existing values
      * @exception       MessagingException for other failures
      */
-    public synchronized void addBodyPart(BodyPart part) 
+    public synchronized void addBodyPart(BodyPart part)
 		throws MessagingException {
 	parse();
 	super.addBodyPart(part);
@@ -463,7 +463,7 @@ public class MimeMultipart extends Multipart {
      *			of existing values
      * @exception       MessagingException for other failures
      */
-    public synchronized void addBodyPart(BodyPart part, int index) 
+    public synchronized void addBodyPart(BodyPart part, int index)
 				throws MessagingException {
 	parse();
 	super.addBodyPart(part, index);
@@ -532,7 +532,7 @@ public class MimeMultipart extends Multipart {
      * method is invoked on the Message object containing this
      * Multipart. This is typically done as part of the Message
      * send process, however note that a client is free to call
-     * it any number of times. So if the header updating process is 
+     * it any number of times. So if the header updating process is
      * expensive for a specific MimeMultipart subclass, then it
      * might itself want to track whether its internal state actually
      * did change, and do the header updating only if necessary.
@@ -552,8 +552,8 @@ public class MimeMultipart extends Multipart {
     public synchronized void writeTo(OutputStream os)
 				throws IOException, MessagingException {
 	parse();
-	
-	String boundary = "--" + 
+
+	String boundary = "--" +
 		(new ContentType(contentType)).getParameter("boundary");
 	LineOutputStream los = new LineOutputStream(os);
 
@@ -569,7 +569,8 @@ public class MimeMultipart extends Multipart {
 	    // XXX - could force a blank line before start boundary
 	}
 
-	if (parts.size() == 0) {
+	int size = parts.size();
+    if (size == 0) {
 	    if (allowEmpty) {
 		// write out a single empty body part
 		los.writeln(boundary); // put out boundary
@@ -578,7 +579,7 @@ public class MimeMultipart extends Multipart {
 		throw new MessagingException("Empty multipart: " + contentType);
 	    }
 	} else {
-	    for (int i = 0; i < parts.size(); i++) {
+	    for (int i = 0; i < size; i++) {
 		los.writeln(boundary); // put out boundary
 		((MimeBodyPart)parts.elementAt(i)).writeTo(os);
 		los.writeln(); // put out empty line
@@ -745,7 +746,7 @@ public class MimeMultipart extends Multipart {
 		    gss[--j] = i;
 	    }
 	    gss[bl - 1] = 1;
- 
+
 	    /*
 	     * Read and process body parts until we see the
 	     * terminating boundary line (or EOF).
