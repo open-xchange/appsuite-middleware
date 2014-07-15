@@ -208,4 +208,14 @@ public final class ParsedUser implements User {
         this.timeZone = timeZone;
     }
 
+    @Override
+    public boolean isGuest() {
+        return false;
+    }
+
+    @Override
+    public int getCreatedBy() {
+        return -1;
+    }
+
 }

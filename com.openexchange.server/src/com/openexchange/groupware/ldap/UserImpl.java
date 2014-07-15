@@ -87,6 +87,11 @@ public class UserImpl implements User, Cloneable {
     private int id;
 
     /**
+     * The user id of this guest users creator.
+     */
+    private int createdBy = -1;
+
+    /**
      * Unique identifier of the contact belonging to this user.
      */
     private int contactId;
@@ -182,6 +187,7 @@ public class UserImpl implements User, Cloneable {
      */
     private String loginInfo;
 
+
     /**
      * Default constructor.
      */
@@ -211,6 +217,7 @@ public class UserImpl implements User, Cloneable {
         passwordMech = user.getPasswordMech();
         shadowLastChange = user.getShadowLastChange();
         groups = user.getGroups().clone();
+        createdBy = user.getCreatedBy();
     }
 
     /**
@@ -235,6 +242,23 @@ public class UserImpl implements User, Cloneable {
     @Override
     public int getId() {
         return id;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int getCreatedBy() {
+        return createdBy ;
+    }
+
+    public void setCreatedBy(int createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    @Override
+    public boolean isGuest() {
+        return createdBy > 0;
     }
 
     /**

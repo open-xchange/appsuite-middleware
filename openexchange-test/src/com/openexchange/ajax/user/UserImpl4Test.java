@@ -206,4 +206,14 @@ public class UserImpl4Test implements User {
     public void setSurname(String surname) {
         this.surName = surname;
     }
+
+    @Override
+    public int getCreatedBy() {
+        return -1;
+    }
+
+    @Override
+    public boolean isGuest() {
+        return false;
+    }
 }
