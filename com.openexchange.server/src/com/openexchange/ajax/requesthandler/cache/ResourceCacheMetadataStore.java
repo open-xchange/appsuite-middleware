@@ -585,13 +585,13 @@ public class ResourceCacheMetadataStore {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            if (userId < 0) {
-                stmt = con.prepareStatement("SELECT user, id, fileName, fileType, size, createdAt, refId FROM preview WHERE cid = ? FOR UPDATE");
-                stmt.setInt(1, contextId);
-            } else {
+            if (userId > 0) {
                 stmt = con.prepareStatement("SELECT id, fileName, fileType, size, createdAt, refId FROM preview WHERE cid = ? AND user = ? FOR UPDATE");
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
+            } else {
+                stmt = con.prepareStatement("SELECT user, id, fileName, fileType, size, createdAt, refId FROM preview WHERE cid = ? FOR UPDATE");
+                stmt.setInt(1, contextId);
             }
 
             rs = stmt.executeQuery();
@@ -613,13 +613,13 @@ public class ResourceCacheMetadataStore {
         }
 
         try {
-            if (userId < 0) {
-                stmt = con.prepareStatement("DELETE FROM preview WHERE cid = ?");
-                stmt.setInt(1, contextId);
-            } else {
+            if (userId > 0) {
                 stmt = con.prepareStatement("DELETE FROM preview WHERE cid = ? AND user = ?");
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
+            } else {
+                stmt = con.prepareStatement("DELETE FROM preview WHERE cid = ?");
+                stmt.setInt(1, contextId);
             }
             stmt.executeUpdate();
         } finally {

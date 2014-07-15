@@ -85,7 +85,7 @@ import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.external.FileStorageCodes;
 
 /**
- * {@link FileStoreResourceCacheImpl} - The database-backed preview cache implementation for documents.
+ * {@link FileStoreResourceCacheImpl} - The filestore-backed preview cache implementation for documents.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
