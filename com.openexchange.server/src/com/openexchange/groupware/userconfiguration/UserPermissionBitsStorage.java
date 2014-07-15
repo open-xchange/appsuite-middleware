@@ -52,9 +52,10 @@ package com.openexchange.groupware.userconfiguration;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.userconf.UserPermissionService;
 
 /**
- * {@link UserPermissionBitsStorage}
+ * Direct usage of this class is strictly discouraged! Always use {@link UserPermissionService}!
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */

@@ -210,7 +210,7 @@ public final class OXFolderLoader {
     }
 
     private static final String SQL_LOAD_P =
-        "SELECT permission_id, fp, orp, owp, odp, admin_flag, group_flag, system FROM #TABLE# WHERE cid = ? AND fuid = ?";
+        "SELECT permission_id, fp, orp, owp, odp, admin_flag, group_flag, guest_flag, system FROM #TABLE# WHERE cid = ? AND fuid = ?";
 
     /**
      * Loads folder permissions from database. Creates a new connection if <code>null</code> is given.
@@ -244,7 +244,8 @@ public final class OXFolderLoader {
                 p.setAllPermission(rs.getInt(2), rs.getInt(3), rs.getInt(4), rs.getInt(5)); // fp, orp, owp, and odp
                 p.setFolderAdmin(rs.getInt(6) > 0 ? true : false); // admin_flag
                 p.setGroupPermission(rs.getInt(7) > 0 ? true : false); // group_flag
-                p.setSystem(rs.getInt(8)); // system
+                p.setGuestPermission(rs.getInt(8) > 0 ? true : false); // guest_flag
+                p.setSystem(rs.getInt(9)); // system
                 permList.add(p);
             }
             stmt.close();

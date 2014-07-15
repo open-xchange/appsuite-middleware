@@ -166,6 +166,9 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
      */
     private boolean groupPermission;
 
+
+    private boolean guestPermission;
+
     /**
      * Initializes a new {@link OCLPermission}
      */
@@ -263,6 +266,10 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
         if (name == null) {
             name = entity + (folderAdmin ? STR_FOLDER_ADMIN : STR_EMPTY) + (groupPermission ? STR_GROUP : STR_USER);
         }
+    }
+
+    public void setGuestPermission(boolean guestPermission) {
+        this.guestPermission = guestPermission;
     }
 
     /**
@@ -402,6 +409,10 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
      */
     public boolean isGroupPermission() {
         return groupPermission;
+    }
+
+    public boolean isGuestPermission() {
+        return guestPermission;
     }
 
     /**

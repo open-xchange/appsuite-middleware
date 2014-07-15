@@ -49,11 +49,15 @@
 
 package com.openexchange.userconf.internal;
 
+import java.util.HashSet;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
 
 /**
@@ -63,11 +67,14 @@ import com.openexchange.userconf.UserConfigurationService;
  */
 public final class UserConfigurationServiceImpl implements UserConfigurationService {
 
+    private final UserService userService;
+
     /**
      * Initializes a new {@link UserConfigurationServiceImpl}.
      */
-    public UserConfigurationServiceImpl() {
+    public UserConfigurationServiceImpl(UserService userService) {
         super();
+        this.userService = userService;
     }
 
     @Override
@@ -82,21 +89,62 @@ public final class UserConfigurationServiceImpl implements UserConfigurationServ
 
     @Override
     public UserConfiguration getUserConfiguration(final int userId, final Context ctx, final boolean initExtendedPermissions) throws OXException {
+        User user = userService.getUser(userId, ctx);
+        if (user.isGuest()) {
+            return adjustGuestConfiguration(user, ctx, UserConfigurationStorage.getInstance().getUserConfiguration(user.getCreatedBy(), null, ctx));
+        }
+
         return UserConfigurationStorage.getInstance().getUserConfiguration(userId, null, ctx);
     }
 
     @Override
     public UserConfiguration getUserConfiguration(final int userId, final int[] groups, final Context ctx) throws OXException {
+        User user = userService.getUser(userId, ctx);
+        if (user.isGuest()) {
+            return adjustGuestConfiguration(user, ctx, UserConfigurationStorage.getInstance().getUserConfiguration(user.getCreatedBy(), groups, ctx));
+        }
+
         return UserConfigurationStorage.getInstance().getUserConfiguration(userId, groups, ctx);
     }
 
     @Override
     public UserConfiguration[] getUserConfiguration(final Context ctx, final User[] users) throws OXException {
-        return UserConfigurationStorage.getInstance().getUserConfiguration(ctx, users);
+        User[] realUsers = new User[users.length];
+        User[] guests = new User[users.length];
+        for (int i = 0; i < users.length; i++) {
+            User user = users[i];
+            if (user.isGuest()) {
+                User realUser = userService.getUser(user.getCreatedBy(), ctx);
+                realUsers[i] = realUser;
+                guests[i] = user;
+            } else {
+                realUsers[i] = user;
+            }
+        }
+
+        UserConfiguration[] configurations = new UserConfiguration[users.length];
+        UserConfiguration[] loadedConfigurations = UserConfigurationStorage.getInstance().getUserConfiguration(ctx, realUsers);
+        for (int i = 0; i < loadedConfigurations.length; i++) {
+            UserConfiguration configuration = loadedConfigurations[i];
+            User guest = guests[i];
+            if (guest != null) {
+                configurations[i] = adjustGuestConfiguration(guest, ctx, configuration);
+            } else {
+                configurations[i] = configuration;
+            }
+        }
+
+        return configurations;
     }
 
     @Override
     public void removeUserConfiguration(final int userId, final Context ctx) throws OXException {
         UserConfigurationStorage.getInstance().invalidateCache(userId, ctx);
+    }
+
+    private UserConfiguration adjustGuestConfiguration(User guest, Context ctx, UserConfiguration creatorConfiguration) {
+        Set<String> permissions = new HashSet<String>(creatorConfiguration.getExtendedPermissions());
+        permissions.remove(Permission.WEBMAIL);
+        return new UserConfiguration(permissions, guest.getId(), guest.getGroups(), ctx);
     }
 }

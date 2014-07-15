@@ -81,10 +81,12 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.service.PermissionAvailabilityService;
 import com.openexchange.java.ConcurrentEnumMap;
+import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -290,9 +292,13 @@ public abstract class AbstractCapabilityService implements CapabilityService {
     private static final Capability CAP_AUTO_LOGIN = new Capability("autologin");
 
     @Override
-    public CapabilitySet getCapabilities(final int userId, final int contextId, final boolean computeCapabilityFilters, final boolean allowCache) throws OXException {
+    public CapabilitySet getCapabilities(int userId, final int contextId, final boolean computeCapabilityFilters, final boolean allowCache) throws OXException {
         // Initialize server session
         ServerSession serverSession = ServerSessionAdapter.valueOf(userId, contextId);
+        User user = serverSession.getUser();
+        if (user.isGuest()) {
+            userId = user.getCreatedBy();
+        }
 
         // Create capability set
         CapabilitySet capabilities = new CapabilitySet(64);
@@ -369,7 +375,8 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                     capabilities.remove("pim");
                 }
                 // Spam
-                if (serverSession.getUserSettingMail().isSpamEnabled()) {
+                UserSettingMail userSettingMail = serverSession.getUserSettingMail();
+                if (userSettingMail != null && userSettingMail.isSpamEnabled()) {
                     capabilities.add(getCapability("spam"));
                 } else {
                     capabilities.remove("spam");
@@ -492,6 +499,10 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             if (check(cap, serverSession, capabilities)) {
                 capabilities.add(getCapability(cap));
             }
+        }
+
+        if (serverSession.getUser().isGuest()) {
+            capabilities.remove(getCapability(Permission.WEBMAIL));
         }
 
         // Put in cache

@@ -376,7 +376,6 @@ public final class Init {
         startAndInjectSessiondBundle();
         startAndInjectEventBundle();
         startAndInjectContextService();
-        startAndInjectUserService();
         startAndInjectGroupService();
         startAndInjectFolderService();
         startAndInjectResourceService();
@@ -470,6 +469,16 @@ public final class Init {
     }
 
     private static void startAndInjectBasicServices() throws OXException {
+        if (null == TestServiceRegistry.getInstance().getService(UserService.class)) {
+            final UserService us = new UserServiceImpl(new UserServiceInterceptorRegistry(null) {
+                @Override
+                public synchronized List<UserServiceInterceptor> getInterceptors() {
+                    return Collections.emptyList();
+                }
+            });
+            services.put(UserService.class, us);
+            TestServiceRegistry.getInstance().addService(UserService.class, us);
+        }
         /*
          * Check for one service which is initialized below
          */
@@ -486,8 +495,8 @@ public final class Init {
             } catch (final IllegalAccessException e) {
                 throw getWrappingOXException(e);
             }
-            services.put(UserConfigurationService.class, new UserConfigurationServiceImpl());
-            services.put(UserPermissionService.class, new UserPermissionServiceImpl());
+            services.put(UserConfigurationService.class, new UserConfigurationServiceImpl((UserService) services.get(UserService.class)));
+            services.put(UserPermissionService.class, new UserPermissionServiceImpl((UserService) services.get(UserService.class)));
             TestServiceRegistry.getInstance().addService(UserConfigurationService.class, services.get(UserConfigurationService.class));
             TestServiceRegistry.getInstance().addService(UserPermissionService.class, services.get(UserPermissionService.class));
         }
@@ -786,19 +795,6 @@ public final class Init {
             final ResourceService resources = ResourceServiceImpl.getInstance();
             services.put(ResourceService.class, resources);
             TestServiceRegistry.getInstance().addService(ResourceService.class, resources);
-        }
-    }
-
-    private static void startAndInjectUserService() {
-        if (null == TestServiceRegistry.getInstance().getService(UserService.class)) {
-            final UserService us = new UserServiceImpl(new UserServiceInterceptorRegistry(null) {
-                @Override
-                public synchronized List<UserServiceInterceptor> getInterceptors() {
-                    return Collections.emptyList();
-                }
-            });
-            services.put(UserService.class, us);
-            TestServiceRegistry.getInstance().addService(UserService.class, us);
         }
     }
 

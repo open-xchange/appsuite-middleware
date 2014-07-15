@@ -67,7 +67,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 
 /**
- * {@link CachingUserPermissionBitsStorage}
+ * {@inheritDoc}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */

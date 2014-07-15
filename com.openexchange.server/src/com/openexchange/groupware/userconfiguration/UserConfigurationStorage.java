@@ -52,10 +52,10 @@ package com.openexchange.groupware.userconfiguration;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.userconf.UserConfigurationService;
 
 /**
- * {@link UserConfigurationStorage} - Storage for instances of
- * {@link UserConfiguration}.
+ * Direct usage of this class is strongly discouraged! Always use {@link UserConfigurationService}!
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -120,8 +120,8 @@ public abstract class UserConfigurationStorage {
         stopInternal();
         started = false;
     }
-    
-    
+
+
 
     /**
      * A convenience method that invokes
@@ -202,7 +202,7 @@ public abstract class UserConfigurationStorage {
     public abstract UserConfiguration getUserConfiguration(final int userId, final int[] groups, final Context ctx) throws OXException;
 
     public abstract UserConfiguration[] getUserConfiguration(Context ctx, User[] users) throws OXException;
-    
+
     public abstract UserConfiguration[] getUserConfigurations(Context ctx, int[] userIds, int[][] groups) throws OXException;
 
 
