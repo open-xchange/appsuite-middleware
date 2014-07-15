@@ -4,6 +4,12 @@ open-xchange-spamhandler-default (7.6.1-0) unstable; urgency=medium
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 26 Jun 2014 11:40:07 +0200
 
+open-xchange-spamhandler-default (7.6.0-10) stable; urgency=low
+
+  * Build for patch 2014-07-24
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 14 Jul 2014 12:52:29 +0200
+
 open-xchange-spamhandler-default (7.6.0-9) stable; urgency=low
 
   * Build for patch 2014-07-15

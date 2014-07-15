@@ -152,7 +152,7 @@ public class S3FileStorage implements FileStorage {
 				// nothing to do
 			}
 		});
-        LOG.info("S3 file storage initialized for \"" + bucketName + "/" + prefix + DELIMITER + "\"");
+        LOG.info("S3 file storage initialized for \"{}/{}{}\"", bucketName, prefix, DELIMITER);
     }
 
     @Override
