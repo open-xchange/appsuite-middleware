@@ -71,6 +71,8 @@ fi
 * Thu Jul 10 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2014-07-15
 * Mon Jul 07 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2014-07-14
+* Mon Jul 07 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2014-07-07
 * Tue Jul 01 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2014-07-07

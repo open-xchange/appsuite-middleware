@@ -64,6 +64,12 @@ open-xchange-munin-scripts (7.6.0-0) unstable; urgency=low
 
  -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 12 Feb 2014 09:36:14 +0100
 
+open-xchange-munin-scripts (7.4.2-29) stable; urgency=low
+
+  * Build for patch 2014-07-14
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 07 Jul 2014 16:26:33 +0200
+
 open-xchange-munin-scripts (7.4.2-28) stable; urgency=low
 
   * Build for patch 2014-07-07
