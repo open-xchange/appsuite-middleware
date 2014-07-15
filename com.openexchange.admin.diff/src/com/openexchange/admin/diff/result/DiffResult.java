@@ -59,7 +59,7 @@ import com.openexchange.admin.diff.util.PropertyDiffByFileNameSorter;
 
 /**
  * Presents the results of diff processing
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.1
  */
@@ -107,7 +107,7 @@ public class DiffResult {
 
     /**
      * Gets the processingErrors
-     * 
+     *
      * @return The processingErrors
      */
     public List<String> getProcessingErrors() {
@@ -116,7 +116,7 @@ public class DiffResult {
 
     /**
      * Gets the missingFiles
-     * 
+     *
      * @return The missingFiles
      */
     public List<ConfigurationFile> getMissingFiles() {
@@ -125,7 +125,7 @@ public class DiffResult {
 
     /**
      * Gets the duplicateFiles
-     * 
+     *
      * @return The duplicateFiles
      */
     public List<ConfigurationFile> getDuplicateFiles() {
@@ -134,7 +134,7 @@ public class DiffResult {
 
     /**
      * Gets the nonConfigurationFiles
-     * 
+     *
      * @return The nonConfigurationFiles
      */
     public List<ConfigurationFile> getNonConfigurationFiles() {
@@ -143,7 +143,7 @@ public class DiffResult {
 
     /**
      * Gets the additionalFiles
-     * 
+     *
      * @return The additionalFiles
      */
     public List<ConfigurationFile> getAdditionalFiles() {
@@ -152,7 +152,7 @@ public class DiffResult {
 
     /**
      * Gets the additionalProperties
-     * 
+     *
      * @return The additionalProperties
      */
     public List<PropertyDiff> getAdditionalProperties() {
@@ -161,7 +161,7 @@ public class DiffResult {
 
     /**
      * Gets the missingProperties
-     * 
+     *
      * @return The missingProperties
      */
     public List<PropertyDiff> getMissingProperties() {
@@ -170,7 +170,7 @@ public class DiffResult {
 
     /**
      * Gets the changedProperties
-     * 
+     *
      * @return The changedProperties
      */
     public List<PropertyDiff> getChangedProperties() {
@@ -191,35 +191,49 @@ public class DiffResult {
             builder.append(processingError + "\n");
         }
 
+        builder.append("\n");
+
         builder.append("---------- Missing configuration files: " + missingFiles.size() + " ---------- \n");
         for (ConfigurationFile missingFile : missingFiles) {
             builder.append(missingFile.toString());
         }
+
+        builder.append("\n");
 
         builder.append("---------- Missing properties: " + missingProperties.size() + " ---------- \n");
         for (PropertyDiff missingProperty : missingProperties) {
             builder.append(missingProperty.toString());
         }
 
+        builder.append("\n");
+
         builder.append("---------- Additional configuration files: " + additionalFiles.size() + " ---------- \n");
         for (ConfigurationFile additionalFile : additionalFiles) {
             builder.append(additionalFile.toString());
         }
+
+        builder.append("\n");
 
         builder.append("---------- Additional properties: " + additionalProperties.size() + " ---------- \n");
         for (PropertyDiff additionalProperty : additionalProperties) {
             builder.append(additionalProperty.toString());
         }
 
+        builder.append("\n");
+
         builder.append("---------- Duplicate configuration files: " + duplicateFiles.size() + " ---------- \n");
         for (ConfigurationFile duplicateFile : duplicateFiles) {
             builder.append(duplicateFile.toString());
         }
 
+        builder.append("\n");
+
         builder.append("---------- Non configuration files: " + nonConfigurationFiles.size() + " ---------- \n");
         for (ConfigurationFile nonConfigurationFile : nonConfigurationFiles) {
             builder.append(nonConfigurationFile.toString());
         }
+
+        builder.append("\n");
 
         builder.append("---------- Changed properties: " + changedProperties.size() + " ---------- \n");
         for (PropertyDiff changedProperty : changedProperties) {
@@ -245,7 +259,7 @@ public class DiffResult {
 
     /**
      * Sorts the given list of property diffs based on the file names the diff occurs in
-     * 
+     *
      * @param list with PropertyDiffs to sort
      */
     private void sortProperties(List<PropertyDiff> properties) {
@@ -254,7 +268,7 @@ public class DiffResult {
 
     /**
      * Sorts the given list of configuration files based on the file names
-     * 
+     *
      * @param list with ConfigurationFiles to sort
      */
     private void sortFilesByFileName(List<ConfigurationFile> list) {
