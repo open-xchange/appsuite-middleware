@@ -51,6 +51,7 @@ package com.openexchange.tools.file;
 
 import java.io.InputStream;
 import java.net.URI;
+import java.util.Collections;
 import java.util.Set;
 import java.util.SortedSet;
 import com.openexchange.exception.OXException;
@@ -88,6 +89,9 @@ public class FileStorage {
     }
 
     public Set<String> deleteFiles(final String[] identifiers) throws OXException {
+        if (null == identifiers || 0 == identifiers.length) {
+            return Collections.emptySet();
+        }
         return fs.deleteFiles(identifiers);
     }
 

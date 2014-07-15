@@ -1,3 +1,21 @@
+open-xchange-ajp (7.6.0-10) stable; urgency=low
+
+  * Build for patch 2014-07-24
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Mon, 14 Jul 2014 12:50:46 +0200
+
+open-xchange-ajp (7.6.0-9) stable; urgency=low
+
+  * Build for patch 2014-07-15
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Thu, 10 Jul 2014 12:15:58 +0200
+
+open-xchange-ajp (7.6.0-8) stable; urgency=low
+
+  * Build for patch 2014-07-07
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Tue, 01 Jul 2014 13:21:00 +0200
+
 open-xchange-ajp (7.6.0-7) stable; urgency=low
 
   * Seventh candidate for 7.6.0 release

@@ -51,6 +51,7 @@ package com.openexchange.tools.file;
 
 import java.io.InputStream;
 import java.net.URI;
+import java.util.Collections;
 import java.util.Set;
 import java.util.SortedSet;
 import com.openexchange.exception.OXException;
@@ -103,6 +104,9 @@ public final class QuotaFileStorage extends FileStorage {
 
     @Override
     public Set<String> deleteFiles(final String[] identifiers) throws OXException {
+        if (null == identifiers || 0 == identifiers.length) {
+            return Collections.emptySet();
+        }
         return qfs.deleteFiles(identifiers);
     }
 

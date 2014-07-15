@@ -1,6 +1,22 @@
+* 2014-07-11 - thorben.betten@open-xchange.com
+
+ - Fix for bug 33522: Wrong table was referenced in SQL statement to prepare table "user_attribute" to have UUID as primary key
+ - Fix for bug 33525: Use a more unique name for added index to not conflict with MySQL bug http://bugs.mysql.com/bug.php?id=61146
+                      (that is fix with >= MySQL 5.6.3)
+
+* 2014-07-09 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 33485: Don't attempt to delete an empty list of files
+
+* 2014-07-07 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 33412: Use larger chunks when performing multipart uploads to S3 stores
+ - Fix for bug 33422: Made the setting "com.openexchange.filestore.s3.[filestoreID].pathStyleAccess" officially available in the 
+                      configuration file "filestore-s3.properties"  
+
 * 2014-06-25 - tobias.friedrich@open-xchange.com
 
- - Fix for bug 33273: Switched to a root bucket name per S3 filestore registration and separate context data using fixed prefixes
+ - Fix for bug 33273: Switched to a root bucket name per S3 filestore registration and separate context data using fixed prefixes   
 
 * 2014-06-25 - marcus.klein@open-xchange.com
 
