@@ -90,6 +90,8 @@ public enum FileStorageCodes implements DisplayableOXExceptionCode {
     INVALID_OFFSET("The specified offset %1$d for the file \"%2$s\" (current size: %3$d) is invalid.", MESSAGE_RETRY, Category.CATEGORY_USER_INPUT, 19),
     /** The specified length %1$d for the file \"%2$s\" (current size: %3$d) is invalid. */
     INVALID_LENGTH("The specified length %1$d for the file \"%2$s\" (current size: %3$d) is invalid.", MESSAGE_RETRY, Category.CATEGORY_USER_INPUT, 20),
+    /** No such file storage: %1$s */
+    NO_SUCH_FILE_STORAGE("No such file storage: %1$s", MESSAGE, Category.CATEGORY_SERVICE_DOWN, 21),
     ;
 
     /**

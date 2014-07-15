@@ -134,6 +134,17 @@ public abstract class DefaultFileStorage implements FileStorage {
         }
     }
 
+    /**
+     * Checks if <tt>"storage"</tt> file does exist.
+     *
+     * @throws OXException If <tt>"storage"</tt> file does not exist (<tt>"FLS-0021"</tt>)
+     */
+    protected void ensureStorageExists() throws OXException {
+        if (!storage.exists()) {
+            throw FileStorageCodes.NO_SUCH_FILE_STORAGE.create(storage.getPath());
+        }
+    }
+
     @Override
     public boolean deleteFile(String identifier) throws OXException {
         return file(identifier).delete();

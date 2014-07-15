@@ -432,6 +432,16 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
     @Override
     public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType, final String fileName, final String id) throws OXException {
+        if (isInline && isAlternative && null != altId && id.startsWith(altId) && baseContentType.startsWith("text/xml")) {
+            // Ignore
+            return true;
+        }
+
+        // Handle attachment
+        return handleAttachment0(part, isInline, null, baseContentType, fileName, id);
+    }
+
+    private boolean handleAttachment0(final MailPart part, final boolean isInline, final String disposition, final String baseContentType, final String fileName, final String id) throws OXException {
         try {
             final JSONObject jsonObject = new JSONObject(8);
             /*
@@ -472,7 +482,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
             /*
              * Disposition
              */
-            jsonObject.put(DISPOSITION, Part.ATTACHMENT);
+            jsonObject.put(DISPOSITION, null == disposition ? Part.ATTACHMENT : disposition);
             /*
              * Content-ID
              */
@@ -485,7 +495,12 @@ public final class JsonMessageHandler implements MailMessageHandler {
             /*
              * Content-Type
              */
-            jsonObject.put(CONTENT_TYPE, part.getContentType().toString());
+            {
+                ContentType clone = new ContentType();
+                clone.setContentType(part.getContentType());
+                clone.removeNameParameter();
+                jsonObject.put(CONTENT_TYPE, clone.toString());
+            }
             /*
              * Content
              */

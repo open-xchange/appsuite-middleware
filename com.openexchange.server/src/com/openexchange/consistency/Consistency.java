@@ -85,6 +85,7 @@ import com.openexchange.report.internal.Tools;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
+import com.openexchange.tools.file.external.FileStorageCodes;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -539,7 +540,18 @@ public abstract class Consistency implements ConsistencyMBean {
         // We believe in the worst case, so lets check the storage first, so
         // that the state file is recreated
         LOG.info("Checking context {}. Using solvers db: {} attachments: {} snippets: {} files: {}", ctx.getContextId(), dbSolver.description(), attachmentSolver.description(), snippetSolver.description(), fileSolver.description());
-        stor.recreateStateFile();
+        try {
+            stor.recreateStateFile();
+        } catch (OXException e) {
+            if (FileStorageCodes.NO_SUCH_FILE_STORAGE.equals(e)) {
+                // Does not (yet) exist
+                Object[] logArgs = e.getLogArgs();
+                LOG.info("Cannot check files in filestore for context {} since associated filestore does not (yet) exist: {}", ctx.getContextId(), null == logArgs || 0 == logArgs.length ? e.getMessage() : (String) logArgs[0]);
+                return;
+            }
+
+            throw e;
+        }
 
         LOG.info("Listing all files in filestore");
         final SortedSet<String> filestoreset = stor.getFileList();

@@ -56,7 +56,9 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
@@ -65,6 +67,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.user.internal.mapping.UserMapper;
 
 /**
  * This class implements the user storage using a cache to store once read
@@ -166,8 +169,34 @@ public class CachingUserStorage extends UserStorage {
 
     @Override
     public void updateUserInternal(final User user, final Context context) throws OXException {
-        delegate.updateUser(user, context);
-        invalidateUser(context, user.getId());
+        // First try to detect some lousy client writing the same values all the time.
+        boolean doUpdate = false;
+        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (cacheService != null) {
+            final Cache cache = cacheService.getCache(REGION_NAME);
+            final Object object = cache.get(cacheService.newCacheKey(context.getContextId(), user.getId()));
+            if (object instanceof User) {
+                // Okay, we still have that user in the cache. Now compare attributes.
+                User oldUser = (User) object;
+                User differences = new UserMapper().getDifferences(oldUser, user);
+                doUpdate = new UserMapper().getAssignedFields(differences).length != 0;
+                // All attributes the same? Then check for changed user attributes.
+                if (!doUpdate && null != user.getAttributes()) {
+                    final Map<String, UserAttribute> oldAttributes = UserImpl.toInternal(oldUser.getAttributes());
+                    final Map<String, UserAttribute> attributes = UserImpl.toInternal(user.getAttributes());
+                    final Map<String, UserAttribute> added = new HashMap<String, UserAttribute>();
+                    final Map<String, UserAttribute> removed = new HashMap<String, UserAttribute>();
+                    final Map<String, UserAttribute> changed = new HashMap<String, UserAttribute>();
+                    RdbUserStorage.calculateDifferences(oldAttributes, attributes, added, removed, changed);
+                    doUpdate = !added.isEmpty() || !removed.isEmpty() || !changed.isEmpty();
+                }
+            }
+        }
+        if (doUpdate) {
+            // Only update the user in the database if it differs from the one in the cache.
+            invalidateUser(context, user.getId());
+            delegate.updateUser(user, context);
+        }
     }
 
     @Override
