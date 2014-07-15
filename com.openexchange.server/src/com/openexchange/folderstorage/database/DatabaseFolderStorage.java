@@ -143,6 +143,7 @@ import com.openexchange.tools.oxfolder.OXFolderUtility;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link DatabaseFolderStorage} - The database folder storage.
@@ -884,7 +885,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 if (s instanceof ServerSession) {
                     userPermissionBits = ((ServerSession) s).getUserPermissionBits();
                 } else {
-                    userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
+                    userPermissionBits = DatabaseServiceRegistry.getService(UserPermissionService.class, true).getUserPermissionBits(user.getId(), ctx);
                 }
             }
 
