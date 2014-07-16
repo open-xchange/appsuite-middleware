@@ -50,7 +50,7 @@
 package com.openexchange.find.basic.contacts;
 
 import static com.openexchange.find.basic.SimpleTokenizer.tokenize;
-import static com.openexchange.find.facet.Facets.newExclusiveBuilder;
+import static com.openexchange.find.facet.Facets.newDefaultBuilder;
 import static com.openexchange.find.facet.Facets.newSimpleBuilder;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -78,7 +78,7 @@ import com.openexchange.find.contacts.ContactsDocument;
 import com.openexchange.find.contacts.ContactsFacetType;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
-import com.openexchange.find.facet.Facets.ExclusiveFacetBuilder;
+import com.openexchange.find.facet.Facets.DefaultFacetBuilder;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
@@ -236,7 +236,7 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
         {
             List<Contact> contacts = autocompleteContacts(session, autocompleteRequest);
             if (null != contacts && !contacts.isEmpty()) {
-                ExclusiveFacetBuilder builder = newExclusiveBuilder(ContactsFacetType.CONTACT);
+                DefaultFacetBuilder builder = newDefaultBuilder(ContactsFacetType.CONTACT);
                 for (Contact contact : contacts) {
                     String id = ContactsFacetType.CONTACT.getId();
                     Filter filter = Filter.of(id, String.valueOf(contact.getObjectID()));
