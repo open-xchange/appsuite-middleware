@@ -222,7 +222,7 @@ collect_ox_configs() {
    if [ "$(normalize_path ${OX_CONFIG_DIR})" == "$(normalize_path ${_ox_config_copy})" ]; then
         die "${0}: Internal Tool Error, tried to modify original data: ${OX_CONFIG_DIR}"
    fi
-   cp -rL ${OX_CONFIG_DIR} ${_ox_config_copy}
+   cp -aL ${OX_CONFIG_DIR} ${_ox_config_copy}
    if [ 'true' == "${EXCLUDE_SECRETS}" ]; then
        echo "Removing secrets from Open-Xchange configurations: ${_ox_config_copy}"
        exclude_secret_ox_properties_entries ${_ox_config_copy}
