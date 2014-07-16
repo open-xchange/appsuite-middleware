@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: The share API bundle
+Bundle-SymbolicName: com.openexchange.share.json
+Bundle-Version: 7.6.1
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.ajax.requesthandler,
+ com.openexchange.ajax.requesthandler.osgiservice,
+ com.openexchange.documentation,
+ com.openexchange.documentation.annotations,
+ com.openexchange.documentation.descriptions,
+ com.openexchange.exception,
+ com.openexchange.groupware.modules,
+ com.openexchange.java.util,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.tools.session,
+ org.json,
+ org.osgi.framework;version="1.7.0"
+Bundle-Activator: com.openexchange.share.json.osgi.ShareJsonActivator
