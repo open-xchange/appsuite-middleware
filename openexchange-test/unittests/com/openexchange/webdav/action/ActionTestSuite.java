@@ -29,7 +29,7 @@ public class ActionTestSuite {
 
         tests.addTestSuite(StandardIfHeaderApplyTest.class);
 		tests.addTestSuite(IgnoreLocksIfHeaderApplyTest.class);
-        tests.addTestSuite(Bug33305Test.class);
+        tests.addTestSuite(Bug33505Test.class);
 
 		return tests;
 	}

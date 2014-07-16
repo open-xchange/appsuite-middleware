@@ -54,13 +54,13 @@ import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 /**
- * {@link Bug33305Test}
+ * {@link Bug33505Test}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class Bug33305Test extends ActionTestCase {
+public class Bug33505Test extends ActionTestCase {
 
-    public void testBug33305() throws Exception {
+    public void testBug33505() throws Exception {
         MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
         MockWebdavResponse res = new MockWebdavResponse();
         /*
