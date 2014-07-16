@@ -47,64 +47,52 @@
  *
  */
 
-package com.openexchange.ajax.find;
+package com.openexchange.ajax.find.contacts;
 
-import junit.extensions.TestSetup;
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import com.openexchange.ajax.find.common.Bug32060Test;
-import com.openexchange.ajax.find.contacts.Bug33447Test;
-import com.openexchange.ajax.find.contacts.ExcludeContextAdminTest;
-import com.openexchange.ajax.find.drive.BasicDriveTest;
-import com.openexchange.ajax.find.mail.BasicMailTest;
-import com.openexchange.ajax.find.tasks.FindTasksAutocompleteTests;
-import com.openexchange.ajax.find.tasks.FindTasksQueryTests;
-import com.openexchange.ajax.find.tasks.FindTasksTestEnvironment;
-import com.openexchange.ajax.find.tasks.FindTasksTestsFilterCombinations;
-
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import com.openexchange.ajax.find.PropDocument;
+import com.openexchange.ajax.find.actions.AutocompleteRequest;
+import com.openexchange.ajax.find.actions.AutocompleteResponse;
+import com.openexchange.find.Module;
+import com.openexchange.find.common.ContactDisplayItem;
+import com.openexchange.find.contacts.ContactsFacetType;
+import com.openexchange.find.facet.ActiveFacet;
+import com.openexchange.find.facet.FacetValue;
+import com.openexchange.groupware.container.Contact;
 
 /**
- * {@link FindTestSuite}
+ * {@link Bug33447Test}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since 7.6.0
+ * address book search does not show results from folders other than the global address book
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class FindTestSuite {
+public class Bug33447Test extends ContactsFindTest {
 
     /**
-     * Initializes a new {@link FindTestSuite}.
+     * Initializes a new {@link Bug33447Test}.
+     *
+     * @param name The test name
      */
-    private FindTestSuite() {
-        super();
+    public Bug33447Test(String name) {
+        super(name);
     }
 
-    public static Test suite() {
-        final TestSuite tests = new TestSuite("com.openexchange.ajax.find.FindTestSuite");
-        tests.addTestSuite(com.openexchange.ajax.find.calendar.QueryTest.class);
-        //disable AutoCompleteTest for now
-        //tests.addTestSuite(com.openexchange.ajax.find.calendar.AutocompleteTest.class);
-        tests.addTestSuite(com.openexchange.ajax.find.contacts.QueryTest.class);
-        tests.addTestSuite(com.openexchange.ajax.find.contacts.AutocompleteTest.class);
-        tests.addTestSuite(BasicMailTest.class);
-        tests.addTestSuite(BasicDriveTest.class);
-        tests.addTestSuite(FindTasksTestsFilterCombinations.class);
-        tests.addTestSuite(FindTasksQueryTests.class);
-        tests.addTestSuite(FindTasksAutocompleteTests.class);
-        tests.addTestSuite(Bug32060Test.class);
-        tests.addTestSuite(ExcludeContextAdminTest.class);
-        tests.addTestSuite(Bug33447Test.class);
-
-        TestSetup setup = new TestSetup(tests) {
-            @Override
-            protected void setUp() {
-                FindTasksTestEnvironment.getInstance().init();
-            }
-            @Override
-            protected void tearDown() throws Exception {
-                FindTasksTestEnvironment.getInstance().cleanup();
-            }
-        };
-
-        return setup;
+    public void testSearchContactFromPersonalContactsFolder() throws Exception {
+        Map<String, String> options = new HashMap<String, String>();
+        options.put("admin", Boolean.FALSE.toString());
+        Contact contact = manager.newAction(randomContact());
+        String prefix = contact.getEmail1().substring(0, 8);
+        AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, Module.CONTACTS.getIdentifier(), options);
+        AutocompleteResponse autocompleteResponse = client.execute(autocompleteRequest);
+        FacetValue foundFacetValue = findByDisplayName(autocompleteResponse.getFacets(), ContactDisplayItem.extractDefaultValue(contact));
+        assertNotNull("no facet value found for: " + contact.getEmail1(), foundFacetValue);
+        ActiveFacet activeFacet = createActiveFacet(ContactsFacetType.CONTACT, foundFacetValue.getId(), foundFacetValue.getFilter());
+        List<PropDocument> documents = query(Module.CONTACTS, Collections.singletonList(activeFacet), options);
+        assertTrue("Contact not found", null != documents && 0 < documents.size());
     }
+
 }
