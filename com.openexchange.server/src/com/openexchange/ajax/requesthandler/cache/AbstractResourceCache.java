@@ -123,18 +123,16 @@ public abstract class AbstractResourceCache implements ResourceCache, EventHandl
         if (FileStorageEventConstants.UPDATE_TOPIC.equals(topic)) {
             try {
                 final Session session = (Session) event.getProperty(FileStorageEventConstants.SESSION);
-                final int userId = session.getUserId();
                 final int contextId = session.getContextId();
-                removeAlikes(event.getProperty(FileStorageEventConstants.E_TAG).toString(), userId, contextId);
+                removeAlikes(event.getProperty(FileStorageEventConstants.E_TAG).toString(), 0, contextId);
             } catch (final OXException e) {
                 LOG.warn("Couldn't remove cache entry.", e);
             }
         } else if (FileStorageEventConstants.DELETE_TOPIC.equals(topic)) {
             try {
                 final Session session = (Session) event.getProperty(FileStorageEventConstants.SESSION);
-                final int userId = session.getUserId();
                 final int contextId = session.getContextId();
-                removeAlikes(event.getProperty(FileStorageEventConstants.E_TAG).toString(), userId, contextId);
+                removeAlikes(event.getProperty(FileStorageEventConstants.E_TAG).toString(), 0, contextId);
             } catch (final OXException e) {
                 LOG.warn("Couldn't remove cache entry.", e);
             }
