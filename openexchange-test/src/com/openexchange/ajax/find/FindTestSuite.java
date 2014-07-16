@@ -83,8 +83,7 @@ public final class FindTestSuite {
         //disable AutoCompleteTest for now
         //tests.addTestSuite(com.openexchange.ajax.find.calendar.AutocompleteTest.class);
         tests.addTestSuite(com.openexchange.ajax.find.contacts.QueryTest.class);
-        //disable AutoCompleteTest for now
-        //tests.addTestSuite(com.openexchange.ajax.find.contacts.AutocompleteTest.class);
+        tests.addTestSuite(com.openexchange.ajax.find.contacts.AutocompleteTest.class);
         tests.addTestSuite(BasicMailTest.class);
         tests.addTestSuite(BasicDriveTest.class);
         tests.addTestSuite(FindTasksTestsFilterCombinations.class);
