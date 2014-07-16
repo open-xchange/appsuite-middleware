@@ -1,3 +1,7 @@
+* 2014-07-16 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 33505: Prevent wrong changing date being applied to parent folder upon folder deletion 
+
 * 2014-07-11 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 33478: Run AttachmentCleaner without delay

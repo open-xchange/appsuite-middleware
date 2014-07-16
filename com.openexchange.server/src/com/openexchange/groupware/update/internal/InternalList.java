@@ -740,6 +740,9 @@ public final class InternalList {
         // Removes invalid priority values from tasks
         list.add(new com.openexchange.groupware.update.tasks.TasksDeleteInvalidPriorityTask());
 
+        // Corrects values in the 'changing_date' column that are set to {@link Long#MAX_VALUE}.
+        list.add(new com.openexchange.groupware.update.tasks.FolderCorrectChangingDateTask());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 }
