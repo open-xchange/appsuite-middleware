@@ -57,10 +57,28 @@ package com.openexchange.groupware.update;
  */
 public interface PerformParameters {
 
+    /**
+     * Gets the schema.
+     *
+     * @return The schema
+     */
     Schema getSchema();
 
+    /**
+     * Gets the (representative) context identifier to aid fetching / returning the correct database connection from / to the pool.
+     * <p/>
+     * <strong>Note:</strong> for update tasks working on {@link WorkingLevel#SCHEMA}-level, the context ID should not be used as
+     * restriction in <code>WHERE</code> clauses; instead the task should be executed for all contexts in the schema.
+     *
+     * @return The context ID
+     */
     int getContextId();
 
+    /**
+     * Gets the progress state.
+     *
+     * @return The progress state
+     */
     ProgressState getProgressState();
 
 }
