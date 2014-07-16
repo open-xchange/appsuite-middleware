@@ -508,11 +508,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     }
 
     @Override
-    public FolderObject updateFolder(FolderObject fo, boolean checkPermissions, long lastModified) throws OXException {
-        return updateFolder(fo, checkPermissions, false, lastModified);
-    }
-
-    @Override
     public FolderObject updateFolder(final FolderObject fo, final boolean checkPermissions, final boolean handDown, final long lastModified) throws OXException {
         return updateFolder(fo, checkPermissions, handDown, lastModified, OPTION_NONE);
     }
@@ -1412,11 +1407,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             }
         }
         return fo;
-    }
-
-    @Override
-    public FolderObject deleteFolder(final FolderObject fo, final boolean checkPermissions, final long lastModified) throws OXException {
-        return deleteFolder(fo, checkPermissions, lastModified, false);
     }
 
     @Override
