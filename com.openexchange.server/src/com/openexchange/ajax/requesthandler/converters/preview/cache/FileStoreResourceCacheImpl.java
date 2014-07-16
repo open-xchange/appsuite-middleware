@@ -130,7 +130,10 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
 
     private void batchDeleteFiles(final Collection<String> ids, final FileStorage fileStorage) {
         try {
-            fileStorage.deleteFiles(ids.toArray(new String[0]));
+            Set<String> notDeleted = fileStorage.deleteFiles(ids.toArray(new String[0]));
+            if (!notDeleted.isEmpty()) {
+                LOG.warn("Some cached files could not be deleted from filestore. Consider using 'checkconsistency' to clean up manually.");
+            }
         } catch (final Exception e) {
             LOG.warn("Error while deleting a batch of preview files. Trying one-by-one now...", e);
             // Retry one-by-one
@@ -368,6 +371,16 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
 
     @Override
     public void remove(final int userId, final int contextId) throws OXException {
+        remove0(userId, contextId);
+    }
+
+    @Override
+    public void clearFor(final int contextId) throws OXException {
+        remove0(-1, contextId);
+    }
+
+    private void remove0(int userId, int contextId) throws OXException {
+        long start = System.currentTimeMillis();
         ResourceCacheMetadataStore metadataStore = getMetadataStore();
         FileStorage fileStorage = getFileStorage(contextId, quotaAware);
         List<ResourceCacheMetadata> removed = metadataStore.removeAll(contextId, userId);
@@ -378,6 +391,7 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
             }
         }
         batchDeleteFiles(refIds, fileStorage);
+        LOG.info("Cleared resource cache for user {} in context {} in {}ms.", userId, contextId, System.currentTimeMillis() - start);
     }
 
     @Override
@@ -396,11 +410,6 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
             }
         }
         batchDeleteFiles(refIds, fileStorage);
-    }
-
-    @Override
-    public void clearFor(final int contextId) throws OXException {
-        remove(-1, contextId);
     }
 
     @Override

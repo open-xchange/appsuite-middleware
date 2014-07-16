@@ -497,11 +497,11 @@ public class ResourceCacheMetadataStore {
         ResultSet rs = null;
         try {
             if (userId < 0) {
-                stmt = con.prepareStatement("SELECT user, id, fileName, fileType, size, createdAt, refId FROM preview WHERE cid = ? AND id LIKE ? FOR UPDATE");
+                stmt = con.prepareStatement("SELECT user, id, fileName, fileType, size, createdAt, refId FROM preview WHERE cid = ? AND id LIKE ?");
                 stmt.setInt(1, contextId);
                 stmt.setString(2, resourceIdPrefix + "%");
             } else {
-                stmt = con.prepareStatement("SELECT id, fileName, fileType, size, createdAt, refId FROM preview WHERE cid = ? AND user = ? AND id LIKE ? FOR UPDATE");
+                stmt = con.prepareStatement("SELECT id, fileName, fileType, size, createdAt, refId FROM preview WHERE cid = ? AND user = ? AND id LIKE ?");
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
                 stmt.setString(3, resourceIdPrefix + "%");
@@ -526,17 +526,25 @@ public class ResourceCacheMetadataStore {
         }
 
         try {
-            if (userId < 0) {
-                stmt = con.prepareStatement("DELETE FROM preview WHERE cid = ? AND id LIKE ?");
-                stmt.setInt(1, contextId);
-                stmt.setString(2, resourceIdPrefix + "%");
+            if (userId > 0) {
+                stmt = con.prepareStatement("DELETE FROM preview WHERE cid = ? AND user = ? AND id = ? AND refId = ?");
+                for (ResourceCacheMetadata toDelete : result) {
+                    stmt.setInt(1, contextId);
+                    stmt.setInt(2, userId);
+                    stmt.setString(3, toDelete.getResourceId());
+                    stmt.setString(4, toDelete.getRefId());
+                    stmt.addBatch();
+                }
             } else {
-                stmt = con.prepareStatement("DELETE FROM preview WHERE cid = ? AND user = ? AND id LIKE ?");
-                stmt.setInt(1, contextId);
-                stmt.setInt(2, userId);
-                stmt.setString(3, resourceIdPrefix + "%");
+                stmt = con.prepareStatement("DELETE FROM preview WHERE cid = ? AND id = ? AND refId = ?");
+                for (ResourceCacheMetadata toDelete : result) {
+                    stmt.setInt(1, contextId);
+                    stmt.setString(2, toDelete.getResourceId());
+                    stmt.setString(3, toDelete.getRefId());
+                    stmt.addBatch();
+                }
             }
-            stmt.executeUpdate();
+            stmt.executeBatch();
         } finally {
             Databases.closeSQLStuff(stmt);
         }
@@ -586,11 +594,11 @@ public class ResourceCacheMetadataStore {
         ResultSet rs = null;
         try {
             if (userId > 0) {
-                stmt = con.prepareStatement("SELECT id, fileName, fileType, size, createdAt, refId FROM preview WHERE cid = ? AND user = ? FOR UPDATE");
+                stmt = con.prepareStatement("SELECT id, fileName, fileType, size, createdAt, refId FROM preview WHERE cid = ? AND user = ?");
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
             } else {
-                stmt = con.prepareStatement("SELECT user, id, fileName, fileType, size, createdAt, refId FROM preview WHERE cid = ? FOR UPDATE");
+                stmt = con.prepareStatement("SELECT user, id, fileName, fileType, size, createdAt, refId FROM preview WHERE cid = ?");
                 stmt.setInt(1, contextId);
             }
 
@@ -614,14 +622,24 @@ public class ResourceCacheMetadataStore {
 
         try {
             if (userId > 0) {
-                stmt = con.prepareStatement("DELETE FROM preview WHERE cid = ? AND user = ?");
-                stmt.setInt(1, contextId);
-                stmt.setInt(2, userId);
+                stmt = con.prepareStatement("DELETE FROM preview WHERE cid = ? AND user = ? AND id = ? AND refId = ?");
+                for (ResourceCacheMetadata toDelete : result) {
+                    stmt.setInt(1, contextId);
+                    stmt.setInt(2, userId);
+                    stmt.setString(3, toDelete.getResourceId());
+                    stmt.setString(4, toDelete.getRefId());
+                    stmt.addBatch();
+                }
             } else {
-                stmt = con.prepareStatement("DELETE FROM preview WHERE cid = ?");
-                stmt.setInt(1, contextId);
+                stmt = con.prepareStatement("DELETE FROM preview WHERE cid = ? AND id = ? AND refId = ?");
+                for (ResourceCacheMetadata toDelete : result) {
+                    stmt.setInt(1, contextId);
+                    stmt.setString(2, toDelete.getResourceId());
+                    stmt.setString(3, toDelete.getRefId());
+                    stmt.addBatch();
+                }
             }
-            stmt.executeUpdate();
+            stmt.executeBatch();
         } finally {
             Databases.closeSQLStuff(stmt);
         }
@@ -679,7 +697,7 @@ public class ResourceCacheMetadataStore {
         ResultSet rs = null;
         List<ResourceCacheMetadata> metadatas = new LinkedList<ResourceCacheMetadata>();
         try {
-            stmt = con.prepareStatement("SELECT user, id, size, createdAt, fileName, fileType, refId FROM preview WHERE cid = ? ORDER BY createdAt ASC LIMIT 500 FOR UPDATE");
+            stmt = con.prepareStatement("SELECT user, id, size, createdAt, fileName, fileType, refId FROM preview WHERE cid = ? ORDER BY createdAt ASC LIMIT 500");
             stmt.setInt(1, contextId);
             rs = stmt.executeQuery();
             while (rs.next()) {
