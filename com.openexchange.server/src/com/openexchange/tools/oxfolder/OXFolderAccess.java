@@ -495,7 +495,7 @@ public class OXFolderAccess {
                      */
                     folderId = -1 == type ? OXFolderSQL.getUserDefaultFolder(userId, module, wc, ctx) :
                         OXFolderSQL.getUserDefaultFolder(userId, module, type, wc, ctx);
-                    if (-1 == folderId) {
+                    if (-1 == folderId && !user.isGuest()) {
                         /*
                          * Not found, create default folder
                          */
