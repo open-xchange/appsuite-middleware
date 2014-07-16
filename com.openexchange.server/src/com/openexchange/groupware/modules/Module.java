@@ -53,6 +53,8 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.groupware.container.FolderObject;
 
 /**
@@ -80,16 +82,20 @@ public enum Module {
 
     private static final TIntObjectMap<Module> folderConstant2Module;
     private static final TObjectIntMap<String> string2FolderConstant;
+    private static final Map<String, Module> name2Module;
     static {
         final Module[] values = values();
         final TIntObjectMap<Module> map1 = new TIntObjectHashMap<Module>(values.length);
         final TObjectIntMap<String> map2 = new TObjectIntHashMap<String>(values.length, 0.5f, -1);
+        Map<String, Module> map3 = new HashMap<String, Module>();
         for (final Module module : values) {
             map1.put(module.folderConstant, module);
             map2.put(module.name, module.folderConstant);
+            map3.put(module.name, module);
         }
         folderConstant2Module = map1;
         string2FolderConstant = map2;
+        name2Module = map3;
     }
 
     /**
@@ -100,6 +106,16 @@ public enum Module {
      */
     public static Module getForFolderConstant(int constant) {
         return folderConstant2Module.get(constant);
+    }
+
+    /**
+     * Gets the module for the given name.
+     *
+     * @param name The name, never <code>null</code>
+     * @return The module or <code>null</code>, if unknown
+     */
+    public static Module getForName(String name) {
+        return name2Module.get(name);
     }
 
     /**
