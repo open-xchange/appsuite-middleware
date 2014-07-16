@@ -238,7 +238,7 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
          * add ContactsFacetType.CONTACT facet dynamically
          */
         {
-            List<Contact> contacts = autocompleteContacts(session, autocompleteRequest);
+            List<Contact> contacts = autocompleteContacts(session, autocompleteRequest, false);
             if (null != contacts && !contacts.isEmpty()) {
                 DefaultFacetBuilder builder = newDefaultBuilder(ContactsFacetType.CONTACT);
                 for (Contact contact : contacts) {

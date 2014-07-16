@@ -109,7 +109,7 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
     }
 
     /**
-     * Performs the contacts auto-complete search.
+     * Performs the contacts auto-complete search. only contacts with at least one e-mail address are considered.
      *
      * @param session The session associated with this auto-complete request
      * @param autocompleteRequest The auto-complete request
@@ -121,6 +121,26 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
             session,
             autocompleteRequest.getPrefix(),
             true,
+            null,
+            autocompleteRequest.getLimit(),
+            autocompleteRequest.getOptions().includeContextAdmin());
+    }
+
+    /**
+     * Performs the contacts auto-complete search.
+     *
+     * @param session The session associated with this auto-complete request
+     * @param autocompleteRequest The auto-complete request
+     * @param requireEmail <code>true</code> if the returned contacts should have at least one e-mail address, <code>false</code>,
+     *                     otherwise
+     * @return The resulting contacts
+     * @throws OXException If auto-complete search fails for any reason
+     */
+    protected List<Contact> autocompleteContacts(ServerSession session, AutocompleteRequest autocompleteRequest, boolean requireEmail) throws OXException {
+        return searchContacts(
+            session,
+            autocompleteRequest.getPrefix(),
+            requireEmail,
             null,
             autocompleteRequest.getLimit(),
             autocompleteRequest.getOptions().includeContextAdmin());
