@@ -3464,9 +3464,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	// this decision on whether we *think* the folder is open.
 	if ((protocol != null && cex.getProtocol() == protocol) ||
 		(protocol == null && !reallyClosed))
-            throw new FolderClosedException(this, cex.getMessage());
+            throw new FolderClosedException(this, cex.getMessage(), cex);
         else
-            throw new StoreClosedException(store, cex.getMessage());
+            throw new StoreClosedException(store, cex.getMessage(), cex);
     }
 
     /**
