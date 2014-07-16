@@ -1,6 +1,7 @@
 * 2014-07-16 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 33505: Prevent wrong changing date being applied to parent folder upon folder deletion 
+ - Fix for bug 33447: Corrected the 'exclude context admin' condition in the search term passed down to the storage layer 
 
 * 2014-07-11 - jan.bauerdick@open-xchange.com
 
