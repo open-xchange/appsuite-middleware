@@ -116,14 +116,24 @@ public final class LoginCounterTool {
             } catch (java.text.ParseException e) {
                 // args=[-s, 2012-09-24, 00:00:00, -e, 2012-09-25, 23:59:59]
                 if (args.length >= 6) {
+                    int sPos = 0;
+                    int ePos = 0;
+                    for (int i = 0; i < args.length; i++) {
+                        if ("-s".equals(args[i])) {
+                            sPos = i;
+                        }
+                        if ("-e".equals(args[i])) {
+                            ePos = i;
+                        }
+                    }
                     final Pattern appendix = Pattern.compile("[0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}");
-                    String input = unquote(args[2]);
+                    String input = unquote(args[sPos + 2]);
                     if (appendix.matcher(input).matches()) {
                         try {
                             startDate = sdf.parse(source + " " + input);
-                            input = unquote(args[5]);
+                            input = unquote(args[ePos + 2]);
                             if (appendix.matcher(input).matches()) {
-                                endDate = sdf.parse(unquote(args[4]) + " " + input);
+                                endDate = sdf.parse(unquote(args[ePos + 1]) + " " + input);
                             }
                         } catch (final java.text.ParseException pe) {
                             // Ignore
