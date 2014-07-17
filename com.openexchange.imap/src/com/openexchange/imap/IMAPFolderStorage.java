@@ -700,6 +700,27 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         return FolderCache.getCachedFolder(fullName, this);
     }
 
+    /**
+     * Gets the personal namespace folder.
+     *
+     * @return The personal namespace folder or <code>null</code>
+     * @throws OXException If operation fails
+     */
+    public String getPersonalNamespace() throws OXException {
+        try {
+            if (!imapConfig.getImapCapabilities().hasNamespace()) {
+                return null;
+            }
+
+            String[] personalNamespaces = NamespaceFoldersCache.getPersonalNamespaces(imapStore, true, session, accountId);
+            return null == personalNamespaces || 0 == personalNamespaces.length ? null : personalNamespaces[0];
+        } catch (final MessagingException e) {
+            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, null);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
+        }
+    }
+
     // private static final String PATTERN_ALL = "%";
 
     @Override
