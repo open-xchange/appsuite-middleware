@@ -49,8 +49,8 @@
 
 package com.openexchange.ajax.osgi;
 
-import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.LinkedList;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -67,7 +67,14 @@ public abstract class AbstractServletActivator extends HousekeepingActivator {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractServletActivator.class);
 
-    private final List<String> servlets = new ArrayList<String>();
+    private final List<String> servlets = new LinkedList<String>();
+
+    /**
+     * Initializes a new {@link AbstractServletActivator}.
+     */
+    protected AbstractServletActivator() {
+        super();
+    }
 
     protected void registerServlet(final String alias, final HttpServlet servlet, final HttpService httpService) {
         registerServlet(alias, servlet, null, httpService);
@@ -100,6 +107,7 @@ public abstract class AbstractServletActivator extends HousekeepingActivator {
                     LOG.warn("Failed to unregister servlet alias: {}", servlet, e);
                 }
             }
+            servlets.clear();
         }
     }
 
