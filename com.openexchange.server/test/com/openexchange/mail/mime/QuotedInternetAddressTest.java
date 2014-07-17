@@ -49,8 +49,6 @@
 
 package com.openexchange.mail.mime;
 
-import java.io.UnsupportedEncodingException;
-import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import junit.framework.TestCase;
 
@@ -69,18 +67,34 @@ public class QuotedInternetAddressTest extends TestCase {
         super();
     }
 
-    public void testBug33552() throws AddressException, UnsupportedEncodingException {
+    public void testBug33552() throws Exception {
         String s = "Foo \u00e0 Bar <foo@bar.info>, =?UTF-8?Q?Foo_=C3=A0_Bar_=3Cfoo=40bar=2Einfo=3E?=, \"Foo, Bar\" <foo@bar.info>";
-
         InternetAddress[] parsed = QuotedInternetAddress.parse(s);
 
-        parsed = QuotedInternetAddress.parse(s);
+        assertEquals("Display name does not equals \"Foo \u00e0 Bar\"", "Foo \u00e0 Bar", parsed[0].getPersonal());
+        assertEquals("Address does not equals \"foo@bar.info\"", "foo@bar.info", parsed[0].getAddress());
 
-        assertEquals("Display name does not equals \"Foo \u00e0 Bar\"", parsed[0].getPersonal(), "Foo \u00e0 Bar");
-        assertEquals("Address does not equals \"foo@bar.info\"", parsed[0].getAddress(), "foo@bar.info");
-        assertEquals("Display name does not equals \"Foo \u00e0 Bar\"", parsed[1].getPersonal(), "Foo \u00e0 Bar");
-        assertEquals("Address does not equals \"foo@bar.info\"", parsed[1].getAddress(), "foo@bar.info");
-        assertEquals("Display name does not equals \"Foo, Bar\"", parsed[2].getPersonal(), "Foo, Bar");
-        assertEquals("Address does not equals \"foo@bar.info\"",parsed[2].getAddress(), "foo@bar.info");
+        assertEquals("Display name does not equals \"Foo \u00e0 Bar\"", "Foo \u00e0 Bar", parsed[1].getPersonal());
+        assertEquals("Address does not equals \"foo@bar.info\"", "foo@bar.info", parsed[1].getAddress());
+
+        assertEquals("Display name does not equals \"Foo, Bar\"", "Foo, Bar", parsed[2].getPersonal());
+        assertEquals("Address does not equals \"foo@bar.info\"", "foo@bar.info", parsed[2].getAddress());
     }
+
+    public void testBug33305() throws Exception {
+        QuotedInternetAddress a = new QuotedInternetAddress("\u00d6tt\u00f6 <stark@wie-die-wutz.de>");
+        assertEquals("Unexpected personal", "\u00d6tt\u00f6", a.getPersonal());
+        assertEquals("Unexpected mail-safe form", "=?UTF-8?B?w5Z0dMO2?= <stark@wie-die-wutz.de>", a.toString());
+        assertEquals("Unexpected unicode form", "\u00d6tt\u00f6 <stark@wie-die-wutz.de>", a.toUnicodeString());
+
+        InternetAddress[] parsed = QuotedInternetAddress.parse("\u00d6tt\u00f6 <stark@wie-die-wutz.de>, Foo \u00e0 Bar <foo@bar.info>");
+        assertEquals("Unexpected personal", "\u00d6tt\u00f6", parsed[0].getPersonal());
+        assertEquals("Unexpected mail-safe form", "=?UTF-8?B?w5Z0dMO2?= <stark@wie-die-wutz.de>", parsed[0].toString());
+        assertEquals("Unexpected unicode form", "\u00d6tt\u00f6 <stark@wie-die-wutz.de>", parsed[0].toUnicodeString());
+
+        assertEquals("Unexpected personal", "Foo \u00e0 Bar", parsed[1].getPersonal());
+        assertEquals("Unexpected mail-safe form", "=?UTF-8?Q?Foo_=C3=A0_Bar?= <foo@bar.info>", parsed[1].toString());
+        assertEquals("Unexpected unicode form", "Foo \u00e0 Bar <foo@bar.info>", parsed[1].toUnicodeString());
+    }
+
 }
