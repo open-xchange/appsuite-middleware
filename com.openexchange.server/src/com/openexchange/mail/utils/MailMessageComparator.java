@@ -109,6 +109,9 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
         public int compareFieldsDesc(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
             // Negate ASC order
             int result = compareFields(msg1, msg2);
+            if (0 == result) {
+                return result;
+            }
             result = -result;
             return result;
         }
