@@ -151,9 +151,21 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
      * @param locale The locale
      */
     public MailMessageComparator(final MailSortField sortField, final boolean descendingDirection, final Locale locale) {
+        this(sortField, descendingDirection, locale, MailProperties.getInstance().isUserFlagsEnabled());
+    }
+
+    /**
+     * Initializes a new {@link MailMessageComparator}.
+     *
+     * @param sortField The sort field
+     * @param descendingDirection <code>true</code> for descending order; otherwise <code>false</code>
+     * @param locale The locale
+     * @param userFlagsEnabled <code>true</code> to signal support for user flags; otherwise <code>false</code>
+     */
+    public MailMessageComparator(final MailSortField sortField, final boolean descendingDirection, final Locale locale, final boolean userFlagsEnabled) {
         super();
         descendingDir = descendingDirection;
-        if (MailSortField.COLOR_LABEL.equals(sortField) && !MailProperties.getInstance().isUserFlagsEnabled()) {
+        if (MailSortField.COLOR_LABEL.equals(sortField) && !userFlagsEnabled) {
             fieldComparer = DUMMY_COMPARER;
         } else {
             IFieldComparer tmp = COMPARERS.get(sortField);
