@@ -524,32 +524,58 @@ public class ResourceCacheMetadataStore {
         } finally {
             Databases.closeSQLStuff(rs, stmt);
         }
+        removeAllInternal(con, contextId, userId, result);
+        return result;
+    }
 
+    /**
+     * @param con The writable database connection in a transactional state.
+     * @throws SQLException
+     */
+    private void removeAllInternal(Connection con, int contextId, int userId, List<ResourceCacheMetadata> result) throws SQLException {
+        PreparedStatement stmtWithRefId = null;
+        PreparedStatement stmtWithoutRefId = null;
         try {
             if (userId > 0) {
-                stmt = con.prepareStatement("DELETE FROM preview WHERE cid = ? AND user = ? AND id = ? AND refId = ?");
+                stmtWithRefId = con.prepareStatement("DELETE FROM preview WHERE cid = ? AND user = ? AND id = ? AND refId = ?");
+                stmtWithoutRefId = con.prepareStatement("DELETE FROM preview WHERE cid = ? AND user = ? AND id = ?");
                 for (ResourceCacheMetadata toDelete : result) {
-                    stmt.setInt(1, contextId);
-                    stmt.setInt(2, userId);
-                    stmt.setString(3, toDelete.getResourceId());
-                    stmt.setString(4, toDelete.getRefId());
-                    stmt.addBatch();
+                    if (null != toDelete.getRefId()) {
+                        stmtWithRefId.setInt(1, contextId);
+                        stmtWithRefId.setInt(2, userId);
+                        stmtWithRefId.setString(3, toDelete.getResourceId());
+                        stmtWithRefId.setString(4, toDelete.getRefId());
+                        stmtWithRefId.addBatch();
+                    } else {
+                        stmtWithoutRefId.setInt(1, contextId);
+                        stmtWithoutRefId.setInt(2, userId);
+                        stmtWithoutRefId.setString(3, toDelete.getResourceId());
+                        stmtWithoutRefId.addBatch();
+                    }
                 }
             } else {
-                stmt = con.prepareStatement("DELETE FROM preview WHERE cid = ? AND id = ? AND refId = ?");
+                stmtWithRefId = con.prepareStatement("DELETE FROM preview WHERE cid = ? AND id = ? AND refId = ?");
+                stmtWithoutRefId = con.prepareStatement("DELETE FROM preview WHERE cid = ? AND id = ?");
                 for (ResourceCacheMetadata toDelete : result) {
-                    stmt.setInt(1, contextId);
-                    stmt.setString(2, toDelete.getResourceId());
-                    stmt.setString(3, toDelete.getRefId());
-                    stmt.addBatch();
+                    if (null != toDelete.getRefId()) {
+                        stmtWithRefId.setInt(1, contextId);
+                        stmtWithRefId.setString(2, toDelete.getResourceId());
+                        stmtWithRefId.setString(3, toDelete.getRefId());
+                        stmtWithRefId.addBatch();
+                    } else {
+                        stmtWithoutRefId.setInt(1, contextId);
+                        stmtWithoutRefId.setString(2, toDelete.getResourceId());
+                        stmtWithoutRefId.addBatch();
+                    }
+
                 }
             }
-            stmt.executeBatch();
+            stmtWithRefId.executeBatch();
+            stmtWithoutRefId.executeBatch();
         } finally {
-            Databases.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmtWithRefId);
+            Databases.closeSQLStuff(stmtWithoutRefId);
         }
-
-        return result;
     }
 
     /**
@@ -620,29 +646,7 @@ public class ResourceCacheMetadataStore {
             Databases.closeSQLStuff(rs, stmt);
         }
 
-        try {
-            if (userId > 0) {
-                stmt = con.prepareStatement("DELETE FROM preview WHERE cid = ? AND user = ? AND id = ? AND refId = ?");
-                for (ResourceCacheMetadata toDelete : result) {
-                    stmt.setInt(1, contextId);
-                    stmt.setInt(2, userId);
-                    stmt.setString(3, toDelete.getResourceId());
-                    stmt.setString(4, toDelete.getRefId());
-                    stmt.addBatch();
-                }
-            } else {
-                stmt = con.prepareStatement("DELETE FROM preview WHERE cid = ? AND id = ? AND refId = ?");
-                for (ResourceCacheMetadata toDelete : result) {
-                    stmt.setInt(1, contextId);
-                    stmt.setString(2, toDelete.getResourceId());
-                    stmt.setString(3, toDelete.getRefId());
-                    stmt.addBatch();
-                }
-            }
-            stmt.executeBatch();
-        } finally {
-            Databases.closeSQLStuff(stmt);
-        }
+        removeAllInternal(con, contextId, userId, result);
 
         return result;
     }
