@@ -62,6 +62,12 @@ import junit.framework.TestCase;
  * @since v7.6.1
  */
 public class QuotedInternetAddressTest extends TestCase {
+    /**
+     * Initializes a new {@link QuotedInternetAddressTest}.
+     */
+    public QuotedInternetAddressTest() {
+        super();
+    }
 
     public void testBug33552() throws AddressException, UnsupportedEncodingException {
         String s = "Foo \u00e0 Bar <foo@bar.info>, =?UTF-8?Q?Foo_=C3=A0_Bar_=3Cfoo=40bar=2Einfo=3E?=, \"Foo, Bar\" <foo@bar.info>";
