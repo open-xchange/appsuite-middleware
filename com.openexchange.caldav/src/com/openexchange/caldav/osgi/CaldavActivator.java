@@ -204,8 +204,9 @@ public class CaldavActivator extends HousekeepingActivator {
             });
 
             openTrackers();
-        } catch (final Throwable t) {
-            LOG.error("", t);
+        } catch (final Exception e) {
+            LOG.error("", e);
+            throw e;
         }
     }
 
