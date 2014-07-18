@@ -1,6 +1,7 @@
 * 2014-07-18 - thorben.betten@open-xchange.com
 
  - Fix for bug 33593: Properly XML-escape characters written to XML output
+ - Fix for bug 33587: Do graceful shutdown and handle exceptions
 
 * 2014-07-17 - thorben.betten@open-xchange.com
 
