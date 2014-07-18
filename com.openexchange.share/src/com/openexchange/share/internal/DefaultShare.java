@@ -1,0 +1,338 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.share.internal;
+
+import java.util.Date;
+import com.openexchange.groupware.modules.Module;
+import com.openexchange.share.Share;
+import com.openexchange.share.ShareAuthentication;
+
+/**
+ * {@link DefaultShare}
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.6.1
+ */
+public class DefaultShare implements Share {
+
+    private String token;
+    private int contextID;
+    private int module;
+    private String folder;
+    private String item;
+    private Date created;
+    private int createdBy;
+    private Date lastModified;
+    private int modifiedBy;
+    private Date expires;
+    private int guest;
+    private int authentication;
+    private String displayName;
+
+    /**
+     * Initializes a new {@link DefaultShare}.
+     */
+    public DefaultShare() {
+        super();
+    }
+
+    /**
+     * Gets the token
+     *
+     * @return The token
+     */
+    @Override
+    public String getToken() {
+        return token;
+    }
+
+    /**
+     * Sets the token
+     *
+     * @param token The token to set
+     */
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    /**
+     * Gets the contextID
+     *
+     * @return The contextID
+     */
+    @Override
+    public int getContextID() {
+        return contextID;
+    }
+
+    /**
+     * Sets the contextID
+     *
+     * @param contextID The contextID to set
+     */
+    public void setContextID(int contextID) {
+        this.contextID = contextID;
+    }
+
+    /**
+     * Gets the module
+     *
+     * @return The module
+     */
+    @Override
+    public Module getModule() {
+        return Module.getForFolderConstant(module);
+    }
+
+    /**
+     * Sets the module
+     *
+     * @param module The module to set
+     */
+    public void setModule(int module) {
+        this.module = module;
+    }
+
+    /**
+     * Gets the folder
+     *
+     * @return The folder
+     */
+    @Override
+    public String getFolder() {
+        return folder;
+    }
+
+    @Override
+    public boolean isFolder() {
+        return null != getFolder();
+    }
+
+    /**
+     * Sets the folder
+     *
+     * @param folder The folder to set
+     */
+    public void setFolder(String folder) {
+        this.folder = folder;
+    }
+
+    /**
+     * Gets the item
+     *
+     * @return The item
+     */
+    @Override
+    public String getItem() {
+        return item;
+    }
+
+    /**
+     * Sets the item
+     *
+     * @param item The item to set
+     */
+    public void setItem(String item) {
+        this.item = item;
+    }
+
+    /**
+     * Gets the created
+     *
+     * @return The created
+     */
+    @Override
+    public Date getCreated() {
+        return created;
+    }
+
+    /**
+     * Sets the created
+     *
+     * @param created The created to set
+     */
+    public void setCreated(Date created) {
+        this.created = created;
+    }
+
+    /**
+     * Gets the createdBy
+     *
+     * @return The createdBy
+     */
+    @Override
+    public int getCreatedBy() {
+        return createdBy;
+    }
+
+    /**
+     * Sets the createdBy
+     *
+     * @param createdBy The createdBy to set
+     */
+    public void setCreatedBy(int createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    /**
+     * Gets the lastModified
+     *
+     * @return The lastModified
+     */
+    @Override
+    public Date getLastModified() {
+        return lastModified;
+    }
+
+    /**
+     * Sets the lastModified
+     *
+     * @param lastModified The lastModified to set
+     */
+    public void setLastModified(Date lastModified) {
+        this.lastModified = lastModified;
+    }
+
+    /**
+     * Gets the modifiedBy
+     *
+     * @return The modifiedBy
+     */
+    @Override
+    public int getModifiedBy() {
+        return modifiedBy;
+    }
+
+    /**
+     * Sets the modifiedBy
+     *
+     * @param modifiedBy The modifiedBy to set
+     */
+    public void setModifiedBy(int modifiedBy) {
+        this.modifiedBy = modifiedBy;
+    }
+
+    /**
+     * Gets the expires
+     *
+     * @return The expires
+     */
+    @Override
+    public Date getExpires() {
+        return expires;
+    }
+
+    /**
+     * Sets the expires
+     *
+     * @param expires The expires to set
+     */
+    public void setExpires(Date expires) {
+        this.expires = expires;
+    }
+
+    /**
+     * Gets the guest
+     *
+     * @return The guest
+     */
+    @Override
+    public int getGuest() {
+        return guest;
+    }
+
+    /**
+     * Sets the guest
+     *
+     * @param guest The guest to set
+     */
+    public void setGuest(int guest) {
+        this.guest = guest;
+    }
+
+    /**
+     * Gets the authentication
+     *
+     * @return The authentication
+     */
+    @Override
+    public ShareAuthentication getAuthentication() {
+        return ShareAuthentication.fromID(authentication);
+    }
+
+    /**
+     * Sets the authentication
+     *
+     * @param authentication The authentication to set
+     */
+    public void setAuthentication(int authentication) {
+        this.authentication = authentication;
+    }
+
+    /**
+     * Gets the displayName
+     *
+     * @return The displayName
+     */
+    @Override
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    /**
+     * Sets the displayName
+     *
+     * @param displayName The displayName to set
+     */
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+}

@@ -296,7 +296,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         // Initialize server session
         ServerSession serverSession = ServerSessionAdapter.valueOf(userId, contextId);
         User user = serverSession.getUser();
-        if (user.isGuest()) {
+        if (null != user && user.isGuest()) {
             userId = user.getCreatedBy();
         }
 
@@ -501,7 +501,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             }
         }
 
-        if (serverSession.getUser().isGuest()) {
+        if (null != serverSession.getUser() && serverSession.getUser().isGuest()) {
             capabilities.remove(getCapability(Permission.WEBMAIL));
         }
 

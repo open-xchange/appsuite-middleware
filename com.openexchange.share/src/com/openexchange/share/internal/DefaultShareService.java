@@ -47,83 +47,38 @@
  *
  */
 
-package com.openexchange.share.json.actions;
+package com.openexchange.share.internal;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.modules.Module;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareService;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.share.rdb.ShareStorage;
 
 
 /**
- * {@link GETAction}
+ * {@link DefaultShareService}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.6.1
  */
-@DispatcherNotes(noSession = true)
-public class GETAction implements AJAXActionService {
+public class DefaultShareService implements ShareService {
 
-    private static final Pattern PATH_PATTERN = Pattern.compile("/+([a-f0-9]{32})(?:/+items(?:/+([0-9]+))?)?/*");
-
-    private final ServiceLookup services;
-
+    private final ShareStorage storage;
 
     /**
-     * Initializes a new {@link GETAction}.
-     * @param services
+     * Initializes a new {@link DefaultShareService}.
+     *
+     * @param storage The underlying share storage
      */
-    public GETAction(ServiceLookup services) {
+    public DefaultShareService(ShareStorage storage) {
         super();
-        this.services = services;
+        this.storage = storage;
     }
 
-    /*
-     * http://ox.io/appsuite/api/share/ca1ccf2b2dd54b129c1b56e7cd65bdf9
-     * http://ox.io/appsuite/api/share/ca1ccf2b2dd54b129c1b56e7cd65bdf9/items
-     * http://ox.io/appsuite/api/share/ca1ccf2b2dd54b129c1b56e7cd65bdf9/items/123
-     */
     @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        ShareService shareService = services.getService(ShareService.class);
-
-        String pathInfo = requestData.getPathInfo();
-        Matcher matcher = PATH_PATTERN.matcher(pathInfo);
-        if (matcher.matches()) {
-            String token = matcher.group(1);
-            Share share = shareService.resolveToken(token);
-            if (share.isFolder()) {
-                if (matcher.groupCount() > 1) {
-                    String itemId = matcher.group(2);
-                    return performGet(share.getModule(), share.getFolder(), itemId);
-                } else {
-                    return performList();
-                }
-            } else {
-                return performGet(share.getModule(), share.getFolder(), share.getItem());
-            }
-        } else {
-            // TODO: throw exception
-            return null;
-        }
-    }
-
-    private AJAXRequestResult performGet(Module module, String folder, String item) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    private AJAXRequestResult performList() {
-        // TODO Auto-generated method stub
-        return null;
+    public Share resolveToken(String token) throws OXException {
+        int contextID = ShareTool.extractContextId(token);
+        return storage.loadShare(contextID, token);
     }
 
 }

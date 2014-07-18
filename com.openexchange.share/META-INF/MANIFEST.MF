@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: The share API bundle
+Bundle-SymbolicName: com.openexchange.share
+Bundle-Version: 7.6.1
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.database,
+ com.openexchange.exception,
+ com.openexchange.groupware.delete,
+ com.openexchange.groupware.modules,
+ com.openexchange.groupware.update,
+ com.openexchange.i18n,
+ com.openexchange.java.util,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.tools.sql,
+ org.osgi.framework,
+ org.osgi.service.event,
+ org.slf4j
+Bundle-Activator: com.openexchange.share.osgi.ShareActivator
+Export-Package: com.openexchange.share

@@ -47,29 +47,37 @@
  *
  */
 
-package com.openexchange.share.json.osgi;
+package com.openexchange.share.internal;
 
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.share.ShareService;
-import com.openexchange.share.json.ShareActionFactory;
+import java.util.UUID;
+import com.openexchange.java.util.UUIDs;
 
 
 /**
- * {@link ShareJsonActivator}
+ * {@link ShareTool}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class ShareJsonActivator extends AJAXModuleActivator {
+public class ShareTool {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ShareService.class };
+    private static final long LOW_BITS = 0x00000000FFFFFFFFL;
+
+    private static final long HIGH_BITS = 0xFFFFFFFF00000000L;
+
+    public static int extractContextId(String token) {
+        UUID uuid = UUIDs.fromUnformattedString(token);
+        long mostSignificantBits = uuid.getMostSignificantBits();
+        return (int) ((mostSignificantBits &= HIGH_BITS) >>> 32);
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        registerModule(new ShareActionFactory(this), "share");
+    public static String generateToken(int contextId) {
+        UUID randomUUID = UUID.randomUUID();
+        long mostSignificantBits = randomUUID.getMostSignificantBits();
+        mostSignificantBits &= LOW_BITS;
+        mostSignificantBits |= (((long)contextId) << 32);
+        String token = UUIDs.getUnformattedString(new UUID(mostSignificantBits, randomUUID.getLeastSignificantBits()));
+        return token;
     }
 
 }

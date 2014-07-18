@@ -47,29 +47,46 @@
  *
  */
 
-package com.openexchange.share.json.osgi;
+package com.openexchange.share;
 
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.share.ShareService;
-import com.openexchange.share.json.ShareActionFactory;
+import java.util.Date;
+import com.openexchange.groupware.modules.Module;
 
 
 /**
- * {@link ShareJsonActivator}
+ * {@link Share}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class ShareJsonActivator extends AJAXModuleActivator {
+public interface Share {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ShareService.class };
-    }
+    String getToken();
 
-    @Override
-    protected void startBundle() throws Exception {
-        registerModule(new ShareActionFactory(this), "share");
-    }
+    int getContextID();
+
+    Module getModule();
+
+    String getFolder();
+
+    boolean isFolder();
+
+    String getItem();
+
+    Date getCreated();
+
+    int getCreatedBy();
+
+    Date getLastModified();
+
+    int getModifiedBy();
+
+    Date getExpires();
+
+    int getGuest();
+
+    ShareAuthentication getAuthentication();
+
+    String getDisplayName();
 
 }

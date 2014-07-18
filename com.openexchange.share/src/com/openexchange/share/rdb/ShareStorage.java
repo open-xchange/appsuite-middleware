@@ -47,17 +47,24 @@
  *
  */
 
-package com.openexchange.share.json;
+package com.openexchange.share.rdb;
+
+import com.openexchange.exception.OXException;
+import com.openexchange.share.Share;
 
 
 /**
- * {@link ShareService}
+ * {@link ShareStorage}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.6.1
  */
-public interface ShareService {
+public interface ShareStorage {
 
-    Share resolveToken(String token);
+    Share loadShare(int contextID, String token) throws OXException;
+
+    void storeShare(int contextID, Share share);
+
+    void updateShare(int contextID, Share share);
 
 }

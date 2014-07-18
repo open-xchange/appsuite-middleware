@@ -47,29 +47,19 @@
  *
  */
 
-package com.openexchange.share.json.osgi;
+package com.openexchange.share;
 
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.share.ShareService;
-import com.openexchange.share.json.ShareActionFactory;
+import com.openexchange.exception.OXException;
 
 
 /**
- * {@link ShareJsonActivator}
+ * {@link ShareService}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class ShareJsonActivator extends AJAXModuleActivator {
+public interface ShareService {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ShareService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        registerModule(new ShareActionFactory(this), "share");
-    }
+    Share resolveToken(String token) throws OXException;
 
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,27 +49,88 @@
 
 package com.openexchange.share.json.osgi;
 
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import javax.servlet.ServletException;
+import org.osgi.service.http.HttpService;
+import org.osgi.service.http.NamespaceException;
+import com.openexchange.context.ContextService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.ShareService;
-import com.openexchange.share.json.ShareActionFactory;
-
+import com.openexchange.share.json.internal.ShareServiceLookup;
+import com.openexchange.share.json.internal.ShareServlet;
+import com.openexchange.user.UserService;
 
 /**
- * {@link ShareJsonActivator}
+ * {@link ServletActivator}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.1
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ShareJsonActivator extends AJAXModuleActivator {
+public class ServletActivator extends HousekeepingActivator {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServletActivator.class);
+
+    private volatile boolean registered;
+
+    /**
+     * Initializes a new {@link ServletActivator}.
+     */
+    public ServletActivator() {
+        super();
+    }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ShareService.class };
+        return new Class<?>[] { ShareService.class, UserService.class, ContextService.class, DispatcherPrefixService.class, HttpService.class, SessiondService.class };
+    }
+
+    @Override
+    protected void handleAvailability(final Class<?> clazz) {
+        registerServlet();
+    }
+
+    @Override
+    protected void handleUnavailability(final Class<?> clazz) {
+        unregisterServlet();
     }
 
     @Override
     protected void startBundle() throws Exception {
-        registerModule(new ShareActionFactory(this), "share");
+        registerServlet();
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        cleanUp();
+        unregisterServlet();
+    }
+
+    private void registerServlet() {
+        LOG.info("starting bundle: \"com.openexchange.share.json\"");
+        /*
+         * set references
+         */
+        ShareServiceLookup.set(this);
+        /*
+         * register servlet
+         */
+        registered = true;
+        try {
+            getService(HttpService.class).registerServlet(getService(DispatcherPrefixService.class).getPrefix() + "share", new ShareServlet(), null, null);
+        } catch (final ServletException e) {
+            LOG.error("", e);
+        } catch (final NamespaceException e) {
+            LOG.error("", e);
+        }
+    }
+
+    private void unregisterServlet() {
+        ShareServiceLookup.set(null);
+        if (false == registered) {
+            return;
+        }
+        registered = false;
+        getService(HttpService.class).unregister(getService(DispatcherPrefixService.class).getPrefix() + "/share");
     }
 
 }

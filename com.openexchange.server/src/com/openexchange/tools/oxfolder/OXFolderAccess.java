@@ -484,6 +484,12 @@ public class OXFolderAccess {
                  * (Re-)Create default infostore / infostore trash folder on demand
                  */
                 User user = UserStorage.getInstance().getUser(userId, ctx);
+                if (user.isGuest()) {
+                    throw OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.create(
+                        folderModule2String(module),
+                        getUserName(userId, ctx),
+                        Integer.valueOf(ctx.getContextId()));
+                }
                 final Connection wc = DBPool.pickupWriteable(ctx);
                 boolean rollback = false;
                 boolean created = false;

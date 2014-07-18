@@ -47,27 +47,57 @@
  *
  */
 
-package com.openexchange.share.json;
-
-import com.openexchange.groupware.modules.Module;
-
+package com.openexchange.share;
 
 /**
- * {@link Share}
+ * {@link ShareAuthentication}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.6.1
  */
-public interface Share {
+public enum ShareAuthentication {
 
-    String getToken();
+    /**
+     * Access is granted without providing additional authentication information.
+     */
+    ANONYMOUS(0),
 
-    Module getModule();
+    /**
+     * Access is granted if the client provides a Base64-encoded string that contains a user name and password of the guest user entity.
+     */
+    BASIC(1),
 
-    String getFolderId();
+    ;
 
-    String getItemId();
+    /**
+     * Gets the share authentication based on it's identifier.
+     *
+     * @param id The ID to get the authentication for
+     * @return The share authentication
+     */
+    public static ShareAuthentication fromID(int id) {
+        for (ShareAuthentication auth : ShareAuthentication.values()) {
+            if (auth.id == id) {
+                return auth;
+            }
+        }
+        throw new IllegalArgumentException(String.valueOf(id));
+    }
 
-    boolean isFolder();
+
+    private final int id;
+
+    private ShareAuthentication(int id) {
+        this.id = id;
+    }
+
+    /**
+     * Gets the authentication ID.
+     *
+     * @return The ID
+     */
+    public int getID() {
+        return id;
+    }
 
 }

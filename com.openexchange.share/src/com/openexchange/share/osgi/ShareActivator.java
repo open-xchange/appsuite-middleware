@@ -47,37 +47,54 @@
  *
  */
 
-package com.openexchange.share.json;
+package com.openexchange.share.osgi;
 
-import java.util.UUID;
-import com.openexchange.java.util.UUIDs;
-
+import com.openexchange.database.DatabaseService;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.share.ShareService;
+import com.openexchange.share.internal.DefaultShareService;
+import com.openexchange.share.internal.ShareServiceLookup;
+import com.openexchange.share.rdb.RdbShareStorage;
 
 /**
- * {@link ShareTool}
+ * {@link ShareActivator}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.1
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ShareTool {
+public class ShareActivator extends HousekeepingActivator {
 
-    private static final long LOW_BITS = 0x00000000FFFFFFFFL;
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ShareActivator.class);
 
-    private static final long HIGH_BITS = 0xFFFFFFFF00000000L;
-
-    public int extractContextId(String token) {
-        UUID uuid = UUIDs.fromUnformattedString(token);
-        long mostSignificantBits = uuid.getMostSignificantBits();
-        return (int) ((mostSignificantBits &= HIGH_BITS) >>> 32);
+    /**
+     * Initializes a new {@link ShareActivator}.
+     */
+    public ShareActivator() {
+        super();
     }
 
-    public static String generateToken(int contextId) {
-        UUID randomUUID = UUID.randomUUID();
-        long mostSignificantBits = randomUUID.getMostSignificantBits();
-        mostSignificantBits &= LOW_BITS;
-        mostSignificantBits |= (((long)contextId) << 32);
-        String token = UUIDs.getUnformattedString(new UUID(mostSignificantBits, randomUUID.getLeastSignificantBits()));
-        return token;
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { DatabaseService.class };
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        LOG.info("starting bundle: \"com.openexchange.share\"");
+        /*
+         * set references
+         */
+        ShareServiceLookup.set(this);
+        /*
+         * register services
+         */
+        registerService(ShareService.class, new DefaultShareService(new RdbShareStorage(getService(DatabaseService.class))));
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        LOG.info("stopping bundle: \"com.openexchange.share\"");
+        ShareServiceLookup.set(null);
+        super.stopBundle();
     }
 
 }
