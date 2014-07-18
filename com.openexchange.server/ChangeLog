@@ -1,3 +1,7 @@
+* 2014-07-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 33593: Properly XML-escape characters written to XML output
+
 * 2014-07-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 33570: Order shut-down initiated timer and cleanse cache of registered Servlets once they are unregistered
