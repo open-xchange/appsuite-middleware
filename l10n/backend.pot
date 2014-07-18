@@ -7469,6 +7469,14 @@ msgstr ""
 msgid "No session found for identifier: %1$s"
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:63
+msgid "The requested share does not exist."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:65
+msgid "The link \"%1$s\" is invalid."
+msgstr ""
+
 #. *
 #. * No recipient(s) has been defined for new message
 #.
