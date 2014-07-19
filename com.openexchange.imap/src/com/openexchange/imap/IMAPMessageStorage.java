@@ -1192,10 +1192,16 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
             IMAPMessage msg;
             try {
-                final long start = System.currentTimeMillis();
+                long start = System.currentTimeMillis();
                 msg = (IMAPMessage) imapFolder.getMessageByUID(msgUID);
                 imapFolder.fetch(new Message[] {msg}, FETCH_PROFILE_ENVELOPE);
-                mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                long duration = System.currentTimeMillis() - start;
+
+                if (duration > 1000L) {
+                    LOG.warn("Retrieval of message {} in folder {} from IMAP mailbox {} took {}msec", msgUID, fullName, imapStore, duration);
+                }
+
+                mailInterfaceMonitor.addUseTime(duration);
             } catch (final java.lang.NullPointerException e) {
                 /*
                  * Obviously message was removed in the meantime
