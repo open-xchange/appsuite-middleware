@@ -47,46 +47,53 @@
  *
  */
 
-package com.openexchange.share;
+package com.openexchange.share.json.auth;
 
-import java.util.Date;
-import com.openexchange.groupware.modules.Module;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.share.AuthenticationMode;
+
 
 
 /**
- * {@link Share}
+ * {@link AuthenticationMode}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.6.1
  */
-public interface Share {
+public class ShareAuthentication {
 
-    String getToken();
+    private final User user;
+    private final Context context;
 
-    int getContextID();
+    /**
+     * Initializes a new {@link ShareAuthentication}.
+     *
+     * @param user The user
+     * @param context The context
+     */
+    public ShareAuthentication(User user, Context context) {
+        super();
+        this.user = user;
+        this.context = context;
+    }
 
-    Module getModule();
+    /**
+     * Gets the user
+     *
+     * @return The user
+     */
+    public User getUser() {
+        return user;
+    }
 
-    String getFolder();
-
-    boolean isFolder();
-
-    String getItem();
-
-    Date getCreated();
-
-    int getCreatedBy();
-
-    Date getLastModified();
-
-    int getModifiedBy();
-
-    Date getExpires();
-
-    int getGuest();
-
-    AuthenticationMode getAuthentication();
-
-    String getDisplayName();
+    /**
+     * Gets the context
+     *
+     * @return The context
+     */
+    public Context getContext() {
+        return context;
+    }
 
 }

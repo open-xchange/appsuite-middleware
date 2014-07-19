@@ -52,7 +52,7 @@ package com.openexchange.share.internal;
 import java.util.Date;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.share.Share;
-import com.openexchange.share.ShareAuthentication;
+import com.openexchange.share.AuthenticationMode;
 
 /**
  * {@link DefaultShare}
@@ -303,8 +303,8 @@ public class DefaultShare implements Share {
      * @return The authentication
      */
     @Override
-    public ShareAuthentication getAuthentication() {
-        return ShareAuthentication.fromID(authentication);
+    public AuthenticationMode getAuthentication() {
+        return AuthenticationMode.fromID(authentication);
     }
 
     /**

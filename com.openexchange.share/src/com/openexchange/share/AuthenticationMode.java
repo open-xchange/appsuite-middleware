@@ -50,12 +50,12 @@
 package com.openexchange.share;
 
 /**
- * {@link ShareAuthentication}
+ * {@link AuthenticationMode}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.6.1
  */
-public enum ShareAuthentication {
+public enum AuthenticationMode {
 
     /**
      * Access is granted without providing additional authentication information.
@@ -75,8 +75,8 @@ public enum ShareAuthentication {
      * @param id The ID to get the authentication for
      * @return The share authentication
      */
-    public static ShareAuthentication fromID(int id) {
-        for (ShareAuthentication auth : ShareAuthentication.values()) {
+    public static AuthenticationMode fromID(int id) {
+        for (AuthenticationMode auth : AuthenticationMode.values()) {
             if (auth.id == id) {
                 return auth;
             }
@@ -87,7 +87,7 @@ public enum ShareAuthentication {
 
     private final int id;
 
-    private ShareAuthentication(int id) {
+    private AuthenticationMode(int id) {
         this.id = id;
     }
 

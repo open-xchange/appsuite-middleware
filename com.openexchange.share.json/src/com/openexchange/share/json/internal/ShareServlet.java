@@ -49,7 +49,6 @@
 
 package com.openexchange.share.json.internal;
 
-import static com.openexchange.tools.servlet.http.Authorization.checkForBasicAuthorization;
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -59,24 +58,19 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.LoginServlet;
-import com.openexchange.ajax.fields.Header;
-import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.Share;
-import com.openexchange.share.ShareAuthentication;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
+import com.openexchange.share.json.auth.ShareAuthentication;
+import com.openexchange.share.json.auth.ShareAuthenticator;
 import com.openexchange.tools.servlet.RateLimitedException;
-import com.openexchange.tools.servlet.http.Authorization;
-import com.openexchange.tools.servlet.http.Authorization.Credentials;
 import com.openexchange.tools.servlet.http.Tools;
-import com.openexchange.user.UserService;
 
 
 /**
@@ -122,46 +116,16 @@ public class ShareServlet extends HttpServlet {
             /*
              * get & authenticate associated guest user
              */
-            Context context = ShareServiceLookup.getService(ContextService.class, true).getContext(share.getContextID());
-            UserService userService = ShareServiceLookup.getService(UserService.class, true);
-            User guestUser;
-            if (false == ShareAuthentication.ANONYMOUS.equals(share.getAuthentication())) {
-                String authHeader = request.getHeader(Header.AUTH_HEADER);
-                if (false == checkForBasicAuthorization(authHeader)) {
-                    response.setHeader("WWW-Authenticate", "Basic realm=\"Please enter your e-mail address and password to access the share "
-                        + share.getToken() + "\", encoding=\"UTF-8\"");
-                    sendError(response, HttpServletResponse.SC_UNAUTHORIZED, "401 Unauthorized");
-                    return;
-                }
-                Credentials credentials = Authorization.decode(authHeader);
-                if (null == credentials || false == Authorization.checkLogin(credentials.getPassword())) {
-                    sendError(response, HttpServletResponse.SC_UNAUTHORIZED, "401 Unauthorized");
-                    return;
-                }
-                  //TODO: existence via login2guest table?
-//                guestUserID = userService.getUserId(credentials.getLogin(), context);
-//                if (guestUserID != share.getGuest()) {
-//                    sendError(response, HttpServletResponse.SC_UNAUTHORIZED, "401 Unauthorized");
-//                    return;
-//                }
-//                guestUser = userService.getUser(guestUserID, context);
-                guestUser = userService.getUser(share.getGuest(), context);
-                if (Strings.isEmpty(credentials.getLogin()) || false == credentials.getLogin().equalsIgnoreCase(guestUser.getMail())) {
-                    sendError(response, HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
-                    return;
-                }
-                if (false == userService.authenticate(guestUser, credentials.getPassword())) {
-                    sendError(response, HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
-                    return;
-                }
-            } else {
-                guestUser = userService.getUser(share.getGuest(), context);
+            ShareAuthentication authentication = new ShareAuthenticator(share).authenticate(request, response);
+            if (null == authentication) {
+                sendError(response, HttpServletResponse.SC_UNAUTHORIZED, "401 Unauthorized");
+                return;
             }
             /*
              * create guest session
              */
             Session session = ShareServiceLookup.getService(SessiondService.class, true).addSession(
-                new ShareAddSessionParameter(request, context, guestUser));
+                new ShareAddSessionParameter(request, authentication.getContext(), authentication.getUser()));
             if (null == session) {
                 sendError(response, HttpServletResponse.SC_FORBIDDEN, "Forbidden");
                 return;
@@ -176,7 +140,7 @@ public class ShareServlet extends HttpServlet {
             /*
              * construct redirect URL
              */
-            String url = getRedirectURL(session, guestUser, share);
+            String url = getRedirectURL(session, authentication.getUser(), share);
             response.sendRedirect(url);
         } catch (RateLimitedException e) {
             sendError(response, 429, e.getMessage());
@@ -186,21 +150,40 @@ public class ShareServlet extends HttpServlet {
     }
 
     private static String getRedirectURL(Session session, User user, Share share) {
+        // http://192.168.32.191/ox6/#m=infostore&f=2580&i=255391
+
         StringBuilder stringBuilder = new StringBuilder()
-            .append("/appsuite/")
-//            .append(ShareServiceLookup.getService(DispatcherPrefixService.class).getPrefix())
+            .append("/ox6/")
+    //        .append(ShareServiceLookup.getService(DispatcherPrefixService.class).getPrefix())
             .append("#session=").append(session.getSessionID())
-            .append("&user=").append(session.getLogin())
+            .append("&user=").append(user.getMail())
             .append("&user_id=").append(session.getUserId())
             .append("&language=").append(user.getLocale())
             .append("&store=true")
-            .append("&app=").append(getApp(share.getModule()))
-            .append("&folder=").append(share.getFolder())
+            .append("&m=").append(getApp(share.getModule()))
+            .append("&f=").append(share.getFolder())
         ;
         if (false == share.isFolder()) {
             stringBuilder.append("&id=").append(share.getItem());
         }
         return stringBuilder.toString();
+
+
+//        StringBuilder stringBuilder = new StringBuilder()
+//            .append("/appsuite/")
+////            .append(ShareServiceLookup.getService(DispatcherPrefixService.class).getPrefix())
+//            .append("#session=").append(session.getSessionID())
+//            .append("&user=").append(session.getLogin())
+//            .append("&user_id=").append(session.getUserId())
+//            .append("&language=").append(user.getLocale())
+//            .append("&store=true")
+//            .append("&app=").append(getApp(share.getModule()))
+//            .append("&folder=").append(share.getFolder())
+//        ;
+//        if (false == share.isFolder()) {
+//            stringBuilder.append("&id=").append(share.getItem());
+//        }
+//        return stringBuilder.toString();
     }
 
     private static String getApp(Module module) {
