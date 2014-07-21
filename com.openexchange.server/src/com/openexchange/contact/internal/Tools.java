@@ -74,7 +74,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Collators;
 import com.openexchange.java.Strings;
@@ -219,11 +218,20 @@ public final class Tools {
      * @throws OXException
      */
     public static UserConfiguration getUserConfig(Session session) throws OXException {
-        if (session instanceof ServerSession) {
-            return ((ServerSession) session).getUserConfiguration();
-        }
         return ContactServiceLookup.getService(UserConfigurationService.class, true).getUserConfiguration(
             session.getUserId(), getContext(session));
+    }
+
+    /**
+     * Gets the user configuration.
+     *
+     * @param userID
+     * @param context
+     * @return
+     * @throws OXException
+     */
+    public static UserConfiguration getUserConfig(int userID, Context context) throws OXException {
+        return ContactServiceLookup.getService(UserConfigurationService.class, true).getUserConfiguration(userID, context);
     }
 
     /**
@@ -401,12 +409,12 @@ public final class Tools {
 	 */
 	public static List<String> getVisibleFolders(final int contextID, final int userID) throws OXException {
 		final List<String> folderIDs = new ArrayList<String>();
-        final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfiguration(
-        		userID, Tools.getContext(contextID));
+		final Context context = Tools.getContext(contextID);
+        final UserConfiguration userConfig = Tools.getUserConfig(userID, context);
         SearchIterator<FolderObject> searchIterator = null;
         try {
         	searchIterator = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(userID, userConfig.getGroups(),
-        			userConfig.getAccessibleModules(), FolderObject.CONTACT, Tools.getContext(contextID));
+        			userConfig.getAccessibleModules(), FolderObject.CONTACT, context);
             while (searchIterator.hasNext()) {
                 final FolderObject folder = searchIterator.next();
     			if (FolderObject.CONTACT != folder.getModule()) {

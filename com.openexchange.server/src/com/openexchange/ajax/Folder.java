@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax;
 
-import static com.openexchange.ajax.SessionUtility.getSessionObject;
 import static com.openexchange.tools.oxfolder.OXFolderUtility.folderModule2String;
 import static com.openexchange.tools.oxfolder.OXFolderUtility.getUserName;
 import java.io.IOException;
@@ -112,7 +111,6 @@ import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Collators;
@@ -154,6 +152,7 @@ import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * {@link Folder} - The folder servlet.
@@ -2248,7 +2247,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                     } else {
                         final MessagingFolderIdentifier mfi = MessagingFolderIdentifier.parseFQN(deleteIdentifier);
                         if (null == mfi) {
-                            if (UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx).hasWebMail()) {
+                            if (getUserConfigurationService().getUserConfiguration(session.getUserId(), ctx).hasWebMail()) {
                                 if (mailInterface == null) {
                                     mailInterface = MailServletInterface.getInstance(session);
                                 }
@@ -2294,6 +2293,10 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
         response.setData(jsonWriter.getObject());
         response.setTimestamp(lastModifiedDate);
         return response;
+    }
+
+    private UserConfigurationService getUserConfigurationService() throws OXException {
+        return ServerServiceRegistry.getInstance().getService(UserConfigurationService.class, true);
     }
 
     private final void actionPutRemoveTestFolder(final HttpServletRequest req, final HttpServletResponse resp) throws Exception {

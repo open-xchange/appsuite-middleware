@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax;
 
-import static com.openexchange.ajax.SessionUtility.getSessionObject;
 import static com.openexchange.tools.oxfolder.OXFolderUtility.getUserName;
 import java.io.IOException;
 import java.io.Writer;
@@ -72,16 +71,18 @@ import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.monitoring.MonitoringInfo;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.UserService;
+import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * {@link SyncServlet} - The AJAX servlet to serve SyncML requests
@@ -202,6 +203,8 @@ public class SyncServlet extends PermissionServlet {
 			try {
 				long lastModified = 0;
 				final OXFolderAccess access = new OXFolderAccess(ctx);
+				UserConfigurationService userConfigurationService = getUserConfigurationService();
+				UserService userService = getUserService();
 				NextId: for (int i = 0; i < length; i++) {
 					final String deleteIdentifier = jsonArr.getString(i);
 					int delFolderId = -1;
@@ -210,7 +213,12 @@ public class SyncServlet extends PermissionServlet {
 							timestamp = paramContainer.checkDateParam(PARAMETER_TIMESTAMP);
 						}
 						if (folderSyncInterface == null) {
-							folderSyncInterface = new RdbFolderSyncInterface(sessionObj, ctx, access);
+							folderSyncInterface = new RdbFolderSyncInterface(
+							    sessionObj,
+							    ctx,
+							    access,
+							    userConfigurationService.getUserConfiguration(sessionObj.getUserId(), ctx),
+							    userService.getUser(sessionObj.getUserId(), ctx));
 						}
 						FolderObject delFolderObj;
 						try {
@@ -230,8 +238,7 @@ public class SyncServlet extends PermissionServlet {
                             deleteIdentifier,
                             Integer.valueOf(ctx.getContextId()));
 					} else {
-						if (UserConfigurationStorage.getInstance()
-								.getUserConfigurationSafe(sessionObj.getUserId(), ctx).hasWebMail()) {
+						if (userConfigurationService.getUserConfiguration(sessionObj.getUserId(), ctx).hasWebMail()) {
 							if (mailInterface == null) {
 								mailInterface = MailServletInterface.getInstance(sessionObj);
 							}
@@ -272,6 +279,14 @@ public class SyncServlet extends PermissionServlet {
 	/*-
 	 * ++++++++++++++++++++++ Helper methods +++++++++++++++++++++++
 	 */
+
+    private UserConfigurationService getUserConfigurationService() throws OXException {
+        return ServerServiceRegistry.getInstance().getService(UserConfigurationService.class, true);
+    }
+
+    private UserService getUserService() throws OXException {
+        return ServerServiceRegistry.getInstance().getService(UserService.class, true);
+    }
 
 	private static final void writeErrorResponse(final HttpServletResponseWrapper resp, final Throwable e, final Session session)
 			throws IOException {

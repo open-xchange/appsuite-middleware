@@ -57,9 +57,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -88,19 +86,15 @@ public class RdbFolderSyncInterface implements FolderSyncInterface {
 
     private final UserConfiguration userConfiguration;
 
-    public RdbFolderSyncInterface(final Session sessionObj, final Context ctx) throws OXException {
-        this(sessionObj, ctx, null);
-    }
 
-    public RdbFolderSyncInterface(final Session session, final Context ctx, final OXFolderAccess oxfolderAccess) throws OXException {
+    public RdbFolderSyncInterface(Session session, Context ctx, OXFolderAccess oxfolderAccess, UserConfiguration userConfiguration, User user) {
         super();
         this.session = session;
-        user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
+        this.user = user;
         this.userId = user.getId();
-        user.getGroups();
         this.ctx = ctx;
         this.oxfolderAccess = oxfolderAccess == null ? new OXFolderAccess(ctx) : oxfolderAccess;
-        userConfiguration = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx);
+        this.userConfiguration = userConfiguration;
     }
 
     /*

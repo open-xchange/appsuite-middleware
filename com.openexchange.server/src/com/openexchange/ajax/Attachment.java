@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax;
 
-import static com.openexchange.ajax.SessionUtility.getSessionObject;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -83,16 +82,15 @@ import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Streams;
 import com.openexchange.json.OXJSONWriter;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.exceptions.OXAborted;
@@ -101,6 +99,8 @@ import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.UserService;
+import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * Attachment
@@ -147,19 +147,19 @@ public class Attachment extends PermissionServlet {
 
         final ServerSession session;
         final User user;
+        final UserConfiguration userConfig;
         try {
             session = ServerSessionAdapter.valueOf(getSessionObject(req));
-            user = UserStorage.getInstance().getUser(session.getUserId(), session.getContext());
+            user = getUserService().getUser(session.getUserId(), session.getContext());
+            userConfig = getUserConfigurationService().getUserConfiguration(
+                session.getUserId(),
+                session.getContext());
         } catch (final OXException e) {
             handle(res, e, action, getSessionObject(req));
             return;
         }
 
         final Context ctx = session.getContext();
-        final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(
-            session.getUserId(),
-            session.getContext());
-
         if (ACTION_DOCUMENT.equals(action)) {
             try {
                 require(req, PARAMETER_FOLDERID, PARAMETER_ATTACHEDID, PARAMETER_MODULE, PARAMETER_ID);
@@ -273,19 +273,19 @@ public class Attachment extends PermissionServlet {
 
         final ServerSession session;
         final User user;
+        final UserConfiguration userConfig;
         try {
             session = ServerSessionAdapter.valueOf(getSessionObject(req));
-            user = UserStorage.getInstance().getUser(session.getUserId(), session.getContext());
+            user = getUserService().getUser(session.getUserId(), session.getContext());
+            userConfig = getUserConfigurationService().getUserConfiguration(
+                session.getUserId(),
+                session.getContext());
         } catch (final OXException e) {
             handle(res, e, action, getSessionObject(req));
             return;
         }
 
         final Context ctx = session.getContext();
-        final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(
-            session.getUserId(),
-            session.getContext());
-
         try {
             checkSize(req.getContentLength());
             if (ACTION_ATTACH.equals(action)) {
@@ -572,6 +572,14 @@ public class Attachment extends PermissionServlet {
         if (size > maxUploadSize) {
             throw UploadSizeExceededException.create(size, maxUploadSize, true);
         }
+    }
+
+    private UserConfigurationService getUserConfigurationService() throws OXException {
+        return ServerServiceRegistry.getInstance().getService(UserConfigurationService.class, true);
+    }
+
+    private UserService getUserService() throws OXException {
+        return ServerServiceRegistry.getInstance().getService(UserService.class, true);
     }
 
     protected void require(final HttpServletRequest req, final String... parameters) throws OXException {
