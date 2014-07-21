@@ -61,7 +61,8 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.osgi.util.ServiceCallWrapper.ServiceClosure;
+import com.openexchange.osgi.util.ServiceCallWrapper.ServiceException;
+import com.openexchange.osgi.util.ServiceCallWrapper.ServiceUser;
 import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObject;
@@ -489,26 +490,22 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
     private static Context loadContext(final int contextId) throws OXException {
         try {
             return doServiceCall(ServerSessionAdapter.class, ContextService.class,
-                new ServiceClosure<ContextService, Context>() {
+                new ServiceUser<ContextService, Context>() {
                     @Override
-                    public Context perform(ContextService service) throws OXException {
+                    public Context call(ContextService service) throws OXException {
                         return service.getContext(contextId);
                     }
                 });
-        } catch (Exception e) {
-            if (e instanceof OXException) {
-                throw (OXException) e;
-            }
-
-            throw new OXException(e);
+        } catch (ServiceException e) {
+            throw e.toOXException();
         }
     }
 
     private User loadUser() throws Exception {
         return doServiceCall(getClass(), UserService.class,
-            new ServiceClosure<UserService, User>() {
+            new ServiceUser<UserService, User>() {
                 @Override
-                public User perform(UserService service) throws OXException {
+                public User call(UserService service) throws OXException {
                     return service.getUser(getUserId(), getContextId());
                 }
             });
@@ -516,9 +513,9 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
 
     private UserPermissionBits loadUserPermissionBits() throws Exception {
         return doServiceCall(getClass(), UserPermissionService.class,
-            new ServiceClosure<UserPermissionService, UserPermissionBits>() {
+            new ServiceUser<UserPermissionService, UserPermissionBits>() {
                 @Override
-                public UserPermissionBits perform(UserPermissionService service) throws OXException {
+                public UserPermissionBits call(UserPermissionService service) throws OXException {
                     return service.getUserPermissionBits(getUserId(), getContext());
                 }
             });
@@ -526,9 +523,9 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
 
     private UserConfiguration loadUserConfiguration() throws Exception {
         return doServiceCall(getClass(), UserConfigurationService.class,
-            new ServiceClosure<UserConfigurationService, UserConfiguration>() {
+            new ServiceUser<UserConfigurationService, UserConfiguration>() {
                 @Override
-                public UserConfiguration perform(UserConfigurationService service) throws OXException {
+                public UserConfiguration call(UserConfigurationService service) throws OXException {
                     return service.getUserConfiguration(getUserId(), getContext());
                 }
             });

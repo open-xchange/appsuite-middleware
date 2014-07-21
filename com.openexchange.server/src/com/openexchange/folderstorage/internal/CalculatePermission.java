@@ -68,7 +68,8 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.osgi.util.ServiceCallWrapper.ServiceClosure;
+import com.openexchange.osgi.util.ServiceCallWrapper.ServiceException;
+import com.openexchange.osgi.util.ServiceCallWrapper.ServiceUser;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserPermissionService;
@@ -143,8 +144,6 @@ public final class CalculatePermission {
                 }
             } catch (final OXException e) {
                 LOG.warn("User configuration could not be loaded. Ignoring user permissions.", e);
-            } catch (Exception e) {
-                LOG.warn("User configuration could not be loaded. Ignoring user permissions.", e);
             }
         }
         /*
@@ -191,7 +190,7 @@ public final class CalculatePermission {
         final UserPermissionBits userPermissionBits;
         try {
             userPermissionBits = getUserPermissionBits(user.getId(), context);
-        } catch (Exception e) {
+        } catch (OXException e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e.getMessage(), e);
         }
 
@@ -208,7 +207,7 @@ public final class CalculatePermission {
         final UserPermissionBits userPermissionBits;
         try {
             userPermissionBits = getUserPermissionBits(user.getId(), context);
-        } catch (Exception e) {
+        } catch (OXException e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e.getMessage(), e);
         }
 
@@ -299,34 +298,46 @@ public final class CalculatePermission {
             allowedContentTypes);
     }
 
-    private static User[] getUsers(final int[] userIds, final Context context) throws Exception {
-        return doServiceCall(CalculatePermission.class, UserService.class,
-            new ServiceClosure<UserService, User[]>() {
-                @Override
-                public User[] perform(UserService service) throws Exception {
-                    return service.getUser(context, userIds);
-                }
-            });
+    private static User[] getUsers(final int[] userIds, final Context context) throws OXException {
+        try {
+            return doServiceCall(CalculatePermission.class, UserService.class,
+                new ServiceUser<UserService, User[]>() {
+                    @Override
+                    public User[] call(UserService service) throws Exception {
+                        return service.getUser(context, userIds);
+                    }
+                });
+        } catch (ServiceException e) {
+            throw e.toOXException();
+        }
     }
 
-    private static UserPermissionBits getUserPermissionBits(final int userId, final Context context) throws Exception {
-        return doServiceCall(CalculatePermission.class, UserPermissionService.class,
-            new ServiceClosure<UserPermissionService, UserPermissionBits>() {
-                @Override
-                public UserPermissionBits perform(UserPermissionService service) throws Exception {
-                    return service.getUserPermissionBits(userId, context);
-                }
-            });
+    private static UserPermissionBits getUserPermissionBits(final int userId, final Context context) throws OXException {
+        try {
+            return doServiceCall(CalculatePermission.class, UserPermissionService.class,
+                new ServiceUser<UserPermissionService, UserPermissionBits>() {
+                    @Override
+                    public UserPermissionBits call(UserPermissionService service) throws Exception {
+                        return service.getUserPermissionBits(userId, context);
+                    }
+                });
+        } catch (ServiceException e) {
+            throw e.toOXException();
+        }
     }
 
-    private static UserPermissionBits[] getUserPermissionBits(final Context context, final User[] users) throws Exception {
-        return doServiceCall(CalculatePermission.class, UserPermissionService.class,
-            new ServiceClosure<UserPermissionService, UserPermissionBits[]>() {
-                @Override
-                public UserPermissionBits[] perform(UserPermissionService service) throws Exception {
-                    return service.getUserPermissionBits(context, users);
-                }
-            });
+    private static UserPermissionBits[] getUserPermissionBits(final Context context, final User[] users) throws OXException {
+        try {
+            return doServiceCall(CalculatePermission.class, UserPermissionService.class,
+                new ServiceUser<UserPermissionService, UserPermissionBits[]>() {
+                    @Override
+                    public UserPermissionBits[] call(UserPermissionService service) throws Exception {
+                        return service.getUserPermissionBits(context, users);
+                    }
+                });
+        } catch (ServiceException e) {
+            throw e.toOXException();
+        }
     }
 
     private static Permission getMaxPermission(final Permission[] permissions, final UserPermissionBits userPermissionBits) {

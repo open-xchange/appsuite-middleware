@@ -53,46 +53,151 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
 
 
 /**
- * {@link ServiceCallWrapper}
+ * The {@link ServiceCallWrapper} may be used in static helper classes to execute calls to
+ * services that are not available yet in the current scope.
+ *
+ * This wrapper is especially meant to be used in cases where formerly service implementations
+ * have been used directly instead of their service equivalent. Such usage is discouraged in
+ * most cases and should be avoided. See below example how such legacy code can be refactored:<br>
+ * <br>
+ * Before:
+ * <pre>
+ * User user = UserStorage.getInstance().getUser(userId, contextId);
+ * </pre>
+ *
+ * After:
+ * <pre>
+ * try {
+ *     User user = ServiceCallWrapper.doServiceCall(CurrentClazz.class, UserService.class,
+ *          new ServiceUser<UserService, User>() {
+ *              public User perform(UserService service) throws Exception {
+ *                  return service.getUser(context, userId);
+ *              }
+ *          });
+ * } catch (ServiceException e) {
+ *     if (e.isServiceUnavailable()) {
+ *         handleServiceUnavailable();
+ *     } else {
+ *         throw e.toOXException();
+ *     }
+ * }
+ * </pre>
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
 public class ServiceCallWrapper {
 
-    public static <S, T> T doServiceCall(Class<?> caller, Class<S> serviceClass, ServiceClosure<S, T> sc) throws Exception {
+    /**
+     * Performs a call to a specified service. The service is requested from the OSGi service registry and passed
+     * to the call()-method of a given {@link ServiceUser}.
+     *
+     * @param caller The calling class. Will be used to determine the {@link BundleContext} for getting the service.
+     *  Must not be <code>null</code>.
+     * @param serviceClass The class of the required service. The service registry will be asked for a service according
+     *  to this class.
+     * @param serviceUser The {@link ServiceUser} that is called with the requested service.
+     * @return The return value of {@link ServiceUser#call(Object)}.
+     * @throws ServiceException if the service was not available or an error occurred during {@link ServiceUser#call(Object)}.
+     */
+    public static <S, T> T doServiceCall(Class<?> caller, Class<S> serviceClass, ServiceUser<S, T> serviceUser) throws ServiceException {
         Bundle bundle = FrameworkUtil.getBundle(caller);
         if (bundle == null) {
-            throw new IllegalStateException("Class '" + caller.getName() + "' was loaded outside from OSGi!");
+            throw new ServiceException("Class '" + caller.getName() + "' was loaded outside from OSGi!", serviceClass);
         }
 
         BundleContext bundleContext = bundle.getBundleContext();
         if (bundleContext == null) {
-            throw new IllegalStateException("No valid bundle context exists for bundle '" + bundle.getSymbolicName() + "'!");
+            throw new ServiceException("No valid bundle context exists for bundle '" + bundle.getSymbolicName() + "'!", serviceClass);
         }
 
         ServiceReference<S> serviceReference = bundleContext.getServiceReference(serviceClass);
         if (serviceReference == null) {
-            throw new IllegalStateException("Service '" + serviceClass.getName() + "' is not available!");
+            throw new ServiceException("Service '" + serviceClass.getName() + "' is not available!", serviceClass);
         }
 
         try {
             S service = bundleContext.getService(serviceReference);
             if (service == null) {
-                throw new IllegalStateException("Service '" + serviceClass.getName() + "' is not available!");
+                throw new ServiceException("Service '" + serviceClass.getName() + "' is not available!", serviceClass);
             }
 
-            return sc.perform(service);
+            return serviceUser.call(service);
+        } catch (Exception e) {
+            throw new ServiceException(e, serviceClass);
         } finally {
             bundleContext.ungetService(serviceReference);
         }
     }
 
-    public static interface ServiceClosure<S, T> {
-        T perform(S service) throws Exception;
+    public static interface ServiceUser<S, T> {
+        T call(S service) throws Exception;
+    }
+
+    /**
+     * This exception is thrown by the {@link ServiceCallWrapper}. It indicates either the absence
+     * of the needed service or an exception thrown by the service call itself.
+     *
+     * In the first case {@link ServiceException#isServiceUnavailable()} returns <code>true</code>.
+     * A more detailed message about why the service couldn't be obtained can then be got via
+     * {@link ServiceException#getMessage()}. In the second case {@link ServiceException#isServiceUnavailable()}
+     * returns <code>false</code> and the causing exception can be obtained via {@link ServiceException#getCause()}.
+     *
+     * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+     */
+    public static class ServiceException extends Exception {
+
+        private static final long serialVersionUID = 4795091520600135899L;
+
+        private final Class<?> serviceClass;
+
+        private final boolean isServiceUnavailable;
+
+        ServiceException(String message, Class<?> serviceClass) {
+            super(message);
+            this.serviceClass = serviceClass;
+            isServiceUnavailable = true;
+        }
+
+        ServiceException(Throwable cause, Class<?> serviceClass) {
+            super(cause);
+            this.serviceClass = serviceClass;
+            isServiceUnavailable = false;
+        }
+
+        /**
+         * @return <code>true</code> if the cause for this exception is a missing service, otherwise <code>false</code>.
+         */
+        public boolean isServiceUnavailable() {
+            return isServiceUnavailable;
+        }
+
+        /**
+         * Throws an {@link OXException} according to the actual cause of this exception.
+         * <ul>
+         * <li>If the service was not available, {@link ServiceExceptionCode#SERVICE_UNAVAILABLE} is thrown.</li>
+         * <li>If the underlying exception is an {@link OXException}, it is simply re-thrown.</li>
+         * <li>A generic {@link OXException} is thrown with the cause set to the cause of this exception.</li>
+         * </ul>
+         */
+        public OXException toOXException() {
+            if (isServiceUnavailable) {
+                return ServiceExceptionCode.SERVICE_UNAVAILABLE.create(serviceClass.getName());
+            }
+
+            Throwable cause = getCause();
+            if (cause instanceof OXException) {
+                return (OXException) cause;
+            }
+
+            return new OXException(cause);
+        }
+
     }
 
 }
