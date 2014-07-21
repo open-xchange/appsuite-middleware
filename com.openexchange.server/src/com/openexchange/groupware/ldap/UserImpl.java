@@ -289,7 +289,7 @@ public class UserImpl implements User, Cloneable {
      * Setter for imapServer.
      * @param imapServer IMAP server.
      */
-    void setImapServer(final String imapServer) {
+    public void setImapServer(final String imapServer) {
         this.imapServer = imapServer == null ? null : IDNA.toUnicode(imapServer);
     }
 
@@ -305,7 +305,7 @@ public class UserImpl implements User, Cloneable {
      * Setter for smtpServer.
      * @param smtpServer SMTP server.
      */
-    void setSmtpServer(final String smtpServer) {
+    public void setSmtpServer(final String smtpServer) {
         this.smtpServer = smtpServer == null ? null : IDNA.toUnicode(smtpServer);
     }
 
@@ -501,7 +501,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * @param imapLogin the imapLogin to set
      */
-    void setImapLogin(final String imapLogin) {
+    public void setImapLogin(final String imapLogin) {
         this.imapLogin = imapLogin == null ? imapLogin : IDNA.toIDN(imapLogin);
     }
 
