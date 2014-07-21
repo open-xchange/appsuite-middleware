@@ -90,6 +90,7 @@ public class ShareServlet extends HttpServlet {
 
         // http://192.168.32.191/ajax/share/19496DEDE78141A6AB77B316ADDB366E
         // http://192.168.32.191/ajax/share/19496ded2c6542b5a1d6ef4aeeea4d20
+        // http://192.168.32.191/ajax/share/19496ded2c6542b5a1d6ef4aeeea4d22 - digest
 
         try {
             /*

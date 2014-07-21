@@ -67,6 +67,11 @@ public enum AuthenticationMode {
      */
     BASIC(1),
 
+    /**
+     * Access is granted if the client provides the correct message digest of his credentials.
+     */
+    DIGEST(2),
+
     ;
 
     /**

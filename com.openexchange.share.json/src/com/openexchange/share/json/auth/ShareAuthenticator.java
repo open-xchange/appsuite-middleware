@@ -50,19 +50,25 @@
 package com.openexchange.share.json.auth;
 
 import static com.openexchange.tools.servlet.http.Authorization.checkForBasicAuthorization;
+import static com.openexchange.tools.servlet.http.Authorization.checkForDigestAuthorization;
 import java.io.IOException;
+import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.fields.Header;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
+import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.share.Share;
 import com.openexchange.share.json.internal.ShareServiceLookup;
 import com.openexchange.tools.servlet.http.Authorization;
 import com.openexchange.tools.servlet.http.Authorization.Credentials;
+import com.openexchange.tools.webdav.digest.DigestUtility;
 import com.openexchange.user.UserService;
 
 /**
@@ -85,12 +91,24 @@ public class ShareAuthenticator {
         this.share = share;
     }
 
+    /**
+     * Authenticates the supplied HTTP request using the share's authentication mode. In case authentication fails, an appropriate HTTP
+     * status and suitable authentication headers are automatically written to the supplied response.
+     *
+     * @param request The request
+     * @param response The response
+     * @return The authentication, or <code>null</code> if not authorized
+     * @throws OXException
+     * @throws IOException
+     */
     public ShareAuthentication authenticate(HttpServletRequest request, HttpServletResponse response) throws OXException, IOException {
         switch (share.getAuthentication()) {
         case ANONYMOUS:
             return anonymous(request, response);
         case BASIC:
             return basic(request, response);
+        case DIGEST:
+            return digest(request, response);
         default:
             throw new UnsupportedOperationException(String.valueOf(share.getAuthentication()));
         }
@@ -105,36 +123,87 @@ public class ShareAuthenticator {
     private ShareAuthentication basic(HttpServletRequest request, HttpServletResponse response) throws OXException, IOException {
         String authHeader = request.getHeader(Header.AUTH_HEADER);
         if (false == checkForBasicAuthorization(authHeader)) {
-            return unauthorized(share, response);
+            return unauthorized(share, request, response);
         }
         Credentials credentials = Authorization.decode(authHeader);
         if (null == credentials || false == Authorization.checkLogin(credentials.getPassword())) {
-            return unauthorized(share, response);
+            return unauthorized(share, request, response);
         }
-          //TODO: existence of guest via login2guest table?
-//        guestUserID = userService.getUserId(credentials.getLogin(), context);
-//        if (guestUserID != share.getGuest()) {
-//            sendError(response, HttpServletResponse.SC_UNAUTHORIZED, "401 Unauthorized");
-//            return;
-//        }
-//        guestUser = userService.getUser(guestUserID, context);
+        //TODO: existence of guest via login2guest table?
+        //      guestUserID = userService.getUserId(credentials.getLogin(), context);
+        //      if (guestUserID != share.getGuest()) {
+        //          sendError(response, HttpServletResponse.SC_UNAUTHORIZED, "401 Unauthorized");
+        //          return;
+        //      }
+        //      guestUser = userService.getUser(guestUserID, context);
         Context context = ShareServiceLookup.getService(ContextService.class, true).getContext(share.getContextID());
         UserService userService = ShareServiceLookup.getService(UserService.class, true);
         User user = userService.getUser(share.getGuest(), context);
-        if (Strings.isEmpty(credentials.getLogin()) || false == credentials.getLogin().equalsIgnoreCase(user.getMail())) {
-            return unauthorized(share, response);
-        }
-        if (false == userService.authenticate(user, credentials.getPassword())) {
-            return unauthorized(share, response);
+        if (Strings.isEmpty(credentials.getLogin()) || false == credentials.getLogin().equalsIgnoreCase(user.getMail()) ||
+            Strings.isEmpty(credentials.getPassword()) || false == credentials.getPassword().equals(decrypt(user.getUserPassword()))) {
+            return unauthorized(share, request, response);
         }
         return new ShareAuthentication(user, context);
     }
 
-    private ShareAuthentication unauthorized(Share share, HttpServletResponse response) throws IOException {
-        response.setHeader("WWW-Authenticate", "Basic realm=\"Please enter your e-mail address and password to access the share "
-            + share.getToken() + "\", encoding=\"UTF-8\"");
+    private ShareAuthentication digest(HttpServletRequest request, HttpServletResponse response) throws OXException, IOException {
+        String authHeader = request.getHeader(Header.AUTH_HEADER);
+        if (false == checkForDigestAuthorization(authHeader)) {
+            return unauthorized(share, request, response);
+        }
+        com.openexchange.tools.webdav.digest.Authorization parsed = DigestUtility.getInstance().parseDigestAuthorization(authHeader);
+        String username = parsed.getUser();
+        Context context = ShareServiceLookup.getService(ContextService.class, true).getContext(share.getContextID());
+        UserService userService = ShareServiceLookup.getService(UserService.class, true);
+        User user = userService.getUser(share.getGuest(), context);
+        if (Strings.isEmpty(username) || false == username.equalsIgnoreCase(user.getMail())) {
+            return unauthorized(share, request, response);
+        }
+        String serverDigest = DigestUtility.getInstance().generateServerDigest(request, decrypt(user.getUserPassword()));
+        if (null == serverDigest || false == serverDigest.equals(parsed.getResponse())) {
+            return unauthorized(share, request, response);
+        }
+        return new ShareAuthentication(user, context);
+    }
+
+//    private static String encrypt(String value) throws OXException {
+//        CryptoService cryptoService = ShareServiceLookup.getService(CryptoService.class, true);
+//        String cryptKey = ShareServiceLookup.getService(ConfigurationService.class, true).getProperty(
+//            "com.openexchange.share.cryptKey", "erE2e8OhAo71");
+//        return cryptoService.encrypt(value, cryptKey);
+//    }
+
+    private static String decrypt(String value) throws OXException {
+        CryptoService cryptoService = ShareServiceLookup.getService(CryptoService.class, true);
+        String cryptKey = ShareServiceLookup.getService(ConfigurationService.class, true).getProperty(
+            "com.openexchange.share.cryptKey", "erE2e8OhAo71");
+        return cryptoService.decrypt(value, cryptKey);
+    }
+
+    private ShareAuthentication unauthorized(Share share, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        switch (share.getAuthentication()) {
+        case BASIC:
+            response.setHeader("WWW-Authenticate", "Basic realm=\"" + getRealm(share) + "\", encoding=\"UTF-8\"");
+            break;
+        case DIGEST:
+            response.setHeader("WWW-Authenticate", new StringBuilder()
+                .append("Digest realm=\"").append(getRealm(share)).append("\", ")
+                .append("qop=\"auth,auth-int\", ")
+                .append("nonce=\"").append(DigestUtility.getInstance().generateNOnce(request)).append("\", ")
+                .append("opaque=\"").append(UUIDs.getUnformattedString(UUID.randomUUID())).append("\", ")
+                .append("stale=\"false\", ")
+                .append("algorithm=\"MD5\"")
+            .toString());
+            break;
+        default:
+            break;
+        }
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "401 Unauthorized");
         return null;
+    }
+
+    private static String getRealm(Share share) {
+        return "Share " + share.getToken();
     }
 
 }
