@@ -73,12 +73,12 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.UserService;
 
 /**
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
@@ -90,11 +90,16 @@ public class AuditEventHandler implements EventHandler {
 
     private static final SimpleDateFormat logDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+    private final UserService userService;
+
     /**
      * Initializes a new {@link AuditEventHandler}.
+     * @param userService
      */
-    public AuditEventHandler() {
+    public AuditEventHandler(UserService userService) {
         super();
+        this.userService = userService;
+
         try {
             if (AuditConfiguration.getEnabled() == true) {
                 LOG.info("Using own Logging instance.");
@@ -297,9 +302,9 @@ public class AuditEventHandler implements EventHandler {
         appendUserInformation(commonEvent.getUserId(), commonEvent.getContextId(), log);
         log.append("CONTEXT ID: ").append(commonEvent.getContextId()).append("; ");
         log.append("FOLDER ID: ").append(folder.getObjectID()).append("; ");
-        log.append("CREATED BY: ").append(UserStorage.getInstance().getUser(folder.getCreatedBy(), context).getDisplayName()).append(
+        log.append("CREATED BY: ").append(userService.getUser(folder.getCreatedBy(), context).getDisplayName()).append(
             "; ");
-        log.append("MODIFIED BY: ").append(UserStorage.getInstance().getUser(folder.getModifiedBy(), context).getDisplayName()).append(
+        log.append("MODIFIED BY: ").append(userService.getUser(folder.getModifiedBy(), context).getDisplayName()).append(
             "; ");
         log.append("NAME: ").append(folder.getFolderName()).append("; ");
     }
@@ -327,7 +332,7 @@ public class AuditEventHandler implements EventHandler {
             int createdBy = appointment.getCreatedBy();
             if (createdBy > 0) {
                 try {
-                    log.append("CREATED BY: ").append(UserStorage.getInstance().getUser(createdBy, context).getDisplayName()).append("; ");
+                    log.append("CREATED BY: ").append(userService.getUser(createdBy, context).getDisplayName()).append("; ");
                 } catch (OXException e) {
                     LOG.debug("Failed to load user {} in context {}", createdBy, context.getContextId(), e);
                     log.append("CREATED BY: <unknown>; ");
@@ -340,7 +345,7 @@ public class AuditEventHandler implements EventHandler {
             int modifiedBy = appointment.getModifiedBy();
             if (modifiedBy > 0) {
                 try {
-                    log.append("MODIFIED BY: ").append(UserStorage.getInstance().getUser(modifiedBy, context).getDisplayName()).append("; ");
+                    log.append("MODIFIED BY: ").append(userService.getUser(modifiedBy, context).getDisplayName()).append("; ");
                 } catch (OXException e) {
                     LOG.debug("Failed to load user {} in context {}", modifiedBy, context.getContextId(), e);
                     log.append("MODIFIED BY: <unknown>; ");
@@ -381,11 +386,11 @@ public class AuditEventHandler implements EventHandler {
             log.append("OBJECT ID: ").append(contact.getObjectID()).append("; ");
             if (contact.containsCreatedBy()) {
                 log.append("CREATED BY: ").append(
-                    UserStorage.getInstance().getUser(contact.getCreatedBy(), context).getDisplayName()).append("; ");
+                    userService.getUser(contact.getCreatedBy(), context).getDisplayName()).append("; ");
             }
             if (contact.containsModifiedBy()) {
                 log.append("MODIFIED BY: ").append(
-                    UserStorage.getInstance().getUser(contact.getModifiedBy(), context).getDisplayName()).append("; ");
+                    userService.getUser(contact.getModifiedBy(), context).getDisplayName()).append("; ");
             }
             log.append("CONTACT FULLNAME: ").append(contact.getDisplayName()).append(';');
             log.append("FOLDER: ").append(getPathToRoot(contact.getParentFolderID(), commonEvent.getSession())).append(';');
@@ -437,8 +442,8 @@ public class AuditEventHandler implements EventHandler {
         appendUserInformation(commonEvent.getUserId(), commonEvent.getContextId(), log);
         log.append("CONTEXT ID: ").append(commonEvent.getContextId()).append("; ");
         log.append("OBJECT ID: ").append(task.getObjectID()).append("; ");
-        log.append("CREATED BY: ").append(UserStorage.getInstance().getUser(task.getCreatedBy(), context).getDisplayName()).append("; ");
-        log.append("MODIFIED BY: ").append(UserStorage.getInstance().getUser(task.getModifiedBy(), context).getDisplayName()).append("; ");
+        log.append("CREATED BY: ").append(userService.getUser(task.getCreatedBy(), context).getDisplayName()).append("; ");
+        log.append("MODIFIED BY: ").append(userService.getUser(task.getModifiedBy(), context).getDisplayName()).append("; ");
         log.append("TITLE: ").append(task.getTitle()).append("; ");
         log.append("FOLDER: ").append(getPathToRoot(task.getParentFolderID(), commonEvent.getSession())).append(';');
     }
@@ -461,8 +466,8 @@ public class AuditEventHandler implements EventHandler {
         appendUserInformation(commonEvent.getUserId(), commonEvent.getContextId(), log);
         log.append("CONTEXT ID: ").append(commonEvent.getContextId()).append("; ");
         log.append("OBJECT ID: ").append(document.getId()).append("; ");
-        log.append("CREATED BY: ").append(UserStorage.getInstance().getUser(document.getCreatedBy(), context).getDisplayName()).append("; ");
-        log.append("MODIFIED BY: ").append(UserStorage.getInstance().getUser(document.getModifiedBy(), context).getDisplayName()).append(
+        log.append("CREATED BY: ").append(userService.getUser(document.getCreatedBy(), context).getDisplayName()).append("; ");
+        log.append("MODIFIED BY: ").append(userService.getUser(document.getModifiedBy(), context).getDisplayName()).append(
             "; ");
         log.append("TITLE: ").append(document.getTitle()).append("; ");
         log.append("TITLE: ").append(document.getFileName()).append("; ");
@@ -497,7 +502,7 @@ public class AuditEventHandler implements EventHandler {
     private void appendUserInformation(final int userId, final int contextId, final StringBuilder log) {
         String displayName;
         try {
-            displayName = UserStorage.getInstance().getUser(userId, ContextStorage.getInstance().getContext(contextId)).getDisplayName();
+            displayName = userService.getUser(userId, ContextStorage.getInstance().getContext(contextId)).getDisplayName();
         } catch (final Exception e) {
             // Ignore
             displayName = null;
