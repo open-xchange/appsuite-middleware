@@ -75,13 +75,13 @@ import com.openexchange.context.ContextService;
 import com.openexchange.data.conversion.ical.itip.ITipEmitter;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.html.HtmlService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
+import com.openexchange.userconf.UserConfigurationService;
 
 
 /**
@@ -96,7 +96,7 @@ public class ITipActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContextService.class, ResourceService.class, UserService.class, GroupService.class, TemplateService.class, TimerService.class, ITipEmitter.class, ConfigurationService.class, HtmlService.class, AttachmentBase.class };
+        return new Class<?>[] { ContextService.class, ResourceService.class, UserService.class, UserConfigurationService.class, GroupService.class, TemplateService.class, TimerService.class, ITipEmitter.class, ConfigurationService.class, HtmlService.class, AttachmentBase.class };
     }
 
     @Override
@@ -109,7 +109,7 @@ public class ITipActivator extends HousekeepingActivator {
         final ITipEmitter emitter = getService(ITipEmitter.class);
         final HtmlService htmlService = getService(HtmlService.class);
         final AttachmentBase attachments = getService(AttachmentBase.class);
-        final UserConfigurationStorage userConfigs = UserConfigurationStorage.getInstance();
+        final UserConfigurationService userConfigs = getService(UserConfigurationService.class);
         final TimerService timers = getService(TimerService.class);
 
         int detailInterval = config.getIntProperty("com.openexchange.calendar.notify.interval.detail", 120000);

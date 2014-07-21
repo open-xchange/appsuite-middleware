@@ -175,7 +175,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
         final Context ctx = Tools.getContext(session);
         final User user = Tools.getUser(session, ctx);
-        final UserConfiguration userConfiguration = Tools.getUserConfiguration(ctx, session.getUserId());
+        final UserConfiguration userConfiguration = Tools.getUserConfiguration(session.getUserId(), ctx);
         Connection readcon = null;
         try {
             readcon = DBPool.pickup(ctx);
@@ -211,7 +211,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         boolean close_connection = true;
         final Context ctx = Tools.getContext(session);
         final User user = Tools.getUser(session, ctx);
-        final UserConfiguration userConfig = Tools.getUserConfiguration(ctx, session.getUserId());
+        final UserConfiguration userConfig = Tools.getUserConfiguration(session.getUserId(), ctx);
         try {
             readcon = DBPool.pickup(ctx);
             cols = calendarCollection.checkAndAlterCols(cols);
@@ -273,7 +273,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         boolean close_connection = true;
         final Context ctx = Tools.getContext(session);
         final User user = Tools.getUser(session, ctx);
-        final UserConfiguration userConfig = Tools.getUserConfiguration(ctx, session.getUserId());
+        final UserConfiguration userConfig = Tools.getUserConfiguration(session.getUserId(), ctx);
         try {
             readcon = DBPool.pickup(ctx);
             cols = calendarCollection.checkAndAlterCols(cols);
@@ -338,7 +338,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         ResultSet rs = null;
         boolean close_connection = true;
         final Context ctx = Tools.getContext(session);
-        final UserConfiguration userConfig = Tools.getUserConfiguration(ctx, session.getUserId());
+        final UserConfiguration userConfig = Tools.getUserConfiguration(session.getUserId(), ctx);
         try {
             readcon = DBPool.pickup(ctx);
             cols = calendarCollection.checkAndAlterColsForDeleted(cols);
@@ -451,7 +451,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         Connection writecon = null;
         final Context ctx = Tools.getContext(session);
         final User user = Tools.getUser(session, ctx);
-        final UserConfiguration userConfig = Tools.getUserConfiguration(ctx, session.getUserId());
+        final UserConfiguration userConfig = Tools.getUserConfiguration(session.getUserId(), ctx);
         boolean modificationPerformed = false;
         try {
             final CalendarOperation co = new CalendarOperation();
@@ -465,7 +465,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                     if (oclp.canCreateObjects()) {
                         calendarCollection.checkForInvalidCharacters(cdao);
                         cdao.setActionFolder(cdao.getParentFolderID());
-                        final ConflictHandler ch = new ConflictHandler(cdao, null, session, true);
+                        final ConflictHandler ch = new ConflictHandler(cdao, null, session, userConfig, true);
                         final CalendarDataObject conflicts[] = ch.getConflicts();
                         if (conflicts.length == 0) {
                             writecon = DBPool.pickupWriteable(ctx);
@@ -537,6 +537,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         Connection writecon = null;
         final Context ctx = Tools.getContext(session);
         final User user = Tools.getUser(session, ctx);
+        final UserConfiguration userConfig = Tools.getUserConfiguration(session.getUserId(), ctx);
         try {
             final CalendarOperation co;
             final CalendarSqlImp cimp;
@@ -565,7 +566,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             final CalendarDataObject[] conflicts;
             {
                 final CalendarDataObject conflict_dao = calendarCollection.fillFieldsForConflictQuery(cdao, edao, false);
-                final ConflictHandler ch = new ConflictHandler(conflict_dao, edao, session, false);
+                final ConflictHandler ch = new ConflictHandler(conflict_dao, edao, session, userConfig, false);
                 conflicts = ch.getConflicts();
             }
             if (conflicts.length == 0) {
@@ -1005,7 +1006,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 
     /**
      * Validates provided confirm message and throws exception if an invalid character was found
-     * 
+     *
      * @param confirmMessage - the message to check
      * @throws OXException
      */
@@ -1021,7 +1022,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 
     /**
      * Returns the object id from the given CalendarDataObject exception if there is an exception.
-     * 
+     *
      * @param original - the original CalendarDataObject to get the exception id from
      * @param objectId - id of the series object to get all exceptions for
      * @param optOccurrenceId - the occurrence to get the exception from
@@ -1184,7 +1185,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 
         final Context ctx = Tools.getContext(session);
         final User user = Tools.getUser(session, ctx);
-        final UserConfiguration userConfig = Tools.getUserConfiguration(ctx, session.getUserId());
+        final UserConfiguration userConfig = Tools.getUserConfiguration(session.getUserId(), ctx);
         cols = calendarCollection.checkAndAlterCols(cols);
 
         final Connection readcon = DBPool.pickup(ctx);
@@ -1321,7 +1322,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         PreparedStatement prep = null;
         ResultSet rs = null;
         boolean close_connection = true;
-        final UserConfiguration userConfig = Tools.getUserConfiguration(ctx, session.getUserId());
+        final UserConfiguration userConfig = Tools.getUserConfiguration(session.getUserId(), ctx);
         final CalendarSqlImp calendarsqlimp = CalendarSql.getCalendarSqlImplementation();
         SearchIterator<List<Integer>> private_folder_information = null;
         try {
@@ -1412,7 +1413,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         boolean close_connection = true;
         final Context ctx = Tools.getContext(session);
         final User user = Tools.getUser(session, ctx);
-        final UserConfiguration userConfig = Tools.getUserConfiguration(ctx, session.getUserId());
+        final UserConfiguration userConfig = Tools.getUserConfiguration(session.getUserId(), ctx);
         try {
             readcon = DBPool.pickup(ctx);
             cols = calendarCollection.checkAndAlterCols(cols);
@@ -1619,7 +1620,7 @@ public class CalendarSql implements AppointmentSQLInterface {
     public int countObjectsInFolder(int folderId) throws OXException {
         OXFolderAccess oxfa = new OXFolderAccess(Tools.getContext(session));
         int folderType = oxfa.getFolderType(folderId, session.getUserId());
-        UserConfiguration userConfiguration = Tools.getUserConfiguration(Tools.getContext(session), session.getUserId());
+        UserConfiguration userConfiguration = Tools.getUserConfiguration(session.getUserId(), Tools.getContext(session));
         EffectivePermission folderPermission = oxfa.getFolderPermission(folderId, session.getUserId(), userConfiguration);
 
         if (!folderPermission.isFolderVisible()) {

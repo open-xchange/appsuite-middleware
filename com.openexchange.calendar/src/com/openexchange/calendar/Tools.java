@@ -61,20 +61,23 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.calendar.api.CalendarCollection;
+import com.openexchange.context.ContextService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.user.UserService;
+import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * {@link Tools} - Utility methods for calendaring.
@@ -83,6 +86,8 @@ import com.openexchange.tools.sql.DBUtils;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Tools {
+
+    private static final AtomicReference<ServiceLookup> SERVICES_REF = new AtomicReference<ServiceLookup>();
 
     private static final Map<String, TimeZone> zoneCache = new ConcurrentHashMap<String, TimeZone>();
 
@@ -93,6 +98,10 @@ public final class Tools {
      */
     private Tools() {
         super();
+    }
+
+    public static void setServiceLookup(ServiceLookup services) {
+        SERVICES_REF.set(services);
     }
 
     /**
@@ -118,15 +127,30 @@ public final class Tools {
     }
 
     public static Context getContext(final Session so) throws OXException {
-        return ContextStorage.getInstance().getContext(so.getContextId());
+        ContextService service = services().getService(ContextService.class);
+        if (service == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ContextService.class.getName());
+        }
+
+        return service.getContext(so.getContextId());
     }
 
     public static User getUser(final Session so, final Context ctx) throws OXException {
-        return UserStorage.getInstance().getUser(so.getUserId(), ctx);
+        UserService service = services().getService(UserService.class);
+        if (service == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName());
+        }
+
+        return service.getUser(so.getUserId(), ctx);
     }
 
-    public static UserConfiguration getUserConfiguration(final Context ctx, final int userId) throws OXException {
-        return UserConfigurationStorage.getInstance().getUserConfiguration(userId, ctx);
+    public static UserConfiguration getUserConfiguration(final int userId, final Context ctx) throws OXException {
+        UserConfigurationService service = services().getService(UserConfigurationService.class);
+        if (service == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserConfiguration.class.getName());
+        }
+
+        return service.getUserConfiguration(userId, ctx);
     }
 
     /**
@@ -249,6 +273,15 @@ public final class Tools {
         }
         sb.append(')');
         return sb.toString();
+    }
+
+    private static ServiceLookup services() {
+        ServiceLookup services = SERVICES_REF.get();
+        if (services == null) {
+            throw new IllegalStateException("ServiceLookup has not been set yet!");
+        }
+
+        return services;
     }
 
 }
