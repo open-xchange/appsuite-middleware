@@ -76,7 +76,7 @@ import com.openexchange.test.OXTestToolkit;
 
 public class CSVContactExportTest extends AbstractContactTest {
 
-	public static Exporter exp = new CSVContactExporter();
+	public static Exporter exp = new CSVContactExporter(null);
 	public static String TEST1_RESULT =
 		"\"Object id\"," +
 		"\"Folder id\"," +
