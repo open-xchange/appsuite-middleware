@@ -1,3 +1,7 @@
+* 2014-07-11 - pascal.bleser@open-xchange.com
+
+ - Fix for bug 33506: Fix primary key violation when changing more than one user attribute that had not been set before in OXUserInterface
+
 * 2014-05-08 - martin.schneider@open-xchange.com
 
  - Fix for bug 32378: Add config cascade parameters to --help and --extendedoptions
