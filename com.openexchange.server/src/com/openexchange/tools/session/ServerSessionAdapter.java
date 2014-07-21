@@ -56,7 +56,6 @@ import com.openexchange.annotation.Nullable;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
@@ -170,17 +169,23 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
      */
     public ServerSessionAdapter(final int userId, final int contextId) throws OXException {
         super();
-        context = contextId > 0 ? ContextStorage.getStorageContext(contextId) : null;
-        overwriteUser = null;
-        overwriteUserConfiguration = null;
-        overwritePermissionBits = null;
-        this.session = new SessionObject("synthetic") {
+        if (contextId > 0) {
+            context = loadContext(contextId);
+        } else {
+            context = null;
+        }
+
+        session = new SessionObject("synthetic") {
             @Override
             public int getUserId() { return userId; }
             @Override
             public int getContextId() {return contextId; }
         };
-        this.serverSession = null;
+
+        serverSession = null;
+        overwriteUserConfiguration = null;
+        overwritePermissionBits = null;
+        overwriteUser = null;
     }
 
     /**
@@ -190,21 +195,7 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
      * @throws OXException If initialization fails
      */
     public ServerSessionAdapter(final Session session) throws OXException {
-        super();
-
-        Validate.notNull(session, "Session is null.");
-
-        context = ContextStorage.getStorageContext(session.getContextId());
-        overwriteUser = null;
-        overwriteUserConfiguration = null;
-        overwritePermissionBits = null;
-        if (ServerSession.class.isInstance(session)) {
-            this.serverSession = (ServerSession) session;
-            this.session = null;
-        } else {
-            this.serverSession = null;
-            this.session = session;
-        }
+        this(session, loadContext(session.getContextId()), null, null, null);
     }
 
     /**
@@ -214,23 +205,8 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
      * @param ctx The session's context object
      * @throws IllegalArgumentException If session argument is <code>null</code>
      */
-    public ServerSessionAdapter(final Session session, final Context ctx) {
-        super();
-
-        Validate.notNull(session, "Session is null.");
-        Validate.notNull(ctx, "Context is null.");
-
-        context = ctx;
-        overwriteUser = null;
-        overwriteUserConfiguration = null;
-        overwritePermissionBits = null;
-        if (ServerSession.class.isInstance(session)) {
-            this.serverSession = (ServerSession) session;
-            this.session = null;
-        } else {
-            this.serverSession = null;
-            this.session = session;
-        }
+    public ServerSessionAdapter(@NonNull final Session session, @NonNull final Context ctx) {
+        this(session, ctx, null, null, null);
     }
 
     /**
@@ -242,22 +218,8 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
      * @throws IllegalArgumentException If session argument is <code>null</code>
      */
     public ServerSessionAdapter(@NonNull final Session session, @NonNull final Context ctx, @Nullable final User user) {
-        super();
+        this(session, ctx, user, null, null);
 
-        Validate.notNull(session, "Session is null.");
-        Validate.notNull(ctx, "Context is null.");
-
-        context = ctx;
-        overwriteUser = user;
-        overwriteUserConfiguration = null;
-        overwritePermissionBits = null;
-        if (ServerSession.class.isInstance(session)) {
-            this.serverSession = (ServerSession) session;
-            this.session = null;
-        } else {
-            this.serverSession = null;
-            this.session = session;
-        }
     }
 
     /**
@@ -269,15 +231,26 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
      * @throws IllegalArgumentException If session argument is <code>null</code>
      */
     public ServerSessionAdapter(@NonNull final Session session, @NonNull final Context ctx, @Nullable final User user, @Nullable final UserConfiguration userConfiguration) {
-        super();
+        this(session, ctx, user, userConfiguration, null);
+    }
 
+    /**
+     * Initializes a new {@link ServerSessionAdapter}.
+     *
+     * @param session The delegate session
+     * @param ctx The session's context object
+     * @param user The session's user object
+     * @throws IllegalArgumentException If session argument is <code>null</code>
+     */
+    public ServerSessionAdapter(@NonNull final Session session, @NonNull final Context ctx, @Nullable final User user, @Nullable final UserConfiguration userConfiguration, @Nullable final UserPermissionBits permissionBits) {
+        super();
         Validate.notNull(session, "Session is null.");
         Validate.notNull(ctx, "Context is null.");
 
         context = ctx;
         overwriteUser = user;
         overwriteUserConfiguration = userConfiguration;
-        overwritePermissionBits = null;
+        overwritePermissionBits = permissionBits;
         if (ServerSession.class.isInstance(session)) {
             this.serverSession = (ServerSession) session;
             this.session = null;
