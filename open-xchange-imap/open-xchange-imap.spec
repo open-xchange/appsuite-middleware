@@ -77,6 +77,9 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-2016
     ox_add_property com.openexchange.imap.ssl.ciphersuites "" $PFILE
+
+    # SoftwareChange_Request-2093
+    ox_add_property com.openexchange.imap.namespacePerUser "true" $PFILE
 fi
 
 %clean
