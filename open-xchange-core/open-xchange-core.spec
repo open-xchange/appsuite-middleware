@@ -985,9 +985,17 @@ ox_set_property com.openexchange.hazelcast.network.symmetricEncryption "$VALUE" 
 # SoftwareChange_Request-2037
 PFILE=/opt/open-xchange/etc/sessiond.properties
 ox_comment com.openexchange.sessiond.remoteParameterNames= add $PFILE
+
 # SoftwareChange_Request-2055
 ox_add_property com.openexchange.rest.services.basic-auth.login open-xchange /opt/open-xchange/etc/server.properties
 ox_add_property com.openexchange.rest.services.basic-auth.password secret /opt/open-xchange/etc/server.properties
+
+# SoftwareChange_Request-2081
+PFILE=/opt/open-xchange/etc/configdb.properties
+KEY=minIdle
+if ox_exists_property $KEY $PFILE; then
+    ox_remove_property $KEY $PFILE
+fi
 
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
