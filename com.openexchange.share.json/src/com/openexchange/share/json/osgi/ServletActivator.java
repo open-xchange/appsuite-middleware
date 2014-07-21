@@ -104,8 +104,8 @@ public class ServletActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        cleanUp();
         unregisterServlet();
+        cleanUp();
     }
 
     private void registerServlet() {
@@ -128,12 +128,12 @@ public class ServletActivator extends HousekeepingActivator {
     }
 
     private void unregisterServlet() {
-        ShareServiceLookup.set(null);
+        getService(HttpService.class).unregister(getService(DispatcherPrefixService.class).getPrefix() + "/share");
         if (false == registered) {
             return;
         }
         registered = false;
-        getService(HttpService.class).unregister(getService(DispatcherPrefixService.class).getPrefix() + "/share");
+        ShareServiceLookup.set(null);
     }
 
 }
