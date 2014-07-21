@@ -843,6 +843,11 @@ if ox_exists_property $KEY $PFILE; then
     ox_remove_property $KEY $PFILE
 fi
 
+# SoftwareChange_Request-2094
+PFILE=/opt/open-xchange/etc/mail.properties
+KEY=com.openexchange.mail.imageHost
+ox_add_property $KEY "" $PFILE
+
 setConfigFilePermissions() {
     PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
     for FILE in $PROTECT
