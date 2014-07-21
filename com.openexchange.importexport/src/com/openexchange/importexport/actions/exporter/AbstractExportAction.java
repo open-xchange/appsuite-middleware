@@ -63,9 +63,17 @@ import com.openexchange.importexport.exporters.Exporter;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.importexport.json.ExportRequest;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 public abstract class AbstractExportAction implements AJAXActionService {
+
+    protected final ServiceLookup services;
+
+    public AbstractExportAction(ServiceLookup services) {
+        super();
+        this.services = services;
+    }
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {

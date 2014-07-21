@@ -65,12 +65,12 @@ import com.openexchange.groupware.contact.helpers.ContactGetter;
 import com.openexchange.groupware.contact.helpers.ContactStringGetter;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.java.Charsets;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -79,7 +79,11 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class CSVContactExporter implements Exporter {
+public class CSVContactExporter extends AbstractExporter {
+
+    public CSVContactExporter(ServiceLookup services) {
+        super(services);
+    }
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CSVContactExporter.class);
 
@@ -145,7 +149,7 @@ public class CSVContactExporter implements Exporter {
         // check read access to folder
         EffectivePermission perm;
         try {
-            perm = fo.getEffectiveUserPermission(sessObj.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(
+            perm = fo.getEffectiveUserPermission(sessObj.getUserId(), getUserConfigurationService().getUserConfiguration(
                 sessObj.getUserId(),
                 sessObj.getContext()));
         } catch (final OXException e) {

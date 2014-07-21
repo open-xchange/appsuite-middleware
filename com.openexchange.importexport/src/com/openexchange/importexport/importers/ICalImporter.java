@@ -87,7 +87,6 @@ import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.osgi.ImportExportServices;
@@ -156,16 +155,12 @@ public class ICalImporter extends AbstractImporter {
 			// check format of folder
 			final int module = fo.getModule();
 			if (module == FolderObject.CALENDAR) {
-				if (!UserConfigurationStorage
-						.getInstance()
-						.getUserConfigurationSafe(session.getUserId(),
+				if (!getUserConfigurationService().getUserConfiguration(session.getUserId(),
 								session.getContext()).hasCalendar()) {
 					return false;
 				}
 			} else if (module == FolderObject.TASK) {
-				if (!UserConfigurationStorage
-						.getInstance()
-						.getUserConfigurationSafe(session.getUserId(),
+				if (!getUserConfigurationService().getUserConfiguration(session.getUserId(),
 								session.getContext()).hasTask()) {
 					return false;
 				}
@@ -178,8 +173,7 @@ public class ICalImporter extends AbstractImporter {
 			try {
 				perm = fo.getEffectiveUserPermission(
 						session.getUserId(),
-						UserConfigurationStorage.getInstance()
-								.getUserConfigurationSafe(session.getUserId(),
+						getUserConfigurationService().getUserConfiguration(session.getUserId(),
 										session.getContext()));
 			} catch (final OXException e) {
 				throw ImportExportExceptionCodes.NO_DATABASE_CONNECTION
@@ -599,9 +593,7 @@ public class ICalImporter extends AbstractImporter {
             return null;
         }
 
-		if (!UserConfigurationStorage
-				.getInstance()
-				.getUserConfigurationSafe(session.getUserId(),
+		if (!getUserConfigurationService().getUserConfiguration(session.getUserId(),
 						session.getContext()).hasCalendar()) {
             throw ImportExportExceptionCodes.CALENDAR_DISABLED
 					.create().setGeneric(Generic.NO_PERMISSION);
@@ -616,9 +608,7 @@ public class ICalImporter extends AbstractImporter {
 		if (taskFolderId == -1) {
             return null;
         }
-		if (!UserConfigurationStorage
-				.getInstance()
-				.getUserConfigurationSafe(session.getUserId(),
+		if (!getUserConfigurationService().getUserConfiguration(session.getUserId(),
 						session.getContext()).hasTask()) {
             throw ImportExportExceptionCodes.TASKS_DISABLED
 					.create().setGeneric(Generic.NO_PERMISSION);

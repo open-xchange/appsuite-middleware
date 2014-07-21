@@ -76,12 +76,12 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.java.Charsets;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -99,7 +99,11 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (minor: changes to new interface; fixes)
  */
-public class ICalExporter implements Exporter {
+public class ICalExporter extends AbstractExporter {
+
+    public ICalExporter(ServiceLookup services) {
+        super(services);
+    }
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICalExporter.class);
 
@@ -180,11 +184,11 @@ public class ICalExporter implements Exporter {
         //check format of folder
         final int module = fo.getModule();
         if (module == FolderObject.CALENDAR) {
-            if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()).hasCalendar()) {
+            if (!getUserConfigurationService().getUserConfiguration(sessObj.getUserId(), sessObj.getContext()).hasCalendar()) {
                 return false;
             }
         } else if (module == FolderObject.TASK) {
-            if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()).hasTask()) {
+            if (!getUserConfigurationService().getUserConfiguration(sessObj.getUserId(), sessObj.getContext()).hasTask()) {
                 return false;
             }
         } else {
@@ -194,7 +198,7 @@ public class ICalExporter implements Exporter {
         //check read access to folder
         EffectivePermission perm;
         try {
-            perm = fo.getEffectiveUserPermission(sessObj.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()));
+            perm = fo.getEffectiveUserPermission(sessObj.getUserId(), getUserConfigurationService().getUserConfiguration(sessObj.getUserId(), sessObj.getContext()));
         } catch (final OXException e) {
             throw ImportExportExceptionCodes.NO_DATABASE_CONNECTION.create(e);
         } catch (final RuntimeException e) {

@@ -66,11 +66,11 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.importexport.osgi.ImportExportServices;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -88,7 +88,11 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (minor: changes to new interface)
  */
-public class VCardExporter implements Exporter {
+public class VCardExporter extends AbstractExporter {
+
+    public VCardExporter(ServiceLookup services) {
+        super(services);
+    }
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(VCardExporter.class);
     protected final static int[] _contactFields = {
@@ -214,7 +218,7 @@ public class VCardExporter implements Exporter {
         }
         //check format of folder
         if ( fo.getModule() == FolderObject.CONTACT){
-            if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()).hasContact()) {
+            if (!getUserConfigurationService().getUserConfiguration(session.getUserId(), session.getContext()).hasContact()) {
                 return false;
             }
         } else {
@@ -223,7 +227,7 @@ public class VCardExporter implements Exporter {
         //check read access to folder
         final EffectivePermission perm;
         try {
-            perm = fo.getEffectiveUserPermission(session.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()));
+            perm = fo.getEffectiveUserPermission(session.getUserId(), getUserConfigurationService().getUserConfiguration(session.getUserId(), session.getContext()));
         } catch (final OXException e) {
             throw ImportExportExceptionCodes.NO_DATABASE_CONNECTION.create(e);
         } catch (final RuntimeException e) {
