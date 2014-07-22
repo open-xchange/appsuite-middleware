@@ -54,7 +54,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
-import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserPermissionService;
 
 
@@ -65,54 +64,14 @@ import com.openexchange.userconf.UserPermissionService;
  */
 public class UserPermissionServiceImpl implements UserPermissionService {
 
-    private final UserService userService;
-
-    public UserPermissionServiceImpl(UserService userService) {
-        super();
-        this.userService = userService;
-    }
-
     @Override
     public UserPermissionBits getUserPermissionBits(int userId, Context ctx) throws OXException {
-        User user = userService.getUser(userId, ctx);
-        if (user.isGuest()) {
-            return adjustGuestPermissions(
-                user,
-                ctx,
-                UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getCreatedBy(), ctx)
-            );
-        }
         return UserPermissionBitsStorage.getInstance().getUserPermissionBits(userId, ctx);
     }
 
     @Override
     public UserPermissionBits[] getUserPermissionBits(Context ctx, User[] users) throws OXException {
-        User[] realUsers = new User[users.length];
-        User[] guests = new User[users.length];
-        for (int i = 0; i < users.length; i++) {
-            User user = users[i];
-            if (user.isGuest()) {
-                User realUser = userService.getUser(user.getCreatedBy(), ctx);
-                realUsers[i] = realUser;
-                guests[i] = user;
-            } else {
-                realUsers[i] = user;
-            }
-        }
-
-        UserPermissionBits[] permissions = new UserPermissionBits[users.length];
-        UserPermissionBits[] loadedPermissions = UserPermissionBitsStorage.getInstance().getUserPermissionBits(ctx, realUsers);
-        for (int i = 0; i < loadedPermissions.length; i++) {
-            UserPermissionBits permissionBits = loadedPermissions[i];
-            User guest = guests[i];
-            if (guest != null) {
-                permissions[i] = adjustGuestPermissions(guest, ctx, permissionBits);
-            } else {
-                permissions[i] = permissionBits;
-            }
-        }
-
-        return permissions;
+        return UserPermissionBitsStorage.getInstance().getUserPermissionBits(ctx, users);
     }
 
     @Override
@@ -123,10 +82,6 @@ public class UserPermissionServiceImpl implements UserPermissionService {
     @Override
     public void removeUserPermissionBits(int userId, Context ctx) throws OXException {
         UserPermissionBitsStorage.getInstance().removeUserPermissionBits(userId, ctx);
-    }
-
-    private static UserPermissionBits adjustGuestPermissions(User guest, Context ctx, UserPermissionBits creatorPermissions) {
-        return new UserPermissionBits(creatorPermissions.getPermissionBits(), guest.getId(), guest.getGroups(), ctx.getContextId());
     }
 
 }

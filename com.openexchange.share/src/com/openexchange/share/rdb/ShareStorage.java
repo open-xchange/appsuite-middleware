@@ -49,6 +49,7 @@
 
 package com.openexchange.share.rdb;
 
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.share.Share;
 
@@ -61,10 +62,37 @@ import com.openexchange.share.Share;
  */
 public interface ShareStorage {
 
+    /**
+     * Loads a share identified by it's unique token.
+     *
+     * @param contextID The context ID
+     * @param token The token
+     * @return The share, or <code>null</code> if not found
+     * @throws OXException
+     */
     Share loadShare(int contextID, String token) throws OXException;
 
-    void storeShare(int contextID, Share share);
+    /**
+     * Saves a new share in the storage.
+     *
+     * @param share The share to store
+     */
+    void storeShare(Share share) throws OXException;
 
-    void updateShare(int contextID, Share share);
+    /**
+     * Updates an already existing share in the storage.
+     *
+     * @param share The share to update
+     */
+    void updateShare(Share share) throws OXException;
+
+    /**
+     * Loads all shares that were created by a specific user ID.
+     *
+     * @param contextID The context ID
+     * @param createdBy The ID of the user to load the shares from
+     * @return The shares
+     */
+    List<Share> loadSharesCreatedBy(int contextID, int createdBy) throws OXException;
 
 }

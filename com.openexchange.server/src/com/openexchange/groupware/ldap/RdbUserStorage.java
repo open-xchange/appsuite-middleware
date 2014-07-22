@@ -72,7 +72,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -109,12 +108,6 @@ public class RdbUserStorage extends UserStorage {
         "shadowLastChange,mail,timeZone,preferredLanguage,passwordMech,contactId FROM user WHERE user.cid=?";
 
     private static final String SELECT_USER = SELECT_ALL_USER + " AND id IN (";
-
-    private static final String SELECT_ALL_GUEST = "SELECT id, createdBy, displayName, mail, userPassword, passwordMech, timeZone, preferredLanguage FROM guest WHERE cid = ?";
-
-    private static final String SELECT_GUEST = SELECT_ALL_GUEST + " AND id IN (";
-
-    private static final String SELECT_USER_FOR_GUEST = "SELECT createdBy FROM guest WHERE cid = ? AND id = ?";
 
     private static final String SELECT_ATTRS = "SELECT id,uuid,name,value FROM user_attribute WHERE cid=? AND id IN (";
 
@@ -343,63 +336,15 @@ public class RdbUserStorage extends UserStorage {
         } catch (final SQLException e) {
             throw UserExceptionCode.LOAD_FAILED.create(e, e.getMessage());
         }
-
-        loadLoginInfo(ctx, con, users);
-        loadContact(ctx, con, users);
-        loadGroups(ctx, con, users);
-        loadAttributes(ctx.getContextId(), con, users, false);
-        if (users.size() != userIds.length) {
-            PreparedStatement stmt = null;
-            ResultSet result = null;
-            try  {
-                Set<Integer> guestIdsToLoad = new HashSet<Integer>();
-                for (int userId : userIds) {
-                    if (!users.containsKey(userId)) {
-                        guestIdsToLoad.add(userId);
-                    }
-                }
-
-                if (!guestIdsToLoad.isEmpty()) {
-                    stmt = con.prepareStatement(getIN(SELECT_GUEST, guestIdsToLoad.size()));
-                    int pos = 1;
-                    stmt.setInt(pos++, ctx.getContextId());
-                    for (final int userId : guestIdsToLoad) {
-                        stmt.setInt(pos++, userId);
-                    }
-                    result = stmt.executeQuery();
-                    while (result.next()) {
-                        final UserImpl user = new UserImpl();
-                        pos = 1;
-                        user.setId(result.getInt(pos++));
-                        user.setCreatedBy(result.getInt(pos++));
-                        user.setDisplayName(result.getString(pos++));
-                        user.setMail(result.getString(pos++));
-                        user.setUserPassword(result.getString(pos++));
-                        user.setPasswordMech(result.getString(pos++));
-                        user.setTimeZone(result.getString(pos++));
-                        user.setPreferredLanguage(result.getString(pos++));
-                        user.setMailEnabled(true);
-                        user.setShadowLastChange(-1);
-                        user.setContactId(-2);
-                        user.setAttributes(Collections.<String,Set<String>>emptyMap());
-                        user.setGroups(new int[] { 0 });
-                        user.setAliases(new String[0]);
-                        users.put(user.getId(), user);
-                    }
-                }
-            } catch (SQLException e) {
-                throw UserExceptionCode.LOAD_FAILED.create(e, e.getMessage());
-            } finally {
-                closeSQLStuff(result, stmt);
-            }
-        }
-
         for (final int userId : userIds) {
             if (!users.containsKey(userId)) {
                 throw UserExceptionCode.USER_NOT_FOUND.create(I(userId), I(ctx.getContextId()));
             }
         }
-
+        loadLoginInfo(ctx, con, users);
+        loadContact(ctx, con, users);
+        loadGroups(ctx, con, users);
+        loadAttributes(ctx.getContextId(), con, users, false);
         final User[] retval = new User[users.size()];
         for (int i = 0; i < length; i++) {
             retval[i] = users.get(userIds[i]);
@@ -495,7 +440,9 @@ public class RdbUserStorage extends UserStorage {
         final TIntObjectMap<TIntList> tmp = new TIntObjectHashMap<TIntList>(users.size(), 1);
         for (final User user : users.valueCollection()) {
             final TIntList userGroups = new TIntArrayList();
-            userGroups.add(0);
+            if (false == user.isGuest()) {
+                userGroups.add(0);
+            }
             tmp.put(user.getId(), userGroups);
         }
         try {
@@ -596,6 +543,20 @@ public class RdbUserStorage extends UserStorage {
                         }
                     }
                     user.setAliases(tmp.toArray(new String[tmp.size()]));
+                }
+            }
+            // Check for guest
+            {
+                UserAttribute guestCreatedBy = attrs.get("com.openexchange.user.guestCreatedBy");
+                if (null != guestCreatedBy) {
+                    Set<String> values = guestCreatedBy.getStringValues();
+                    if (null != values && 0 < values.size()) {
+                        try {
+                            user.setCreatedBy(Integer.valueOf(values.iterator().next()));
+                        } catch (NumberFormatException e) {
+                            throw UserExceptionCode.SQL_ERROR.create("Invalid value for \"com.openexchange.user.guestCreatedBy\"");//TODO
+                        }
+                    }
                 }
             }
             // Apply attributes

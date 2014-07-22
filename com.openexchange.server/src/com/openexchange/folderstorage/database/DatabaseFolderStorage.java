@@ -1108,10 +1108,14 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
 
     @Override
     public SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws OXException {
+        final User user = storageParameters.getUser();
+        if (user.isGuest() && false == SharedType.getInstance().equals(type)) {
+            return new SortableId[0];
+        }
         final ConnectionProvider provider = getConnection(Mode.READ, storageParameters);
         try {
             final Connection con = provider.getConnection();
-            final User user = storageParameters.getUser();
+//            User user = storageParameters.getUser();
             final int userId = user.getId();
             final Context ctx = storageParameters.getContext();
             final UserPermissionBits userPermissionBits;

@@ -91,6 +91,7 @@ public class ShareServlet extends HttpServlet {
         // http://192.168.32.191/ajax/share/19496DEDE78141A6AB77B316ADDB366E
         // http://192.168.32.191/ajax/share/19496ded2c6542b5a1d6ef4aeeea4d20
         // http://192.168.32.191/ajax/share/19496ded2c6542b5a1d6ef4aeeea4d22 - digest
+        // http://192.168.32.191/ajax/share/19496ded2c6542b5a1d6ef4aeeea4d24 - digest
 
         try {
             /*
@@ -119,8 +120,7 @@ public class ShareServlet extends HttpServlet {
              */
             ShareAuthentication authentication = new ShareAuthenticator(share).authenticate(request, response);
             if (null == authentication) {
-                sendError(response, HttpServletResponse.SC_UNAUTHORIZED, "401 Unauthorized");
-                return;
+                return; // response already written by authenticator
             }
             /*
              * create guest session
@@ -153,38 +153,38 @@ public class ShareServlet extends HttpServlet {
     private static String getRedirectURL(Session session, User user, Share share) {
         // http://192.168.32.191/ox6/#m=infostore&f=2580&i=255391
 
-        StringBuilder stringBuilder = new StringBuilder()
-            .append("/ox6/")
-    //        .append(ShareServiceLookup.getService(DispatcherPrefixService.class).getPrefix())
-            .append("#session=").append(session.getSessionID())
-            .append("&user=").append(user.getMail())
-            .append("&user_id=").append(session.getUserId())
-            .append("&language=").append(user.getLocale())
-            .append("&store=true")
-            .append("&m=").append(getApp(share.getModule()))
-            .append("&f=").append(share.getFolder())
-        ;
-        if (false == share.isFolder()) {
-            stringBuilder.append("&id=").append(share.getItem());
-        }
-        return stringBuilder.toString();
-
-
 //        StringBuilder stringBuilder = new StringBuilder()
-//            .append("/appsuite/")
-////            .append(ShareServiceLookup.getService(DispatcherPrefixService.class).getPrefix())
+//            .append("/ox6/")
+//    //        .append(ShareServiceLookup.getService(DispatcherPrefixService.class).getPrefix())
 //            .append("#session=").append(session.getSessionID())
-//            .append("&user=").append(session.getLogin())
+//            .append("&user=").append(user.getMail())
 //            .append("&user_id=").append(session.getUserId())
 //            .append("&language=").append(user.getLocale())
 //            .append("&store=true")
-//            .append("&app=").append(getApp(share.getModule()))
-//            .append("&folder=").append(share.getFolder())
+//            .append("&m=").append(getApp(share.getModule()))
+//            .append("&f=").append(share.getFolder())
 //        ;
 //        if (false == share.isFolder()) {
 //            stringBuilder.append("&id=").append(share.getItem());
 //        }
 //        return stringBuilder.toString();
+
+
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("/appsuite/")
+//            .append(ShareServiceLookup.getService(DispatcherPrefixService.class).getPrefix())
+            .append("#session=").append(session.getSessionID())
+            .append("&user=").append(session.getLogin())
+            .append("&user_id=").append(session.getUserId())
+            .append("&language=").append(user.getLocale())
+            .append("&store=true")
+            .append("&app=").append(getApp(share.getModule()))
+            .append("&folder=").append(share.getFolder())
+        ;
+        if (false == share.isFolder()) {
+            stringBuilder.append("&id=").append(share.getItem());
+        }
+        return stringBuilder.toString();
     }
 
     private static String getApp(Module module) {

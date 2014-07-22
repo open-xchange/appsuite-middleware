@@ -56,6 +56,7 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.fields.Header;
+import com.openexchange.authorization.AuthorizationExceptionCodes;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
@@ -102,16 +103,32 @@ public class ShareAuthenticator {
      * @throws IOException
      */
     public ShareAuthentication authenticate(HttpServletRequest request, HttpServletResponse response) throws OXException, IOException {
+        ShareAuthentication authentication;
         switch (share.getAuthentication()) {
         case ANONYMOUS:
-            return anonymous(request, response);
+            authentication = anonymous(request, response);
+            break;
         case BASIC:
-            return basic(request, response);
+            authentication = basic(request, response);
+            break;
         case DIGEST:
-            return digest(request, response);
+            authentication = digest(request, response);
+            break;
         default:
             throw new UnsupportedOperationException(String.valueOf(share.getAuthentication()));
         }
+        if (null != authentication) {
+            /*
+             * check context & user
+             */
+            if (null != authentication.getContext() && false == authentication.getContext().isEnabled() ||
+                null != authentication.getUser() && false == authentication.getUser().isMailEnabled()) {
+                response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,
+                    AuthorizationExceptionCodes.USER_DISABLED.create().getDisplayMessage(null));
+                return null;
+            }
+        }
+        return authentication;
     }
 
     private ShareAuthentication anonymous(HttpServletRequest request, HttpServletResponse response) throws OXException {

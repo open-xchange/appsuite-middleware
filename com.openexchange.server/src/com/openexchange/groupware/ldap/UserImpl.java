@@ -470,7 +470,7 @@ public class UserImpl implements User, Cloneable {
      */
     @Override
     public int[] getGroups() {
-        return groups.clone();
+        return isGuest() ? new int[0] : groups.clone();
     }
 
     /**

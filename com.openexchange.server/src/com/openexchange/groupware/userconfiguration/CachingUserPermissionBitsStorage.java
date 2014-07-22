@@ -302,7 +302,9 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
             final CacheKey key = getKey(id, ctx, cache);
             final Object object = cache.get(key);
             if (object == null) {
-                toLoad.add(id);
+                if (false == toLoad.contains(id)) {
+                    toLoad.add(id);
+                }
             } else {
                 map.put(id, ((UserPermissionBits) object).clone());
             }
