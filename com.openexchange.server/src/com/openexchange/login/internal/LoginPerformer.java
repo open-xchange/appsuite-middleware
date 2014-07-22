@@ -74,6 +74,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.login.Blocking;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginRequest;
@@ -90,7 +91,6 @@ import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
-import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * {@link LoginPerformer} - Performs a login for specified credentials.
@@ -243,7 +243,7 @@ public final class LoginPerformer {
         final String client = request.getClient();
         // Check for OLOX v2.0
         if ("USM-JSON".equalsIgnoreCase(client)) {
-            final UserConfigurationService ucs = ServerServiceRegistry.getServize(UserConfigurationService.class, true);
+            final UserConfigurationStorage ucs = UserConfigurationStorage.getInstance();
             final UserConfiguration userConfiguration = ucs.getUserConfiguration(user.getId(), user.getGroups(), ctx);
             if (!userConfiguration.hasOLOX20()) {
                 // Deny login for OLOX v2.0 client since disabled as per user configuration

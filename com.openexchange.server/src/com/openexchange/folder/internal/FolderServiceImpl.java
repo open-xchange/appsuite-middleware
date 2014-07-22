@@ -51,18 +51,18 @@ package com.openexchange.folder.internal;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.context.ContextService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.FolderService;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderLoader;
-import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * {@link FolderServiceImpl}
@@ -74,27 +74,22 @@ public final class FolderServiceImpl implements FolderService {
     private static final String DEL_OXFOLDER_TREE = "del_oxfolder_tree";
     private static final String DEL_OXFOLDER_PERMISSIONS = "del_oxfolder_permissions";
 
-    private final ContextService contextService;
-    private final UserConfigurationService userConfigurationService;
-
     /**
      * Initializes a new {@link FolderServiceImpl}.
      */
-    public FolderServiceImpl(ContextService contextService, UserConfigurationService userConfigurationService) {
+    public FolderServiceImpl() {
         super();
-        this.contextService = contextService;
-        this.userConfigurationService = userConfigurationService;
     }
 
     @Override
     public FolderObject getFolderObject(final int folderId, final int contextId) throws OXException {
         try {
-            return new OXFolderAccess(contextService.getContext(contextId)).getFolderObject(folderId);
+            return new OXFolderAccess(ContextStorage.getStorageContext(contextId)).getFolderObject(folderId);
         } catch (final OXException e) {
             if (!OXFolderExceptionCode.NOT_EXISTS.equals(e)) {
                 throw e;
             }
-            final Context ctx = contextService.getContext(contextId);
+            final Context ctx = ContextStorage.getStorageContext(contextId);
             final Connection con = Database.get(ctx, false);
             try {
                 return OXFolderLoader.loadFolderObjectFromDB(folderId, ctx, con, true, false, DEL_OXFOLDER_TREE, DEL_OXFOLDER_PERMISSIONS);
@@ -107,9 +102,9 @@ public final class FolderServiceImpl implements FolderService {
     @Override
     public FolderObject getFolderObject(final int folderId, final int contextId, final boolean working) throws OXException {
         if (working) {
-            return new OXFolderAccess(contextService.getContext(contextId)).getFolderObject(folderId);
+            return new OXFolderAccess(ContextStorage.getStorageContext(contextId)).getFolderObject(folderId);
         }
-        final Context ctx = contextService.getContext(contextId);
+        final Context ctx = ContextStorage.getStorageContext(contextId);
         final Connection con = Database.get(ctx, false);
         try {
             return OXFolderLoader.loadFolderObjectFromDB(folderId, ctx, con, true, false, DEL_OXFOLDER_TREE, DEL_OXFOLDER_PERMISSIONS);
@@ -121,9 +116,9 @@ public final class FolderServiceImpl implements FolderService {
     @Override
     public FolderObject getFolderObject(final int folderId, final int contextId, final Storage storage) throws OXException {
         if (Storage.WORKING.equals(storage)) {
-            return new OXFolderAccess(contextService.getContext(contextId)).getFolderObject(folderId);
+            return new OXFolderAccess(ContextStorage.getStorageContext(contextId)).getFolderObject(folderId);
         }
-        final Context ctx = contextService.getContext(contextId);
+        final Context ctx = ContextStorage.getStorageContext(contextId);
         if (Storage.BACKUP.equals(storage)) {
             final Connection con = Database.get(ctx, false);
             try {
@@ -157,8 +152,8 @@ public final class FolderServiceImpl implements FolderService {
 
     @Override
     public EffectivePermission getFolderPermission(final int folderId, final int userId, final int contextId, final boolean working) throws OXException {
-        final Context ctx = contextService.getContext(contextId);
-        final UserConfiguration userConfig = userConfigurationService.getUserConfiguration(userId, ctx);
+        final Context ctx = ContextStorage.getStorageContext(contextId);
+        final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfiguration(userId, ctx);
         if (working) {
             return new OXFolderAccess(ctx).getFolderPermission(folderId, userId, userConfig);
         }

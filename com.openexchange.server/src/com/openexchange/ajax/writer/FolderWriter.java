@@ -54,6 +54,7 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.sql.SQLException;
 import java.util.Locale;
+import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -72,16 +73,15 @@ import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.user.UserService;
-import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * FolderWriter
@@ -347,15 +347,19 @@ public final class FolderWriter extends DataWriter {
      * @throws OXException
      */
     public FolderWriter(final JSONWriter jw, final Session session, final Context ctx, final String timeZone, final AdditionalFolderFieldList fields) throws OXException {
-        super(null, jw);
-        this.user = ServerServiceRegistry.getInstance()
-            .getService(UserService.class, true).getUser(session.getUserId(), ctx);
-        this.userConfig = ServerServiceRegistry.getInstance()
-            .getService(UserConfigurationService.class, true).getUserConfiguration(session.getUserId(), ctx);
+        super(null == timeZone ? getTimeZoneBySession(session, ctx) : getTimeZone(timeZone), jw);
+        this.user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
+        this.userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx);
         this.ctx = ctx;
-        this.timeZone = timeZone == null ? getTimeZone(user.getTimeZone()) : getTimeZone(timeZone);
         this.fields = fields;
         this.session = ServerSessionAdapter.valueOf(session, ctx, user, userConfig);
+    }
+
+    private static TimeZone getTimeZoneBySession(final Session session, final Context ctx) throws OXException {
+        if (session instanceof ServerSession) {
+            return getTimeZone(((ServerSession) session).getUser().getTimeZone());
+        }
+        return getTimeZone(UserStorage.getInstance().getUser(session.getUserId(), ctx).getTimeZone());
     }
 
     /**
@@ -622,7 +626,7 @@ public final class FolderWriter extends DataWriter {
                             final JSONArray ja = new JSONArray();
                             {
                                 final OCLPermission[] perms = fo.getPermissionsAsArray();
-                                final UserConfigurationService userConfService = getUserConfigurationService();
+                                final UserConfigurationStorage userConfStorage = UserConfigurationStorage.getInstance();
                                 try {
                                     for (int k = 0; k < perms.length; k++) {
                                         final OCLPermission permission = perms[k];
@@ -636,7 +640,7 @@ public final class FolderWriter extends DataWriter {
                                                 effectPerm.setGroupPermission(true);
                                             } else {
                                                 effectPerm =
-                                                    fo.getEffectiveUserPermission(entity, userConfService.getUserConfiguration(entity, ctx));
+                                                    fo.getEffectiveUserPermission(entity, userConfStorage.getUserConfiguration(entity, ctx));
                                             }
                                             final JSONObject jo = new JSONObject();
                                             jo.put(FolderFields.BITS, createPermissionBits(effectPerm));
@@ -727,10 +731,6 @@ public final class FolderWriter extends DataWriter {
             }
         }
         return retval;
-    }
-
-    private static UserConfigurationService getUserConfigurationService() throws OXException {
-        return ServerServiceRegistry.getInstance().getService(UserConfigurationService.class, true);
     }
 
     protected long addTimeZoneOffset(final long date) {

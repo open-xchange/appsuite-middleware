@@ -599,15 +599,15 @@ public final class ServerActivator extends HousekeepingActivator {
         registerService(GroupService.class, groupService);
         ServerServiceRegistry.getInstance().addService(GroupService.class, groupService);
         registerService(ResourceService.class, ServerServiceRegistry.getInstance().getService(ResourceService.class, true));
-        UserConfigurationServiceImpl userConfigurationService = new UserConfigurationServiceImpl(userService);
-        ServerServiceRegistry.getInstance().addService(UserConfigurationService.class, userConfigurationService);
-        registerService(UserConfigurationService.class, userConfigurationService);
+        ServerServiceRegistry.getInstance().addService(UserConfigurationService.class, new UserConfigurationServiceImpl(userService));
+        registerService(
+            UserConfigurationService.class,
+            ServerServiceRegistry.getInstance().getService(UserConfigurationService.class, true));
 
         ServerServiceRegistry.getInstance().addService(UserPermissionService.class, new UserPermissionServiceImpl(userService));
         registerService(UserPermissionService.class, ServerServiceRegistry.getInstance().getService(UserPermissionService.class, true));
 
-        ContextService contextService = ServerServiceRegistry.getInstance().getService(ContextService.class, true);
-        registerService(ContextService.class, contextService);
+        registerService(ContextService.class, ServerServiceRegistry.getInstance().getService(ContextService.class, true));
         // Register mail stuff
         MailServiceImpl mailService = new MailServiceImpl();
         {
@@ -743,7 +743,7 @@ public final class ServerActivator extends HousekeepingActivator {
         }
 
         // Register folder service
-        final FolderService folderService = new FolderServiceImpl(contextService, userConfigurationService);
+        final FolderService folderService = new FolderServiceImpl();
         registerService(FolderService.class, folderService);
         ServerServiceRegistry.getInstance().addService(FolderService.class, folderService);
 
