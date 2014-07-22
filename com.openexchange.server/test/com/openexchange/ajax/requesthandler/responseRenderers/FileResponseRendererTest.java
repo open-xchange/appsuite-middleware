@@ -73,6 +73,7 @@ import com.openexchange.config.SimConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.SimHtmlService;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.images.ImageTransformationService;
@@ -80,6 +81,7 @@ import com.openexchange.tools.images.ImageTransformations;
 import com.openexchange.tools.images.ScaleType;
 import com.openexchange.tools.images.TransformedImage;
 import com.openexchange.tools.images.impl.JavaImageTransformationService;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.SimServerSession;
 import com.openexchange.tools.strings.BasicTypesStringParser;
 import com.openexchange.tools.strings.StringParser;
@@ -137,6 +139,37 @@ public class FileResponseRendererTest extends TestCase {
             assertTrue("Unexpected Content-Length: " + contentLength + ", but should be less than " + length, length > contentLength);
             final int size = servletOutputStream.size();
             assertEquals("Unexpected Content-Length.", size, contentLength);
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    public void testMaxAgeHeader_Bug33441() {
+        try {
+            ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder("28082.jpg", "image/jpeg", Delivery.view, Disposition.inline, "28082.jpg");
+            final AJAXRequestData requestData = new AJAXRequestData();
+            {
+                requestData.setSession(new SimServerSession(1, 1));
+                requestData.putParameter("width", "10");
+                requestData.putParameter("height", "10");
+            }
+            final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+            result.setExpires(Tools.getDefaultImageExpiry());
+            final SimHttpServletRequest req = new SimHttpServletRequest();
+            final SimHttpServletResponse resp = new SimHttpServletResponse();
+            final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
+            resp.setOutputStream(servletOutputStream);
+            final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
+            fileResponseRenderer.setScaler(new TestableImageTransformationService(IOUtils.toByteArray(fileHolder.getStream()), ImageTransformations.HIGH_EXPENSE));
+            fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
+
+            assertTrue("HTTP header \"cache-control\" is missing", resp.containsHeader("cache-control"));
+
+            String sCacheControl = resp.getHeaders().get("cache-control");
+            assertTrue("HTTP header \"cache-control\" is missing", !Strings.isEmpty(sCacheControl));
+
+            assertTrue("Invalid HTTP header \"cache-control\"", sCacheControl.indexOf("max-age=3600") > 0);
         } catch (final Exception e) {
             e.printStackTrace();
             fail(e.getMessage());

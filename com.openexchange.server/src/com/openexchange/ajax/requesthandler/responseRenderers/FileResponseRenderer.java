@@ -61,7 +61,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -458,7 +457,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 } else {
                     final long expires = result.getExpires();
                     if (expires > 0) {
-                        Tools.setExpires(new Date(System.currentTimeMillis() + expires), resp);
+                        Tools.setExpires(expires, resp);
                     }
                 }
                 /*

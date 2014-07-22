@@ -1,3 +1,7 @@
+* 2014-07-22 - thorben.betten@open-xchange.com
+
+ - Fix for bug 33441: Fixed calculation of "max-age" part in Cache-Control header from given expiry value
+
 * 2014-07-18 - thorben.betten@open-xchange.com
 
  - Fix for bug 33593: Properly XML-escape characters written to XML output
