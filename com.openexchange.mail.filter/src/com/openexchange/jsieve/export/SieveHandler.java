@@ -393,15 +393,19 @@ public class SieveHandler {
         bos_sieve.write(CRLF.getBytes(com.openexchange.java.Charsets.UTF_8));
         bos_sieve.flush();
 
-        final String actualline = bis_sieve.readLine();
-        if (null != actualline && actualline.startsWith(SIEVE_OK)) {
-            return;
-        } else if (null != actualline && actualline.startsWith("NO ")) {
-            final String errorMessage = parseError(actualline).replaceAll(CRLF, "\n");
-            throw new OXSieveHandlerException(errorMessage, sieve_host, sieve_host_port, parseSIEVEResponse(actualline, errorMessage)).setParseError(true);
-        } else {
-            throw new OXSieveHandlerException("Unknown response code", sieve_host, sieve_host_port, parseSIEVEResponse(actualline, null));
-        }
+        String actualline = bis_sieve.readLine();
+        do {
+            if (null != actualline && actualline.startsWith(SIEVE_OK)) {
+                return;
+            } else if (null != actualline && actualline.startsWith("NO ")) {
+                final String errorMessage = parseError(actualline).replaceAll(CRLF, "\n");
+                throw new OXSieveHandlerException(errorMessage, sieve_host, sieve_host_port, parseSIEVEResponse(actualline, errorMessage)).setParseError(true);
+            } else {
+                if (null == actualline || actualline.length() != 0) {
+                    throw new OXSieveHandlerException("Unknown response code", sieve_host, sieve_host_port, parseSIEVEResponse(actualline, null));
+                }
+            }
+        } while ((actualline = bis_sieve.readLine()) != null);
     }
 
 	/**
@@ -469,20 +473,55 @@ public class SieveHandler {
             }
             sb.ensureCapacity(parsed[1]);
         }
+        boolean inQuote = false;
         while (true) {
-            final String temp = bis_sieve.readLine();
-            if (null == temp) {
+            int ch = bis_sieve.read();
+            switch (ch) {
+            case -1:
+                // End of stream
                 throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
-            }
-            if (temp.startsWith(SIEVE_OK)) {
-                if (sb.length() >= 2) {
-                    // We have to strip off the last trailing CRLF...
-                    return sb.substring(0, sb.length() - 2);
+            case '\\':
+                {
+                    sb.append((char) ch);
+                    ch = bis_sieve.read();
+                    if (ch == -1) {
+                        // End of stream
+                        throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
+                    }
+                    sb.append((char) ch);
                 }
-                return sb.toString();
+                break;
+            case '"':
+                {
+                    if (inQuote) {
+                        inQuote = false;
+                    } else {
+                        inQuote = true;
+                    }
+                    sb.append((char) ch);
+                }
+                break;
+            case 'O': // OK\r\n
+                {
+                    if (inQuote) {
+                        sb.append((char) ch);
+                    } else {
+                        ch = bis_sieve.read();
+                        if (ch == -1) {
+                            // End of stream
+                            sb.append('O');
+                            return returnScript(sb);
+                        }
+                        if ('K' == ch) {
+                            return returnScript(sb);
+                        }
+                    }
+                }
+                break;
+            default:
+                sb.append((char) ch);
+                break;
             }
-            sb.append(temp);
-            sb.append(CRLF);
         }
         /*-
          *
@@ -509,6 +548,15 @@ public class SieveHandler {
             }
         }
          */
+    }
+
+    private String returnScript(final StringBuilder sb) {
+        int length = sb.length();
+        if (length >= 2 && sb.charAt(length - 2) == '\r' && sb.charAt(length - 1) == '\n') {
+            // We have to strip off the last trailing CRLF...
+            return sb.substring(0, length - 2);
+        }
+        return sb.toString();
     }
 
     /**

@@ -1,6 +1,7 @@
 * 2014-07-22 - thorben.betten@open-xchange.com
 
  - Fix for bug 33441: Fixed calculation of "max-age" part in Cache-Control header from given expiry value
+ - Fix for bug 31253: Quote-aware parsing of SIEVE script content + reverted changes from commit d695ca1965fbcb98b94ab6705962a2e9201fae3c
 
 * 2014-07-16 - tobias.friedrich@open-xchange.com
 
