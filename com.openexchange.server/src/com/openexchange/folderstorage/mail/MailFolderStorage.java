@@ -127,6 +127,7 @@ import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.RdbMailAccountStorage;
@@ -1047,6 +1048,11 @@ public final class MailFolderStorage implements FolderStorage {
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
+
+            if (!session.getUserConfiguration().hasWebMail()) {
+                return new SortableId[0];
+            }
+
             if (PRIVATE_FOLDER_ID.equals(parentId)) {
                 /*
                  * Get all user mail accounts
@@ -1063,7 +1069,13 @@ public final class MailFolderStorage implements FolderStorage {
                 } else {
                     accounts = new ArrayList<MailAccount>(1);
                     final MailAccountStorageService storageService = serviceRegistry.getService(MailAccountStorageService.class, true);
-                    accounts.add(storageService.getDefaultMailAccount(session.getUserId(), session.getContextId()));
+                    try {
+                        accounts.add(storageService.getDefaultMailAccount(session.getUserId(), session.getContextId()));
+                    } catch (OXException e) {
+                        if (!MailAccountExceptionCodes.NOT_FOUND.equals(e)) {
+                            throw e;
+                        }
+                    }
                 }
                 if (!accounts.isEmpty() && UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(accounts.get(0).getMailProtocol())) {
                     /*
