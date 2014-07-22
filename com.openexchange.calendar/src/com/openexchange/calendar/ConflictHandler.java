@@ -71,7 +71,7 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -84,7 +84,6 @@ public class ConflictHandler {
 
     private final CalendarDataObject cdao;
     private final Session so;
-    private final UserConfiguration userConfiguration;
     private boolean create = true;
     private int current_results;
 
@@ -96,17 +95,17 @@ public class ConflictHandler {
     private final CalendarDataObject edao;
     private final CalendarCollection recColl;
 
-    public ConflictHandler(final CalendarDataObject cdao,final CalendarDataObject edao, final Session so, final UserConfiguration userConfiguration, final boolean create) {
+    public ConflictHandler(final CalendarDataObject cdao,final CalendarDataObject edao, final Session so, final boolean create) {
         this.cdao = cdao;
         this.edao = edao;
         this.so = so;
-        this.userConfiguration = userConfiguration;
         this.create = create;
         this.recColl = new CalendarCollection();
     }
 
     public CalendarDataObject[] getConflicts() throws OXException {
-        if (isFree() || !userConfiguration.hasConflictHandling()) {
+        final Context ctx = Tools.getContext(so);
+        if (isFree() || !UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx).hasConflictHandling()) {
             return NO_CONFLICTS; // According to bug #5267 and modularisation concept
         } else if (!create && !cdao.containsStartDate() && !cdao.containsEndDate() && !cdao.containsParticipants() && !cdao.containsRecurrenceType() && !cdao.containsShownAs()) {
             LOG.debug("Ignoring conflict checks because we detected an update and no start/end time, recurrence type or participants and shown as are changed!");
@@ -226,7 +225,7 @@ public class ConflictHandler {
             rs = calendarsqlimp.getResultSet(prep);
             final long startTime = start.getTime();
             final long endTime = end.getTime();
-            si = new FreeBusyResults(rs, prep, ctx, user.getId(), user.getGroups(), userConfiguration, readcon, true, cdao.getUsers(), private_folder_information, calendarsqlimp, startTime, endTime);
+            si = new FreeBusyResults(rs, prep, ctx, user.getId(), user.getGroups(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx), readcon, true, cdao.getUsers(), private_folder_information, calendarsqlimp, startTime, endTime);
             ArrayList<CalendarDataObject> li = null;
             while (si.hasNext()) {
                 final CalendarDataObject conflict_dao = si.next();
@@ -355,7 +354,7 @@ public class ConflictHandler {
             rs = calendarsqlimp.getResultSet(prep);
             final long startTime = start.getTime();
             final long endTime = end.getTime();
-            si = new FreeBusyResults(rs, prep, ctx, user.getId(), user.getGroups(), userConfiguration, readcon, true, cdao.getParticipants(), private_folder_information, calendarsqlimp, startTime, endTime);
+            si = new FreeBusyResults(rs, prep, ctx, user.getId(), user.getGroups(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx), readcon, true, cdao.getParticipants(), private_folder_information, calendarsqlimp, startTime, endTime);
             ArrayList<CalendarDataObject> li = null;
             while (si.hasNext()) {
                 final CalendarDataObject conflict_dao = (CalendarDataObject)si.next();
@@ -468,7 +467,7 @@ public class ConflictHandler {
             rs = calendarsqlimp.getResultSet(prep);
             final long startTime = start.getTime();
             final long endTime = end.getTime();
-            si = new FreeBusyResults(rs, prep, ctx, user.getId(), user.getGroups(), userConfiguration, readcon, true, cdao.getParticipants(), private_folder_information, calendarsqlimp, startTime, endTime);
+            si = new FreeBusyResults(rs, prep, ctx, user.getId(), user.getGroups(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx), readcon, true, cdao.getParticipants(), private_folder_information, calendarsqlimp, startTime, endTime);
             final ArrayList<CalendarDataObject> li = new ArrayList<CalendarDataObject>();
             while (si.hasNext()) {
                 final CalendarDataObject conflict_dao = si.next();
@@ -531,5 +530,4 @@ public class ConflictHandler {
     private final boolean containsResources() {
         return cdao.containsResources();
     }
-
 }

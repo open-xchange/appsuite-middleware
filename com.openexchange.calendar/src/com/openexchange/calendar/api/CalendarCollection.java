@@ -115,6 +115,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.java.Strings;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.impl.DBPool;
@@ -1620,7 +1621,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
             if (action == CalendarOperation.READ) {
                 if (cdao.getFolderType() != FolderObject.SHARED) {
                     EffectivePermission oclp = null;
-                    oclp = access.getFolderPermission(inFolder, so.getUserId(), Tools.getUserConfiguration(so.getUserId(), ctx));
+                    oclp = access.getFolderPermission(inFolder, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx));
                     if (oclp.canReadAllObjects()) {
                         return true;
                     } else if (oclp.canReadOwnObjects()) {
@@ -1631,14 +1632,14 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
                 } else {
                     cdao.setSharedFolderOwner(access.getFolderOwner(inFolder));
 
-                    final EffectivePermission oclp = access.getFolderPermission(inFolder, so.getUserId(), Tools.getUserConfiguration(so.getUserId(), ctx));
+                    final EffectivePermission oclp = access.getFolderPermission(inFolder, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx));
                     if (oclp.canReadAllObjects()|| oclp.canReadOwnObjects()) {
                             return true;
                     }
                 }
             } else if (action == CalendarOperation.INSERT) {
                 EffectivePermission oclp = null;
-                oclp = access.getFolderPermission(inFolder, so.getUserId(), Tools.getUserConfiguration(so.getUserId(), ctx));
+                oclp = access.getFolderPermission(inFolder, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx));
                 //oclp = OXFolderTools.getEffectiveFolderOCL(inFolder, so.getUserObject().getId(), so.getUserObject().getGroups(), so.getContext(), so.getUserConfiguration());
                 if (cdao.getFolderType() == FolderObject.SHARED) {
                     cdao.setSharedFolderOwner(access.getFolderOwner(inFolder));
@@ -1653,7 +1654,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
                         return false;
                     }
                     EffectivePermission oclp = null;
-                    oclp = access.getFolderPermission(inFolder, so.getUserId(), Tools.getUserConfiguration(so.getUserId(), ctx));
+                    oclp = access.getFolderPermission(inFolder, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx));
                     //oclp = OXFolderTools.getEffectiveFolderOCL(inFolder, so.getUserObject().getId(), so.getUserObject().getGroups(), so.getContext(), so.getUserConfiguration());
                     if (oclp.canWriteAllObjects()) {
                         return true;
@@ -1664,7 +1665,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
                     }
                 } else {
                     EffectivePermission oclp = null;
-                    oclp = access.getFolderPermission(inFolder, so.getUserId(), Tools.getUserConfiguration(so.getUserId(), ctx));
+                    oclp = access.getFolderPermission(inFolder, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx));
                     //oclp = OXFolderTools.getEffectiveFolderOCL(inFolder, so.getUserObject().getId(), so.getUserObject().getGroups(), so.getContext(), so.getUserConfiguration());
                     if (oclp.canWriteAllObjects()) {
                         return true;
@@ -1682,7 +1683,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
                         return false;
                     }
                     EffectivePermission oclp = null;
-                    oclp = access.getFolderPermission(inFolder, so.getUserId(), Tools.getUserConfiguration(so.getUserId(), ctx));
+                    oclp = access.getFolderPermission(inFolder, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx));
                     //oclp = OXFolderTools.getEffectiveFolderOCL(inFolder, so.getUserObject().getId(), so.getUserObject().getGroups(), so.getContext(), so.getUserConfiguration());
                     if (oclp.canDeleteAllObjects()) {
                         return true;
@@ -1693,7 +1694,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
                     }
                 } else {
                     EffectivePermission oclp = null;
-                    oclp = access.getFolderPermission(inFolder, so.getUserId(), Tools.getUserConfiguration(so.getUserId(), ctx));
+                    oclp = access.getFolderPermission(inFolder, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx));
                     //oclp = OXFolderTools.getEffectiveFolderOCL(inFolder, so.getUserObject().getId(), so.getUserObject().getGroups(), so.getContext(), so.getUserConfiguration());
                     if (oclp.canDeleteAllObjects()) {
                         return true;
@@ -1733,7 +1734,8 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
             // so.getUserObject().getId(), so.getContext());
             if (type != FolderObject.SHARED) {
                 EffectivePermission oclp = null;
-                oclp = access.getFolderPermission(fid, so.getUserId(), Tools.getUserConfiguration(so.getUserId(), ctx));
+                oclp = access.getFolderPermission(fid, so.getUserId(), UserConfigurationStorage.getInstance()
+                        .getUserConfigurationSafe(so.getUserId(), ctx));
                 // oclp = OXFolderTools.getEffectiveFolderOCL(fid,
                 // so.getUserObject().getId(), so.getUserObject().getGroups(),
                 // so.getContext(), so.getUserConfiguration());
@@ -1760,7 +1762,8 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
             // so.getUserObject().getId(), so.getContext());
             if (type != FolderObject.SHARED) {
                 EffectivePermission oclp = null;
-                oclp = access.getFolderPermission(fid, so.getUserId(), Tools.getUserConfiguration(so.getUserId(), ctx));
+                oclp = access.getFolderPermission(fid, so.getUserId(), UserConfigurationStorage.getInstance()
+                        .getUserConfigurationSafe(so.getUserId(), ctx));
                 // oclp = OXFolderTools.getEffectiveFolderOCL(fid,
                 // so.getUserObject().getId(), so.getUserObject().getGroups(),
                 // so.getContext(), so.getUserConfiguration());
@@ -3189,7 +3192,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
             final CalendarOperation co = new CalendarOperation();
             co.setResultSet(rs, prep, nfields, calendarsqlimp, readcon, 0, 0, session, ctx);
             User user = Tools.getUser(session, ctx);
-            UserConfiguration userConfig = Tools.getUserConfiguration(session.getUserId(), ctx);
+            UserConfiguration userConfig = Tools.getUserConfiguration(ctx, session.getUserId());
             CalendarFolderObject visibleFolders = recColl.getAllVisibleAndReadableFolderObject(user.getId(), user.getGroups(), ctx, userConfig, readcon);
             final SearchIterator<CalendarDataObject> it = new CachedCalendarIterator(visibleFolders, co, ctx, session.getUserId());
             final List<CalendarDataObject> retval = new ArrayList<CalendarDataObject>();
@@ -3772,7 +3775,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
 
     @Override
     public UserConfiguration getUserConfiguration(final Context ctx, final int userId) throws OXException {
-        return Tools.getUserConfiguration(userId, ctx);
+        return UserConfigurationStorage.getInstance().getUserConfiguration(userId, ctx);
     }
 
     /**

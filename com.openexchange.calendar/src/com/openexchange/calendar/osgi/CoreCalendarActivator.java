@@ -57,12 +57,10 @@ import com.openexchange.calendar.CalendarAdministration;
 import com.openexchange.calendar.CalendarMySQL;
 import com.openexchange.calendar.CalendarQuotaProvider;
 import com.openexchange.calendar.CalendarReminderDelete;
-import com.openexchange.calendar.Tools;
 import com.openexchange.calendar.api.AppointmentSqlFactory;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.calendar.cache.CalendarVolatileCache;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -73,8 +71,6 @@ import com.openexchange.groupware.reminder.TargetService;
 import com.openexchange.java.Streams;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.quota.QuotaProvider;
-import com.openexchange.user.UserService;
-import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * {@link CoreCalendarActivator}
@@ -92,19 +88,17 @@ public class CoreCalendarActivator extends HousekeepingActivator {
 
     @Override
     protected java.lang.Class<?>[] getNeededServices() {
-        return new Class<?>[] { CacheService.class, DatabaseService.class, ConfigViewFactory.class,
-            UserService.class, UserConfigurationService.class, ContextService.class };
+        return new Class<?>[] { CacheService.class, DatabaseService.class, ConfigViewFactory.class };
     }
 
 
     @Override
     protected void startBundle() throws Exception {
-        CalendarMySQL.setServiceLookup(this);
-        Tools.setServiceLookup(this);
         final AppointmentSqlFactory factory = new AppointmentSqlFactory();
         ITipActivator.initFeatures(factory);
         CalendarMySQL.setApppointmentSqlFactory(factory);
 
+        CalendarMySQL.setServiceLookup(this);
 
         registerService(QuotaProvider.class, new CalendarQuotaProvider(new CalendarMySQL(), this));
         registerService(AppointmentSqlFactoryService.class, factory, null);

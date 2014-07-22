@@ -74,12 +74,11 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * {@link UpdateITipAnalyzer}
@@ -156,15 +155,10 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         if (owner != session.getUserId()) {
             OXFolderAccess oxfs = new OXFolderAccess(ctx);
             FolderObject defaultFolder = oxfs.getDefaultFolder(owner, FolderObject.CALENDAR);
-            UserConfigurationService userConfigurationService = services.getService(UserConfigurationService.class);
-            if (userConfigurationService == null) {
-                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserConfigurationService.class);
-            }
-
             EffectivePermission permission = oxfs.getFolderPermission(
                 defaultFolder.getObjectID(),
                 session.getUserId(),
-                userConfigurationService.getUserConfiguration(session.getUserId(), ctx));
+                UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx));
             if (permission.canCreateObjects()) {
                 original.setParentFolderID(defaultFolder.getObjectID());
             } else {
@@ -291,23 +285,23 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         if (original.getParticipants() == null || original.getParticipants().length == 0) {
             return;
         }
-
+        
         List<Participant> newParticipants = new ArrayList<Participant>();
         for (Participant p : original.getParticipants()) {
             if (p.getType() == Participant.RESOURCE || p.getType() == Participant.RESOURCEGROUP) {
                 newParticipants.add(p);
             }
         }
-
+        
         if (newParticipants.isEmpty()) {
             return;
         }
-
+        
         if (update.getParticipants() == null || update.getParticipants().length == 0) {
             update.setParticipants(newParticipants);
             return;
         }
-
+        
         List<Participant> participants = Arrays.asList(update.getParticipants());
         for (Participant p : newParticipants) {
             if (!participants.contains(p)) {
@@ -341,7 +335,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
             updateLastTouched = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             updateLastTouched.setTime(update.getCreationDate());
         }
-
+        
         if (originalLastTouched != null && updateLastTouched != null) {
             if (timeInMillisWithoutMillis(originalLastTouched) > timeInMillisWithoutMillis(updateLastTouched)) { //Remove millis, since ical accuracy is just of seconds.
                 return true;
@@ -349,7 +343,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         }
         return false;
     }
-
+    
     private long timeInMillisWithoutMillis(Calendar cal) {
         return cal.getTimeInMillis() - cal.get(Calendar.MILLISECOND);
     }

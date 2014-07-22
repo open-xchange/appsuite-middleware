@@ -1405,7 +1405,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                     sb.append("(pd.fid = 0 AND pdm.pfid = " + folderId + " AND pdm.member_uid = " + uid + ")");
                 } else {
                     // Folder is shared or public
-                    UserConfiguration userConfig = Tools.getUserConfiguration(uid, ctx);
+                    UserConfiguration userConfig = Tools.getUserConfiguration(ctx, uid);
                     EffectivePermission folderPermission = folderAccess.getFolderPermission(folderId, uid, userConfig);
                     boolean canReadAll = folderPermission.canReadAllObjects();
                     if (folderType == FolderObject.SHARED) {
@@ -4197,7 +4197,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     private void checkConfirmPermission(final int folderId, final int uid, final Session so, final Context ctx) throws OXException {
         if (uid != so.getUserId()) {
-            final UserConfiguration userConfig = Tools.getUserConfiguration(so.getUserId(), ctx);
+            final UserConfiguration userConfig = Tools.getUserConfiguration(ctx, so.getUserId());
             final OXFolderAccess ofa = new OXFolderAccess(ctx);
             final EffectivePermission oclp = ofa.getFolderPermission(folderId, so.getUserId(), userConfig);
             if (ofa.getFolderType(folderId, so.getUserId()) == FolderObject.PUBLIC) {

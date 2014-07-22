@@ -85,6 +85,7 @@ import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty
 import com.openexchange.groupware.notify.State;
 import com.openexchange.groupware.userconfiguration.CapabilityUserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.html.HtmlService;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.ContentDisposition;
@@ -99,7 +100,6 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
-import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * {@link DefaultMailSenderService}
@@ -120,9 +120,9 @@ public class DefaultMailSenderService implements MailSenderService {
 
     private final UserService users;
 
-    private final UserConfigurationService userConfigurations;
+    private final UserConfigurationStorage userConfigurations;
 
-    public DefaultMailSenderService(final ITipEmitter iTipEmitter, final HtmlService htmlService, AttachmentBase attachments, ContextService contexts, UserService users, UserConfigurationService userConfigs, AttachmentMemory attachmentMemory) {
+    public DefaultMailSenderService(final ITipEmitter iTipEmitter, final HtmlService htmlService, AttachmentBase attachments, ContextService contexts, UserService users, UserConfigurationStorage userConfigs, AttachmentMemory attachmentMemory) {
         this.iTipEmitter = iTipEmitter;
         this.htmlService = htmlService;
         this.attachments = attachments;

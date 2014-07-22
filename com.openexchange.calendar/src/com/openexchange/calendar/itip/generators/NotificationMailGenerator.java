@@ -88,6 +88,7 @@ import com.openexchange.groupware.notify.State;
 import com.openexchange.groupware.notify.State.Type;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.server.ServiceLookup;
@@ -95,7 +96,6 @@ import com.openexchange.session.Session;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * {@link NotificationMailGenerator}
@@ -165,9 +165,8 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         this.attachmentMemory = attachmentMemory;
 
         this.user = user;
-        UserConfigurationService userConfigurationService = services.getService(UserConfigurationService.class);
-        if (userConfigurationService != null) {
-            this.userConfig = userConfigurationService.getUserConfiguration(user.getId(), ctx);
+        if (UserConfigurationStorage.getInstance() != null) {
+            this.userConfig = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
         }
 
         this.recipients = resolver.resolveAllRecipients(original, appointment, user, onBehalfOf, ctx);
