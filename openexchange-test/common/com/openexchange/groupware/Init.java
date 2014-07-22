@@ -808,7 +808,7 @@ public final class Init {
 
     private static void startAndInjectFolderService() {
         if (null == TestServiceRegistry.getInstance().getService(FolderService.class)) {
-            final FolderService fs = new FolderServiceImpl(TestServiceRegistry.getInstance().getService(ContextService.class), TestServiceRegistry.getInstance().getService(UserConfigurationService.class));
+            final FolderService fs = new FolderServiceImpl();
             services.put(FolderService.class, fs);
             TestServiceRegistry.getInstance().addService(FolderService.class, fs);
         }

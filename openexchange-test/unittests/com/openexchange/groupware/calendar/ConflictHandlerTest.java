@@ -49,20 +49,16 @@
 
 package com.openexchange.groupware.calendar;
 
+import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.tools.CalendarAssertions.assertResourceParticipants;
 import static com.openexchange.groupware.calendar.tools.CalendarAssertions.assertUserParticipants;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import junit.framework.TestCase;
 import com.openexchange.calendar.ConflictHandler;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.calendar.tools.CommonAppointments;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.Permission;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 import com.openexchange.setuptools.TestConfig;
 import com.openexchange.setuptools.TestContextToolkit;
@@ -81,7 +77,6 @@ public class ConflictHandlerTest extends TestCase {
     private String user;
     private String secondUser;
     private Context ctx;
-    private UserConfiguration userConfig;
     private CommonAppointments appointments;
     private TestFolderToolkit folders;
 
@@ -92,6 +87,7 @@ public class ConflictHandlerTest extends TestCase {
         Init.startServer();
 
         final TestConfig config = new TestConfig();
+
         user = config.getUser();
         secondUser = config.getSecondUser();
 
@@ -111,9 +107,7 @@ public class ConflictHandlerTest extends TestCase {
         group = config.getGroup();
         final int groupid = tools.resolveGroup(group, ctx);
         final int memberid = tools.loadGroup(groupid, ctx).getMember()[0];
-        User u = tools.loadUser(memberid, ctx);
-        member = u.getLoginInfo();
-        userConfig = new UserConfiguration(Collections.singleton(Permission.CALENDAR.getCapabilityName()), memberid, u.getGroups(), ctx);
+        member = tools.loadUser(memberid, ctx).getLoginInfo();
 
         appointments.deleteAll(ctx);
 
@@ -252,7 +246,7 @@ public class ConflictHandlerTest extends TestCase {
     }
 
     private CalendarDataObject[] getConflicts(final CalendarDataObject conflictingAppointment) throws OXException {
-        final ConflictHandler ch = new ConflictHandler(conflictingAppointment, null, appointments.getSession(), userConfig, false);
+        final ConflictHandler ch = new ConflictHandler(conflictingAppointment, null, appointments.getSession(), false);
         final CalendarDataObject[] conflicts = ch.getConflicts();
         for(final CalendarDataObject conflict : conflicts) {
             conflict.setContext(ctx);
