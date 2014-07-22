@@ -50,6 +50,7 @@ package com.openexchange.importexport.actions;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.importexport.actions.exporter.CsvExportAction;
 import com.openexchange.importexport.actions.exporter.ICalExportAction;
@@ -66,9 +67,9 @@ public class ExportActionFactory  extends AbstractIEActionFactory{
     @Override
     protected Map<Format, AJAXActionService> getActions(){
     	return new HashMap<Format, AJAXActionService>(){{
-    		put(Format.CSV, new CsvExportAction(services));
-    		put(Format.VCARD, new VCardExportAction(services));
-    		put(Format.ICAL, new ICalExportAction(services));
+    		put(Format.CSV, new CsvExportAction());
+    		put(Format.VCARD, new VCardExportAction());
+    		put(Format.ICAL, new ICalExportAction());
     	}};
     }
 

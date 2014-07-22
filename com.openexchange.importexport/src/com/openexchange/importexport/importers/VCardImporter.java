@@ -65,6 +65,7 @@ import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.ImportResult;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.formats.vcard.VCardFileToken;
@@ -104,7 +105,7 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
         if (!format.equals(Format.VCARD)) {
             return false;
         }
-        if (!getUserConfigurationService().getUserConfiguration(session.getUserId(), session.getContext()).hasContact()) {
+        if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()).hasContact()) {
             throw ImportExportExceptionCodes.CONTACTS_DISABLED.create().setGeneric(Generic.NO_PERMISSION);
         }
         final OXFolderAccess folderAccess = new OXFolderAccess(session.getContext());
@@ -128,7 +129,7 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
 
             // check format of folder
             if (fo.getModule() == FolderObject.CONTACT) {
-                if (!getUserConfigurationService().getUserConfiguration(session.getUserId(),
+                if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
                         session.getContext()).hasContact()) {
                     return false;
                 }
@@ -138,7 +139,8 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
             // check read access to folder
             EffectivePermission perm;
             try {
-                perm = fo.getEffectiveUserPermission(session.getUserId(), getUserConfigurationService().getUserConfiguration(session.getUserId(), session.getContext()));
+                perm = fo.getEffectiveUserPermission(session.getUserId(), UserConfigurationStorage.getInstance()
+                        .getUserConfigurationSafe(session.getUserId(), session.getContext()));
             } catch (final OXException e) {
                 throw ImportExportExceptionCodes.NO_DATABASE_CONNECTION.create(e);
             } catch (final RuntimeException e) {

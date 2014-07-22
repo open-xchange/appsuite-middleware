@@ -49,12 +49,10 @@
 
 package com.openexchange.importexport.exporters;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.userconf.UserConfigurationService;
+
 
 /**
  * {@link AbstractExporter}
@@ -62,27 +60,18 @@ import com.openexchange.userconf.UserConfigurationService;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class AbstractExporter implements Exporter {
-
     protected ServiceLookup services;
-
+    
     public AbstractExporter(ServiceLookup services) {
         this.services = services;
     }
-
+    
+    
     public boolean acceptContact(Contact contact, ServerSession session) {
         if (contact.getParentFolderID() == 6 && contact.getInternalUserId() == session.getContext().getMailadmin()) {
-
+            
         }
         return true;
-    }
-
-    protected UserConfigurationService getUserConfigurationService() throws OXException {
-        UserConfigurationService service = services.getService(UserConfigurationService.class);
-        if (service == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserConfigurationService.class);
-        }
-
-        return service;
     }
 
 }

@@ -56,16 +56,11 @@ import com.openexchange.importexport.exporters.CSVContactExporter;
 import com.openexchange.importexport.exporters.Exporter;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.json.ExportRequest;
-import com.openexchange.server.ServiceLookup;
 
 @DispatcherNotes(defaultFormat="file")
 public class CsvExportAction extends AbstractExportAction {
 
-    public CsvExportAction(ServiceLookup services) {
-        super(services);
-    }
-
-    private Exporter exporter;
+	private Exporter exporter;
 
 	@Override
 	public Format getFormat() {
@@ -75,7 +70,7 @@ public class CsvExportAction extends AbstractExportAction {
 	@Override
 	public Exporter getExporter() {
 		if(this.exporter == null){
-			exporter = new CSVContactExporter(services);
+			exporter = new CSVContactExporter();
 		}
 		return exporter;
 	}

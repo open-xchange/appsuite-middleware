@@ -80,6 +80,7 @@ import com.openexchange.groupware.generic.FolderUpdaterServiceV2;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.importexport.csv.CSVParser;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.formats.csv.ContactFieldMapper;
@@ -117,7 +118,7 @@ public class CSVContactImporter extends AbstractImporter {
             return false;
         }
 
-        if (!getUserConfigurationService().getUserConfiguration(session.getUserId(), session.getContext()).hasContact()) {
+        if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()).hasContact()) {
             throw ImportExportExceptionCodes.CONTACTS_DISABLED.create().setGeneric(Generic.NO_PERMISSION);
         }
 
@@ -146,7 +147,7 @@ public class CSVContactImporter extends AbstractImporter {
         try {
             perm = fo.getEffectiveUserPermission(
                 session.getUserId(),
-                getUserConfigurationService().getUserConfiguration(session.getUserId(), session.getContext()));
+                UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()));
         } catch (final OXException e) {
             return false;
         }
@@ -352,7 +353,7 @@ public class CSVContactImporter extends AbstractImporter {
     /**
      * Validates if the given value can be parsed and a date object can be created. Based on regular expressions only dates will be
      * evaluated
-     *
+     * 
      * @param currEntry - string to be validated
      * @return true if the value can be used for processing, false if the given string is not valid
      */

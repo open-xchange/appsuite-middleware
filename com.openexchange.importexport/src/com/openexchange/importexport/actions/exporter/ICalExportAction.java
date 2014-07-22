@@ -52,16 +52,11 @@ import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.importexport.exporters.Exporter;
 import com.openexchange.importexport.exporters.ICalExporter;
 import com.openexchange.importexport.formats.Format;
-import com.openexchange.server.ServiceLookup;
 
 @DispatcherNotes(defaultFormat="file")
 public class ICalExportAction extends AbstractExportAction {
 
-    public ICalExportAction(ServiceLookup services) {
-        super(services);
-    }
-
-    private Exporter exporter;
+	private Exporter exporter;
 
 	@Override
 	public Format getFormat() {
@@ -71,7 +66,7 @@ public class ICalExportAction extends AbstractExportAction {
 	@Override
 	public Exporter getExporter() {
 		if(this.exporter == null) {
-            this.exporter = new ICalExporter(services);
+            this.exporter = new ICalExporter();
         }
 		return this.exporter;
 	}

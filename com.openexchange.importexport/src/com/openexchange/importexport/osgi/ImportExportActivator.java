@@ -61,7 +61,6 @@ import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.importexport.actions.ExportActionFactory;
 import com.openexchange.importexport.actions.ImportActionFactory;
-import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * {@link ImportExportActivator}
@@ -84,8 +83,7 @@ public class ImportExportActivator extends AJAXModuleActivator{
 			CalendarCollectionService.class,
 			ConfigurationService.class,
 			ICalEmitter.class,
-			ConfigViewFactory.class,
-			UserConfigurationService.class
+			ConfigViewFactory.class
 		};
 	}
 

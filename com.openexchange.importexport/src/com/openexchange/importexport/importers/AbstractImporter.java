@@ -51,10 +51,8 @@ package com.openexchange.importexport.importers;
 
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.userconf.UserConfigurationService;
 
 
 /**
@@ -77,14 +75,5 @@ public abstract class AbstractImporter implements Importer {
             return 0;
         }
         return services.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId()).opt(CONTACT_LIMIT, int.class, 0);
-    }
-
-    protected UserConfigurationService getUserConfigurationService() throws OXException {
-        UserConfigurationService service = services.getService(UserConfigurationService.class);
-        if (service == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserConfigurationService.class);
-        }
-
-        return service;
     }
 }

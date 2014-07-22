@@ -52,16 +52,11 @@ import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.importexport.exporters.Exporter;
 import com.openexchange.importexport.exporters.VCardExporter;
 import com.openexchange.importexport.formats.Format;
-import com.openexchange.server.ServiceLookup;
 
 @DispatcherNotes(defaultFormat="file")
 public class VCardExportAction extends AbstractExportAction {
 
-    public VCardExportAction(ServiceLookup services) {
-        super(services);
-    }
-
-    private Exporter exporter;
+	private Exporter exporter;
 
 	@Override
 	public Format getFormat() {
@@ -71,7 +66,7 @@ public class VCardExportAction extends AbstractExportAction {
 	@Override
 	public Exporter getExporter() {
 		if(this.exporter == null) {
-            exporter = new VCardExporter(services);
+            exporter = new VCardExporter();
         }
 		return exporter;
 	}
