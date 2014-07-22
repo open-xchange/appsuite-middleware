@@ -4896,13 +4896,18 @@ msgstr ""
 msgid "Other files"
 msgstr ""
 
-#. Display name of group with identifier 0. This group always contains all existing users of a context.
+#. Display name of group with identifier 0. This group always contains all existing users of a context but no guests.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Groups.java:68
 msgid "All users"
 msgstr ""
 
-#. Display name of group with identifier 1. Every created user will be added to this group but they can be removed.
+#. Display name of group for guest users.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Groups.java:71
+msgid "Guests"
+msgstr ""
+
+#. Display name of group with identifier 1. Every created user will be added to this group but they can be removed.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Groups.java:74
 msgid "Standard group"
 msgstr ""
 
