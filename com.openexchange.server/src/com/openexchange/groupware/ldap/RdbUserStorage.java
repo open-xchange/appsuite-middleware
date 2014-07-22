@@ -82,6 +82,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import com.openexchange.exception.OXException;
+import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
@@ -343,8 +344,8 @@ public class RdbUserStorage extends UserStorage {
         }
         loadLoginInfo(ctx, con, users);
         loadContact(ctx, con, users);
-        loadGroups(ctx, con, users);
         loadAttributes(ctx.getContextId(), con, users, false);
+        loadGroups(ctx, con, users);
         final User[] retval = new User[users.size()];
         for (int i = 0; i < length; i++) {
             retval[i] = users.get(userIds[i]);
@@ -440,8 +441,10 @@ public class RdbUserStorage extends UserStorage {
         final TIntObjectMap<TIntList> tmp = new TIntObjectHashMap<TIntList>(users.size(), 1);
         for (final User user : users.valueCollection()) {
             final TIntList userGroups = new TIntArrayList();
-            if (false == user.isGuest()) {
-                userGroups.add(0);
+            if (user.isGuest()) {
+                userGroups.add(GroupStorage.GUEST_GROUP_IDENTIFIER);
+            } else {
+                userGroups.add(GroupStorage.GROUP_ZERO_IDENTIFIER);
             }
             tmp.put(user.getId(), userGroups);
         }

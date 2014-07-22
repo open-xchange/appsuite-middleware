@@ -1109,13 +1109,9 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
     @Override
     public SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws OXException {
         final User user = storageParameters.getUser();
-        if (user.isGuest() && false == SharedType.getInstance().equals(type)) {
-            return new SortableId[0];
-        }
         final ConnectionProvider provider = getConnection(Mode.READ, storageParameters);
         try {
             final Connection con = provider.getConnection();
-//            User user = storageParameters.getUser();
             final int userId = user.getId();
             final Context ctx = storageParameters.getContext();
             final UserPermissionBits userPermissionBits;
@@ -1230,20 +1226,20 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
     public SortableId[] getSubfolders(final String treeId, final String parentIdentifier, final StorageParameters storageParameters) throws OXException {
         final ConnectionProvider provider = getConnection(Mode.READ, storageParameters);
         try {
-            final Connection con = provider.getConnection();
-
-            if (DatabaseFolderStorageUtility.hasSharedPrefix(parentIdentifier)) {
-                final User user = storageParameters.getUser();
-                final Context ctx = storageParameters.getContext();
-                final UserPermissionBits userPermissionBits;
-                {
-                    final Session s = storageParameters.getSession();
-                    if (s instanceof ServerSession) {
-                        userPermissionBits = ((ServerSession) s).getUserPermissionBits();
-                    } else {
-                        userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
-                    }
+            final User user = storageParameters.getUser();
+            final Context ctx = storageParameters.getContext();
+            final UserPermissionBits userPermissionBits;
+            {
+                final Session s = storageParameters.getSession();
+                if (s instanceof ServerSession) {
+                    userPermissionBits = ((ServerSession) s).getUserPermissionBits();
+                } else {
+                    userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
                 }
+            }
+
+            final Connection con = provider.getConnection();
+            if (DatabaseFolderStorageUtility.hasSharedPrefix(parentIdentifier)) {
                 final List<FolderIdNamePair> subfolderIds =
                     SharedPrefixFolder.getSharedPrefixFolderSubfolders(parentIdentifier, user, userPermissionBits, ctx, con);
                 final List<SortableId> list = new ArrayList<SortableId>(subfolderIds.size());
@@ -1257,7 +1253,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             final int parentId = Integer.parseInt(parentIdentifier);
 
             if (FolderObject.SYSTEM_ROOT_FOLDER_ID == parentId) {
-                final List<String[]> subfolderIds = SystemRootFolder.getSystemRootFolderSubfolder(storageParameters.getUser().getLocale());
+                final List<String[]> subfolderIds = SystemRootFolder.getSystemRootFolderSubfolder(user, userPermissionBits, ctx, con);
                 final List<SortableId> list = new ArrayList<SortableId>(subfolderIds.size());
                 int i = 0;
                 for (final String[] sa : subfolderIds) {
@@ -1270,17 +1266,6 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 /*
                  * A virtual database folder
                  */
-                final User user = storageParameters.getUser();
-                final Context ctx = storageParameters.getContext();
-                final UserPermissionBits userPermissionBits;
-                {
-                    final Session s = storageParameters.getSession();
-                    if (s instanceof ServerSession) {
-                        userPermissionBits = ((ServerSession) s).getUserPermissionBits();
-                    } else {
-                        userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
-                    }
-                }
                 final List<String[]> subfolderIds =
                     VirtualListFolder.getVirtualListFolderSubfolders(parentId, user, userPermissionBits, ctx, con);
                 final int size = subfolderIds.size();
@@ -1296,17 +1281,6 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 /*
                  * The system private folder
                  */
-                final User user = storageParameters.getUser();
-                final Context ctx = storageParameters.getContext();
-                final UserPermissionBits userPermissionBits;
-                {
-                    final Session s = storageParameters.getSession();
-                    if (s instanceof ServerSession) {
-                        userPermissionBits = ((ServerSession) s).getUserPermissionBits();
-                    } else {
-                        userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
-                    }
-                }
                 final List<String[]> subfolderIds = SystemPrivateFolder.getSystemPrivateFolderSubfolders(user, userPermissionBits, ctx, con);
                 final int size = subfolderIds.size();
                 final List<SortableId> list = new ArrayList<SortableId>(size);
@@ -1321,17 +1295,6 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 /*
                  * The system shared folder
                  */
-                final User user = storageParameters.getUser();
-                final Context ctx = storageParameters.getContext();
-                final UserPermissionBits userPermissionBits;
-                {
-                    final Session s = storageParameters.getSession();
-                    if (s instanceof ServerSession) {
-                        userPermissionBits = ((ServerSession) s).getUserPermissionBits();
-                    } else {
-                        userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
-                    }
-                }
                 final List<String[]> subfolderIds = SystemSharedFolder.getSystemSharedFolderSubfolder(user, userPermissionBits, ctx, con);
                 final int size = subfolderIds.size();
                 final List<SortableId> list = new ArrayList<SortableId>(size);
@@ -1346,17 +1309,6 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 /*
                  * The system public folder
                  */
-                final User user = storageParameters.getUser();
-                final Context ctx = storageParameters.getContext();
-                final UserPermissionBits userPermissionBits;
-                {
-                    final Session s = storageParameters.getSession();
-                    if (s instanceof ServerSession) {
-                        userPermissionBits = ((ServerSession) s).getUserPermissionBits();
-                    } else {
-                        userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
-                    }
-                }
                 final List<String[]> subfolderIds = SystemPublicFolder.getSystemPublicFolderSubfolders(user, userPermissionBits, ctx, con);
                 final int size = subfolderIds.size();
                 final List<SortableId> list = new ArrayList<SortableId>(size);
@@ -1371,17 +1323,6 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 /*
                  * The system infostore folder
                  */
-                final User user = storageParameters.getUser();
-                final Context ctx = storageParameters.getContext();
-                final UserPermissionBits userPermissionBits;
-                {
-                    final Session s = storageParameters.getSession();
-                    if (s instanceof ServerSession) {
-                        userPermissionBits = ((ServerSession) s).getUserPermissionBits();
-                    } else {
-                        userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
-                    }
-                }
                 final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
                 final List<String[]> subfolderIds = SystemInfostoreFolder.getSystemInfostoreFolderSubfolders(user, userPermissionBits, ctx, altNames, storageParameters.getSession(), con);
                 final int size = subfolderIds.size();
