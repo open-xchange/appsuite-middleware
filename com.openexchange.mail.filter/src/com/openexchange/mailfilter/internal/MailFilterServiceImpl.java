@@ -91,19 +91,19 @@ import com.openexchange.mailfilter.services.Services;
 
 /**
  * {@link MailFilterServiceImpl}
- * 
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public final class MailFilterServiceImpl implements MailFilterService {
-    
+
     private static final Logger log = LoggerFactory.getLogger(MailFilterServiceImpl.class);
-    
+
     private final Object lock;
 
     private final String scriptname;
 
     private final boolean useSIEVEResponseCodes;
-    
+
     private static final class RuleAndPosition {
         private final int position;
 
@@ -137,7 +137,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
 
     /**
      * Initializes a new {@link MailFilterServiceImpl}.
-     * 
+     *
      * @param kerberosSubject
      */
     public MailFilterServiceImpl() {
@@ -159,14 +159,14 @@ public final class MailFilterServiceImpl implements MailFilterService {
             final SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials);
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
-                
+
                 final String activeScript = sieveHandler.getActiveScript();
                 final String script = (activeScript != null) ? sieveHandler.getScript(activeScript) : "";
-                
+
                 final RuleListAndNextUid rules = sieveTextFilter.readScriptFromString(script);
 
                 final ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(rules.getRulelist(), null, rules.isError());
-                
+
                 if (isVacationRule(rule)) {
                     // A vacation rule...
                     final List<Rule> clientrules = clientrulesandrequire.getRules();
@@ -178,9 +178,9 @@ public final class MailFilterServiceImpl implements MailFilterService {
                 }
 
                 changeIncomingVacationRule(rule);
-                
+
                 final int nextuid = insertIntoPosition(rule, rules, clientrulesandrequire);
-                
+
                 final String writeback = sieveTextFilter.writeback(clientrulesandrequire, new HashSet<String>(sieveHandler.getCapabilities().getSieve()));
                 log.debug("The following sieve script will be written:\n{}", writeback);
                 writeScript(sieveHandler, activeScript, writeback);
@@ -209,7 +209,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
             }
         }
     }
-    
+
     /*
      * (non-Javadoc)
      * @see com.openexchange.mailfilter.MailFilterService#updateFilterRule(com.openexchange.mailfilter.Credentials, com.openexchange.jsieve.commands.Rule)
@@ -230,7 +230,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
                     final RuleAndPosition rightRule = getRightRuleForUniqueId(clientRulesAndReq.getRules(), uid);
                     changeIncomingVacationRule(rightRule.getRule());
                     clientRulesAndReq.getRules().set(rightRule.getPosition(), rule);
-                    
+
                     final String writeback = sieveTextFilter.writeback(clientRulesAndReq, new HashSet<String>(sieveHandler.getCapabilities().getSieve()));
                     log.debug("The following sieve script will be written:\n{}", writeback);
 
@@ -259,7 +259,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
             }
         }
     }
-    
+
     /*
      * (non-Javadoc)
      * @see com.openexchange.mailfilter.MailFilterService#deleteFilterRule(com.openexchange.mailfilter.Credentials, com.openexchange.jsieve.commands.Rule)
@@ -272,13 +272,13 @@ public final class MailFilterServiceImpl implements MailFilterService {
 
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
-                
+
                 final String activeScript = sieveHandler.getActiveScript();
                 if (null != activeScript) {
                     final String script = sieveHandler.getScript(activeScript);
                     final RuleListAndNextUid rulesandid = sieveTextFilter.readScriptFromString(script);
                     final ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(rulesandid.getRulelist(), null, rulesandid.isError());
-   
+
                     final List<Rule> rules = clientrulesandrequire.getRules();
                     final RuleAndPosition deletedrule = getRightRuleForUniqueId(rules, uid);
                     rules.remove(deletedrule.getPosition());
@@ -310,7 +310,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
             }
         }
     }
-    
+
     /*
      * (non-Javadoc)
      * @see com.openexchange.mailfilter.MailFilterService#purgeFilters(com.openexchange.mailfilter.Credentials)
@@ -332,7 +332,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
             }
         }
     }
-    
+
     /*
      * (non-Javadoc)
      * @see com.openexchange.mailfilter.MailFilterService#getActiveScript(com.openexchange.mailfilter.Credentials)
@@ -368,7 +368,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
             }
         }
     }
-    
+
     /*
      * (non-Javadoc)
      * @see com.openexchange.mailfilter.MailFilterService#listRules(com.openexchange.mailfilter.Credentials)
@@ -411,10 +411,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
             }
         }
     }
-    
-    /* (non-Javadoc)
-     * @see com.openexchange.mailfilter.MailFilterService#listRules(com.openexchange.mailfilter.Credentials, java.util.List)
-     */
+
     @Override
     public List<Rule> listRules(Credentials credentials, List<String> exclusionFlags) throws OXException {
         synchronized (lock) {
@@ -427,8 +424,11 @@ public final class MailFilterServiceImpl implements MailFilterService {
                 final SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
                 final RuleListAndNextUid rules = sieveTextFilter.readScriptFromString(script);
                 final ClientRulesAndRequire splittedRules = sieveTextFilter.splitClientRulesAndRequire(rules.getRulelist(), null, rules.isError());
-                
-                return exclude(splittedRules.getFlaggedRules(), exclusionFlags);
+
+                if(splittedRules.getFlaggedRules() != null) {
+                    return exclude(splittedRules.getFlaggedRules(), exclusionFlags);
+                }
+                return splittedRules.getRules();
             } catch (SieveException e) {
                 throw MailFilterExceptionCode.SIEVE_ERROR.create(e, e.getMessage());
             } catch (ParseException e) {
@@ -453,10 +453,6 @@ public final class MailFilterServiceImpl implements MailFilterService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mailfilter.MailFilterService#reorderRules(com.openexchange.mailfilter.Credentials, int[])
-     */
     @Override
     public void reorderRules(final Credentials credentials, final int[] uids) throws OXException {
         synchronized (lock) {
@@ -508,7 +504,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
             }
         }
     }
-    
+
     /*
      * (non-Javadoc)
      * @see com.openexchange.mailfilter.MailFilterService#getFilterRule(com.openexchange.mailfilter.Credentials, int)
@@ -531,7 +527,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
                     final RuleAndPosition rightRule = getRightRuleForUniqueId(clientrules, uid);
 
                     return rightRule.getRule();
-                    
+
                 } else {
                     throw MailFilterExceptionCode.NO_ACTIVE_SCRIPT.create();
                 }
@@ -558,7 +554,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
             }
         }
     }
-    
+
     /*
      * (non-Javadoc)
      * @see com.openexchange.mailfilter.MailFilterService#getCapabilities(com.openexchange.mailfilter.Credentials)
@@ -599,10 +595,10 @@ public final class MailFilterServiceImpl implements MailFilterService {
         }
         return ret;
     }
-    
+
     /**
      * Change a vacation rule
-     * 
+     *
      * @param rule the rule to be changed
      * @throws SieveException
      */
@@ -640,10 +636,10 @@ public final class MailFilterServiceImpl implements MailFilterService {
             }
         }
     }
-    
+
     /**
      * Change the outgoing vacation rule
-     * 
+     *
      * @param clientrules
      * @throws SieveException
      */
@@ -682,7 +678,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
             }
         }
     }
-    
+
     /**
      * Check own vacation
      * @param arguments
@@ -694,10 +690,10 @@ public final class MailFilterServiceImpl implements MailFilterService {
             && null != arguments.get(1) && arguments.get(1) instanceof TagArgument && ":domain".equals(((TagArgument)arguments.get(1)).getTag())
             && null != arguments.get(2) && arguments.get(2) instanceof List<?> && "From".equals(((List<?>)arguments.get(2)).get(0));
     }
-    
+
     /**
      * Set the specified UID to the specified Rule
-     * 
+     *
      * @param rule the rule
      * @param uid the UID
      */
@@ -712,7 +708,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
 
     /**
      * Determine whether the specified rule is a vacation rule
-     * 
+     *
      * @param rule
      * @return true if the specified rule is a vacation rule; false otherwise
      */
@@ -720,10 +716,10 @@ public final class MailFilterServiceImpl implements MailFilterService {
         final RuleComment ruleComment = rule.getRuleComment();
         return (null != ruleComment) && (null != ruleComment.getFlags()) && ruleComment.getFlags().contains("vacation") && rule.getIfCommand() != null && ActionCommand.Commands.VACATION.equals(rule.getIfCommand().getFirstCommand());
     }
-    
+
     /**
      * Used to perform checks to set the right script name when writing
-     * 
+     *
      * @param sieveHandler the sieveHandler to use
      * @param activeScript the activeScript
      * @param writeback the writeback String
@@ -745,7 +741,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
 
     /**
      * Fix parsing
-     * 
+     *
      * @param script
      * @return
      */
@@ -753,7 +749,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
         final String pattern = ":addresses\\s+:";
         return script.replaceAll(pattern, ":addresses \"\" :");
     }
-    
+
     /**
      * Search within the given List of Rules for the one matching the specified UID
      * @param clientrules
@@ -772,17 +768,17 @@ public final class MailFilterServiceImpl implements MailFilterService {
         }
         return null;
     }
-    
+
     private TagArgument createTagArg(final String string) {
         final Token token = new Token();
         token.image = ":" + string;
         return new TagArgument(token);
     }
-    
+
     /**
-     * 
+     *
      * @param sieveHandler
-     * @throws OXException 
+     * @throws OXException
      * @throws UnsupportedEncodingException
      * @throws IOException
      * @throws OXSieveHandlerException
@@ -816,7 +812,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
 
     /**
      * Find the correct position into the array
-     * 
+     *
      * @param rule the rule to add
      * @param rules the rules list
      * @param clientrulesandrequire
