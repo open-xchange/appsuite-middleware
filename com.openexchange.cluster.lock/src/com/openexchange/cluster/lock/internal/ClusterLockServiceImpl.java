@@ -118,24 +118,21 @@ public class ClusterLockServiceImpl implements ClusterLockService {
     @Override
     public void releaseClusterLock(final String action, final Lock lock) throws OXException {
         final ConcurrentMap<String, Lock> map = getHzMap();
-        final Lock l = map.get(action);
-        if (lock.equals(l)) {
-            map.remove(action);
-        }
+        map.remove(action, lock);
     }
 
     @Override
-    public Lock acquirePeriodicClusterLock(final String action, final Long period) throws OXException {
-        final Long now = System.currentTimeMillis();
+    public Lock acquirePeriodicClusterLock(final String action, final long period) throws OXException {
+        final long now = System.currentTimeMillis();
         final ConcurrentMap<String, Long> map = getPeriodicHzMap();
         final Long timestamp = map.get(action);
         if (timestamp != null) {
-            if (now - timestamp < period) {
+            if (now - timestamp.longValue() < period) {
                 throw ClusterLockExceptionCodes.CLUSTER_PERIODIC_LOCKED.create(period, action, period - (now - timestamp));
             }
         }
         final Lock lock = hazelcastInstance.getLock(action);
-        final Long futureTS = map.putIfAbsent(action, now);
+        final Long futureTS = map.putIfAbsent(action, Long.valueOf(now));
         if (futureTS != null) {
             throw ClusterLockExceptionCodes.CLUSTER_PERIODIC_LOCKED.create(period, action, period - (now - futureTS));
         }
