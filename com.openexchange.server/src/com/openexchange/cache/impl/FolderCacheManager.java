@@ -279,7 +279,7 @@ public final class FolderCacheManager {
     public FolderObject getFolderObject(final int objectId, final boolean fromCache, final Context ctx, final Connection readCon) throws OXException {
         final Cache folderCache = this.folderCache;
         if (null == folderCache) {
-            throw OXFolderExceptionCode.CACHE_NOT_ENABLED.create("foldercache.properties");
+            throw OXFolderExceptionCode.CACHE_NOT_ENABLED.create();
         }
         if (fromCache) {
             // Conditional put into cache: Put only if absent.
