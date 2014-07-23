@@ -165,6 +165,7 @@ import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.Trackable;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -2024,8 +2025,10 @@ public final class OutlookFolderStorage implements FolderStorage {
         /*
          * Callable for primary mail folder
          */
-        completionService.submit(new MailFolderCallable(comparator, locale, user, contextId, tree, parameters));
-        taskCount++;
+        if (null == parameters.getSession() || ServerSessionAdapter.valueOf(parameters.getSession()).getUserConfiguration().hasWebMail()) {
+            completionService.submit(new MailFolderCallable(comparator, locale, user, contextId, tree, parameters));
+            taskCount++;
+        }
         /*
          * Callable for the ones from virtual table
          */
