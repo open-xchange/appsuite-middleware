@@ -593,12 +593,9 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
             {
                 final MimeBodyPart text = new MimeBodyPart();
                 final String txt = performLineFolding(
-                    strHelper.getString(MailStrings.ACK_NOTIFICATION_TEXT).replaceFirst(
-                        "#DATE#",
-                        sentDate == null ? "" : quoteReplacement(DateFormat.getDateInstance(DateFormat.LONG, locale).format(sentDate))).replaceFirst(
-                            "#RECIPIENT#",
-                            quoteReplacement(from)).replaceFirst("#SUBJECT#", quoteReplacement(srcMail.getSubject())),
-                            usm.getAutoLinebreak());
+                    strHelper.getString(MailStrings.ACK_NOTIFICATION_TEXT)
+                    .replaceFirst("#DATE#", sentDate == null ? "" : quoteReplacement(DateFormat.getDateInstance(DateFormat.LONG, locale).format(sentDate)))
+                    .replaceFirst("#RECIPIENT#", quoteReplacement(from)).replaceFirst("#SUBJECT#", quoteReplacement(srcMail.getSubject())), usm.getAutoLinebreak());
                 MessageUtility.setText(txt, defaultMimeCS, text);
                 // text.setText(txt,defaultMimeCS);
                 text.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
