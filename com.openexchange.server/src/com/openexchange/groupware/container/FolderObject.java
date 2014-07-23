@@ -1697,11 +1697,21 @@ public class FolderObject extends FolderChildObject implements Cloneable {
     }
 
     public static final OCLPermission VIRTUAL_FOLDER_PERMISSION = new OCLPermission();
+    public static final OCLPermission VIRTUAL_GUEST_PERMISSION = new OCLPermission();
     static {
         VIRTUAL_FOLDER_PERMISSION.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
         VIRTUAL_FOLDER_PERMISSION.setFolderAdmin(false);
         VIRTUAL_FOLDER_PERMISSION.setGroupPermission(true);
         VIRTUAL_FOLDER_PERMISSION.setAllPermission(
+            OCLPermission.READ_FOLDER,
+            OCLPermission.NO_PERMISSIONS,
+            OCLPermission.NO_PERMISSIONS,
+            OCLPermission.NO_PERMISSIONS);
+
+        VIRTUAL_GUEST_PERMISSION.setEntity(OCLPermission.ALL_GUESTS);
+        VIRTUAL_GUEST_PERMISSION.setFolderAdmin(false);
+        VIRTUAL_GUEST_PERMISSION.setGroupPermission(true);
+        VIRTUAL_GUEST_PERMISSION.setAllPermission(
             OCLPermission.READ_FOLDER,
             OCLPermission.NO_PERMISSIONS,
             OCLPermission.NO_PERMISSIONS,
@@ -1730,7 +1740,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
      * @param module The module
      * @param hasSubfolders Whether the folder is supposed to contain subfolders
      * @param type The type
-     * @param virtualPerm The folder's permission
+     * @param virtualPerms The folder's permissions
      * @return A folder instance representing a virtual folder
      */
     public static final FolderObject createVirtualFolderObject(final int objectID, final String name, final int module, final boolean hasSubfolders, final int type, final OCLPermission... virtualPerms) {
@@ -1769,14 +1779,42 @@ public class FolderObject extends FolderChildObject implements Cloneable {
      * @return A folder instance representing a virtual folder
      */
     public static final FolderObject createVirtualFolderObject(final String fullName, final String name, final int module, final boolean hasSubfolders, final int type) {
-        final OCLPermission p = VIRTUAL_FOLDER_PERMISSION;
+        return createVirtualFolderObject(fullName, name, module, hasSubfolders, type, VIRTUAL_FOLDER_PERMISSION);
+    }
+
+    /**
+     * Creates a folder instance representing a virtual folder.
+     *
+     * @param fullName The folder's fullname
+     * @param name The name
+     * @param module The module
+     * @param hasSubfolders Whether the folder is supposed to contain subfolders
+     * @param type The type
+     * @param virtualPerms The folder's permissions
+     * @return A folder instance representing a virtual folder
+     */
+    public static final FolderObject createVirtualFolderObject(final String fullName, final String name, final int module, final boolean hasSubfolders, final int type, final OCLPermission... virtualPerms) {
+        final List<OCLPermission> permissions;
+        if (virtualPerms == null || virtualPerms.length == 0) {
+            permissions = Collections.singletonList(VIRTUAL_FOLDER_PERMISSION.deepClone());
+        } else {
+            permissions = new ArrayList<OCLPermission>(virtualPerms.length);
+            for (OCLPermission permission : virtualPerms) {
+                if (virtualPerms != null) {
+                    permissions.add(permission);
+                }
+            }
+        }
+
         final FolderObject virtualFolder = new FolderObject();
         virtualFolder.setFullName(fullName);
         virtualFolder.setFolderName(name);
         virtualFolder.setModule(module);
         virtualFolder.setSubfolderFlag(hasSubfolders);
         virtualFolder.setType(type);
-        virtualFolder.setPermissionsAsArray(new OCLPermission[] { p });
+        for (OCLPermission permission : permissions) {
+            virtualFolder.addPermission(permission);
+        }
         return virtualFolder;
     }
 
@@ -1793,7 +1831,9 @@ public class FolderObject extends FolderChildObject implements Cloneable {
             creatorDisplayName,
             FolderObject.SYSTEM_MODULE,
             true,
-            FolderObject.SYSTEM_TYPE);
+            FolderObject.SYSTEM_TYPE,
+            VIRTUAL_FOLDER_PERMISSION,
+            VIRTUAL_GUEST_PERMISSION);
     }
 
     /**
