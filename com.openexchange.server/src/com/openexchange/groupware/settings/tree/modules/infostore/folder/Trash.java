@@ -107,6 +107,9 @@ public class Trash implements PreferencesItemService {
 
             @Override
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
+                if (user.isGuest()) {
+                    return;
+                }
                 /*
                  * Use infostore default trash folder if available
                  */
