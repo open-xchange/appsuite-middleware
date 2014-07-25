@@ -62,6 +62,7 @@ import java.nio.charset.UnsupportedCharsetException;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.text.DateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
@@ -78,6 +79,8 @@ import javax.mail.NoSuchProviderException;
 import javax.mail.Part;
 import javax.mail.Provider;
 import javax.mail.Transport;
+import javax.mail.event.TransportEvent;
+import javax.mail.event.TransportListener;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeBodyPart;
@@ -122,6 +125,7 @@ import com.openexchange.mail.mime.filler.MimeMessageFiller;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.MimeSupport;
+import com.openexchange.mail.transport.MtaStatusInfo;
 import com.openexchange.mail.transport.config.ITransportProperties;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.transport.config.TransportProperties;
@@ -140,6 +144,7 @@ import com.openexchange.smtp.services.Services;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 import com.sun.mail.smtp.JavaSMTPTransport;
 import com.sun.mail.smtp.SMTPMessage;
+import com.sun.mail.smtp.SMTPSendFailedException;
 
 /**
  * {@link SMTPTransport} - The SMTP mail transport.
@@ -814,7 +819,7 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
                         try {
                             connectTransport(transport, smtpConfig);
                             saveChangesSafe(mimeMessage);
-                            transport(mimeMessage, recipients, transport, smtpConfig);
+                            transport(mimeMessage, recipients, transport, smtpConfig, new MtaStatusInfo());
                             mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                         } catch (final javax.mail.AuthenticationFailedException e) {
                             throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
@@ -931,10 +936,29 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
     }
 
     private void transport(final MimeMessage smtpMessage, final Address[] recipients, final Transport transport, final SMTPConfig smtpConfig) throws OXException {
+        transport(smtpMessage, recipients, transport, smtpConfig, null);
+    }
+
+    private void transport(final MimeMessage smtpMessage, final Address[] recipients, final Transport transport, final SMTPConfig smtpConfig, final MtaStatusInfo smtpStatusInfo) throws OXException {
+        // Prepare addresses
         prepareAddresses(recipients);
+
+        // Register transport listener to fill addresses to status info
+        if (null != smtpStatusInfo) {
+            transport.addTransportListener(new AddressAddingTransportListener(smtpStatusInfo));
+        }
+
+        // Try to send the message
         try {
             transport.sendMessage(smtpMessage, recipients);
             logMessageTransport(smtpMessage, smtpConfig);
+        } catch (SMTPSendFailedException sendFailed) {
+            if (null == smtpStatusInfo) {
+                throw MimeMailException.handleMessagingException(sendFailed, smtpConfig, session);
+            }
+            smtpStatusInfo.setReturnCode(sendFailed.getReturnCode());
+            OXException oxe = MimeMailException.handleMessagingException(sendFailed, smtpConfig, session);
+            throw oxe;
         } catch (final MessagingException e) {
             if (e.getNextException() instanceof javax.activation.UnsupportedDataTypeException) {
                 // Check for "no object DCH for MIME type xxxxx/yyyy"
@@ -1315,4 +1339,49 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
         }
         return builder.toString();
     }
+
+    private static final class AddressAddingTransportListener implements TransportListener {
+
+        private final MtaStatusInfo statusInfo;
+
+        AddressAddingTransportListener(MtaStatusInfo statusInfo) {
+            super();
+            this.statusInfo = statusInfo;
+        }
+
+        @Override
+        public void messagePartiallyDelivered(TransportEvent e) {
+            fillAddressesFromEvent(e);
+        }
+
+        @Override
+        public void messageNotDelivered(TransportEvent e) {
+            fillAddressesFromEvent(e);
+
+        }
+
+        @Override
+        public void messageDelivered(TransportEvent e) {
+            fillAddressesFromEvent(e);
+
+        }
+
+        private void fillAddressesFromEvent(TransportEvent e) {
+            javax.mail.Address[] arr = e.getInvalidAddresses();
+            if (null != arr) {
+                statusInfo.getInvalidAddresses().addAll(Arrays.asList(arr));
+            }
+
+            arr = e.getValidUnsentAddresses();
+            if (null != arr) {
+                statusInfo.getUnsentAddresses().addAll(Arrays.asList(arr));
+            }
+
+            arr = e.getValidSentAddresses();
+            if (null != arr) {
+                statusInfo.getSentAddresses().addAll(Arrays.asList(arr));
+            }
+        }
+    }
+
 }
