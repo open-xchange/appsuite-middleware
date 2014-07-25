@@ -751,6 +751,11 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
 
     @Override
     public MailMessage sendMailMessage(final ComposedMailMessage composedMail, final ComposeType sendType, final Address[] allRecipients) throws OXException {
+        return sendMailMessage(composedMail, sendType, allRecipients, null);
+    }
+
+    @Override
+    public MailMessage sendMailMessage(final ComposedMailMessage composedMail, final ComposeType sendType, final Address[] allRecipients, final MtaStatusInfo mtaStatusInfo) throws OXException {
         final SMTPConfig smtpConfig = getTransportConfig0();
         // There is an issue in the OSGi framework preventing the MailCap
         // from loading correctly. When getting the session here,
@@ -819,7 +824,7 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
                         try {
                             connectTransport(transport, smtpConfig);
                             saveChangesSafe(mimeMessage);
-                            transport(mimeMessage, recipients, transport, smtpConfig, new MtaStatusInfo());
+                            transport(mimeMessage, recipients, transport, smtpConfig, mtaStatusInfo);
                             mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                         } catch (final javax.mail.AuthenticationFailedException e) {
                             throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
@@ -878,7 +883,7 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
                         /*
                          * TODO: Do encryption here
                          */
-                        transport(smtpMessage, recipients, transport, smtpConfig);
+                        transport(smtpMessage, recipients, transport, smtpConfig, mtaStatusInfo);
                         mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                     } catch (final javax.mail.AuthenticationFailedException e) {
                         throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
