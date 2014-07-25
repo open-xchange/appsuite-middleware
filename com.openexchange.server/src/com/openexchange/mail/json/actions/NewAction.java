@@ -93,6 +93,7 @@ import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
+import com.openexchange.mail.transport.MtaStatusInfo;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
@@ -283,7 +284,7 @@ public final class NewAction extends AbstractMailAction {
                 /*
                  * Check
                  */
-                msgIdentifier = mailInterface.sendMessage(composedMails[0], sendType, accountId, usm);
+                msgIdentifier = mailInterface.sendMessage(composedMails[0], sendType, accountId, usm, new MtaStatusInfo());
                 for (int i = 1; i < composedMails.length; i++) {
                     final ComposedMailMessage cm = composedMails[i];
                     if (null != cm) {
