@@ -379,8 +379,8 @@ public class RealtimeException extends OXException {
     }
 
     @Override
-    public String remove(String name) {
-        return delegate.remove(name);
+    public String removeProperty(String name) {
+        return delegate.removeProperty(name);
     }
 
     @Override
