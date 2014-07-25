@@ -1111,6 +1111,15 @@ public class OXException extends Exception implements OXExceptionConstants {
         return Collections.unmodifiableSet(arguments.keySet());
     }
 
+    /**
+     * Gets the unmodifiable {@link Map} view for contained arguments.<br>
+     *
+     * @return The arguments
+     */
+    public Map<String, Object> getArguments() {
+        return Collections.unmodifiableMap(arguments);
+    }
+
     /*-
      * ----------------------------- Property related methods -----------------------------
      */

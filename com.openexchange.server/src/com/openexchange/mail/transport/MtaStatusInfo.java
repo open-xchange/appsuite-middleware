@@ -52,6 +52,11 @@ package com.openexchange.mail.transport;
 import java.util.LinkedList;
 import java.util.List;
 import javax.mail.Address;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import com.openexchange.json.Jsonable;
 
 /**
  * {@link MtaStatusInfo} - A container for an MTA's status information.
@@ -59,7 +64,7 @@ import javax.mail.Address;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.1
  */
-public class MtaStatusInfo {
+public class MtaStatusInfo implements Jsonable {
 
     private final List<Address> sentAddresses;
     private final List<Address> unsentAddresses;
@@ -74,6 +79,48 @@ public class MtaStatusInfo {
         sentAddresses = new LinkedList<Address>();
         unsentAddresses = new LinkedList<Address>();
         invalidAddresses = new LinkedList<Address>();
+    }
+
+    @Override
+    public Object toJson() {
+        try {
+            JSONObject jMtaInfo = new JSONObject(6);
+
+            jMtaInfo.put("return_code", returnCode);
+
+            int size = sentAddresses.size();
+            if (size > 0) {
+                JSONArray jAddresses = new JSONArray(size);
+                for (Address address : sentAddresses) {
+                    jAddresses.put(address.toString());
+                }
+                jMtaInfo.put("sent_addresses", jAddresses);
+            }
+
+            size = unsentAddresses.size();
+            if (!unsentAddresses.isEmpty()) {
+                JSONArray jAddresses = new JSONArray(size);
+                for (Address address : unsentAddresses) {
+                    jAddresses.put(address.toString());
+                }
+                jMtaInfo.put("unsent_addresses", jAddresses);
+            }
+
+            size = invalidAddresses.size();
+            if (!invalidAddresses.isEmpty()) {
+                JSONArray jAddresses = new JSONArray(size);
+                for (Address address : invalidAddresses) {
+                    jAddresses.put(address.toString());
+                }
+                jMtaInfo.put("invalid_addresses", jAddresses);
+            }
+
+            return jMtaInfo;
+        } catch (JSONException e) {
+            Logger logger = org.slf4j.LoggerFactory.getLogger(MtaStatusInfo.class);
+            logger.warn("Failed to convert MTA status information to its JSON representation", e);
+            return null;
+        }
     }
 
     /**
