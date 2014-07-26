@@ -53,6 +53,8 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PushbackReader;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -394,18 +396,14 @@ public class SieveHandler {
         bos_sieve.flush();
 
         String actualline = bis_sieve.readLine();
-        do {
-            if (null != actualline && actualline.startsWith(SIEVE_OK)) {
-                return;
-            } else if (null != actualline && actualline.startsWith("NO ")) {
-                final String errorMessage = parseError(actualline).replaceAll(CRLF, "\n");
-                throw new OXSieveHandlerException(errorMessage, sieve_host, sieve_host_port, parseSIEVEResponse(actualline, errorMessage)).setParseError(true);
-            } else {
-                if (null == actualline || actualline.length() != 0) {
-                    throw new OXSieveHandlerException("Unknown response code", sieve_host, sieve_host_port, parseSIEVEResponse(actualline, null));
-                }
-            }
-        } while ((actualline = bis_sieve.readLine()) != null);
+        if (null != actualline && actualline.startsWith(SIEVE_OK)) {
+            return;
+        } else if (null != actualline && actualline.startsWith("NO ")) {
+            final String errorMessage = parseError(actualline).replaceAll(CRLF, "\n");
+            throw new OXSieveHandlerException(errorMessage, sieve_host, sieve_host_port, parseSIEVEResponse(actualline, errorMessage)).setParseError(true);
+        } else {
+            throw new OXSieveHandlerException("Unknown response code", sieve_host, sieve_host_port, parseSIEVEResponse(actualline, null));
+        }
     }
 
 	/**
@@ -474,6 +472,7 @@ public class SieveHandler {
             sb.ensureCapacity(parsed[1]);
         }
         boolean inQuote = false;
+        boolean okStart = false;
         while (true) {
             int ch = bis_sieve.read();
             switch (ch) {
@@ -482,6 +481,7 @@ public class SieveHandler {
                 throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
             case '\\':
                 {
+                    okStart = false;
                     sb.append((char) ch);
                     ch = bis_sieve.read();
                     if (ch == -1) {
@@ -498,27 +498,31 @@ public class SieveHandler {
                     } else {
                         inQuote = true;
                     }
+                    okStart = false;
                     sb.append((char) ch);
                 }
                 break;
             case 'O': // OK\r\n
                 {
-                    if (inQuote) {
-                        sb.append((char) ch);
-                    } else {
-                        ch = bis_sieve.read();
-                        if (ch == -1) {
-                            // End of stream
-                            sb.append('O');
-                            return returnScript(sb);
-                        }
-                        if ('K' == ch) {
-                            return returnScript(sb);
-                        }
+                    if (!inQuote) {
+                        okStart = true;
                     }
+                    sb.append((char) ch);
+                }
+                break;
+            case 'K': // OK\r\n
+                {
+                    if (!inQuote && okStart) {
+                        sb.setLength(sb.length() - 1);
+                        consumeUntilCRLF(); // OK "Getscript completed."\r\n
+                        return returnScript(sb);
+                    }
+                    okStart = false;
+                    sb.append((char) ch);
                 }
                 break;
             default:
+                okStart = false;
                 sb.append((char) ch);
                 break;
             }
@@ -550,13 +554,59 @@ public class SieveHandler {
          */
     }
 
-    private String returnScript(final StringBuilder sb) {
+    private static String returnScript(final StringBuilder sb) {
         int length = sb.length();
         if (length >= 2 && sb.charAt(length - 2) == '\r' && sb.charAt(length - 1) == '\n') {
             // We have to strip off the last trailing CRLF...
             return sb.substring(0, length - 2);
         }
         return sb.toString();
+    }
+
+    private void consumeUntilCRLF() throws IOException, OXSieveHandlerException {
+        Reader in = bis_sieve;
+        boolean doRead = true;
+        int c1 = -1;
+
+        while (doRead && (c1 = in.read()) >= 0) {
+            if (c1 == '\n') {
+                doRead = false;
+            } else if (c1 == '\r') {
+                // Got CR, is the next char LF?
+                boolean twoCRs = false;
+                if (in.markSupported()) {
+                    in.mark(2);
+                }
+                int c2 = in.read();
+                if (c2 == '\r') {
+                    // Discard extraneous CR
+                    twoCRs = true;
+                    c2 = in.read();
+                }
+                if (c2 != '\n') {
+                    // If the reader supports it (which we hope will always be the case), reset to after the first CR.
+                    // Otherwise, we wrap a PushbackReader around the stream so we can unread the characters we don't need.
+                    if (in.markSupported()) {
+                        in.reset();
+                    } else {
+                        if (!(in instanceof PushbackReader)) {
+                            in = new PushbackReader(in, 2);
+                        }
+                        if (c2 != -1) {
+                            ((PushbackReader) in).unread(c2);
+                        }
+                        if (twoCRs) {
+                            ((PushbackReader) in).unread('\r');
+                        }
+                    }
+                }
+                doRead = false;
+            }
+        }
+        if (c1 < 0) {
+            // End of stream
+            throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
+        }
     }
 
     /**
