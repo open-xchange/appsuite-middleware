@@ -586,7 +586,7 @@ public class SieveHandler {
                 if (c2 != '\n') {
                     // If the reader supports it (which we hope will always be the case), reset to after the first CR.
                     // Otherwise, we wrap a PushbackReader around the stream so we can unread the characters we don't need.
-                    if (in.markSupported()) {
+                    if (in.markSupported()) { // Always true for BufferedReader
                         in.reset();
                     } else {
                         if (!(in instanceof PushbackReader)) {
