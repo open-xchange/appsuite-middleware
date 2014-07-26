@@ -99,8 +99,8 @@ import com.openexchange.exception.OXException.Truncated;
 import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.json.Jsonable;
 import com.openexchange.json.OXJSONWriter;
+import com.openexchange.json.io.Jsonable;
 import com.openexchange.log.LogProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
 
@@ -872,21 +872,29 @@ public final class ResponseWriter {
     private static void writeArguments(final OXException exc, final JSONWriter writer) throws JSONException {
         Map<String, Object> arguments = exc.getArguments();
         if (!arguments.isEmpty()) {
-            JSONObject jArguments = null;
-            for (Entry<String, Object> argument : arguments.entrySet()) {
-                Object value = argument.getValue();
-                if (value instanceof Jsonable) {
-                    Object jValue = ((Jsonable) value).toJson();
-                    if (null != jValue) {
-                        if (null == jArguments) {
-                            jArguments = new JSONObject(4);
+            try {
+                JSONObject jArguments = null;
+                for (Entry<String, Object> argument : arguments.entrySet()) {
+                    Object value = argument.getValue();
+                    if (value instanceof Jsonable) {
+                        Object jValue = ((Jsonable) value).toJson();
+                        if (null != jValue) {
+                            if (null == jArguments) {
+                                jArguments = new JSONObject(4);
+                            }
+                            jArguments.put(argument.getKey(), jValue);
                         }
-                        jArguments.put(argument.getKey(), jValue);
                     }
                 }
-            }
-            if (null != jArguments) {
-                writer.key(ARGUMENTS).value(jArguments);
+                if (null != jArguments) {
+                    writer.key(ARGUMENTS).value(jArguments);
+                }
+            } catch (IOException e) {
+                Throwable cause = e.getCause();
+                if (cause instanceof JSONException) {
+                    throw (JSONException) cause;
+                }
+                throw new JSONException("Error while composing JSON", e);
             }
         }
     }

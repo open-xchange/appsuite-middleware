@@ -47,7 +47,9 @@
  *
  */
 
-package com.openexchange.json;
+package com.openexchange.json.io;
+
+import java.io.IOException;
 
 
 /**
@@ -62,7 +64,8 @@ public interface Jsonable {
      * Gets the JSON representation of this data resource.
      *
      * @return The JSON representation.
+     * @throws IOException If composing JSON representation fails
      */
-    Object toJson();
+    Object toJson() throws IOException;
 
 }

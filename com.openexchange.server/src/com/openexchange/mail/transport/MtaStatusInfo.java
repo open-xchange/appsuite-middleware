@@ -49,14 +49,14 @@
 
 package com.openexchange.mail.transport;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import javax.mail.Address;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import com.openexchange.json.Jsonable;
+import com.openexchange.json.io.Jsonable;
 
 /**
  * {@link MtaStatusInfo} - A container for an MTA's status information.
@@ -82,7 +82,7 @@ public class MtaStatusInfo implements Jsonable {
     }
 
     @Override
-    public Object toJson() {
+    public Object toJson() throws IOException {
         try {
             JSONObject jMtaInfo = new JSONObject(6);
 
@@ -117,9 +117,7 @@ public class MtaStatusInfo implements Jsonable {
 
             return jMtaInfo;
         } catch (JSONException e) {
-            Logger logger = org.slf4j.LoggerFactory.getLogger(MtaStatusInfo.class);
-            logger.warn("Failed to convert MTA status information to its JSON representation", e);
-            return null;
+            throw new IOException(e);
         }
     }
 
