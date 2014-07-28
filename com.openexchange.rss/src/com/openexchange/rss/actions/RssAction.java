@@ -59,6 +59,8 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -227,9 +229,93 @@ public class RssAction implements AJAXActionService {
         return new AJAXRequestResult(results, "rss").addWarnings(warnings);
     }
 
-    private String getTitle(SyndEntry entry) {
+    private static String getTitle(SyndEntry entry) {
         final HtmlService htmlService = RssServices.getHtmlService();
-        return null == htmlService ? entry.getTitle() : htmlService.sanitize(entry.getTitle(), null, true, null, null);
+        return null == htmlService ? entry.getTitle() : replaceBody(htmlService.sanitize(entry.getTitle(), null, true, null, null));
+    }
+
+    private static final Pattern PATTERN_HTML = Pattern.compile("<html.*?>(.*?)</html>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_HEAD = Pattern.compile("<head.*?>(.*?)</head>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_BODY = Pattern.compile("<body(.*?)>(.*?)</body>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_STYLE = Pattern.compile("<style.*?>.*?</style>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+
+    /**
+     * Replaces body tag with an appropriate &lt;div&gt; tag.
+     *
+     * @param htmlContent The HTML content
+     * @return The HTML content with replaced body tag
+     */
+    private static String replaceBody(final String htmlContent) {
+        if (isEmpty(htmlContent)) {
+            return htmlContent;
+        }
+        final Matcher htmlMatcher = PATTERN_HTML.matcher(htmlContent);
+        if (!htmlMatcher.find()) {
+            return replaceBodyPlain(htmlContent);
+        }
+        final Matcher headMatcher = PATTERN_HEAD.matcher(htmlMatcher.group(1));
+        if (!headMatcher.find()) {
+            return replaceBodyPlain(htmlContent);
+        }
+        final Matcher bodyMatcher = PATTERN_BODY.matcher(htmlContent);
+        if (!bodyMatcher.find()) {
+            return replaceBodyPlain(htmlContent);
+        }
+        final StringBuilder sb = new StringBuilder(htmlContent.length() + 256);
+        sb.append("<div");
+        {
+            final String rest = bodyMatcher.group(1);
+            if (!isEmpty(rest)) {
+                sb.append(' ').append(cleanUpRest(rest));
+            }
+        }
+        sb.append('>');
+        final Matcher styleMatcher = PATTERN_STYLE.matcher(headMatcher.group(1));
+        while (styleMatcher.find()) {
+            sb.append(styleMatcher.group());
+        }
+        sb.append(bodyMatcher.group(2));
+        sb.append("</div>");
+        // Is there more behind closing <body> tag?
+        final int end = bodyMatcher.end();
+        if (end < htmlContent.length()) {
+            sb.append(htmlContent.substring(end));
+        }
+        return sb.toString();
+    }
+
+    private static final Pattern PAT_ATTR_BGCOLOR = Pattern.compile("bgcolor=\"([^\"]+)\"", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PAT_ATTR_STYLE = Pattern.compile("style=\"([^\"]+)\"", Pattern.CASE_INSENSITIVE);
+
+    private static String cleanUpRest(final String rest) {
+        Matcher m = PAT_ATTR_BGCOLOR.matcher(rest);
+        if (!m.find()) {
+            return rest;
+        }
+        final String color = m.group(1);
+        final String ret = rest;
+        final StringBuffer sbuf = new StringBuffer(ret.length());
+        m.appendReplacement(sbuf, "");
+        m.appendTail(sbuf);
+        // Check for script attribute
+        m = PAT_ATTR_STYLE.matcher(sbuf.toString());
+        if (!m.find()) {
+            return sbuf.append(" style=\"background-color: ").append(color).append(";\"").toString();
+        }
+        sbuf.setLength(0);
+        m.appendReplacement(sbuf, "style=\"" + com.openexchange.java.Strings.quoteReplacement(m.group(1)) + " background-color: " + color + ";\"");
+        m.appendTail(sbuf);
+        return sbuf.toString();
+    }
+
+    private static String replaceBodyPlain(final String htmlContent) {
+        final Matcher m = PATTERN_BODY.matcher(htmlContent);
+        StringBuffer sb = new StringBuffer();
+        if (m.find()) {
+            m.appendReplacement(sb, Matcher.quoteReplacement("<div " + m.group(1) + '>' + m.group(2) + "</div>"));
+        }
+        m.appendTail(sb);
+        return sb.toString();
     }
 
 	private static String urlDecodeSafe(final String urlString) throws MalformedURLException {
