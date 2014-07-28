@@ -253,20 +253,7 @@ public class RssAction implements AJAXActionService {
             return replaceBodyPlain(htmlContent);
         }
         final StringBuilder sb = new StringBuilder(htmlContent.length() + 256);
-        sb.append("<div");
-        {
-            final String rest = bodyMatcher.group(1);
-            if (!isEmpty(rest)) {
-                sb.append(' ').append(cleanUpRest(rest));
-            }
-        }
-        sb.append('>');
-        final Matcher styleMatcher = PATTERN_STYLE.matcher(headMatcher.group(1));
-        while (styleMatcher.find()) {
-            sb.append(styleMatcher.group());
-        }
         sb.append(bodyMatcher.group(2));
-        sb.append("</div>");
         // Is there more behind closing <body> tag?
         final int end = bodyMatcher.end();
         if (end < htmlContent.length()) {
@@ -275,35 +262,11 @@ public class RssAction implements AJAXActionService {
         return sb.toString();
     }
 
-    private static final Pattern PAT_ATTR_BGCOLOR = Pattern.compile("bgcolor=\"([^\"]+)\"", Pattern.CASE_INSENSITIVE);
-    private static final Pattern PAT_ATTR_STYLE = Pattern.compile("style=\"([^\"]+)\"", Pattern.CASE_INSENSITIVE);
-
-    private static String cleanUpRest(final String rest) {
-        Matcher m = PAT_ATTR_BGCOLOR.matcher(rest);
-        if (!m.find()) {
-            return rest;
-        }
-        final String color = m.group(1);
-        final String ret = rest;
-        final StringBuffer sbuf = new StringBuffer(ret.length());
-        m.appendReplacement(sbuf, "");
-        m.appendTail(sbuf);
-        // Check for script attribute
-        m = PAT_ATTR_STYLE.matcher(sbuf.toString());
-        if (!m.find()) {
-            return sbuf.append(" style=\"background-color: ").append(color).append(";\"").toString();
-        }
-        sbuf.setLength(0);
-        m.appendReplacement(sbuf, "style=\"" + com.openexchange.java.Strings.quoteReplacement(m.group(1)) + " background-color: " + color + ";\"");
-        m.appendTail(sbuf);
-        return sbuf.toString();
-    }
-
     private static String replaceBodyPlain(final String htmlContent) {
         final Matcher m = PATTERN_BODY.matcher(htmlContent);
         StringBuffer sb = new StringBuffer();
         if (m.find()) {
-            m.appendReplacement(sb, Matcher.quoteReplacement("<div " + m.group(1) + '>' + m.group(2) + "</div>"));
+            m.appendReplacement(sb, Matcher.quoteReplacement(m.group(2)));
         }
         m.appendTail(sb);
         return sb.toString();
