@@ -210,7 +210,17 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
             }
         }
 
-        final JSONObject jsonAccount = MailAccountWriter.write(newAccount);
+        final JSONObject jsonAccount;
+        if (null == newAccount) {
+            final MailAccount loadedMailAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
+            if (null == loadedMailAccount) {
+                throw MailAccountExceptionCodes.NOT_FOUND.create(id, session.getUserId(), session.getContextId());
+            }
+            jsonAccount = MailAccountWriter.write(checkFullNames(loadedMailAccount, storageService, session));
+        } else {
+            jsonAccount = MailAccountWriter.write(newAccount);
+        }
+
         return new AJAXRequestResult(jsonAccount).addWarnings(warnings);
     }
 

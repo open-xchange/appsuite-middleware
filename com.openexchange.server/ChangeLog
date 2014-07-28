@@ -43,6 +43,9 @@
  - Fix for bug 33522: Wrong table was referenced in SQL statement to prepare table "user_attribute" to have UUID as primary key
  - Fix for bug 33525: Use a more unique name for added index to not conflict with MySQL bug http://bugs.mysql.com/bug.php?id=61146
                       (that is fix with >= MySQL 5.6.3)
+ - Fix for bug 33396: Try to recover from malformed Content-Type value like ``=?windows-1252?q?application/pdf; name="blatt8.pdf"´´
+ - Fix for bug 33374: Check for null prior to JSON conversion
+ - Fix for bug 31610: Introduced a rate limiter when checking for new mails; allowing not more than one run per 5 seconds
 
 * 2014-07-09 - marc.arens@open-xchange.com
 
@@ -136,6 +139,10 @@
 * 2014-06-12 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 33094: Invalidate folder and subfolders in cache folder storage on "clear" operation
+
+* 2014-06-16 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 32820: Present a more detailed error message to the user
 
 * 2014-06-11 - thorben.betten@open-xchange.com
 
