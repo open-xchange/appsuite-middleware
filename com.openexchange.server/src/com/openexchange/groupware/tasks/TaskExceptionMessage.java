@@ -106,7 +106,8 @@ public class TaskExceptionMessage implements LocalizableStrings {
 
     public static final String START_NOT_BEFORE_END_MSG = "Start date \"%1$s\" must be before end date \"%2$s\".";
 
-    public static final String TRUNCATED_MSG = "The task could not be saved. Please shorten the \"%1$s\" and try again.";
+    public static final String TRUNCATED_MSG = "The task could not be saved. Please shorten the \"%1$s\" and try again. Current length \"%3$d\" is more than allowed length"
+        + " of \"%2$d\" characters.";
 
     public static final String NO_PRIVATE_MOVE_TO_PUBLIC_MSG = "Tasks with private flag cannot be moved to a public folder \"%1$s\".";
 

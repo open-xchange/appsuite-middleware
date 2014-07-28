@@ -1,3 +1,30 @@
+* 2014-07-11 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 33478: Run AttachmentCleaner without delay
+
+* 2014-07-11 - thorben.betten@open-xchange.com
+
+ - Fix for bug 33522: Wrong table was referenced in SQL statement to prepare table "user_attribute" to have UUID as primary key
+ - Fix for bug 33396: Try to recover from malformed Content-Type value like ``=?windows-1252?q?application/pdf; name="blatt8.pdf"´´
+ - Fix for bug 33374: Check for null prior to JSON conversion
+ - Fix for bug 31610: Introduced a rate limiter when checking for new mails; allowing not more than one run per 5 seconds
+
+* 2014-07-09 - marc.arens@open-xchange.com
+
+ - Fix for bug 27301: A MembershipListener recognizes a leaving hazelcast node and triggers a cleanup for its resources
+ 
+* 2014-07-09 - martin.schneider@open-xchange.com
+
+ - Fix for bug 33201: improved output if parameter is missing
+
+* 2014-07-09 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 33485: Don't attempt to delete an empty list of files
+
+* 2014-07-08 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32489: Exclude special messenger files and folders from drive synchronization
+
 * 2014-07-07 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 33412: Use larger chunks when performing multipart uploads to S3 stores
@@ -16,7 +43,11 @@
 * 2014-06-20 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 32323: Introduced "acknowledge" parameter for EDIT actions to prevent implicit client-side acknowledgments of unknown files
-  
+
+* 2014-06-16 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 32820: Present a more detailed error message to the user
+ 
 * 2014-06-11 - thorben.betten@open-xchange.com
 
  - Fix for bug 33061: Ignore alternative HTML part nested inside multipart/related part if text-only is user's preference
@@ -158,6 +189,10 @@
 * 2014-03-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 31684: Prefer look-up by user identifier over look-up by object/folder identifier pair
+
+* 2014-03-03 - marcus.klein@open-xchange.com
+
+ - Fix for bug 31364: Marked autoconfig.properties as configuration file.
 
 * 2014-03-14 - thorben.betten@open-xchange.com
 
