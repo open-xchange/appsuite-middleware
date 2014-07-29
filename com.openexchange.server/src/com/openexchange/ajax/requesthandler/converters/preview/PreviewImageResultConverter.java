@@ -72,6 +72,8 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.InterruptibleInputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.preview.ContentTypeChecker;
 import com.openexchange.preview.Delegating;
 import com.openexchange.preview.PreviewDocument;
@@ -248,9 +250,17 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                         // Determine candidate
                         {
                             String mimeType = getContentType(fileHolder, previewService instanceof ContentTypeChecker ? (ContentTypeChecker) previewService : null);
-                            PreviewService candidate = ((Delegating) previewService).getBestFitOrDelegate(mimeType, getOutput());
+                            Delegating delegating = (Delegating) previewService;
+                            PreviewService candidate = delegating.getBestFitOrDelegate(mimeType, getOutput());
                             if (null == candidate) {
-                                throw PreviewExceptionCodes.NO_PREVIEW_SERVICE.create(null == mimeType ? "" :  mimeType);
+                                // Try mime type by filename as fall-back
+                                String fallbackMimeType = MimeType2ExtMap.getContentType(fileHolder.getName());
+                                if (false == MimeTypes.MIME_APPL_OCTET.equals(fallbackMimeType) && false == fallbackMimeType.equals(mimeType)) {
+                                    candidate = delegating.getBestFitOrDelegate(fallbackMimeType, getOutput());
+                                }
+                                if (null == candidate) {
+                                    throw PreviewExceptionCodes.NO_PREVIEW_SERVICE.create(null == mimeType ? "" :  mimeType);
+                                }
                             }
                             previewService = candidate;
                         }
