@@ -126,8 +126,12 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
     public boolean updateToken(int contextID, String serviceID, String oldToken, String newToken) throws OXException {
         Connection connection = databaseService.getWritable(contextID);
         try {
-            deleteSubscription(connection, contextID, serviceID, oldToken);
-            return 0 < updateToken(connection, contextID, serviceID, oldToken, newToken);
+            if (null == serviceID) {
+                // workaround for bug #33652
+                return 0 < updateToken(connection, contextID, oldToken, newToken);
+            } else {
+                return 0 < updateToken(connection, contextID, serviceID, oldToken, newToken);
+            }
         } catch (SQLException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -234,6 +238,19 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
             stmt.setInt(2, cid);
             stmt.setString(3, service);
             stmt.setString(4, oldToken);
+            return SQL.logExecuteUpdate(stmt);
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
+
+    private static int updateToken(Connection connection, int cid, String oldToken, String newToken) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(SQL.UPDATE_TOKEN_WITHOUT_SERVICE_STMT);
+            stmt.setString(1, newToken);
+            stmt.setInt(2, cid);
+            stmt.setString(3, oldToken);
             return SQL.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
