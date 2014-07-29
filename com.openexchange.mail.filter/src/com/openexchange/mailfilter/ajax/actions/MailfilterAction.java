@@ -285,7 +285,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                         sieveTextFilter.splitClientRulesAndRequire(rulesandid.getRulelist(), null, rulesandid.isError());
                     final JSONObject json = getJsonBody(request);
 
-                    final ArrayList<Rule> rules = clientrulesandrequire.getRules();
+                    final List<Rule> rules = clientrulesandrequire.getRules();
                     final RuleAndPosition deletedrule =
                         getRightRuleForUniqueId(rules, getUniqueId(json), credentials.getRightUsername(), credentials.getContextString());
                     rules.remove(deletedrule.getPosition());
@@ -355,7 +355,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                     readScriptFromString.getRulelist(),
                     parameters.getParameter(Parameter.FLAG),
                     readScriptFromString.isError());
-                final ArrayList<Rule> clientrules = clientrulesandrequire.getRules();
+                final List<Rule> clientrules = clientrulesandrequire.getRules();
                 changeOutgoingVacationRule(clientrules);
                 return CONVERTER.write(clientrules.toArray(new Rule[clientrules.size()]));
             } catch (final UnsupportedEncodingException e) {
@@ -424,7 +424,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
 
                 if (isVacationRule(newrule)) {
                     // A vacation rule...
-                    final ArrayList<Rule> clientrules = clientrulesandrequire.getRules();
+                    final List<Rule> clientrules = clientrulesandrequire.getRules();
                     for (final Rule rule : clientrules) {
                         if (isVacationRule(rule)) {
                             throw OXMailfilterExceptionCode.DUPLICATE_VACATION_RULE.create();
@@ -436,7 +436,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
 
                 // Now find the right position inside the array
                 int position = newrule.getPosition();
-                final ArrayList<Rule> clientrules = clientrulesandrequire.getRules();
+                final List<Rule> clientrules = clientrulesandrequire.getRules();
                 if (position >= clientrules.size()) {
                     throw OXMailfilterExceptionCode.BAD_POSITION.create(Integer.valueOf(position));
                 }
@@ -545,7 +545,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                     final String body = request.getBody();
                     final JSONArray json = new JSONArray(body);
 
-                    final ArrayList<Rule> clientrules = clientrulesandrequire.getRules();
+                    final List<Rule> clientrules = clientrulesandrequire.getRules();
                     for (int i = 0; i < json.length(); i++) {
                         final int uniqueid = json.getInt(i);
                         final RuleAndPosition rightRule =
@@ -622,8 +622,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                             null, rules.isError());
                     final JSONObject json = getJsonBody(request);
                     final Integer uniqueid = getUniqueId(json);
-                    final ArrayList<Rule> clientrules = clientrulesandrequire
-                        .getRules();
+                    final List<Rule> clientrules = clientrulesandrequire.getRules();
                     if (null == uniqueid) {
                         throw OXMailfilterExceptionCode.ID_MISSING.create();
                     }
@@ -929,7 +928,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         }
     }
 
-    private void changeOutgoingVacationRule(final ArrayList<Rule> clientrules) throws SieveException {
+    private void changeOutgoingVacationRule(final List<Rule> clientrules) throws SieveException {
         final ConfigurationService config = Services.getService(ConfigurationService.class);
         final String vacationdomains = config.getProperty(MailFilterProperties.Values.VACATION_DOMAINS.property);
 
@@ -991,7 +990,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         return actionarray;
     }
 
-    private RuleAndPosition getRightRuleForUniqueId(final ArrayList<Rule> clientrules, final Integer uniqueid,
+    private RuleAndPosition getRightRuleForUniqueId(final List<Rule> clientrules, final Integer uniqueid,
             final String userName, final String contextStr) throws OXException {
         for (int i = 0; i < clientrules.size(); i++) {
             final Rule rule = clientrules.get(i);

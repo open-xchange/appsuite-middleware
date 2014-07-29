@@ -53,8 +53,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -93,20 +95,40 @@ public final class SieveTextFilter {
      *
      */
     public class ClientRulesAndRequire {
-        private final ArrayList<Rule> rules;
+
+        private Map<String, List<Rule>> flaggedRules;
+
+        private final List<Rule> rules;
 
         private final HashSet<String> require;
 
         /**
+         * Represents a list of client rules
+         *
          * @param rules
          * @param require
          */
-        public ClientRulesAndRequire(final ArrayList<Rule> rules, final HashSet<String> require) {
-            this.rules = rules;
+        public ClientRulesAndRequire(final HashSet<String> require, final List<Rule> rules) {
             this.require = require;
+            this.rules = rules;
         }
 
-        public final ArrayList<Rule> getRules() {
+        /**
+         * Represents a flagged list of client rules
+         *
+         * @param rules
+         * @param flagged
+         */
+        public ClientRulesAndRequire(final HashSet<String> require, final Map<String, List<Rule>> flagged) {
+            this.require = require;
+            flaggedRules = flagged;
+            rules = new ArrayList<Rule>();
+            for(List<Rule> list : flaggedRules.values()) {
+                rules.addAll(list);
+            }
+        }
+
+        public final List<Rule> getRules() {
             return rules;
         }
 
@@ -114,6 +136,9 @@ public final class SieveTextFilter {
             return require;
         }
 
+        public final Map<String, List<Rule>> getFlaggedRules() {
+            return flaggedRules;
+        }
 
     }
 
@@ -205,10 +230,8 @@ public final class SieveTextFilter {
     private static final String MATCH_STRING = "([^" + SEPARATOR_REGEX + "]*?)";
 
     private static final Pattern PATTERN = Pattern.compile("^" + FLAG_TAG + MATCH_STRING + SEPARATOR_REGEX + UNIQUE_ID + MATCH_STRING + SEPARATOR_REGEX + RULENAME_TAG + "(.*?)$");
-    
-    private static final String OK = "\nOK";
-    
-    private static final String ESCAPED_OK = "\n_OK_";
+
+    // ------------------------------------------------------------------------------------------------------------------------------ //
 
     private final String username;
 
@@ -224,10 +247,9 @@ public final class SieveTextFilter {
         boolean errorsinscript = false;
         // The following line strips off the first line of the script
         // final String first = readFileToString.replaceAll("^.*(\r)?\n", "");
-        final String unescaped = readFileToString.replaceAll(ESCAPED_OK, OK);
-        final String commentedlines = diffremovenotcommentedlines(kickcommentsright(unescaped), unescaped);
+        final String commentedlines = diffremovenotcommentedlines(kickcommentsright(readFileToString), readFileToString);
 
-        final Node uncommented = new SieveParser(new StringReader(unescaped)).start();
+        final Node uncommented = new SieveParser(new StringReader(readFileToString)).start();
         // final List<OwnType> jjtAccept = (List<OwnType>)
         // uncommented.jjtAccept(new Visitor(), null);
         // log.debug(jjtAccept);
@@ -236,16 +258,16 @@ public final class SieveTextFilter {
         // final List<OwnType> jjtAccept2 = (List<OwnType>)
         // commented.jjtAccept(new Visitor(), null);
         // log.debug(jjtAccept2);
-        final ArrayList<RuleComment> rulenames = getRulenames(unescaped);
+        final ArrayList<RuleComment> rulenames = getRulenames(readFileToString);
         final ArrayList<Rule> rules = (ArrayList<Rule>) uncommented.jjtAccept(new InternalVisitor(), Boolean.FALSE);
         final ArrayList<Rule> rules2 = (ArrayList<Rule>) commented.jjtAccept(new InternalVisitor(), Boolean.TRUE);
         // Attention: After merging the manipulation of finalrules also
         // manipulates rules and rules2
         final ArrayList<Rule> finalrules = mergerules(rules, rules2);
-        if (addRulenameToFittingCommandAndSetErrors(rulenames, finalrules, unescaped, commentedlines)) {
+        if (addRulenameToFittingCommandAndSetErrors(rulenames, finalrules, readFileToString, commentedlines)) {
             errorsinscript = true;
         }
-        final NextUidAndError nextuidanderror = setPosAndMissingErrortextsAndIds(finalrules, unescaped, commentedlines);
+        final NextUidAndError nextuidanderror = setPosAndMissingErrortextsAndIds(finalrules, readFileToString, commentedlines);
         if (nextuidanderror.isError()) {
             errorsinscript = true;
         }
@@ -300,40 +322,55 @@ public final class SieveTextFilter {
     /**
      * Here we have to strip off the require line because this line should not be edited by the client
      *
-     * @param rules
+     * @param rules list of rules
      * @param flag The flag which should be filtered out
-     * @param error If an error in any rules has occurred while reading the sieve script. This is important because if so
-     *        we must keep the old requires line
+     * @param error If an error in any rules has occurred while reading the sieve script. This is important because if so we must keep the
+     *            old requires line
      * @return
      */
-    public ClientRulesAndRequire splitClientRulesAndRequire(final ArrayList<Rule> rules, final String flag, final boolean error) {
-        final ArrayList<Rule> retval = new ArrayList<Rule>();
+    public ClientRulesAndRequire splitClientRulesAndRequire(final List<Rule> rules, final String flag, final boolean error) {
+        final List<Rule> listOfRules = new ArrayList<Rule>();
         final HashSet<String> requires = new HashSet<String>();
+        final Map<String, List<Rule>> flagged = new HashMap<String, List<Rule>>();
+        ClientRulesAndRequire retval = new ClientRulesAndRequire(requires, rules);
         // The flag is checked here because if no flag is given we can omit some checks which increases performance
         if (null != flag) {
             for (final Rule rule : rules) {
                 final RuleComment ruleComment = rule.getRuleComment();
                 final RequireCommand requireCommand = rule.getRequireCommand();
-                if (null != requireCommand) {
+                if (null != requireCommand && error) {
                     requires.addAll(requireCommand.getList().get(0));
                 } else if (null != ruleComment && null != ruleComment.getFlags() && ruleComment.getFlags().contains(flag)) {
-                    retval.add(rule);
+                    listOfRules.add(rule);
+                    List<Rule> fl = flagged.get(flag);
+                    if (fl == null) {
+                        fl = new ArrayList<Rule>();
+                    }
+                    fl.add(rule);
+                    flagged.put(flag, fl);
                 }
             }
+            if (error) {
+                retval = new ClientRulesAndRequire(requires, flagged);
+            }
+
+            retval = new ClientRulesAndRequire(new HashSet<String>(), flagged);
         } else {
             for (final Rule rule : rules) {
                 final RequireCommand requireCommand = rule.getRequireCommand();
                 if (null == requireCommand) {
-                    retval.add(rule);
-                } else {
+                    listOfRules.add(rule);
+                } else if (error) {
                     requires.addAll(requireCommand.getList().get(0));
                 }
             }
+            if (error) {
+                retval = new ClientRulesAndRequire(requires, listOfRules);
+            }
+
+            retval = new ClientRulesAndRequire(new HashSet<String>(), listOfRules);
         }
-        if (error) {
-            return new ClientRulesAndRequire(retval, requires);
-        }
-        return new ClientRulesAndRequire(retval, new HashSet<String>());
+        return retval;
     }
 
 
@@ -633,18 +670,17 @@ public final class SieveTextFilter {
         return false;
     }
 
-    private List<String> interweaving(final List<OwnType> noncommentedoutput, final List<OwnType> commentedoutput, final ArrayList<Rule> rules) {
+    private List<String> interweaving(final List<OwnType> noncommentedoutput, final List<OwnType> commentedoutput, final List<Rule> rules) {
         final List<String> retval = new ArrayList<String>();
         retval.add(FIRST_LINE + (new Date()).toString());
         for (final OwnType owntype : noncommentedoutput) {
             final int linenumber = owntype.getLinenumber();
             final String string = owntype.getOutput().toString();
-            final String escaped = string.replaceAll(OK, ESCAPED_OK);
             final int size = retval.size();
             if (linenumber > size + 1) {
                 fillup(retval, linenumber - (size + 1));
             }
-            retval.addAll(stringToList(escaped));
+            retval.addAll(stringToList(string));
         }
         for (final OwnType owntype : commentedoutput) {
             int linenumber = owntype.getLinenumber() - 1;
