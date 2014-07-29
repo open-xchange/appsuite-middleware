@@ -1,3 +1,7 @@
+* 2014-07-29 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 33652: Also accept "updateToken" requests without service identifier 
+
 * 2014-07-11 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 33478: Run AttachmentCleaner without delay

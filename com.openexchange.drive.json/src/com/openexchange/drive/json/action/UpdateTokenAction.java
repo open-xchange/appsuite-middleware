@@ -84,9 +84,10 @@ public class UpdateTokenAction extends AbstractDriveAction {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("newToken");
         }
         String serviceID = requestData.getParameter("service");
-        if (Strings.isEmpty(serviceID)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("service");
-        }
+        // workaround for bug #33652
+        // if (Strings.isEmpty(serviceID)) {
+        //     throw AjaxExceptionCodes.MISSING_PARAMETER.create("service");
+        // }
         /*
          * update token
          */
