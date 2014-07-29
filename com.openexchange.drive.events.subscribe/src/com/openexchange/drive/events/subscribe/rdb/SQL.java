@@ -92,6 +92,10 @@ public class SQL {
         "UPDATE driveEventSubscriptions SET token=? " +
         "WHERE cid=? AND service=? AND token=?;";
 
+    public static final String UPDATE_TOKEN_WITHOUT_SERVICE_STMT =
+        "UPDATE driveEventSubscriptions SET token=? " +
+        "WHERE cid=? AND token=?;";
+
     /**
      * SELECT service,token,user,REVERSE(folder),timestamp FROM driveEventSubscriptions
      * WHERE cid=? AND service IN (...) AND REVERSE(folder) IN (...);"
