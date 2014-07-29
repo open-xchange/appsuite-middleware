@@ -1,0 +1,30 @@
+Manifest-Version: 1.0
+Export-Package: org.flywaydb.core;uses:="org.flywaydb.core.api.callbac
+ k,org.flywaydb.core.api,org.flywaydb.core.api.resolver,javax.sql";ver
+ sion="3.0",org.flywaydb.core.api.callback;uses:="org.flywaydb.core.ap
+ i";version="3.0",org.flywaydb.core.api.migration.jdbc;version="3.0",o
+ rg.flywaydb.core.api.resolver;uses:="org.flywaydb.core.api";version="
+ 3.0",org.flywaydb.core.api.android;version="3.0",org.flywaydb.core.ap
+ i.migration.spring;uses:="org.springframework.jdbc.core";version="3.0
+ ",org.flywaydb.core.api;version="3.0",org.flywaydb.core.api.migration
+ ;uses:="org.flywaydb.core.api";version="3.0"
+Built-By: Axel
+Tool: Bnd-1.50.0
+Bundle-Name: flyway-core
+Created-By: Apache Maven Bundle Plugin
+Build-Jdk: 1.7.0_51
+Bundle-Version: 3.0.0
+Bnd-LastModified: 1398011254847
+Bundle-ManifestVersion: 2
+Bundle-License: https://github.com/flyway/flyway/blob/master/LICENSE.t
+ xt
+Bundle-Description: Flyway: The agile database migration framework for
+  Java.
+Bundle-SymbolicName: org.flywaydb.core
+Import-Package: javax.sql,org.apache.commons.logging;resolution:=optio
+ nal;version="[1.1,2)",org.osgi.framework;resolution:=mandatory;versio
+ n="1.3.0",org.springframework.jdbc.core;resolution:=optional;version=
+ "[2.5,5.0)",org.springframework.jdbc.datasource;resolution:=optional;
+ version="[2.5,5.0)"
+Archiver-Version: Plexus Archiver
+

@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Core
+Bundle-SymbolicName: com.openexchange.flywaytest
+Bundle-Version: 1.0.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: org.eclipse.osgi.framework.util,
+ org.flywaydb.core.api.migration.jdbc,
+ org.osgi.framework;version="1.7.0"
+Bundle-Activator: com.openexchange.flywaytest.osgi.Activator
