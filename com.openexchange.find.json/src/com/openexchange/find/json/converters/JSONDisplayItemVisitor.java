@@ -51,11 +51,22 @@ package com.openexchange.find.json.converters;
 
 import static com.openexchange.ajax.AJAXUtility.sanitizeParam;
 import java.util.Locale;
+import java.util.TimeZone;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.find.common.ContactDisplayItem;
 import com.openexchange.find.facet.DisplayItemVisitor;
 import com.openexchange.find.facet.FormattableDisplayItem;
 import com.openexchange.find.facet.NoDisplayItem;
 import com.openexchange.find.facet.SimpleDisplayItem;
+import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.tools.mappings.json.JsonMapping;
+import com.openexchange.tools.TimeZoneUtils;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
@@ -65,19 +76,39 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
 
     private final StringTranslator translator;
 
+    private final ServerSession session;
+
     private final Locale locale;
+
+    private final TimeZone timeZone;
 
     private Object result;
 
-    public JSONDisplayItemVisitor(final StringTranslator translator, final Locale locale) {
+    private String imageUrl = null;
+
+    private JSONException exception = null;
+
+    public JSONDisplayItemVisitor(final StringTranslator translator, final ServerSession session) {
         super();
         this.translator = translator;
-        this.locale = locale;
+        this.session = session;
+        User user = session.getUser();
+        locale = user.getLocale();
+        timeZone = TimeZoneUtils.getTimeZone(user.getTimeZone());
     }
 
     @Override
     public void visit(ContactDisplayItem item) {
         result = sanitizeParam(item.getDefaultValue());
+        JsonMapping<? extends Object, Contact> jsonMapping = ContactMapper.getInstance().getMappings().get(ContactField.IMAGE1_URL);
+        try {
+            Object url = jsonMapping.serialize(item.getItem(), timeZone, session);
+            if (url != null && url instanceof String) {
+                imageUrl = (String) url;
+            }
+        } catch (JSONException e) {
+            exception = e;
+        }
     }
 
     @Override
@@ -102,13 +133,23 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
     }
 
     /**
-     * Gets the value to set for the 'display_name' or 'display_item' attribute.
+     * Appends the display name to the given JSON object.
      * This value is only valid if DisplayItem.accept(visitor) has been called.
-     *
-     * @return The display name or <code>null</code> if it should
-     * not be included in the response object.
      */
-    public Object getResult() {
-        return result;
+    public void appendResult(JSONObject json) throws JSONException {
+        if (exception != null) {
+            throw exception;
+        }
+
+        if (result instanceof String) {
+            json.put("display_name", result);
+        } else if (result instanceof String[]) {
+            JSONArray parts = new JSONArray();
+            parts.put(((String[])result)[0]);
+            parts.put(((String[])result)[1]);
+            json.put("display_item", parts);
+        }
+
+        json.put("image_url", imageUrl);
     }
 }

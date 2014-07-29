@@ -50,6 +50,7 @@
 package com.openexchange.ajax.find.mail;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -60,13 +61,19 @@ import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.io.FileUtils;
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.PropDocument;
+import com.openexchange.ajax.find.actions.AutocompleteRequest;
+import com.openexchange.ajax.find.actions.AutocompleteResponse;
 import com.openexchange.ajax.mail.actions.ImportMailRequest;
 import com.openexchange.ajax.mail.actions.ImportMailResponse;
 import com.openexchange.ajax.user.actions.GetRequest;
 import com.openexchange.ajax.user.actions.GetResponse;
+import com.openexchange.configuration.MailConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.Module;
 import com.openexchange.find.common.CommonFacetType;
@@ -127,12 +134,56 @@ public class BasicMailTest extends AbstractFindTest {
 
     public void testAutocomplete() throws Exception {
         /*
+         * Set an image for autocomplete tests
+         */
+        GetRequest getRequest = new GetRequest(client.getValues().getUserId(), client.getValues().getTimeZone());
+        GetResponse getResponse = client.execute(getRequest);
+        Contact ownContact = getResponse.getContact();
+        Contact modified = new Contact();
+        modified.setObjectID(ownContact.getObjectID());
+
+        MailConfig.init();
+        String testDataDir = MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR);
+        byte[] image = FileUtils.readFileToByteArray(new File(testDataDir, "contact_image.png"));
+        modified.setImage1(image);
+        modified.setImageContentType("image/png");
+        modified.setLastModified(new Date());
+        contactManager.updateAction(ownContact.getParentFolderID(), modified);
+
+        /*
          * Expect the clients contact in autocomplete response
          */
         String prefix = defaultAddress.substring(0, 3);
-        List<Facet> facets = autocomplete(prefix);
+        AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, Module.MAIL.getIdentifier());
+        AutocompleteResponse autocompleteResponse = client.execute(autocompleteRequest);
+        List<Facet> facets = autocompleteResponse.getFacets();
         FacetValue found = detectContact(facets);
         assertNotNull("own contact was missing in response", found);
+
+        /*
+         * Contact image url included?
+         */
+        JSONObject json = (JSONObject) autocompleteResponse.getResponse().getData();
+        JSONArray jFacets = json.getJSONArray("facets");
+        JSONObject jContactFacet = null;
+        for (int i = 0; i < jFacets.length(); i++) {
+            JSONObject jFacet = jFacets.getJSONObject(i);
+            if ("contacts".equals(jFacet.optString("id"))) {
+                jContactFacet = jFacet;
+                break;
+            }
+        }
+        JSONArray jValues = jContactFacet.getJSONArray("values");
+        JSONObject jContactValue = null;
+        for (int i = 0; i < jValues.length(); i++) {
+            JSONObject jValue = jValues.getJSONObject(i);
+            if (found.getId().equals(jValue.getString("id"))) {
+                jContactValue = jValue;
+                break;
+            }
+        }
+        assertNotNull("image_url missing in contact", jContactValue.optString("image_url", null));
+
 
         /*
          * Set own contact as activeFacet
@@ -227,22 +278,22 @@ public class BasicMailTest extends AbstractFindTest {
     }
 
     public void testTimeFilter() throws Exception {
-        Calendar cal = new GregorianCalendar(TimeZones.UTC);
-        cal.add(Calendar.WEEK_OF_YEAR, -1);
-        cal.add(Calendar.DAY_OF_YEAR, 1);
-        String idWithinLastWeek = importMail(defaultAddress, defaultAddress, randomUID(), randomUID(), cal.getTime())[0][1];
-        cal = new GregorianCalendar(TimeZones.UTC);
-        cal.add(Calendar.MONTH, -1);
-        cal.add(Calendar.DAY_OF_YEAR, 1);
-        String idWithinLastMonth = importMail(defaultAddress, defaultAddress, randomUID(), randomUID(), cal.getTime())[0][1];
-        cal = new GregorianCalendar(TimeZones.UTC);
-        cal.add(Calendar.YEAR, -1);
-        cal.add(Calendar.DAY_OF_YEAR, 1);
-        String idWithinLastYear = importMail(defaultAddress, defaultAddress, randomUID(), randomUID(), cal.getTime())[0][1];
-        cal = new GregorianCalendar(TimeZones.UTC);
-        cal.add(Calendar.YEAR, -1);
-        cal.add(Calendar.DAY_OF_YEAR, -1);
-        String idBeforeLastYear = importMail(defaultAddress, defaultAddress, randomUID(), randomUID(), cal.getTime())[0][1];
+        Calendar calWithinLastWeek = new GregorianCalendar(TimeZones.UTC);
+        calWithinLastWeek.add(Calendar.WEEK_OF_YEAR, -1);
+        calWithinLastWeek.add(Calendar.DAY_OF_YEAR, 1);
+        String idWithinLastWeek = importMail(defaultAddress, defaultAddress, randomUID(), randomUID(), calWithinLastWeek.getTime())[0][1];
+        Calendar calWithinLastMonth = new GregorianCalendar(TimeZones.UTC);
+        calWithinLastMonth.add(Calendar.MONTH, -1);
+        calWithinLastMonth.add(Calendar.DAY_OF_YEAR, 1);
+        String idWithinLastMonth = importMail(defaultAddress, defaultAddress, randomUID(), randomUID(), calWithinLastMonth.getTime())[0][1];
+        Calendar calWithinLastYear = new GregorianCalendar(TimeZones.UTC);
+        calWithinLastYear.add(Calendar.YEAR, -1);
+        calWithinLastYear.add(Calendar.DAY_OF_YEAR, 1);
+        String idWithinLastYear = importMail(defaultAddress, defaultAddress, randomUID(), randomUID(), calWithinLastYear.getTime())[0][1];
+        Calendar calBeforeLastYear = new GregorianCalendar(TimeZones.UTC);
+        calBeforeLastYear.add(Calendar.YEAR, -1);
+        calBeforeLastYear.add(Calendar.DAY_OF_YEAR, -1);
+        String idBeforeLastYear = importMail(defaultAddress, defaultAddress, randomUID(), randomUID(), calBeforeLastYear.getTime())[0][1];
 
         List<ActiveFacet> facets = prepareFacets();
         facets.add(createActiveFacet(MailFacetType.TIME, "last_week", "time", "last_week"));
@@ -250,9 +301,30 @@ public class BasicMailTest extends AbstractFindTest {
         assertEquals("Should only find 1 mails", 1, documents.size());
         assertNotNull("Mail not found", findByProperty(documents, "id", idWithinLastWeek));
         assertNull("Wrong mail found", findByProperty(documents, "id", idBeforeLastYear));
+        /*
+         * And again with time range
+         */
+        String timeRange = "[" + calWithinLastWeek.getTime().getTime() + " TO " + System.currentTimeMillis() + "]";
+        facets = prepareFacets();
+        facets.add(createActiveFacet(MailFacetType.TIME, timeRange, Filter.NO_FILTER));
+        documents = query(facets);
+        assertEquals("Should only find 1 mails", 1, documents.size());
+        assertNotNull("Mail not found", findByProperty(documents, "id", idWithinLastWeek));
+        assertNull("Wrong mail found", findByProperty(documents, "id", idBeforeLastYear));
 
         facets = prepareFacets();
         facets.add(createActiveFacet(MailFacetType.TIME, "last_month", "time", "last_month"));
+        documents = query(facets);
+        assertEquals("Should only find 2 mails", 2, documents.size());
+        assertNotNull("Mail not found", findByProperty(documents, "id", idWithinLastWeek));
+        assertNotNull("Mail not found", findByProperty(documents, "id", idWithinLastMonth));
+        assertNull("Wrong mail found", findByProperty(documents, "id", idBeforeLastYear));
+        /*
+         * And again with time range
+         */
+        timeRange = "[" + calWithinLastMonth.getTime().getTime() + " TO *]";
+        facets = prepareFacets();
+        facets.add(createActiveFacet(MailFacetType.TIME, timeRange, Filter.NO_FILTER));
         documents = query(facets);
         assertEquals("Should only find 2 mails", 2, documents.size());
         assertNotNull("Mail not found", findByProperty(documents, "id", idWithinLastWeek));
@@ -267,6 +339,31 @@ public class BasicMailTest extends AbstractFindTest {
         assertNotNull("Mail not found", findByProperty(documents, "id", idWithinLastMonth));
         assertNotNull("Mail not found", findByProperty(documents, "id", idWithinLastYear));
         assertNull("Wrong mail found", findByProperty(documents, "id", idBeforeLastYear));
+        /*
+         * And again with time range
+         */
+        timeRange = "[" + calWithinLastYear.getTime().getTime() + " TO *]";
+        facets = prepareFacets();
+        facets.add(createActiveFacet(MailFacetType.TIME, timeRange, Filter.NO_FILTER));
+        documents = query(facets);
+        assertEquals("Should only find 3 mails", 3, documents.size());
+        assertNotNull("Mail not found", findByProperty(documents, "id", idWithinLastWeek));
+        assertNotNull("Mail not found", findByProperty(documents, "id", idWithinLastMonth));
+        assertNotNull("Mail not found", findByProperty(documents, "id", idWithinLastYear));
+        assertNull("Wrong mail found", findByProperty(documents, "id", idBeforeLastYear));
+
+        /*
+         * Find all with time range. This time we test exclusive ranges and wildcards...
+         */
+        timeRange = "{* TO *}";
+        facets = prepareFacets();
+        facets.add(createActiveFacet(MailFacetType.TIME, timeRange, Filter.NO_FILTER));
+        documents = query(facets);
+        assertEquals("Should find 4 mails", 4, documents.size());
+        assertNotNull("Mail not found", findByProperty(documents, "id", idWithinLastWeek));
+        assertNotNull("Mail not found", findByProperty(documents, "id", idWithinLastMonth));
+        assertNotNull("Mail not found", findByProperty(documents, "id", idWithinLastYear));
+        assertNotNull("Mail not found", findByProperty(documents, "id", idBeforeLastYear));
     }
 
     public void testFilterChaining() throws Exception {

@@ -65,6 +65,7 @@ import com.openexchange.find.facet.FacetVisitor;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.facet.Option;
 import com.openexchange.find.facet.SimpleFacet;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
@@ -76,14 +77,17 @@ public class JSONFacetVisitor implements FacetVisitor {
 
     private final Locale locale;
 
+    private final ServerSession session;
+
     private final JSONObject result;
 
     private JSONException jsonException;
 
-    public JSONFacetVisitor(final StringTranslator translator, final Locale locale) {
+    public JSONFacetVisitor(final StringTranslator translator, final ServerSession session) {
         super();
         this.translator = translator;
-        this.locale = locale;
+        this.session = session;
+        this.locale = session.getUser().getLocale();
         result = new JSONObject();
     }
 
@@ -93,7 +97,7 @@ public class JSONFacetVisitor implements FacetVisitor {
             FacetType type = facet.getType();
             result.put("id", type.getId());
             result.put("style", facet.getStyle());
-            addDisplayItem(result, locale, facet.getDisplayItem());
+            addDisplayItem(result, facet.getDisplayItem());
             result.put("filter", convertFilter(facet.getFilter()));
 
             addFlags(facet);
@@ -113,7 +117,7 @@ public class JSONFacetVisitor implements FacetVisitor {
             List<FacetValue> values = facet.getValues();
             JSONArray jValues = new JSONArray(values.size());
             for (FacetValue value : values) {
-                JSONObject jValue = convertFacetValue(locale, value);
+                JSONObject jValue = convertFacetValue(value);
                 jValues.put(jValue);
             }
 
@@ -136,7 +140,7 @@ public class JSONFacetVisitor implements FacetVisitor {
             List<FacetValue> values = facet.getValues();
             JSONArray jValues = new JSONArray(values.size());
             for (FacetValue value : values) {
-                JSONObject jValue = convertFacetValue(locale, value);
+                JSONObject jValue = convertFacetValue(value);
                 jValues.put(jValue);
             }
 
@@ -164,10 +168,10 @@ public class JSONFacetVisitor implements FacetVisitor {
         return result;
     }
 
-    protected JSONObject convertFacetValue(Locale locale, FacetValue value) throws JSONException {
+    protected JSONObject convertFacetValue(FacetValue value) throws JSONException {
         JSONObject jValue = new JSONObject(4);
         jValue.put("id", value.getId());
-        addDisplayItem(jValue, locale, value.getDisplayItem());
+        addDisplayItem(jValue, value.getDisplayItem());
         int count = value.getCount();
         if (count >= 0) {
             jValue.put("count", value.getCount());
@@ -178,7 +182,7 @@ public class JSONFacetVisitor implements FacetVisitor {
             for (Option option : value.getOptions()) {
                 JSONObject jOption = new JSONObject();
                 jOption.put("id", option.getId());
-                addDisplayItem(jOption, locale, option.getDisplayItem());
+                addDisplayItem(jOption, option.getDisplayItem());
                 jOption.put("filter", convertFilter(option.getFilter()));
                 jOptions.put(jOption);
             }
@@ -190,18 +194,10 @@ public class JSONFacetVisitor implements FacetVisitor {
         return jValue;
     }
 
-    protected void addDisplayItem(JSONObject json, Locale locale, DisplayItem displayItem) throws JSONException {
-        JSONDisplayItemVisitor visitor = new JSONDisplayItemVisitor(translator, locale);
+    protected void addDisplayItem(JSONObject json, DisplayItem displayItem) throws JSONException {
+        JSONDisplayItemVisitor visitor = new JSONDisplayItemVisitor(translator, session);
         displayItem.accept(visitor);
-        Object result = visitor.getResult();
-        if (result instanceof String) {
-            json.put("display_name", result);
-        } else if (result instanceof String[]) {
-            JSONArray parts = new JSONArray();
-            parts.put(((String[])result)[0]);
-            parts.put(((String[])result)[1]);
-            json.put("display_item", parts);
-        }
+        visitor.appendResult(json);
     }
 
     protected JSONObject convertFilter(Filter filter) throws JSONException {
