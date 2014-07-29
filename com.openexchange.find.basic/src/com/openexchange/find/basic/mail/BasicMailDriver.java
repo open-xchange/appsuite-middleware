@@ -56,12 +56,12 @@ import static com.openexchange.find.basic.mail.Constants.FIELD_FROM;
 import static com.openexchange.find.basic.mail.Constants.FIELD_SUBJECT;
 import static com.openexchange.find.basic.mail.Constants.FIELD_TIME;
 import static com.openexchange.find.basic.mail.Constants.FIELD_TO;
+import static com.openexchange.find.basic.mail.Constants.FROM_AND_TO_FIELDS;
+import static com.openexchange.find.basic.mail.Constants.FROM_FIELDS;
 import static com.openexchange.find.basic.mail.Constants.QUERY_LAST_MONTH;
 import static com.openexchange.find.basic.mail.Constants.QUERY_LAST_WEEK;
 import static com.openexchange.find.basic.mail.Constants.QUERY_LAST_YEAR;
 import static com.openexchange.find.basic.mail.Constants.TO_FIELDS;
-import static com.openexchange.find.basic.mail.Constants.FROM_AND_TO_FIELDS;
-import static com.openexchange.find.basic.mail.Constants.FROM_FIELDS;
 import static com.openexchange.find.common.CommonFacetType.GLOBAL;
 import static com.openexchange.find.facet.Facets.newSimpleBuilder;
 import static com.openexchange.find.mail.MailFacetType.CONTACTS;
@@ -375,7 +375,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         SearchTerm<?> queryTerm = prepareQueryTerm(folder, queryFields, searchRequest.getQueries());
 
         List<SearchTerm<?>> facetTerms = new LinkedList<SearchTerm<?>>();
-        SearchTerm<?> timeTerm = prepareTermForFacet(searchRequest, MailFacetType.TIME, folder, OP.OR, OP.OR, OP.OR);
+        SearchTerm<?> timeTerm = prepareTimeTerm(searchRequest, folder);
         if (timeTerm != null) {
             facetTerms.add(timeTerm);
         }
@@ -432,6 +432,30 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         }
 
         return termFor(fields, queries, OP.OR, OP.AND, folder.isSent());
+    }
+
+    private static SearchTerm<?> prepareTimeTerm(SearchRequest searchRequest, MailFolder folder) throws OXException {
+        List<ActiveFacet> timeFacets = searchRequest.getActiveFacets(MailFacetType.TIME);
+        if (timeFacets != null && !timeFacets.isEmpty()) {
+            ActiveFacet timeFacet = timeFacets.get(0);
+            Filter filter = timeFacet.getFilter();
+            if (filter == Filter.NO_FILTER) {
+                String rangeString = timeFacet.getValueId();
+                SearchTerm<?> timeTerm = parseTimeRange(rangeString, folder.isSent());
+                if (timeTerm == null) {
+                    throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(rangeString, FIELD_TIME);
+                }
+
+                return timeTerm;
+            } else {
+                Pair<Comparison, Long> parsed = parseTimeQuery(filter.getQueries().get(0));
+                Comparison comparison = parsed.getFirst();
+                Long timestamp = parsed.getSecond();
+                return buildTimeTerm(comparison, timestamp, folder.isSent());
+            }
+        }
+
+        return null;
     }
 
     private static SearchTerm<?> prepareTermForFacet(SearchRequest searchRequest, FacetType type, MailFolder folder, OP filterOP, OP fieldOP, OP queryOP) throws OXException {
@@ -592,6 +616,68 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         return new ReceivedDateTerm(comparisonType, date);
     }
 
+    /*
+     * We support lucenes range syntax for custom time queries:
+     * [<from> TO <to>] with from and to being long values in ms since 1970-01-01.
+     * Wildcards are also allowed, so <from> and <to> can be replaced with *.
+     */
+    private static SearchTerm<?> parseTimeRange(String query, boolean isOutgoingFolder) {
+        if (query == null) {
+            return null;
+        }
+
+        char[] chars = query.trim().toCharArray();
+        int length = chars.length;
+        if (length < 8) { // Minimum: [* TO *]
+            return null;
+        }
+
+        Comparison fromComparison;
+        Comparison toComparison;
+        if (chars[0] == '[' && chars[length - 1] == ']') {
+            fromComparison = Comparison.GREATER_EQUALS;
+            toComparison = Comparison.LOWER_EQUALS;
+        } else if (chars[0] == '{' && chars[length - 1] == '}') {
+            fromComparison = Comparison.GREATER_THAN;
+            toComparison = Comparison.LOWER_THAN;
+        } else {
+            return null;
+        }
+
+        String[] times = new String(chars, 1, length - 2).split("\\sTO\\s");
+        if (times.length != 2) {
+            return null;
+        }
+
+        String sFrom = times[0].trim();
+        String sTo = times[1].trim();
+        long from = 0L;
+        long to = -1L;
+        if (!"*".equals(sFrom)) {
+            try {
+                from = Long.valueOf(sFrom);
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+
+        if (!"*".equals(sTo)) {
+            try {
+                to = Long.valueOf(sTo);
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+
+        if (to < 0L) {
+            return buildTimeTerm(fromComparison, from, isOutgoingFolder);
+        }
+
+        SearchTerm<?> fromTerm = buildTimeTerm(fromComparison, from, isOutgoingFolder);
+        SearchTerm<?> toTerm = buildTimeTerm(toComparison, to, isOutgoingFolder);
+        return new ANDTerm(fromTerm, toTerm);
+    }
+
     private static Pair<Comparison, Long> parseTimeQuery(String query) throws OXException {
         if (Strings.isEmpty(query)) {
             throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, FIELD_TIME);
@@ -613,53 +699,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             comparison = Comparison.GREATER_EQUALS;
             timestamp = cal.getTime().getTime();
         } else {
-            /*
-             * This block just preserves the code, as we likely have to implement
-             * custom time ranges in the future. Currently this else path should
-             * never be called.
-             *
-             * Idea: Introduce an additional custom time facet that might be set,
-             * but is not part of autocomplete responses. If it is set, we also
-             * should not deliver the normal time facet in autocomplete responses.
-             *
-             * {
-             *   'facet':'time_custom',
-             *   'value':'>=12345678900'
-             * }
-             */
-            char[] chars = query.toCharArray();
-            String sTimestamp;
-            if (chars.length > 1) {
-                int offset = 0;
-                if (chars[0] == '<') {
-                    offset = 1;
-                    comparison = Comparison.LOWER_THAN;
-                    if (chars[1] == '=') {
-                        offset = 2;
-                        comparison = Comparison.LOWER_EQUALS;
-                    }
-                } else if (chars[0] == '>') {
-                    offset = 1;
-                    comparison = Comparison.GREATER_THAN;
-                    if (chars[1] == '=') {
-                        offset = 2;
-                        comparison = Comparison.GREATER_EQUALS;
-                    }
-                } else {
-                    comparison = Comparison.EQUALS;
-                }
-
-                sTimestamp = String.copyValueOf(chars, offset, chars.length);
-            } else {
-                comparison = Comparison.EQUALS;
-                sTimestamp = query;
-            }
-
-            try {
-                timestamp = Long.parseLong(sTimestamp);
-            } catch (NumberFormatException e) {
-                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, FIELD_TIME);
-            }
+            return null;
         }
 
         return new Pair<Comparison, Long>(comparison, timestamp);
