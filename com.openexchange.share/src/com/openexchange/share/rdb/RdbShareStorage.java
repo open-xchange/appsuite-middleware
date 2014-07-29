@@ -114,36 +114,36 @@ public class RdbShareStorage implements ShareStorage {
     }
 
     @Override
-    public Share loadShare(int contextID, String token) throws OXException {
-        Connection connection = databaseService.getReadOnly(contextID);
+    public Share loadShare(int contextID, String token, StorageParameters parameters) throws OXException {
+        ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
-            return selectShare(connection, contextID, token);
+            return selectShare(provider.get(), contextID, token);
         } catch (SQLException e) {
             throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
-            databaseService.backReadOnly(contextID, connection);
+            provider.close();
         }
     }
 
     @Override
-    public void storeShare(Share share) {
+    public void storeShare(Share share, StorageParameters parameters) {
     }
 
     @Override
-    public void updateShare(Share share) {
+    public void updateShare(Share share, StorageParameters parameters) {
         // TODO Auto-generated method stub
 
     }
 
     @Override
-    public List<Share> loadSharesCreatedBy(int contextID, int createdBy) throws OXException {
-        Connection connection = databaseService.getReadOnly(contextID);
+    public List<Share> loadSharesCreatedBy(int contextID, int createdBy, StorageParameters parameters) throws OXException {
+        ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
-            return selectSharesCreatedBy(connection, contextID, createdBy);
+            return selectSharesCreatedBy(provider.get(), contextID, createdBy);
         } catch (SQLException e) {
             throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
-            databaseService.backReadOnly(contextID, connection);
+            provider.close();
         }
     }
 
@@ -217,6 +217,14 @@ public class RdbShareStorage implements ShareStorage {
         return shares;
     }
 
+    private ConnectionProvider getReadProvider(int contextId, StorageParameters parameters) throws OXException {
+        return new ConnectionProvider(databaseService, parameters, ConnectionMode.READ, contextId);
+    }
+
+    private ConnectionProvider getWriteProvider(int contextId, StorageParameters parameters) throws OXException {
+        return new ConnectionProvider(databaseService, parameters, ConnectionMode.WRITE, contextId);
+    }
+
     private static ResultSet logExecuteQuery(PreparedStatement stmt) throws SQLException {
         if (false == LOG.isDebugEnabled()) {
             return stmt.executeQuery();
@@ -237,6 +245,71 @@ public class RdbShareStorage implements ShareStorage {
             LOG.debug("executeUpdate: {} - {} rows affected, {} ms elapsed.", stmt.toString(), rowCount, (System.currentTimeMillis() - start));
             return rowCount;
         }
+    }
+
+    private static enum ConnectionMode {
+        READ, WRITE;
+    }
+
+    private static final class ConnectionProvider {
+
+        private final Connection connection;
+
+        private final ConnectionMode mode;
+
+        private final boolean external;
+
+        private final DatabaseService dbService;
+
+        private final int contextId;
+
+        private ConnectionProvider(DatabaseService dbService, StorageParameters parameters, ConnectionMode mode, int contextId) throws OXException {
+            super();
+            Connection connection = null;
+            if (parameters != null) {
+                connection = parameters.get(Connection.class.getName());
+            }
+
+            boolean external = true;
+            if (connection == null) {
+                external = false;
+                if (mode == ConnectionMode.READ) {
+                    connection = dbService.getReadOnly(contextId);
+                } else {
+                    connection = dbService.getWritable(contextId);
+                }
+            } else {
+                try {
+                    if (mode == ConnectionMode.WRITE && connection.isReadOnly()) {
+                        external = false;
+                        connection = dbService.getWritable(contextId);
+                    }
+                } catch (SQLException e) {
+                    throw new OXException(e); // TODO:
+                }
+            }
+
+            this.dbService = dbService;
+            this.connection = connection;
+            this.external = external;
+            this.contextId = contextId;
+            this.mode = mode;
+        }
+
+        Connection get() {
+            return connection;
+        }
+
+        void close() {
+            if (!external) {
+                if (mode == ConnectionMode.READ) {
+                    dbService.backReadOnly(contextId, connection);
+                } else {
+                    dbService.backWritable(contextId, connection);
+                }
+            }
+        }
+
     }
 
 }

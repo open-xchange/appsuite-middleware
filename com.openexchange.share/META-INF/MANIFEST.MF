@@ -5,16 +5,25 @@ Bundle-SymbolicName: com.openexchange.share
 Bundle-Version: 7.6.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.database,
+Import-Package: com.openexchange.contact,
+ com.openexchange.database,
  com.openexchange.exception,
+ com.openexchange.folderstorage,
+ com.openexchange.folderstorage.database.contentType,
+ com.openexchange.groupware.container,
+ com.openexchange.groupware.contexts,
  com.openexchange.groupware.delete,
+ com.openexchange.groupware.ldap,
  com.openexchange.groupware.modules,
  com.openexchange.groupware.update,
  com.openexchange.i18n,
  com.openexchange.java.util,
  com.openexchange.osgi,
  com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.tools.session,
  com.openexchange.tools.sql,
+ com.openexchange.user,
  org.osgi.framework,
  org.osgi.service.event,
  org.slf4j

@@ -47,39 +47,121 @@
  *
  */
 
-package com.openexchange.share.internal;
+package com.openexchange.share;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.share.Share;
-import com.openexchange.share.ShareService;
-import com.openexchange.share.rdb.ShareStorage;
-import com.openexchange.share.rdb.StorageParameters;
-
+import java.util.Date;
 
 /**
- * {@link DefaultShareService}
+ * {@link Entity}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.6.1
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.x.x
  */
-public class DefaultShareService implements ShareService {
+public class Entity {
 
-    private final ShareStorage storage;
+    // {
+    // "module":"drive",
+    // "folder":"43242",
+    // "item":null,
+    // "displayName":"Party Pictures",
+    // "entities":[
+    // {
+    // "userId":42,
+    // "permissions":268500996
+    // },
+    // {
+    // "email":"otto@example.com",
+    // "permissions":268500996,
+    // "expires":1383056574868,
+    // "auth":1
+    // },
+    // {
+    // "email":"tante.erna@example.com",
+    // "contactId":12,
+    // "contactFolder":"contacts",
+    // "permissions":268500996
+    // }
+    // ]
+    // }
 
-    /**
-     * Initializes a new {@link DefaultShareService}.
-     *
-     * @param storage The underlying share storage
-     */
-    public DefaultShareService(ShareStorage storage) {
-        super();
-        this.storage = storage;
+    private int userId;
+
+    private int groupId;
+
+    private int contactId;
+
+    private String contactFolder;
+
+    private String mailAddress;
+
+    private int permissions;
+
+    private Date expires;
+
+    private AuthenticationMode authenticationMode;
+
+    public int getUserId() {
+        return userId;
     }
 
-    @Override
-    public Share resolveToken(String token) throws OXException {
-        int contextID = ShareTool.extractContextId(token);
-        return storage.loadShare(contextID, token, StorageParameters.NO_PARAMETERS);
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
+    public int getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(int groupId) {
+        this.groupId = groupId;
+    }
+
+    public int getContactId() {
+        return contactId;
+    }
+
+    public void setContactId(int contactId) {
+        this.contactId = contactId;
+    }
+
+    public String getContactFolder() {
+        return contactFolder;
+    }
+
+    public void setContactFolder(String contactFolder) {
+        this.contactFolder = contactFolder;
+    }
+
+    public String getMailAddress() {
+        return mailAddress;
+    }
+
+    public void setMailAddress(String mailAddress) {
+        this.mailAddress = mailAddress;
+    }
+
+    public int getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(int permissions) {
+        this.permissions = permissions;
+    }
+
+    public Date getExpires() {
+        return expires;
+    }
+
+    public void setExpires(Date expires) {
+        this.expires = expires;
+    }
+
+    public AuthenticationMode getAuthenticationMode() {
+        return authenticationMode;
+    }
+
+    public void setAuthenticationMode(AuthenticationMode authenticationMode) {
+        this.authenticationMode = authenticationMode;
     }
 
 }

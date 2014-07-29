@@ -47,56 +47,66 @@
  *
  */
 
-package com.openexchange.share.rdb;
+package com.openexchange.share.internal;
 
-import java.util.List;
+import com.openexchange.contact.ContactService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.share.Share;
+import com.openexchange.folderstorage.FolderService;
+import com.openexchange.share.Entity;
+import com.openexchange.share.ShareRequest;
+import com.openexchange.share.rdb.ShareStorage;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.UserService;
 
 
 /**
- * {@link ShareStorage}
+ * {@link AbstractCreator}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.6.1
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.x.x
  */
-public interface ShareStorage {
+public abstract class AbstractCreator {
+
+    protected final ShareRequest shareRequest;
+
+    protected final Entity entity;
+
+    protected final ServerSession session;
 
     /**
-     * Loads a share identified by it's unique token.
-     *
-     * @param contextID The context ID
-     * @param token The token
-     * @param parameters The storage parameters
-     * @return The share, or <code>null</code> if not found
-     * @throws OXException
+     * Initializes a new {@link AbstractCreator}.
+     * @param shareRequest
+     * @param entity
+     * @param session
      */
-    Share loadShare(int contextID, String token, StorageParameters parameters) throws OXException;
+    protected AbstractCreator(ShareRequest shareRequest, Entity entity, ServerSession session) {
+        super();
+        this.shareRequest = shareRequest;
+        this.entity = entity;
+        this.session = session;
+    }
 
-    /**
-     * Saves a new share in the storage.
-     *
-     * @param share The share to store
-     * @param parameters The storage parameters
-     */
-    void storeShare(Share share, StorageParameters parameters) throws OXException;
+    protected abstract void perform() throws OXException;
 
-    /**
-     * Updates an already existing share in the storage.
-     *
-     * @param share The share to update
-     * @param parameters The storage parameters
-     */
-    void updateShare(Share share, StorageParameters parameters) throws OXException;
+    protected ShareStorage getShareStorage() throws OXException {
+        return ShareServiceLookup.getService(ShareStorage.class, true);
+    }
 
-    /**
-     * Loads all shares that were created by a specific user ID.
-     *
-     * @param contextID The context ID
-     * @param createdBy The ID of the user to load the shares from
-     * @param parameters The storage parameters
-     * @return The shares
-     */
-    List<Share> loadSharesCreatedBy(int contextID, int createdBy, StorageParameters parameters) throws OXException;
+    protected UserService getUserService() throws OXException {
+        return ShareServiceLookup.getService(UserService.class, true);
+    }
+
+    protected ContactService getContactService() throws OXException {
+        return ShareServiceLookup.getService(ContactService.class, true);
+    }
+
+    protected FolderService getFolderService() throws OXException {
+        return ShareServiceLookup.getService(FolderService.class, true);
+    }
+
+    protected DatabaseService getDatabaseService() throws OXException {
+        return ShareServiceLookup.getService(DatabaseService.class, true);
+    }
 
 }

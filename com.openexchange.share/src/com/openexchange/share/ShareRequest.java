@@ -47,56 +47,105 @@
  *
  */
 
-package com.openexchange.share.rdb;
+package com.openexchange.share;
 
+import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.share.Share;
+import com.openexchange.groupware.modules.Module;
 
 
 /**
- * {@link ShareStorage}
+ * {@link ShareRequest}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.6.1
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.x.x
  */
-public interface ShareStorage {
+public class ShareRequest {
 
-    /**
-     * Loads a share identified by it's unique token.
-     *
-     * @param contextID The context ID
-     * @param token The token
-     * @param parameters The storage parameters
-     * @return The share, or <code>null</code> if not found
-     * @throws OXException
-     */
-    Share loadShare(int contextID, String token, StorageParameters parameters) throws OXException;
+//    {
+//        "module":"drive",
+//        "folder":"43242",
+//        "item":null,
+//        "displayName":"Party Pictures",
+//        "entities":[
+//          {
+//            "userId":42,
+//            "permissions":268500996
+//          },
+//          {
+//            "email":"otto@example.com",
+//            "permissions":268500996,
+//            "expires":1383056574868,
+//            "auth":1
+//          },
+//          {
+//            "email":"tante.erna@example.com",
+//            "contactId":12,
+//            "contactFolder":"contacts",
+//            "permissions":268500996
+//          }
+//        ]
+//      }
 
-    /**
-     * Saves a new share in the storage.
-     *
-     * @param share The share to store
-     * @param parameters The storage parameters
-     */
-    void storeShare(Share share, StorageParameters parameters) throws OXException;
+    private Module module;
 
-    /**
-     * Updates an already existing share in the storage.
-     *
-     * @param share The share to update
-     * @param parameters The storage parameters
-     */
-    void updateShare(Share share, StorageParameters parameters) throws OXException;
+    private String folder;
 
-    /**
-     * Loads all shares that were created by a specific user ID.
-     *
-     * @param contextID The context ID
-     * @param createdBy The ID of the user to load the shares from
-     * @param parameters The storage parameters
-     * @return The shares
-     */
-    List<Share> loadSharesCreatedBy(int contextID, int createdBy, StorageParameters parameters) throws OXException;
+    private String item;
+
+    private String displayName;
+
+    private final List<Entity> entities = new ArrayList<Entity>(4);
+
+
+    public Module getModule() {
+        return module;
+    }
+
+
+    public void setModule(Module module) {
+        this.module = module;
+    }
+
+
+    public String getFolder() {
+        return folder;
+    }
+
+
+    public void setFolder(String folder) {
+        this.folder = folder;
+    }
+
+
+    public String getItem() {
+        return item;
+    }
+
+
+    public void setItem(String item) {
+        this.item = item;
+    }
+
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+
+    public List<Entity> getEntities() {
+        return entities;
+    }
+
+    public void addEntity(Entity entity) {
+        entities.add(entity);
+    }
+
+
 
 }

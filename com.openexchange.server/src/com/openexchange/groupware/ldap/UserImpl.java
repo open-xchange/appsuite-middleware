@@ -265,7 +265,7 @@ public class UserImpl implements User, Cloneable {
      * Setter for userPassword.
      * @param userPassword Password.
      */
-    void setUserPassword(final String userPassword) {
+    public void setUserPassword(final String userPassword) {
         this.userPassword = userPassword;
     }
 
@@ -281,7 +281,7 @@ public class UserImpl implements User, Cloneable {
      * Setter for mailEnabled.
      * @param mailEnabled <code>true</code> to enable user.
      */
-    void setMailEnabled(final boolean mailEnabled) {
+    public void setMailEnabled(final boolean mailEnabled) {
         this.mailEnabled = mailEnabled;
     }
 
@@ -298,14 +298,14 @@ public class UserImpl implements User, Cloneable {
      * @param shadowLastChange Days since Jan 1, 1970 that password was last
      * changed.
      */
-    void setShadowLastChange(final int shadowLastChange) {
+    public void setShadowLastChange(final int shadowLastChange) {
         this.shadowLastChange = shadowLastChange;
     }
 
     /**
      * @param passwordMech password encryption mechanism.
      */
-    void setPasswordMech(final String passwordMech) {
+    public void setPasswordMech(final String passwordMech) {
         this.passwordMech = passwordMech;
     }
 
@@ -345,7 +345,7 @@ public class UserImpl implements User, Cloneable {
      * Setter for mailDomain.
      * @param mailDomain mail domain.
      */
-    void setMailDomain(final String mailDomain) {
+    public void setMailDomain(final String mailDomain) {
         this.mailDomain = mailDomain == null ? null : IDNA.toUnicode(mailDomain);
     }
 
@@ -361,7 +361,7 @@ public class UserImpl implements User, Cloneable {
      * Setter for givenName.
      * @param givenName given name.
      */
-    void setGivenName(final String givenName) {
+    public void setGivenName(final String givenName) {
         this.givenName = givenName;
     }
 
@@ -377,7 +377,7 @@ public class UserImpl implements User, Cloneable {
      * Setter for sure name.
      * @param sureName sure name.
      */
-    void setSurname(final String sureName) {
+    public void setSurname(final String sureName) {
         this.surname = sureName;
     }
 
@@ -393,7 +393,7 @@ public class UserImpl implements User, Cloneable {
      * Setter for mail.
      * @param mail Mail address.
      */
-    void setMail(final String mail) {
+    public void setMail(final String mail) {
         this.mail = mail == null ? mail : IDNA.toIDN(mail);
     }
 
@@ -409,7 +409,7 @@ public class UserImpl implements User, Cloneable {
      * Setter for displayName.
      * @param displayName Display name.
      */
-    void setDisplayName(final String displayName) {
+    public void setDisplayName(final String displayName) {
         this.displayName = displayName;
     }
 
@@ -477,7 +477,7 @@ public class UserImpl implements User, Cloneable {
      * Setter for groups.
      * @param groups the groups this user is member of.
      */
-    void setGroups(final int[] groups) {
+    public void setGroups(final int[] groups) {
         this.groups = groups;
     }
 
@@ -611,7 +611,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * @param loginInfo the login information.
      */
-    void setLoginInfo(final String loginInfo) {
+    public void setLoginInfo(final String loginInfo) {
         this.loginInfo = loginInfo;
     }
 }

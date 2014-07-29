@@ -375,30 +375,31 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         if (null == con) {
             return;
         }
-        if (WRITEES.contains(con.readWrite)) {
-            try {
-                con.connection.commit();
-            } catch (final SQLException e) {
-                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-            } finally {
-                DBUtils.autocommit(con.connection);
+
+        if (!con.controlledExternally) {
+            if (WRITEES.contains(con.readWrite)) {
+                try {
+                    con.connection.commit();
+                } catch (final SQLException e) {
+                    throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+                } finally {
+                    DBUtils.autocommit(con.connection);
+                    final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class);
+                    if (null != databaseService) {
+                        con.close(databaseService, params.getContext().getContextId());
+                    }
+                }
+            } else {
                 final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class);
                 if (null != databaseService) {
-                    con.close(databaseService, params.getContext().getContextId());
+                    databaseService.backReadOnly(params.getContext(), con.connection);
                 }
-                final FolderType folderType = getFolderType();
-                params.putParameter(folderType, PARAM_CONNECTION, null);
-                params.markCommitted();
             }
-        } else {
-            final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class);
-            if (null != databaseService) {
-                databaseService.backReadOnly(params.getContext(), con.connection);
-            }
-            final FolderType folderType = getFolderType();
-            params.putParameter(folderType, PARAM_CONNECTION, null);
-            params.markCommitted();
         }
+
+        final FolderType folderType = getFolderType();
+        params.putParameter(folderType, PARAM_CONNECTION, null);
+        params.markCommitted();
     }
 
     @Override
@@ -1449,23 +1450,27 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         if (null == con) {
             return;
         }
-        if (con.isWritable()) {
-            try {
-                DBUtils.rollback(con.connection);
-            } finally {
-                DBUtils.autocommit(con.connection);
+
+        if (!con.controlledExternally) {
+            if (con.isWritable()) {
+                try {
+                    DBUtils.rollback(con.connection);
+                } finally {
+                    DBUtils.autocommit(con.connection);
+                    final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class);
+                    if (null != databaseService) {
+                        con.close(databaseService, params.getContext().getContextId());
+                    }
+                }
+            } else {
                 final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class);
                 if (null != databaseService) {
-                    con.close(databaseService, params.getContext().getContextId());
+                    databaseService.backReadOnly(params.getContext(), con.connection);
                 }
-                params.putParameter(getFolderType(), PARAM_CONNECTION, null);
-            }
-        } else {
-            final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class);
-            if (null != databaseService) {
-                databaseService.backReadOnly(params.getContext(), con.connection);
             }
         }
+
+        params.putParameter(getFolderType(), PARAM_CONNECTION, null);
     }
 
     @Override
@@ -1479,9 +1484,9 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         try {
             final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
             final Context context = parameters.getContext();
-            ConnectionMode con = parameters.getParameter(folderType, PARAM_CONNECTION);
-            if (null != con) {
-                if (con.supports(mode)) {
+            ConnectionMode connectionMode = parameters.getParameter(folderType, PARAM_CONNECTION);
+            if (null != connectionMode) {
+                if (connectionMode.supports(mode)) {
                     // Connection already present in proper access mode
                     return false;
                 }
@@ -1490,33 +1495,47 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                  *
                  * commit, restore auto-commit & push to pool
                  */
-                parameters.putParameter(folderType, PARAM_CONNECTION, null);
-                if (con.isWritable()) {
-                    try {
-                        con.connection.commit();
-                    } catch (final Exception e) {
-                        // Ignore
-                        DBUtils.rollback(con.connection);
+                if (!connectionMode.controlledExternally) {
+                    parameters.putParameter(folderType, PARAM_CONNECTION, null);
+                    if (connectionMode.isWritable()) {
+                        try {
+                            connectionMode.connection.commit();
+                        } catch (final Exception e) {
+                            // Ignore
+                            DBUtils.rollback(connectionMode.connection);
+                        }
+                        DBUtils.autocommit(connectionMode.connection);
                     }
-                    DBUtils.autocommit(con.connection);
+                    connectionMode.close(databaseService, context.getContextId());
                 }
-                con.close(databaseService, context.getContextId());
             }
+
+            Connection connection = parameters.getParameter(folderType, Connection.class.getName());
             if (WRITEES.contains(mode)) {
-                con = new ConnectionMode(databaseService.getWritable(context), mode);
-                con.connection.setAutoCommit(false);
+                if (connection == null || connection.isReadOnly()) {
+                    connectionMode = new ConnectionMode(databaseService.getWritable(context), mode);
+                    connectionMode.connection.setAutoCommit(false);
+                } else {
+                    connectionMode = new ConnectionMode(connection, mode, true);
+                }
             } else {
-                con = new ConnectionMode(databaseService.getReadOnly(context), mode);
+                if (connection == null) {
+                    connectionMode = new ConnectionMode(databaseService.getReadOnly(context), mode);
+                } else {
+                    connectionMode = new ConnectionMode(connection, mode, true);
+                }
             }
             // Put to parameters
-            if (parameters.putParameterIfAbsent(folderType, PARAM_CONNECTION, con)) {
+            if (parameters.putParameterIfAbsent(folderType, PARAM_CONNECTION, connectionMode)) {
                 // Success
             } else {
                 // Fail
-                if (con.isWritable()) {
-                    con.connection.setAutoCommit(true);
+                if (!connectionMode.controlledExternally) {
+                    if (connectionMode.isWritable()) {
+                        connectionMode.connection.setAutoCommit(true);
+                    }
+                    connectionMode.close(databaseService, context.getContextId());
                 }
-                con.close(databaseService, context.getContextId());
             }
             return true;
         } catch (final SQLException e) {
@@ -2050,15 +2069,32 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         public Mode readWrite;
 
         /**
+         * Whether this connection is in a transactional state controlled by an outer scope.
+         */
+        public boolean controlledExternally;
+
+        /**
          * Initializes a new {@link ConnectionMode}.
          *
          * @param connection
          * @param readWrite
          */
         public ConnectionMode(final Connection connection, final Mode readWrite) {
+            this(connection, readWrite, false);
+        }
+
+        /**
+         * Initializes a new {@link ConnectionMode}.
+         *
+         * @param connection
+         * @param readWrite
+         * @param controlledExternally
+         */
+        public ConnectionMode(final Connection connection, final Mode readWrite, final boolean controlledExternally) {
             super();
             this.connection = connection;
             this.readWrite = readWrite;
+            this.controlledExternally = controlledExternally;
         }
 
         public boolean isWritable () {
@@ -2082,12 +2118,14 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
          * @param contextId The context identifier
          */
         public void close(final DatabaseService databaseService, final int contextId) {
-            if (Mode.WRITE == readWrite) {
-                databaseService.backWritable(contextId, connection);
-            } else if (Mode.WRITE_AFTER_READ == readWrite) {
-                databaseService.backWritableAfterReading(contextId, connection);
-            } else {
-                databaseService.backReadOnly(contextId, connection);
+            if (!controlledExternally) {
+                if (Mode.WRITE == readWrite) {
+                    databaseService.backWritable(contextId, connection);
+                } else if (Mode.WRITE_AFTER_READ == readWrite) {
+                    databaseService.backWritableAfterReading(contextId, connection);
+                } else {
+                    databaseService.backReadOnly(contextId, connection);
+                }
             }
         }
     }

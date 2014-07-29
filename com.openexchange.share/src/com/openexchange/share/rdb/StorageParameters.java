@@ -49,54 +49,66 @@
 
 package com.openexchange.share.rdb;
 
-import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.share.Share;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
- * {@link ShareStorage}
+ * {@link StorageParameters}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public interface ShareStorage {
+public class StorageParameters {
 
-    /**
-     * Loads a share identified by it's unique token.
-     *
-     * @param contextID The context ID
-     * @param token The token
-     * @param parameters The storage parameters
-     * @return The share, or <code>null</code> if not found
-     * @throws OXException
-     */
-    Share loadShare(int contextID, String token, StorageParameters parameters) throws OXException;
+    public static final StorageParameters NO_PARAMETERS = new StorageParameters(Collections.<String, Object>emptyMap());
 
-    /**
-     * Saves a new share in the storage.
-     *
-     * @param share The share to store
-     * @param parameters The storage parameters
-     */
-    void storeShare(Share share, StorageParameters parameters) throws OXException;
+    private final Map<String, Object> parameters;
 
-    /**
-     * Updates an already existing share in the storage.
-     *
-     * @param share The share to update
-     * @param parameters The storage parameters
-     */
-    void updateShare(Share share, StorageParameters parameters) throws OXException;
+    public StorageParameters() {
+        this(new HashMap<String, Object>());
+    }
 
-    /**
-     * Loads all shares that were created by a specific user ID.
-     *
-     * @param contextID The context ID
-     * @param createdBy The ID of the user to load the shares from
-     * @param parameters The storage parameters
-     * @return The shares
-     */
-    List<Share> loadSharesCreatedBy(int contextID, int createdBy, StorageParameters parameters) throws OXException;
+    private StorageParameters(Map<String, Object> parameters) {
+        super();
+        this.parameters = parameters;
+    }
+
+    public StorageParameters put(String key, Object value) {
+        parameters.put(key, value);
+        return this;
+    }
+
+//    public Object get(String key) {
+//        return parameters.get(key);
+//    }
+//
+//    public <T> T get(String key, Class<T> type) {
+//        Object object = parameters.get(key);
+//        if (object == null) {
+//            return null;
+//        }
+//
+//        if (type.isAssignableFrom(object.getClass())) {
+//            return type.cast(object);
+//        }
+//
+//        return null;
+//    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T get(String key) {
+        Object object = parameters.get(key);
+        if (object == null) {
+            return null;
+        }
+
+        try {
+            return (T) object;
+        } catch (ClassCastException e) {
+            return null;
+        }
+    }
 
 }
