@@ -1,6 +1,7 @@
 * 2014-07-29 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 33652: Also accept "updateToken" requests without service identifier 
+ - Fix for bug 30654: Try fallback based on the file extension in case there's no preview service for mime type 
 
 * 2014-07-28 - lars.hoogestraat@open-xchange.com
 
