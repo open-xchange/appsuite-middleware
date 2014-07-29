@@ -1,3 +1,7 @@
+* 2014-07-28 - lars.hoogestraat@open-xchange.com
+
+ - Fix for bug 33577: Improved sanitizing of snippet management
+
 * 2014-07-28 - thorben.betten@open-xchange.com
 
  - Fix for bug 33728: Drop SUBSCRIPTION bit from capabilities bit mask if not allowed
