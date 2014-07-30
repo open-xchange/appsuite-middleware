@@ -108,7 +108,7 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
         moduleId = requireNumber(requestData, AJAXServlet.PARAMETER_MODULE);
         id = requireNumber(requestData, AJAXServlet.PARAMETER_ID);
 
-        if(!requestData.getFormat().equals("preview_image")) {
+        if(!"preview_image".equals(requestData.getFormat())) {
             requestData.setFormat("file");
         }
         return document(
