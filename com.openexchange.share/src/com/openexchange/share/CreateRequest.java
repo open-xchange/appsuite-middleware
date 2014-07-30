@@ -53,39 +53,38 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.groupware.modules.Module;
 
-
 /**
- * {@link ShareRequest}
+ * {@link CreateRequest}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.x.x
  */
-public class ShareRequest {
+public class CreateRequest {
 
-//    {
-//        "module":"drive",
-//        "folder":"43242",
-//        "item":null,
-//        "displayName":"Party Pictures",
-//        "entities":[
-//          {
-//            "userId":42,
-//            "permissions":268500996
-//          },
-//          {
-//            "email":"otto@example.com",
-//            "permissions":268500996,
-//            "expires":1383056574868,
-//            "auth":1
-//          },
-//          {
-//            "email":"tante.erna@example.com",
-//            "contactId":12,
-//            "contactFolder":"contacts",
-//            "permissions":268500996
-//          }
-//        ]
-//      }
+    // {
+    // "module":"drive",
+    // "folder":"43242",
+    // "item":null,
+    // "displayName":"Party Pictures",
+    // "entities":[
+    // {
+    // "userId":42,
+    // "permissions":268500996
+    // },
+    // {
+    // "email":"otto@example.com",
+    // "permissions":268500996,
+    // "expires":1383056574868,
+    // "auth":1
+    // },
+    // {
+    // "email":"tante.erna@example.com",
+    // "contactId":12,
+    // "contactFolder":"contacts",
+    // "permissions":268500996
+    // }
+    // ]
+    // }
 
     private Module module;
 
@@ -93,50 +92,31 @@ public class ShareRequest {
 
     private String item;
 
-    private String displayName;
-
     private final List<Entity> entities = new ArrayList<Entity>(4);
-
 
     public Module getModule() {
         return module;
     }
 
-
     public void setModule(Module module) {
         this.module = module;
     }
-
 
     public String getFolder() {
         return folder;
     }
 
-
     public void setFolder(String folder) {
         this.folder = folder;
     }
-
 
     public String getItem() {
         return item;
     }
 
-
     public void setItem(String item) {
         this.item = item;
     }
-
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
-
 
     public List<Entity> getEntities() {
         return entities;
@@ -145,7 +125,5 @@ public class ShareRequest {
     public void addEntity(Entity entity) {
         entities.add(entity);
     }
-
-
 
 }

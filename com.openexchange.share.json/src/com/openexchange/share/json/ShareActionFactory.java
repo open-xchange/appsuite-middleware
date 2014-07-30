@@ -57,6 +57,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.json.actions.GETAction;
+import com.openexchange.share.json.actions.NewAction;
 
 
 /**
@@ -76,6 +77,7 @@ public class ShareActionFactory implements AJAXActionServiceFactory {
     public ShareActionFactory(ServiceLookup services) {
         super();
         actions.put("GET", new GETAction(services));
+        actions.put("new", new NewAction(services));
     }
 
     @Override

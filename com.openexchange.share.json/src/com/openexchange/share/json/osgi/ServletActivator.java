@@ -52,13 +52,14 @@ package com.openexchange.share.json.osgi;
 import javax.servlet.ServletException;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.ShareService;
+import com.openexchange.share.json.ShareActionFactory;
 import com.openexchange.share.json.internal.ShareServiceLookup;
 import com.openexchange.share.json.internal.ShareServlet;
 import com.openexchange.user.UserService;
@@ -68,11 +69,11 @@ import com.openexchange.user.UserService;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ServletActivator extends HousekeepingActivator {
+public class ServletActivator extends AJAXModuleActivator {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServletActivator.class);
 
-    private volatile boolean registered;
+    private volatile boolean servletRegistered;
 
     /**
      * Initializes a new {@link ServletActivator}.
@@ -99,7 +100,14 @@ public class ServletActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        LOG.info("starting bundle: \"com.openexchange.share.json\"");
+        /*
+         * set references
+         */
+        ShareServiceLookup.set(this);
+
         registerServlet();
+        registerModule(new ShareActionFactory(this), "share/management");
     }
 
     @Override
@@ -109,15 +117,10 @@ public class ServletActivator extends HousekeepingActivator {
     }
 
     private void registerServlet() {
-        LOG.info("starting bundle: \"com.openexchange.share.json\"");
-        /*
-         * set references
-         */
-        ShareServiceLookup.set(this);
         /*
          * register servlet
          */
-        registered = true;
+        servletRegistered = true;
         try {
             getService(HttpService.class).registerServlet(getService(DispatcherPrefixService.class).getPrefix() + "share", new ShareServlet(), null, null);
         } catch (final ServletException e) {
@@ -129,10 +132,10 @@ public class ServletActivator extends HousekeepingActivator {
 
     private void unregisterServlet() {
         getService(HttpService.class).unregister(getService(DispatcherPrefixService.class).getPrefix() + "/share");
-        if (false == registered) {
+        if (false == servletRegistered) {
             return;
         }
-        registered = false;
+        servletRegistered = false;
         ShareServiceLookup.set(null);
     }
 

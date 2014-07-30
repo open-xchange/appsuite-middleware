@@ -84,11 +84,7 @@ public class Entity {
     // ]
     // }
 
-    private int userId;
-
-    private int groupId;
-
-    private int contactId;
+    private String contactId;
 
     private String contactFolder;
 
@@ -100,27 +96,14 @@ public class Entity {
 
     private AuthenticationMode authenticationMode;
 
-    public int getUserId() {
-        return userId;
-    }
+    private String password;
 
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
 
-    public int getGroupId() {
-        return groupId;
-    }
-
-    public void setGroupId(int groupId) {
-        this.groupId = groupId;
-    }
-
-    public int getContactId() {
+    public String getContactId() {
         return contactId;
     }
 
-    public void setContactId(int contactId) {
+    public void setContactId(String contactId) {
         this.contactId = contactId;
     }
 
@@ -162,6 +145,14 @@ public class Entity {
 
     public void setAuthenticationMode(AuthenticationMode authenticationMode) {
         this.authenticationMode = authenticationMode;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
 }

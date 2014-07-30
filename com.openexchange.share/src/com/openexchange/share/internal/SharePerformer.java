@@ -53,60 +53,64 @@ import com.openexchange.contact.ContactService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderService;
-import com.openexchange.share.Entity;
-import com.openexchange.share.ShareRequest;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.rdb.ShareStorage;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
 
 /**
- * {@link AbstractCreator}
+ * {@link SharePerformer}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.x.x
+ * @since v7.6.1
  */
-public abstract class AbstractCreator {
-
-    protected final ShareRequest shareRequest;
-
-    protected final Entity entity;
+public abstract class SharePerformer<R> {
 
     protected final ServerSession session;
 
-    /**
-     * Initializes a new {@link AbstractCreator}.
-     * @param shareRequest
-     * @param entity
-     * @param session
-     */
-    protected AbstractCreator(ShareRequest shareRequest, Entity entity, ServerSession session) {
+    protected final ShareStorage storage;
+
+    protected final ServiceLookup services;
+
+
+    protected SharePerformer(ShareStorage storage, ServiceLookup services, ServerSession session) {
         super();
-        this.shareRequest = shareRequest;
-        this.entity = entity;
+        this.storage = storage;
+        this.services = services;
         this.session = session;
     }
 
-    protected abstract void perform() throws OXException;
+    protected abstract R perform() throws OXException;
 
     protected ShareStorage getShareStorage() throws OXException {
-        return ShareServiceLookup.getService(ShareStorage.class, true);
+        return storage;
     }
 
     protected UserService getUserService() throws OXException {
-        return ShareServiceLookup.getService(UserService.class, true);
+        return getService(UserService.class, true);
     }
 
     protected ContactService getContactService() throws OXException {
-        return ShareServiceLookup.getService(ContactService.class, true);
+        return getService(ContactService.class, true);
     }
 
     protected FolderService getFolderService() throws OXException {
-        return ShareServiceLookup.getService(FolderService.class, true);
+        return getService(FolderService.class, true);
     }
 
     protected DatabaseService getDatabaseService() throws OXException {
-        return ShareServiceLookup.getService(DatabaseService.class, true);
+        return getService(DatabaseService.class, true);
+    }
+
+    protected <S> S getService(Class<S> serviceClass, boolean failIfAbsent) throws OXException {
+        S service = services.getService(serviceClass);
+        if (service == null && failIfAbsent) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(serviceClass.getName());
+        }
+
+        return service;
     }
 
 }

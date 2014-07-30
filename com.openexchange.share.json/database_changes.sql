@@ -28,10 +28,8 @@ CREATE TABLE `share` (
   `expires` bigint(64) DEFAULT NULL,
   `guest` int(10) unsigned NOT NULL,
   `auth` tinyint(3) unsigned NOT NULL,
-  `displayName` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`cid`,`token`),
   KEY `createdByIndex` (`cid`,`createdBy`),
   KEY `guestIndex` (`cid`,`guest`),
   KEY `folderIndex` (`cid`,`folder`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
-
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci 
