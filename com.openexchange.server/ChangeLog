@@ -44,6 +44,10 @@
 
  - Fix for bug 33839: Escape site information when generating the publication site from selected template
 
+* 2014-07-30 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32897: Send empty string for default alarms in CalDAV
+
 * 2014-07-29 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 33652: Also accept "updateToken" requests without service identifier 
