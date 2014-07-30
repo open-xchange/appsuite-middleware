@@ -1,3 +1,7 @@
+* 2014-07-30 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32897: Send empty string for default alarms in CalDAV
+
 * 2014-07-30 - martin.schneider@open-xchange.com
 
  - Fix for bug 33529: Provide more information for using report client parameter and use hazelcast portable serialization
