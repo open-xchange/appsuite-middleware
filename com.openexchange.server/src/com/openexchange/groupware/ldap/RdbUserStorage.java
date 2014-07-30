@@ -72,6 +72,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -102,6 +103,8 @@ import com.openexchange.user.internal.mapping.UserMapper;
  * of a directory service.
  */
 public class RdbUserStorage extends UserStorage {
+
+    private static final String ATTR_GUEST_CREATED_BY = "com.openexchange.user.guestCreatedBy";
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbUserStorage.class);
 
@@ -208,8 +211,20 @@ public class RdbUserStorage extends UserStorage {
             setStringOrNull(i++, stmt, "/bin/bash");
             stmt.executeUpdate();
 
-            writeLoginInfo(con, user, context, userId);
-            writeUserAttributes(con, user, context, userId);
+            Map<String, Set<String>> attributes;
+            if (user.isGuest()) {
+                attributes = new HashMap<String, Set<String>>();
+                attributes.put(ATTR_GUEST_CREATED_BY, Collections.singleton(Integer.toString(user.getCreatedBy())));
+
+                Map<String, Set<String>> origin = user.getAttributes();
+                if (origin != null) {
+                    attributes.putAll(origin);
+                }
+            } else {
+                attributes = user.getAttributes();
+                writeLoginInfo(con, user, context, userId);
+            }
+            writeUserAttributes(con, attributes, context, userId);
             return userId;
         } catch (final SQLException e) {
             throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -232,11 +247,10 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private static void writeUserAttributes(Connection con, User user, Context context, int userId) throws SQLException {
+    private static void writeUserAttributes(Connection con, Map<String, Set<String>> attributes, Context context, int userId) throws SQLException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(INSERT_ATTRIBUTES);
-            final Map<String, Set<String>> attributes = user.getAttributes();
             for (final String key : attributes.keySet()) {
                 final Set<String> valueSet = attributes.get(key);
                 for (final String value : valueSet) {
@@ -550,14 +564,14 @@ public class RdbUserStorage extends UserStorage {
             }
             // Check for guest
             {
-                UserAttribute guestCreatedBy = attrs.get("com.openexchange.user.guestCreatedBy");
+                UserAttribute guestCreatedBy = attrs.get(ATTR_GUEST_CREATED_BY);
                 if (null != guestCreatedBy) {
                     Set<String> values = guestCreatedBy.getStringValues();
                     if (null != values && 0 < values.size()) {
                         try {
                             user.setCreatedBy(Integer.valueOf(values.iterator().next()));
                         } catch (NumberFormatException e) {
-                            throw UserExceptionCode.SQL_ERROR.create("Invalid value for \"com.openexchange.user.guestCreatedBy\"");//TODO
+                            throw UserExceptionCode.SQL_ERROR.create("Invalid value for \"" + ATTR_GUEST_CREATED_BY + "\"");//TODO
                         }
                     }
                 }

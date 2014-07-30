@@ -180,7 +180,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * Groups this user is member of.
      */
-    private int[] groups;
+    private int[] groups = new int[0];
 
     /**
      * Login information of this user.

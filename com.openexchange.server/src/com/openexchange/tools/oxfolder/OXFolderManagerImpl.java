@@ -716,7 +716,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         fo.setDefaultFolder(storageObj.isDefaultFolder());
         OXFolderUtility.checkPermissionsAgainstSessionUserConfig(fo, userPerms, ctx);
         OXFolderUtility.checkFolderPermissions(fo, user.getId(), ctx, warnings);
-        OXFolderUtility.checkPermissionsAgainstUserConfigs(fo, ctx);
+        OXFolderUtility.checkPermissionsAgainstUserConfigs(readCon, fo, ctx);
         OXFolderUtility.checkSystemFolderPermissions(fo.getObjectID(), fo.getNonSystemPermissionsAsArray(), user, ctx);
         if (FolderObject.PUBLIC == fo.getType()) {
             {
@@ -820,6 +820,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
          */
         try {
             OXFolderSQL.updateFolderSQL(user.getId(), fo, lastModified, ctx, writeCon);
+            // FIXME
             if (null != writeCon && !writeCon.getAutoCommit()) {
                 writeCon.commit();
             }
@@ -1045,6 +1046,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
          */
         try {
             OXFolderSQL.renameFolderSQL(user.getId(), folderObj, lastModified, ctx, writeCon);
+            // FIXME
             if (null != writeCon && !writeCon.getAutoCommit()) {
                 writeCon.commit();
             }
@@ -1210,6 +1212,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         try {
             storageSrc.setFolderName(newName);
             OXFolderSQL.moveFolderSQL(user.getId(), storageSrc, storageDest, lastModified, ctx, readCon, writeCon);
+            // FIXME:
             if (null != writeCon && !writeCon.getAutoCommit()) {
                 writeCon.commit();
             }
@@ -1244,6 +1247,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     folderIDs.addAll(OXFolderSQL.getSubfolderIDs(folderId, readCon, ctx, true));
                 }
                 OXFolderSQL.updateFolderType(writeCon, ctx, storageDest.getType(), folderIDs);
+                // FIXME:
                 if (null != writeCon && !writeCon.getAutoCommit()) {
                     writeCon.commit();
                 }
@@ -1258,6 +1262,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             OXFolderSQL.updateLastModified(storageSrc.getParentFolderID(), lastModified, user.getId(), writeCon, ctx);
             OXFolderSQL.updateLastModified(storageSrc.getObjectID(), lastModified, user.getId(), writeCon, ctx);
             OXFolderSQL.updateLastModified(storageDest.getObjectID(), lastModified, user.getId(), writeCon, ctx);
+            // FIXME:
             if (null != writeCon && !writeCon.getAutoCommit()) {
                 writeCon.commit();
             }
@@ -1815,6 +1820,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
              */
             try {
                 OXFolderSQL.delOXFolder(folderID, session.getUserId(), lastModified, true, false, ctx, writeCon);
+                // FIXME:
                 if (null != writeCon && !writeCon.getAutoCommit()) {
                     writeCon.commit();
                 }
@@ -1849,6 +1855,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
              */
             try {
                 OXFolderSQL.delWorkingOXFolder(folderID, session.getUserId(), lastModified, ctx, writeCon);
+             // FIXME:
                 if (null != writeCon && !writeCon.getAutoCommit()) {
                     writeCon.commit();
                 }

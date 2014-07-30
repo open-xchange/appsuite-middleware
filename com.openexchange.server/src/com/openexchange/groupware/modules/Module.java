@@ -56,6 +56,7 @@ import gnu.trove.map.hash.TObjectIntHashMap;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.userconfiguration.Permission;
 
 /**
  * {@link Module} - A module known to Open-Xchange Server.
@@ -64,20 +65,22 @@ import com.openexchange.groupware.container.FolderObject;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum Module {
-    TASK("tasks", FolderObject.TASK),
-    CALENDAR("calendar", FolderObject.CALENDAR),
-    CONTACTS("contacts", FolderObject.CONTACT),
-    UNBOUND("unbound", FolderObject.UNBOUND),
-    MAIL("mail", FolderObject.MAIL),
-    INFOSTORE("infostore", FolderObject.INFOSTORE),
-    SYSTEM("system", FolderObject.SYSTEM_MODULE);
+    TASK("tasks", FolderObject.TASK, Permission.TASKS),
+    CALENDAR("calendar", FolderObject.CALENDAR, Permission.CALENDAR),
+    CONTACTS("contacts", FolderObject.CONTACT, Permission.CONTACTS),
+    UNBOUND("unbound", FolderObject.UNBOUND, null),
+    MAIL("mail", FolderObject.MAIL, Permission.WEBMAIL),
+    INFOSTORE("infostore", FolderObject.INFOSTORE, Permission.INFOSTORE),
+    SYSTEM("system", FolderObject.SYSTEM_MODULE, null);
 
     private final String name;
     private final int folderConstant;
+    private final Permission permission;
 
-    Module(String name, int folderConstant) {
+    Module(String name, int folderConstant, Permission permission) {
         this.name = name;
         this.folderConstant = folderConstant;
+        this.permission = permission;
     }
 
     private static final TIntObjectMap<Module> folderConstant2Module;
@@ -134,6 +137,15 @@ public enum Module {
      */
     public int getFolderConstant() {
         return folderConstant;
+    }
+
+    /**
+     * Gets the {@link Permission} according to this module
+     *
+     * @return The permission or <code>null</code> if there is none for this module
+     */
+    public Permission getPermission() {
+        return permission;
     }
 
     /**

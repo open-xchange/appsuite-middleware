@@ -1510,7 +1510,15 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 }
             }
 
-            Connection connection = parameters.getParameter(folderType, Connection.class.getName());
+            Connection connection = null;
+            FolderServiceDecorator decorator = parameters.getDecorator();
+            if (decorator != null) {
+                Object obj = decorator.getProperty(Connection.class.getName());
+                if (obj != null && obj instanceof Connection) {
+                    connection = (Connection) obj;
+                }
+            }
+
             if (WRITEES.contains(mode)) {
                 if (connection == null || connection.isReadOnly()) {
                     connectionMode = new ConnectionMode(databaseService.getWritable(context), mode);

@@ -73,6 +73,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
@@ -528,6 +529,51 @@ public final class OXFolderUtility {
                 }
             }
         }
+    }
+
+    /**
+     * Checks every <b>user permission</b> against user configuration settings
+     *
+     * @param con The current db connection
+     * @param folderObj The folder object
+     * @param ctx The context
+     * @throws OXException If a composed permission does not obey user's configuration
+     */
+    public static void checkPermissionsAgainstUserConfigs(final Connection con, final FolderObject folderObj, final Context ctx) throws OXException {
+        final int size = folderObj.getPermissions().size();
+        final Iterator<OCLPermission> iter = folderObj.getPermissions().iterator();
+        UserPermissionBitsStorage permissionBitsStorage = UserPermissionBitsStorage.getInstance();
+        for (int i = 0; i < size; i++) {
+            final OCLPermission assignedPerm = iter.next();
+            if (!assignedPerm.isGroupPermission()) {
+                final UserPermissionBits userPermissionBits = permissionBitsStorage.getUserPermissionBits(con, assignedPerm.getEntity(), ctx);
+                final OCLPermission maxApplicablePerm = getMaxApplicablePermission(folderObj, userPermissionBits);
+                if (!isApplicable(maxApplicablePerm, assignedPerm)) {
+                    throw OXFolderExceptionCode.UNAPPLICABLE_FOLDER_PERM.create(getUserName(assignedPerm.getEntity(), ctx),
+                        getFolderName(folderObj),
+                        Integer.valueOf(ctx.getContextId()));
+                }
+            }
+        }
+    }
+
+    private static OCLPermission getMaxApplicablePermission(final FolderObject folderObj, final UserPermissionBits permissionBits) {
+        final int userId = permissionBits.getUserId();
+        final EffectivePermission retval =
+            new EffectivePermission(
+                userId,
+                folderObj.getObjectID(),
+                folderObj.getType(userId),
+                folderObj.getModule(),
+                folderObj.getCreatedBy(),
+                permissionBits);
+        retval.setFolderAdmin(true);
+        retval.setAllPermission(
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION);
+        return retval;
     }
 
     private static OCLPermission getMaxApplicablePermission(final FolderObject folderObj, final UserConfiguration userConfig) {
