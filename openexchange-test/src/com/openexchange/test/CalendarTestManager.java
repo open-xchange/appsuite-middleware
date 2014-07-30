@@ -66,6 +66,7 @@ import org.json.JSONObject;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
+import com.openexchange.ajax.appointment.action.AppointmentUpdatesResponse;
 import com.openexchange.ajax.appointment.action.ConfirmRequest;
 import com.openexchange.ajax.appointment.action.ConfirmResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -82,7 +83,6 @@ import com.openexchange.ajax.appointment.action.NewAppointmentSearchResponse;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.appointment.action.UpdatesRequest;
-import com.openexchange.ajax.appointment.action.AppointmentUpdatesResponse;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -96,7 +96,6 @@ import com.openexchange.ajax.parser.ParticipantParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CommonObject;
-import com.openexchange.groupware.container.Participants;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 
@@ -213,7 +212,7 @@ public class CalendarTestManager implements TestManager {
         setFailOnError(false); // switching off, because there are other ways to delete an appointment, for example creating enough delete
         // exceptions
         for (Appointment appointment : new ArrayList<Appointment>(createdEntities)) {
-            delete(appointment);
+            delete(appointment, true);
         }
         setFailOnError(old);
     }
@@ -302,7 +301,7 @@ public class CalendarTestManager implements TestManager {
             return null;
         }
     }
-    
+
     public void confirm(Appointment app, int status, String message, int occurrence) {
         ConfirmRequest confirmRequest = new ConfirmRequest(app.getParentFolderID(), app.getObjectID(), occurrence, status, message, 0, app.getLastModified(), getFailOnError());
         ConfirmResponse resp = execute(confirmRequest);
@@ -316,14 +315,14 @@ public class CalendarTestManager implements TestManager {
         setLastResponse(resp);
         setLastModification(resp.getTimestamp());
     }
-    
+
     public void confirm(Appointment app, int user, int status, String message) {
         ConfirmRequest confirmRequest = new ConfirmRequest(app.getParentFolderID(), app.getObjectID(), status, message, user, app.getLastModified(),  getFailOnError());
         ConfirmResponse resp = execute(confirmRequest);
         setLastResponse(resp);
         setLastModification(resp.getTimestamp());
     }
-    
+
     public void confirmExternal(Appointment app, String mail, int status, String message, int occurrence) {
         ConfirmRequest confirmRequest = new ConfirmRequest(app.getParentFolderID(), app.getObjectID(), occurrence, status, message, mail, app.getLastModified(),  getFailOnError());
         ConfirmResponse resp = execute(confirmRequest);
@@ -353,7 +352,7 @@ public class CalendarTestManager implements TestManager {
             return null;
         }
     }
-    
+
     public List<Appointment> getChangeExceptions(int folderId, int objectId, int[] columns) {
         GetChangeExceptionsRequest request = new GetChangeExceptionsRequest(folderId, objectId, columns);
         GetChangeExceptionsResponse response = execute(request);
@@ -364,7 +363,7 @@ public class CalendarTestManager implements TestManager {
             e.printStackTrace();
             return null;
         }
-        
+
     }
 
     public void update(Appointment updatedAppointment) {
@@ -494,14 +493,14 @@ public class CalendarTestManager implements TestManager {
                         }
                     }
                 }
-                
+
             }
         }
 
         return appointments.toArray(new Appointment[appointments.size()]);
-        
+
     }
-    
+
     private void parseUsers(JSONArray jUsers, Appointment app) {
         List<UserParticipant> users = new ArrayList<UserParticipant>();
         try {
@@ -514,7 +513,7 @@ public class CalendarTestManager implements TestManager {
                 if (jUser.has(ParticipantsFields.CONFIRM_MESSAGE)) {
                     user.setConfirmMessage(jUser.getString(ParticipantsFields.CONFIRM_MESSAGE));
                 }
-    
+
                 if (jUser.has(CalendarFields.ALARM)) {
                     user.setAlarmDate(new Date(jUser.getLong(CalendarFields.ALARM)));
                 }
@@ -578,8 +577,10 @@ public class CalendarTestManager implements TestManager {
         return appointments.toArray(new Appointment[appointments.size()]);
     }
 
-    public void delete(Appointment appointment, boolean failOnErrorOverride) {
-        createdEntities.remove(appointment); // TODO: Does this remove the right object or does equals() suck?
+    public void delete(Appointment appointment, boolean failOnErrorOverride, boolean deleteFromCreatedEntities) {
+        if (deleteFromCreatedEntities) {
+            createdEntities.remove(appointment); // TODO: Does this remove the right object or does equals() suck?
+        }
         DeleteRequest deleteRequest;
         if(appointment.containsRecurrencePosition()){
             deleteRequest = new DeleteRequest(
@@ -602,7 +603,11 @@ public class CalendarTestManager implements TestManager {
     }
 
     public void delete(Appointment appointment) {
-        delete(appointment, getFailOnError());
+        delete(appointment, getFailOnError(), false);
+    }
+
+    public void delete(Appointment appointment, boolean deleteFromCreatedEntities) {
+        delete(appointment, getFailOnError(), deleteFromCreatedEntities);
     }
 
     public void createDeleteException(int folder, int seriesId, int recurrencePos) {
@@ -629,7 +634,7 @@ public class CalendarTestManager implements TestManager {
     public List<Appointment> getCreatedEntities() {
     	return this.createdEntities;
     }
-    
+
     /*
      * Helper methods
      */
@@ -661,7 +666,7 @@ public class CalendarTestManager implements TestManager {
 
     public void clearFolder(int folderId, Date start, Date end) {
         for (Appointment app : all(folderId, start, end)) {
-            delete(app);
+            delete(app, true);
         }
     }
 

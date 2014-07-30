@@ -88,4 +88,16 @@ public class HTMLDetectorTest {
         }
 
     }
+
+    @Test
+    public final void testDetectClosingHTMLTags_Bug33577() {
+        final String htmlContent = ("<td>My Name</td></tr>" +
+            "</tbody></table>" +
+            "</body>" +
+            "</html>");
+
+        boolean containsHTMLTags = HTMLDetector.containsHTMLTags(htmlContent, true);
+
+        org.junit.Assert.assertTrue("HTMLDetector should have found html.", containsHTMLTags);
+    }
 }

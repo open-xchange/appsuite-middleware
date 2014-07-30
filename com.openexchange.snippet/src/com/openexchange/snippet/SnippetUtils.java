@@ -89,8 +89,18 @@ public final class SnippetUtils {
             return content;
         }
         try {
-            String retval = service.sanitize(content, null, false, null, null).trim();
-            retval = P_TAG_BODY.matcher(retval).replaceAll("");
+            String retval = service.getConformHTML(content, "UTF-8");
+            retval = service.sanitize(retval, null, false, null, null);
+
+            int start = retval.indexOf("<body>");
+            if (start >= 0) {
+                start += 6;
+                int end = retval.indexOf("</body>", start);
+                if (end > 0) {
+                    retval = retval.substring(start, end).trim();
+                }
+            }
+
             return retval;
         } catch (final Exception e) {
             // Ignore

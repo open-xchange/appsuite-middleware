@@ -68,6 +68,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.transport.MtaStatusInfo;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.session.Session;
@@ -377,6 +378,12 @@ public abstract class MailServletInterface implements Closeable {
      * of <code>uploadEvent</code>.
      */
     public abstract String sendMessage(ComposedMailMessage transportMail, ComposeType sendType, int accountId, UserSettingMail optUserSetting) throws OXException;
+
+    /**
+     * Sends a message described through given instance of <code>msgObj</code> and its possible file attachments contained in given instance
+     * of <code>uploadEvent</code>.
+     */
+    public abstract String sendMessage(ComposedMailMessage transportMail, ComposeType sendType, int accountId, UserSettingMail optUserSetting, MtaStatusInfo statusInfo) throws OXException;
 
     /**
      * Appends given messages to given folder.

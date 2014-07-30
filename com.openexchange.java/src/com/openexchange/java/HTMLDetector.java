@@ -161,13 +161,13 @@ public final class HTMLDetector {
             throw new NullPointerException();
         }
         final String lc = toLowerCase(sequence);
-        if ((lc.indexOf("<html>") >= 0)) {
+        if ((lc.indexOf("html>") >= 0)) {
             return true;
         }
-        if ((lc.indexOf("<head>") >= 0)) {
+        if ((lc.indexOf("head>") >= 0)) {
             return true;
         }
-        if ((lc.indexOf("<body>") >= 0)) {
+        if ((lc.indexOf("body>") >= 0)) {
             return true;
         }
         if ((lc.indexOf("<script>") >= 0)) {

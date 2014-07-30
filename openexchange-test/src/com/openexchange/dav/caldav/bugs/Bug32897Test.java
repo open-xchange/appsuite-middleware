@@ -57,17 +57,16 @@ import org.w3c.dom.Node;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
+import com.openexchange.java.Strings;
 
 /**
- * {@link Bug22689Test}
- *
- * Mountain Lion: The server responded: &quot;403&quot; to operation CalDAVWriteEntityQueueableOperation.
+ * {@link Bug32897Test}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class Bug22689Test extends CalDAVTest {
+public class Bug32897Test extends CalDAVTest {
 
-	public Bug22689Test(final String name) {
+	public Bug32897Test(final String name) {
 		super(name);
 	}
 
@@ -75,7 +74,6 @@ public class Bug22689Test extends CalDAVTest {
 	    /*
          * discover default alarms
          */
-	    final String expected = "BEGIN:VALARM\r\nEND:VALARM";
         final DavPropertyNameSet props = new DavPropertyNameSet();
         props.add(PropertyNames.DEFAULT_ALARM_VEVENT_DATE);
         props.add(PropertyNames.DEFAULT_ALARM_VEVENT_DATETIME);
@@ -90,12 +88,12 @@ public class Bug22689Test extends CalDAVTest {
                 final Node node = extractNodeValue(PropertyNames.SUPPORTED_CALENDAR_COMPONENT_SET, response);
                 if (null != node && null != node.getAttributes() && null != node.getAttributes().getNamedItem("name") &&
                             "VEVENT".equals(node.getAttributes().getNamedItem("name").getTextContent())) {
-                    final String defaultAlarmVEventDate = extractTextContent(PropertyNames.DEFAULT_ALARM_VEVENT_DATE, response);
-                    assertNotNull("no default alarm", defaultAlarmVEventDate);
-                    assertEquals("wrong default alarm", expected, defaultAlarmVEventDate.trim());
-                    final String defaultAlarmVEventDatetime = extractTextContent(PropertyNames.DEFAULT_ALARM_VEVENT_DATETIME, response);
-                    assertNotNull("no default alarm", defaultAlarmVEventDatetime);
-                    assertEquals("wrong default alarm", expected, defaultAlarmVEventDatetime.trim());
+                    Object defaultAlarmVEventDate = response.getProperties(StatusCodes.SC_OK).get(
+                        PropertyNames.DEFAULT_ALARM_VEVENT_DATE).getValue();
+                    assertTrue("wrong default alarm", null == defaultAlarmVEventDate || Strings.isEmpty(String.valueOf(defaultAlarmVEventDate)));
+                    Object defaultAlarmVEventDatetime = response.getProperties(StatusCodes.SC_OK).get(
+                        PropertyNames.DEFAULT_ALARM_VEVENT_DATETIME).getValue();
+                    assertTrue("wrong default alarm", null == defaultAlarmVEventDatetime || Strings.isEmpty(String.valueOf(defaultAlarmVEventDatetime)));
                 }
             }
         }

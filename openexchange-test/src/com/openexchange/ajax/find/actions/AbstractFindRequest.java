@@ -113,7 +113,7 @@ public abstract class AbstractFindRequest<T extends AbstractAJAXResponse> implem
 
                 // filter
                 Filter filter = facet.getFilter();
-                if (filter != null) {
+                if (filter != null && filter != Filter.NO_FILTER) {
                     final JSONObject jFilter = new JSONObject(3);
                     final List<String> filterQueries = filter.getQueries();
                     final JSONArray jQueries = new JSONArray(filterQueries.size());

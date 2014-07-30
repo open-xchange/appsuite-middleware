@@ -51,7 +51,6 @@ package com.openexchange.tools.oxfolder.deletelistener.sql;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.text.MessageFormat;
 import com.openexchange.tools.oxfolder.deletelistener.CorruptPermission;
 import com.openexchange.tools.oxfolder.deletelistener.Permission;
 
@@ -101,7 +100,7 @@ public final class GroupPermissionMerger {
             }
             if (delete[0]) {
                 MergerUtility.deletePermission(corruptPermission.permission_id, corruptPermission.fuid, corruptPermission.cid, con);
-                LOG.info(MessageFormat.format("Permission deleted for group {} on folder {} in context {}", corruptPermission.permission_id, corruptPermission.fuid, corruptPermission.cid));
+                LOG.info("Permission deleted for group {} on folder {} in context {}", corruptPermission.permission_id, corruptPermission.fuid, corruptPermission.cid);
                 MergerUtility.updatePermission(merged, admin, admin, corruptPermission.fuid, corruptPermission.cid, con);
                 LOG.info("...and merged to context admin: {}", merged);
             } else {

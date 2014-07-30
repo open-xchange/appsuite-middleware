@@ -201,7 +201,7 @@ collect_logs() {
    fi
 
    if [ 'true' != "${SKIP_COMPRESSION}" ]; then
-       bzip2 ${_logs_archive}
+       bzip2 -9 ${_logs_archive}
    fi
 }
 
@@ -222,7 +222,7 @@ collect_ox_configs() {
    if [ "$(normalize_path ${OX_CONFIG_DIR})" == "$(normalize_path ${_ox_config_copy})" ]; then
         die "${0}: Internal Tool Error, tried to modify original data: ${OX_CONFIG_DIR}"
    fi
-   cp -aL ${OX_CONFIG_DIR} ${_ox_config_copy}
+   cp -rL ${OX_CONFIG_DIR} ${_ox_config_copy}
    if [ 'true' == "${EXCLUDE_SECRETS}" ]; then
        echo "Removing secrets from Open-Xchange configurations: ${_ox_config_copy}"
        exclude_secret_ox_properties_entries ${_ox_config_copy}
@@ -572,7 +572,7 @@ test -f ${OXFUNCTIONS} || {
 source ${OXFUNCTIONS}
 
 for tool in ${EARLY_NEEDED_TOOLS}; do
-    check_on_needed ${tool}
+    check_on_needed ${tool} >/dev/null
 done
 
 JAVA_VM_TYPE=$(get_java_vm_type)

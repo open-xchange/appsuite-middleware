@@ -136,6 +136,11 @@ public final class ResponseFields {
     public static final String TRUNCATED = "truncated";
 
     /**
+     * Name of the JSON attribute containing the arguments' JSON object.
+     */
+    public static final String ARGUMENTS = "arguments";
+
+    /**
      * Name of the JSON attribute providing the continuation UUID.
      */
     public static final String CONTINUATION = "continuation";

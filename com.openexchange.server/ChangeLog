@@ -1,3 +1,32 @@
+* 2014-07-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 27711: Output standard HTML error page if requested resource appears not to be in JSON output format
+
+* 2014-07-30 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32897: Send empty string for default alarms in CalDAV
+
+* 2014-07-30 - martin.schneider@open-xchange.com
+
+ - Fix for bug 33529: Provide more information for using report client parameter and use hazelcast portable serialization
+
+* 2014-07-29 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 33652: Also accept "updateToken" requests without service identifier
+ - Fix for bug 30654: Try fallback based on the file extension in case there's no preview service for mime type
+
+* 2014-07-28 - lars.hoogestraat@open-xchange.com
+
+ - Fix for bug 33577: Improved sanitizing of snippet management
+
+* 2014-07-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 33728: Drop SUBSCRIPTION bit from capabilities bit mask if not allowed
+
+* 2014-07-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 33620: Sanitize RSS feed's title, too
+
 * 2014-07-22 - thorben.betten@open-xchange.com
 
  - Fix for bug 33441: Fixed calculation of "max-age" part in Cache-Control header from given expiry value
@@ -35,6 +64,9 @@
  - Fix for bug 33522: Wrong table was referenced in SQL statement to prepare table "user_attribute" to have UUID as primary key
  - Fix for bug 33525: Use a more unique name for added index to not conflict with MySQL bug http://bugs.mysql.com/bug.php?id=61146
                       (that is fix with >= MySQL 5.6.3)
+ - Fix for bug 33396: Try to recover from malformed Content-Type value like ``=?windows-1252?q?application/pdf; name="blatt8.pdf"´´
+ - Fix for bug 33374: Check for null prior to JSON conversion
+ - Fix for bug 31610: Introduced a rate limiter when checking for new mails; allowing not more than one run per 5 seconds
 
 * 2014-07-09 - marc.arens@open-xchange.com
 
@@ -128,6 +160,10 @@
 * 2014-06-12 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 33094: Invalidate folder and subfolders in cache folder storage on "clear" operation
+
+* 2014-06-16 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 32820: Present a more detailed error message to the user
 
 * 2014-06-11 - thorben.betten@open-xchange.com
 

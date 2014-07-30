@@ -158,6 +158,7 @@ import com.openexchange.mail.threader.Conversation;
 import com.openexchange.mail.threader.Conversations;
 import com.openexchange.mail.threader.ThreadableMapping;
 import com.openexchange.mail.transport.MailTransport;
+import com.openexchange.mail.transport.MtaStatusInfo;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.mail.transport.config.TransportProperties;
@@ -2757,6 +2758,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     @Override
     public String sendMessage(final ComposedMailMessage composedMail, final ComposeType type, final int accountId, final UserSettingMail optUserSetting) throws OXException {
+        return sendMessage(composedMail, type, accountId, optUserSetting, null);
+    }
+
+    @Override
+    public String sendMessage(final ComposedMailMessage composedMail, final ComposeType type, final int accountId, final UserSettingMail optUserSetting, final MtaStatusInfo statusInfo) throws OXException {
         /*
          * Initialize
          */
@@ -2771,13 +2777,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             final MailMessage sentMail;
             startTransport = System.currentTimeMillis();
             final MailProperties properties = MailProperties.getInstance();
-            if ((properties.getRateLimitPrimaryOnly() && MailAccount.DEFAULT_ID == accountId) || !properties.getRateLimitPrimaryOnly()) {
+            if (!properties.getRateLimitPrimaryOnly() || MailAccount.DEFAULT_ID == accountId) {
                 final int rateLimit = properties.getRateLimit();
                 rateLimitChecks(composedMail, rateLimit, properties.getMaxToCcBcc());
-                sentMail = transport.sendMailMessage(composedMail, type);
+                sentMail = transport.sendMailMessage(composedMail, type, null, statusInfo);
                 setRateLimitTime(rateLimit);
             } else {
-                sentMail = transport.sendMailMessage(composedMail, type);
+                sentMail = transport.sendMailMessage(composedMail, type, null, statusInfo);
             }
             mailSent = true;
             /*

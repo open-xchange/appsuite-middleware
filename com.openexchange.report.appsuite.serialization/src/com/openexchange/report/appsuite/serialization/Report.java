@@ -47,18 +47,20 @@
  *
  */
 
-package com.openexchange.report.appsuite;
+package com.openexchange.report.appsuite.serialization;
 
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import com.openexchange.report.appsuite.serialization.osgi.StringParserServiceRegistry;
 import com.openexchange.tools.strings.StringParser;
 
 
 /**
- * A {@link Report} contains the analysis of a context ( in a {@link ContextReport}), a User ( in a {@link UserReport} ) or the system ( in a regular {@link Report} ). It
- * also keeps track of runtime statistics (when was it started, when was it done, how many tasks must be performed, how many are still open). 
+ * A {@link Report} contains the analysis of a context ( in a {@link ContextReport}), a User ( in a {@link UserReport} ) or the system ( in
+ * a regular {@link Report} ). It also keeps track of runtime statistics (when was it started, when was it done, how many tasks must be
+ * performed, how many are still open).
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
@@ -67,8 +69,9 @@ public class Report implements Serializable {
     private static final long serialVersionUID = 6998213011280390705L;
 
     private final String uuid;
+
     private final String type;
-    
+
     private final Map<String, Map<String, Object>> namespaces = new HashMap<String, Map<String, Object>>();
 
     private final long startTime;
@@ -78,10 +81,10 @@ public class Report implements Serializable {
     private int numberOfTasks;
 
     private int pendingTasks;
-    
+
     /**
-     * 
      * Initializes a new {@link Report}.
+     *
      * @param uuid The uuid of this report run
      * @param type The type of this report run to determine which analyzers and cumulators are asked for contributions
      * @param startTime When this report was started in milliseconds.
@@ -91,7 +94,7 @@ public class Report implements Serializable {
         this.type = type;
         this.startTime = startTime;
     }
-    
+
     /**
      * Save a value in the report
      * @param ns a namespace, to keep the data of different analyzers and cumulators separate from one another
@@ -105,15 +108,15 @@ public class Report implements Serializable {
 
         return this;
     }
-    
+
     private static Class[] allowedTypes = new Class[]{Integer.class, Long.class, Float.class, Short.class, Double.class, Byte.class, Boolean.class, String.class};
-    
+
     private void checkValue(Object value) {
-        
+
         if (value == null) {
             throw new NullPointerException("value may not be null");
         }
-        
+
         if (! (value instanceof Serializable)) {
             throw new IllegalArgumentException("Illegal type! Use only serializable types! " + value.getClass() + ": " + value);
         }
@@ -138,11 +141,11 @@ public class Report implements Serializable {
                 }
             }
         }
-        
+
         throw new IllegalArgumentException("Illegal type! Use only native java types! Was " + value.getClass());
-        
+
     }
-    
+
     /**
      * Retrieve a value and try to turn it into an Object of the given class
      * @param ns The namespace, as it was used in {@link #set(String, String, Serializable)}
@@ -170,13 +173,13 @@ public class Report implements Serializable {
         if (klass.isAssignableFrom(klass)) {
             return (T) value;
         }
-        
+
         if (klass == String.class) {
             return (T) value.toString();
         }
-        return Services.getService(StringParser.class).parse(value.toString(), klass);
+        return StringParserServiceRegistry.getServiceRegistry().getService(StringParser.class).parse(value.toString(), klass);
     }
-    
+
     /**
      * Remove a value from the report
      */
@@ -187,14 +190,14 @@ public class Report implements Serializable {
             namespaces.remove(ns);
         }
     }
-    
+
     /**
      * Remove all values in the given namespace
      */
     public void clearNamespace(String ns) {
         namespaces.remove(ns);
     }
-    
+
     /**
      * Retrieve the Namespace -> ( Key -> Value ) mappings. Note that this is the internal Object, so
      * whatever you do with it, it will also change the state in the report. Though it's better to use {@link #set(String, String, Serializable)}, {@link #get(String, String, Class)}, {@link #remove(String, String)} and {@link #clearNamespace(String)} for modifying this Report
@@ -203,18 +206,18 @@ public class Report implements Serializable {
         return namespaces;
     }
 
-    
+
     public String getUUID() {
         return uuid;
     }
-    
+
     public String getType() {
         if (type == null) {
             return "default";
         }
         return type;
     }
-    
+
     public long getStartTime() {
         return startTime;
     }
@@ -222,14 +225,14 @@ public class Report implements Serializable {
     public void setStopTime(long stopTime) {
         this.stopTime = stopTime;
     }
-    
+
     public long getStopTime() {
         return stopTime;
     }
 
     /**
-     * Retrieve a namespace. Useful for e.g. iterating of all keys in a namespace. Note this is also the internal Object, so 
-     * modifying it will have side-effects in the state of the report
+     * Retrieve a namespace. Useful for e.g. iterating of all keys in a namespace. Note this is also the internal Object, so modifying it
+     * will have side-effects in the state of the report
      */
     public Map<String, Object> getNamespace(String ns) {
         Map<String, Object> candidate = namespaces.get(ns);
@@ -239,7 +242,7 @@ public class Report implements Serializable {
         }
         return candidate;
     }
-    
+
     /**
      * A report tracks the number of tasks that had to be, or still have to be, looked at for the report to complete. This is usually the number of contexts
      * that have to be analyzed
@@ -248,25 +251,25 @@ public class Report implements Serializable {
         this.numberOfTasks = numberOfTasks;
         this.pendingTasks = numberOfTasks;
     }
-    
+
     /**
      * Mark one task as done
      */
     public void markTaskAsDone() {
         this.pendingTasks--;
     }
-    
+
     /**
      * Retrieve the number of tasks that remain to be done. A report is complete when this number reaches 0.
      */
     public int getNumberOfPendingTasks() {
         return pendingTasks;
     }
-    
+
     /**
-     * A report tracks the number of tasks that had to be, or still have to be, looked at for the report to complete. This is usually the number of contexts
-     * that have to be analyzed
-     */    
+     * A report tracks the number of tasks that had to be, or still have to be, looked at for the report to complete. This is usually the
+     * number of contexts that have to be analyzed
+     */
     public int getNumberOfTasks() {
         return numberOfTasks;
     }
