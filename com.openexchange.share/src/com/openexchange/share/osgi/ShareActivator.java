@@ -49,12 +49,15 @@
 
 package com.openexchange.share.osgi;
 
+import com.openexchange.contact.ContactService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.folderstorage.FolderService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.internal.DefaultShareService;
 import com.openexchange.share.internal.ShareServiceLookup;
 import com.openexchange.share.rdb.RdbShareStorage;
+import com.openexchange.user.UserService;
 
 /**
  * {@link ShareActivator}
@@ -74,7 +77,7 @@ public class ShareActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class };
+        return new Class<?>[] { DatabaseService.class, UserService.class, ContactService.class, FolderService.class };
     }
 
     @Override
@@ -87,7 +90,7 @@ public class ShareActivator extends HousekeepingActivator {
         /*
          * register services
          */
-        registerService(ShareService.class, new DefaultShareService(new RdbShareStorage(getService(DatabaseService.class))));
+        registerService(ShareService.class, new DefaultShareService(new RdbShareStorage(getService(DatabaseService.class)), this));
     }
 
     @Override

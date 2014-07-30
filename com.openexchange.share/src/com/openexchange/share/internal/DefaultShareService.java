@@ -50,10 +50,13 @@
 package com.openexchange.share.internal;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.CreateRequest;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.rdb.ShareStorage;
 import com.openexchange.share.rdb.StorageParameters;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -66,14 +69,22 @@ public class DefaultShareService implements ShareService {
 
     private final ShareStorage storage;
 
+    private final ServiceLookup services;
+
     /**
      * Initializes a new {@link DefaultShareService}.
      *
      * @param storage The underlying share storage
      */
-    public DefaultShareService(ShareStorage storage) {
+    public DefaultShareService(ShareStorage storage, ServiceLookup services) {
         super();
         this.storage = storage;
+        this.services = services;
+    }
+
+    @Override
+    public Share create(CreateRequest shareRequest, ServerSession session) throws OXException {
+        return new ShareCreator(storage, services, shareRequest, session).perform();
     }
 
     @Override

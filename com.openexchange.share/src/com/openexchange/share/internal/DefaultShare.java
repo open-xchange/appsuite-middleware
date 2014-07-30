@@ -51,8 +51,8 @@ package com.openexchange.share.internal;
 
 import java.util.Date;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.share.Share;
 import com.openexchange.share.AuthenticationMode;
+import com.openexchange.share.Share;
 
 /**
  * {@link DefaultShare}
@@ -74,7 +74,6 @@ public class DefaultShare implements Share {
     private Date expires;
     private int guest;
     private int authentication;
-    private String displayName;
 
     /**
      * Initializes a new {@link DefaultShare}.
@@ -152,7 +151,7 @@ public class DefaultShare implements Share {
 
     @Override
     public boolean isFolder() {
-        return null != getFolder();
+        return item == null;
     }
 
     /**
@@ -269,6 +268,11 @@ public class DefaultShare implements Share {
         return expires;
     }
 
+    @Override
+    public boolean isExpired() {
+        return expires != null && new Date().after(expires);
+    }
+
     /**
      * Sets the expires
      *
@@ -314,25 +318,6 @@ public class DefaultShare implements Share {
      */
     public void setAuthentication(int authentication) {
         this.authentication = authentication;
-    }
-
-    /**
-     * Gets the displayName
-     *
-     * @return The displayName
-     */
-    @Override
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    /**
-     * Sets the displayName
-     *
-     * @param displayName The displayName to set
-     */
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
     }
 
 }

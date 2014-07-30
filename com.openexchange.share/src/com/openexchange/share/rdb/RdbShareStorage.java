@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -76,29 +77,27 @@ public class RdbShareStorage implements ShareStorage {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbShareStorage.class);
 
     private static final String SELECT_SHARE_STMT =
-        "SELECT module,folder,item,created,createdBy,lastModified,modifiedBy,expires,guest,auth,displayName " +
+        "SELECT module,folder,item,created,createdBy,lastModified,modifiedBy,expires,guest,auth " +
         "FROM share " +
         "WHERE cid=? AND token=?;"
     ;
 
     private static final String SELECT_SHARES_CREATED_BY_STMT =
-        "SELECT HEX(token),module,folder,item,created,lastModified,modifiedBy,expires,guest,auth,displayName " +
+        "SELECT token,module,folder,item,created,lastModified,modifiedBy,expires,guest,auth " +
         "FROM share " +
         "WHERE cid=? AND createdBy=?;"
     ;
 
-    private static final String INSERT_SHARES_STMT(int count) {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("INSERT INTO share (token,  uuid,cid,folder,file,version,sequence,checksum) ");
-        if (0 < count) {
-            stringBuilder.append("VALUES (UNHEX(?),?,REVERSE(?),REVERSE(?),?,?,UNHEX(?))");
-        }
-        for (int i = 1; i < count; i++) {
-            stringBuilder.append(",(UNHEX(?),?,REVERSE(?),REVERSE(?),?,?,UNHEX(?))");
-        }
-        stringBuilder.append(';');
-        return stringBuilder.toString();
-    }
+    private static final String INSERT_SHARE_STMT =
+        "INSERT INTO share (token,cid,module,folder,item,created,createdBy,lastModified,modifiedBy,expires,guest,auth) " +
+        "VALUES (?,?,?,?,?,?,?,?,?,?,?,?);"
+    ;
+
+    private static final String SELECT_EXPIRED_SHARES_STMT =
+        "SELECT token,cid,module,folder,item,created,createdBy,lastModified,modifiedBy,expires,guest,auth " +
+        "FROM share " +
+        "WHERE expires IS NOT NULL AND expires > ?";
+    ;
 
 
     private final DatabaseService databaseService;
@@ -126,7 +125,15 @@ public class RdbShareStorage implements ShareStorage {
     }
 
     @Override
-    public void storeShare(Share share, StorageParameters parameters) {
+    public void storeShare(Share share, StorageParameters parameters) throws OXException {
+        ConnectionProvider provider = getWriteProvider(share.getContextID(), parameters);
+        try {
+            storeShare(provider.get(), share, parameters);
+        } catch (SQLException e) {
+            throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            provider.close();
+        }
     }
 
     @Override
@@ -144,6 +151,38 @@ public class RdbShareStorage implements ShareStorage {
             throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
             provider.close();
+        }
+    }
+
+    private static void storeShare(Connection connection, Share share, StorageParameters parameters) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(INSERT_SHARE_STMT);
+            int i = 1;
+            stmt.setBytes(i++, UUIDs.toByteArray(UUIDs.fromUnformattedString(share.getToken())));
+            stmt.setInt(i++, share.getContextID());
+            stmt.setInt(i++, share.getModule().getFolderConstant());
+            stmt.setString(i++, share.getFolder());
+            if (share.isFolder()) {
+                stmt.setNull(i++, Types.VARCHAR);
+            } else {
+                stmt.setString(i++, share.getItem());
+            }
+            stmt.setLong(i++, share.getCreated().getTime());
+            stmt.setInt(i++, share.getCreatedBy());
+            stmt.setLong(i++, share.getLastModified().getTime());
+            stmt.setInt(i++, share.getModifiedBy());
+            Date expires = share.getExpires();
+            if (expires == null) {
+                stmt.setNull(i++, Types.BIGINT);
+            } else {
+                stmt.setLong(i++, expires.getTime());
+            }
+            stmt.setInt(i++, share.getGuest());
+            stmt.setInt(i++, share.getAuthentication().getID());
+            logExecuteUpdate(stmt);
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
         }
     }
 
@@ -171,7 +210,6 @@ public class RdbShareStorage implements ShareStorage {
                 }
                 share.setGuest(resultSet.getInt(9));
                 share.setAuthentication(resultSet.getInt(10));
-                share.setDisplayName(resultSet.getString(11));
                 return share;
             } else {
                 return null;
@@ -193,7 +231,7 @@ public class RdbShareStorage implements ShareStorage {
                 DefaultShare share = new DefaultShare();
                 share.setContextID(cid);
                 share.setCreatedBy(createdBy);
-                share.setToken(resultSet.getString(1));
+                share.setToken(UUIDs.getUnformattedString(UUIDs.toUUID(resultSet.getBytes(1))));
                 share.setModule(resultSet.getInt(2));
                 share.setFolder(resultSet.getString(3));
                 share.setItem(resultSet.getString(4));
@@ -206,7 +244,6 @@ public class RdbShareStorage implements ShareStorage {
                 }
                 share.setGuest(resultSet.getInt(9));
                 share.setAuthentication(resultSet.getInt(10));
-                share.setDisplayName(resultSet.getString(11));
                 shares.add(share);
             } else {
                 return null;

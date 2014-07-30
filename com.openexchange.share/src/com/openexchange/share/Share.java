@@ -83,10 +83,10 @@ public interface Share {
 
     Date getExpires();
 
+    boolean isExpired();
+
     int getGuest();
 
     AuthenticationMode getAuthentication();
-
-    String getDisplayName();
 
 }
