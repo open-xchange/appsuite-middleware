@@ -259,7 +259,8 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                                     candidate = delegating.getBestFitOrDelegate(fallbackMimeType, getOutput());
                                 }
                                 if (null == candidate) {
-                                    throw PreviewExceptionCodes.NO_PREVIEW_SERVICE.create(null == mimeType ? "" :  mimeType);
+                                    String name = fileHolder.getName();
+                                    throw PreviewExceptionCodes.NO_PREVIEW_SERVICE2.create(null == mimeType ? "" :  mimeType, null == name ? "" : name);
                                 }
                             }
                             previewService = candidate;
