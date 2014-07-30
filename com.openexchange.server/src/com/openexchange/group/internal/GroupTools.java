@@ -133,6 +133,6 @@ public final class GroupTools {
         GROUP_ZERO = new Group();
         GROUP_ZERO.setIdentifier(GroupStorage.GROUP_ZERO_IDENTIFIER);
         GUEST_GROUP = new Group();
-        GROUP_ZERO.setIdentifier(GroupStorage.GUEST_GROUP_IDENTIFIER);
+        GUEST_GROUP.setIdentifier(GroupStorage.GUEST_GROUP_IDENTIFIER);
     }
 }
