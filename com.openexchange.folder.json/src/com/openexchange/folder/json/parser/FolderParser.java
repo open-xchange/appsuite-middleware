@@ -49,7 +49,9 @@
 
 package com.openexchange.folder.json.parser;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -59,7 +61,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.FolderField;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
-import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.Permission;
 
@@ -87,7 +88,7 @@ public final class FolderParser {
      * @return The parsed folder
      * @throws OXException If parsing folder fails
      */
-    public Folder parseFolder(final JSONObject folderJsonObject) throws OXException {
+    public ParsedFolder parseFolder(final JSONObject folderJsonObject) throws OXException {
         try {
             final ParsedFolder folder = new ParsedFolder();
 
@@ -148,8 +149,7 @@ public final class FolderParser {
 
             if (folderJsonObject.hasAndNotNull(FolderField.PERMISSIONS_BITS.getName())) {
                 final JSONArray jsonArr = folderJsonObject.getJSONArray(FolderField.PERMISSIONS_BITS.getName());
-                final Permission[] permissions = parsePermission(jsonArr);
-                folder.setPermissions(permissions);
+                folder.setPermissions(parsePermission(jsonArr).toArray(new ParsedPermission[0]));
             }
 
             if (folderJsonObject.hasAndNotNull(FolderField.TOTAL.getName())) {
@@ -179,37 +179,43 @@ public final class FolderParser {
      * @return The parsed permissions
      * @throws OXException If parsing permissions fails
      */
-    public static Permission[] parsePermission(final JSONArray permissionsAsJSON) throws OXException {
+    public static List<ParsedPermission> parsePermission(final JSONArray permissionsAsJSON) throws OXException {
         try {
             final int numberOfPermissions = permissionsAsJSON.length();
-            final Permission[] perms = new Permission[numberOfPermissions];
+            final List<ParsedPermission> perms = new ArrayList<ParsedPermission>(numberOfPermissions);
             for (int i = 0; i < numberOfPermissions; i++) {
-                final JSONObject elem = permissionsAsJSON.getJSONObject(i);
-
-                if (!elem.hasAndNotNull(FolderField.ENTITY.getName())) {
-                    throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(FolderField.ENTITY.getName());
-                }
-                final int entity = elem.getInt(FolderField.ENTITY.getName());
-
-                final ParsedPermission oclPerm = new ParsedPermission();
-                oclPerm.setEntity(entity);
-                if (!elem.has(FolderField.BITS.getName())) {
+                final JSONObject jPerm = permissionsAsJSON.getJSONObject(i);
+                if (!jPerm.hasAndNotNull(FolderField.BITS.getName())) {
                     throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(FolderField.BITS.getName());
                 }
-                final int[] permissionBits = parsePermissionBits(elem.getInt(FolderField.BITS.getName()));
+
+                final int[] permissionBits = parsePermissionBits(jPerm.getInt(FolderField.BITS.getName()));
+                final ParsedPermission oclPerm = new ParsedPermission();
                 oclPerm.setFolderPermission(permissionBits[0]);
                 oclPerm.setReadPermission(permissionBits[1]);
                 oclPerm.setWritePermission(permissionBits[2]);
                 oclPerm.setDeletePermission(permissionBits[3]);
-
                 oclPerm.setAdmin(permissionBits[4] > 0 ? true : false);
+                if (jPerm.hasAndNotNull(FolderField.ENTITY.getName())) {
+                    if (!jPerm.has(FolderField.GROUP.getName())) {
+                        throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(FolderField.GROUP.getName());
+                    }
 
-                if (!elem.has(FolderField.GROUP.getName())) {
-                    throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(FolderField.GROUP.getName());
+                    oclPerm.setEntity(jPerm.getInt(FolderField.ENTITY.getName()));
+                    oclPerm.setGroup(jPerm.getBoolean(FolderField.GROUP.getName()));
+                } else if (jPerm.hasAndNotNull(FolderField.MAIL_ADDRESS.getName())) {
+                    final String mailAddress = jPerm.getString(FolderField.MAIL_ADDRESS.getName());
+                    final String contactId = jPerm.optString(FolderField.CONTACT_ID.getName(), null);
+                    final String contactFolderId = jPerm.optString(FolderField.CONTACT_FOLDER_ID.getName(), null);
+
+                    oclPerm.setMailAddress(mailAddress);
+                    oclPerm.setContactId(contactId);
+                    oclPerm.setContactFolderId(contactFolderId);
+                } else {
+                    throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(FolderField.ENTITY.getName());
                 }
-                oclPerm.setGroup(elem.getBoolean(FolderField.GROUP.getName()));
 
-                perms[i] = oclPerm;
+                perms.add(oclPerm);
             }
             return perms;
         } catch (final JSONException e) {

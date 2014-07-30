@@ -84,7 +84,7 @@ public final class ParsedFolder implements Folder {
 
     protected String parent;
 
-    protected Permission[] permissions;
+    protected ParsedPermission[] permissions;
 
     protected String[] subfolders;
 
@@ -144,10 +144,10 @@ public final class ParsedFolder implements Folder {
                 clone.lastModified = new Date(lastModified.getTime());
             }
             if (permissions != null) {
-                final Permission[] thisPermissions = permissions;
-                final Permission[] clonePermissions = new Permission[thisPermissions.length];
+                final ParsedPermission[] thisPermissions = permissions;
+                final ParsedPermission[] clonePermissions = new ParsedPermission[thisPermissions.length];
                 for (int i = 0; i < thisPermissions.length; i++) {
-                    clonePermissions[i] = (Permission) thisPermissions[i].clone();
+                    clonePermissions[i] = (ParsedPermission) thisPermissions[i].clone();
                 }
                 clone.permissions = clonePermissions;
             }
@@ -231,7 +231,7 @@ public final class ParsedFolder implements Folder {
     }
 
     @Override
-    public Permission[] getPermissions() {
+    public ParsedPermission[] getPermissions() {
         return permissions;
     }
 
@@ -272,7 +272,24 @@ public final class ParsedFolder implements Folder {
 
     @Override
     public void setPermissions(final Permission[] permissions) {
-        this.permissions = permissions;
+        if (permissions instanceof ParsedPermission[]) {
+            this.permissions = (ParsedPermission[]) permissions;
+        } else {
+            this.permissions = new ParsedPermission[permissions.length];
+            for (int i = 0; i < permissions.length; i++) {
+                Permission permission = permissions[i];
+                ParsedPermission parsedPermission = new ParsedPermission();
+                parsedPermission.setEntity(permission.getEntity());
+                parsedPermission.setFolderPermission(permission.getFolderPermission());
+                parsedPermission.setReadPermission(permission.getReadPermission());
+                parsedPermission.setWritePermission(permission.getWritePermission());
+                parsedPermission.setDeletePermission(permission.getDeletePermission());
+                parsedPermission.setAdmin(permission.isAdmin());
+                parsedPermission.setGroup(permission.isGroup());
+                parsedPermission.setSystem(permission.getSystem());
+                this.permissions[i] = parsedPermission;
+            }
+        }
     }
 
     @Override

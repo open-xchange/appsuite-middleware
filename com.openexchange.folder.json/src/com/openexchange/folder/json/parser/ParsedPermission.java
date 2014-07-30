@@ -70,69 +70,21 @@ public final class ParsedPermission implements Permission {
 
     private boolean admin;
 
-    private int entity;
+    private int entity = -1;
 
     private boolean group;
+
+    private String mailAddress;
+
+    private String contactId;
+
+    private String contactFolderId;
 
     /**
      * Initializes an empty {@link ParsedPermission}.
      */
     public ParsedPermission() {
         super();
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + (admin ? 1231 : 1237);
-        result = prime * result + deletePermission;
-        result = prime * result + entity;
-        result = prime * result + folderPermission;
-        result = prime * result + (group ? 1231 : 1237);
-        result = prime * result + readPermission;
-        result = prime * result + system;
-        result = prime * result + writePermission;
-        return result;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof Permission)) {
-            return false;
-        }
-        final Permission other = (Permission) obj;
-        if (admin != other.isAdmin()) {
-            return false;
-        }
-        if (deletePermission != other.getDeletePermission()) {
-            return false;
-        }
-        if (entity != other.getEntity()) {
-            return false;
-        }
-        if (folderPermission != other.getFolderPermission()) {
-            return false;
-        }
-        if (group != other.isGroup()) {
-            return false;
-        }
-        if (readPermission != other.getReadPermission()) {
-            return false;
-        }
-        if (system != other.getSystem()) {
-            return false;
-        }
-        if (writePermission != other.getWritePermission()) {
-            return false;
-        }
-        return true;
     }
 
     @Override
@@ -246,6 +198,35 @@ public final class ParsedPermission implements Permission {
         writePermission = permission;
     }
 
+    public String getMailAddress() {
+        return mailAddress;
+    }
+
+
+    public void setMailAddress(String mailAddress) {
+        this.mailAddress = mailAddress;
+    }
+
+
+    public String getContactId() {
+        return contactId;
+    }
+
+
+    public void setContactId(String contactId) {
+        this.contactId = contactId;
+    }
+
+
+    public String getContactFolderId() {
+        return contactFolderId;
+    }
+
+
+    public void setContactFolderId(String contactFolderId) {
+        this.contactFolderId = contactFolderId;
+    }
+
     @Override
     public Object clone() {
         try {
@@ -254,5 +235,84 @@ public final class ParsedPermission implements Permission {
             throw new InternalError(e.getMessage());
         }
     }
+
+  @Override
+  public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + (admin ? 1231 : 1237);
+      result = prime * result + deletePermission;
+      result = prime * result + entity;
+      result = prime * result + folderPermission;
+      result = prime * result + (group ? 1231 : 1237);
+      result = prime * result + readPermission;
+      result = prime * result + system;
+      result = prime * result + writePermission;
+      result = prime * result + (mailAddress == null ? 0 : mailAddress.hashCode());
+      result = prime * result + (contactId == null ? 0 : contactId.hashCode());
+      result = prime * result + (contactFolderId == null ? 0 : contactFolderId.hashCode());
+      return result;
+  }
+
+  @Override
+  public boolean equals(final Object obj) {
+      if (this == obj) {
+          return true;
+      }
+      if (obj == null) {
+          return false;
+      }
+
+      if (!(obj instanceof Permission)) {
+          return false;
+      }
+
+      if (obj instanceof ParsedPermission) {
+          final ParsedPermission parsed = (ParsedPermission) obj;
+          if (contactFolderId == null) {
+              if (parsed.contactFolderId != null)
+                  return false;
+          } else if (!contactFolderId.equals(parsed.contactFolderId))
+              return false;
+          if (contactId == null) {
+              if (parsed.contactId != null)
+                  return false;
+          } else if (!contactId.equals(parsed.contactId))
+              return false;
+          if (mailAddress == null) {
+              if (parsed.mailAddress != null)
+                  return false;
+          } else if (!mailAddress.equals(parsed.mailAddress))
+              return false;
+      }
+
+      final Permission other = (Permission) obj;
+      if (admin != other.isAdmin()) {
+          return false;
+      }
+      if (deletePermission != other.getDeletePermission()) {
+          return false;
+      }
+      if (entity != other.getEntity()) {
+          return false;
+      }
+      if (folderPermission != other.getFolderPermission()) {
+          return false;
+      }
+      if (group != other.isGroup()) {
+          return false;
+      }
+      if (readPermission != other.getReadPermission()) {
+          return false;
+      }
+      if (system != other.getSystem()) {
+          return false;
+      }
+      if (writePermission != other.getWritePermission()) {
+          return false;
+      }
+
+      return true;
+  }
 
 }

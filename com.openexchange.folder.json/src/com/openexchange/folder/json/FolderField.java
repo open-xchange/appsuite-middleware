@@ -165,6 +165,18 @@ public enum FolderField {
      */
     GROUP(-1, "group"),
     /**
+     * Mail address for an external permission
+     */
+    MAIL_ADDRESS(-1, "mail_address"),
+    /**
+     * Contact id for an external permission
+     */
+    CONTACT_ID(-1, "contact_id"),
+    /**
+     * Contact folder id for an external permission
+     */
+    CONTACT_FOLDER_ID(-1, "contact_folder"),
+    /**
      * The meta field
      */
     META(23, "meta");
