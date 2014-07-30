@@ -1437,12 +1437,27 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 check_default_sender_address = s == null ? s : IDNA.toIDN(s);
             }
 
-            final boolean found_primary_mail = useraliases.contains(check_primary_mail);
-            final boolean found_email1 = useraliases.contains(check_email1);
-            final boolean found_default_sender_address = useraliases.contains(check_default_sender_address);
+            boolean found_primary_mail = useraliases.contains(check_primary_mail);
+            boolean found_email1 = useraliases.contains(check_email1);
+            boolean found_default_sender_address = useraliases.contains(check_default_sender_address);
 
             if (!found_primary_mail || !found_email1 || !found_default_sender_address) {
-                throw new InvalidDataException("primaryMail, Email1 and defaultSenderAddress must be present in set of aliases.");
+                // if any of those is missing, update the alias list like OXToolMySQLStorage.checkCreateUserData does
+                newuser.setAliases(useraliases);
+                newuser.addAlias(check_primary_mail);
+                newuser.addAlias(check_default_sender_address);
+
+                // retest to see if the added values are now present inside the aliasList
+                {
+                    HashSet<String> newUseraliases = newuser.getAliases();
+                    found_primary_mail = newUseraliases.contains(check_primary_mail);
+                    found_email1 = newUseraliases.contains(check_email1);
+                    found_default_sender_address = newUseraliases.contains(check_default_sender_address);
+                    if (!found_primary_mail || !found_email1 || !found_default_sender_address) {
+                        throw new InvalidDataException("primaryMail, Email1 and defaultSenderAddress must be present in set of aliases.");
+                    }
+                }
+
             }
             // added "usrdata.getPrimaryEmail() != null" for this check, else we cannot update user data without mail data
             // which is not very good when just changing the displayname for example
