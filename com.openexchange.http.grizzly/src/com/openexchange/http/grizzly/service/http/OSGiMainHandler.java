@@ -96,11 +96,14 @@ import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import org.glassfish.grizzly.http.server.HttpHandler;
@@ -151,6 +154,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
     public OSGiMainHandler(Bundle bundle) {
         this.bundle = bundle;
         this.mapper = new OSGiCleanMapper();
+        ServletFilterRegistration.getInstance().setOSGiMainHandler(this);
     }
 
     /**
@@ -288,6 +292,29 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         }
     }
 
+    protected void updateTrackedServletFilters(ServletFilterRegistration filterRegistration) {
+        List<Filter> filtersToRemove;
+        {
+            List<FilterProxy> allFilters = filterRegistration.getFilters();
+            filtersToRemove = new LinkedList<Filter>();
+            for (FilterProxy filterProxy : allFilters) {
+                filtersToRemove.add(filterProxy.getFilter());
+            }
+        }
+
+        for (Entry<String, HttpHandler> handlerEntry : mapper.getHttpHandlers()) {
+            // 1. Remove all possible tracked filters
+            // 2. Re-add them ordered
+            ((OSGiServletHandler) handlerEntry.getValue()).updateFilters(filtersToRemove, filterRegistration.getFilters(handlerEntry.getKey()));
+        }
+    }
+
+    protected void removeTrackedServletFilter(FilterProxy proxy) {
+        for (Entry<String, HttpHandler> handlerEntry : mapper.getHttpHandlers()) {
+            ((OSGiServletHandler) handlerEntry.getValue()).removeFilter(proxy.getFilter());
+        }
+    }
+
     /**
      * Add our default set of Filters to the ServletHandler.
      *
@@ -299,15 +326,18 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         servletHandler.addFilter(new WrappingFilter(), WrappingFilter.class.getName(), null);
 
         // watch it
-            try {
-                servletHandler.addFilter(
-                    new RequestReportingFilter(),
-                    RequestReportingFilter.class.getName(),
-                    null);
-            } catch (OXException e) {
-                throw new ServletException(e);
-            }
+        try {
+            servletHandler.addFilter(new RequestReportingFilter(), RequestReportingFilter.class.getName(), null);
+        } catch (OXException e) {
+            throw new ServletException(e);
+        }
 
+        // Add tracked ones
+        ServletFilterRegistration filterRegistration = ServletFilterRegistration.getInstance();
+        List<Filter> filters = filterRegistration.getFilters(servletHandler.getServletPath());
+        for (Filter filter : filters) {
+            servletHandler.addFilter(filter, filter.getClass().getName(), null);
+        }
     }
 
     /**

@@ -50,6 +50,7 @@
 package com.openexchange.http.grizzly.osgi;
 
 import java.util.concurrent.ExecutorService;
+import javax.servlet.Filter;
 import org.glassfish.grizzly.comet.CometAddOn;
 import org.glassfish.grizzly.http.ajp.AjpAddOn;
 import org.glassfish.grizzly.http.server.NetworkListener;
@@ -61,6 +62,7 @@ import org.glassfish.grizzly.websockets.WebSocketAddOn;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.service.http.HttpService;
+import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
@@ -68,7 +70,9 @@ import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.http.grizzly.GrizzlyExceptionCode;
 import com.openexchange.http.grizzly.service.comet.CometContextService;
 import com.openexchange.http.grizzly.service.comet.impl.CometContextServiceImpl;
+import com.openexchange.http.grizzly.service.http.FilterProxy;
 import com.openexchange.http.grizzly.service.http.HttpServiceFactory;
+import com.openexchange.http.grizzly.service.http.ServletFilterRegistration;
 import com.openexchange.http.grizzly.service.websocket.WebApplicationService;
 import com.openexchange.http.grizzly.service.websocket.impl.WebApplicationServiceImpl;
 import com.openexchange.http.grizzly.threadpool.GrizzlOXExecutorService;
@@ -84,6 +88,8 @@ import com.openexchange.timer.TimerService;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class GrizzlyActivator extends HousekeepingActivator {
+
+    private volatile ServiceTracker<Filter, FilterProxy> filterTracker;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -111,6 +117,13 @@ public class GrizzlyActivator extends HousekeepingActivator {
                     }
                 }
             });
+
+            ServletFilterRegistration.initInstance(getService(ConfigurationService.class));
+            {
+                ServiceTracker<Filter, FilterProxy> tracker = new ServiceTracker<Filter, FilterProxy>(context, Filter.class, new ServletFilterTracker(context));
+                this.filterTracker = tracker;
+                tracker.open();
+            }
 
             final GrizzlyConfig grizzlyConfig = GrizzlyConfig.getInstance();
             grizzlyConfig.start();
@@ -199,7 +212,14 @@ public class GrizzlyActivator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(GrizzlyActivator.class);
 
+        ServiceTracker<Filter, FilterProxy> tracker = this.filterTracker;
+        if (null != tracker) {
+            tracker.close();
+            this.filterTracker = null;
+        }
+
         Services.setServiceLookup(null);
+        ServletFilterRegistration.dropInstance();
 
         log.info("Unregistering services.");
         super.stopBundle();
