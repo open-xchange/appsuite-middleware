@@ -57,8 +57,10 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.httpclient.HttpStatus;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.requesthandler.Dispatchers;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.database.DatabaseService;
@@ -155,37 +157,7 @@ public abstract class SessionServlet extends AJAXServlet {
             resp.setContentType("text/plain; charset=UTF-8");
             resp.sendError(429, "Too Many Requests - Your request is being rate limited.");
         } catch (final OXException e) {
-            if (SessionExceptionCodes.getErrorPrefix().equals(e.getPrefix())) {
-                LOG.debug("", e);
-                handleSessiondException(e, req, resp);
-                /*
-                 * Return JSON response
-                 */
-                final Response response = new Response();
-                response.setException(e);
-                resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-                final PrintWriter writer = resp.getWriter();
-                try {
-                    ResponseWriter.write(response, writer, localeFrom(session));
-                    writer.flush();
-                } catch (final JSONException e1) {
-                    log(RESPONSE_ERROR, e1);
-                    sendError(resp);
-                }
-            } else {
-                e.log(LOG);
-                final Response response = new Response(SessionUtility.getSessionObject(req));
-                response.setException(e);
-                resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-                final PrintWriter writer = resp.getWriter();
-                try {
-                    ResponseWriter.write(response, writer, localeFrom(session));
-                    writer.flush();
-                } catch (final JSONException e1) {
-                    log(RESPONSE_ERROR, e1);
-                    sendError(resp);
-                }
-            }
+            handleOXException(e, req, resp, session);
         } finally {
             if (null != sessionId && null != threadCounter) {
                 threadCounter.decrement(sessionId);
@@ -226,6 +198,124 @@ public abstract class SessionServlet extends AJAXServlet {
                 LogProperties.removeSessionProperties();
             }
         }
+    }
+
+    /**
+     * Handles passed {@link OXException} instance.
+     *
+     * @param e The {@code OXException} instance
+     * @param req The associated HTTP request
+     * @param resp The associated HTTP response
+     * @param optSession The optional session; likely <code>null</code>
+     * @throws IOException If an I/O error occurs
+     */
+    protected void handleOXException(OXException e, HttpServletRequest req, HttpServletResponse resp, ServerSession optSession) throws IOException {
+        if (SessionExceptionCodes.getErrorPrefix().equals(e.getPrefix())) {
+            LOG.debug("", e);
+            handleSessiondException(e, req, resp);
+
+            // Check expected output format
+            if (Dispatchers.isJsonOutputExpectedFor(req)) {
+                // JSON response
+                final Response response = new Response();
+                response.setException(e);
+                resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+                final PrintWriter writer = resp.getWriter();
+                try {
+                    ResponseWriter.write(response, writer, localeFrom(optSession));
+                    writer.flush();
+                } catch (final JSONException e1) {
+                    log(RESPONSE_ERROR, e1);
+                    sendError(resp);
+                }
+            } else {
+                // No JSON response
+                String desc = e.getMessage();
+                resp.setContentType("text/html; charset=UTF-8");
+                resp.setStatus(HttpServletResponse.SC_FORBIDDEN);;
+                resp.getWriter().write(getErrorPage(HttpServletResponse.SC_FORBIDDEN, null, desc));
+                resp.getWriter().flush();
+            }
+        } else {
+            e.log(LOG);
+
+            // Check expected output format
+            if (Dispatchers.isJsonOutputExpectedFor(req)) {
+                // JSON response
+                final Response response = new Response();
+                response.setException(e);
+                resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+                final PrintWriter writer = resp.getWriter();
+                try {
+                    ResponseWriter.write(response, writer, localeFrom(optSession));
+                    writer.flush();
+                } catch (final JSONException e1) {
+                    log(RESPONSE_ERROR, e1);
+                    sendError(resp);
+                }
+            } else {
+                // No JSON response
+                String desc = "An error occurred inside the server which prevented it from fulfilling the request.";
+                resp.setContentType("text/html; charset=UTF-8");
+                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);;
+                resp.getWriter().write(getErrorPage(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, null, desc));
+                resp.getWriter().flush();
+            }
+        }
+    }
+
+    /**
+     * Generates a simple error page for given status code.
+     *
+     * @param sc The status code; e.g. <code>404</code>
+     * @return A simple error page
+     */
+    protected String getErrorPage(int sc) {
+        return getErrorPage(sc, null, null);
+    }
+
+    /**
+     * Generates a simple error page for given arguments.
+     *
+     * @param sc The status code; e.g. <code>404</code>
+     * @param msg The optional status message; e.g. <code>"Not Found"</code>
+     * @param desc The optional status description; e.g. <code>"The requested URL was not found on this server."</code>
+     * @return A simple error page
+     */
+    protected String getErrorPage(int sc, String msg, String desc) {
+        String msg0 = null == msg ? HttpStatus.getStatusText(sc) : msg;
+
+        StringBuilder sb = new StringBuilder(512);
+        String lineSep = System.getProperty("line.separator");
+        sb.append("<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">").append(lineSep);
+        sb.append("<html><head>").append(lineSep);
+        {
+            sb.append("<title>").append(sc);
+            if (null != msg0) {
+                sb.append(' ').append(msg0);
+            }
+            sb.append("</title>").append(lineSep);
+        }
+        sb.append("<html><head>").append(lineSep);
+
+
+        sb.append("</head><body>").append(lineSep);
+
+        sb.append("<h1>");
+        if (null == msg0) {
+            sb.append(sc);
+        } else {
+            sb.append(msg0);
+        }
+        sb.append("</h1>").append(lineSep);
+
+        String desc0 = null == desc ? msg0 : desc;
+        if (null != desc0) {
+            sb.append("<p>").append(desc0).append("</p>").append(lineSep);
+        }
+
+        sb.append("</body></html>").append(lineSep);
+        return sb.toString();
     }
 
     // --------------------------------------------------------------------------------------------------------------------- //

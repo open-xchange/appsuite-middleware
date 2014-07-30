@@ -1,3 +1,7 @@
+* 2014-07-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 27711: Output standard HTML error page if requested resource appears not to be in JSON output format
+
 * 2014-07-30 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 32897: Send empty string for default alarms in CalDAV
