@@ -54,20 +54,20 @@ import java.util.Date;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.report.LoginCounterService;
-import com.openexchange.report.appsuite.Report;
 import com.openexchange.report.appsuite.ReportSystemHandler;
 import com.openexchange.report.appsuite.Services;
+import com.openexchange.report.appsuite.serialization.Report;
 
 
 /**
- * The {@link ClientLoginCount} reports on the login count per client in the system. 
+ * The {@link ClientLoginCount} reports on the login count per client in the system.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ClientLoginCount implements ReportSystemHandler {
-    
+
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ClientLoginCount.class);
-    
+
     @Override
     public boolean appliesTo(String reportType) {
         return "default".equals(reportType);
@@ -75,28 +75,28 @@ public class ClientLoginCount implements ReportSystemHandler {
 
     @Override
     public void runSystemReport(Report report) {
-       Calendar cal = Calendar.getInstance();
-       // We have to add the counts for two periods: one month and one year
-       try {
-           // For a year
-           Date endDate = cal.getTime();
-           cal.add(Calendar.YEAR, -1);
-           Date startDate = cal.getTime();
-           runReport(report, "clientlogincountyear", startDate, endDate);
-           
-           // For a month
-           cal = Calendar.getInstance();
-           
-           endDate = cal.getTime();
-           cal.add(Calendar.DATE, -30);
-           startDate = cal.getTime();
-           runReport(report, "clientlogincount", startDate, endDate);
-       } catch (OXException x) {
-           LOG.error("", x);
-       }
-        
+        Calendar cal = Calendar.getInstance();
+        // We have to add the counts for two periods: one month and one year
+        try {
+            // For a year
+            Date endDate = cal.getTime();
+            cal.add(Calendar.YEAR, -1);
+            Date startDate = cal.getTime();
+            runReport(report, "clientlogincountyear", startDate, endDate);
+
+            // For a month
+            cal = Calendar.getInstance();
+
+            endDate = cal.getTime();
+            cal.add(Calendar.DATE, -30);
+            startDate = cal.getTime();
+            runReport(report, "clientlogincount", startDate, endDate);
+        } catch (OXException x) {
+            LOG.error("", x);
+        }
+
     }
-    
+
     private void runReport(Report report, String ns, Date startDate, Date endDate) throws OXException {
         // Use the LoginCounterService to retrieve the sum of logins for the clients (usm, olox2, mobileapp, carddav, caldav) in the given timeframe
         LoginCounterService loginCounterService = Services.getService(LoginCounterService.class);
@@ -104,11 +104,11 @@ public class ClientLoginCount implements ReportSystemHandler {
         Map<String, Integer> usmEasResult = loginCounterService.getNumberOfLogins(startDate, endDate, true, "USM-EAS");
         Integer usmEas = usmEasResult.get(LoginCounterService.SUM);
         report.set(ns, "usm-eas", usmEas.toString());
-        
+
         Map<String, Integer> olox2Result = loginCounterService.getNumberOfLogins(startDate, endDate, true, "OpenXchange.HTTPClient.OXAddIn");
         Integer olox2 = olox2Result.get(LoginCounterService.SUM);
         report.set(ns, "olox2", olox2.toString());
-        
+
         Map<String, Integer> mobileAppResult = loginCounterService.getNumberOfLogins(startDate, endDate, true, "com.openexchange.mobileapp");
         Integer mobileApp = mobileAppResult.get(LoginCounterService.SUM);
         report.set(ns, "mobileapp", mobileApp.toString());
@@ -129,7 +129,7 @@ public class ClientLoginCount implements ReportSystemHandler {
         Integer appsuite = appsuiteResults.get(LoginCounterService.SUM);
         report.set(ns, "appsuite", appsuite.toString());
 
-    
+
     }
 
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,50 +47,33 @@
  *
  */
 
-package com.openexchange.report.appsuite.defaultHandlers;
+package com.openexchange.report.appsuite.serialization;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.report.appsuite.ContextReport;
-import com.openexchange.report.appsuite.ContextReportCumulator;
-import com.openexchange.report.appsuite.serialization.Report;
-
+import com.hazelcast.nio.serialization.Portable;
+import com.openexchange.hazelcast.serialization.CustomPortable;
+import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 
 /**
- * The {@link Total} cumulator sums up the number of contexts and users. It is based on the results of the {@link CapabilityHandler}
+ * {@link PortableReportFactory} registered in {@link ReportActivator} to provide a {@link PortableReport} for distribution in a cluster.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.6.1
  */
-public class Total implements ContextReportCumulator{
+public class PortableReportFactory implements CustomPortableFactory {
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public boolean appliesTo(String reportType) {
-        return "default".equals(reportType);
+    public int getClassId() {
+        return CustomPortable.PORTABLEREPORT_CLASS_ID;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void merge(ContextReport contextReport, Report report) {
-        // Count up one for each context
-        long contexts = report.get("total", "contexts", 0l, Long.class);
-        report.set("total", "contexts", contexts + 1);
-
-        // Sum up the totals of the capabilities combinations from the CapabilityHandler
-        long users = report.get("total", "users", 0l, Long.class);
-
-        Map<String, Object> macdetail = contextReport.getNamespace("macdetail");
-
-        for(Map.Entry<String, Object> entry: macdetail.entrySet()) {
-            HashMap<String, Long> counts = (HashMap) entry.getValue();
-
-            if (counts != null && counts.containsKey("total")) {
-                users += counts.get("total");
-            }
-        }
-
-        report.set("total", "users", users);
-
-        report.set("total", "report-format", "appsuite-short");
+    public Portable create() {
+        return new PortableReport();
     }
-
-
 }

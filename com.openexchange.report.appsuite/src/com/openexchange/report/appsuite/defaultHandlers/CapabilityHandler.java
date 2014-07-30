@@ -61,13 +61,13 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.report.appsuite.ContextReport;
 import com.openexchange.report.appsuite.ContextReportCumulator;
-import com.openexchange.report.appsuite.Report;
 import com.openexchange.report.appsuite.ReportContextHandler;
 import com.openexchange.report.appsuite.ReportFinishingTouches;
 import com.openexchange.report.appsuite.ReportUserHandler;
 import com.openexchange.report.appsuite.Services;
 import com.openexchange.report.appsuite.UserReport;
 import com.openexchange.report.appsuite.UserReportCumulator;
+import com.openexchange.report.appsuite.serialization.Report;
 import com.openexchange.tools.file.QuotaFileStorage;
 
 

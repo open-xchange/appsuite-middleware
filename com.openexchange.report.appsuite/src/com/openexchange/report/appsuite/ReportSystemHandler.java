@@ -49,6 +49,7 @@
 
 package com.openexchange.report.appsuite;
 
+import com.openexchange.report.appsuite.serialization.Report;
 
 /**
  * A {@link ReportSystemHandler} collects data about the entire installation. It is run once per report.
