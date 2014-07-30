@@ -296,10 +296,6 @@ public final class UserServiceImpl implements UserService {
          */
         if (passwordMech == null) {
             throw UserExceptionCode.MISSING_PASSWORD_MECH.create();
-        } else {
-            if (!passwordMech.equalsIgnoreCase("{CRYPT}") && !passwordMech.equalsIgnoreCase("{SHA}")) {
-                throw UserExceptionCode.MISSING_PASSWORD_MECH.create(passwordMech);
-            }
         }
 
         // TODO: Maybe we have to check the contact id here.
