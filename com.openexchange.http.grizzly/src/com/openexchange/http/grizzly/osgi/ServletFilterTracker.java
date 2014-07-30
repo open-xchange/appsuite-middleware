@@ -53,6 +53,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import javax.servlet.Filter;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
@@ -101,7 +102,7 @@ public class ServletFilterTracker implements ServiceTrackerCustomizer<Filter, Fi
             Filter filter = context.getService(reference);
             String[] paths = getPathsFrom(reference);
 
-            FilterProxy proxy = new FilterProxy(filter, paths);
+            FilterProxy proxy = new FilterProxy(filter, paths, getRanking(reference));
             ServletFilterRegistration.getInstance().put(proxy);
 
             return proxy;
@@ -158,6 +159,42 @@ public class ServletFilterTracker implements ServiceTrackerCustomizer<Filter, Fi
             LOG.warn("Invalid filter paths : Neither of type String nor String[] : {} - Ignoring ServiceReference [{} | Bundle({})]", topicObj.getClass().getName(), reference, reference.getBundle());
             throw new InvalidFilterPathsException();
         }
+    }
+
+    /**
+     * Gets the service ranking by look-up of <code>"service.ranking"</code> property.
+     * <p>
+     * See {@link Constants#SERVICE_RANKING}.
+     *
+     * @param reference The service reference providing properties Dictionary object of the service
+     * @return The ranking or <code>0</code> (zero) if absent
+     */
+    private <S> int getRanking(final ServiceReference<S> reference) {
+        return getRanking(reference, 0);
+    }
+
+    /**
+     * Gets the service ranking by look-up of <code>"service.ranking"</code> property.
+     * <p>
+     * See {@link Constants#SERVICE_RANKING}.
+     *
+     * @param reference The service reference providing properties Dictionary object of the service
+     * @param defaultRanking The default ranking if {@link Constants#SERVICE_RANKING} property is absent
+     * @return The ranking or <code>0</code> (zero) if absent
+     */
+    private <S> int getRanking(final ServiceReference<S> reference, final int defaultRanking) {
+        int ranking = defaultRanking;
+        {
+            final Object oRanking = reference.getProperty(Constants.SERVICE_RANKING);
+            if (null != oRanking) {
+                try {
+                    ranking = Integer.parseInt(oRanking.toString().trim());
+                } catch (final NumberFormatException e) {
+                    ranking = defaultRanking;
+                }
+            }
+        }
+        return ranking;
     }
 
 }

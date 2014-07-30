@@ -118,7 +118,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
                 }
             });
 
-            ServletFilterRegistration.initInstance(getService(ConfigurationService.class));
+            ServletFilterRegistration.initInstance();
             {
                 ServiceTracker<Filter, FilterProxy> tracker = new ServiceTracker<Filter, FilterProxy>(context, Filter.class, new ServletFilterTracker(context));
                 this.filterTracker = tracker;

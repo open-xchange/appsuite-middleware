@@ -49,9 +49,6 @@
 
 package com.openexchange.http.grizzly.service.http;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -61,9 +58,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.Filter;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.java.Streams;
-import com.openexchange.java.Strings;
 
 /**
  * {@link ServletFilterRegistration}
@@ -81,28 +75,8 @@ public class ServletFilterRegistration {
      * @param configService The configuration service instance
      * @throws IOException If initialization fails
      */
-    public static void initInstance(ConfigurationService configService) throws IOException {
-        List<String> filterNames = null;
-        {
-            File file = configService.getFileByName("Service.properties");
-            if (null != file) {
-                BufferedReader reader = new BufferedReader(new FileReader(file), 65536);
-                try {
-                    for (String line; (line = reader.readLine()) != null;) {
-                        line = line.trim();
-                        if (!Strings.isEmpty(line) && !line.startsWith("#") && !line.startsWith("!")) {
-                            if (null == filterNames) {
-                                filterNames = new LinkedList<String>();
-                            }
-                            filterNames.add(line);
-                        }
-                    }
-                } finally {
-                    Streams.close(reader);
-                }
-            }
-        }
-        instance = new ServletFilterRegistration(filterNames);
+    public static void initInstance() throws IOException {
+        instance = new ServletFilterRegistration();
     }
 
     /**
@@ -126,44 +100,28 @@ public class ServletFilterRegistration {
     private volatile List<FilterProxy> matchingAllPaths;
     private volatile Map<String, List<FilterProxy>> matchingPath;
     private volatile Map<String, List<FilterProxy>> matchingPrefixPath;
-    private final Comparator<FilterProxy> comparator;
     private volatile OSGiMainHandler handler;
+    private final Comparator<FilterProxy> comparator;
 
     /**
      * Initializes a new {@link ServletFilterRegistration}.
      */
-    private ServletFilterRegistration(List<String> filterNames) {
+    private ServletFilterRegistration() {
         super();
         // we start with empty collections
         this.matchingAllPaths = new LinkedList<FilterProxy>();
         this.matchingPath = new HashMap<String, List<FilterProxy>>();
         this.matchingPrefixPath = new HashMap<String, List<FilterProxy>>();
 
-        if (null == filterNames) {
-            this.comparator = null;
-        } else {
-            final Map<String, Integer> m = new HashMap<String, Integer>(filterNames.size());
-            {
-                int count = 0;
-                for (String name : filterNames) {
-                    m.put(name, Integer.valueOf(++count));
-                }
+        comparator = new Comparator<FilterProxy>() {
+
+            @Override
+            public int compare(FilterProxy o1, FilterProxy o2) {
+                int rank1 = o1.getRanking();
+                int rank2 = o2.getRanking();
+                return (rank1 < rank2 ? -1 : (rank1 == rank2 ? 0 : 1));
             }
-            this.comparator = new Comparator<FilterProxy>() {
-
-                @Override
-                public int compare(FilterProxy proxy1, FilterProxy proxy2) {
-                    Integer pos1 = m.get(proxy1.getClass().getName());
-                    Integer pos2 = m.get(proxy2.getClass().getName());
-
-                    if (null == pos1) {
-                        return null == pos2 ? proxy1.getClass().getName().compareTo(proxy2.getClass().getName()) : 1;
-                    }
-
-                    return null == pos2 ? -1 : pos1.compareTo(pos2);
-                }
-            };
-        }
+        };
     }
 
     /**
@@ -216,7 +174,7 @@ public class ServletFilterRegistration {
             filters.addAll(proxies);
         }
 
-        // Now order them according to 'Service.properties' file
+        // Now order them according to service ranking file
         if (null != comparator) {
             Collections.sort(filters, comparator);
         }

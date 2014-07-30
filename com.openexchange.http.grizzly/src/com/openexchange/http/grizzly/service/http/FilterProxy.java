@@ -65,16 +65,29 @@ public class FilterProxy {
     /** Optional filter. */
     private final Filter filter;
 
+    /** The service ranking */
+    private final int ranking;
+
     /**
      * Initializes a new {@link FilterProxy}.
      *
      * @param filter The filter
      * @param paths The filter paths
      */
-    public FilterProxy(Filter filter, String[] paths) {
+    public FilterProxy(Filter filter, String[] paths, int ranking) {
         super();
         this.filter = filter;
         this.paths = paths;
+        this.ranking = ranking;
+    }
+
+    /**
+     * Gets the ranking
+     *
+     * @return The ranking
+     */
+    public int getRanking() {
+        return ranking;
     }
 
     /**
