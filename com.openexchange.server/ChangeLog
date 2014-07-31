@@ -1,6 +1,7 @@
 * 2014-07-31 - thorben.betten@open-xchange.com
 
  - Fix for bug 33839: Escape site information when generating the publication site from selected template
+ - Fix for bug 33850: Keep "Message-Id" header if present
 
 * 2014-07-30 - thorben.betten@open-xchange.com
 
