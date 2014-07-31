@@ -146,7 +146,7 @@ public class DelegationPreviewService implements Delegating, SimpleRegistryListe
         final PreviewService previewService = getBestFitOrDelegate(toLowerCase(mimeType), output);
         if (previewService == null) {
             String name = documentData.getDataProperties().get(DataProperties.PROPERTY_NAME);
-            throw PreviewExceptionCodes.NO_PREVIEW_SERVICE2.create(null == mimeType ? "" :  mimeType, null == name ? "" : name);
+            throw PreviewExceptionCodes.NO_PREVIEW_SERVICE2.create(null == mimeType ? "" :  mimeType, null == name ? "<unknown>" : name);
         }
         return previewService.getPreviewFor(documentData, output, session, pages);
     }
