@@ -134,9 +134,9 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
             if ((null == contentType) || (APPLICATION_OCTET_STREAM.equals(toLowerCase(contentType)))) {
                 sContentType = APPLICATION_OCTET_STREAM;
             } else {
-                final String contentTypeByFileName = MimeType2ExtMap.getContentType(attachment.getFilename());
+                final String contentTypeByFileName = MimeType2ExtMap.getContentType(attachment.getFilename(), null);
                 String preferredContentType = attachment.getFileMIMEType();
-                if (!APPLICATION_OCTET_STREAM.equals(contentTypeByFileName)) {
+                if (null != contentTypeByFileName) {
                     if (APPLICATION_OCTET_STREAM.equals(preferredContentType)) {
                         preferredContentType = contentTypeByFileName;
                     } else {
