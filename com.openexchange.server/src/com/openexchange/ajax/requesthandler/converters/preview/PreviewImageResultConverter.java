@@ -267,7 +267,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                         PreviewService candidate = delegating.getBestFitOrDelegate(mimeType, getOutput());
                         if (null == candidate) {
                             String name = fileHolder.getName();
-                            throw PreviewExceptionCodes.NO_PREVIEW_SERVICE2.create(null == mimeType ? "" :  mimeType, null == name ? "" : name);
+                            throw PreviewExceptionCodes.NO_PREVIEW_SERVICE2.create(null == mimeType ? "" :  mimeType, null == name ? "<unknown>" : name);
                         }
 
                         // Check for possible RemoteInternalPreviewService instance
