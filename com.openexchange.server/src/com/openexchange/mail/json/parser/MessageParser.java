@@ -514,14 +514,14 @@ public final class MessageParser {
          * Parse headers
          */
         if (jsonObj.hasAndNotNull(MailJSONField.HEADERS.getKey())) {
-            final JSONObject obj = jsonObj.getJSONObject(MailJSONField.HEADERS.getKey());
-            final int size = obj.length();
+            final JSONObject jHeaders = jsonObj.getJSONObject(MailJSONField.HEADERS.getKey());
+            final int size = jHeaders.length();
             final HeaderCollection headers = new HeaderCollection(size);
-            final Iterator<String> iter = obj.keys();
+            final Iterator<String> iter = jHeaders.keys();
             for (int i = 0; i < size; i++) {
                 final String key = iter.next();
                 if (isCustomOrReplyHeader(key) && !key.equalsIgnoreCase("x-original-headers")) {
-                    headers.setHeader(key, obj.getString(key));
+                    headers.setHeader(key, jHeaders.getString(key));
                 }
             }
             mail.addHeaders(headers);
