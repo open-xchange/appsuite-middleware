@@ -3511,8 +3511,16 @@ public class CalendarMySQL implements CalendarSqlImp {
                                                 pfid = access.getDefaultFolder(new_userparticipant.getIdentifier(), FolderObject.CALENDAR).getObjectID();
                                             }
                                         } else {
-                                            // A move into another private folder: Set to default folder ID for non-folder-owner
-                                            pfid = access.getDefaultFolder(new_userparticipant.getIdentifier(), FolderObject.CALENDAR).getObjectID();
+                                            /*
+                                             *  A move into another private folder:
+                                             *    - Set to target folder ID for the folder owner
+                                             *    - Set to default folder ID for non-folder-owners 
+                                             */
+                                            if(new_userparticipant.getIdentifier() == access.getFolderOwner(cdao.getParentFolderID())) {
+                                                pfid = cdao.getParentFolderID();
+                                            } else {
+                                                pfid = access.getDefaultFolder(new_userparticipant.getIdentifier(), FolderObject.CALENDAR).getObjectID();
+                                            }
                                         }
                                     } else {
                                         // always set the folder to the private folder of the user participant in private calendar folders.
