@@ -530,6 +530,28 @@ public final class ThresholdFileHolder implements IFileHolder {
     }
 
     /**
+     * Sets the content information retrieved from passed file holder.
+     * <ul>
+     * <li>MIME type</li>
+     * <li>Disposition</li>
+     * <li>Name</li>
+     * <li>Delivery</li>
+     * </ul>
+     *
+     * @param fileHolder The file holder to get the content information from
+     * @return This file holder instance with content information applied
+     */
+    public ThresholdFileHolder setContentInfo(IFileHolder fileHolder) {
+        if (null != fileHolder) {
+            setContentType(fileHolder.getContentType());
+            setDelivery(fileHolder.getDelivery());
+            setDisposition(fileHolder.getDisposition());
+            setName(fileHolder.getName());
+        }
+        return this;
+    }
+
+    /**
      * Sets the disposition.
      *
      * @param disposition The disposition
