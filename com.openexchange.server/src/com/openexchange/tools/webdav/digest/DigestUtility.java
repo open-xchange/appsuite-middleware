@@ -123,7 +123,7 @@ public final class DigestUtility {
         return generateServerDigest(req.getHeader("Authorization"), req.getMethod(), password);
     }
 
-    private String generateServerDigest(final String auth, final String method, final String password) {
+    public String generateServerDigest(final String auth, final String method, final String password) {
         if ((auth == null) || (!auth.startsWith("Digest ")) || (method == null) || (password == null)) {
             return null;
         }

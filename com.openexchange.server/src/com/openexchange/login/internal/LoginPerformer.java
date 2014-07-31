@@ -60,6 +60,7 @@ import javax.security.auth.login.LoginException;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.Cookie;
+import com.openexchange.authentication.GuestAuthenticated;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.ResponseEnhancement;
 import com.openexchange.authentication.ResultCode;
@@ -181,19 +182,40 @@ public final class LoginPerformer {
                     return retval;
                 }
             }
-            final Context ctx = findContext(authed.getContextInfo());
-            retval.setContext(ctx);
-            final String username = authed.getUserInfo();
-            final User user = findUser(ctx, username);
-            retval.setUser(user);
-            // Checks if something is deactivated.
-            final AuthorizationService authService = Authorization.getService();
-            if (null == authService) {
-                final OXException e = ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AuthorizationService.class.getName());
-                LOG.error("unable to find AuthorizationService", e);
-                throw e;
+
+            /*
+             * get user & context
+             */
+            final Context ctx;
+            final User user;
+            if (GuestAuthenticated.class.isInstance(authed)) {
+                /*
+                 * use already resolved user / context
+                 */
+                GuestAuthenticated guestAuthenticated = (GuestAuthenticated) authed;
+                ctx = getContext(guestAuthenticated.getContextID());
+                user = getUser(ctx, guestAuthenticated.getUserID());
+            } else {
+                /*
+                 * perform user / context lookup
+                 */
+                ctx = findContext(authed.getContextInfo());
+                user = findUser(ctx, authed.getUserInfo());
+                // Checks if something is deactivated.
+                final AuthorizationService authService = Authorization.getService();
+                if (null == authService) {
+                    final OXException e = ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AuthorizationService.class.getName());
+                    LOG.error("unable to find AuthorizationService", e);
+                    throw e;
+                }
+                /*
+                 * authorize
+                 */
+                authService.authorizeUser(ctx, user);
             }
-            authService.authorizeUser(ctx, user);
+            retval.setContext(ctx);
+            retval.setUser(user);
+
             // Check if indicated client is allowed to perform a login
             checkClient(request, user, ctx);
             // Create session
@@ -205,7 +227,7 @@ public final class LoginPerformer {
                     throw ServiceExceptionCode.absentService(SessiondService.class);
                 }
             }
-            final Session session = sessiondService.addSession(new AddSessionParameterImpl(username, request, user, ctx));
+            final Session session = sessiondService.addSession(new AddSessionParameterImpl(authed.getUserInfo(), request, user, ctx));
             if (null == session) {
                 // Session could not be created
                 throw LoginExceptionCodes.UNKNOWN.create("Session could not be created.");
@@ -258,11 +280,7 @@ public final class LoginPerformer {
         if (ContextStorage.NOT_FOUND == contextId) {
             throw ContextExceptionCodes.NO_MAPPING.create(contextInfo);
         }
-        final Context context = contextStor.getContext(contextId);
-        if (null == context) {
-            throw ContextExceptionCodes.NOT_FOUND.create(I(contextId));
-        }
-        return context;
+        return getContext(contextId);
     }
 
     private static User findUser(final Context ctx, final String userInfo) throws OXException {
@@ -275,6 +293,33 @@ public final class LoginPerformer {
             userId = us.getUserId(userInfo, ctx);
         }
         return us.getUser(userId, ctx);
+    }
+
+    /**
+     * Gets a context by it's identifier from the context storage.
+     *
+     * @param contextID The context ID
+     * @return The context
+     * @throws OXException
+     */
+    private static Context getContext(int contextID) throws OXException {
+        final Context context = ContextStorage.getInstance().getContext(contextID);
+        if (null == context) {
+            throw ContextExceptionCodes.NOT_FOUND.create(I(contextID));
+        }
+        return context;
+    }
+
+    /**
+     * Gets a user by it's identifier from the user storage.
+     *
+     * @param ctx The context
+     * @param userID The user ID
+     * @return The user
+     * @throws OXException
+     */
+    private static User getUser(Context ctx, int userID) throws OXException {
+        return UserStorage.getInstance().getUser(userID, ctx);
     }
 
     /**
