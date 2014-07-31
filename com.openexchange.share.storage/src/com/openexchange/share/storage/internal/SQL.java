@@ -105,6 +105,18 @@ public class SQL {
         "WHERE cid=? AND createdBy=?;"
     ;
 
+    public static final String SELECT_SHARES_BY_FOLDER_STMT =
+        "SELECT token,module,item,created,createdBy,lastModified,modifiedBy,expires,guest,auth " +
+        "FROM share " +
+        "WHERE cid=? AND folder=?;"
+    ;
+
+    public static final String SELECT_SHARES_BY_ITEM_STMT =
+        "SELECT token,module,created,createdBy,lastModified,modifiedBy,expires,guest,auth " +
+        "FROM share " +
+        "WHERE cid=? AND folder=? AND item=?;"
+    ;
+
     public static final String INSERT_SHARE_STMT =
         "INSERT INTO share (token,cid,module,folder,item,created,createdBy,lastModified,modifiedBy,expires,guest,auth) " +
         "VALUES (?,?,?,?,?,?,?,?,?,?,?,?);"

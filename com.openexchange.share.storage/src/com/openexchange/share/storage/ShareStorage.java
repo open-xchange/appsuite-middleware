@@ -99,7 +99,6 @@ public interface ShareStorage {
      */
     void deleteShare(int contextID, String token, StorageParameters parameters) throws OXException;
 
-
     /**
      * Loads all shares that were created by a specific user ID.
      *
@@ -109,5 +108,26 @@ public interface ShareStorage {
      * @return The shares
      */
     List<Share> loadSharesCreatedBy(int contextID, int createdBy, StorageParameters parameters) throws OXException;
+
+    /**
+     * Loads all shares that were created for a specific folder.
+     *
+     * @param contextID The context ID
+     * @param folder The ID of the folder to load the shares for
+     * @param parameters The storage parameters
+     * @return The shares
+     */
+    List<Share> loadSharesForFolder(int contextID, String folder, StorageParameters parameters) throws OXException;
+
+    /**
+     * Loads all shares that were created for a specific item.
+     *
+     * @param contextID The context ID
+     * @param folder The ID of the folder where the item is located in
+     * @param item The ID of the item to load the shares for
+     * @param parameters The storage parameters
+     * @return The shares
+     */
+    List<Share> loadSharesForItem(int contextID, String folder, String item, StorageParameters parameters) throws OXException;
 
 }
