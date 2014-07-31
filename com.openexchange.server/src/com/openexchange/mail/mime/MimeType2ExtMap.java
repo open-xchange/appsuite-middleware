@@ -282,7 +282,7 @@ public final class MimeType2ExtMap {
      *
      * @param fileName The file name; e.g. <code>"file.html"</code>
      * @param fallBack The fall-back value to return in case file extension is unknown
-     * @return The MIME type associated with given <code>fallBack</code> if none found
+     * @return The MIME type associated with given file name or <code>fallBack</code> if none found
      */
     public static String getContentType(final String fileName, final String fallBack) {
         init();
