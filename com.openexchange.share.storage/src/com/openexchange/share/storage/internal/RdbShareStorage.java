@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.share.rdb;
+package com.openexchange.share.storage.internal;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -60,9 +60,11 @@ import java.util.List;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.share.DefaultShare;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.internal.DefaultShare;
+import com.openexchange.share.storage.ShareStorage;
+import com.openexchange.share.storage.StorageParameters;
 import com.openexchange.tools.sql.DBUtils;
 
 

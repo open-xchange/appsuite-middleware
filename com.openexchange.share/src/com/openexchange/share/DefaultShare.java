@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.share.internal;
+package com.openexchange.share;
 
 import java.util.Date;
 import com.openexchange.groupware.modules.Module;

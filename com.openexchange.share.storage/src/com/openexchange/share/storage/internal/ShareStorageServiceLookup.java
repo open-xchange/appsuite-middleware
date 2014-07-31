@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,37 +47,65 @@
  *
  */
 
-package com.openexchange.share.internal;
+package com.openexchange.share.storage.internal;
 
-import java.util.UUID;
-import com.openexchange.java.util.UUIDs;
-
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link ShareTool}
+ * {@link ShareStorageServiceLookup}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.1
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ShareTool {
+public final class ShareStorageServiceLookup {
 
-    private static final long LOW_BITS = 0x00000000FFFFFFFFL;
-
-    private static final long HIGH_BITS = 0xFFFFFFFF00000000L;
-
-    public static int extractContextId(String token) {
-        UUID uuid = UUIDs.fromUnformattedString(token);
-        long mostSignificantBits = uuid.getMostSignificantBits();
-        return (int) ((mostSignificantBits &= HIGH_BITS) >>> 32);
+    /**
+     * Initializes a new {@link ShareStorageServiceLookup}.
+     */
+    private ShareStorageServiceLookup() {
+        super();
     }
 
-    public static String generateToken(int contextId) {
-        UUID randomUUID = UUID.randomUUID();
-        long mostSignificantBits = randomUUID.getMostSignificantBits();
-        mostSignificantBits &= LOW_BITS;
-        mostSignificantBits |= (((long)contextId) << 32);
-        String token = UUIDs.getUnformattedString(new UUID(mostSignificantBits, randomUUID.getLeastSignificantBits()));
-        return token;
+    private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Gets the service look-up
+     *
+     * @return The service look-up or <code>null</code>
+     */
+    public static ServiceLookup get() {
+        return ref.get();
+    }
+
+    /**
+     * Sets the service look-up
+     *
+     * @param serviceLookup The service look-up or <code>null</code>
+     */
+    public static void set(ServiceLookup serviceLookup) {
+        ref.set(serviceLookup);
+    }
+
+    public static <S extends Object> S getService(Class<? extends S> c) {
+        ServiceLookup serviceLookup = ref.get();
+        S service = null == serviceLookup ? null : serviceLookup.getService(c);
+        return service;
+    }
+
+    public static <S extends Object> S getService(Class<? extends S> c, boolean throwOnAbsence) throws OXException {
+        S service = getService(c);
+        if (null == service && throwOnAbsence) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(c.getName());
+        }
+        return service;
+    }
+
+    public static <S extends Object> S getOptionalService(Class<? extends S> c) {
+        ServiceLookup serviceLookup = ref.get();
+        S service = null == serviceLookup ? null : serviceLookup.getOptionalService(c);
+        return service;
     }
 
 }

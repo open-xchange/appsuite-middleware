@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.share.internal;
+package com.openexchange.share.impl;
 
 import java.sql.Connection;
 import java.util.Date;
@@ -71,10 +71,11 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.CreateRequest;
+import com.openexchange.share.DefaultShare;
 import com.openexchange.share.Entity;
 import com.openexchange.share.Share;
-import com.openexchange.share.rdb.ShareStorage;
-import com.openexchange.share.rdb.StorageParameters;
+import com.openexchange.share.storage.ShareStorage;
+import com.openexchange.share.storage.StorageParameters;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
@@ -95,8 +96,8 @@ public class ShareCreator extends SharePerformer<Share> {
      * @param entity
      * @param session
      */
-    public ShareCreator(ShareStorage storage, ServiceLookup services, CreateRequest createRequest, ServerSession session) {
-        super(storage, services, session);
+    public ShareCreator(ServiceLookup services, CreateRequest createRequest, ServerSession session) {
+        super(services, session);
         this.createRequest = createRequest;
     }
 

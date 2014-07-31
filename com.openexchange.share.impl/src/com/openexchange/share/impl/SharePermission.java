@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.share.internal;
+package com.openexchange.share.impl;
 
 import com.openexchange.folderstorage.Permission;
 

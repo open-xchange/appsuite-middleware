@@ -47,68 +47,56 @@
  *
  */
 
-package com.openexchange.share.rdb;
+package com.openexchange.share.impl.osgi;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
+import com.openexchange.contact.ContactService;
+import com.openexchange.folderstorage.FolderService;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.share.ShareService;
+import com.openexchange.share.impl.DefaultShareService;
+import com.openexchange.share.impl.ShareServiceLookup;
+import com.openexchange.share.storage.ShareStorage;
+import com.openexchange.user.UserService;
 
 /**
- * {@link StorageParameters}
+ * {@link ShareActivator}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.1
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class StorageParameters {
+public class ShareActivator extends HousekeepingActivator {
 
-    public static final StorageParameters NO_PARAMETERS = new StorageParameters(Collections.<String, Object>emptyMap());
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ShareActivator.class);
 
-    private final Map<String, Object> parameters;
-
-    public StorageParameters() {
-        this(new HashMap<String, Object>());
-    }
-
-    private StorageParameters(Map<String, Object> parameters) {
+    /**
+     * Initializes a new {@link ShareActivator}.
+     */
+    public ShareActivator() {
         super();
-        this.parameters = parameters;
     }
 
-    public StorageParameters put(String key, Object value) {
-        parameters.put(key, value);
-        return this;
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { UserService.class, ContactService.class, FolderService.class, ShareStorage.class };
     }
 
-//    public Object get(String key) {
-//        return parameters.get(key);
-//    }
-//
-//    public <T> T get(String key, Class<T> type) {
-//        Object object = parameters.get(key);
-//        if (object == null) {
-//            return null;
-//        }
-//
-//        if (type.isAssignableFrom(object.getClass())) {
-//            return type.cast(object);
-//        }
-//
-//        return null;
-//    }
+    @Override
+    protected void startBundle() throws Exception {
+        LOG.info("starting bundle: \"com.openexchange.share\"");
+        /*
+         * set references
+         */
+        ShareServiceLookup.set(this);
+        /*
+         * register services
+         */
+        registerService(ShareService.class, new DefaultShareService(this));
+    }
 
-    @SuppressWarnings("unchecked")
-    public <T> T get(String key) {
-        Object object = parameters.get(key);
-        if (object == null) {
-            return null;
-        }
-
-        try {
-            return (T) object;
-        } catch (ClassCastException e) {
-            return null;
-        }
+    @Override
+    protected void stopBundle() throws Exception {
+        LOG.info("stopping bundle: \"com.openexchange.share\"");
+        ShareServiceLookup.set(null);
+        super.stopBundle();
     }
 
 }

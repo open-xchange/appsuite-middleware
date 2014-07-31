@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.share.internal;
+package com.openexchange.share.impl;
 
 import java.util.Date;
 import java.util.HashMap;

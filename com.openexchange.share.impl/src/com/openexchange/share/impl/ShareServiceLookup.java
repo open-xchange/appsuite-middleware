@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,56 +47,65 @@
  *
  */
 
-package com.openexchange.share.rdb;
+package com.openexchange.share.impl;
 
-import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
-import com.openexchange.share.Share;
-
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link ShareStorage}
+ * {@link ShareServiceLookup}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.6.1
  */
-public interface ShareStorage {
+public final class ShareServiceLookup {
 
     /**
-     * Loads a share identified by it's unique token.
-     *
-     * @param contextID The context ID
-     * @param token The token
-     * @param parameters The storage parameters
-     * @return The share, or <code>null</code> if not found
-     * @throws OXException
+     * Initializes a new {@link ShareServiceLookup}.
      */
-    Share loadShare(int contextID, String token, StorageParameters parameters) throws OXException;
+    private ShareServiceLookup() {
+        super();
+    }
+
+    private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
 
     /**
-     * Saves a new share in the storage.
+     * Gets the service look-up
      *
-     * @param share The share to store
-     * @param parameters The storage parameters
+     * @return The service look-up or <code>null</code>
      */
-    void storeShare(Share share, StorageParameters parameters) throws OXException;
+    public static ServiceLookup get() {
+        return ref.get();
+    }
 
     /**
-     * Updates an already existing share in the storage.
+     * Sets the service look-up
      *
-     * @param share The share to update
-     * @param parameters The storage parameters
+     * @param serviceLookup The service look-up or <code>null</code>
      */
-    void updateShare(Share share, StorageParameters parameters) throws OXException;
+    public static void set(ServiceLookup serviceLookup) {
+        ref.set(serviceLookup);
+    }
 
-    /**
-     * Loads all shares that were created by a specific user ID.
-     *
-     * @param contextID The context ID
-     * @param createdBy The ID of the user to load the shares from
-     * @param parameters The storage parameters
-     * @return The shares
-     */
-    List<Share> loadSharesCreatedBy(int contextID, int createdBy, StorageParameters parameters) throws OXException;
+    public static <S extends Object> S getService(Class<? extends S> c) {
+        ServiceLookup serviceLookup = ref.get();
+        S service = null == serviceLookup ? null : serviceLookup.getService(c);
+        return service;
+    }
+
+    public static <S extends Object> S getService(Class<? extends S> c, boolean throwOnAbsence) throws OXException {
+        S service = getService(c);
+        if (null == service && throwOnAbsence) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(c.getName());
+        }
+        return service;
+    }
+
+    public static <S extends Object> S getOptionalService(Class<? extends S> c) {
+        ServiceLookup serviceLookup = ref.get();
+        S service = null == serviceLookup ? null : serviceLookup.getOptionalService(c);
+        return service;
+    }
 
 }

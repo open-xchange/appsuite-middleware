@@ -47,50 +47,51 @@
  *
  */
 
-package com.openexchange.share.internal;
+package com.openexchange.share.storage.osgi;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.CreateRequest;
-import com.openexchange.share.Share;
-import com.openexchange.share.ShareService;
-import com.openexchange.share.rdb.ShareStorage;
-import com.openexchange.share.rdb.StorageParameters;
-import com.openexchange.tools.session.ServerSession;
-
+import com.openexchange.database.DatabaseService;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.share.storage.ShareStorage;
+import com.openexchange.share.storage.internal.RdbShareStorage;
+import com.openexchange.share.storage.internal.ShareStorageServiceLookup;
 
 /**
- * {@link DefaultShareService}
+ * {@link ShareStorageActivator}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.6.1
  */
-public class DefaultShareService implements ShareService {
-
-    private final ShareStorage storage;
-
-    private final ServiceLookup services;
+public class ShareStorageActivator extends HousekeepingActivator {
 
     /**
-     * Initializes a new {@link DefaultShareService}.
-     *
-     * @param storage The underlying share storage
+     * Initializes a new {@link ShareStorageActivator}.
      */
-    public DefaultShareService(ShareStorage storage, ServiceLookup services) {
+    public ShareStorageActivator() {
         super();
-        this.storage = storage;
-        this.services = services;
     }
 
     @Override
-    public Share create(CreateRequest shareRequest, ServerSession session) throws OXException {
-        return new ShareCreator(storage, services, shareRequest, session).perform();
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { DatabaseService.class };
     }
 
     @Override
-    public Share resolveToken(String token) throws OXException {
-        int contextID = ShareTool.extractContextId(token);
-        return storage.loadShare(contextID, token, StorageParameters.NO_PARAMETERS);
+    protected void startBundle() throws Exception {
+        org.slf4j.LoggerFactory.getLogger(ShareStorageActivator.class).info("starting bundle: \"com.openexchange.share.storage\"");
+        /*
+         * set references
+         */
+        ShareStorageServiceLookup.set(this);
+        /*
+         * register services
+         */
+        registerService(ShareStorage.class, new RdbShareStorage(getService(DatabaseService.class)));
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        org.slf4j.LoggerFactory.getLogger(ShareStorageActivator.class).info("stopping bundle: \"com.openexchange.share.storage\"");
+        ShareStorageServiceLookup.set(null);
+        super.stopBundle();
     }
 
 }

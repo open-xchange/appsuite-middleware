@@ -47,70 +47,68 @@
  *
  */
 
-package com.openexchange.share.internal;
+package com.openexchange.share.storage;
 
-import com.openexchange.contact.ContactService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.rdb.ShareStorage;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.user.UserService;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
- * {@link SharePerformer}
+ * {@link StorageParameters}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public abstract class SharePerformer<R> {
+public class StorageParameters {
 
-    protected final ServerSession session;
+    public static final StorageParameters NO_PARAMETERS = new StorageParameters(Collections.<String, Object>emptyMap());
 
-    protected final ShareStorage storage;
+    private final Map<String, Object> parameters;
 
-    protected final ServiceLookup services;
+    public StorageParameters() {
+        this(new HashMap<String, Object>());
+    }
 
-
-    protected SharePerformer(ShareStorage storage, ServiceLookup services, ServerSession session) {
+    private StorageParameters(Map<String, Object> parameters) {
         super();
-        this.storage = storage;
-        this.services = services;
-        this.session = session;
+        this.parameters = parameters;
     }
 
-    protected abstract R perform() throws OXException;
-
-    protected ShareStorage getShareStorage() throws OXException {
-        return storage;
+    public StorageParameters put(String key, Object value) {
+        parameters.put(key, value);
+        return this;
     }
 
-    protected UserService getUserService() throws OXException {
-        return getService(UserService.class, true);
-    }
+//    public Object get(String key) {
+//        return parameters.get(key);
+//    }
+//
+//    public <T> T get(String key, Class<T> type) {
+//        Object object = parameters.get(key);
+//        if (object == null) {
+//            return null;
+//        }
+//
+//        if (type.isAssignableFrom(object.getClass())) {
+//            return type.cast(object);
+//        }
+//
+//        return null;
+//    }
 
-    protected ContactService getContactService() throws OXException {
-        return getService(ContactService.class, true);
-    }
-
-    protected FolderService getFolderService() throws OXException {
-        return getService(FolderService.class, true);
-    }
-
-    protected DatabaseService getDatabaseService() throws OXException {
-        return getService(DatabaseService.class, true);
-    }
-
-    protected <S> S getService(Class<S> serviceClass, boolean failIfAbsent) throws OXException {
-        S service = services.getService(serviceClass);
-        if (service == null && failIfAbsent) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(serviceClass.getName());
+    @SuppressWarnings("unchecked")
+    public <T> T get(String key) {
+        Object object = parameters.get(key);
+        if (object == null) {
+            return null;
         }
 
-        return service;
+        try {
+            return (T) object;
+        } catch (ClassCastException e) {
+            return null;
+        }
     }
 
 }

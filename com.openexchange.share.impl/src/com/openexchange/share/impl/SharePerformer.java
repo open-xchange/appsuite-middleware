@@ -47,57 +47,66 @@
  *
  */
 
-package com.openexchange.share.osgi;
+package com.openexchange.share.impl;
 
 import com.openexchange.contact.ContactService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.share.ShareService;
-import com.openexchange.share.internal.DefaultShareService;
-import com.openexchange.share.internal.ShareServiceLookup;
-import com.openexchange.share.rdb.RdbShareStorage;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.storage.ShareStorage;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
+
 /**
- * {@link ShareActivator}
+ * {@link SharePerformer}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.6.1
  */
-public class ShareActivator extends HousekeepingActivator {
+public abstract class SharePerformer<R> {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ShareActivator.class);
+    protected final ServerSession session;
+    protected final ServiceLookup services;
 
-    /**
-     * Initializes a new {@link ShareActivator}.
-     */
-    public ShareActivator() {
+
+    protected SharePerformer(ServiceLookup services, ServerSession session) {
         super();
+        this.services = services;
+        this.session = session;
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, UserService.class, ContactService.class, FolderService.class };
+    protected abstract R perform() throws OXException;
+
+    protected ShareStorage getShareStorage() throws OXException {
+        return getService(ShareStorage.class, true);
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("starting bundle: \"com.openexchange.share\"");
-        /*
-         * set references
-         */
-        ShareServiceLookup.set(this);
-        /*
-         * register services
-         */
-        registerService(ShareService.class, new DefaultShareService(new RdbShareStorage(getService(DatabaseService.class)), this));
+    protected UserService getUserService() throws OXException {
+        return getService(UserService.class, true);
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: \"com.openexchange.share\"");
-        ShareServiceLookup.set(null);
-        super.stopBundle();
+    protected ContactService getContactService() throws OXException {
+        return getService(ContactService.class, true);
+    }
+
+    protected FolderService getFolderService() throws OXException {
+        return getService(FolderService.class, true);
+    }
+
+    protected DatabaseService getDatabaseService() throws OXException {
+        return getService(DatabaseService.class, true);
+    }
+
+    protected <S> S getService(Class<S> serviceClass, boolean failIfAbsent) throws OXException {
+        S service = services.getService(serviceClass);
+        if (service == null && failIfAbsent) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(serviceClass.getName());
+        }
+
+        return service;
     }
 
 }
