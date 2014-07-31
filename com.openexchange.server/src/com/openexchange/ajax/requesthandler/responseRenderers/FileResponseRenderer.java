@@ -669,16 +669,7 @@ public class FileResponseRenderer implements ResponseRenderer {
     }
 
     private String getContentTypeByFileName(final String fileName) {
-        if (null == fileName) {
-            // Not known
-            return null;
-        }
-        final String contentTypeByFileName = MimeType2ExtMap.getContentType(fileName);
-        if (SAVE_AS_TYPE.equals(contentTypeByFileName)) {
-            // Not known
-            return null;
-        }
-        return contentTypeByFileName;
+        return null == fileName ? null : MimeType2ExtMap.getContentType(fileName, null);
     }
 
     private void sendErrorSafe(int sc, String msg, final HttpServletResponse resp) {
