@@ -87,6 +87,10 @@ public enum PreviewExceptionCodes implements DisplayableOXExceptionCode {
      * No preview service for MIME type %1$s
      */
     NO_PREVIEW_SERVICE("No preview service for MIME type %1$s", PreviewExceptionMessages.NO_PREVIEW_SERVICE, CATEGORY_USER_INPUT, 6),
+    /**
+     * No preview service for MIME type %1$s (file name %2$s)
+     */
+    NO_PREVIEW_SERVICE2("No preview service for MIME type %1$s (file name %2$s)", PreviewExceptionMessages.NO_PREVIEW_SERVICE, NO_PREVIEW_SERVICE.getCategory(), NO_PREVIEW_SERVICE.getNumber()),
 
     ;
 
@@ -95,14 +99,14 @@ public enum PreviewExceptionCodes implements DisplayableOXExceptionCode {
     private final int number;
 
     private final String message;
-    
+
     private final String displayMessage;
 
 
     private PreviewExceptionCodes(final String message, final Category category, final int detailNumber) {
         this(message, null, category, detailNumber);
     }
-    
+
     private PreviewExceptionCodes(final String message, final String displayMessage, final Category category, final int detailNumber) {
         this.message = message;
         number = detailNumber;
