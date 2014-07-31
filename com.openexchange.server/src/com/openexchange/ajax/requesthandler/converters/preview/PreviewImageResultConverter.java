@@ -55,9 +55,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
+import com.openexchange.ajax.container.ModifyableFileHolder;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -245,25 +248,26 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
 
                     // Obtain preview either using running or separate thread
                     PreviewService previewService = ServerServiceRegistry.getInstance().getService(PreviewService.class);
+
+                    // Name-wise MIME type detection
+                    String mimeType = MimeType2ExtMap.getContentType(fileHolder.getName());
+                    if (MimeTypes.MIME_APPL_OCTET.equals(mimeType)) {
+                        // Unknown. Then detect MIME type by content.
+                        if (!fileHolder.repetitive()) {
+                            fileHolder = new ThresholdFileHolder(fileHolder);
+                        }
+                        mimeType = AJAXUtility.detectMimeType(fileHolder.getStream());
+                    }
+                    fileHolder = new ModifyableFileHolder(fileHolder).setContentType(mimeType);
+
                     boolean useCurrentThread = true;
                     if (previewService instanceof Delegating) {
                         // Determine candidate
-                        {
-                            String mimeType = getContentType(fileHolder, previewService instanceof ContentTypeChecker ? (ContentTypeChecker) previewService : null);
-                            Delegating delegating = (Delegating) previewService;
-                            PreviewService candidate = delegating.getBestFitOrDelegate(mimeType, getOutput());
-                            if (null == candidate) {
-                                // Try mime type by filename as fall-back
-                                String fallbackMimeType = MimeType2ExtMap.getContentType(fileHolder.getName());
-                                if (false == MimeTypes.MIME_APPL_OCTET.equals(fallbackMimeType) && false == fallbackMimeType.equals(mimeType)) {
-                                    candidate = delegating.getBestFitOrDelegate(fallbackMimeType, getOutput());
-                                }
-                                if (null == candidate) {
-                                    String name = fileHolder.getName();
-                                    throw PreviewExceptionCodes.NO_PREVIEW_SERVICE2.create(null == mimeType ? "" :  mimeType, null == name ? "" : name);
-                                }
-                            }
-                            previewService = candidate;
+                        Delegating delegating = (Delegating) previewService;
+                        PreviewService candidate = delegating.getBestFitOrDelegate(mimeType, getOutput());
+                        if (null == candidate) {
+                            String name = fileHolder.getName();
+                            throw PreviewExceptionCodes.NO_PREVIEW_SERVICE2.create(null == mimeType ? "" :  mimeType, null == name ? "" : name);
                         }
 
                         // Check for possible RemoteInternalPreviewService instance
