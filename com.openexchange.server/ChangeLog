@@ -1,3 +1,7 @@
+* 2014-07-31 - thorben.betten@open-xchange.com
+
+ - Fix for bug 33839: Escape site information when generating the publication site from selected template
+
 * 2014-07-30 - thorben.betten@open-xchange.com
 
  - Fix for bug 27711: Output standard HTML error page if requested resource appears not to be in JSON output format
