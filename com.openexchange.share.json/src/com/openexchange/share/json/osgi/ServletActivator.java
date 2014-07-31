@@ -49,9 +49,6 @@
 
 package com.openexchange.share.json.osgi;
 
-import javax.servlet.ServletException;
-import org.osgi.service.http.HttpService;
-import org.osgi.service.http.NamespaceException;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
@@ -60,8 +57,6 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.json.ShareActionFactory;
-import com.openexchange.share.json.internal.ShareServiceLookup;
-import com.openexchange.share.json.internal.ShareServlet;
 import com.openexchange.user.UserService;
 
 /**
@@ -73,8 +68,6 @@ public class ServletActivator extends AJAXModuleActivator {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServletActivator.class);
 
-    private volatile boolean servletRegistered;
-
     /**
      * Initializes a new {@link ServletActivator}.
      */
@@ -85,17 +78,7 @@ public class ServletActivator extends AJAXModuleActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ShareService.class, UserService.class, ContextService.class, DispatcherPrefixService.class,
-            HttpService.class, SessiondService.class, CryptoService.class, ConfigurationService.class };
-    }
-
-    @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        registerServlet();
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        unregisterServlet();
+            SessiondService.class, CryptoService.class, ConfigurationService.class };
     }
 
     @Override
@@ -104,39 +87,7 @@ public class ServletActivator extends AJAXModuleActivator {
         /*
          * set references
          */
-        ShareServiceLookup.set(this);
-
-        registerServlet();
         registerModule(new ShareActionFactory(this), "share/management");
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        unregisterServlet();
-        cleanUp();
-    }
-
-    private void registerServlet() {
-        /*
-         * register servlet
-         */
-        servletRegistered = true;
-        try {
-            getService(HttpService.class).registerServlet(getService(DispatcherPrefixService.class).getPrefix() + "share", new ShareServlet(), null, null);
-        } catch (final ServletException e) {
-            LOG.error("", e);
-        } catch (final NamespaceException e) {
-            LOG.error("", e);
-        }
-    }
-
-    private void unregisterServlet() {
-        getService(HttpService.class).unregister(getService(DispatcherPrefixService.class).getPrefix() + "/share");
-        if (false == servletRegistered) {
-            return;
-        }
-        servletRegistered = false;
-        ShareServiceLookup.set(null);
     }
 
 }
