@@ -76,7 +76,6 @@ import com.openexchange.java.InterruptibleInputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
-import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.preview.ContentTypeChecker;
 import com.openexchange.preview.Delegating;
 import com.openexchange.preview.PreviewDocument;
@@ -250,12 +249,10 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                     PreviewService previewService = ServerServiceRegistry.getInstance().getService(PreviewService.class);
 
                     // Name-wise MIME type detection
-                    String mimeType = MimeType2ExtMap.getContentType(fileHolder.getName());
-                    if (MimeTypes.MIME_APPL_OCTET.equals(mimeType)) {
+                    String mimeType = MimeType2ExtMap.getContentType(fileHolder.getName(), null);
+                    if (null == mimeType) {
                         // Unknown. Then detect MIME type by content.
-                        if (!fileHolder.repetitive()) {
-                            fileHolder = new ThresholdFileHolder(fileHolder);
-                        }
+                        fileHolder = new ThresholdFileHolder().write(stream).setContentInfo(fileHolder);
                         mimeType = AJAXUtility.detectMimeType(fileHolder.getStream());
                     }
                     fileHolder = new ModifyableFileHolder(fileHolder).setContentType(mimeType);
