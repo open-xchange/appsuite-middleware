@@ -89,15 +89,15 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class OXMFPublicationService extends AbstractPublicationService {
 
-    private static final String SECRET = "secret";
+    private static final String SECRET = OXMFConstants.SECRET;
 
-    private static final String PROTECTED = "protected";
+    private static final String PROTECTED = OXMFConstants.PROTECTED;
 
-    private static final String SITE = "siteName";
+    private static final String SITE_NAME = OXMFConstants.SITE_NAME;
 
-    private static final String URL = "url";
+    private static final String URL = OXMFConstants.URL;
 
-    private static final String TEMPLATE = "template";
+    private static final String TEMPLATE = OXMFConstants.TEMPLATE;
 
     private final Random random = new Random();
 
@@ -127,8 +127,8 @@ public class OXMFPublicationService extends AbstractPublicationService {
         final DynamicFormDescription form = new DynamicFormDescription();
         final DynamicFormDescription withoutInfostore = new DynamicFormDescription();
 
-        form.add(FormElement.input(SITE, FORM_LABEL_SITE, true, null));
-        withoutInfostore.add(FormElement.input(SITE, FORM_LABEL_SITE, true, null));
+        form.add(FormElement.input(SITE_NAME, FORM_LABEL_SITE, true, null));
+        withoutInfostore.add(FormElement.input(SITE_NAME, FORM_LABEL_SITE, true, null));
 
         templateChooser = FormElement.custom("com.openexchange.templating.templateChooser",TEMPLATE, FORM_LABEL_TEMPLATE);
         form.add(templateChooser);
@@ -209,14 +209,14 @@ public class OXMFPublicationService extends AbstractPublicationService {
 
         publication.getConfiguration().remove(SECRET);
 
-        publication.setDisplayName( (String) publication.getConfiguration().get(SITE));
+        publication.setDisplayName( (String) publication.getConfiguration().get(SITE_NAME));
     }
 
     private void updateUrl(final Publication publication) {
         final Map<String, Object> configuration = publication.getConfiguration();
 
         final StringBuilder urlBuilder = new StringBuilder(rootURL);
-        urlBuilder.append('/').append(publication.getContext().getContextId()).append('/').append(saneSiteName((String) configuration.get(SITE)));
+        urlBuilder.append('/').append(publication.getContext().getContextId()).append('/').append(saneSiteName((String) configuration.get(SITE_NAME)));
 
         if (configuration.containsKey(SECRET)) {
             urlBuilder.append("?secret=").append(configuration.get(SECRET));
@@ -247,15 +247,15 @@ public class OXMFPublicationService extends AbstractPublicationService {
 
     @Override
     public void modifyIncoming(final Publication publication) throws OXException {
-        String siteName = (String) publication.getConfiguration().get(SITE);
+        String siteName = (String) publication.getConfiguration().get(SITE_NAME);
 
         if (siteName != null) {
             siteName = normalizeSiteName(siteName);
             final Publication oldPub = getPublication(publication.getContext(), siteName);
             if (oldPub != null && oldPub.getId() != publication.getId()) {
-                throw PublicationErrorMessage.UNIQUENESS_CONSTRAINT_VIOLATION_EXCEPTION.create(SITE, siteName);
+                throw PublicationErrorMessage.UNIQUENESS_CONSTRAINT_VIOLATION_EXCEPTION.create(SITE_NAME, siteName);
             }
-            publication.getConfiguration().put(SITE, siteName);
+            publication.getConfiguration().put(SITE_NAME, siteName);
         }
     }
 
@@ -296,7 +296,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
 
     public Publication getPublication(final Context ctx, final String site) throws OXException {
         final Map<String,Object> query = new HashMap<String, Object>();
-        query.put(SITE, site);
+        query.put(SITE_NAME, site);
 
         final Collection<Publication> result = getStorage().search(ctx, getTarget().getId(), query);
         if (result.isEmpty()) {
