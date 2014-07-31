@@ -58,7 +58,7 @@ import java.util.Random;
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class AppointmentRangeGenerator {
+class AppointmentRangeGenerator {
     
     /**
      * A DateRange container consisting of a start- and endDate. 
