@@ -49,10 +49,15 @@
 
 package com.openexchange.share.storage.osgi;
 
+import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.share.storage.internal.RdbShareStorage;
+import com.openexchange.share.storage.internal.ShareCreateTableService;
+import com.openexchange.share.storage.internal.ShareCreateTableTask;
 import com.openexchange.share.storage.internal.ShareStorageServiceLookup;
 
 /**
@@ -84,6 +89,8 @@ public class ShareStorageActivator extends HousekeepingActivator {
         /*
          * register services
          */
+        registerService(CreateTableService.class, new ShareCreateTableService());
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new ShareCreateTableTask()));
         registerService(ShareStorage.class, new RdbShareStorage(getService(DatabaseService.class)));
     }
 

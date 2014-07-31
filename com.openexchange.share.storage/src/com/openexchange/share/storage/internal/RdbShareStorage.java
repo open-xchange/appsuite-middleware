@@ -49,6 +49,8 @@
 
 package com.openexchange.share.storage.internal;
 
+import static com.openexchange.share.storage.internal.SQL.logExecuteQuery;
+import static com.openexchange.share.storage.internal.SQL.logExecuteUpdate;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -65,6 +67,7 @@ import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.share.storage.StorageParameters;
+import com.openexchange.share.storage.internal.ConnectionProvider.ConnectionMode;
 import com.openexchange.tools.sql.DBUtils;
 
 
@@ -75,32 +78,6 @@ import com.openexchange.tools.sql.DBUtils;
  * @since v7.6.1
  */
 public class RdbShareStorage implements ShareStorage {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbShareStorage.class);
-
-    private static final String SELECT_SHARE_STMT =
-        "SELECT module,folder,item,created,createdBy,lastModified,modifiedBy,expires,guest,auth " +
-        "FROM share " +
-        "WHERE cid=? AND token=?;"
-    ;
-
-    private static final String SELECT_SHARES_CREATED_BY_STMT =
-        "SELECT token,module,folder,item,created,lastModified,modifiedBy,expires,guest,auth " +
-        "FROM share " +
-        "WHERE cid=? AND createdBy=?;"
-    ;
-
-    private static final String INSERT_SHARE_STMT =
-        "INSERT INTO share (token,cid,module,folder,item,created,createdBy,lastModified,modifiedBy,expires,guest,auth) " +
-        "VALUES (?,?,?,?,?,?,?,?,?,?,?,?);"
-    ;
-
-    private static final String SELECT_EXPIRED_SHARES_STMT =
-        "SELECT token,cid,module,folder,item,created,createdBy,lastModified,modifiedBy,expires,guest,auth " +
-        "FROM share " +
-        "WHERE expires IS NOT NULL AND expires > ?";
-    ;
-
 
     private final DatabaseService databaseService;
 
@@ -130,7 +107,7 @@ public class RdbShareStorage implements ShareStorage {
     public void storeShare(Share share, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getWriteProvider(share.getContextID(), parameters);
         try {
-            storeShare(provider.get(), share, parameters);
+            insertShare(provider.get(), share);
         } catch (SQLException e) {
             throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -139,9 +116,27 @@ public class RdbShareStorage implements ShareStorage {
     }
 
     @Override
-    public void updateShare(Share share, StorageParameters parameters) {
-        // TODO Auto-generated method stub
+    public void updateShare(Share share, StorageParameters parameters) throws OXException {
+        ConnectionProvider provider = getWriteProvider(share.getContextID(), parameters);
+        try {
+            updateShare(provider.get(), share);
+        } catch (SQLException e) {
+            throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            provider.close();
+        }
+    }
 
+    @Override
+    public void deleteShare(int contextID, String token, StorageParameters parameters) throws OXException {
+        ConnectionProvider provider = getWriteProvider(contextID, parameters);
+        try {
+            deleteShare(provider.get(), contextID, token);
+        } catch (SQLException e) {
+            throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            provider.close();
+        }
     }
 
     @Override
@@ -156,10 +151,10 @@ public class RdbShareStorage implements ShareStorage {
         }
     }
 
-    private static void storeShare(Connection connection, Share share, StorageParameters parameters) throws SQLException {
+    private static int insertShare(Connection connection, Share share) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            stmt = connection.prepareStatement(INSERT_SHARE_STMT);
+            stmt = connection.prepareStatement(SQL.INSERT_SHARE_STMT);
             int i = 1;
             stmt.setBytes(i++, UUIDs.toByteArray(UUIDs.fromUnformattedString(share.getToken())));
             stmt.setInt(i++, share.getContextID());
@@ -182,7 +177,39 @@ public class RdbShareStorage implements ShareStorage {
             }
             stmt.setInt(i++, share.getGuest());
             stmt.setInt(i++, share.getAuthentication().getID());
-            logExecuteUpdate(stmt);
+            return SQL.logExecuteUpdate(stmt);
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
+
+    private static int updateShare(Connection connection, Share share) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(SQL.UPDATE_SHARE_STMT);
+            int i = 1;
+            stmt.setInt(i++, share.getModule().getFolderConstant());
+            stmt.setString(i++, share.getFolder());
+            if (share.isFolder()) {
+                stmt.setNull(i++, Types.VARCHAR);
+            } else {
+                stmt.setString(i++, share.getItem());
+            }
+            stmt.setLong(i++, share.getCreated().getTime());
+            stmt.setInt(i++, share.getCreatedBy());
+            stmt.setLong(i++, share.getLastModified().getTime());
+            stmt.setInt(i++, share.getModifiedBy());
+            Date expires = share.getExpires();
+            if (expires == null) {
+                stmt.setNull(i++, Types.BIGINT);
+            } else {
+                stmt.setLong(i++, expires.getTime());
+            }
+            stmt.setInt(i++, share.getGuest());
+            stmt.setInt(i++, share.getAuthentication().getID());
+            stmt.setBytes(i++, UUIDs.toByteArray(UUIDs.fromUnformattedString(share.getToken())));
+            stmt.setInt(i++, share.getContextID());
+            return logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
@@ -191,7 +218,7 @@ public class RdbShareStorage implements ShareStorage {
     private static DefaultShare selectShare(Connection connection, int cid, String token) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            stmt = connection.prepareStatement(SELECT_SHARE_STMT);
+            stmt = connection.prepareStatement(SQL.SELECT_SHARE_STMT);
             stmt.setInt(1, cid);
             stmt.setBytes(2, UUIDs.toByteArray(UUIDs.fromUnformattedString(token)));
             ResultSet resultSet = logExecuteQuery(stmt);
@@ -221,11 +248,23 @@ public class RdbShareStorage implements ShareStorage {
         }
     }
 
+    private static int deleteShare(Connection connection, int cid, String token) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(SQL.DELETE_SHARE_STMT);
+            stmt.setInt(1, cid);
+            stmt.setBytes(2, UUIDs.toByteArray(UUIDs.fromUnformattedString(token)));
+            return logExecuteUpdate(stmt);
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
+
     private static List<Share> selectSharesCreatedBy(Connection connection, int cid, int createdBy) throws SQLException {
         List<Share> shares = new ArrayList<Share>();
         PreparedStatement stmt = null;
         try {
-            stmt = connection.prepareStatement(SELECT_SHARES_CREATED_BY_STMT);
+            stmt = connection.prepareStatement(SQL.SELECT_SHARES_CREATED_BY_STMT);
             stmt.setInt(1, cid);
             stmt.setInt(2, createdBy);
             ResultSet resultSet = logExecuteQuery(stmt);
@@ -262,93 +301,6 @@ public class RdbShareStorage implements ShareStorage {
 
     private ConnectionProvider getWriteProvider(int contextId, StorageParameters parameters) throws OXException {
         return new ConnectionProvider(databaseService, parameters, ConnectionMode.WRITE, contextId);
-    }
-
-    private static ResultSet logExecuteQuery(PreparedStatement stmt) throws SQLException {
-        if (false == LOG.isDebugEnabled()) {
-            return stmt.executeQuery();
-        } else {
-            long start = System.currentTimeMillis();
-            ResultSet resultSet = stmt.executeQuery();
-            LOG.debug("executeQuery: {} - {} ms elapsed.", stmt.toString(), (System.currentTimeMillis() - start));
-            return resultSet;
-        }
-    }
-
-    private static int logExecuteUpdate(PreparedStatement stmt) throws SQLException {
-        if (false == LOG.isDebugEnabled()) {
-            return stmt.executeUpdate();
-        } else {
-            long start = System.currentTimeMillis();
-            int rowCount = stmt.executeUpdate();
-            LOG.debug("executeUpdate: {} - {} rows affected, {} ms elapsed.", stmt.toString(), rowCount, (System.currentTimeMillis() - start));
-            return rowCount;
-        }
-    }
-
-    private static enum ConnectionMode {
-        READ, WRITE;
-    }
-
-    private static final class ConnectionProvider {
-
-        private final Connection connection;
-
-        private final ConnectionMode mode;
-
-        private final boolean external;
-
-        private final DatabaseService dbService;
-
-        private final int contextId;
-
-        private ConnectionProvider(DatabaseService dbService, StorageParameters parameters, ConnectionMode mode, int contextId) throws OXException {
-            super();
-            Connection connection = null;
-            if (parameters != null) {
-                connection = parameters.get(Connection.class.getName());
-            }
-
-            boolean external = true;
-            if (connection == null) {
-                external = false;
-                if (mode == ConnectionMode.READ) {
-                    connection = dbService.getReadOnly(contextId);
-                } else {
-                    connection = dbService.getWritable(contextId);
-                }
-            } else {
-                try {
-                    if (mode == ConnectionMode.WRITE && connection.isReadOnly()) {
-                        external = false;
-                        connection = dbService.getWritable(contextId);
-                    }
-                } catch (SQLException e) {
-                    throw new OXException(e); // TODO:
-                }
-            }
-
-            this.dbService = dbService;
-            this.connection = connection;
-            this.external = external;
-            this.contextId = contextId;
-            this.mode = mode;
-        }
-
-        Connection get() {
-            return connection;
-        }
-
-        void close() {
-            if (!external) {
-                if (mode == ConnectionMode.READ) {
-                    dbService.backReadOnly(contextId, connection);
-                } else {
-                    dbService.backWritable(contextId, connection);
-                }
-            }
-        }
-
     }
 
 }

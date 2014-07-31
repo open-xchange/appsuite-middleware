@@ -53,7 +53,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-
 /**
  * {@link StorageParameters}
  *
@@ -62,19 +61,37 @@ import java.util.Map;
  */
 public class StorageParameters {
 
+    /**
+     * The constant indicating no special storage parameters.
+     */
     public static final StorageParameters NO_PARAMETERS = new StorageParameters(Collections.<String, Object>emptyMap());
 
     private final Map<String, Object> parameters;
 
+    /**
+     * Initializes a new {@link StorageParameters}.
+     */
     public StorageParameters() {
         this(new HashMap<String, Object>());
     }
 
+    /**
+     * Initializes a new {@link StorageParameters} using the supplied parameters map.
+     *
+     * @param parameters The parameters to use
+     */
     private StorageParameters(Map<String, Object> parameters) {
         super();
         this.parameters = parameters;
     }
 
+    /**
+     * Adds a parameter with the supplied key.
+     *
+     * @param key The key
+     * @param value The value
+     * @return
+     */
     public StorageParameters put(String key, Object value) {
         parameters.put(key, value);
         return this;
@@ -97,6 +114,12 @@ public class StorageParameters {
 //        return null;
 //    }
 
+    /**
+     * Gets a parameter identified by its key.
+     *
+     * @param key The key
+     * @return The parameter, or <code>null</code> if not defined
+     */
     @SuppressWarnings("unchecked")
     public <T> T get(String key) {
         Object object = parameters.get(key);
@@ -107,6 +130,8 @@ public class StorageParameters {
         try {
             return (T) object;
         } catch (ClassCastException e) {
+            org.slf4j.LoggerFactory.getLogger(StorageParameters.class).warn(
+                "Error casting parameter value for '{}': {}", key, e.getMessage(), e);
             return null;
         }
     }

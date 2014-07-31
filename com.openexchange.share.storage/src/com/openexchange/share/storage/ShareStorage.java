@@ -90,6 +90,17 @@ public interface ShareStorage {
     void updateShare(Share share, StorageParameters parameters) throws OXException;
 
     /**
+     * Deletes a share identified by it's unique token.
+     *
+     * @param contextID The context ID
+     * @param token The token
+     * @param parameters The storage parameters
+     * @throws OXException
+     */
+    void deleteShare(int contextID, String token, StorageParameters parameters) throws OXException;
+
+
+    /**
      * Loads all shares that were created by a specific user ID.
      *
      * @param contextID The context ID

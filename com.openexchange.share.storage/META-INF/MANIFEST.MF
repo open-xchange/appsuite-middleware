@@ -7,7 +7,10 @@ Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.database,
  com.openexchange.exception,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.delete,
  com.openexchange.groupware.modules,
+ com.openexchange.groupware.update,
  com.openexchange.java.util,
  com.openexchange.osgi,
  com.openexchange.server,
