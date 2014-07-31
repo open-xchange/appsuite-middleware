@@ -132,6 +132,21 @@ public final class ThresholdFileHolder implements IFileHolder {
     }
 
     /**
+     * Creates a copy from given {@link IFileHolder}.
+     *
+     * @param source The source file holder
+     * @throws OXException If an error occurs
+     */
+    public ThresholdFileHolder(IFileHolder source) throws OXException {
+        this();
+        write(source.getStream());
+        name = source.getName();
+        contentType = source.getContentType();
+        delivery = source.getDelivery();
+        disposition = source.getDisposition();
+    }
+
+    /**
      * Resets this file holder.
      * <p>
      * Deletes associated file (if set) and resets internal buffer.
