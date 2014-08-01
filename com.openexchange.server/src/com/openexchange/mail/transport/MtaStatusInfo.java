@@ -59,7 +59,7 @@ import org.json.JSONObject;
 import com.openexchange.json.io.Jsonable;
 
 /**
- * {@link MtaStatusInfo} - A container for an MTA's status information.
+ * {@link MtaStatusInfo} - A container for MTA status information.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.1
