@@ -400,7 +400,6 @@ public class ServletFilterRegistration {
      */
     public void setOSGiMainHandler(OSGiMainHandler handler) {
         this.handler = handler;
-        handler.updateTrackedServletFilters(this);
     }
 
 }
