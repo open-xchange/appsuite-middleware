@@ -139,8 +139,6 @@ public final class SieveTextFilter {
         public final Map<String, List<Rule>> getFlaggedRules() {
             return flaggedRules;
         }
-
-
     }
 
     public class RuleListAndNextUid {
