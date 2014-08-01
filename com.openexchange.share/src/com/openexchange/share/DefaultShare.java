@@ -51,8 +51,6 @@ package com.openexchange.share;
 
 import java.util.Date;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.share.AuthenticationMode;
-import com.openexchange.share.Share;
 
 /**
  * {@link DefaultShare}
@@ -82,14 +80,75 @@ public class DefaultShare implements Share {
         super();
     }
 
-    /**
-     * Gets the token
-     *
-     * @return The token
-     */
     @Override
     public String getToken() {
         return token;
+    }
+
+    @Override
+    public int getContextID() {
+        return contextID;
+    }
+
+    @Override
+    public Module getModule() {
+        return Module.getForFolderConstant(module);
+    }
+
+    @Override
+    public String getFolder() {
+        return folder;
+    }
+
+    @Override
+    public boolean isFolder() {
+        return item == null;
+    }
+
+
+    @Override
+    public String getItem() {
+        return item;
+    }
+
+    @Override
+    public Date getCreated() {
+        return created;
+    }
+
+    @Override
+    public int getCreatedBy() {
+        return createdBy;
+    }
+
+    @Override
+    public Date getLastModified() {
+        return lastModified;
+    }
+
+    @Override
+    public int getModifiedBy() {
+        return modifiedBy;
+    }
+
+    @Override
+    public Date getExpires() {
+        return expires;
+    }
+
+    @Override
+    public boolean isExpired() {
+        return expires != null && new Date().after(expires);
+    }
+
+    @Override
+    public int getGuest() {
+        return guest;
+    }
+
+    @Override
+    public AuthenticationMode getAuthentication() {
+        return AuthenticationMode.fromID(authentication);
     }
 
     /**
@@ -102,32 +161,12 @@ public class DefaultShare implements Share {
     }
 
     /**
-     * Gets the contextID
-     *
-     * @return The contextID
-     */
-    @Override
-    public int getContextID() {
-        return contextID;
-    }
-
-    /**
      * Sets the contextID
      *
      * @param contextID The contextID to set
      */
     public void setContextID(int contextID) {
         this.contextID = contextID;
-    }
-
-    /**
-     * Gets the module
-     *
-     * @return The module
-     */
-    @Override
-    public Module getModule() {
-        return Module.getForFolderConstant(module);
     }
 
     /**
@@ -140,37 +179,12 @@ public class DefaultShare implements Share {
     }
 
     /**
-     * Gets the folder
-     *
-     * @return The folder
-     */
-    @Override
-    public String getFolder() {
-        return folder;
-    }
-
-    @Override
-    public boolean isFolder() {
-        return item == null;
-    }
-
-    /**
      * Sets the folder
      *
      * @param folder The folder to set
      */
     public void setFolder(String folder) {
         this.folder = folder;
-    }
-
-    /**
-     * Gets the item
-     *
-     * @return The item
-     */
-    @Override
-    public String getItem() {
-        return item;
     }
 
     /**
@@ -183,32 +197,12 @@ public class DefaultShare implements Share {
     }
 
     /**
-     * Gets the created
-     *
-     * @return The created
-     */
-    @Override
-    public Date getCreated() {
-        return created;
-    }
-
-    /**
      * Sets the created
      *
      * @param created The created to set
      */
     public void setCreated(Date created) {
         this.created = created;
-    }
-
-    /**
-     * Gets the createdBy
-     *
-     * @return The createdBy
-     */
-    @Override
-    public int getCreatedBy() {
-        return createdBy;
     }
 
     /**
@@ -221,32 +215,12 @@ public class DefaultShare implements Share {
     }
 
     /**
-     * Gets the lastModified
-     *
-     * @return The lastModified
-     */
-    @Override
-    public Date getLastModified() {
-        return lastModified;
-    }
-
-    /**
      * Sets the lastModified
      *
      * @param lastModified The lastModified to set
      */
     public void setLastModified(Date lastModified) {
         this.lastModified = lastModified;
-    }
-
-    /**
-     * Gets the modifiedBy
-     *
-     * @return The modifiedBy
-     */
-    @Override
-    public int getModifiedBy() {
-        return modifiedBy;
     }
 
     /**
@@ -259,37 +233,12 @@ public class DefaultShare implements Share {
     }
 
     /**
-     * Gets the expires
-     *
-     * @return The expires
-     */
-    @Override
-    public Date getExpires() {
-        return expires;
-    }
-
-    @Override
-    public boolean isExpired() {
-        return expires != null && new Date().after(expires);
-    }
-
-    /**
      * Sets the expires
      *
      * @param expires The expires to set
      */
     public void setExpires(Date expires) {
         this.expires = expires;
-    }
-
-    /**
-     * Gets the guest
-     *
-     * @return The guest
-     */
-    @Override
-    public int getGuest() {
-        return guest;
     }
 
     /**
@@ -302,22 +251,17 @@ public class DefaultShare implements Share {
     }
 
     /**
-     * Gets the authentication
-     *
-     * @return The authentication
-     */
-    @Override
-    public AuthenticationMode getAuthentication() {
-        return AuthenticationMode.fromID(authentication);
-    }
-
-    /**
      * Sets the authentication
      *
      * @param authentication The authentication to set
      */
     public void setAuthentication(int authentication) {
         this.authentication = authentication;
+    }
+
+    @Override
+    public String toString() {
+        return "DefaultShare [token=" + token + ", contextID=" + contextID + ", module=" + module + ", folder=" + folder + ", item=" + item + "]";
     }
 
 }
