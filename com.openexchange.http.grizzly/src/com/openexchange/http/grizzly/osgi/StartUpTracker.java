@@ -66,7 +66,7 @@ import com.openexchange.startup.SignalStartedService;
 public final class StartUpTracker implements ServiceTrackerCustomizer<SignalStartedService, SignalStartedService> {
 
     private final BundleContext context;
-    private OXHttpServer grizzly;
+    private final OXHttpServer grizzly;
     private final GrizzlyConfig grizzlyConfig;
 
     /**
@@ -111,7 +111,6 @@ public final class StartUpTracker implements ServiceTrackerCustomizer<SignalStar
                 logger.info("Stopping Grizzly...");
 
                 grizzly.stop();
-                this.grizzly = null;
 
                 logger.info("Grizzly stopped.");
             }
