@@ -1,3 +1,7 @@
+* 2014-08-01 - thorben.betten@open-xchange.com
+
+ - Fix for bug 33857: Do not log a warning in case Content-Type misses any charset information; just detect it and continue
+
 * 2014-07-31 - thorben.betten@open-xchange.com
 
  - Fix for bug 33839: Escape site information when generating the publication site from selected template
