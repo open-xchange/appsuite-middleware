@@ -209,7 +209,7 @@ public class Bug33697Test extends AbstractAppointmentTest {
      *  - UserZ:
      *    - sees appointment "Bug33697Appointment" in folder "Bug33697AppointmentSubfolderZ"
      *    - became a participant
-     */
+     
     @Ignore
     public void testMoveFromUserXSharedSubFolderToUserZPrivateSubFolder() throws Exception {
         bug33697Appointment.setParentFolderID(bug33697SubfolderZ.getObjectID());
@@ -252,5 +252,6 @@ public class Bug33697Test extends AbstractAppointmentTest {
         Arrays.sort(clientIds);
         assertTrue("Participants and clients should be equal for the moved appointment", Arrays.equals(participantIds, clientIds));
     }
+    */
 
 }
