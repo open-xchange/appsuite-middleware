@@ -255,25 +255,39 @@ public final class MimeType2ExtMap {
         list.add(mimeType);
     }
 
+    private static final String MIME_APPL_OCTET = MimeTypes.MIME_APPL_OCTET;
+
     /**
      * Gets the MIME type associated with given file.
      *
      * @param file The file
-     * @return The MIME type associated with given file or <code>application/octet-stream</code> if none found
+     * @return The MIME type associated with given file or <code>"application/octet-stream"</code> if none found
      */
     public static String getContentType(final File file) {
-        return getContentType(file.getName());
+        return getContentType(file.getName(), MIME_APPL_OCTET);
     }
 
-    private static final String MIME_APPL_OCTET = MimeTypes.MIME_APPL_OCTET;
+    /**
+     * Gets the MIME type associated with given file.
+     *
+     * @param file The file
+     * @param fallBack The fall-back value to return in case file extension is unknown
+     * @return The MIME type associated with given file or <code>"application/octet-stream"</code> if none found
+     */
+    public static String getContentType(final File file, String fallBack) {
+        return getContentType(file.getName(), fallBack);
+    }
 
     /**
      * Gets the MIME type associated with given file name.
+     * <p>
+     * This is a convenience method that invokes {@link #getContentType(String, String)} with latter argument set to <code>"application/octet-stream"</code>.
      *
      * @param fileName The file name; e.g. <code>"file.html"</code>
-     * @return The MIME type associated with given file name or <code>application/octet-stream</code> if none found
+     * @return The MIME type associated with given file name or <code>"application/octet-stream"</code> if none found
+     * @see #getContentType(String, String)
      */
-    public static String getContentType(final String fileName) {
+    public static String getContentType(String fileName) {
         return getContentType(fileName, MIME_APPL_OCTET);
     }
 
@@ -284,7 +298,7 @@ public final class MimeType2ExtMap {
      * @param fallBack The fall-back value to return in case file extension is unknown
      * @return The MIME type associated with given file name or <code>fallBack</code> if none found
      */
-    public static String getContentType(final String fileName, final String fallBack) {
+    public static String getContentType(String fileName, String fallBack) {
         init();
         if (Strings.isEmpty(fileName)) {
             return fallBack;
@@ -306,18 +320,26 @@ public final class MimeType2ExtMap {
      * Gets the MIME type associated with given file extension.
      *
      * @param extension The file extension; e.g. <code>"txt"</code>
-     * @return The MIME type associated with given file extension or <code>application/octet-stream</code> if none found
+     * @return The MIME type associated with given file extension or <code>"application/octet-stream"</code> if none found
      */
-    public static String getContentTypeByExtension(final String extension) {
+    public static String getContentTypeByExtension(String extension) {
+        return getContentTypeByExtension(extension, MIME_APPL_OCTET);
+    }
+
+    /**
+     * Gets the MIME type associated with given file extension.
+     *
+     * @param extension The file extension; e.g. <code>"txt"</code>
+     * @param fallBack The fall-back value to return in case file extension is unknown
+     * @return The MIME type associated with given file extension or <code>fallBack</code> if none found
+     */
+    public static String getContentTypeByExtension(String extension, String fallBack) {
         init();
         if (Strings.isEmpty(extension)) {
-            return MIME_APPL_OCTET;
+            return fallBack;
         }
         final String type = typeMap.get(toLowerCase(extension));
-        if (null == type) {
-            return MIME_APPL_OCTET;
-        }
-        return type;
+        return null == type ? fallBack : type;
     }
 
     private static final String DEFAULT_EXT = "dat";

@@ -385,7 +385,7 @@ public final class NewAction extends AbstractMailAction {
         // Check if "folder" element is present which indicates to save given message as a draft or append to denoted folder
         final JSONValue responseData;
         if (folder == null) {
-            responseData = appendDraft(session, flags, force, data.getFromAddress(), data.getMail());
+            responseData = transportMessage(session, flags, force, data.getFromAddress(), data.getMail());
         } else {
             final String[] ids;
             final MailServletInterface mailInterface = MailServletInterface.getInstance(session);
@@ -414,7 +414,7 @@ public final class NewAction extends AbstractMailAction {
         MailMessage getMail();
     }
 
-    private JSONObject appendDraft(final ServerSession session, final int flags, final boolean force, final InternetAddress from, final MailMessage m) throws OXException, JSONException {
+    private JSONObject transportMessage(final ServerSession session, final int flags, final boolean force, final InternetAddress from, final MailMessage m) throws OXException, JSONException {
         /*
          * Determine the account to transport with
          */
