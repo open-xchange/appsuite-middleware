@@ -1063,7 +1063,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     /**
      * Sets whether this mail access is currently waiting for any mail server notifications or not.
      *
-     * @param cacheable <code>true</code> if this mail access is waiting; otherwise <code>false</code>
+     * @param waiting <code>true</code> if this mail access is waiting; otherwise <code>false</code>
      */
     public void setWaiting(final boolean waiting) {
         this.waiting = waiting;
