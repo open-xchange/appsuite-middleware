@@ -49,12 +49,16 @@
 
 package com.openexchange.http.grizzly.service.http;
 
+import java.util.Arrays;
 import javax.servlet.Filter;
 
 /**
- * {@link FilterProxy}
- *
+ * {@link FilterProxy} - FilterProxy object that holds the values of configured paths and ranking associated with a ServletFilter.
+ * Those values are read from the ServiceReference of a Filter service once it gets added to the OSGI runtime. The paths are used to decide
+ * if a Filter should be used for an incoming request and the ranking decides the position of the filter in a chain.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a> JavaDoc
  * @since v7.6.1
  */
 public class FilterProxy {
@@ -73,6 +77,7 @@ public class FilterProxy {
      *
      * @param filter The filter
      * @param paths The filter paths
+     * @param ranking The filter ranking
      */
     public FilterProxy(Filter filter, String[] paths, int ranking) {
         super();
@@ -106,6 +111,11 @@ public class FilterProxy {
      */
     public Filter getFilter() {
         return filter;
+    }
+
+    @Override
+    public String toString() {
+        return "FilterProxy [paths=" + Arrays.toString(paths) + ", filter=" + filter + ", ranking=" + ranking + "]";
     }
 
 }

@@ -52,6 +52,7 @@ package com.openexchange.http.grizzly;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.http.grizzly.service.http.ServletFilterRegistrationTest;
 import com.openexchange.http.grizzly.servletfilter.RemoteIPFinderTest;
 
 /**
@@ -62,7 +63,8 @@ import com.openexchange.http.grizzly.servletfilter.RemoteIPFinderTest;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-    RemoteIPFinderTest.class
+    RemoteIPFinderTest.class,
+    ServletFilterRegistrationTest.class
 })
 public class UnitTests {
 

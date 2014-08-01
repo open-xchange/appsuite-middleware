@@ -58,12 +58,83 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import com.openexchange.http.grizzly.service.http.FilterProxy;
+import com.openexchange.http.grizzly.service.http.OSGiMainHandler;
 import com.openexchange.http.grizzly.service.http.ServletFilterRegistration;
 
 /**
- * {@link ServletFilterTracker}
+ * {@link ServletFilterTracker} - Tracks services with the type {@link Filter} and updates the central {@link OSGiMainHandler}
+ * accordingly so the filters are applied to new incoming requests/outgoing responses.
+ * 
+ * <p>
+ * A Filter service may be registered with an additional <strong>filter.paths</strong> property. This property may consist of path
+ * expressions including wildcards. The path property should be provided as:
+ * 
+ * <ol>
+ *   <li>A single String for a single path</li>
+ *   <li>An array of Strings</li>
+ *   <li>A Collection of of Objects that provides the path via invocation of <cod>toString()</code></li>
+ * </ol>
+ * 
+ * if the filter.path property is missing/null the filter will be used for every incoming request.
+ * </p>
+ * 
+ * <p>
+ * The form of a path must be one of:
+ * <ol>
+ *   <li>
+ *     <strong>*</strong>: This filter will be applied to all request
+ *   </li>
+ *   <li>
+ *     The path starts with <strong>/</strong> and ends with the <strong>/*</strong> wildcard but doesn't equal <strong>/*</strong> e.g.
+ *     <strong>/a/b/*</strong>: This filter will be used for requests to all URLs starting with <strong>/a/b</strong> e.g
+ *     <strong>/a/b/c</strong>, <strong>/a/b/c/d</strong> and so on
+ *   </li>
+ *   <li>
+ *     The path starts with <strong>/</strong> but doesn't end with the <strong>/*</strong> wildcard: This filter will only be used for
+ *     requests that match this path exactly
+ *   </li>
+ * </ol>
+ * </p>
+ *
+ * <h4>Example:</h4>
+ * <pre>
+ * {@code
+ * public class ServletFilterActivator extends HousekeepingActivator {
+ *
+ *  {@literal @}Override
+ *  protected Class<?>[] getNeededServices() {
+ *      return new Class[] { HttpService.class };
+ *  }
+ *
+ *  {@literal @}Override
+ *  protected void startBundle() throws Exception {
+ *      Filter yourFilter = new Filter() {
+ *
+ *          {@literal @}Override
+ *          public void destroy() {
+ *          }
+ *
+ *          {@literal @}Override
+ *          public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
+ *              String world = request.getParameter("hello");
+ *              filterChain.doFilter(request, response);
+ *          }
+ *
+ *          {@literal @}Override
+ *          public void init(FilterConfig config) throws ServletException {
+ *          }
+ *      };
+ *
+ *      Hashtable<String, Object> serviceProperties = new Hashtable<String, Object>();
+ *      serviceProperties.put(Constants.SERVICE_RANKING, 0);
+ *      serviceProperties.put(ServletFilterTracker.PATH_INFO, "*");
+ *
+ *      registerService(Filter.class, yourFilter, serviceProperties);
+ *}
+ * </pre>
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since v7.6.1
  */
 public class ServletFilterTracker implements ServiceTrackerCustomizer<Filter, FilterProxy> {
@@ -83,6 +154,8 @@ public class ServletFilterTracker implements ServiceTrackerCustomizer<Filter, Fi
             return this;
         }
     }
+    
+    public static String PATH_INFO = "path.info";
 
     // ------------------------------------------------------------------------------------------------------------------------------- //
 
@@ -107,6 +180,7 @@ public class ServletFilterTracker implements ServiceTrackerCustomizer<Filter, Fi
 
             return proxy;
         } catch (InvalidFilterPathsException e) {
+            LOG.error("Not adding servlet filter because of malformed path.info", e);
             context.ungetService(reference);
             return null;
         }
@@ -124,12 +198,12 @@ public class ServletFilterTracker implements ServiceTrackerCustomizer<Filter, Fi
     }
 
     private String[] getPathsFrom(ServiceReference<Filter> reference) throws InvalidFilterPathsException {
-        final Object topicObj = reference.getProperty("filter.paths");
-        if (topicObj instanceof String) {
-            return topicObj.toString().equals("*") ? null : new String[] { topicObj.toString() };
-        } else if (topicObj instanceof String[]) {
+        final Object filterPathObj = reference.getProperty("filter.paths");
+        if (filterPathObj instanceof String) {
+            return filterPathObj.toString().equals("*") ? null : new String[] { filterPathObj.toString() };
+        } else if (filterPathObj instanceof String[]) {
             // check if one value matches '*'
-            final String[] values = (String[]) topicObj;
+            final String[] values = (String[]) filterPathObj;
             boolean matchAll = false;
             for (int i = 0; i < values.length; i++) {
                 if ("*".equals(values[i])) {
@@ -137,8 +211,8 @@ public class ServletFilterTracker implements ServiceTrackerCustomizer<Filter, Fi
                 }
             }
             return matchAll ? null : values;
-        } else if (topicObj instanceof Collection) {
-            final Collection<?> col = (Collection<?>) topicObj;
+        } else if (filterPathObj instanceof Collection) {
+            final Collection<?> col = (Collection<?>) filterPathObj;
             final String[] values = new String[col.size()];
             int index = 0;
             // check if one value matches '*'
@@ -153,10 +227,10 @@ public class ServletFilterTracker implements ServiceTrackerCustomizer<Filter, Fi
                 }
             }
             return matchAll ? null : values;
-        } else if (topicObj == null) {
+        } else if (filterPathObj == null) {
             return null;
         } else {
-            LOG.warn("Invalid filter paths : Neither of type String nor String[] : {} - Ignoring ServiceReference [{} | Bundle({})]", topicObj.getClass().getName(), reference, reference.getBundle());
+            LOG.warn("Invalid filter paths : Neither of type String nor String[] : {} - Ignoring ServiceReference [{} | Bundle({})]", filterPathObj.getClass().getName(), reference, reference.getBundle());
             throw new InvalidFilterPathsException();
         }
     }
