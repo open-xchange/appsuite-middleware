@@ -217,7 +217,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
 
                 boolean notified = false;
 
-                IMAPStore imapStore = getImapMessageStorageFrom(mailAccess).getImapStore();
+                IMAPStore imapStore = getImapFolderStorageFrom(mailAccess).getImapStore();
                 final IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(fullName);
                 this.imapFolderInUse = imapFolder;
                 try {
@@ -515,7 +515,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         }
     }
 
-    private static IMAPFolderStorage getImapMessageStorageFrom(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+    private static IMAPFolderStorage getImapFolderStorageFrom(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
         IMailFolderStorage fstore = mailAccess.getFolderStorage();
         if (!(fstore instanceof IMAPFolderStorage)) {
             if (!(fstore instanceof IMailFolderStorageDelegator)) {
