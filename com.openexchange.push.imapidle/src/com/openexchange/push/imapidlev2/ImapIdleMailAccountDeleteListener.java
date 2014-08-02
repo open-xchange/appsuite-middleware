@@ -47,47 +47,46 @@
  *
  */
 
-package com.openexchange.push.imapidle;
+package com.openexchange.push.imapidlev2;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.push.PushListener;
-import com.openexchange.push.PushManagerService;
-import com.openexchange.session.Session;
+import java.sql.Connection;
+import java.util.Map;
+import org.slf4j.Logger;
+import com.openexchange.mailaccount.MailAccountDeleteListener;
 
 /**
- * {@link ImapIdlePushManagerService} - The IMAP IDLE {@link PushManagerService} for primary mail account.
+ * {@link ImapIdleMailAccountDeleteListener} - The {@link MailAccountDeleteListener} for IMAP IDLE bundle.
  *
  */
-public final class ImapIdlePushManagerService implements PushManagerService {
-
-    private final String name;
+public final class ImapIdleMailAccountDeleteListener implements MailAccountDeleteListener {
 
     /**
-     * Initializes a new {@link ImapIdlePushManagerService}.
+     * Initializes a new {@link ImapIdleMailAccountDeleteListener}.
      */
-    public ImapIdlePushManagerService() {
+    public ImapIdleMailAccountDeleteListener() {
         super();
-        name = "IMAP IDLE Push Manager";
     }
 
     @Override
-    public PushListener startListener(final Session session) throws OXException {
-        final ImapIdlePushListener pushListener = ImapIdlePushListener.newInstance(session);
-        if (ImapIdlePushListenerRegistry.getInstance().addPushListener(session.getContextId(), session.getUserId(), pushListener)) {
-            pushListener.open();
-            return pushListener;
+    public void onAfterMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) {
+        // Nothing to do
+    }
+
+    @Override
+    public void onBeforeMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) {
+        ImapIdlePushManagerService instance = ImapIdlePushManagerService.getInstance();
+        if (null == instance) {
+            return;
         }
-        return null;
-    }
 
-    @Override
-    public boolean stopListener(final Session session) throws OXException {
-        return ImapIdlePushListenerRegistry.getInstance().removePushListener(session);
-    }
-
-    @Override
-    public String toString() {
-        return name;
+        if (instance.getAccountId() == id) {
+            try {
+                instance.stopListener(false, user, cid);
+            } catch (Exception e) {
+                Logger logger = org.slf4j.LoggerFactory.getLogger(ImapIdleMailAccountDeleteListener.class);
+                logger.warn("Failed to stop IMAP-IDLE listener for user {} in context {}", user, cid);
+            }
+        }
     }
 
 }

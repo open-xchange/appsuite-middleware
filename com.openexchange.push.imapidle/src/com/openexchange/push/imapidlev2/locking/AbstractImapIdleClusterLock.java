@@ -47,35 +47,74 @@
  *
  */
 
-package com.openexchange.push.imapidle;
+package com.openexchange.push.imapidlev2.locking;
 
-import java.sql.Connection;
-import java.util.Map;
-import com.openexchange.mailaccount.MailAccountDeleteListener;
+import java.util.concurrent.TimeUnit;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.sessiond.SessiondService;
 
 /**
- * {@link ImapIdleMailAccountDeleteListener} - The {@link MailAccountDeleteListener} for IMAP IDLE bundle.
+ * {@link AbstractImapIdleClusterLock}
  *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ImapIdleMailAccountDeleteListener implements MailAccountDeleteListener {
+public abstract class AbstractImapIdleClusterLock implements ImapIdleClusterLock {
+
+    /** The service look-up */
+    protected final ServiceLookup services;
 
     /**
-     * Initializes a new {@link ImapIdleMailAccountDeleteListener}.
+     * Initializes a new {@link AbstractImapIdleClusterLock}.
      */
-    public ImapIdleMailAccountDeleteListener() {
+    protected AbstractImapIdleClusterLock(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
-    @Override
-    public void onAfterMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) {
-        // Nothing to do
+    /**
+     * Generate an appropriate value for given time stamp and session identifier pair
+     *
+     * @param nanos The time stamp
+     * @param sessionId The session identifier
+     * @return The value
+     */
+    protected String generateValue(long nanos, String sessionId) {
+        return new StringBuilder(32).append(nanos).append('?').append(sessionId).toString();
     }
 
-    @Override
-    public void onBeforeMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) {
-        if (ImapIdlePushListener.getAccountId() == id) {
-            ImapIdlePushListenerRegistry.getInstance().purgeUserPushListener(cid, user);
+    /**
+     * Parses the time stamp nanos from given value
+     *
+     * @param value The value
+     * @return The nano seconds
+     */
+    protected long parseNanosFromValue(String value) {
+        return Long.parseLong(value.substring(0, value.indexOf('?')));
+    }
+
+    /**
+     * Checks if the session referenced by given value does still exists
+     *
+     * @param value The value
+     * @return <code>true</code> if session still exists; otherwise <code>false</code>
+     */
+    protected boolean existsSessionFromValue(String value) {
+        SessiondService sessiondService = services.getService(SessiondService.class);
+        if (null != sessiondService) {
+            return sessiondService.getSession(value.substring(value.indexOf('?') + 1)) != null;
         }
+        return false;
+    }
+
+    /**
+     * Checks validity of passed value in comparison to given time stamp (and session).
+     *
+     * @param value The value to check
+     * @param now The current time stamp nano seconds
+     * @return <code>true</code> if valid; otherwise <code>false</code>
+     */
+    protected boolean validValue(String value, long now) {
+        return (TimeUnit.NANOSECONDS.toMillis(now - parseNanosFromValue(value)) <= TIMEOUT_MILLIS) && existsSessionFromValue(value);
     }
 
 }

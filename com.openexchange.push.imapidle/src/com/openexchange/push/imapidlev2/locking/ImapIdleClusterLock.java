@@ -47,72 +47,48 @@
  *
  */
 
-package com.openexchange.push.imapidle;
+package com.openexchange.push.imapidlev2.locking;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.server.ServiceLookup;
+import java.util.concurrent.TimeUnit;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
+
 
 /**
- * {@link Services} - The static service lookup.
+ * {@link ImapIdleClusterLock}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Services {
+public interface ImapIdleClusterLock {
 
     /**
-     * Initializes a new {@link Services}.
+     * The default timeout for an acquired lock in milliseconds.
      */
-    private Services() {
-        super();
-    }
-
-    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
+    public static final long TIMEOUT_MILLIS = TimeUnit.MINUTES.toMillis(10L);
 
     /**
-     * Sets the service lookup.
+     * Attempts to acquires the lock for given user
      *
-     * @param serviceLookup The service lookup or <code>null</code>
+     * @param session The associated session
+     * @return <code>true</code> if lock was acquired; otherwise <code>false</code> if another one acquired the lock before
+     * @throws OXException
      */
-    public static void setServiceLookup(final ServiceLookup serviceLookup) {
-        REF.set(serviceLookup);
-    }
+    boolean acquireLock(Session session) throws OXException;
 
     /**
-     * Gets the service lookup.
+     * Refreshed the lock for given user.
      *
-     * @return The service lookup or <code>null</code>
+     * @param session The associated session
+     * @throws OXException If refresh operation fails
      */
-    public static ServiceLookup getServiceLookup() {
-        return REF.get();
-    }
+    void refreshLock(Session session) throws OXException;
 
     /**
-     * Gets the service of specified type
+     * Releases the possibly held lock for given user.
      *
-     * @param clazz The service's class
-     * @return The service
-     * @throws IllegalStateException If an error occurs while returning the demanded service
+     * @param session The associated session
+     * @throws OXException If release operation fails
      */
-    public static <S extends Object> S getService(final Class<? extends S> clazz) {
-        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
-        if (null == serviceLookup) {
-            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.push.imapidle\" not started?");
-        }
-        return serviceLookup.getService(clazz);
-    }
-
-    /**
-     * (Optionally) Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> if absent
-     */
-    public static <S extends Object> S optService(final Class<? extends S> clazz) {
-        try {
-            return getService(clazz);
-        } catch (final IllegalStateException e) {
-            return null;
-        }
-    }
+    void releaseLock(Session session) throws OXException;
 
 }

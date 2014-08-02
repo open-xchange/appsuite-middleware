@@ -47,27 +47,68 @@
  *
  */
 
-package com.openexchange.push.imapidle;
+package com.openexchange.push.imapidlev2;
 
-import java.sql.Connection;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteListener;
+
 
 /**
- * {@link ImapIdleDeleteListener} - Delete listener for IMAP IDLE bundle.
+ * {@link SimpleKey}
  *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.6.1
  */
-public final class ImapIdleDeleteListener implements DeleteListener {
+public class SimpleKey {
 
-    public ImapIdleDeleteListener() {
+    /**
+     * Gets a simple key instance for given user.
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     *
+     * @return The simple key
+     */
+    public static SimpleKey valueOf(final int userId, final int contextId) {
+        return new SimpleKey(userId, contextId);
+    }
+
+    // -------------------------------------------------------------------------------------------- //
+
+    final int contextId;
+    final int userId;
+    private final int hash;
+
+    private SimpleKey(final int userId, final int contextId) {
         super();
+        this.contextId = contextId;
+        this.userId = userId;
+        // hash code
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + contextId;
+        result = prime * result + userId;
+        hash = result;
     }
 
     @Override
-    public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
-        if (DeleteEvent.TYPE_USER == event.getType()) {
-            ImapIdlePushListenerRegistry.getInstance().purgeUserPushListener(event.getContext().getContextId(), event.getId());
-        }
+    public int hashCode() {
+        return hash;
     }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof SimpleKey)) {
+            return false;
+        }
+        final SimpleKey other = (SimpleKey) obj;
+        if (contextId != other.contextId) {
+            return false;
+        }
+        if (userId != other.userId) {
+            return false;
+        }
+        return true;
+    }
+
 }
