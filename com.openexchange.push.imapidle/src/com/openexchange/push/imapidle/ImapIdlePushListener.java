@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.push.imapidlev2;
+package com.openexchange.push.imapidle;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -74,7 +74,7 @@ import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushUtility;
-import com.openexchange.push.imapidlev2.locking.ImapIdleClusterLock;
+import com.openexchange.push.imapidle.locking.ImapIdleClusterLock;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;

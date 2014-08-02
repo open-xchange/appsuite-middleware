@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.push.imapidlev2;
+package com.openexchange.push.imapidle;
 
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
@@ -57,8 +57,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushManagerService;
 import com.openexchange.push.PushUtility;
-import com.openexchange.push.imapidlev2.ImapIdlePushListener.PushMode;
-import com.openexchange.push.imapidlev2.locking.ImapIdleClusterLock;
+import com.openexchange.push.imapidle.ImapIdlePushListener.PushMode;
+import com.openexchange.push.imapidle.locking.ImapIdleClusterLock;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;

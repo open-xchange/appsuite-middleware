@@ -47,48 +47,31 @@
  *
  */
 
-package com.openexchange.push.imapidlev2.locking;
+package com.openexchange.push.imapidle;
 
-import java.util.concurrent.TimeUnit;
+import java.sql.Connection;
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
-
+import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteListener;
 
 /**
- * {@link ImapIdleClusterLock}
+ * {@link ImapIdleDeleteListener} - Delete listener for IMAP IDLE bundle.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ImapIdleClusterLock {
+public final class ImapIdleDeleteListener implements DeleteListener {
 
-    /**
-     * The default timeout for an acquired lock in milliseconds.
-     */
-    public static final long TIMEOUT_MILLIS = TimeUnit.MINUTES.toMillis(10L);
+    public ImapIdleDeleteListener() {
+        super();
+    }
 
-    /**
-     * Attempts to acquires the lock for given user
-     *
-     * @param session The associated session
-     * @return <code>true</code> if lock was acquired; otherwise <code>false</code> if another one acquired the lock before
-     * @throws OXException
-     */
-    boolean acquireLock(Session session) throws OXException;
-
-    /**
-     * Refreshed the lock for given user.
-     *
-     * @param session The associated session
-     * @throws OXException If refresh operation fails
-     */
-    void refreshLock(Session session) throws OXException;
-
-    /**
-     * Releases the possibly held lock for given user.
-     *
-     * @param session The associated session
-     * @throws OXException If release operation fails
-     */
-    void releaseLock(Session session) throws OXException;
+    @Override
+    public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
+        if (DeleteEvent.TYPE_USER == event.getType()) {
+            ImapIdlePushManagerService instance = ImapIdlePushManagerService.getInstance();
+            if (null != instance) {
+                instance.stopListener(false, event.getId(), event.getContext().getContextId());
+            }
+        }
+    }
 
 }

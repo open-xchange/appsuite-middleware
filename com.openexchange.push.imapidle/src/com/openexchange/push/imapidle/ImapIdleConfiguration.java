@@ -47,16 +47,16 @@
  *
  */
 
-package com.openexchange.push.imapidlev2;
+package com.openexchange.push.imapidle;
 
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
-import com.openexchange.push.imapidlev2.ImapIdlePushListener.PushMode;
-import com.openexchange.push.imapidlev2.locking.DbImapIdleClusterLock;
-import com.openexchange.push.imapidlev2.locking.HzImapIdleClusterLock;
-import com.openexchange.push.imapidlev2.locking.ImapIdleClusterLock;
-import com.openexchange.push.imapidlev2.locking.NoOpImapIdleClusterLock;
+import com.openexchange.push.imapidle.ImapIdlePushListener.PushMode;
+import com.openexchange.push.imapidle.locking.DbImapIdleClusterLock;
+import com.openexchange.push.imapidle.locking.HzImapIdleClusterLock;
+import com.openexchange.push.imapidle.locking.ImapIdleClusterLock;
+import com.openexchange.push.imapidle.locking.NoOpImapIdleClusterLock;
 import com.openexchange.server.ServiceLookup;
 
 /**

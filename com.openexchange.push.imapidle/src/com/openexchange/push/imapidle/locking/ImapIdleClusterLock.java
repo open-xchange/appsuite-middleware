@@ -47,74 +47,48 @@
  *
  */
 
-package com.openexchange.push.imapidlev2.locking;
+package com.openexchange.push.imapidle.locking;
 
 import java.util.concurrent.TimeUnit;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.sessiond.SessiondService;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
+
 
 /**
- * {@link AbstractImapIdleClusterLock}
+ * {@link ImapIdleClusterLock}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractImapIdleClusterLock implements ImapIdleClusterLock {
-
-    /** The service look-up */
-    protected final ServiceLookup services;
+public interface ImapIdleClusterLock {
 
     /**
-     * Initializes a new {@link AbstractImapIdleClusterLock}.
+     * The default timeout for an acquired lock in milliseconds.
      */
-    protected AbstractImapIdleClusterLock(ServiceLookup services) {
-        super();
-        this.services = services;
-    }
+    public static final long TIMEOUT_MILLIS = TimeUnit.MINUTES.toMillis(10L);
 
     /**
-     * Generate an appropriate value for given time stamp and session identifier pair
+     * Attempts to acquires the lock for given user
      *
-     * @param nanos The time stamp
-     * @param sessionId The session identifier
-     * @return The value
+     * @param session The associated session
+     * @return <code>true</code> if lock was acquired; otherwise <code>false</code> if another one acquired the lock before
+     * @throws OXException
      */
-    protected String generateValue(long nanos, String sessionId) {
-        return new StringBuilder(32).append(nanos).append('?').append(sessionId).toString();
-    }
+    boolean acquireLock(Session session) throws OXException;
 
     /**
-     * Parses the time stamp nanos from given value
+     * Refreshed the lock for given user.
      *
-     * @param value The value
-     * @return The nano seconds
+     * @param session The associated session
+     * @throws OXException If refresh operation fails
      */
-    protected long parseNanosFromValue(String value) {
-        return Long.parseLong(value.substring(0, value.indexOf('?')));
-    }
+    void refreshLock(Session session) throws OXException;
 
     /**
-     * Checks if the session referenced by given value does still exists
+     * Releases the possibly held lock for given user.
      *
-     * @param value The value
-     * @return <code>true</code> if session still exists; otherwise <code>false</code>
+     * @param session The associated session
+     * @throws OXException If release operation fails
      */
-    protected boolean existsSessionFromValue(String value) {
-        SessiondService sessiondService = services.getService(SessiondService.class);
-        if (null != sessiondService) {
-            return sessiondService.getSession(value.substring(value.indexOf('?') + 1)) != null;
-        }
-        return false;
-    }
-
-    /**
-     * Checks validity of passed value in comparison to given time stamp (and session).
-     *
-     * @param value The value to check
-     * @param now The current time stamp nano seconds
-     * @return <code>true</code> if valid; otherwise <code>false</code>
-     */
-    protected boolean validValue(String value, long now) {
-        return (TimeUnit.NANOSECONDS.toMillis(now - parseNanosFromValue(value)) <= TIMEOUT_MILLIS) && existsSessionFromValue(value);
-    }
+    void releaseLock(Session session) throws OXException;
 
 }

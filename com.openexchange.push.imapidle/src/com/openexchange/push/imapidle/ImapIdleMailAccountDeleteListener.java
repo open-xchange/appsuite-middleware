@@ -47,68 +47,46 @@
  *
  */
 
-package com.openexchange.push.imapidlev2;
+package com.openexchange.push.imapidle;
 
-
+import java.sql.Connection;
+import java.util.Map;
+import org.slf4j.Logger;
+import com.openexchange.mailaccount.MailAccountDeleteListener;
 
 /**
- * {@link SimpleKey}
+ * {@link ImapIdleMailAccountDeleteListener} - The {@link MailAccountDeleteListener} for IMAP IDLE bundle.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.6.1
  */
-public class SimpleKey {
+public final class ImapIdleMailAccountDeleteListener implements MailAccountDeleteListener {
 
     /**
-     * Gets a simple key instance for given user.
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     *
-     * @return The simple key
+     * Initializes a new {@link ImapIdleMailAccountDeleteListener}.
      */
-    public static SimpleKey valueOf(final int userId, final int contextId) {
-        return new SimpleKey(userId, contextId);
-    }
-
-    // -------------------------------------------------------------------------------------------- //
-
-    final int contextId;
-    final int userId;
-    private final int hash;
-
-    private SimpleKey(final int userId, final int contextId) {
+    public ImapIdleMailAccountDeleteListener() {
         super();
-        this.contextId = contextId;
-        this.userId = userId;
-        // hash code
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + contextId;
-        result = prime * result + userId;
-        hash = result;
     }
 
     @Override
-    public int hashCode() {
-        return hash;
+    public void onAfterMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) {
+        // Nothing to do
     }
 
     @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
+    public void onBeforeMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) {
+        ImapIdlePushManagerService instance = ImapIdlePushManagerService.getInstance();
+        if (null == instance) {
+            return;
         }
-        if (!(obj instanceof SimpleKey)) {
-            return false;
+
+        if (instance.getAccountId() == id) {
+            try {
+                instance.stopListener(false, user, cid);
+            } catch (Exception e) {
+                Logger logger = org.slf4j.LoggerFactory.getLogger(ImapIdleMailAccountDeleteListener.class);
+                logger.warn("Failed to stop IMAP-IDLE listener for user {} in context {}", user, cid);
+            }
         }
-        final SimpleKey other = (SimpleKey) obj;
-        if (contextId != other.contextId) {
-            return false;
-        }
-        if (userId != other.userId) {
-            return false;
-        }
-        return true;
     }
 
 }

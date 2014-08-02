@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.push.imapidlev2.osgi;
+package com.openexchange.push.imapidle.osgi;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -61,10 +61,10 @@ import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.push.PushManagerService;
-import com.openexchange.push.imapidlev2.ImapIdleConfiguration;
-import com.openexchange.push.imapidlev2.ImapIdleDeleteListener;
-import com.openexchange.push.imapidlev2.ImapIdleMailAccountDeleteListener;
-import com.openexchange.push.imapidlev2.ImapIdlePushManagerService;
+import com.openexchange.push.imapidle.ImapIdleConfiguration;
+import com.openexchange.push.imapidle.ImapIdleDeleteListener;
+import com.openexchange.push.imapidle.ImapIdleMailAccountDeleteListener;
+import com.openexchange.push.imapidle.ImapIdlePushManagerService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.push.imapidlev2.locking;
+package com.openexchange.push.imapidle.locking;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.hazelcast.core.HazelcastException;

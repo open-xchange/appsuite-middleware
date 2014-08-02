@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.push.imapidlev2.locking;
+package com.openexchange.push.imapidle.locking;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
