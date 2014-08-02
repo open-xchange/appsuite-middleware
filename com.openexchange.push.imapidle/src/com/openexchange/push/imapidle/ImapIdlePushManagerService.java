@@ -148,14 +148,14 @@ public final class ImapIdlePushManagerService implements PushManagerService {
                 }
 
                 // Already running for session user
-                LOGGER.info("Did not start IMAP-IDLE listener for user {} in context {} with session {} as there is already another one using another session", userId, contextId, session.getSessionID());
+                LOGGER.info("Did not start IMAP-IDLE listener for user {} in context {} with session {} as there is already such a listener using another session", userId, contextId, session.getSessionID());
             } finally {
                 if (unlock) {
                     releaseLock(session);
                 }
             }
         } else {
-            LOGGER.info("Could not acquire lock to start IMAP-IDLE listener for user {} in context {} with session {}", userId, contextId, session.getSessionID());
+            LOGGER.info("Could not acquire lock to start IMAP-IDLE listener for user {} in context {} with session {} as there is already such a listener using another session", userId, contextId, session.getSessionID());
         }
 
         // No listener registered for given session
