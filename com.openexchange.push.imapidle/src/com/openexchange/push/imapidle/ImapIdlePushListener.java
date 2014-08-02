@@ -59,13 +59,12 @@ import javax.mail.MessagingException;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCapabilities;
-import com.openexchange.imap.IMAPMessageStorage;
+import com.openexchange.imap.IMAPFolderStorage;
 import com.openexchange.imap.IMAPProvider;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageDelegator;
 import com.openexchange.mail.api.IMailMessageStorage;
-import com.openexchange.mail.api.IMailMessageStorageDelegator;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.utils.MailFolderUtility;
@@ -516,18 +515,18 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         }
     }
 
-    private static IMAPMessageStorage getImapMessageStorageFrom(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
-        IMailMessageStorage mstore = mailAccess.getMessageStorage();
-        if (!(mstore instanceof IMAPMessageStorage)) {
-            if (!(mstore instanceof IMailFolderStorageDelegator)) {
+    private static IMAPFolderStorage getImapMessageStorageFrom(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+        IMailFolderStorage fstore = mailAccess.getFolderStorage();
+        if (!(fstore instanceof IMAPFolderStorage)) {
+            if (!(fstore instanceof IMailFolderStorageDelegator)) {
                 throw PushExceptionCodes.UNEXPECTED_ERROR.create("Unknown MAL implementation");
             }
-            mstore = ((IMailMessageStorageDelegator) mstore).getDelegateMessageStorage();
-            if (!(mstore instanceof IMAPMessageStorage)) {
+            fstore = ((IMailFolderStorageDelegator) fstore).getDelegateFolderStorage();
+            if (!(fstore instanceof IMAPFolderStorage)) {
                 throw PushExceptionCodes.UNEXPECTED_ERROR.create("Unknown MAL implementation");
             }
         }
-        return (IMAPMessageStorage) mstore;
+        return (IMAPFolderStorage) fstore;
     }
 
 }
