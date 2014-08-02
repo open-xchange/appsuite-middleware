@@ -519,11 +519,11 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         IMailFolderStorage fstore = mailAccess.getFolderStorage();
         if (!(fstore instanceof IMAPFolderStorage)) {
             if (!(fstore instanceof IMailFolderStorageDelegator)) {
-                throw PushExceptionCodes.UNEXPECTED_ERROR.create("Unknown MAL implementation");
+                throw PushExceptionCodes.UNEXPECTED_ERROR.create("Unknown MAL implementation: " + fstore.getClass().getName());
             }
             fstore = ((IMailFolderStorageDelegator) fstore).getDelegateFolderStorage();
             if (!(fstore instanceof IMAPFolderStorage)) {
-                throw PushExceptionCodes.UNEXPECTED_ERROR.create("Unknown MAL implementation");
+                throw PushExceptionCodes.UNEXPECTED_ERROR.create("Unknown MAL implementation: " + fstore.getClass().getName());
             }
         }
         return (IMAPFolderStorage) fstore;
