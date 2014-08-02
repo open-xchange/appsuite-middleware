@@ -71,7 +71,7 @@ import com.openexchange.session.Session;
  */
 public class DbImapIdleClusterLock extends AbstractImapIdleClusterLock {
 
-    private static final String IMAPIDLE_LOCK = "imapidle.lock";
+    private static final String ATTR_IMAPIDLE_LOCK = "imapidle.lock";
 
     /**
      * Initializes a new {@link DbImapIdleClusterLock}.
@@ -108,12 +108,12 @@ public class DbImapIdleClusterLock extends AbstractImapIdleClusterLock {
             int pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
-            stmt.setString(pos++, IMAPIDLE_LOCK);
+            stmt.setString(pos++, ATTR_IMAPIDLE_LOCK);
             stmt.setString(pos++, generateValue(now, session.getSessionID()));
             stmt.setBytes(pos++, UUIDs.toByteArray(UUID.randomUUID()));
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
-            stmt.setString(pos++, IMAPIDLE_LOCK);
+            stmt.setString(pos++, ATTR_IMAPIDLE_LOCK);
             if (stmt.executeUpdate() > 0) {
                 return true;
             }
@@ -124,7 +124,7 @@ public class DbImapIdleClusterLock extends AbstractImapIdleClusterLock {
             pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
-            stmt.setString(pos++, IMAPIDLE_LOCK);
+            stmt.setString(pos++, ATTR_IMAPIDLE_LOCK);
             rs = stmt.executeQuery();
             String previous = rs.getString(pos);
             Databases.closeSQLStuff(rs, stmt);
@@ -141,7 +141,7 @@ public class DbImapIdleClusterLock extends AbstractImapIdleClusterLock {
             stmt.setString(pos++, generateValue(now, session.getSessionID()));
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
-            stmt.setString(pos++, IMAPIDLE_LOCK);
+            stmt.setString(pos++, ATTR_IMAPIDLE_LOCK);
             stmt.setString(pos++, previous);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -177,7 +177,7 @@ public class DbImapIdleClusterLock extends AbstractImapIdleClusterLock {
             stmt.setString(pos++, generateValue(System.nanoTime(), session.getSessionID()));
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
-            stmt.setString(pos++, IMAPIDLE_LOCK);
+            stmt.setString(pos++, ATTR_IMAPIDLE_LOCK);
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -211,7 +211,7 @@ public class DbImapIdleClusterLock extends AbstractImapIdleClusterLock {
             int pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
-            stmt.setString(pos++, IMAPIDLE_LOCK);
+            stmt.setString(pos++, ATTR_IMAPIDLE_LOCK);
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
