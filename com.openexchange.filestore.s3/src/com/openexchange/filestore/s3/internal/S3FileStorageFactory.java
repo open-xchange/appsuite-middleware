@@ -214,14 +214,14 @@ public class S3FileStorageFactory implements FileStorageFactoryCandidate {
     }
 
     private EncryptionMaterials getEncryptionMaterials(String filestoreID, String encryptionMode) throws OXException {
-        if ("rsa".equalsIgnoreCase(encryptionMode)) {
-            String keyStore = requireProperty("com.openexchange.filestore.s3." + filestoreID + ".encryption.rsa.keyStore");
-            String password = requireProperty("com.openexchange.filestore.s3." + filestoreID + ".encryption.rsa.password");
-            KeyPair keyPair = extractKeys(keyStore, password);
-            return new EncryptionMaterials(keyPair);
-        } else {
+        if (!"rsa".equalsIgnoreCase(encryptionMode)) {
             throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Unknown encryption mode: " + encryptionMode);
         }
+
+        String keyStore = requireProperty("com.openexchange.filestore.s3." + filestoreID + ".encryption.rsa.keyStore");
+        String password = requireProperty("com.openexchange.filestore.s3." + filestoreID + ".encryption.rsa.password");
+        KeyPair keyPair = extractKeys(keyStore, password);
+        return new EncryptionMaterials(keyPair);
     }
 
     /**
