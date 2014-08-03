@@ -63,43 +63,68 @@ public final class QuotaFileStorage extends FileStorage {
 
     private static volatile QuotaFileStorageFactory qfss;
 
-    private com.openexchange.tools.file.external.QuotaFileStorage qfs;
-
-    private QuotaFileStorage(final URI uri, final Context ctx, final QuotaFileStorageFactory qfss) throws OXException {
-        super();
-        qfs = qfss.getQuotaFileStorage(ctx, uri);
-    }
-
+    /**
+     * Gets the <tt>QuotaFileStorage</tt> instance for specified URI and context.
+     *
+     * @param uri The file storage's URI
+     * @param ctx The associated context
+     * @return The appropriate <tt>QuotaFileStorage</tt> instance
+     * @throws OXException If a <tt>QuotaFileStorage</tt> instance cannot be returned
+     */
     public static final QuotaFileStorage getInstance(final URI uri, final Context ctx) throws OXException {
-        if (qfss == null) {
+        QuotaFileStorageFactory factory = qfss;
+        if (factory == null) {
             throw FileStorageCodes.INSTANTIATIONERROR.create("No quota file storage starter registered.");
         }
-        return new com.openexchange.tools.file.QuotaFileStorage(uri, ctx, qfss);
+        return new com.openexchange.tools.file.QuotaFileStorage(uri, ctx, factory);
     }
 
+    /**
+     * Statically sets the <tt>QuotaFileStorageFactory</tt> instance.
+     *
+     * @param qfss The factory instance to set
+     */
     public static void setQuotaFileStorageStarter(final QuotaFileStorageFactory qfss) {
         QuotaFileStorage.qfss = qfss;
     }
 
+    // ----------------------------------------------------------------------------------------------------------- //
+
+    private com.openexchange.tools.file.external.QuotaFileStorage delegateQuotaFileStorage;
+
+    private QuotaFileStorage(URI uri, Context ctx, QuotaFileStorageFactory qfss) throws OXException {
+        super();
+        delegateQuotaFileStorage = qfss.getQuotaFileStorage(ctx, uri);
+    }
+
+    private com.openexchange.tools.file.external.QuotaFileStorage getDelegateQuotaFileStorage() {
+        // Helper method to ensure QuotaFileStorage instance is not null
+        com.openexchange.tools.file.external.QuotaFileStorage tmp = this.delegateQuotaFileStorage;
+        if (null == tmp) {
+            throw new IllegalStateException("QuotaFileStorage has already been closed.");
+        }
+        return tmp;
+    }
+
     public long getUsage() throws OXException {
-        return qfs.getUsage();
+        return getDelegateQuotaFileStorage().getUsage();
     }
 
     public void recalculateUsage() throws OXException {
-        qfs.recalculateUsage();
+        getDelegateQuotaFileStorage().recalculateUsage();
     }
 
     public void recalculateUsage(Set<String> filesToIgnore) throws OXException {
-        qfs.recalculateUsage(filesToIgnore);
+        getDelegateQuotaFileStorage().recalculateUsage(filesToIgnore);
     }
 
     public long getQuota() {
-        return qfs.getQuota();
+        return getDelegateQuotaFileStorage().getQuota();
     }
 
     @Override
     public boolean deleteFile(final String identifier) throws OXException {
-        return qfs.deleteFile(identifier);
+        return getDelegateQuotaFileStorage().deleteFile(identifier);
     }
 
     @Override
@@ -107,70 +132,70 @@ public final class QuotaFileStorage extends FileStorage {
         if (null == identifiers || 0 == identifiers.length) {
             return Collections.emptySet();
         }
-        return qfs.deleteFiles(identifiers);
+        return getDelegateQuotaFileStorage().deleteFiles(identifiers);
     }
 
     @Override
     public InputStream getFile(final String name) throws OXException {
-        return qfs.getFile(name);
+        return getDelegateQuotaFileStorage().getFile(name);
     }
 
     @Override
     public SortedSet<String> getFileList() throws OXException {
-        return qfs.getFileList();
+        return getDelegateQuotaFileStorage().getFileList();
     }
 
     @Override
     public long getFileSize(final String name) throws OXException {
-        return qfs.getFileSize(name);
+        return getDelegateQuotaFileStorage().getFileSize(name);
     }
 
     @Override
     public String getMimeType(final String name) throws OXException {
-        return qfs.getMimeType(name);
+        return getDelegateQuotaFileStorage().getMimeType(name);
     }
 
     @Override
     public void recreateStateFile() throws OXException {
-        qfs.recreateStateFile();
+        getDelegateQuotaFileStorage().recreateStateFile();
     }
 
     @Override
     public void remove() throws OXException {
-        qfs.remove();
+        getDelegateQuotaFileStorage().remove();
     }
 
     @Override
     public String saveNewFile(final InputStream file) throws OXException {
-        return qfs.saveNewFile(file);
+        return getDelegateQuotaFileStorage().saveNewFile(file);
     }
 
     public String saveNewFile(final InputStream file, final long sizeHint) throws OXException {
-        return qfs.saveNewFile(file, sizeHint);
+        return getDelegateQuotaFileStorage().saveNewFile(file, sizeHint);
     }
 
     public long appendToFile(InputStream file, String name, long offset, long sizeHint) throws OXException {
-        return qfs.appendToFile(file, name, offset, sizeHint);
+        return getDelegateQuotaFileStorage().appendToFile(file, name, offset, sizeHint);
     }
 
     @Override
     public void close() {
-        qfs = null;
+        delegateQuotaFileStorage = null;
     }
 
     @Override
     public long appendToFile(InputStream file, String name, long offset) throws OXException {
-        return qfs.appendToFile(file, name, offset);
+        return getDelegateQuotaFileStorage().appendToFile(file, name, offset);
     }
 
     @Override
     public void setFileLength(long length, String name) throws OXException {
-        qfs.setFileLength(length, name);
+        getDelegateQuotaFileStorage().setFileLength(length, name);
     }
 
     @Override
     public InputStream getFile(String name, long offset, long length) throws OXException {
-        return qfs.getFile(name, offset, length);
+        return getDelegateQuotaFileStorage().getFile(name, offset, length);
     }
 
 }
