@@ -54,8 +54,14 @@ import com.openexchange.exception.OXException;
 import com.openexchange.tools.file.external.FileStorage;
 import com.openexchange.tools.file.external.FileStorageFactory;
 
+/**
+ * {@link LocalFileStorageFactory} - The local file storage factory.
+ */
 public class LocalFileStorageFactory implements FileStorageFactory {
 
+    /**
+     * Initializes a new {@link LocalFileStorageFactory}.
+     */
     public LocalFileStorageFactory() {
         super();
     }
