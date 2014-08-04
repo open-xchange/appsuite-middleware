@@ -59,6 +59,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
@@ -359,14 +360,22 @@ public abstract class UserStorage {
     /**
      * Creates a user within the database.
      *
-     * @param con The connection.
      * @param context The context.
      * @param user The user.
      * @return The ID of the created user.
      */
-    public abstract int createUser(final Context context, final User user) throws OXException;
+    public int createUser(final Context context, final User user) throws OXException {
+        Connection con = null;
+        try {
+            con = DBPool.pickupWriteable(context);
+            return createUser(con, context, user);
+        } finally {
+            DBPool.closeWriterSilent(context, con);
+        }
+    }
 
     /**
+     * Creates a user within the database.
      *
      * @param con The database connection.
      * @param context The context.
@@ -374,6 +383,32 @@ public abstract class UserStorage {
      * @return The ID of the created user.
      */
     public abstract int createUser(final Connection con, final Context context, final User user) throws OXException;
+
+    /**
+     * Deletes a user from the database.
+     *
+     * @param context The context
+     * @param userId The identifier of the user to delete
+     */
+    public void deleteUser(Context context, int userId) throws OXException {
+        Connection con = null;
+        try {
+            con = DBPool.pickupWriteable(context);
+            deleteUser(con, context, userId);
+        } finally {
+            DBPool.closeWriterSilent(context, con);
+        }
+    }
+
+    /**
+     * Deletes a user from the database.
+     *
+     * @param con A (writable) database connection
+     * @param context The context
+     * @param userId The identifier of the user to delete
+     * @return The ID of the created user.
+     */
+    public abstract void deleteUser(Connection con, Context context, int userId) throws OXException;
 
     public final void invalidateUser(final Context ctx, final int[] userIds) throws OXException {
         for (final int member : userIds) {

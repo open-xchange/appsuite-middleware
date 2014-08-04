@@ -117,8 +117,8 @@ public class CachingUserStorage extends UserStorage {
     }
 
     @Override
-    public int createUser(final Context context, final User user) throws OXException {
-        return delegate.createUser(context, user);
+    public void deleteUser(final Connection con, final Context context, int userId) throws OXException {
+        delegate.deleteUser(con, context, userId);
     }
 
     @Override

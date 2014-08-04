@@ -221,6 +221,91 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
+    @Override
+    public void deleteUser(Connection con, Context context, int userId) throws OXException {
+        try {
+            /*
+             * fetch data to copy into del_user table
+             */
+            int contactId;
+            int uidNumber;
+            int gidNumber;
+            int guestCreatedBy;
+            ResultSet result = null;
+            PreparedStatement stmt = null;
+            try {
+                stmt = con.prepareStatement("SELECT contactId,uidNumber,gidNumber,guestCreatedBy FROM user WHERE cid=? AND id=?;");
+                stmt.setInt(1, context.getContextId());
+                stmt.setInt(2, userId);
+                result = stmt.executeQuery();
+                if (false == result.next()) {
+                    throw UserExceptionCode.USER_NOT_FOUND.create(I(userId), I(context.getContextId()));
+                }
+                contactId = result.getInt(1);
+                uidNumber = result.getInt(2);
+                gidNumber = result.getInt(3);
+                guestCreatedBy = result.getInt(4);
+            } finally {
+                closeSQLStuff(result, stmt);
+            }
+            /*
+             * insert tombstone record into del_user table
+             */
+            try {
+                stmt = con.prepareStatement(
+                    "INSERT INTO del_user (cid,id,contactId,uidNumber,gidNumber,guestCreatedBy) VALUES (?,?,?,?,?,?);");
+                stmt.setInt(1, context.getContextId());
+                stmt.setInt(2, userId);
+                stmt.setInt(3, contactId);
+                stmt.setInt(4, uidNumber);
+                stmt.setInt(5, gidNumber);
+                stmt.setInt(6, guestCreatedBy);
+                stmt.executeUpdate();
+            } finally {
+                closeSQLStuff(stmt);
+            }
+            /*
+             * remove login info if needed
+             */
+            if (0 < guestCreatedBy) {
+                try {
+                    stmt = con.prepareStatement("DELETE FROM login2user WHERE cid=? AND id=?;");
+                    stmt.setInt(1, context.getContextId());
+                    stmt.setInt(2, userId);
+                    stmt.executeUpdate();
+                } finally {
+                    closeSQLStuff(stmt);
+                }
+            }
+            /*
+             * remove all user attributes
+             */
+            try {
+                stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=?;");
+                stmt.setInt(1, context.getContextId());
+                stmt.setInt(2, userId);
+                stmt.executeUpdate();
+            } finally {
+                closeSQLStuff(stmt);
+            }
+            /*
+             * delete user from user table
+             */
+            try {
+                stmt = con.prepareStatement("DELETE FROM user WHERE cid=? AND id=?;");
+                stmt.setInt(1, context.getContextId());
+                stmt.setInt(2, userId);
+                stmt.executeUpdate();
+            } catch (SQLException e) {
+                throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                closeSQLStuff(stmt);
+            }
+        } catch (SQLException e) {
+            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        }
+    }
+
     private static void writeLoginInfo(Connection con, User user, Context context, int userId) throws SQLException {
         PreparedStatement stmt = null;
         try {
@@ -255,17 +340,6 @@ public class RdbUserStorage extends UserStorage {
             stmt.executeBatch();
         } finally {
             closeSQLStuff(stmt);
-        }
-    }
-
-    @Override
-    public int createUser(final Context context, final User user) throws OXException {
-        Connection con = null;
-        try {
-            con = DBPool.pickupWriteable(context);
-            return createUser(con, context, user);
-        } finally {
-            DBPool.closeWriterSilent(context, con);
         }
     }
 
