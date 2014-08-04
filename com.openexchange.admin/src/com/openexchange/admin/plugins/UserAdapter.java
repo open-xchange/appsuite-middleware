@@ -211,7 +211,7 @@ public class UserAdapter implements User {
 
     @Override
     public int getCreatedBy() {
-        return -1;
+        return 0;
     }
 
 }

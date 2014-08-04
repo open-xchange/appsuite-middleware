@@ -72,7 +72,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -104,12 +103,10 @@ import com.openexchange.user.internal.mapping.UserMapper;
  */
 public class RdbUserStorage extends UserStorage {
 
-    private static final String ATTR_GUEST_CREATED_BY = "com.openexchange.user.guestCreatedBy";
-
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbUserStorage.class);
 
     private static final String SELECT_ALL_USER = "SELECT id,userPassword,mailEnabled,imapServer,imapLogin,smtpServer,mailDomain," +
-        "shadowLastChange,mail,timeZone,preferredLanguage,passwordMech,contactId FROM user WHERE user.cid=?";
+        "shadowLastChange,mail,timeZone,preferredLanguage,passwordMech,contactId,guestCreatedBy FROM user WHERE user.cid=?";
 
     private static final String SELECT_USER = SELECT_ALL_USER + " AND id IN (";
 
@@ -127,7 +124,7 @@ public class RdbUserStorage extends UserStorage {
 
     private static final String INSERT_USER = "INSERT INTO user (cid, id, imapServer, imapLogin, mail, mailDomain, mailEnabled, " +
         "preferredLanguage, shadowLastChange, smtpServer, timeZone, userPassword, contactId, passwordMech, uidNumber, gidNumber, " +
-        "homeDirectory, loginShell) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        "homeDirectory, loginShell, guestCreatedBy) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String INSERT_ATTRIBUTES = "INSERT INTO user_attribute (cid, id, name, value, uuid) VALUES (?, ?, ?, ?, ?)";
 
@@ -209,22 +206,13 @@ public class RdbUserStorage extends UserStorage {
             stmt.setInt(i++, 0);
             setStringOrNull(i++, stmt, "/home/" + user.getGivenName());
             setStringOrNull(i++, stmt, "/bin/bash");
+            stmt.setInt(i++, user.getCreatedBy());
             stmt.executeUpdate();
 
-            Map<String, Set<String>> attributes;
-            if (user.isGuest()) {
-                attributes = new HashMap<String, Set<String>>();
-                attributes.put(ATTR_GUEST_CREATED_BY, Collections.singleton(Integer.toString(user.getCreatedBy())));
-
-                Map<String, Set<String>> origin = user.getAttributes();
-                if (origin != null) {
-                    attributes.putAll(origin);
-                }
-            } else {
-                attributes = user.getAttributes();
+            if (false == user.isGuest()) {
                 writeLoginInfo(con, user, context, userId);
             }
-            writeUserAttributes(con, attributes, context, userId);
+            writeUserAttributes(con, user.getAttributes(), context, userId);
             return userId;
         } catch (final SQLException e) {
             throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -274,10 +262,10 @@ public class RdbUserStorage extends UserStorage {
     public int createUser(final Context context, final User user) throws OXException {
         Connection con = null;
         try {
-            con = DBPool.pickup(context);
+            con = DBPool.pickupWriteable(context);
             return createUser(con, context, user);
         } finally {
-            DBPool.closeReaderSilent(context, con);
+            DBPool.closeWriterSilent(context, con);
         }
     }
 
@@ -310,6 +298,7 @@ public class RdbUserStorage extends UserStorage {
             return new User[0];
         }
         final TIntObjectMap<UserImpl> users = new TIntObjectHashMap<UserImpl>(length);
+        final TIntObjectMap<UserImpl> regularUsers = new TIntObjectHashMap<UserImpl>(length);
         try {
             for (int i = 0; i < userIds.length; i += IN_LIMIT) {
                 PreparedStatement stmt = null;
@@ -342,7 +331,12 @@ public class RdbUserStorage extends UserStorage {
                         user.setPreferredLanguage(result.getString(pos++));
                         user.setPasswordMech(result.getString(pos++));
                         user.setContactId(result.getInt(pos++));
+                        user.setCreatedBy(result.getInt(pos++));
+
                         users.put(user.getId(), user);
+                        if (false == user.isGuest()) {
+                            regularUsers.put(user.getId(), user);
+                        }
                     }
                 } finally {
                     closeSQLStuff(result, stmt);
@@ -356,8 +350,8 @@ public class RdbUserStorage extends UserStorage {
                 throw UserExceptionCode.USER_NOT_FOUND.create(I(userId), I(ctx.getContextId()));
             }
         }
-        loadLoginInfo(ctx, con, users);
-        loadContact(ctx, con, users);
+        loadLoginInfo(ctx, con, regularUsers);
+        loadContact(ctx, con, regularUsers);
         loadAttributes(ctx.getContextId(), con, users, false);
         loadGroups(ctx, con, users);
         final User[] retval = new User[users.size()];
@@ -368,10 +362,10 @@ public class RdbUserStorage extends UserStorage {
     }
 
     @Override
-    public User[] getUser(final Context ctx) throws OXException {
+    public User[] getUser(final Context ctx, boolean includeGuests, boolean excludeUsers) throws OXException {
         final Connection con = DBPool.pickup(ctx);
         try {
-            return getUser(ctx, con, listAllUser(ctx, con));
+            return getUser(ctx, con, listAllUser(ctx, con, includeGuests, excludeUsers));
         } finally {
             DBPool.closeReaderSilent(ctx, con);
         }
@@ -560,20 +554,6 @@ public class RdbUserStorage extends UserStorage {
                         }
                     }
                     user.setAliases(tmp.toArray(new String[tmp.size()]));
-                }
-            }
-            // Check for guest
-            {
-                UserAttribute guestCreatedBy = attrs.get(ATTR_GUEST_CREATED_BY);
-                if (null != guestCreatedBy) {
-                    Set<String> values = guestCreatedBy.getStringValues();
-                    if (null != values && 0 < values.size()) {
-                        try {
-                            user.setCreatedBy(Integer.valueOf(values.iterator().next()));
-                        } catch (NumberFormatException e) {
-                            throw UserExceptionCode.SQL_ERROR.create("Invalid value for \"" + ATTR_GUEST_CREATED_BY + "\"");//TODO
-                        }
-                    }
                 }
             }
             // Apply attributes
@@ -1119,13 +1099,21 @@ public class RdbUserStorage extends UserStorage {
     }
 
     @Override
-    public User searchUser(final String email, final Context context) throws OXException {
-        return searchUser(email, context, true);
-    }
-
-    @Override
-    public User searchUser(final String email, final Context context, boolean considerAliases) throws OXException {
-        String sql = "SELECT id FROM user WHERE cid=? AND mail LIKE ?";
+    public User searchUser(final String email, final Context context, boolean considerAliases, boolean includeGuests, boolean excludeUsers) throws OXException {
+        StringBuilder stringBuilder = new StringBuilder("SELECT id FROM user WHERE cid=? AND mail LIKE ?");
+        if (excludeUsers) {
+            /*
+             * exclude all regular users
+             */
+            stringBuilder.append(" AND guestCreatedBy>0");
+        }
+        if (false == includeGuests) {
+            /*
+             * exclude all guest users
+             */
+            stringBuilder.append(" AND guestCreatedBy=0");
+        }
+        String sql = stringBuilder.toString();
         final Connection con = DBPool.pickup(context);
         try {
             final String pattern = StringCollection.prepareForSearch(email, false, true);
@@ -1233,7 +1221,7 @@ public class RdbUserStorage extends UserStorage {
     }
 
     @Override
-    public int[] listAllUser(final Context context) throws OXException {
+    public int[] listAllUser(final Context context, boolean includeGuests, boolean excludeUsers) throws OXException {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
@@ -1241,18 +1229,32 @@ public class RdbUserStorage extends UserStorage {
             throw UserExceptionCode.NO_CONNECTION.create(e);
         }
         try {
-            return listAllUser(context, con);
+            return listAllUser(context, con, includeGuests, excludeUsers);
         } finally {
             DBPool.closeReaderSilent(context, con);
         }
     }
 
-    private static int[] listAllUser(Context ctx, Connection con) throws OXException {
+    private static int[] listAllUser(Context ctx, Connection con, boolean includeGuests, boolean excludeUsers) throws OXException {
+        StringBuilder stringBuilder = new StringBuilder("SELECT id FROM user WHERE cid=?");
+        if (excludeUsers) {
+            /*
+             * exclude all regular users
+             */
+            stringBuilder.append(" AND guestCreatedBy>0");
+        }
+        if (false == includeGuests) {
+            /*
+             * exclude all guest users
+             */
+            stringBuilder.append(" AND guestCreatedBy=0");
+        }
+        String sql = stringBuilder.toString();
         final int[] users;
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement("SELECT id FROM user WHERE user.cid=?");
+            stmt = con.prepareStatement(sql);
             stmt.setInt(1, ctx.getContextId());
             result = stmt.executeQuery();
             final TIntList tmp = new TIntArrayList();

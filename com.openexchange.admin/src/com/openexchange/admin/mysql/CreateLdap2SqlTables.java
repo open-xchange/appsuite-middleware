@@ -108,6 +108,7 @@ public class CreateLdap2SqlTables extends AbstractCreateTableImpl {
        + "gidNumber INT4 UNSIGNED NOT NULL,"
        + "homeDirectory VARCHAR(128) NOT NULL,"
        + "loginShell VARCHAR(128) NOT NULL,"
+       + "guestCreatedBy INT4 UNSIGNED NOT NULL DEFAULT 0,"
        + "PRIMARY KEY (cid, id),"
        + "INDEX (cid, mail(255))"
      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
@@ -131,6 +132,7 @@ public class CreateLdap2SqlTables extends AbstractCreateTableImpl {
        + "gidNumber INT4 UNSIGNED NOT NULL,"
        + "homeDirectory VARCHAR(128) NOT NULL DEFAULT '',"
        + "loginShell VARCHAR(128) NOT NULL DEFAULT '',"
+       + "guestCreatedBy INT4 UNSIGNED NOT NULL DEFAULT 0,"
        + "PRIMARY KEY (cid, id)"
      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 

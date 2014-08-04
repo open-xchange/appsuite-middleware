@@ -89,7 +89,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * The user id of this guest users creator.
      */
-    private int createdBy = -1;
+    private int createdBy = 0;
 
     /**
      * Unique identifier of the contact belonging to this user.

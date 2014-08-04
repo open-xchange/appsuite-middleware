@@ -79,7 +79,7 @@ public interface User extends Serializable {
 
     /**
      * Gets the creators user id if this user is a guest.
-     * @return The user id of the creator or <code>-1</code> if this instance is a fully fledged user.
+     * @return The user id of the creator or <code>0</code> if this instance is a fully fledged user.
      */
     int getCreatedBy();
 

@@ -572,7 +572,7 @@ public class MockUser implements User {
 
     @Override
     public int getCreatedBy() {
-        return -1;
+        return 0;
     }
 
     @Override
