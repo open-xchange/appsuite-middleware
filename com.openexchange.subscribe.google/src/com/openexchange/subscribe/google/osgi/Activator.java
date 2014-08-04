@@ -55,7 +55,6 @@ import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.subscribe.google.Services;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**

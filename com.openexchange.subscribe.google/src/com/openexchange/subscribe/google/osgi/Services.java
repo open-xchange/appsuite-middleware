@@ -46,7 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.subscribe.google;
+package com.openexchange.subscribe.google.osgi;
 
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.server.ServiceLookup;
