@@ -75,6 +75,8 @@ import com.openexchange.share.ShareService;
 import com.openexchange.share.servlet.auth.ShareLoginMethod;
 import com.openexchange.tools.servlet.RateLimitedException;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.tools.webdav.OXServlet;
 
 /**
  * {@link ShareServlet}
@@ -106,35 +108,36 @@ public class ShareServlet extends HttpServlet {
             }
             LOG.debug("Successfully resolved share at '{}' to {}", request.getPathInfo(), share);
             /*
-             * get, authenticate and login as associated guest user
+             * check if there's already a valid guest session
              */
-            LoginConfiguration loginConfig = LoginServlet.getLoginConfiguration();
-            LoginRequestImpl loginRequest = LoginTools.parseLogin(request, share.getToken(), null, false, loginConfig.getDefaultClient(),
-                loginConfig.isCookieForceHTTPS(), false);
-            loginRequest.setTransient(true);
-            ShareLoginMethod loginMethod = new ShareLoginMethod(share);
-            Map<String, Object> properties = new HashMap<String, Object>();
-            LoginResult loginResult = LoginPerformer.getInstance().doLogin(loginRequest, properties, loginMethod);
-            if (null == loginResult || null == loginResult.getSession()) {
-                LOG.debug("Unsuccessful login for share {} with guest user {} in context {}.",
+            User guestUser;
+            Session session = OXServlet.findSessionByCookie(request, response);
+            if (null != session && session.getUserId() == share.getGuest() && session.getContextId() == share.getContextID()) {
+                LOG.debug("Existing session found via supplied cookies for share {} with guest user {} in context {}.",
                     share.getToken(), share.getGuest(), share.getContextID());
-                loginMethod.sendUnauthorized(request, response);
-                return;
+                guestUser = ServerSessionAdapter.valueOf(session).getUser();
+            } else {
+                /*
+                 * get, authenticate and login as associated guest user
+                 */
+                LoginResult loginResult = login(share, request, response);
+                if (null == loginResult) {
+                    return;
+                }
+                session = loginResult.getSession();
+                guestUser = loginResult.getUser();
             }
-            LOG.debug("Successful login for share {} with guest user {} in context {}.",
-                share.getToken(), share.getGuest(), share.getContextID());
             /*
              * prepare response
              */
-            Session session = loginResult.getSession();
             Tools.disableCaching(response);
             LoginServlet.writeSecretCookie(request, response, session, session.getHash(), request.isSecure(), request.getServerName(),
-                loginConfig);
+                LoginServlet.getLoginConfiguration());
             response.addCookie(new Cookie("sessionid", session.getSessionID()));
             /*
              * construct redirect URL
              */
-            String url = getRedirectURL(session, loginResult.getUser(), share);
+            String url = getRedirectURL(session, guestUser, share);
             LOG.info("Redirecting share {} to {}...", share.getToken(), url);
             response.sendRedirect(url);
         } catch (RateLimitedException e) {
@@ -144,6 +147,37 @@ public class ShareServlet extends HttpServlet {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
+
+    /**
+     * Authenticates the request to the share and performs a guest login, sending an appropriate HTTP response in case of unauthorized
+     * access.
+     *
+     * @param share The share
+     * @param request The request
+     * @param response The response
+     * @return The login result, or <code>null</code> if not successful
+     */
+    private static LoginResult login(Share share, HttpServletRequest request, HttpServletResponse response) throws OXException, IOException {
+        LoginConfiguration loginConfig = LoginServlet.getLoginConfiguration();
+        LoginRequestImpl loginRequest = LoginTools.parseLogin(request, share.getToken(), null, false, loginConfig.getDefaultClient(),
+            loginConfig.isCookieForceHTTPS(), false);
+        loginRequest.setTransient(true);
+        ShareLoginMethod loginMethod = new ShareLoginMethod(share);
+        Map<String, Object> properties = new HashMap<String, Object>();
+        LoginResult loginResult = LoginPerformer.getInstance().doLogin(loginRequest, properties, loginMethod);
+        if (null == loginResult || null == loginResult.getSession()) {
+            LOG.debug("Unsuccessful login for share {} with guest user {} in context {}.",
+                share.getToken(), share.getGuest(), share.getContextID());
+            loginMethod.sendUnauthorized(request, response);
+            return null;
+        }
+        LOG.debug("Successful login for share {} with guest user {} in context {}.",
+            share.getToken(), share.getGuest(), share.getContextID());
+        return loginResult;
+    }
+
+    // http://192.168.32.191/ajax/share/19496DEDE78141A6AB77B316ADDA3660 kontakte steffen
+    // http://192.168.32.191/ajax/share/19496DED2C6542B5A1D6EF4AEEEA4D24 infostore tobias
 
     /**
      * Extracts the token from a HTTP request's path info and looks up the referenced share.
@@ -173,6 +207,23 @@ public class ShareServlet extends HttpServlet {
             }
         }
         return null;
+    }
+
+    /**
+     * Constructs the redirect URL pointing to the share in the web interface.
+     *
+     * @param session The session
+     * @param user The user
+     * @param share The share
+     * @return The redirect URL
+     */
+    private static String getDriveRedirectURL(Session session, User user, Share share) {
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("/ajax/drive?action=syncfolders")
+            .append("&root=").append(share.getFolder())
+            .append("&session=").append(session.getSessionID())
+        ;
+        return stringBuilder.toString();
     }
 
     /**
