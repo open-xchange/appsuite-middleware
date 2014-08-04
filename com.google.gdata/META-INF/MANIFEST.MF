@@ -1,0 +1,29 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Google Data Java Client Library
+Bundle-SymbolicName: com.google.gdata
+Bundle-Version: 1.47.1
+Bundle-Vendor: Google Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.google.common.annotations,
+ com.google.common.base,
+ com.google.common.base.internal,
+ com.google.common.cache,
+ com.google.common.collect,
+ com.google.common.escape,
+ com.google.common.eventbus,
+ com.google.common.hash,
+ com.google.common.html,
+ com.google.common.io,
+ com.google.common.math,
+ com.google.common.net,
+ com.google.common.primitives,
+ com.google.common.reflect,
+ com.google.common.util.concurrent,
+ com.google.common.xml
+Bundle-ClassPath:  .,
+ lib/gdata-client-1.0.jar,
+ lib/gdata-client-meta-1.0.jar,
+ lib/gdata-contacts-3.0.jar,
+ lib/gdata-contacts-meta-3.0.jar,
+ lib/gdata-core-1.0.jar
