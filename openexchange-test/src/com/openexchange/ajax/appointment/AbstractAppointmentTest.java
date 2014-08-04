@@ -472,7 +472,7 @@ public class AbstractAppointmentTest extends AbstractAJAXSession {
         if(selectedClient == null) {
             selectedClient = client;
         }
-        selectedClient.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder).setFailOnErrorParam(true));
+        selectedClient.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder));
 
     }
 
