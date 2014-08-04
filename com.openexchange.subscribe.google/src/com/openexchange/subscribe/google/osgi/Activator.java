@@ -50,6 +50,7 @@
 package com.openexchange.subscribe.google.osgi;
 
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.subscribe.google.Services;
 
 /**
  * {@link Activator}
@@ -65,8 +66,13 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        // TODO Auto-generated method stub
-        
+        Services.setServices(this);
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        Services.setServices(null);
+        super.stopBundle();
     }
 
 }
