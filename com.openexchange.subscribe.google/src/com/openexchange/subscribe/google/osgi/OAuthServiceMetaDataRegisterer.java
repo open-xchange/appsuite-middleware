@@ -87,7 +87,7 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
         final Logger logger = LoggerFactory.getLogger(OAuthServiceMetaDataRegisterer.class);
         final OAuthServiceMetaData oAuthServiceMetaData = context.getService(ref);
         if (oauthIdentifier.equals(oAuthServiceMetaData.getId())) {
-            logger.info("Registering Google MetaData service.");
+            logger.info("Registering Google subscription services.");
             final SubscribeService calendarSubService = new GoogleCalendarSubscribeService(oAuthServiceMetaData);
             final SubscribeService contactSubService = new GoogleContactSubscribeService(oAuthServiceMetaData);
             serviceRegistration = context.registerService(SubscribeService.class, calendarSubService, null);
@@ -105,7 +105,7 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
     public void removedService(ServiceReference<OAuthServiceMetaData> ref, OAuthServiceMetaData service) {
         final Logger logger = LoggerFactory.getLogger(OAuthServiceMetaDataRegisterer.class);
         if (service.getId().equals(oauthIdentifier) && serviceRegistration != null) {
-            logger.info("Unregistering Google MetaData service.");
+            logger.info("Unregistering Google subscription services.");
             serviceRegistration.unregister();
         }
         context.ungetService(ref);
