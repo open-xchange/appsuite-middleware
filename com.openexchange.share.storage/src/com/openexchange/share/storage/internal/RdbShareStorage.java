@@ -175,6 +175,18 @@ public class RdbShareStorage implements ShareStorage {
         }
     }
 
+    @Override
+    public List<Share> loadSharesExpiredAfter(int contextID, Date expires, StorageParameters parameters) throws OXException {
+        ConnectionProvider provider = getReadProvider(contextID, parameters);
+        try {
+            return selectSharesExpiredAfter(provider.get(), contextID, expires.getTime());
+        } catch (SQLException e) {
+            throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            provider.close();
+        }
+    }
+
     private static int insertShare(Connection connection, Share share) throws SQLException {
         PreparedStatement stmt = null;
         try {
@@ -380,6 +392,38 @@ public class RdbShareStorage implements ShareStorage {
                 }
                 share.setGuest(resultSet.getInt(8));
                 share.setAuthentication(resultSet.getInt(9));
+                shares.add(share);
+            } else {
+                return null;
+            }
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+        return shares;
+    }
+
+    private static List<Share> selectSharesExpiredAfter(Connection connection, int cid, long expired) throws SQLException {
+        List<Share> shares = new ArrayList<Share>();
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(SQL.SELECT_SHARES_EXPIRED_AFTER_STMT);
+            stmt.setInt(1, cid);
+            stmt.setLong(2, expired);
+            ResultSet resultSet = logExecuteQuery(stmt);
+            if (resultSet.next()) {
+                DefaultShare share = new DefaultShare();
+                share.setToken(UUIDs.getUnformattedString(UUIDs.toUUID(resultSet.getBytes(1))));
+                share.setContextID(cid);
+                share.setModule(resultSet.getInt(2));
+                share.setFolder(resultSet.getString(3));
+                share.setItem(resultSet.getString(4));
+                share.setCreated(new Date(resultSet.getLong(5)));
+                share.setCreatedBy(resultSet.getInt(6));
+                share.setLastModified(new Date(resultSet.getLong(7)));
+                share.setModifiedBy(resultSet.getInt(8));
+                share.setExpires(new Date(resultSet.getLong(9)));
+                share.setGuest(resultSet.getInt(10));
+                share.setAuthentication(resultSet.getInt(11));
                 shares.add(share);
             } else {
                 return null;

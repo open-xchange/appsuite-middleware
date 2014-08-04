@@ -49,6 +49,7 @@
 
 package com.openexchange.share.storage;
 
+import java.util.Date;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.share.Share;
@@ -129,5 +130,15 @@ public interface ShareStorage {
      * @return The shares
      */
     List<Share> loadSharesForItem(int contextID, String folder, String item, StorageParameters parameters) throws OXException;
+
+    /**
+     * Loads all shares that are expired after the given date.
+     *
+     * @param contextID The context ID
+     * @param expires The date to compare the share's expires value with
+     * @param parameters The storage parameters
+     * @return The shares
+     */
+    List<Share> loadSharesExpiredAfter(int contextID, Date expires, StorageParameters parameters) throws OXException;
 
 }
