@@ -50,8 +50,8 @@
 package com.openexchange.subscribe.google;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.services.calendar.Calendar;
@@ -64,6 +64,7 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.subscribe.Subscription;
+import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionSource;
 
 /**
@@ -94,7 +95,7 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
     public Collection<?> getContent(Subscription subscription) throws OXException {
         final GoogleCredential googleCreds = GoogleApiClients.getCredentials(subscription.getSession());
         final Calendar googleCal = new Calendar(googleCreds.getTransport(), googleCreds.getJsonFactory(), googleCreds.getRequestInitializer());
-        final List<CalendarObject> calObjList = new ArrayList<CalendarObject>();
+        final List<CalendarObject> calObjList = new LinkedList<CalendarObject>();
         try {
             final com.google.api.services.calendar.Calendar.CalendarList.List list = googleCal.calendarList().list();
             list.setOauthToken(googleCreds.getAccessToken());
@@ -108,8 +109,7 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
                 }
             }
         } catch (IOException e) {
-            //TODO exception handling
-            e.printStackTrace();
+            throw SubscriptionErrorMessage.IO_ERROR.create(e, e.getMessage());
         }
         return calObjList;
     }
