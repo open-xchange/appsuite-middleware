@@ -49,36 +49,60 @@
 
 package com.openexchange.subscribe.google.osgi;
 
-import com.openexchange.context.ContextService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.oauth.OAuthService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.subscribe.google.Services;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.threadpool.ThreadPoolService;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.subscribe.SubscribeService;
 
 /**
- * {@link Activator}
+ * {@link OAuthServiceMetaDataRegisterer}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class Activator extends HousekeepingActivator {
+public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<OAuthServiceMetaData, OAuthServiceMetaData> {
+    
+    private final String oauthIdentifier;
+    
+    private final BundleContext context;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] {
-            OAuthService.class, ContextService.class, SessiondService.class, DatabaseService.class, ThreadPoolService.class };
+    /**
+     * Initializes a new {@link OAuthServiceMetaDataRegisterer}.
+     */
+    public OAuthServiceMetaDataRegisterer(final BundleContext ctx) {
+        super();
+        context = ctx;
+        oauthIdentifier = "com.openexchange.oauth.google";
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        Services.setServices(this);
+    public OAuthServiceMetaData addingService(ServiceReference<OAuthServiceMetaData> ref) {
+        final OAuthServiceMetaData oAuthServiceMetaData = context.getService(ref);
+        if (oauthIdentifier.equals(oAuthServiceMetaData.getId())) {
+            final SubscribeService ss = new GoogleSubscribeService(oAuthServiceMetaData);
+            context.registerService(SubscribeService.class, ss, null);
+        }
+        return oAuthServiceMetaData;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
+     */
     @Override
-    protected void stopBundle() throws Exception {
-        Services.setServices(null);
-        super.stopBundle();
+    public void modifiedService(ServiceReference<OAuthServiceMetaData> ref, OAuthServiceMetaData service) {
+        // TODO Auto-generated method stub
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
+     */
+    @Override
+    public void removedService(ServiceReference<OAuthServiceMetaData> ref, OAuthServiceMetaData service) {
+        // TODO Auto-generated method stub
+
     }
 
 }

@@ -49,36 +49,52 @@
 
 package com.openexchange.subscribe.google.osgi;
 
-import com.openexchange.context.ContextService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.oauth.OAuthService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.subscribe.google.Services;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.threadpool.ThreadPoolService;
+import java.util.Collection;
+import com.openexchange.exception.OXException;
+import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.subscribe.AbstractSubscribeService;
+import com.openexchange.subscribe.Subscription;
+import com.openexchange.subscribe.SubscriptionSource;
 
 /**
- * {@link Activator}
+ * {@link GoogleSubscribeService}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class Activator extends HousekeepingActivator {
+public class GoogleSubscribeService extends AbstractSubscribeService {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] {
-            OAuthService.class, ContextService.class, SessiondService.class, DatabaseService.class, ThreadPoolService.class };
+    private OAuthServiceMetaData googleMetaData;
+
+    public GoogleSubscribeService(final OAuthServiceMetaData googleMetaData) {
+        this.googleMetaData = googleMetaData;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.subscribe.SubscribeService#getSubscriptionSource()
+     */
     @Override
-    protected void startBundle() throws Exception {
-        Services.setServices(this);
+    public SubscriptionSource getSubscriptionSource() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.subscribe.SubscribeService#handles(int)
+     */
     @Override
-    protected void stopBundle() throws Exception {
-        Services.setServices(null);
-        super.stopBundle();
+    public boolean handles(int folderModule) {
+        return false;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.subscribe.SubscribeService#getContent(com.openexchange.subscribe.Subscription)
+     */
+    @Override
+    public Collection<?> getContent(Subscription subscription) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }
