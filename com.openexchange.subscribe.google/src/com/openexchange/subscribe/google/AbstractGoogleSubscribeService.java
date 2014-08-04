@@ -68,7 +68,7 @@ public abstract class AbstractGoogleSubscribeService extends AbstractSubscribeSe
 
     protected final SubscriptionSource initSS(final int module) {
         final SubscriptionSource source = new SubscriptionSource();
-        source.setDisplayName("XING");
+        source.setDisplayName("Google");
         source.setFolderModule(module);
         source.setId("com.openexchange.subscribe.google");
         source.setSubscribeService(this);
