@@ -62,12 +62,12 @@ import com.openexchange.subscribe.SubscriptionSource;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class GoogleContactSubscribeService extends AbstractGoogleSubscribeService {
-    
+
     private final SubscriptionSource source;
 
     public GoogleContactSubscribeService(final OAuthServiceMetaData googleMetaData) {
         super(googleMetaData);
-        source = initSS(FolderObject.CONTACT);
+        source = initSS(FolderObject.CONTACT, "contact");
     }
 
     @Override

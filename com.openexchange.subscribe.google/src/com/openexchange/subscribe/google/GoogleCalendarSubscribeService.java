@@ -67,7 +67,7 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
 
     public GoogleCalendarSubscribeService(final OAuthServiceMetaData googleMetaData) {
         super(googleMetaData);
-        source = initSS(FolderObject.CALENDAR);
+        source = initSS(FolderObject.CALENDAR, "calendar");
     }
 
     @Override

@@ -60,18 +60,25 @@ import com.openexchange.subscribe.SubscriptionSource;
  */
 public abstract class AbstractGoogleSubscribeService extends AbstractSubscribeService {
 
-    private OAuthServiceMetaData googleMetaData;
+    private final OAuthServiceMetaData googleMetaData;
 
-    public AbstractGoogleSubscribeService(final OAuthServiceMetaData googleMetaData) {
+    /**
+     * Initializes a new {@link AbstractGoogleSubscribeService}.
+     *
+     * @param googleMetaData The OAuth account's meta data
+     */
+    protected AbstractGoogleSubscribeService(final OAuthServiceMetaData googleMetaData) {
+        super();
         this.googleMetaData = googleMetaData;
     }
 
-    protected final SubscriptionSource initSS(final int module) {
+    protected final SubscriptionSource initSS(int module, String appendix) {
         final SubscriptionSource source = new SubscriptionSource();
         source.setDisplayName("Google");
         source.setFolderModule(module);
-        source.setId("com.openexchange.subscribe.google");
+        source.setId("com.openexchange.subscribe.google." + appendix);
         source.setSubscribeService(this);
         return source;
     }
+
 }
