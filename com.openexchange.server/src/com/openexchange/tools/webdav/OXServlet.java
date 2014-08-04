@@ -497,7 +497,15 @@ public abstract class OXServlet extends WebDavServlet {
         return loginPerformer.doLogin(request, properties).getSession();
     }
 
-    private static Session findSessionByCookie(final HttpServletRequest req, final HttpServletResponse resp) throws OXException {
+    /**
+     * Tries to find an already existing session on the server based on the cookies found in the supplied HTTP request.
+     *
+     * @param req The request
+     * @param resp The response
+     * @return The session, or <code>null</code> if no matching session could be looked up
+     * @throws OXException
+     */
+    public static Session findSessionByCookie(final HttpServletRequest req, final HttpServletResponse resp) throws OXException {
         final Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
         String sessionId = null;
         if (null != cookies) {
