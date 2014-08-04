@@ -50,6 +50,7 @@
 package com.openexchange.subscribe.google;
 
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.SubscriptionSource;
 
@@ -57,19 +58,25 @@ import com.openexchange.subscribe.SubscriptionSource;
  * {@link AbstractGoogleSubscribeService}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractGoogleSubscribeService extends AbstractSubscribeService {
 
     /** The meta data of associated Google OAuth account */
     protected final OAuthServiceMetaData googleMetaData;
 
+    /** The service look-up */
+    protected final ServiceLookup services;
+
     /**
      * Initializes a new {@link AbstractGoogleSubscribeService}.
      *
      * @param googleMetaData The OAuth account's meta data
+     * @param services The service look-up
      */
-    protected AbstractGoogleSubscribeService(OAuthServiceMetaData googleMetaData) {
+    protected AbstractGoogleSubscribeService(OAuthServiceMetaData googleMetaData, ServiceLookup services) {
         super();
+        this.services = services;
         this.googleMetaData = googleMetaData;
     }
 

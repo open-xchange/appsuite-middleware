@@ -56,6 +56,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.google.GoogleCalendarSubscribeService;
 import com.openexchange.subscribe.google.GoogleContactSubscribeService;
@@ -69,16 +70,21 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
 
     private final String oauthIdentifier;
     private final BundleContext context;
+    private final ServiceLookup services;
 
     private volatile ServiceRegistration<SubscribeService> calendarRegistration;
     private volatile ServiceRegistration<SubscribeService> contactRegistration;
 
     /**
      * Initializes a new {@link OAuthServiceMetaDataRegisterer}.
+     *
+     * @param services The service look-up
+     * @param context The bundle context
      */
-    public OAuthServiceMetaDataRegisterer(final BundleContext ctx) {
+    public OAuthServiceMetaDataRegisterer(ServiceLookup services, BundleContext context) {
         super();
-        context = ctx;
+        this.services = services;
+        this.context = context;
         oauthIdentifier = "com.openexchange.oauth.google";
     }
 
@@ -88,8 +94,8 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
         final OAuthServiceMetaData oAuthServiceMetaData = context.getService(ref);
         if (oauthIdentifier.equals(oAuthServiceMetaData.getId())) {
             logger.info("Registering Google subscription services.");
-            final SubscribeService calendarSubService = new GoogleCalendarSubscribeService(oAuthServiceMetaData);
-            final SubscribeService contactSubService = new GoogleContactSubscribeService(oAuthServiceMetaData);
+            final SubscribeService calendarSubService = new GoogleCalendarSubscribeService(oAuthServiceMetaData, services);
+            final SubscribeService contactSubService = new GoogleContactSubscribeService(oAuthServiceMetaData, services);
             calendarRegistration = context.registerService(SubscribeService.class, calendarSubService, null);
             contactRegistration = context.registerService(SubscribeService.class, contactSubService, null);
         }

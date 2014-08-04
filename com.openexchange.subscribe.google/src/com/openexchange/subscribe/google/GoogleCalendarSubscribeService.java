@@ -63,6 +63,7 @@ import com.openexchange.google.api.client.GoogleApiClients;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionSource;
@@ -76,8 +77,8 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
 
     private final SubscriptionSource source;
 
-    public GoogleCalendarSubscribeService(final OAuthServiceMetaData googleMetaData) {
-        super(googleMetaData);
+    public GoogleCalendarSubscribeService(final OAuthServiceMetaData googleMetaData, ServiceLookup services) {
+        super(googleMetaData, services);
         source = initSS(FolderObject.CALENDAR, "calendar");
     }
 

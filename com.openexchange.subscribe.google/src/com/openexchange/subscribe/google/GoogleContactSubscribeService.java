@@ -49,24 +49,241 @@
 
 package com.openexchange.subscribe.google;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import javax.activation.FileTypeMap;
+import org.slf4j.Logger;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.gdata.client.Query;
+import com.google.gdata.client.contacts.ContactsService;
+import com.google.gdata.data.Link;
+import com.google.gdata.data.contacts.ContactEntry;
+import com.google.gdata.data.contacts.ContactFeed;
+import com.google.gdata.data.extensions.Email;
+import com.google.gdata.data.extensions.Name;
+import com.google.gdata.util.ServiceException;
+import com.openexchange.ajax.container.ByteArrayFileHolder;
+import com.openexchange.ajax.container.IFileHolder;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.google.api.client.GoogleApiClients;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.generic.FolderUpdaterRegistry;
+import com.openexchange.groupware.generic.FolderUpdaterService;
+import com.openexchange.java.ImageTypeDetector;
+import com.openexchange.java.Streams;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.Subscription;
+import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionSource;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.tools.iterator.SearchIteratorDelegator;
 
 /**
  * {@link GoogleContactSubscribeService}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class GoogleContactSubscribeService extends AbstractGoogleSubscribeService {
 
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(GoogleContactSubscribeService.class);
+
+    // -------------------------------------------------------------------------------------------------------------------------- //
+
+    /**
+     * Open a new {@link URLConnection URL connection} to specified parameter's value which indicates to be an URI/URL. The image's data and
+     * its MIME type is then read from opened connection.
+     *
+     * @param url The URI parameter's value
+     * @return The appropriate file holder
+     * @throws IOException If converting image's data fails
+     */
+    static IFileHolder loadImageFromURL(final String url) throws IOException {
+        try {
+            return loadImageFromURL(new URL(url));
+        } catch (final MalformedURLException e) {
+            throw new IOException("Problem loading photo from URL: " + url, e);
+        }
+    }
+
+    /**
+     * Open a new {@link URLConnection URL connection} to specified parameter's value which indicates to be an URI/URL. The image's data and
+     * its MIME type is then read from opened connection.
+     *
+     * @param url The image URL
+     * @return The appropriate file holder
+     * @throws XingException If converting image's data fails
+     */
+    private static IFileHolder loadImageFromURL(final URL url) throws IOException {
+        String mimeType = null;
+        byte[] bytes = null;
+        try {
+            final URLConnection urlCon = url.openConnection();
+            urlCon.setConnectTimeout(2500);
+            urlCon.setReadTimeout(2500);
+            urlCon.connect();
+            mimeType = urlCon.getContentType();
+            final InputStream in = urlCon.getInputStream();
+            try {
+                final ByteArrayOutputStream buffer = Streams.newByteArrayOutputStream(in.available());
+                transfer(in, buffer);
+                bytes = buffer.toByteArray();
+            } finally {
+                Streams.close(in);
+            }
+        } catch (final SocketTimeoutException e) {
+            throw e;
+        } catch (final IOException e) {
+            throw e;
+        }
+        if (null != bytes) {
+            final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
+            if (mimeType == null) {
+                mimeType = ImageTypeDetector.getMimeType(bytes);
+                if ("application/octet-stream".equals(mimeType)) {
+                    mimeType = getMimeType(url.toString());
+                }
+            }
+            if (isValidImage(bytes)) {
+                // Mime type should be of image type. Otherwise web server send some error page instead of 404 error code.
+                if (null == mimeType) {
+                    mimeType = "image/jpeg";
+                }
+                fileHolder.setContentType(mimeType);
+            }
+            return fileHolder;
+        }
+        return null;
+    }
+
+    private static void transfer(final InputStream in, final OutputStream out) throws IOException {
+        final byte[] buffer = new byte[4096];
+        int length;
+        while ((length = in.read(buffer)) > 0) {
+            out.write(buffer, 0, length);
+        }
+        out.flush();
+    }
+
+    private static final FileTypeMap DEFAULT_FILE_TYPE_MAP = FileTypeMap.getDefaultFileTypeMap();
+
+    private static String getMimeType(final String filename) {
+        return DEFAULT_FILE_TYPE_MAP.getContentType(filename);
+    }
+
+    private static boolean isValidImage(final byte[] data) {
+        java.awt.image.BufferedImage bimg = null;
+        try {
+            bimg = javax.imageio.ImageIO.read(Streams.newByteArrayInputStream(data));
+        } catch (final Exception e) {
+            return false;
+        }
+        return (bimg != null);
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------- //
+
+    private interface PhotoHandler {
+
+        void handlePhoto(ContactEntry entry, Contact contact) throws OXException;
+    }
+
+    private final class CollectingPhotoHandler implements PhotoHandler {
+
+        private final Map<String, String> photoUrlsMap;
+
+        /**
+         * Initializes a new {@link CollectingPhotoHandler}.
+         */
+        CollectingPhotoHandler(Map<String, String> photoUrlsMap) {
+            super();
+            this.photoUrlsMap = photoUrlsMap;
+        }
+
+        @Override
+        public void handlePhoto(ContactEntry entry, Contact contact) throws OXException {
+            Link photoLink = entry.getContactPhotoLink();
+            if (photoLink != null) {
+                String photoLinkHref = photoLink.getHref();
+                if (null != photoLinkHref) {
+                    photoUrlsMap.put(entry.getId(), photoLinkHref);
+                }
+            }
+        }
+    }
+
+    private final PhotoHandler loadingPhotoHandler = new PhotoHandler() {
+
+        @Override
+        public void handlePhoto(ContactEntry entry, Contact contact) throws OXException {
+            if (null == entry || null == contact) {
+                return;
+            }
+
+            String url = null;
+            {
+                Link photoLink = entry.getContactPhotoLink();
+                if (photoLink != null) {
+                    url = photoLink.getHref();
+                }
+            }
+
+            if (url != null) {
+                try {
+                    IFileHolder photo = loadImageFromURL(url);
+                    if (photo != null) {
+                        byte[] bytes = Streams.stream2bytes(photo.getStream());
+                        contact.setImage1(bytes);
+                        contact.setImageContentType(photo.getContentType());
+                    }
+                } catch (IOException e) {
+                    throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+                }
+            }
+        }
+    };
+
+    // -------------------------------------------------------------------------------------------------------------------------- //
+
+    private static final int PAGE_SIZE = 25;
+    private static final URL CONTACT_URL;
+    private static final URL GROUP_URL;
+
+    static {
+        try {
+            URL feedUrl = new URL("https://www.google.com/m8/feeds/contacts/default/full");
+            CONTACT_URL = feedUrl;
+
+            feedUrl = new URL("https://www.google.com/m8/feeds/groups/default/full");
+            GROUP_URL = feedUrl;
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------- //
+
     private final SubscriptionSource source;
 
-    public GoogleContactSubscribeService(final OAuthServiceMetaData googleMetaData) {
-        super(googleMetaData);
+    public GoogleContactSubscribeService(final OAuthServiceMetaData googleMetaData, ServiceLookup services) {
+        super(googleMetaData, services);
         source = initSS(FolderObject.CONTACT, "contact");
     }
 
@@ -80,14 +297,175 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
         return FolderObject.CONTACT == folderModule;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.subscribe.SubscribeService#getContent(com.openexchange.subscribe.Subscription)
-     */
     @Override
-    public Collection<?> getContent(Subscription subscription) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+    public Collection<?> getContent(final Subscription subscription) throws OXException {
+        try {
+            // Establish GData contact service using OAuth v2 credentials
+            final ContactsService contactsService;
+            {
+                GoogleCredential googleCreds = GoogleApiClients.getCredentials(subscription.getSession());
+                String productName = services.getService(ConfigurationService.class).getProperty("com.openexchange.oauth.google.productName", "");
+                contactsService = new ContactsService(productName);
+                contactsService.setOAuth2Credentials(googleCreds);
+            }
+
+            // Compose the appropriate query for contacts
+            final Query contactQuery = new Query(CONTACT_URL);
+
+            // First page with this thread
+            final int pageSize = PAGE_SIZE;
+            int page = 1;
+            contactQuery.setStartIndex((page - 1) * pageSize + 1);
+            contactQuery.setMaxResults(pageSize);
+            contactQuery.setStringCustomParameter("orderby", "lastmodified");
+            contactQuery.setStringCustomParameter("sortorder", "descending");
+
+            List<Contact> contacts;
+            int resultsFound;
+            {
+                ContactFeed resultFeed = contactsService.getFeed(contactQuery, ContactFeed.class);
+                resultsFound = resultFeed.getEntries().size();
+                contacts = new LinkedList<Contact>();
+                handleContactFeed(resultFeed, contacts, loadingPhotoHandler);
+            }
+
+            if (resultsFound != pageSize) {
+                // No more available - return first chunk
+                return contacts;
+            }
+
+            // More available
+            page++;
+
+            // Query page-wise with either this thread or background thread
+            final FolderUpdaterRegistry folderUpdaterRegistry = services.getOptionalService(FolderUpdaterRegistry.class);
+            final ThreadPoolService threadPool = services.getOptionalService(ThreadPoolService.class);
+            final FolderUpdaterService<Contact> folderUpdater = null == folderUpdaterRegistry ? null : folderUpdaterRegistry.<Contact> getFolderUpdater(subscription);
+            if (null == threadPool || null == folderUpdater) {
+                // All with this thread
+                do {
+                    contactQuery.setStartIndex((page - 1) * pageSize + 1);
+                    contactQuery.setMaxResults(pageSize);
+                    contactQuery.setStringCustomParameter("orderby", "lastmodified");
+                    contactQuery.setStringCustomParameter("sortorder", "descending");
+
+                    ContactFeed resultFeed = contactsService.getFeed(contactQuery, ContactFeed.class);
+                    resultsFound = resultFeed.getEntries().size();
+                    handleContactFeed(resultFeed, contacts, loadingPhotoHandler);
+                    page++;
+                } while (resultsFound == pageSize);
+                return contacts;
+            }
+
+            // Query more in the background and...
+            {
+                final int pageOffset = page;
+                final PhotoHandler ph = loadingPhotoHandler;
+                threadPool.submit(new AbstractTask<Void>() {
+
+                    @Override
+                    public Void call() throws Exception {
+                        int myPage = pageOffset;
+                        int resultsFound = pageSize;
+                        while (resultsFound == pageSize) {
+                            List<Contact> contacts = new ArrayList<Contact>();
+                            contactQuery.setStartIndex((myPage - 1) * pageSize + 1);
+                            contactQuery.setMaxResults(pageSize);
+                            contactQuery.setStringCustomParameter("orderby", "lastmodified");
+                            contactQuery.setStringCustomParameter("sortorder", "descending");
+
+                            ContactFeed resultFeed = contactsService.getFeed(contactQuery, ContactFeed.class);
+                            handleContactFeed(resultFeed, contacts, ph);
+
+                            folderUpdater.save(new SearchIteratorDelegator<Contact>(contacts), subscription);
+
+                            // Next page...
+                            myPage++;
+                        }
+                        return null;
+                    }
+                });
+            }
+
+            // ... return first chunk
+            return contacts;
+        } catch (IOException e) {
+            throw SubscriptionErrorMessage.IO_ERROR.create(e, e.getMessage());
+        } catch (ServiceException e) {
+            throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    protected void handleContactFeed(ContactFeed contactFeed, List<Contact> contacts, PhotoHandler photoHandler) throws OXException {
+        for (ContactEntry entry : contactFeed.getEntries()) {
+            Name name = entry.getName();
+            String emailId = "";
+            for (Email email : entry.getEmailAddresses()) {
+                if (email.getPrimary()) {
+                    emailId = email.getAddress();
+                    break;
+                }
+            }
+
+            Contact contact = new Contact();
+            contact.setDisplayName(name.getFullName().getValue());
+            contact.setGivenName(name.getGivenName().getValue());
+            contact.setSurName(name.getFamilyName().getValue());
+
+            contact.setEmail1(emailId);
+
+            photoHandler.handlePhoto(entry, contact);
+
+            /*-
+             *
+            Link photoLink = entry.getContactPhotoLink();
+            if (photoLink != null && !Strings.isEmpty(photoLink.getEtag())) {
+                photoLinkHref = photoLink.getHref();
+            }
+
+            List<PhoneNumber> phoneNumbers = entry.getPhoneNumbers();
+            for (PhoneNumber phoneNumber : phoneNumbers) {
+
+
+                String rel = phoneNumber.getRel() != null ? phoneNumber.getRel() : (phoneNumber.getLabel() != null ? phoneNumber.getLabel() : "");
+                if (rel.contains("#")) {
+                    rel = rel.substring(rel.indexOf("#") + 1);
+                }
+                contact.setRel(rel);
+                rel = StringUtils.isBlank(rel) ? "" : "[" + rel + "]";
+                contact.setName(name + " <" + phoneNumber.getPhoneNumber() + ">" + " " + rel + " ");
+                contact.setPhotoLink(photoLinkHref);
+                contact.setValue(phoneNumber.getPhoneNumber());
+                contacts.add(contact);
+                if (StringUtils.isBlank(mainContactId)) {
+                    mainContactId = contactId;
+                }
+                if (Rel.MOBILE.equalsIgnoreCase(phoneNumber.getRel())) {
+                    mainContactId = contactId;
+                }
+                if (phoneNumber.getPrimary()) {
+                    mainContactId = contactId;
+                }
+            }
+
+            //Note: mainContactId will be "" in case if the contact doesn't have any phone number.
+            if (!Strings.isEmpty(mainContactId)) {
+                List<GroupMembershipInfo> groupMembershipInfos = entry.getGroupMembershipInfos();
+                for (GroupMembershipInfo groupMembershipInfo : groupMembershipInfos) {
+                    String groupId = groupMembershipInfo.getHref();
+                    if (groupId.contains("/")) {
+                        groupId = groupId.substring(groupId.lastIndexOf("/") + 1);
+                    }
+                    String contactIds = (groupContactMap.get(groupId) != null ? groupContactMap.get(groupId) : "") + mainContactId + ",";
+                    groupContactMap.put(groupId, contactIds);
+                }
+            }
+            */
+
+            contacts.add(contact);
+        }
     }
 
 }

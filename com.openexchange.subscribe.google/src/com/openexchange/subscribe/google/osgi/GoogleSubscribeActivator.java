@@ -49,35 +49,31 @@
 
 package com.openexchange.subscribe.google.osgi;
 
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
- * {@link Activator}
+ * {@link GoogleSubscribeActivator}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Activator extends HousekeepingActivator {
+public class GoogleSubscribeActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { SessiondService.class, DatabaseService.class, ThreadPoolService.class };
+        return new Class[] { SessiondService.class, DatabaseService.class, ThreadPoolService.class, ConfigurationService.class, FolderUpdaterRegistry.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        Services.setServices(this);
-        track(OAuthServiceMetaData.class, new OAuthServiceMetaDataRegisterer(context));
+        track(OAuthServiceMetaData.class, new OAuthServiceMetaDataRegisterer(this, context));
         openTrackers();
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        Services.setServices(null);
-        super.stopBundle();
     }
 
 }
