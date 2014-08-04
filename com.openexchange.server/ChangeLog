@@ -1,3 +1,7 @@
+* 2014-08-04 - marcus.klein@open-xchange.com
+
+ - Fix for bug 33891: Removed superfluous line throwing always an exception.
+
 * 2014-07-11 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 33478: Run AttachmentCleaner without delay
