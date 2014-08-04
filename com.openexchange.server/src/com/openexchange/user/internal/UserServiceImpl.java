@@ -174,6 +174,11 @@ public final class UserServiceImpl implements UserService {
     }
 
     @Override
+    public int[] listAllUser(final Context context, boolean includeGuests, boolean excludeUsers) throws OXException {
+        return UserStorage.getInstance().listAllUser(context, includeGuests, excludeUsers);
+    }
+
+    @Override
     public int[] listModifiedUser(final Date modifiedSince, final Context context) throws OXException {
         return UserStorage.getInstance().listModifiedUser(modifiedSince, context);
     }
@@ -191,6 +196,11 @@ public final class UserServiceImpl implements UserService {
     @Override
     public User searchUser(final String email, final Context context, boolean considerAliases) throws OXException {
         return UserStorage.getInstance().searchUser(email, context, considerAliases);
+    }
+
+    @Override
+    public User searchUser(final String email, final Context context, boolean considerAliases, boolean includeGuests, boolean excludeUsers) throws OXException {
+        return UserStorage.getInstance().searchUser(email, context, considerAliases, includeGuests, excludeUsers);
     }
 
     @Override

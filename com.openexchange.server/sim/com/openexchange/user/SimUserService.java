@@ -147,6 +147,12 @@ public class SimUserService implements UserService {
         return null;
     }
 
+    @Override
+    public int[] listAllUser(Context context, boolean includeGuests, boolean excludeUsers) throws OXException {
+        // Nothing to do
+        return null;
+    }
+
     /* (non-Javadoc)
      * @see com.openexchange.user.UserService#listModifiedUser(java.util.Date, com.openexchange.groupware.contexts.Context)
      */
@@ -221,6 +227,11 @@ public class SimUserService implements UserService {
 
     @Override
     public User searchUser(String email, Context context, boolean considerAliases) throws OXException {
+        return null;
+    }
+
+    @Override
+    public User searchUser(String email, Context context, boolean considerAliases, boolean includeGuests, boolean excludeUsers) throws OXException {
         return null;
     }
 
