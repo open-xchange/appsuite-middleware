@@ -743,6 +743,10 @@ public final class InternalList {
         // Corrects values in the 'changing_date' column that are set to {@link Long#MAX_VALUE}.
         list.add(new com.openexchange.groupware.update.tasks.FolderCorrectChangingDateTask());
 
+        // Adds permissions to system- and root-folders for the virtual guest group.
+        list.add(new com.openexchange.groupware.update.tasks.FolderPermissionAddGuestGroup());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
+
 }
