@@ -51,41 +51,33 @@ package com.openexchange.subscribe.google;
 
 import java.util.Collection;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
 
 /**
- * {@link GoogleSubscribeService}
+ * {@link GoogleCalendarSubscribeService}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class GoogleSubscribeService extends AbstractSubscribeService {
+public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeService {
 
-    private OAuthServiceMetaData googleMetaData;
+    private final SubscriptionSource source;
 
-    public GoogleSubscribeService(final OAuthServiceMetaData googleMetaData) {
-        this.googleMetaData = googleMetaData;
+    public GoogleCalendarSubscribeService(final OAuthServiceMetaData googleMetaData) {
+        super(googleMetaData);
+        source = initSS(FolderObject.CALENDAR);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.subscribe.SubscribeService#getSubscriptionSource()
-     */
     @Override
     public SubscriptionSource getSubscriptionSource() {
-        // TODO Auto-generated method stub
-        return null;
+        return source;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.subscribe.SubscribeService#handles(int)
-     */
     @Override
     public boolean handles(int folderModule) {
-        return false;
+        return FolderObject.CALENDAR == folderModule;
     }
 
     /*
@@ -97,4 +89,5 @@ public class GoogleSubscribeService extends AbstractSubscribeService {
         // TODO Auto-generated method stub
         return null;
     }
+
 }

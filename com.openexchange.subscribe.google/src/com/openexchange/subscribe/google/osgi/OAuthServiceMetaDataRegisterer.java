@@ -57,7 +57,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.subscribe.SubscribeService;
-import com.openexchange.subscribe.google.GoogleSubscribeService;
+import com.openexchange.subscribe.google.AbstractGoogleSubscribeService;
+import com.openexchange.subscribe.google.GoogleCalendarSubscribeService;
+import com.openexchange.subscribe.google.GoogleContactSubscribeService;
 
 /**
  * {@link OAuthServiceMetaDataRegisterer}
@@ -87,8 +89,10 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
         final OAuthServiceMetaData oAuthServiceMetaData = context.getService(ref);
         if (oauthIdentifier.equals(oAuthServiceMetaData.getId())) {
             logger.info("Registering Google MetaData service.");
-            final SubscribeService ss = new GoogleSubscribeService(oAuthServiceMetaData);
-            serviceRegistration = context.registerService(SubscribeService.class, ss, null);
+            final SubscribeService calendarSubService = new GoogleCalendarSubscribeService(oAuthServiceMetaData);
+            final SubscribeService contactSubService = new GoogleContactSubscribeService(oAuthServiceMetaData);
+            serviceRegistration = context.registerService(SubscribeService.class, calendarSubService, null);
+            serviceRegistration = context.registerService(SubscribeService.class, contactSubService, null);
         }
         return oAuthServiceMetaData;
     }
