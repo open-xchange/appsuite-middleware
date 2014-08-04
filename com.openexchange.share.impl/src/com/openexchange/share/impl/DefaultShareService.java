@@ -51,12 +51,13 @@ package com.openexchange.share.impl;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 import com.openexchange.share.CreateRequest;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.share.storage.StorageParameters;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 /**
@@ -80,8 +81,8 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
-    public Share create(CreateRequest shareRequest, ServerSession session) throws OXException {
-        return new ShareCreator(services, shareRequest, session).perform();
+    public Share create(CreateRequest shareRequest, Session session) throws OXException {
+        return new ShareCreator(services, shareRequest, ServerSessionAdapter.valueOf(session)).perform();
     }
 
     @Override

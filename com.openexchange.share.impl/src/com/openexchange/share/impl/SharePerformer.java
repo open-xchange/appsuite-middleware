@@ -52,7 +52,6 @@ package com.openexchange.share.impl;
 import com.openexchange.contact.ContactService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.FolderService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.storage.ShareStorage;
@@ -90,10 +89,6 @@ public abstract class SharePerformer<R> {
 
     protected ContactService getContactService() throws OXException {
         return getService(ContactService.class, true);
-    }
-
-    protected FolderService getFolderService() throws OXException {
-        return getService(FolderService.class, true);
     }
 
     protected DatabaseService getDatabaseService() throws OXException {

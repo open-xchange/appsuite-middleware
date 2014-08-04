@@ -50,7 +50,6 @@
 package com.openexchange.share;
 
 import java.util.Date;
-import com.openexchange.groupware.modules.Module;
 
 
 /**
@@ -80,7 +79,7 @@ public interface Share {
      *
      * @return The module
      */
-    Module getModule();
+    int getModule();
 
     /**
      * Gets the identifier of the share's folder.

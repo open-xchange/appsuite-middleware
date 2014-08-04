@@ -52,7 +52,7 @@ package com.openexchange.share.impl.osgi;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.ContactService;
 import com.openexchange.crypto.CryptoService;
-import com.openexchange.folderstorage.FolderService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareService;
@@ -80,8 +80,7 @@ public class ShareActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, ContactService.class, FolderService.class, ShareStorage.class,
-            CryptoService.class, ConfigurationService.class };
+        return new Class<?>[] { UserService.class, ContactService.class, ShareStorage.class, CryptoService.class, ConfigurationService.class, DatabaseService.class };
     }
 
     @Override

@@ -58,15 +58,11 @@ import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.Folder;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.folderstorage.FolderServiceDecorator;
-import com.openexchange.folderstorage.FolderStorage;
-import com.openexchange.folderstorage.Permission;
-import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
+import com.openexchange.groupware.modules.Module;
+import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.AuthenticationMode;
@@ -105,29 +101,29 @@ public class ShareCreator extends SharePerformer<Share> {
     protected Share perform() throws OXException {
         DatabaseService dbService = getDatabaseService();
         UserService userService = getUserService();
-        FolderService folderService = getFolderService();
         ShareStorage shareStorage = getShareStorage();
 
-        Share share = null;
         Context context = session.getContext();
+        boolean ownsConnection = false;
+        Connection con = createRequest.getConnection();
+        if (con == null) {
+            con = dbService.getWritable(context);
+            ownsConnection = true;
+        }
+
+        Share share = null;
         // TODO: can possibly removed if OXFolderManagerImpl doesn't try to commit foreign connections anymore...
-        ResilientConnection con = new ResilientConnection(dbService.getWritable(context));
+//        ResilientConnection con = new ResilientConnection(dbService.getWritable(context));
         try {
-            Databases.startTransaction(con.getWrapped());
+            if (ownsConnection) {
+                Databases.startTransaction(con);
+            }
+
             for (Entity entity : createRequest.getEntities()) {
                 User guest = prepareGuest(entity);
                 int guestId = userService.createUser(con, context, guest);
                 UserPermissionBitsStorage.getInstance().saveUserPermissionBits(con, getUserPermissionBits(entity), guestId, context); // FIXME: to service layer
                 if (createRequest.getItem() == null) {
-                    FolderServiceDecorator fsDecorator = new FolderServiceDecorator();
-                    fsDecorator.put(Connection.class.getName(), con);
-                    UserizedFolder folder = folderService.getFolder(
-                        FolderStorage.REAL_TREE_ID,
-                        createRequest.getFolder(),
-                        session,
-                        fsDecorator);
-                    Folder modifiedFolder = modifyFolder(entity, folder, guestId);
-                    folderService.updateFolder(modifiedFolder, new Date(), session, fsDecorator);
                     share = createShare(guestId);
                     StorageParameters parameters = new StorageParameters()
                         .put(Connection.class.getName(), con);
@@ -136,14 +132,21 @@ public class ShareCreator extends SharePerformer<Share> {
                     // TODO
                 }
             }
-            con.getWrapped().commit();
+
+            if (ownsConnection) {
+                con.commit();
+            }
             return share;
         } catch (Exception e) {
-            Databases.rollback(con.getWrapped());
+            if (ownsConnection) {
+                Databases.rollback(con);
+            }
             throw new OXException(e); // TODO
         } finally {
-            Databases.autocommit(con.getWrapped());
-            dbService.backWritable(context, con.getWrapped());
+            if (ownsConnection) {
+                Databases.autocommit(con);
+                dbService.backWritable(context, con);
+            }
         }
     }
 
@@ -151,7 +154,7 @@ public class ShareCreator extends SharePerformer<Share> {
         Set<com.openexchange.groupware.userconfiguration.Permission> perms = new HashSet<com.openexchange.groupware.userconfiguration.Permission>();
         perms.add(com.openexchange.groupware.userconfiguration.Permission.DENIED_PORTAL);
         perms.add(com.openexchange.groupware.userconfiguration.Permission.READ_CREATE_SHARED_FOLDERS);
-        com.openexchange.groupware.userconfiguration.Permission modulePermission = createRequest.getModule().getPermission();
+        Permission modulePermission = Module.getForFolderConstant(createRequest.getModule()).getPermission();
         if (modulePermission != null) {
             perms.add(modulePermission);
         }
@@ -171,32 +174,10 @@ public class ShareCreator extends SharePerformer<Share> {
         share.setCreatedBy(userId);
         share.setModifiedBy(userId);
         share.setGuest(guestId);
-        share.setModule(createRequest.getModule().getFolderConstant());
+        share.setModule(createRequest.getModule());
         share.setFolder(createRequest.getFolder());
 
         return share;
-    }
-
-    private Folder modifyFolder(Entity entity, UserizedFolder folder, int guestId) {
-        folder.getPermissions();
-        SharedFolder newFolder = new SharedFolder(folder.getID());
-        newFolder.setTreeID(FolderStorage.REAL_TREE_ID);
-        Permission[] origPermissions = folder.getPermissions();
-        Permission[] newPermissions = new Permission[origPermissions.length + 1];
-        System.arraycopy(origPermissions, 0, newPermissions, 0, origPermissions.length);
-
-        int[] permissionBits = parsePermissionBits(entity.getPermissions());
-        SharePermission sharePermission = new SharePermission();
-        sharePermission.setEntity(guestId);
-        sharePermission.setFolderPermission(permissionBits[0]);
-        sharePermission.setReadPermission(permissionBits[1]);
-        sharePermission.setWritePermission(permissionBits[2]);
-        sharePermission.setDeletePermission(permissionBits[3]);
-        sharePermission.setAdmin(permissionBits[4] > 0 ? true : false);
-
-        newPermissions[origPermissions.length] = sharePermission;
-        newFolder.setPermissions(newPermissions);
-        return newFolder;
     }
 
     private User prepareGuest(Entity entity) throws OXException {
@@ -223,32 +204,6 @@ public class ShareCreator extends SharePerformer<Share> {
             "com.openexchange.share.cryptKey",
             "erE2e8OhAo71");
         return cryptoService.encrypt(value, cryptKey);
-    }
-
-    // FIXME: copied from FolderParser
-    private static final int[] mapping = { 0, 2, 4, -1, 8 };
-
-    /**
-     * The actual max permission that can be transfered in field 'bits' or JSON's permission object
-     */
-    private static final int MAX_PERMISSION = 64;
-
-    private static final int[] parsePermissionBits(final int bitsArg) {
-        int bits = bitsArg;
-        final int[] retval = new int[5];
-        for (int i = retval.length - 1; i >= 0; i--) {
-            final int shiftVal = (i * 7); // Number of bits to be shifted
-            retval[i] = bits >> shiftVal;
-            bits -= (retval[i] << shiftVal);
-            if (retval[i] == MAX_PERMISSION) {
-                retval[i] = Permission.MAX_PERMISSION;
-            } else if (i < (retval.length - 1)) {
-                retval[i] = mapping[retval[i]];
-            } else {
-                retval[i] = retval[i];
-            }
-        }
-        return retval;
     }
 
 }

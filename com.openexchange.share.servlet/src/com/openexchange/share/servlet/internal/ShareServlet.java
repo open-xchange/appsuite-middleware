@@ -245,7 +245,6 @@ public class ShareServlet extends HttpServlet {
      * @return The redirect URL
      */
     private static String getRedirectURL(Session session, User user, Share share) {
-
         boolean ox6 = false;
 
         StringBuilder stringBuilder = new StringBuilder();
@@ -257,7 +256,7 @@ public class ShareServlet extends HttpServlet {
                 .append("&user_id=").append(session.getUserId())
                 .append("&language=").append(user.getLocale())
                 .append("&store=true")
-                .append("&m=").append(getApp(share.getModule()))
+                .append("&m=").append(getApp(Module.getForFolderConstant(share.getModule())))
                 .append("&f=").append(share.getFolder())
                 ;
             if (false == share.isFolder()) {
@@ -272,7 +271,7 @@ public class ShareServlet extends HttpServlet {
                 .append("&user_id=").append(session.getUserId())
                 .append("&language=").append(user.getLocale())
                 .append("&store=true")
-                .append("&app=").append(getApp(share.getModule()))
+                .append("&app=").append(getApp(Module.getForFolderConstant(share.getModule())))
                 .append("&folder=").append(share.getFolder())
             ;
             if (false == share.isFolder()) {

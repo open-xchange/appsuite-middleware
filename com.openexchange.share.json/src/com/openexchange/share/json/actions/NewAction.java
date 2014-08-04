@@ -56,7 +56,6 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.modules.Module;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.CreateRequest;
@@ -102,7 +101,7 @@ public class NewAction implements AJAXActionService {
     private static JSONObject writeShare(Share share) throws JSONException {
         JSONObject json = new JSONObject();
         json.put("token", share.getToken());
-        json.put("module", share.getModule().getFolderConstant());
+        json.put("module", share.getModule());
         json.put("folder", share.getFolder());
         json.put("item", share.getItem());
         json.put("created", share.getCreated().getTime());
@@ -118,7 +117,7 @@ public class NewAction implements AJAXActionService {
 
     private static CreateRequest parseCreateRequest(JSONObject json) throws JSONException {
         CreateRequest createRequest = new CreateRequest();
-        createRequest.setModule(Module.getForFolderConstant(json.getInt("module")));
+        createRequest.setModule(json.getInt("module"));
         createRequest.setFolder(json.getString("folder"));
         JSONArray jEntities = json.getJSONArray("entities");
         for (int i = 0; i < jEntities.length(); i++) {

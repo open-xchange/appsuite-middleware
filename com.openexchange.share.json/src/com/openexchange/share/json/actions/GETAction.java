@@ -56,7 +56,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.modules.Module;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareService;
@@ -116,7 +115,7 @@ public class GETAction implements AJAXActionService {
         }
     }
 
-    private AJAXRequestResult performGet(Module module, String folder, String item) {
+    private AJAXRequestResult performGet(int module, String folder, String item) {
         // TODO Auto-generated method stub
         return null;
     }

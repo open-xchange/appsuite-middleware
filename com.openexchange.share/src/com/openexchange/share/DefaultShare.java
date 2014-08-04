@@ -50,7 +50,6 @@
 package com.openexchange.share;
 
 import java.util.Date;
-import com.openexchange.groupware.modules.Module;
 
 /**
  * {@link DefaultShare}
@@ -91,8 +90,8 @@ public class DefaultShare implements Share {
     }
 
     @Override
-    public Module getModule() {
-        return Module.getForFolderConstant(module);
+    public int getModule() {
+        return module;
     }
 
     @Override

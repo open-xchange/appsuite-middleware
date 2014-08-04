@@ -49,9 +49,9 @@
 
 package com.openexchange.share;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.groupware.modules.Module;
 
 /**
  * {@link CreateRequest}
@@ -86,7 +86,7 @@ public class CreateRequest {
     // ]
     // }
 
-    private Module module;
+    private int module;
 
     private String folder;
 
@@ -94,11 +94,13 @@ public class CreateRequest {
 
     private final List<Entity> entities = new ArrayList<Entity>(4);
 
-    public Module getModule() {
+    private Connection connection;
+
+    public int getModule() {
         return module;
     }
 
-    public void setModule(Module module) {
+    public void setModule(int module) {
         this.module = module;
     }
 
@@ -124,6 +126,14 @@ public class CreateRequest {
 
     public void addEntity(Entity entity) {
         entities.add(entity);
+    }
+
+    public Connection getConnection() {
+        return connection;
+    }
+
+    public void setConnection(Connection connection) {
+        this.connection = connection;
     }
 
 }

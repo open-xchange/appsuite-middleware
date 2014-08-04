@@ -194,7 +194,7 @@ public class RdbShareStorage implements ShareStorage {
             int i = 1;
             stmt.setBytes(i++, UUIDs.toByteArray(UUIDs.fromUnformattedString(share.getToken())));
             stmt.setInt(i++, share.getContextID());
-            stmt.setInt(i++, share.getModule().getFolderConstant());
+            stmt.setInt(i++, share.getModule());
             stmt.setString(i++, share.getFolder());
             if (share.isFolder()) {
                 stmt.setNull(i++, Types.VARCHAR);
@@ -224,7 +224,7 @@ public class RdbShareStorage implements ShareStorage {
         try {
             stmt = connection.prepareStatement(SQL.UPDATE_SHARE_STMT);
             int i = 1;
-            stmt.setInt(i++, share.getModule().getFolderConstant());
+            stmt.setInt(i++, share.getModule());
             stmt.setString(i++, share.getFolder());
             if (share.isFolder()) {
                 stmt.setNull(i++, Types.VARCHAR);

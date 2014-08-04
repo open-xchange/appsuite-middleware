@@ -50,7 +50,8 @@
 package com.openexchange.share;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.session.Session;
+
 
 
 /**
@@ -61,7 +62,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public interface ShareService {
 
-    Share create(CreateRequest shareRequest, ServerSession session) throws OXException;
+    Share create(CreateRequest shareRequest, Session session) throws OXException;
 
     Share resolveToken(String token) throws OXException;
 
