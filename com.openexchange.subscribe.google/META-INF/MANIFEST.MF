@@ -5,3 +5,6 @@ Bundle-SymbolicName: com.openexchange.subscribe.google
 Bundle-Version: 7.6.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.osgi,
+ com.openexchange.server,
+ org.osgi.framework
