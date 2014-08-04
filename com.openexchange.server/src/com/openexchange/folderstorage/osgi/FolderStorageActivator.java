@@ -79,61 +79,61 @@ import com.openexchange.folderstorage.virtual.osgi.VirtualFolderStorageActivator
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.share.ShareService;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link FolderStorageActivator} - {@link BundleActivator Activator} for folder
- * storage framework.
+ * {@link FolderStorageActivator} - {@link BundleActivator Activator} for folder storage framework.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderStorageActivator implements BundleActivator {
 
-	private static final class Key {
+    private static final class Key {
 
-		public static Key valueOf(final int userId, final int cid) {
-			return new Key(userId, cid);
-		}
+        public static Key valueOf(final int userId, final int cid) {
+            return new Key(userId, cid);
+        }
 
-		private final int userId;
+        private final int userId;
 
-		private final int cid;
+        private final int cid;
 
-		private final int hash;
+        private final int hash;
 
-		public Key(final int userId, final int cid) {
-			super();
-			this.userId = userId;
-			this.cid = cid;
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + cid;
-			result = prime * result + userId;
-			hash = result;
-		}
+        public Key(final int userId, final int cid) {
+            super();
+            this.userId = userId;
+            this.cid = cid;
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + cid;
+            result = prime * result + userId;
+            hash = result;
+        }
 
-		@Override
-		public int hashCode() {
-			return hash;
-		}
+        @Override
+        public int hashCode() {
+            return hash;
+        }
 
-		@Override
-		public boolean equals(final Object obj) {
-			if (this == obj) {
-				return true;
-			}
-			if (!(obj instanceof Key)) {
-				return false;
-			}
-			final Key other = (Key) obj;
-			if (cid != other.cid) {
-				return false;
-			}
-			if (userId != other.userId) {
-				return false;
-			}
-			return true;
-		}
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof Key)) {
+                return false;
+            }
+            final Key other = (Key) obj;
+            if (cid != other.cid) {
+                return false;
+            }
+            if (userId != other.userId) {
+                return false;
+            }
+            return true;
+        }
 
     }
 
@@ -183,128 +183,129 @@ public final class FolderStorageActivator implements BundleActivator {
 
     }
 
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderStorageActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderStorageActivator.class);
 
-	private List<ServiceRegistration<?>> serviceRegistrations;
+    private List<ServiceRegistration<?>> serviceRegistrations;
 
-	private List<ServiceTracker<?, ?>> serviceTrackers;
+    private List<ServiceTracker<?, ?>> serviceTrackers;
 
-	private List<BundleActivator> activators;
+    private List<BundleActivator> activators;
 
-	/**
-	 * Initializes a new {@link FolderStorageActivator}.
-	 */
-	public FolderStorageActivator() {
-		super();
-	}
+    /**
+     * Initializes a new {@link FolderStorageActivator}.
+     */
+    public FolderStorageActivator() {
+        super();
+    }
 
-	@Override
+    @Override
     public void start(final BundleContext context) throws Exception {
-		try {
-			// Register error component
-			// Register services
-			serviceRegistrations = new ArrayList<ServiceRegistration<?>>(4);
-			// Register folder service
-			serviceRegistrations.add(context.registerService(
-					FolderService.class.getName(), new FolderServiceImpl(),
-					null));
-			serviceRegistrations.add(context.registerService(
-					ContentTypeDiscoveryService.class.getName(),
-					ContentTypeRegistry.getInstance(), null));
-			serviceRegistrations.add(context.registerService(
-					AdditionalFolderField.class.getName(),
-					new DisplayNameFolderField(), null));
-			// Register service trackers
-			serviceTrackers = new ArrayList<ServiceTracker<?, ?>>(4);
-			serviceTrackers.add(new ServiceTracker<FolderStorage,FolderStorage>(context, FolderStorage.class
-					.getName(), new FolderStorageTracker(context)));
-			for (final ServiceTracker<?,?> serviceTracker : serviceTrackers) {
-				serviceTracker.open();
-			}
+        try {
+            // Register error component
+            // Register services
+            serviceRegistrations = new ArrayList<ServiceRegistration<?>>(4);
+            // Register folder service
+            serviceRegistrations.add(context.registerService(FolderService.class.getName(), new FolderServiceImpl(), null));
+            serviceRegistrations.add(context.registerService(
+                ContentTypeDiscoveryService.class.getName(),
+                ContentTypeRegistry.getInstance(),
+                null));
+            serviceRegistrations.add(context.registerService(AdditionalFolderField.class.getName(), new DisplayNameFolderField(), null));
+            // Register service trackers
+            serviceTrackers = new ArrayList<ServiceTracker<?, ?>>(4);
+            serviceTrackers.add(new ServiceTracker<FolderStorage, FolderStorage>(
+                context,
+                FolderStorage.class.getName(),
+                new FolderStorageTracker(context)));
+            serviceTrackers.add(new ServiceTracker<ShareService, ShareService>(
+                context,
+                ShareService.class.getName(),
+                new ShareServiceHolder(context)));
+            for (final ServiceTracker<?, ?> serviceTracker : serviceTrackers) {
+                serviceTracker.open();
+            }
 
-			// Start other activators
-			activators = new ArrayList<BundleActivator>(8);
-			activators.add(new DatabaseFolderStorageActivator()); // Database impl
-			activators.add(new MailFolderStorageActivator()); // Mail impl
-			activators.add(new MessagingFolderStorageActivator()); // Messaging impl
-			activators.add(new FileStorageFolderStorageActivator()); // File storage impl
-			activators.add(new CacheFolderStorageActivator()); // Cache impl
-			activators.add(new OutlookFolderStorageActivator()); // MS Outlook storage activator
-			activators.add(new VirtualFolderStorageActivator()); // Virtual storage activator
-			BundleActivator activator = null;
-			for (final Iterator<BundleActivator> iter = activators.iterator(); iter
-					.hasNext();) {
-				try {
-					if (isBundleResolved(context)) {
-						if (null != activator) {
-							logFailedStartup(activator);
-						}
-						return;
-					}
-				} catch (final IllegalStateException e) {
-					if (null != activator) {
-						logFailedStartup(activator);
-					}
-					return;
-				}
-				activator = iter.next();
-				activator.start(context);
-			}
+            // Start other activators
+            activators = new ArrayList<BundleActivator>(8);
+            activators.add(new DatabaseFolderStorageActivator()); // Database impl
+            activators.add(new MailFolderStorageActivator()); // Mail impl
+            activators.add(new MessagingFolderStorageActivator()); // Messaging impl
+            activators.add(new FileStorageFolderStorageActivator()); // File storage impl
+            activators.add(new CacheFolderStorageActivator()); // Cache impl
+            activators.add(new OutlookFolderStorageActivator()); // MS Outlook storage activator
+            activators.add(new VirtualFolderStorageActivator()); // Virtual storage activator
+            BundleActivator activator = null;
+            for (final Iterator<BundleActivator> iter = activators.iterator(); iter.hasNext();) {
+                try {
+                    if (isBundleResolved(context)) {
+                        if (null != activator) {
+                            logFailedStartup(activator);
+                        }
+                        return;
+                    }
+                } catch (final IllegalStateException e) {
+                    if (null != activator) {
+                        logFailedStartup(activator);
+                    }
+                    return;
+                }
+                activator = iter.next();
+                activator.start(context);
+            }
 
-			LOG.info("Bundle \"com.openexchange.folderstorage\" successfully started!");
-		} catch (final Exception e) {
-			LOG.error("", e);
-			throw e;
-		}
-	}
+            LOG.info("Bundle \"com.openexchange.folderstorage\" successfully started!");
+        } catch (final Exception e) {
+            LOG.error("", e);
+            throw e;
+        }
+    }
 
-	private static boolean isBundleResolved(final BundleContext context) {
-		return Bundle.RESOLVED == context.getBundle().getState();
-	}
+    private static boolean isBundleResolved(final BundleContext context) {
+        return Bundle.RESOLVED == context.getBundle().getState();
+    }
 
-	private static void logFailedStartup(final BundleActivator activator) {
-		final StringBuilder sb = new StringBuilder(32);
-		sb.append("Failed start of folder storage bundle \"");
-		sb.append(activator.getClass().getName());
-		sb.append("\"!");
-		LOG.error(sb.toString(), new Throwable());
-	}
+    private static void logFailedStartup(final BundleActivator activator) {
+        final StringBuilder sb = new StringBuilder(32);
+        sb.append("Failed start of folder storage bundle \"");
+        sb.append(activator.getClass().getName());
+        sb.append("\"!");
+        LOG.error(sb.toString(), new Throwable());
+    }
 
-	@Override
+    @Override
     public void stop(final BundleContext context) throws Exception {
-		try {
-			// Drop activators
-			if (null != activators) {
-				for (final BundleActivator activator : activators) {
-					activator.stop(context);
-				}
-				activators.clear();
-				activators = null;
-			}
-			// Drop service trackers
-			if (null != serviceTrackers) {
-				for (final ServiceTracker<?,?> serviceTracker : serviceTrackers) {
-					serviceTracker.close();
-				}
-				serviceTrackers.clear();
-				serviceTrackers = null;
-			}
-			// Unregister previously registered services
-			if (null != serviceRegistrations) {
-				for (final ServiceRegistration<?> serviceRegistration : serviceRegistrations) {
-					serviceRegistration.unregister();
-				}
-				serviceRegistrations.clear();
-				serviceRegistrations = null;
-			}
-			// Unregister previously registered component
+        try {
+            // Drop activators
+            if (null != activators) {
+                for (final BundleActivator activator : activators) {
+                    activator.stop(context);
+                }
+                activators.clear();
+                activators = null;
+            }
+            // Drop service trackers
+            if (null != serviceTrackers) {
+                for (final ServiceTracker<?, ?> serviceTracker : serviceTrackers) {
+                    serviceTracker.close();
+                }
+                serviceTrackers.clear();
+                serviceTrackers = null;
+            }
+            // Unregister previously registered services
+            if (null != serviceRegistrations) {
+                for (final ServiceRegistration<?> serviceRegistration : serviceRegistrations) {
+                    serviceRegistration.unregister();
+                }
+                serviceRegistrations.clear();
+                serviceRegistrations = null;
+            }
+            // Unregister previously registered component
 
-
-			LOG.info("Bundle \"com.openexchange.folderstorage\" successfully stopped!");
-		} catch (final Exception e) {
-			LOG.error("", e);
-			throw e;
-		}
-	}
+            LOG.info("Bundle \"com.openexchange.folderstorage\" successfully stopped!");
+        } catch (final Exception e) {
+            LOG.error("", e);
+            throw e;
+        }
+    }
 
 }
