@@ -1,3 +1,7 @@
+* 2014-08-04 - marcus.klein@open-xchange.com
+
+ - Fix for bug 33891: Removed superfluous line throwing always an exception.
+
 * 2014-08-01 - thorben.betten@open-xchange.com
 
  - Fix for bug 33715: Accept new parameter "attach_src" for action=get request to let the client signal RFC822 source is supposed to be
