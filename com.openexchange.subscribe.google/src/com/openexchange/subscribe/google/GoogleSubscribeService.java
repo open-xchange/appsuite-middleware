@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.subscribe.google.osgi;
+package com.openexchange.subscribe.google;
 
 import java.util.Collection;
 import com.openexchange.exception.OXException;

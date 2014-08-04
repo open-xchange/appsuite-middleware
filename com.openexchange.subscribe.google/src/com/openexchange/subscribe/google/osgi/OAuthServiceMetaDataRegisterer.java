@@ -57,6 +57,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.subscribe.SubscribeService;
+import com.openexchange.subscribe.google.GoogleSubscribeService;
 
 /**
  * {@link OAuthServiceMetaDataRegisterer}
