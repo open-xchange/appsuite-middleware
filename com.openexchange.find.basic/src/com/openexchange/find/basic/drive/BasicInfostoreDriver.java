@@ -74,9 +74,10 @@ import com.openexchange.find.Module;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.Services;
+import com.openexchange.find.common.CommonConstants;
 import com.openexchange.find.common.CommonFacetType;
+import com.openexchange.find.common.CommonStrings;
 import com.openexchange.find.common.FolderType;
-import com.openexchange.find.drive.DriveConstants;
 import com.openexchange.find.drive.DriveFacetType;
 import com.openexchange.find.drive.DriveStrings;
 import com.openexchange.find.facet.DefaultFacet;
@@ -245,18 +246,18 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         // Add static time facet
         {
             final String fieldTime = Constants.FIELD_TIME;
-            facets.add(Facets.newExclusiveBuilder(DriveFacetType.TIME)
-                .addValue(FacetValue.newBuilder(DriveConstants.FACET_VALUE_LAST_WEEK)
-                    .withLocalizableDisplayItem(DriveStrings.LAST_WEEK)
-                    .withFilter(Filter.of(fieldTime, DriveConstants.FACET_VALUE_LAST_WEEK))
+            facets.add(Facets.newExclusiveBuilder(CommonFacetType.TIME)
+                .addValue(FacetValue.newBuilder(CommonConstants.QUERY_LAST_WEEK)
+                    .withLocalizableDisplayItem(CommonStrings.LAST_WEEK)
+                    .withFilter(Filter.of(fieldTime, CommonConstants.QUERY_LAST_WEEK))
                     .build())
-                .addValue(FacetValue.newBuilder(DriveConstants.FACET_VALUE_LAST_MONTH)
-                    .withLocalizableDisplayItem(DriveStrings.LAST_MONTH)
-                    .withFilter(Filter.of(fieldTime, DriveConstants.FACET_VALUE_LAST_MONTH))
+                .addValue(FacetValue.newBuilder(CommonConstants.QUERY_LAST_MONTH)
+                    .withLocalizableDisplayItem(CommonStrings.LAST_MONTH)
+                    .withFilter(Filter.of(fieldTime, CommonConstants.QUERY_LAST_MONTH))
                     .build())
-                .addValue(FacetValue.newBuilder(DriveConstants.FACET_VALUE_LAST_YEAR)
-                    .withLocalizableDisplayItem(DriveStrings.LAST_YEAR)
-                    .withFilter(Filter.of(fieldTime, DriveConstants.FACET_VALUE_LAST_YEAR))
+                .addValue(FacetValue.newBuilder(CommonConstants.QUERY_LAST_YEAR)
+                    .withLocalizableDisplayItem(CommonStrings.LAST_YEAR)
+                    .withFilter(Filter.of(fieldTime, CommonConstants.QUERY_LAST_YEAR))
                     .build())
                 .build());
         }

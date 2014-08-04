@@ -47,47 +47,8 @@
  *
  */
 
-package com.openexchange.find.basic.mail;
+package com.openexchange.find.basic.common;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-
-/**
- * {@link Constants}
- *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.0
- */
-public class Constants {
-
-    final static String FIELD_FROM = "from";
-
-    final static String FIELD_TO = "to";
-
-    final static String FIELD_CC = "cc";
-
-    final static String FIELD_SUBJECT = "subject";
-
-    final static String FIELD_BODY = "body";
-
-    final static String FIELD_FOLDER = "folder";
-
-    static final List<String> FROM_FIELDS = asList(FIELD_FROM);
-
-    static final List<String> TO_FIELDS = Arrays.asList(new String[] { FIELD_TO, FIELD_CC });
-
-    static final List<String> FROM_AND_TO_FIELDS = Arrays.asList(new String[] { FIELD_FROM, FIELD_TO, FIELD_CC });
-
-    static final List<String> FOLDERS_FIELDS = Arrays.asList(new String[] { FIELD_FOLDER });
-
-    static final List<String> QUERY_FIELDS = Arrays.asList(new String[] { FIELD_SUBJECT, FIELD_FROM, FIELD_TO, FIELD_CC });
-
-    static final List<String> QUERY_FIELDS_BODY = Arrays.asList(new String[] { FIELD_SUBJECT, FIELD_FROM, FIELD_TO, FIELD_CC, FIELD_BODY });
-
-    static List<String> asList(String str) {
-        return Collections.singletonList(str);
-    }
-
+public enum Comparison {
+    GREATER_THAN, GREATER_EQUALS, EQUALS, LOWER_THAN, LOWER_EQUALS;
 }

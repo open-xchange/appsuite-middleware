@@ -152,7 +152,8 @@ public class SearchRequest extends AbstractFindRequest {
     /**
      * A list of filters to be applied on the search results based
      * on the currently active facets. {@link CommonFacetType#GLOBAL},
-     * {@link CommonFacetType#FOLDER} and {@link CommonFacetType#FOLDER_TYPE}
+     * {@link CommonFacetType#FOLDER}, {@link CommonFacetType#FOLDER_TYPE}
+     * and
      * are always ignored when constructing the filters.
      *
      * @return May be empty but never <code>null</code>.
@@ -164,6 +165,7 @@ public class SearchRequest extends AbstractFindRequest {
             exclude.add(CommonFacetType.GLOBAL);
             exclude.add(CommonFacetType.FOLDER);
             exclude.add(CommonFacetType.FOLDER_TYPE);
+            exclude.add(CommonFacetType.TIME);
             for (Entry<FacetType, List<ActiveFacet>> entry : facetMap.entrySet()) {
                 FacetType type = entry.getKey();
                 if (!exclude.contains(type)) {

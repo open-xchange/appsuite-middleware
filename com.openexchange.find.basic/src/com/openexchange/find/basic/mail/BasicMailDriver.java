@@ -54,28 +54,28 @@ import static com.openexchange.find.basic.mail.Constants.FIELD_BODY;
 import static com.openexchange.find.basic.mail.Constants.FIELD_CC;
 import static com.openexchange.find.basic.mail.Constants.FIELD_FROM;
 import static com.openexchange.find.basic.mail.Constants.FIELD_SUBJECT;
-import static com.openexchange.find.basic.mail.Constants.FIELD_TIME;
 import static com.openexchange.find.basic.mail.Constants.FIELD_TO;
 import static com.openexchange.find.basic.mail.Constants.FROM_AND_TO_FIELDS;
 import static com.openexchange.find.basic.mail.Constants.FROM_FIELDS;
-import static com.openexchange.find.basic.mail.Constants.QUERY_LAST_MONTH;
-import static com.openexchange.find.basic.mail.Constants.QUERY_LAST_WEEK;
-import static com.openexchange.find.basic.mail.Constants.QUERY_LAST_YEAR;
 import static com.openexchange.find.basic.mail.Constants.TO_FIELDS;
+import static com.openexchange.find.common.CommonConstants.FIELD_TIME;
+import static com.openexchange.find.common.CommonConstants.QUERY_LAST_MONTH;
+import static com.openexchange.find.common.CommonConstants.QUERY_LAST_WEEK;
+import static com.openexchange.find.common.CommonConstants.QUERY_LAST_YEAR;
 import static com.openexchange.find.common.CommonFacetType.GLOBAL;
+import static com.openexchange.find.common.CommonFacetType.TIME;
+import static com.openexchange.find.common.CommonStrings.LAST_MONTH;
+import static com.openexchange.find.common.CommonStrings.LAST_WEEK;
+import static com.openexchange.find.common.CommonStrings.LAST_YEAR;
 import static com.openexchange.find.facet.Facets.newSimpleBuilder;
 import static com.openexchange.find.mail.MailFacetType.CONTACTS;
 import static com.openexchange.find.mail.MailFacetType.MAIL_TEXT;
 import static com.openexchange.find.mail.MailFacetType.SUBJECT;
-import static com.openexchange.find.mail.MailFacetType.TIME;
 import static com.openexchange.find.mail.MailStrings.FACET_FROM;
 import static com.openexchange.find.mail.MailStrings.FACET_FROM_AND_TO;
 import static com.openexchange.find.mail.MailStrings.FACET_MAIL_TEXT;
 import static com.openexchange.find.mail.MailStrings.FACET_SUBJECT;
 import static com.openexchange.find.mail.MailStrings.FACET_TO;
-import static com.openexchange.find.mail.MailStrings.LAST_MONTH;
-import static com.openexchange.find.mail.MailStrings.LAST_WEEK;
-import static com.openexchange.find.mail.MailStrings.LAST_YEAR;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -97,9 +97,11 @@ import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.AbstractContactFacetingModuleSearchDriver;
 import com.openexchange.find.basic.Services;
+import com.openexchange.find.basic.common.Comparison;
 import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.common.ContactDisplayItem;
 import com.openexchange.find.common.FolderType;
+import com.openexchange.find.common.TimeFrame;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.Facet;
@@ -435,18 +437,36 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
     }
 
     private static SearchTerm<?> prepareTimeTerm(SearchRequest searchRequest, MailFolder folder) throws OXException {
-        List<ActiveFacet> timeFacets = searchRequest.getActiveFacets(MailFacetType.TIME);
+        List<ActiveFacet> timeFacets = searchRequest.getActiveFacets(TIME);
         if (timeFacets != null && !timeFacets.isEmpty()) {
             ActiveFacet timeFacet = timeFacets.get(0);
             Filter filter = timeFacet.getFilter();
             if (filter == Filter.NO_FILTER) {
-                String rangeString = timeFacet.getValueId();
-                SearchTerm<?> timeTerm = parseTimeRange(rangeString, folder.isSent());
-                if (timeTerm == null) {
-                    throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(rangeString, FIELD_TIME);
+                String timeFramePattern = timeFacet.getValueId();
+                TimeFrame timeFrame = TimeFrame.valueOf(timeFramePattern);
+                if (timeFrame == null) {
+                    throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(timeFramePattern, FIELD_TIME);
                 }
 
-                return timeTerm;
+                Comparison fromComparison;
+                Comparison toComparison;
+                if (timeFrame.isInclusive()) {
+                    fromComparison = Comparison.GREATER_EQUALS;
+                    toComparison = Comparison.LOWER_EQUALS;
+                } else {
+                    fromComparison = Comparison.GREATER_THAN;
+                    toComparison = Comparison.LOWER_THAN;
+                }
+
+                long from = timeFrame.getFrom();
+                long to = timeFrame.getTo();
+                if (to < 0L) {
+                    return buildTimeTerm(fromComparison, from, folder.isSent());
+                }
+
+                SearchTerm<?> fromTerm = buildTimeTerm(fromComparison, from, folder.isSent());
+                SearchTerm<?> toTerm = buildTimeTerm(toComparison, to, folder.isSent());
+                return new ANDTerm(fromTerm, toTerm);
             } else {
                 Pair<Comparison, Long> parsed = parseTimeQuery(filter.getQueries().get(0));
                 Comparison comparison = parsed.getFirst();
@@ -546,10 +566,6 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         return termForQuery(field, queries.iterator().next(), isOutgoingFolder);
     }
 
-    private static enum Comparison {
-        GREATER_THAN, GREATER_EQUALS, EQUALS, LOWER_THAN, LOWER_EQUALS;
-    }
-
     private static SearchTerm<?> termForQuery(String field, String query, boolean isOutgoingFolder) throws OXException {
         if (FIELD_FROM.equals(field)) {
             return new FromTerm(query);
@@ -616,67 +632,6 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         return new ReceivedDateTerm(comparisonType, date);
     }
 
-    /*
-     * We support lucenes range syntax for custom time queries:
-     * [<from> TO <to>] with from and to being long values in ms since 1970-01-01.
-     * Wildcards are also allowed, so <from> and <to> can be replaced with *.
-     */
-    private static SearchTerm<?> parseTimeRange(String query, boolean isOutgoingFolder) {
-        if (query == null) {
-            return null;
-        }
-
-        char[] chars = query.trim().toCharArray();
-        int length = chars.length;
-        if (length < 8) { // Minimum: [* TO *]
-            return null;
-        }
-
-        Comparison fromComparison;
-        Comparison toComparison;
-        if (chars[0] == '[' && chars[length - 1] == ']') {
-            fromComparison = Comparison.GREATER_EQUALS;
-            toComparison = Comparison.LOWER_EQUALS;
-        } else if (chars[0] == '{' && chars[length - 1] == '}') {
-            fromComparison = Comparison.GREATER_THAN;
-            toComparison = Comparison.LOWER_THAN;
-        } else {
-            return null;
-        }
-
-        String[] times = new String(chars, 1, length - 2).split("\\sTO\\s");
-        if (times.length != 2) {
-            return null;
-        }
-
-        String sFrom = times[0].trim();
-        String sTo = times[1].trim();
-        long from = 0L;
-        long to = -1L;
-        if (!"*".equals(sFrom)) {
-            try {
-                from = Long.valueOf(sFrom);
-            } catch (NumberFormatException e) {
-                return null;
-            }
-        }
-
-        if (!"*".equals(sTo)) {
-            try {
-                to = Long.valueOf(sTo);
-            } catch (NumberFormatException e) {
-                return null;
-            }
-        }
-
-        if (to < 0L) {
-            return buildTimeTerm(fromComparison, from, isOutgoingFolder);
-        }
-
-        SearchTerm<?> fromTerm = buildTimeTerm(fromComparison, from, isOutgoingFolder);
-        SearchTerm<?> toTerm = buildTimeTerm(toComparison, to, isOutgoingFolder);
-        return new ANDTerm(fromTerm, toTerm);
-    }
 
     private static Pair<Comparison, Long> parseTimeQuery(String query) throws OXException {
         if (Strings.isEmpty(query)) {
