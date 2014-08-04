@@ -68,10 +68,10 @@ import com.openexchange.subscribe.google.GoogleContactSubscribeService;
 public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<OAuthServiceMetaData, OAuthServiceMetaData> {
 
     private final String oauthIdentifier;
-
     private final BundleContext context;
 
-    private ServiceRegistration<SubscribeService> serviceRegistration;
+    private volatile ServiceRegistration<SubscribeService> calendarRegistration;
+    private volatile ServiceRegistration<SubscribeService> contactRegistration;
 
     /**
      * Initializes a new {@link OAuthServiceMetaDataRegisterer}.
@@ -90,8 +90,8 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
             logger.info("Registering Google subscription services.");
             final SubscribeService calendarSubService = new GoogleCalendarSubscribeService(oAuthServiceMetaData);
             final SubscribeService contactSubService = new GoogleContactSubscribeService(oAuthServiceMetaData);
-            serviceRegistration = context.registerService(SubscribeService.class, calendarSubService, null);
-            serviceRegistration = context.registerService(SubscribeService.class, contactSubService, null);
+            calendarRegistration = context.registerService(SubscribeService.class, calendarSubService, null);
+            contactRegistration = context.registerService(SubscribeService.class, contactSubService, null);
         }
         return oAuthServiceMetaData;
     }
@@ -104,9 +104,20 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
     @Override
     public void removedService(ServiceReference<OAuthServiceMetaData> ref, OAuthServiceMetaData service) {
         final Logger logger = LoggerFactory.getLogger(OAuthServiceMetaDataRegisterer.class);
-        if (service.getId().equals(oauthIdentifier) && serviceRegistration != null) {
+        if (service.getId().equals(oauthIdentifier)) {
             logger.info("Unregistering Google subscription services.");
-            serviceRegistration.unregister();
+
+            ServiceRegistration<SubscribeService> calendarRegistration = this.calendarRegistration;
+            if (null != calendarRegistration) {
+                calendarRegistration.unregister();
+                this.calendarRegistration = null;
+            }
+
+            ServiceRegistration<SubscribeService> contactRegistration = this.contactRegistration;
+            if (null != contactRegistration) {
+                contactRegistration.unregister();
+                this.contactRegistration = null;
+            }
         }
         context.ungetService(ref);
     }
