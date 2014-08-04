@@ -52,9 +52,10 @@ package com.openexchange.subscribe.google.osgi;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.subscribe.google.Services;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.subscribe.google.Services;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
@@ -73,6 +74,8 @@ public class Activator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         Services.setServices(this);
+        track(OAuthServiceMetaData.class, new OAuthServiceMetaDataRegisterer(context));
+        openTrackers();
     }
 
     @Override

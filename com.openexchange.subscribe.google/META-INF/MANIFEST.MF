@@ -18,4 +18,5 @@ Import-Package: com.openexchange.context,
  com.openexchange.subscribe,
  com.openexchange.threadpool,
  org.osgi.framework,
- org.osgi.util.tracker;version="1.5.1"
+ org.osgi.util.tracker;version="1.5.1",
+ org.slf4j;version="1.7.5"

@@ -51,7 +51,10 @@ package com.openexchange.subscribe.google.osgi;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.subscribe.SubscribeService;
 
@@ -61,10 +64,12 @@ import com.openexchange.subscribe.SubscribeService;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<OAuthServiceMetaData, OAuthServiceMetaData> {
-    
+
     private final String oauthIdentifier;
-    
+
     private final BundleContext context;
+
+    private ServiceRegistration<SubscribeService> serviceRegistration;
 
     /**
      * Initializes a new {@link OAuthServiceMetaDataRegisterer}.
@@ -77,32 +82,28 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
 
     @Override
     public OAuthServiceMetaData addingService(ServiceReference<OAuthServiceMetaData> ref) {
+        final Logger logger = LoggerFactory.getLogger(OAuthServiceMetaDataRegisterer.class);
         final OAuthServiceMetaData oAuthServiceMetaData = context.getService(ref);
         if (oauthIdentifier.equals(oAuthServiceMetaData.getId())) {
+            logger.info("Registering Google MetaData service.");
             final SubscribeService ss = new GoogleSubscribeService(oAuthServiceMetaData);
-            context.registerService(SubscribeService.class, ss, null);
+            serviceRegistration = context.registerService(SubscribeService.class, ss, null);
         }
         return oAuthServiceMetaData;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
-     */
     @Override
     public void modifiedService(ServiceReference<OAuthServiceMetaData> ref, OAuthServiceMetaData service) {
-        // TODO Auto-generated method stub
-
+        // nothing
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
-     */
     @Override
     public void removedService(ServiceReference<OAuthServiceMetaData> ref, OAuthServiceMetaData service) {
-        // TODO Auto-generated method stub
-
+        final Logger logger = LoggerFactory.getLogger(OAuthServiceMetaDataRegisterer.class);
+        if (service.getId().equals(oauthIdentifier) && serviceRegistration != null) {
+            logger.info("Unregistering Google MetaData service.");
+            serviceRegistration.unregister();
+        }
+        context.ungetService(ref);
     }
-
 }
