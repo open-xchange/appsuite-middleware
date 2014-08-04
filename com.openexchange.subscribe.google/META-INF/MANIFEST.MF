@@ -5,9 +5,15 @@ Bundle-SymbolicName: com.openexchange.subscribe.google
 Bundle-Version: 7.6.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.context,
+Import-Package: com.google.api.client.auth.oauth2,
+ com.google.api.client.googleapis.auth.oauth2,
+ com.google.api.client.googleapis.services,
+ com.google.api.services.calendar,
+ com.google.api.services.calendar.model,
+ com.openexchange.context,
  com.openexchange.database,
  com.openexchange.exception,
+ com.openexchange.google.api.client,
  com.openexchange.groupware.container,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.ldap,
@@ -21,3 +27,4 @@ Import-Package: com.openexchange.context,
  org.osgi.framework,
  org.osgi.util.tracker;version="1.5.1",
  org.slf4j;version="1.7.5"
+Bundle-Activator: com.openexchange.subscribe.google.osgi.Activator

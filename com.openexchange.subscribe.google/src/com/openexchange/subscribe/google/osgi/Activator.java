@@ -49,9 +49,7 @@
 
 package com.openexchange.subscribe.google.osgi;
 
-import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondService;
@@ -66,8 +64,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] {
-            OAuthService.class, ContextService.class, SessiondService.class, DatabaseService.class, ThreadPoolService.class };
+        return new Class[] { SessiondService.class, DatabaseService.class, ThreadPoolService.class };
     }
 
     @Override
