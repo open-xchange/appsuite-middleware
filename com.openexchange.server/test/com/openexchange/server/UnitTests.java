@@ -64,6 +64,7 @@ import org.junit.runners.Suite.SuiteClasses;
     com.openexchange.ajax.parser.TaskLastModifiedTest.class,
     com.openexchange.ajax.LoginAddFragmentTest.class,
     com.openexchange.groupware.ldap.UserAttributeDiffTest.class,
+    com.openexchange.groupware.ldap.Bug33891Test.class,
     com.openexchange.i18n.tools.replacement.TaskEndDateReplacementTest.class,
     com.openexchange.i18n.tools.replacement.FormatLocalizedStringReplacementTest.class,
     com.openexchange.login.internal.LoginPerformerTest.class,
