@@ -85,5 +85,5 @@ public interface ClusterLockService {
      * @return The lock
      * @throws OXException
      */
-    public Lock acquirePeriodicClusterLock(String action, Long period) throws OXException;
+    public Lock acquirePeriodicClusterLock(String action, long period) throws OXException;
 }

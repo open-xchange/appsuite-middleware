@@ -50,6 +50,7 @@
 package com.openexchange.report.appsuite;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.report.appsuite.serialization.Report;
 
 /**
  * The {@link ReportService} runs reports and manages pending and finished reports. This service is available via OSGi
@@ -64,8 +65,9 @@ public interface ReportService {
     public abstract String run() throws OXException;
 
     /**
-     * Run a report of the given reportType. Note that when a report of this type is already running, no new report is 
-     * triggered and the uuid of the running report is returned instead
+     * Run a report of the given reportType. Note that when a report of this type is already running, no new report is triggered and the
+     * uuid of the running report is returned instead
+     * 
      * @return The uuid of triggered or the already running report
      */
     public abstract String run(String reportType) throws OXException;
@@ -74,7 +76,7 @@ public interface ReportService {
      * Same as calling {@link #getLastReport(String)} with the 'default' reportType
      */
     public abstract Report getLastReport();
-    
+
     /**
      * Get the last finished report of the given reportType or null if during the uptime of this cluster, no report has been produced.
      */

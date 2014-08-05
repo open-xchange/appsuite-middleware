@@ -97,7 +97,7 @@ public class RTJSONActivator extends AJAXModuleActivator {
 
     private static final Logger LOG = LoggerFactory.getLogger(RTJSONActivator.class);
     private RealtimeActions realtimeActions;
-    private RTJSONHandler handler;
+    private volatile RTJSONHandler handler;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -113,7 +113,8 @@ public class RTJSONActivator extends AJAXModuleActivator {
         ManagementHouseKeeper managementHouseKeeper = ManagementHouseKeeper.getInstance();
         managementHouseKeeper.initialize(this);
 
-        handler = new RTJSONHandler();
+        RTJSONHandler handler = new RTJSONHandler();
+        this.handler = handler;
         registerService(Channel.class, new JSONChannel(handler));
 
         /*
@@ -167,6 +168,13 @@ public class RTJSONActivator extends AJAXModuleActivator {
         ManagementHouseKeeper.getInstance().cleanup();
         RealtimeJanitors.getInstance().cleanup();
         unregisterService(realtimeActions);
+
+        RTJSONHandler handler = this.handler;
+        if (null != handler) {
+            handler.shutDownCleanupTimer();
+            this.handler = null;
+        }
+
         JSONServiceRegistry.SERVICES.set(null);
         super.stop(context);
     }

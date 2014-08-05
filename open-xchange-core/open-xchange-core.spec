@@ -985,9 +985,22 @@ ox_set_property com.openexchange.hazelcast.network.symmetricEncryption "$VALUE" 
 # SoftwareChange_Request-2037
 PFILE=/opt/open-xchange/etc/sessiond.properties
 ox_comment com.openexchange.sessiond.remoteParameterNames= add $PFILE
+
 # SoftwareChange_Request-2055
 ox_add_property com.openexchange.rest.services.basic-auth.login open-xchange /opt/open-xchange/etc/server.properties
 ox_add_property com.openexchange.rest.services.basic-auth.password secret /opt/open-xchange/etc/server.properties
+
+# SoftwareChange_Request-2081
+PFILE=/opt/open-xchange/etc/configdb.properties
+KEY=minIdle
+if ox_exists_property $KEY $PFILE; then
+    ox_remove_property $KEY $PFILE
+fi
+
+# SoftwareChange_Request-2094
+PFILE=/opt/open-xchange/etc/mail.properties
+KEY=com.openexchange.mail.imageHost
+ox_add_property $KEY "" $PFILE
 
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
@@ -1028,6 +1041,10 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Mon Jul 21 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-07-28
+* Tue Jul 15 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-07-21
 * Mon Jul 14 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-07-24
 * Thu Jul 10 2014 Marcus Klein <marcus.klein@open-xchange.com>

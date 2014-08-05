@@ -77,6 +77,9 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-2016
     ox_add_property com.openexchange.imap.ssl.ciphersuites "" $PFILE
+
+    # SoftwareChange_Request-2093
+    ox_add_property com.openexchange.imap.namespacePerUser "true" $PFILE
 fi
 
 %clean
@@ -92,6 +95,10 @@ fi
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Mon Jul 21 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-07-28
+* Tue Jul 15 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-07-21
 * Mon Jul 14 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-07-24
 * Thu Jul 10 2014 Marcus Klein <marcus.klein@open-xchange.com>

@@ -53,6 +53,8 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PushbackReader;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -393,7 +395,7 @@ public class SieveHandler {
         bos_sieve.write(CRLF.getBytes(com.openexchange.java.Charsets.UTF_8));
         bos_sieve.flush();
 
-        final String actualline = bis_sieve.readLine();
+        String actualline = bis_sieve.readLine();
         if (null != actualline && actualline.startsWith(SIEVE_OK)) {
             return;
         } else if (null != actualline && actualline.startsWith("NO ")) {
@@ -469,20 +471,61 @@ public class SieveHandler {
             }
             sb.ensureCapacity(parsed[1]);
         }
+        boolean inQuote = false;
+        boolean okStart = false;
         while (true) {
-            final String temp = bis_sieve.readLine();
-            if (null == temp) {
+            int ch = bis_sieve.read();
+            switch (ch) {
+            case -1:
+                // End of stream
                 throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
-            }
-            if (temp.startsWith(SIEVE_OK)) {
-                if (sb.length() >= 2) {
-                    // We have to strip off the last trailing CRLF...
-                    return sb.substring(0, sb.length() - 2);
+            case '\\':
+                {
+                    okStart = false;
+                    sb.append((char) ch);
+                    ch = bis_sieve.read();
+                    if (ch == -1) {
+                        // End of stream
+                        throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
+                    }
+                    sb.append((char) ch);
                 }
-                return sb.toString();
+                break;
+            case '"':
+                {
+                    if (inQuote) {
+                        inQuote = false;
+                    } else {
+                        inQuote = true;
+                    }
+                    okStart = false;
+                    sb.append((char) ch);
+                }
+                break;
+            case 'O': // OK\r\n
+                {
+                    if (!inQuote) {
+                        okStart = true;
+                    }
+                    sb.append((char) ch);
+                }
+                break;
+            case 'K': // OK\r\n
+                {
+                    if (!inQuote && okStart) {
+                        sb.setLength(sb.length() - 1);
+                        consumeUntilCRLF(); // OK "Getscript completed."\r\n
+                        return returnScript(sb);
+                    }
+                    okStart = false;
+                    sb.append((char) ch);
+                }
+                break;
+            default:
+                okStart = false;
+                sb.append((char) ch);
+                break;
             }
-            sb.append(temp);
-            sb.append(CRLF);
         }
         /*-
          *
@@ -509,6 +552,61 @@ public class SieveHandler {
             }
         }
          */
+    }
+
+    private static String returnScript(final StringBuilder sb) {
+        int length = sb.length();
+        if (length >= 2 && sb.charAt(length - 2) == '\r' && sb.charAt(length - 1) == '\n') {
+            // We have to strip off the last trailing CRLF...
+            return sb.substring(0, length - 2);
+        }
+        return sb.toString();
+    }
+
+    private void consumeUntilCRLF() throws IOException, OXSieveHandlerException {
+        Reader in = bis_sieve;
+        boolean doRead = true;
+        int c1 = -1;
+
+        while (doRead && (c1 = in.read()) >= 0) {
+            if (c1 == '\n') {
+                doRead = false;
+            } else if (c1 == '\r') {
+                // Got CR, is the next char LF?
+                boolean twoCRs = false;
+                if (in.markSupported()) {
+                    in.mark(2);
+                }
+                int c2 = in.read();
+                if (c2 == '\r') {
+                    // Discard extraneous CR
+                    twoCRs = true;
+                    c2 = in.read();
+                }
+                if (c2 != '\n') {
+                    // If the reader supports it (which we hope will always be the case), reset to after the first CR.
+                    // Otherwise, we wrap a PushbackReader around the stream so we can unread the characters we don't need.
+                    if (in.markSupported()) { // Always true for BufferedReader
+                        in.reset();
+                    } else {
+                        if (!(in instanceof PushbackReader)) {
+                            in = new PushbackReader(in, 2);
+                        }
+                        if (c2 != -1) {
+                            ((PushbackReader) in).unread(c2);
+                        }
+                        if (twoCRs) {
+                            ((PushbackReader) in).unread('\r');
+                        }
+                    }
+                }
+                doRead = false;
+            }
+        }
+        if (c1 < 0) {
+            // End of stream
+            throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
+        }
     }
 
     /**

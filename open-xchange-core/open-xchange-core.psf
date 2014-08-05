@@ -115,6 +115,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.quartz"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.quota"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.report.appsuite"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.report.appsuite.serialization"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.rdiff"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.rmi"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.secret"/>

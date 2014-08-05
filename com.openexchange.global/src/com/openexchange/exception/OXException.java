@@ -223,34 +223,20 @@ public class OXException extends Exception implements OXExceptionConstants {
      */
 
     private final int count;
-
     private final Map<String, String> properties;
-
     private final List<Category> categories;
+    private final List<ProblematicAttribute> problematics;
+    private final Map<String, Object> arguments;
 
     private Object[] displayArgs;
-
     private int code;
-
     private boolean lightWeight;
-
-    /**
-     * List of problematic attributes.
-     */
-    private final List<ProblematicAttribute> problematics;
-
     private String displayMessage;
-
     private String logMessage;
-
     private Object[] logArgs;
-
     private String exceptionId;
-
     private String prefix;
-
     private Generic generic;
-
     private OXExceptionCode exceptionCode;
 
     /**
@@ -261,7 +247,8 @@ public class OXException extends Exception implements OXExceptionConstants {
         generic = Generic.NONE;
         code = CODE_DEFAULT;
         count = COUNTER.incrementAndGet();
-        properties = new HashMap<String, String>(8);
+        properties = new HashMap<String, String>(4);
+        arguments = new HashMap<String, Object>(4);
         categories = new LinkedList<Category>();
         displayMessage = OXExceptionStrings.MESSAGE;
         logMessage = null;
@@ -280,7 +267,8 @@ public class OXException extends Exception implements OXExceptionConstants {
         generic = Generic.NONE;
         code = CODE_DEFAULT;
         count = COUNTER.incrementAndGet();
-        properties = new HashMap<String, String>(8);
+        properties = new HashMap<String, String>(4);
+        arguments = new HashMap<String, Object>(4);
         categories = new LinkedList<Category>();
         displayMessage = OXExceptionStrings.MESSAGE;
         logMessage = null;
@@ -306,10 +294,9 @@ public class OXException extends Exception implements OXExceptionConstants {
         this.exceptionId = cloneMe.exceptionId;
         this.logMessage = cloneMe.logMessage;
         this.prefix = cloneMe.prefix;
-        this.problematics =
-            null == cloneMe.problematics ? new LinkedList<ProblematicAttribute>() : new ArrayList<ProblematicAttribute>(
-                cloneMe.problematics);
-        this.properties = null == cloneMe.properties ? new HashMap<String, String>(8) : new HashMap<String, String>(cloneMe.properties);
+        this.problematics = null == cloneMe.problematics ? new LinkedList<ProblematicAttribute>() : new ArrayList<ProblematicAttribute>(cloneMe.problematics);
+        this.properties = null == cloneMe.properties ? new HashMap<String, String>(4) : new HashMap<String, String>(cloneMe.properties);
+        this.arguments = null == cloneMe.arguments ? new HashMap<String, Object>(4) : new HashMap<String, Object>(cloneMe.arguments);
         this.lightWeight = cloneMe.lightWeight;
     }
 
@@ -322,7 +309,8 @@ public class OXException extends Exception implements OXExceptionConstants {
         super();
         generic = Generic.NONE;
         count = COUNTER.incrementAndGet();
-        properties = new HashMap<String, String>(8);
+        properties = new HashMap<String, String>(4);
+        arguments = new HashMap<String, Object>(4);
         categories = new LinkedList<Category>();
         this.code = code;
         this.displayMessage = OXExceptionStrings.MESSAGE;
@@ -342,7 +330,8 @@ public class OXException extends Exception implements OXExceptionConstants {
         super();
         generic = Generic.NONE;
         count = COUNTER.incrementAndGet();
-        properties = new HashMap<String, String>(8);
+        properties = new HashMap<String, String>(4);
+        arguments = new HashMap<String, Object>(4);
         categories = new LinkedList<Category>();
         this.code = code;
         this.displayMessage = null == displayMessage ? OXExceptionStrings.MESSAGE : displayMessage;
@@ -363,7 +352,8 @@ public class OXException extends Exception implements OXExceptionConstants {
         super(cause);
         generic = Generic.NONE;
         count = COUNTER.incrementAndGet();
-        properties = new HashMap<String, String>(8);
+        properties = new HashMap<String, String>(4);
+        arguments = new HashMap<String, Object>(4);
         categories = new LinkedList<Category>();
         this.code = code;
         this.displayMessage = null == displayMessage ? OXExceptionStrings.MESSAGE : displayMessage;
@@ -393,6 +383,8 @@ public class OXException extends Exception implements OXExceptionConstants {
         }
         this.properties.clear();
         this.properties.putAll(e.properties);
+        this.arguments.clear();
+        this.arguments.putAll(e.arguments);
     }
 
     @Override
@@ -1062,6 +1054,73 @@ public class OXException extends Exception implements OXExceptionConstants {
     }
 
     /*-
+     * ----------------------------- Arguments related methods -----------------------------
+     */
+
+    /**
+     * Checks for existence of specified argument.
+     *
+     * @param name The argument name
+     * @return <code>true</code> if such an argument exists; otherwise <code>false</code>
+     */
+    public boolean containsArgument(final String name) {
+        return arguments.containsKey(name);
+    }
+
+    /**
+     * Gets the value of the denoted argument.
+     *
+     * @param name The argument name
+     * @return The argument value or <code>null</code> if absent
+     */
+    public Object getArgument(final String name) {
+        return arguments.get(name);
+    }
+
+    /**
+     * Sets the value of denoted argument.
+     *
+     * @param name The argument name
+     * @param value The argument value
+     * @return The value previously associated with argument value or <code>null</code> if not present before
+     */
+    public Object setArgument(final String name, final String value) {
+        if (null == value) {
+            return arguments.remove(name);
+        }
+        return arguments.put(name, value);
+    }
+
+    /**
+     * Removes the value of the denoted argument.
+     *
+     * @param name The argument name
+     * @return The removed argument value or <code>null</code> if absent
+     */
+    public Object removeArgument(final String name) {
+        return arguments.remove(name);
+    }
+
+    /**
+     * Gets the {@link Set} view for contained argument names.<br>
+     * <b>Note</b>: Changes in returned set do not affect original arguments!
+     *
+     * @return The argument names
+     */
+    public Set<String> getArgumentNames() {
+        return Collections.unmodifiableSet(arguments.keySet());
+    }
+
+    /**
+     * Gets the unmodifiable {@link Map} view for contained arguments.<br>
+     *
+     * @return The arguments
+     */
+    public Map<String, Object> getArguments() {
+        return Collections.unmodifiableMap(arguments);
+    }
+
+    /*-
      * ----------------------------- Property related methods -----------------------------
      */
 
@@ -1141,7 +1200,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @return The removed property value or <code>null</code> if absent
      * @see OXExceptionConstants
      */
-    public String remove(final String name) {
+    public String removeProperty(final String name) {
         return properties.remove(name);
     }
 

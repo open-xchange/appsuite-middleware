@@ -182,12 +182,16 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
             contactFields = ColumnParser.getFieldsToQuery(columnIDs);
         } else {
             contactFields = ColumnParser.getFieldsToQuery(columnIDs, ContactField.INTERNAL_USERID);
-            SingleSearchTerm t = new SingleSearchTerm(SingleOperation.NOT_EQUALS);
-            t.addOperand(new ContactFieldOperand(ContactField.INTERNAL_USERID));
-            t.addOperand(new ConstantOperand<Integer>(session.getContext().getMailadmin()));
-            searchTerm.addSearchTerm(t);
+            CompositeSearchTerm excludeAdminTerm = new CompositeSearchTerm(CompositeOperation.OR);
+            SingleSearchTerm isNullTerm = new SingleSearchTerm(SingleOperation.ISNULL);
+            isNullTerm.addOperand(new ContactFieldOperand(ContactField.INTERNAL_USERID));
+            excludeAdminTerm.addSearchTerm(isNullTerm);
+            SingleSearchTerm notEqualsTerm = new SingleSearchTerm(SingleOperation.NOT_EQUALS);
+            notEqualsTerm.addOperand(new ContactFieldOperand(ContactField.INTERNAL_USERID));
+            notEqualsTerm.addOperand(new ConstantOperand<Integer>(session.getContext().getMailadmin()));
+            excludeAdminTerm.addSearchTerm(notEqualsTerm);
+            searchTerm.addSearchTerm(excludeAdminTerm);
         }
-
         /*
          * search
          */
@@ -234,7 +238,7 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
          * add ContactsFacetType.CONTACT facet dynamically
          */
         {
-            List<Contact> contacts = autocompleteContacts(session, autocompleteRequest);
+            List<Contact> contacts = autocompleteContacts(session, autocompleteRequest, false);
             if (null != contacts && !contacts.isEmpty()) {
                 DefaultFacetBuilder builder = newDefaultBuilder(ContactsFacetType.CONTACT);
                 for (Contact contact : contacts) {

@@ -50,11 +50,11 @@
 package com.openexchange.find.json.converters;
 
 import java.util.List;
-import java.util.Locale;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.find.facet.Facet;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -80,10 +80,10 @@ public abstract class AbstractJSONConverter implements ResultConverter {
         return Quality.GOOD;
     }
 
-    protected JSONArray convertFacets(Locale locale, List<Facet> facets) throws JSONException {
+    protected JSONArray convertFacets(ServerSession session, List<Facet> facets) throws JSONException {
         JSONArray result = new JSONArray(facets.size());
         for (Facet facet : facets) {
-            JSONFacetVisitor facetVisitor = new JSONFacetVisitor(translator, locale);
+            JSONFacetVisitor facetVisitor = new JSONFacetVisitor(translator, session);
             facet.accept(facetVisitor);
             result.put(facetVisitor.getResult());
         }

@@ -120,6 +120,12 @@ public class ResourceCacheTest extends AbstractAJAXSession {
     }
 
     private void lifecycle() throws Exception {
+
+        //Preperations if the cache holds old elements
+        clearCache();
+        long used = executeTyped(new UsedRequest(), current).getUsed();
+        assertTrue("Cache is not empty", used == 0);
+
         byte file[] = prepareFile(1024);
         UploadRequest uploadRequest = new UploadRequest();
         uploadRequest.addFile("someimage.jpg", "image/jpeg", new ByteArrayInputStream(file));
@@ -154,6 +160,7 @@ public class ResourceCacheTest extends AbstractAJAXSession {
     }
 
     private void quotaAndInvalidation() throws Exception {
+        clearCache();
         int[] qts = loadQuotas();
         int quota = qts[0];
         int perDocument = qts[1];
@@ -161,6 +168,9 @@ public class ResourceCacheTest extends AbstractAJAXSession {
         if (quota <= 0 || perDocument <= 0 || n < 1) {
             fail("test system is misconfigured. Set correct quotas in preview.properties!");
         }
+
+        long used = executeTyped(new UsedRequest(), current).getUsed();
+        assertTrue("Cache is not empty", used == 0);
 
         // Fill up the whole cache
         byte[] file = prepareFile(perDocument);
@@ -171,6 +181,9 @@ public class ResourceCacheTest extends AbstractAJAXSession {
         UploadResponse uploadResponse = executeTyped(uploadRequest, current);
         List<String> ids = uploadResponse.getIds();
         assertEquals("wrong number of ids", n, ids.size());
+
+        used = executeTyped(new UsedRequest(), current).getUsed();
+        assertTrue("Quota exceeded: used: " + used + " quota: " + quota , used <= quota);
 
         for (String id : ids) {
             DownloadRequest downloadRequest = new DownloadRequest(id);
@@ -205,6 +218,12 @@ public class ResourceCacheTest extends AbstractAJAXSession {
 
     public void testPerformance() throws Exception {
         current = FS;
+
+        //Preperations if the cache holds old elements
+        clearCache();
+        long used = executeTyped(new UsedRequest(), current).getUsed();
+        assertTrue("Cache is not empty", used == 0);
+
         final int[] qts = loadQuotas();
         final int quota = qts[0];
         final int perDocument = qts[1];
@@ -241,7 +260,7 @@ public class ResourceCacheTest extends AbstractAJAXSession {
         }
 
         Thread.sleep(2000L);
-        long used = executeTyped(new UsedRequest(), current).getUsed();
+        used = executeTyped(new UsedRequest(), current).getUsed();
         assertTrue("Quota exceeded", used <= quota);
     }
 
@@ -251,6 +270,12 @@ public class ResourceCacheTest extends AbstractAJAXSession {
     }
 
     private void resourceExceedsQuota() throws Exception {
+
+        //Preperations if the cache holds old elements
+        clearCache();
+        long used = executeTyped(new UsedRequest(), current).getUsed();
+        assertTrue("Cache is not empty", used == 0);
+
         int[] qts = loadQuotas();
         int perDocument = qts[1];
         byte[] file = prepareFile(perDocument + 1);
@@ -262,6 +287,12 @@ public class ResourceCacheTest extends AbstractAJAXSession {
 
     public void testUpdateFS() throws Exception {
         current = FS;
+
+        //Preperations if the cache holds old elements
+        clearCache();
+        long used = executeTyped(new UsedRequest(), current).getUsed();
+        assertTrue("Cache is not empty", used == 0);
+
         String id = UUIDs.getUnformattedString(UUID.randomUUID());
         byte file[] = prepareFile(1024);
         UploadRequest uploadRequest = new UploadRequest();

@@ -67,6 +67,11 @@ public interface CustomPortable extends Portable {
     static final int FACTORY_ID = DynamicPortableFactory.FACTORY_ID;
 
     /**
+     * Unique id for PortableReport
+     */
+    public static final int PORTABLEREPORT_CLASS_ID = 9;
+
+    /**
      * Gets the ID of the dynamic portable factory.<p/>
      *
      * Make sure to supply {@link CustomPortable#FACTORY_ID} here.
@@ -77,11 +82,11 @@ public interface CustomPortable extends Portable {
     int getFactoryId();
 
     /**
-     * Gets the class ID of this portable implementation.<p/>
-     *
-     * Choose a not yet used arbitrary identifier <code>> 0</code> for your portable class here and ensure to return the same class ID in the
-     * corresponding {@link CustomPortableFactory#getClassId()} method.<p/>
-     *
+     * Gets the class ID of this portable implementation.
+     * <p/>
+     * Choose a not yet used arbitrary identifier <code>> 0</code> for your portable class here and ensure to return the same class ID in
+     * the corresponding {@link CustomPortableFactory#getClassId()} method.
+     * <p/>
      * The following list gives an overview about the <b>already used</b> class IDs (add your IDs here):
      * <ul>
      * <li><code>  1</code>: com.openexchange.sessionstorage.hazelcast.portable.PortableSession</li>
@@ -92,6 +97,8 @@ public interface CustomPortable extends Portable {
      * <li><code>  6</code>: com.openexchange.realtime.hazelcast.serialization.PortableSelectorChoice</li>
      * <li><code>  7</code>: com.openexchange.realtime.hazelcast.serialization.PortableNotInternalPredicate</li>
      * <li><code>  8</code>: com.openexchange.realtime.hazelcast.serialization.PortableMemberPredicate</li>
+     * <li><code>  9</code>: com.openexchange.report.appsuite.internal.PortableReport, used via
+     * {@link com.openexchange.hazelcast.serialization.CustomPortable.PORTABLEREPORT_CLASS_ID}</li>
      * </ul>
      *
      * @return The class ID

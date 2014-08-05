@@ -80,7 +80,7 @@ public class AutocompleteResultJSONConverter extends AbstractJSONConverter {
         AutocompleteResult autocompleteResult = (AutocompleteResult) result.getResultObject();
         try {
             JSONObject jsonResult = new JSONObject(2);
-            jsonResult.put("facets", convertFacets(session.getUser().getLocale(), autocompleteResult.getFacets()));
+            jsonResult.put("facets", convertFacets(session, autocompleteResult.getFacets()));
             result.setResultObject(jsonResult, "json");
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());

@@ -49,10 +49,12 @@
 
 package com.openexchange.report.appsuite;
 
+import com.openexchange.report.appsuite.serialization.Report;
+
 
 /**
- * A {@link ContextReportCumulator} knows how to merge information about a context (the {@link ContextReport} into 
- * the overall system information ( {@link Report} ) 
+ * A {@link ContextReportCumulator} knows how to merge information about a context (the {@link ContextReport} into the overall system
+ * information ( {@link Report} )
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */

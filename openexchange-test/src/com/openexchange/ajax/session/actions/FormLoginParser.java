@@ -81,8 +81,9 @@ public class FormLoginParser extends AbstractRedirectParser<FormLoginResponse> {
             int assignPos = param.indexOf('=');
             if (-1 == assignPos) {
                 map.put(param, null);
+            } else {
+                map.put(param.substring(0, assignPos), param.substring(assignPos + 1));
             }
-            map.put(param.substring(0, assignPos), param.substring(assignPos + 1));
         }
         String userIdValue = map.get(PARAMETER_USER_ID);
         final int userId;

@@ -318,7 +318,7 @@ public final class EventPool implements Runnable {
         } else {
             eventAdmin.sendEvent(event);
         }
-        LOG.debug("Notified {}-wise changed folder \"{}\" in account {} of user {} in context {}", pooledEvent.isContentRelated() ? "content-related" : "hierarchical", pooledEvent.getFullname(), pooledEvent.getAccountId(), pooledEvent.getUserId(), pooledEvent.getContextId());
+        LOG.debug("{}Notified {}-wise changed folder \"{}\" in account {} of user {} in context {}", pooledEvent.isRemote() ? "(Remotely) " : "", pooledEvent.isContentRelated() ? "content-related" : "hierarchical", pooledEvent.getFullname(), pooledEvent.getAccountId(), pooledEvent.getUserId(), pooledEvent.getContextId());
     }
 
 }

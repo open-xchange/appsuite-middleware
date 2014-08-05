@@ -50,8 +50,8 @@
 package com.openexchange.report.appsuite.management;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.report.appsuite.Report;
 import com.openexchange.report.appsuite.jobs.Orchestration;
+import com.openexchange.report.appsuite.serialization.Report;
 
 
 /**
@@ -74,7 +74,7 @@ public class ReportMXBeanImpl implements ReportMXBean {
     @Override
     public String run(String reportType) throws Exception {
         try {
-            return Orchestration.getInstance().run();
+            return Orchestration.getInstance().run(reportType);
         } catch (OXException e) {
             throw new Exception(e.getMessage());
         }

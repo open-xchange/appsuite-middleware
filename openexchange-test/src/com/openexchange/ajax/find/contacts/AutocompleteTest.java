@@ -51,9 +51,12 @@ package com.openexchange.ajax.find.contacts;
 
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
 import com.openexchange.ajax.find.actions.AutocompleteResponse;
+import com.openexchange.ajax.user.actions.GetRequest;
 import com.openexchange.find.Module;
+import com.openexchange.find.common.ContactDisplayItem;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.util.TimeZones;
 
 
 /**
@@ -72,17 +75,18 @@ public class AutocompleteTest extends ContactsFindTest {
         super(name);
     }
 
-    public void noTestAutocompleteCurrentUser() throws Exception {
+    public void testAutocompleteCurrentUser() throws Exception {
         String defaultAddress = client.getValues().getDefaultAddress();
-        assertFoundFacetInAutocomplete(defaultAddress.substring(0, 3), defaultAddress);
+        Contact ownContact = client.execute(new GetRequest(client.getValues().getUserId(), TimeZones.UTC)).getContact();
+        assertFoundFacetInAutocomplete(defaultAddress.substring(0, 3), ContactDisplayItem.extractDefaultValue(ownContact));
     }
 
-    public void noTestAutocompleteOtherContact() throws Exception {
+    public void testAutocompleteOtherContact() throws Exception {
         Contact contact = manager.newAction(randomContact());
-        assertFoundFacetInAutocomplete(contact.getDisplayName().substring(0, 3), contact.getEmail1());
-        assertFoundFacetInAutocomplete(contact.getSurName().substring(0, 4), contact.getEmail1());
-        assertFoundFacetInAutocomplete(contact.getGivenName().substring(0, 5), contact.getEmail1());
-        assertFoundFacetInAutocomplete(contact.getEmail1().substring(0, 3), contact.getEmail1());
+        assertFoundFacetInAutocomplete(contact.getDisplayName().substring(0, 3), ContactDisplayItem.extractDefaultValue(contact));
+        assertFoundFacetInAutocomplete(contact.getSurName().substring(0, 4), ContactDisplayItem.extractDefaultValue(contact));
+        assertFoundFacetInAutocomplete(contact.getGivenName().substring(0, 5), ContactDisplayItem.extractDefaultValue(contact));
+        assertFoundFacetInAutocomplete(contact.getEmail1().substring(0, 3), ContactDisplayItem.extractDefaultValue(contact));
     }
 
     private FacetValue assertFoundFacetInAutocomplete(String prefix, String expectedEmail1) throws Exception {

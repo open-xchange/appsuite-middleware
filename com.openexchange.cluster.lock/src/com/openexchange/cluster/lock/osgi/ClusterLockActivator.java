@@ -49,52 +49,58 @@
 
 package com.openexchange.cluster.lock.osgi;
 
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.cluster.lock.internal.ClusterLockServiceImpl;
+import com.openexchange.cluster.lock.internal.Unregisterer;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link ClusterLockActivator}
- * 
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class ClusterLockActivator extends HousekeepingActivator {
+public class ClusterLockActivator extends HousekeepingActivator implements Unregisterer {
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
+    private ServiceTracker<HazelcastInstance, HazelcastInstance> tracker;
+
+    /**
+     * Initializes a new {@link ClusterLockActivator}.
      */
+    public ClusterLockActivator() {
+        super();
+    }
+
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { HazelcastConfigurationService.class };
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
-     */
     @Override
     protected void startBundle() throws Exception {
         final Logger LOG = LoggerFactory.getLogger(ClusterLockActivator.class);
-        
+
         final HazelcastConfigurationService hzConfigService = getService(HazelcastConfigurationService.class);
         final boolean enabled = hzConfigService.isEnabled();
-        
+
         if (false == enabled) {
             LOG.warn("{} will be disabled due to disabled Hazelcast services", context.getBundle().getSymbolicName());
         } else {
-            track(HazelcastInstance.class, new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
+            final BundleContext context = this.context;
+            tracker = track(HazelcastInstance.class, new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
 
                 @Override
                 public HazelcastInstance addingService(ServiceReference<HazelcastInstance> ref) {
                     HazelcastInstance hzInstance = context.getService(ref);
-                    registerService(ClusterLockService.class, new ClusterLockServiceImpl(hzInstance));
+                    registerService(ClusterLockService.class, new ClusterLockServiceImpl(hzInstance, ClusterLockActivator.this));
                     return hzInstance;
                 }
 
@@ -112,4 +118,32 @@ public class ClusterLockActivator extends HousekeepingActivator {
             openTrackers();
         }
     }
+
+    @Override
+    public <S> void registerService(Class<S> clazz, S service) {
+        super.registerService(clazz, service);
+    }
+
+    @Override
+    public <S> void unregisterService(S service) {
+        super.unregisterService(service);
+    }
+
+    @Override
+    public void unregister() {
+        ServiceTracker<HazelcastInstance, HazelcastInstance> tracker = this.tracker;
+        if (null != tracker) {
+            tracker.close();
+            this.tracker = null;
+        }
+    }
+
+    @Override
+    public void propagateNotActive(HazelcastInstanceNotActiveException notActiveException) {
+        final BundleContext context = this.context;
+        if (null != context) {
+            context.registerService(HazelcastInstanceNotActiveException.class, notActiveException, null);
+        }
+    }
+
 }

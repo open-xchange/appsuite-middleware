@@ -1192,20 +1192,15 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 nestedMail = (MailMessage) content;
             } else if (content instanceof InputStream) {
                 try {
-                    nestedMail =
-                        MimeMessageConverter.convertMessage(new MimeMessage(MimeDefaultSession.getDefaultSession(), (InputStream) content));
+                    nestedMail = MimeMessageConverter.convertMessage(new MimeMessage(MimeDefaultSession.getDefaultSession(), (InputStream) content));
                 } catch (final MessagingException e) {
                     throw MimeMailException.handleMessagingException(e);
                 }
             } else if (content instanceof String) {
                 try {
-                    try {
-                        nestedMail =
-                            MimeMessageConverter.convertMessage(new MimeMessage(MimeDefaultSession.getDefaultSession(), new ByteArrayInputStream(((String) content).getBytes("UTF-8"))));
-                    } catch (UnsupportedEncodingException e) {
-                        // Impossible
-                        return true;
-                    }
+                    nestedMail = MimeMessageConverter.convertMessage(new MimeMessage(MimeDefaultSession.getDefaultSession(), new ByteArrayInputStream(((String) content).getBytes("UTF-8"))));
+                } catch (UnsupportedEncodingException e) {
+                    throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
                 } catch (final MessagingException e) {
                     throw MimeMailException.handleMessagingException(e);
                 }

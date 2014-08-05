@@ -49,8 +49,10 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.java.Streams.close;
 import static com.openexchange.java.Strings.isEmpty;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -65,6 +67,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.httpclient.URI;
+import org.apache.tika.Tika;
+import org.apache.tika.config.TikaConfig;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
@@ -94,11 +98,34 @@ public final class AJAXUtility {
 
     // ------------------------------------- STOP Helper classes-------------------------------------------- //
 
+    private static final Tika TIKA;
+    static {
+        TIKA = new Tika(TikaConfig.getDefaultConfig());
+    }
+
     /**
      * No instance.
      */
     private AJAXUtility() {
         super();
+    }
+
+    /**
+     * Detects the MIME type from given input stream using <a href="http://tika.apache.org/">Apache Tika - a content analysis toolkit</a>.
+     *
+     * @param in The input stream
+     * @return The detected input stream
+     * @throws IOException If an I/O error occurs
+     */
+    public static String detectMimeType(final InputStream in) throws IOException {
+        if (null == in) {
+            return null;
+        }
+        try {
+            return TIKA.detect(in);
+        } finally {
+            close(in);
+        }
     }
 
     /**

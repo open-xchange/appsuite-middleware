@@ -132,6 +132,21 @@ public final class ThresholdFileHolder implements IFileHolder {
     }
 
     /**
+     * Creates a copy from given {@link IFileHolder}.
+     *
+     * @param source The source file holder
+     * @throws OXException If an error occurs
+     */
+    public ThresholdFileHolder(IFileHolder source) throws OXException {
+        this();
+        write(source.getStream());
+        name = source.getName();
+        contentType = source.getContentType();
+        delivery = source.getDelivery();
+        disposition = source.getDisposition();
+    }
+
+    /**
      * Resets this file holder.
      * <p>
      * Deletes associated file (if set) and resets internal buffer.
@@ -512,6 +527,28 @@ public final class ThresholdFileHolder implements IFileHolder {
     @Override
     public String getDelivery() {
         return delivery;
+    }
+
+    /**
+     * Sets the content information retrieved from passed file holder.
+     * <ul>
+     * <li>MIME type</li>
+     * <li>Disposition</li>
+     * <li>Name</li>
+     * <li>Delivery</li>
+     * </ul>
+     *
+     * @param fileHolder The file holder to get the content information from
+     * @return This file holder instance with content information applied
+     */
+    public ThresholdFileHolder setContentInfo(IFileHolder fileHolder) {
+        if (null != fileHolder) {
+            setContentType(fileHolder.getContentType());
+            setDelivery(fileHolder.getDelivery());
+            setDisposition(fileHolder.getDisposition());
+            setName(fileHolder.getName());
+        }
+        return this;
     }
 
     /**

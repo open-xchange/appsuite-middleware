@@ -59,6 +59,8 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -67,9 +69,11 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.html.HtmlService;
 import com.openexchange.rss.FeedByDateSorter;
 import com.openexchange.rss.RssExceptionCodes;
 import com.openexchange.rss.RssResult;
+import com.openexchange.rss.RssServices;
 import com.openexchange.rss.preprocessors.RssPreprocessor;
 import com.openexchange.rss.preprocessors.SanitizingPreprocessor;
 import com.openexchange.rss.util.TimoutHttpURLFeedFetcher;
@@ -190,7 +194,7 @@ public class RssAction implements AJAXActionService {
                 SyndEntry entry = (SyndEntry) obj;
                 RssResult result = new RssResult()
                 	.setAuthor(entry.getAuthor())
-                	.setSubject(entry.getTitle())
+                	.setSubject(getTitle(entry))
                 	.setUrl(entry.getLink())
                 	.setFeedUrl(feed.getLink())
                 	.setFeedTitle(feed.getTitle())
@@ -223,6 +227,58 @@ public class RssAction implements AJAXActionService {
             Collections.sort(results, new FeedByDateSorter(order));
         }
         return new AJAXRequestResult(results, "rss").addWarnings(warnings);
+    }
+
+    private static String getTitle(SyndEntry entry) {
+        final HtmlService htmlService = RssServices.getHtmlService();
+        return null == htmlService ? entry.getTitle() : replaceBody(htmlService.sanitize(entry.getTitle(), null, true, null, null));
+    }
+
+    private static final Pattern PATTERN_HTML = Pattern.compile("<html.*?>(.*?)</html>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_HEAD = Pattern.compile("<head.*?>(.*?)</head>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_BODY = Pattern.compile("<body(.*?)>(.*?)</body>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_STYLE = Pattern.compile("<style.*?>.*?</style>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+
+    /**
+     * Replaces body tag with an appropriate &lt;div&gt; tag.
+     *
+     * @param htmlContent The HTML content
+     * @return The HTML content with replaced body tag
+     */
+    private static String replaceBody(final String htmlContent) {
+        if (isEmpty(htmlContent)) {
+            return htmlContent;
+        }
+        final Matcher htmlMatcher = PATTERN_HTML.matcher(htmlContent);
+        if (!htmlMatcher.find()) {
+            return replaceBodyPlain(htmlContent);
+        }
+        final Matcher headMatcher = PATTERN_HEAD.matcher(htmlMatcher.group(1));
+        if (!headMatcher.find()) {
+            return replaceBodyPlain(htmlContent);
+        }
+        final Matcher bodyMatcher = PATTERN_BODY.matcher(htmlContent);
+        if (!bodyMatcher.find()) {
+            return replaceBodyPlain(htmlContent);
+        }
+        final StringBuilder sb = new StringBuilder(htmlContent.length() + 256);
+        sb.append(bodyMatcher.group(2));
+        // Is there more behind closing <body> tag?
+        final int end = bodyMatcher.end();
+        if (end < htmlContent.length()) {
+            sb.append(htmlContent.substring(end));
+        }
+        return sb.toString();
+    }
+
+    private static String replaceBodyPlain(final String htmlContent) {
+        final Matcher m = PATTERN_BODY.matcher(htmlContent);
+        StringBuffer sb = new StringBuffer();
+        if (m.find()) {
+            m.appendReplacement(sb, Matcher.quoteReplacement(m.group(2)));
+        }
+        m.appendTail(sb);
+        return sb.toString();
     }
 
 	private static String urlDecodeSafe(final String urlString) throws MalformedURLException {
