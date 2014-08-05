@@ -49,60 +49,15 @@
 
 package com.openexchange.subscribe.google;
 
-import com.openexchange.datatypes.genericonf.DynamicFormDescription;
-import com.openexchange.datatypes.genericonf.FormElement;
-import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.subscribe.AbstractSubscribeService;
-import com.openexchange.subscribe.SubscriptionSource;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link AbstractGoogleSubscribeService}
+ * {@link FormStrings}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractGoogleSubscribeService extends AbstractSubscribeService {
+public class FormStrings implements LocalizableStrings {
 
-    /** The meta data of associated Google OAuth account */
-    protected final OAuthServiceMetaData googleMetaData;
-
-    /** The service look-up */
-    protected final ServiceLookup services;
-
-    /**
-     * Initializes a new {@link AbstractGoogleSubscribeService}.
-     *
-     * @param googleMetaData The OAuth account's meta data
-     * @param services The service look-up
-     */
-    protected AbstractGoogleSubscribeService(OAuthServiceMetaData googleMetaData, ServiceLookup services) {
-        super();
-        this.services = services;
-        this.googleMetaData = googleMetaData;
-    }
-
-    /**
-     * Initializes the appropriate subscription source.
-     *
-     * @param module The associated module
-     * @param appendix The identifier appendix
-     * @return The subscription source
-     */
-    protected final SubscriptionSource initSS(int module, String appendix) {
-        SubscriptionSource source = new SubscriptionSource();
-        source.setDisplayName("Google");
-        source.setFolderModule(module);
-        source.setId("com.openexchange.subscribe.google." + appendix);
-        source.setSubscribeService(this);
-        
-        final DynamicFormDescription form = new DynamicFormDescription();
-        final FormElement oauthAccount = FormElement.custom("oauthAccount", "account", FormStrings.ACCOUNT_LABEL);
-        oauthAccount.setOption("type", googleMetaData.getId());
-        form.add(oauthAccount);
-        
-        source.setFormDescription(form);
-        return source;
-    }
+    public static final String ACCOUNT_LABEL = "Select an existing account";
 
 }
