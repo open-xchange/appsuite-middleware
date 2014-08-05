@@ -61,6 +61,7 @@ import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.EventReminder;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -133,6 +134,9 @@ public class CalendarEventParser {
                 if (a.getDisplayName() != null) {
                     p.setDisplayName(a.getDisplayName());
                 }
+                if (a.getOrganizer()) {
+                    calenderObject.setOrganizer(a.getEmail());
+                }
                 participants.add(p);
             }
         }
@@ -162,6 +166,11 @@ public class CalendarEventParser {
                         continue;
                     }
                     participants[pos] = new UserParticipant(foundUser.getId());
+                    
+                    if (foundUser.getMail().equals(calendarObject.getOrganizer())) {
+                        calendarObject.setOrganizerId(foundUser.getId());
+                    }
+                    
                 } catch (final OXException e) {
                     logger.debug("Couldn't resolve E-Mail address to an internal user: {}", part.getEmailAddress(), e);
                 }
