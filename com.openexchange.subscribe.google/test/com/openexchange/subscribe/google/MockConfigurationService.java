@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.google.api.client;
+package com.openexchange.subscribe.google;
 
 import java.io.File;
 import java.util.Collections;

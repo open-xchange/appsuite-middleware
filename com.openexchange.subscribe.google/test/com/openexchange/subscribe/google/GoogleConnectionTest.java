@@ -1,3 +1,4 @@
+package com.openexchange.subscribe.google;
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -47,35 +48,38 @@
  *
  */
 
-package com.openexchange.google.api.client;
 
+
+import junit.framework.TestCase;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
+import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.google.GoogleOAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link MockServiceLookup}
+ * {@link GoogleConnectionTest}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
+ * @since v7.6.1
  */
-public class MockServiceLookup implements ServiceLookup {
+public class GoogleConnectionTest extends TestCase {
+    private static final String GOOGLE_API_KEY = "";
+    private static final String GOOGLE_API_SECRET = "";
 
-    private final ConfigurationService csService;
-
-    public MockServiceLookup(final ConfigurationService csService) {
-        super();
-        this.csService = csService;
-    }
+    private GoogleCredential googleCreds;
 
     @Override
-    public <S> S getService(final Class<? extends S> clazz) {
-        return (S) csService;
+    public void setUp() throws OXException {
+
     }
 
-    @Override
-    public <S> S getOptionalService(final Class<? extends S> clazz) {
-        // Nothing to do
-        return null;
+    public void testContacts() throws OXException {
+//        GoogleContactSubscribeService gss = new GoogleContactSubscribeService(oasdm, null);
+        ConfigurationService cs = new MockConfigurationService(GOOGLE_API_KEY, GOOGLE_API_SECRET);
+        ServiceLookup sl = new MockServiceLookup(cs);
+        OAuthServiceMetaData oasdm = new GoogleOAuthServiceMetaData(sl);
     }
-
 }
