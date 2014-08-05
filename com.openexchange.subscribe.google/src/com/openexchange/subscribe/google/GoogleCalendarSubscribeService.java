@@ -60,6 +60,7 @@ import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
 import com.openexchange.exception.OXException;
 import com.openexchange.google.api.client.GoogleApiClients;
+import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.oauth.OAuthServiceMetaData;
@@ -67,6 +68,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionSource;
+import com.openexchange.subscribe.google.internal.CalendarEventParser;
 
 /**
  * {@link GoogleCalendarSubscribeService}
@@ -102,11 +104,14 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
             list.setOauthToken(googleCreds.getAccessToken());
             final com.google.api.services.calendar.model.CalendarList calList = list.execute();
             final List<CalendarListEntry> items = calList.getItems();
+            final CalendarEventParser parser = new CalendarEventParser(subscription.getSession().getContext());
             for (CalendarListEntry entry : items) {
                 final String calendarId = entry.getId();
                 final Events events = googleCal.events().list(calendarId).execute();
                 for (Event event : events.getItems()) {
-                    //TODO: parse events into calendar objects and add to list
+                    final CalendarObject calenderObject = new CalendarDataObject();
+                    parser.parseCalendarEvent(event, calenderObject);
+                    calObjList.add(calenderObject);
                 }
             }
         } catch (IOException e) {
