@@ -93,47 +93,47 @@ public class CalendarEventParser {
      * Parse an Event to a CalendarDataObject
      * 
      * @param event The Event
-     * @param calenderObject The CalendarDataObject
+     * @param calendarObject The CalendarDataObject
      */
-    public void parseCalendarEvent(final Event event, final CalendarDataObject calenderObject) {
-        calenderObject.setContext(context);
+    public void parseCalendarEvent(final Event event, final CalendarDataObject calendarObject) {
+        calendarObject.setContext(context);
 
         // Common stuff
         if (event.getSummary() != null) {
-            calenderObject.setTitle(event.getSummary());
+            calendarObject.setTitle(event.getSummary());
         }
         if (event.getLocation() != null) {
-            calenderObject.setLocation(event.getLocation());
+            calendarObject.setLocation(event.getLocation());
         }
         if (event.getDescription() != null) {
-            calenderObject.setNote(event.getDescription());
+            calendarObject.setNote(event.getDescription());
         }
 
         // Start, end and creation time
         if (event.getOriginalStartTime() != null) {
             final EventDateTime eventDateTime = event.getOriginalStartTime();
-            calenderObject.setStartDate(new Date(eventDateTime.getDate().getValue()));
-            calenderObject.setTimezone(eventDateTime.getTimeZone());
+            calendarObject.setStartDate(new Date(eventDateTime.getDate().getValue()));
+            calendarObject.setTimezone(eventDateTime.getTimeZone());
         }
         if (event.getEnd() != null) {
-            calenderObject.setEndDate(new Date(event.getEnd().getDate().getValue()));
+            calendarObject.setEndDate(new Date(event.getEnd().getDate().getValue()));
         }
         if (event.getCreated() != null) {
             final DateTime dateTime = event.getCreated();
-            calenderObject.setCreationDate(new Date(dateTime.getValue()));
+            calendarObject.setCreationDate(new Date(dateTime.getValue()));
         }
 
         try {
-            calenderObject.setCreatedBy(fetchUserByEmail(event.getCreator().getEmail()).getId());
+            calendarObject.setCreatedBy(fetchUserByEmail(event.getCreator().getEmail()).getId());
         } catch (OXException e) {
-            logger.warn("The calendar object {} has no creator assigned to it.", calenderObject.toString());
+            logger.warn("The calendar object {} has no creator assigned to it.", calendarObject.toString());
         }
 
         // We only support one reminder per calendar Object, thus the first one of the event
         final Reminders reminders = event.getReminders();
         if (reminders.getOverrides() != null && reminders.getOverrides().size() > 0) {
             final EventReminder eventReminder = reminders.getOverrides().get(0);
-            calenderObject.setAlarm(eventReminder.getMinutes());
+            calendarObject.setAlarm(eventReminder.getMinutes());
         }
 
         // Participants
@@ -147,13 +147,13 @@ public class CalendarEventParser {
                     p.setDisplayName(a.getDisplayName());
                 }
                 if (a.getOrganizer()) {
-                    calenderObject.setOrganizer(a.getEmail());
+                    calendarObject.setOrganizer(a.getEmail());
                 }
                 participants.add(p);
             }
         }
-        calenderObject.setParticipants(participants);
-        convertExternalToInternal(calenderObject);
+        calendarObject.setParticipants(participants);
+        convertExternalToInternal(calendarObject);
     }
 
     /**
