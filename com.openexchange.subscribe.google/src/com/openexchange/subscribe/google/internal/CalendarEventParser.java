@@ -49,10 +49,23 @@
 
 package com.openexchange.subscribe.google.internal;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.google.api.services.calendar.model.Event;
-import com.openexchange.groupware.container.CalendarObject;
+import com.google.api.services.calendar.model.EventAttendee;
+import com.google.api.services.calendar.model.EventDateTime;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.container.ExternalUserParticipant;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
-
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.subscribe.google.osgi.Services;
+import com.openexchange.user.UserService;
 
 /**
  * {@link CalendarEventParser}
@@ -70,9 +83,81 @@ public class CalendarEventParser {
         super();
         this.context = context;
     }
-    
-    public void parseCalendarEvent(final Event event, final CalendarObject calenderObject) {
-        
+
+    /**
+     * Parse an Event to a CalendarDataObject
+     * 
+     * @param event The Event
+     * @param calenderObject The CalendarDataObject
+     */
+    public void parseCalendarEvent(final Event event, final CalendarDataObject calenderObject) {
+        calenderObject.setContext(context);
+
+        // Common stuff
+        if (event.getSummary() != null) {
+            calenderObject.setTitle(event.getSummary());
+        }
+        if (event.getLocation() != null) {
+            calenderObject.setLocation(event.getLocation());
+        }
+        if (event.getDescription() != null) {
+            calenderObject.setNote(event.getDescription());
+        }
+
+        // Start and end time
+        if (event.getOriginalStartTime() != null) {
+            final EventDateTime eventDateTime = event.getOriginalStartTime();
+            calenderObject.setStartDate(new Date(eventDateTime.getDate().getValue()));
+            calenderObject.setTimezone(eventDateTime.getTimeZone());
+        }
+        if (event.getEnd() != null) {
+            calenderObject.setEndDate(new Date(event.getEnd().getDate().getValue()));
+        }
+
+        // Participants
+        final List<EventAttendee> attendees = event.getAttendees();
+        final List<Participant> participants = new ArrayList<Participant>(attendees.size());
+        for (EventAttendee a : attendees) {
+            final Participant p;
+            if (!a.getResource()) {
+                p = new ExternalUserParticipant(a.getEmail());
+                if (a.getDisplayName() != null) {
+                    p.setDisplayName(a.getDisplayName());
+                }
+                participants.add(p);
+            }
+        }
+        calenderObject.setParticipants(participants);
+        convertExternalToInternal(calenderObject);
     }
 
+    /**
+     * Convert the external participants to internal users if possible.
+     * 
+     * @param calendarObject The calendar object that contains the participant list
+     */
+    private void convertExternalToInternal(final CalendarDataObject calendarObject) {
+        final Participant[] participants = calendarObject.getParticipants();
+        if (participants == null || participants.length == 0) {
+            return;
+        }
+        final Logger logger = LoggerFactory.getLogger(CalendarEventParser.class);
+        final UserService userService = Services.getService(UserService.class);
+        for (int pos = 0; pos < participants.length; pos++) {
+            final Participant part = participants[pos];
+            if (part.getType() == Participant.EXTERNAL_USER) {
+                User foundUser;
+                try {
+                    foundUser = userService.searchUser(part.getEmailAddress(), context);
+                    if (foundUser == null) {
+                        continue;
+                    }
+                    participants[pos] = new UserParticipant(foundUser.getId());
+                } catch (final OXException e) {
+                    logger.debug("Couldn't resolve E-Mail address to an internal user: {}", part.getEmailAddress(), e);
+                }
+            }
+        }
+        calendarObject.setParticipants(participants);
+    }
 }

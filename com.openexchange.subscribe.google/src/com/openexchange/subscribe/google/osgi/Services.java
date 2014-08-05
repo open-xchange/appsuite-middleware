@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,39 +49,71 @@
 
 package com.openexchange.subscribe.google.osgi;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.generic.FolderUpdaterRegistry;
-import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.user.UserService;
+import java.util.concurrent.atomic.AtomicReference;
+
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link GoogleSubscribeActivator}
+ * {@link Services} - Provides static access to {@link ServiceLookup} reference.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class GoogleSubscribeActivator extends HousekeepingActivator {
+public final class Services {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] {
-            SessiondService.class, UserService.class, DatabaseService.class, ThreadPoolService.class, ConfigurationService.class,
-            FolderUpdaterRegistry.class };
+    private static final AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Initializes a new {@link Services}.
+     */
+    private Services() {
+        super();
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServices(this);
-        track(OAuthServiceMetaData.class, new OAuthServiceMetaDataRegisterer(this, context));
-        openTrackers();
+    /**
+     * Sets the {@link ServiceLookup} reference.
+     *
+     * @param services The reference
+     */
+    public static void setServices(final ServiceLookup services) {
+        SERVICES.set(services);
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        Services.setServices(null);
+    /**
+     * Gets the {@link ServiceLookup} reference.
+     *
+     * @return The reference
+     */
+    public static ServiceLookup getServices() {
+        return SERVICES.get();
     }
+
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final ServiceLookup serviceLookup = SERVICES.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("ServiceLookup is absent. Check bundle activator.");
+        }
+        return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * Gets the optional service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S getOptionalService(final Class<? extends S> clazz) {
+        final ServiceLookup serviceLookup = SERVICES.get();
+        if (null == serviceLookup) {
+            return null;
+        }
+        return serviceLookup.getOptionalService(clazz);
+    }
+
 }

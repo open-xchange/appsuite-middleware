@@ -109,7 +109,7 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
                 final String calendarId = entry.getId();
                 final Events events = googleCal.events().list(calendarId).execute();
                 for (Event event : events.getItems()) {
-                    final CalendarObject calenderObject = new CalendarDataObject();
+                    final CalendarDataObject calenderObject = new CalendarDataObject();
                     parser.parseCalendarEvent(event, calenderObject);
                     calObjList.add(calenderObject);
                 }
