@@ -61,8 +61,10 @@ import java.util.regex.Pattern;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Strings;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -274,6 +276,24 @@ public abstract class AbstractUserAction implements AJAXActionService {
             columns[i] = Integer.parseInt(sa[i]);
         }
         return columns;
+    }
+
+    /**
+     * Creates a virtual contact based on some properties available in the supplied user.
+     *
+     * @param user The user to create the contact for
+     * @return The contact
+     */
+    protected static Contact getVirtualContact(User user) {
+        Contact contact = new Contact();
+        contact.setInternalUserId(user.getId());
+        contact.setObjectID(user.getContactId());
+        contact.setEmail1(user.getMail());
+        contact.setCreatedBy(user.getCreatedBy());
+        contact.setDisplayName(Strings.isEmpty(user.getDisplayName()) ? user.getMail() : user.getDisplayName());
+        contact.setGivenName(user.getGivenName());
+        contact.setSurName(user.getSurname());
+        return contact;
     }
 
     protected static void censor(final ServerSession session, final User[] user) throws OXException {

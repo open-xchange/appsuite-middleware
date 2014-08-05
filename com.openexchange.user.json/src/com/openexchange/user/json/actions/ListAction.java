@@ -155,13 +155,14 @@ public final class ListAction extends AbstractUserAction {
         censor(session, users);
         final List<UserContact> userContacts = new ArrayList<UserContact>(users.length);
         for (final User user : users) {
-            final Contact contact = contacts.get(user.getId());
-            if (null != contact) {
-                userContacts.add(new UserContact(contact, user));
-                final Date contactLastModified = contact.getLastModified();
-                if (null != contactLastModified && ((null == lastModified) || (contactLastModified.after(lastModified)))) {
-                    lastModified = contactLastModified;
-                }
+            Contact contact = contacts.get(user.getId());
+            if (null == contact) {
+                contact = getVirtualContact(user);
+            }
+            userContacts.add(new UserContact(contact, user));
+            final Date contactLastModified = contact.getLastModified();
+            if (null != contactLastModified && ((null == lastModified) || (contactLastModified.after(lastModified)))) {
+                lastModified = contactLastModified;
             }
         }
         /*
