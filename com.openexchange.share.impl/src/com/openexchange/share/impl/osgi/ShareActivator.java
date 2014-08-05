@@ -49,6 +49,9 @@
 
 package com.openexchange.share.impl.osgi;
 
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.ContactService;
 import com.openexchange.crypto.CryptoService;
@@ -80,7 +83,7 @@ public class ShareActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, ContactService.class, ShareStorage.class, CryptoService.class, ConfigurationService.class, DatabaseService.class };
+        return new Class<?>[] { UserService.class, ContactService.class, ShareStorage.class, ConfigurationService.class, DatabaseService.class };
     }
 
     @Override
@@ -94,8 +97,39 @@ public class ShareActivator extends HousekeepingActivator {
          * register services
          */
         registerService(ShareService.class, new DefaultShareService(this));
-        String cryptKey = getService(ConfigurationService.class).getProperty("com.openexchange.share.cryptKey", "erE2e8OhAo71");
-        registerService(ShareCryptoService.class, new ShareCryptoServiceImpl(getService(CryptoService.class), cryptKey));
+
+        track(CryptoService.class, new ServiceTrackerCustomizer<CryptoService, CryptoService>() {
+
+            private volatile ServiceRegistration<ShareCryptoService> registration;
+
+            @Override
+            public CryptoService addingService(ServiceReference<CryptoService> serviceReference) {
+                String cryptKey = ShareServiceLookup.getService(ConfigurationService.class).getProperty("com.openexchange.share.cryptKey", "erE2e8OhAo71");
+                CryptoService service = context.getService(serviceReference);
+                registration = context.registerService(ShareCryptoService.class, new ShareCryptoServiceImpl(service, cryptKey), null);
+                return service;
+            }
+
+            @Override
+            public void modifiedService(ServiceReference<CryptoService> serviceReference, CryptoService service) {
+                // nothing to do
+            }
+
+            @Override
+            public void removedService(ServiceReference<CryptoService> serviceReference, CryptoService service) {
+                ServiceRegistration<ShareCryptoService> registration = this.registration;
+                if (null != registration) {
+                    registration.unregister();
+                    this.registration = null;
+                }
+                context.ungetService(serviceReference);
+            }
+        });
+        openTrackers();
+
+
+//        String cryptKey = getService(ConfigurationService.class).getProperty("com.openexchange.share.cryptKey", "erE2e8OhAo71");
+//        registerService(ShareCryptoService.class, new ShareCryptoServiceImpl(getService(CryptoService.class), cryptKey));
     }
 
     @Override

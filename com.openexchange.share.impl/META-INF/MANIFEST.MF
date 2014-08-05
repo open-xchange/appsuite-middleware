@@ -24,5 +24,6 @@ Import-Package: com.openexchange.config,
  com.openexchange.user,
  org.osgi.framework,
  org.osgi.service.event,
+ org.osgi.util.tracker;version="1.5.1",
  org.slf4j
 Bundle-Activator: com.openexchange.share.impl.osgi.ShareActivator
