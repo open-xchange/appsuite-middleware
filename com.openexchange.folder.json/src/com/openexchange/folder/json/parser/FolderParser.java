@@ -149,7 +149,7 @@ public final class FolderParser {
 
             if (folderJsonObject.hasAndNotNull(FolderField.PERMISSIONS_BITS.getName())) {
                 final JSONArray jsonArr = folderJsonObject.getJSONArray(FolderField.PERMISSIONS_BITS.getName());
-                folder.setPermissions(parsePermission(jsonArr).toArray(new ParsedPermission[0]));
+                folder.setPermissions(parsePermission(jsonArr).toArray(new Permission[0]));
             }
 
             if (folderJsonObject.hasAndNotNull(FolderField.TOTAL.getName())) {
@@ -179,10 +179,10 @@ public final class FolderParser {
      * @return The parsed permissions
      * @throws OXException If parsing permissions fails
      */
-    public static List<ParsedPermission> parsePermission(final JSONArray permissionsAsJSON) throws OXException {
+    public static List<Permission> parsePermission(final JSONArray permissionsAsJSON) throws OXException {
         try {
             final int numberOfPermissions = permissionsAsJSON.length();
-            final List<ParsedPermission> perms = new ArrayList<ParsedPermission>(numberOfPermissions);
+            final List<Permission> perms = new ArrayList<Permission>(numberOfPermissions);
             for (int i = 0; i < numberOfPermissions; i++) {
                 final JSONObject jPerm = permissionsAsJSON.getJSONObject(i);
                 if (!jPerm.hasAndNotNull(FolderField.BITS.getName())) {
@@ -190,13 +190,9 @@ public final class FolderParser {
                 }
 
                 final int[] permissionBits = parsePermissionBits(jPerm.getInt(FolderField.BITS.getName()));
-                final ParsedPermission oclPerm = new ParsedPermission();
-                oclPerm.setFolderPermission(permissionBits[0]);
-                oclPerm.setReadPermission(permissionBits[1]);
-                oclPerm.setWritePermission(permissionBits[2]);
-                oclPerm.setDeletePermission(permissionBits[3]);
-                oclPerm.setAdmin(permissionBits[4] > 0 ? true : false);
+                final Permission oclPerm;
                 if (jPerm.hasAndNotNull(FolderField.ENTITY.getName())) {
+                    oclPerm = new ParsedPermission();
                     if (!jPerm.has(FolderField.GROUP.getName())) {
                         throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(FolderField.GROUP.getName());
                     }
@@ -204,17 +200,24 @@ public final class FolderParser {
                     oclPerm.setEntity(jPerm.getInt(FolderField.ENTITY.getName()));
                     oclPerm.setGroup(jPerm.getBoolean(FolderField.GROUP.getName()));
                 } else if (jPerm.hasAndNotNull(FolderField.MAIL_ADDRESS.getName())) {
+                    final ParsedGuestPermission perm = new ParsedGuestPermission();
                     final String mailAddress = jPerm.getString(FolderField.MAIL_ADDRESS.getName());
                     final String contactId = jPerm.optString(FolderField.CONTACT_ID.getName(), null);
                     final String contactFolderId = jPerm.optString(FolderField.CONTACT_FOLDER_ID.getName(), null);
 
-                    oclPerm.setMailAddress(mailAddress);
-                    oclPerm.setContactId(contactId);
-                    oclPerm.setContactFolderId(contactFolderId);
+                    perm.setEmailAddress(mailAddress);
+                    perm.setContactID(contactId);
+                    perm.setContactFolderID(contactFolderId);
+                    oclPerm = perm;
                 } else {
                     throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(FolderField.ENTITY.getName());
                 }
 
+                oclPerm.setFolderPermission(permissionBits[0]);
+                oclPerm.setReadPermission(permissionBits[1]);
+                oclPerm.setWritePermission(permissionBits[2]);
+                oclPerm.setDeletePermission(permissionBits[3]);
+                oclPerm.setAdmin(permissionBits[4] > 0 ? true : false);
                 perms.add(oclPerm);
             }
             return perms;

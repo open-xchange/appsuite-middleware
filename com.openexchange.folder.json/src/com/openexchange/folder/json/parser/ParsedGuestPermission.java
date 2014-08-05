@@ -49,14 +49,15 @@
 
 package com.openexchange.folder.json.parser;
 
+import com.openexchange.folderstorage.GuestPermission;
 import com.openexchange.folderstorage.Permission;
 
+
 /**
- * {@link ParsedPermission} - A parsed permission.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.6.1
  */
-public final class ParsedPermission implements Permission {
+public class ParsedGuestPermission implements GuestPermission {
 
     private int system;
 
@@ -74,10 +75,18 @@ public final class ParsedPermission implements Permission {
 
     private boolean group;
 
+    private String mailAddress;
+
+    private String contactID;
+
+    private String contactFolderID;
+
+    private String displayName;
+
     /**
-     * Initializes an empty {@link ParsedPermission}.
+     * Initializes an empty {@link ParsedGuestPermission}.
      */
-    public ParsedPermission() {
+    public ParsedGuestPermission() {
         super();
     }
 
@@ -193,6 +202,43 @@ public final class ParsedPermission implements Permission {
     }
 
     @Override
+    public String getEmailAddress() {
+        return mailAddress;
+    }
+
+
+    public void setEmailAddress(String mailAddress) {
+        this.mailAddress = mailAddress;
+    }
+
+    @Override
+    public String getContactID() {
+        return contactID;
+    }
+
+    public void setContactID(String contactID) {
+        this.contactID = contactID;
+    }
+
+    @Override
+    public String getContactFolderID() {
+        return contactFolderID;
+    }
+
+    public void setContactFolderID(String contactFolderID) {
+        this.contactFolderID = contactFolderID;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    @Override
     public Object clone() {
         try {
             return super.clone();
@@ -213,6 +259,9 @@ public final class ParsedPermission implements Permission {
       result = prime * result + readPermission;
       result = prime * result + system;
       result = prime * result + writePermission;
+      result = prime * result + (mailAddress == null ? 0 : mailAddress.hashCode());
+      result = prime * result + (contactID == null ? 0 : contactID.hashCode());
+      result = prime * result + (contactFolderID == null ? 0 : contactFolderID.hashCode());
       return result;
   }
 
@@ -227,6 +276,25 @@ public final class ParsedPermission implements Permission {
 
       if (!(obj instanceof Permission)) {
           return false;
+      }
+
+      if (obj instanceof ParsedGuestPermission) {
+          final ParsedGuestPermission parsed = (ParsedGuestPermission) obj;
+          if (contactFolderID == null) {
+              if (parsed.contactFolderID != null)
+                  return false;
+          } else if (!contactFolderID.equals(parsed.contactFolderID))
+              return false;
+          if (contactID == null) {
+              if (parsed.contactID != null)
+                  return false;
+          } else if (!contactID.equals(parsed.contactID))
+              return false;
+          if (mailAddress == null) {
+              if (parsed.mailAddress != null)
+                  return false;
+          } else if (!mailAddress.equals(parsed.mailAddress))
+              return false;
       }
 
       final Permission other = (Permission) obj;
