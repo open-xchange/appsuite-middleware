@@ -235,4 +235,14 @@ public class SimUserService implements UserService {
         return null;
     }
 
+    @Override
+    public void deleteUser(Context context, User user) throws OXException {
+        // Nothing to do
+    }
+
+    @Override
+    public void deleteUser(Connection con, Context context, User user) throws OXException {
+        // Nothing to do
+    }
+
 }
