@@ -55,8 +55,10 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.Event.Reminders;
 import com.google.api.services.calendar.model.EventAttendee;
 import com.google.api.services.calendar.model.EventDateTime;
+import com.google.api.services.calendar.model.EventReminder;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -113,7 +115,14 @@ public class CalendarEventParser {
         if (event.getEnd() != null) {
             calenderObject.setEndDate(new Date(event.getEnd().getDate().getValue()));
         }
-
+        
+        // We only support one reminder per calendar Object, thus the first one of the event
+        final Reminders reminders = event.getReminders();
+        if (reminders.getOverrides() != null && reminders.getOverrides().size() > 0) {
+            final EventReminder eventReminder = reminders.getOverrides().get(0);
+            calenderObject.setAlarm(eventReminder.getMinutes());
+        }
+        
         // Participants
         final List<EventAttendee> attendees = event.getAttendees();
         final List<Participant> participants = new ArrayList<Participant>(attendees.size());
