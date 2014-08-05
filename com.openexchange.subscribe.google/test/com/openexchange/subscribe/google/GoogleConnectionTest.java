@@ -77,7 +77,6 @@ public class GoogleConnectionTest extends TestCase {
     }
 
     public void testContacts() throws OXException {
-//        GoogleContactSubscribeService gss = new GoogleContactSubscribeService(oasdm, null);
         ConfigurationService cs = new MockConfigurationService(GOOGLE_API_KEY, GOOGLE_API_SECRET);
         ServiceLookup sl = new MockServiceLookup(cs);
         OAuthServiceMetaData oasdm = new GoogleOAuthServiceMetaData(sl);
