@@ -54,6 +54,7 @@ import java.util.Date;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Event.Reminders;
 import com.google.api.services.calendar.model.EventAttendee;
@@ -61,7 +62,6 @@ import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.EventReminder;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -76,6 +76,8 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class CalendarEventParser {
+    
+    final Logger logger = LoggerFactory.getLogger(CalendarEventParser.class);
 
     private Context context;
 
@@ -107,7 +109,7 @@ public class CalendarEventParser {
             calenderObject.setNote(event.getDescription());
         }
 
-        // Start and end time
+        // Start, end and creation time
         if (event.getOriginalStartTime() != null) {
             final EventDateTime eventDateTime = event.getOriginalStartTime();
             calenderObject.setStartDate(new Date(eventDateTime.getDate().getValue()));
@@ -116,14 +118,24 @@ public class CalendarEventParser {
         if (event.getEnd() != null) {
             calenderObject.setEndDate(new Date(event.getEnd().getDate().getValue()));
         }
-        
+        if (event.getCreated() != null) {
+            final DateTime dateTime = event.getCreated();
+            calenderObject.setCreationDate(new Date(dateTime.getValue()));
+        }
+
+        try {
+            calenderObject.setCreatedBy(fetchUserByEmail(event.getCreator().getEmail()).getId());
+        } catch (OXException e) {
+            logger.warn("The calendar object {} has no creator assigned to it.", calenderObject.toString());
+        }
+
         // We only support one reminder per calendar Object, thus the first one of the event
         final Reminders reminders = event.getReminders();
         if (reminders.getOverrides() != null && reminders.getOverrides().size() > 0) {
             final EventReminder eventReminder = reminders.getOverrides().get(0);
             calenderObject.setAlarm(eventReminder.getMinutes());
         }
-        
+
         // Participants
         final List<EventAttendee> attendees = event.getAttendees();
         final List<Participant> participants = new ArrayList<Participant>(attendees.size());
@@ -154,7 +166,7 @@ public class CalendarEventParser {
         if (participants == null || participants.length == 0) {
             return;
         }
-        final Logger logger = LoggerFactory.getLogger(CalendarEventParser.class);
+        
         final UserService userService = Services.getService(UserService.class);
         for (int pos = 0; pos < participants.length; pos++) {
             final Participant part = participants[pos];
@@ -166,16 +178,21 @@ public class CalendarEventParser {
                         continue;
                     }
                     participants[pos] = new UserParticipant(foundUser.getId());
-                    
+
                     if (foundUser.getMail().equals(calendarObject.getOrganizer())) {
                         calendarObject.setOrganizerId(foundUser.getId());
                     }
-                    
+
                 } catch (final OXException e) {
                     logger.debug("Couldn't resolve E-Mail address to an internal user: {}", part.getEmailAddress(), e);
                 }
             }
         }
         calendarObject.setParticipants(participants);
+    }
+
+    private User fetchUserByEmail(final String email) throws OXException {
+        final UserService userService = Services.getService(UserService.class);
+        return userService.searchUser(email, context);
     }
 }
