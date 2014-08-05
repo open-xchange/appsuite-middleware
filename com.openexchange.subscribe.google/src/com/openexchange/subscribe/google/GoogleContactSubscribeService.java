@@ -400,21 +400,26 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
 
     protected void handleContactFeed(ContactFeed contactFeed, List<Contact> contacts, PhotoHandler photoHandler) throws OXException {
         for (ContactEntry entry : contactFeed.getEntries()) {
-            Name name = entry.getName();
-            String emailId = "";
-            for (Email email : entry.getEmailAddresses()) {
-                if (email.getPrimary()) {
-                    emailId = email.getAddress();
-                    break;
+            Contact contact = new Contact();
+
+            {
+                String emailId = null;
+                for (Email email : entry.getEmailAddresses()) {
+                    if (email.getPrimary()) {
+                        emailId = email.getAddress();
+                        break;
+                    }
+                }
+                if (null != emailId) {
+                    contact.setEmail1(emailId);
                 }
             }
 
-            Contact contact = new Contact();
+            Name name = entry.getName();
             contact.setDisplayName(name.getFullName().getValue());
             contact.setGivenName(name.getGivenName().getValue());
             contact.setSurName(name.getFamilyName().getValue());
 
-            contact.setEmail1(emailId);
 
             photoHandler.handlePhoto(entry, contact);
 
