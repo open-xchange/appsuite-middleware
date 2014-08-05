@@ -335,6 +335,10 @@ public class RdbUserStorage extends UserStorage {
     }
 
     private static void writeUserAttributes(Connection con, Map<String, Set<String>> attributes, Context context, int userId) throws SQLException {
+        if (attributes == null || attributes.isEmpty()) {
+            return;
+        }
+
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(INSERT_ATTRIBUTES);
