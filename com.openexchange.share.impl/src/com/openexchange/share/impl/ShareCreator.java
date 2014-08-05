@@ -50,8 +50,10 @@
 package com.openexchange.share.impl;
 
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.crypto.CryptoService;
@@ -82,7 +84,7 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class ShareCreator extends SharePerformer<Share> {
+public class ShareCreator extends SharePerformer<List<Share>> {
 
     protected final CreateRequest createRequest;
 
@@ -98,7 +100,7 @@ public class ShareCreator extends SharePerformer<Share> {
     }
 
     @Override
-    protected Share perform() throws OXException {
+    protected List<Share> perform() throws OXException {
         DatabaseService dbService = getDatabaseService();
         UserService userService = getUserService();
         ShareStorage shareStorage = getShareStorage();
@@ -111,7 +113,8 @@ public class ShareCreator extends SharePerformer<Share> {
             ownsConnection = true;
         }
 
-        Share share = null;
+        List<Entity> entities = createRequest.getEntities();
+        List<Share> shares = new ArrayList<Share>(entities.size());
         // TODO: can possibly removed if OXFolderManagerImpl doesn't try to commit foreign connections anymore...
 //        ResilientConnection con = new ResilientConnection(dbService.getWritable(context));
         try {
@@ -119,15 +122,16 @@ public class ShareCreator extends SharePerformer<Share> {
                 Databases.startTransaction(con);
             }
 
-            for (Entity entity : createRequest.getEntities()) {
+            for (Entity entity : entities) {
                 User guest = prepareGuest(entity);
                 int guestId = userService.createUser(con, context, guest);
                 UserPermissionBitsStorage.getInstance().saveUserPermissionBits(con, getUserPermissionBits(entity), guestId, context); // FIXME: to service layer
                 if (createRequest.getItem() == null) {
-                    share = createShare(guestId);
+                    Share share = createShare(guestId);
                     StorageParameters parameters = new StorageParameters()
                         .put(Connection.class.getName(), con);
                     shareStorage.storeShare(share, parameters);
+                    shares.add(share);
                 } else {
                     // TODO
                 }
@@ -136,7 +140,7 @@ public class ShareCreator extends SharePerformer<Share> {
             if (ownsConnection) {
                 con.commit();
             }
-            return share;
+            return shares;
         } catch (Exception e) {
             if (ownsConnection) {
                 Databases.rollback(con);

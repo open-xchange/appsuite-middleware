@@ -90,9 +90,10 @@ public class NewAction implements AJAXActionService {
         try {
             CreateRequest createRequest = parseCreateRequest((JSONObject) requestData.requireData());
             ShareService service = services.getService(ShareService.class);
-            Share share = service.create(createRequest, session);
+//            Share share = service.create(createRequest, session);
 
-            return new AJAXRequestResult(writeShare(share), "json");
+//            return new AJAXRequestResult(writeShare(share), "json");
+            return AJAXRequestResult.EMPTY_REQUEST_RESULT;
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }
@@ -126,7 +127,7 @@ public class NewAction implements AJAXActionService {
             entity.setMailAddress(jEntity.getString("mail_address"));
             entity.setContactId(jEntity.optString("contact_id", null));
             entity.setContactFolder(jEntity.optString("contact_folder", null));
-            entity.setPermissions(jEntity.getInt("permissions"));
+//            entity.setPermissions(jEntity.getInt("permissions"));
             int jAuthentication = jEntity.optInt("authentication", -1);
             if (0 < jAuthentication) {
                 AuthenticationMode authenticationMode = AuthenticationMode.fromID(jAuthentication);

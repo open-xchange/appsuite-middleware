@@ -49,6 +49,7 @@
 
 package com.openexchange.share;
 
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
@@ -62,7 +63,7 @@ import com.openexchange.session.Session;
  */
 public interface ShareService {
 
-    Share create(CreateRequest shareRequest, Session session) throws OXException;
+    List<Share> create(CreateRequest shareRequest, Session session) throws OXException;
 
     Share resolveToken(String token) throws OXException;
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.share.impl;
 
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -81,7 +82,7 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
-    public Share create(CreateRequest shareRequest, Session session) throws OXException {
+    public List<Share> create(CreateRequest shareRequest, Session session) throws OXException {
         return new ShareCreator(services, shareRequest, ServerSessionAdapter.valueOf(session)).perform();
     }
 

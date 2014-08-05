@@ -90,8 +90,6 @@ public class Entity {
 
     private String mailAddress;
 
-    private int permissions;
-
     private Date expires;
 
     private AuthenticationMode authenticationMode;
@@ -121,14 +119,6 @@ public class Entity {
 
     public void setMailAddress(String mailAddress) {
         this.mailAddress = mailAddress;
-    }
-
-    public int getPermissions() {
-        return permissions;
-    }
-
-    public void setPermissions(int permissions) {
-        this.permissions = permissions;
     }
 
     public Date getExpires() {
