@@ -67,7 +67,7 @@ import com.openexchange.share.ShareService;
  */
 public class ShareServiceHolder implements ServiceTrackerCustomizer<ShareService, ShareService> {
 
-    private static AtomicReference<ShareService> SERVICE;
+    private static AtomicReference<ShareService> SERVICE = new AtomicReference<ShareService>();
 
     private final BundleContext context;
 
