@@ -100,16 +100,23 @@ public class ShareActivator extends HousekeepingActivator {
         /*
          * register share crypto service based on underyling crypto service
          */
+        final ShareActivator serviceLookup = this;
         track(CryptoService.class, new ServiceTrackerCustomizer<CryptoService, CryptoService>() {
 
-            private volatile ServiceRegistration<ShareCryptoService> registration;
+            private volatile ServiceRegistration<ShareCryptoService> cryptoRegistration;
+
+            private volatile ServiceRegistration<ShareService> shareRegistration;
 
             @Override
             public CryptoService addingService(ServiceReference<CryptoService> serviceReference) {
                 String cryptKey = ShareServiceLookup.getService(ConfigurationService.class).getProperty(
                     "com.openexchange.share.cryptKey", "erE2e8OhAo71");
                 CryptoService service = context.getService(serviceReference);
-                registration = context.registerService(ShareCryptoService.class, new ShareCryptoServiceImpl(service, cryptKey), null);
+                ShareCryptoServiceImpl shareCryptoService = new ShareCryptoServiceImpl(service, cryptKey);
+                serviceLookup.addService(ShareCryptoService.class, shareCryptoService);
+
+                cryptoRegistration = context.registerService(ShareCryptoService.class, shareCryptoService, null);
+                shareRegistration = context.registerService(ShareService.class, new DefaultShareService(serviceLookup), null);
                 return service;
             }
 
@@ -120,11 +127,18 @@ public class ShareActivator extends HousekeepingActivator {
 
             @Override
             public void removedService(ServiceReference<CryptoService> serviceReference, CryptoService service) {
-                ServiceRegistration<ShareCryptoService> registration = this.registration;
-                if (null != registration) {
-                    registration.unregister();
-                    this.registration = null;
+                ServiceRegistration<ShareService> shareRegistration = this.shareRegistration;
+                if (null != shareRegistration) {
+                    shareRegistration.unregister();
+                    this.shareRegistration = null;
                 }
+
+                ServiceRegistration<ShareCryptoService> cryptoRegistration = this.cryptoRegistration;
+                if (null != cryptoRegistration) {
+                    cryptoRegistration.unregister();
+                    this.cryptoRegistration = null;
+                }
+
                 context.ungetService(serviceReference);
             }
         });

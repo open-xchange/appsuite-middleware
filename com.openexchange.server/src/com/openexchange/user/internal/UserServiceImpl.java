@@ -175,6 +175,16 @@ public final class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void deleteUser(Context context, int userId) throws OXException {
+        deleteUser(context, getUser(userId, context));
+    }
+
+    @Override
+    public void deleteUser(Connection con, Context context, int userId) throws OXException {
+        deleteUser(con, context, getUser(userId, context));
+    }
+
+    @Override
     public int getUserId(final String loginInfo, final Context context) throws OXException {
         return UserStorage.getInstance().getUserId(loginInfo, context);
     }

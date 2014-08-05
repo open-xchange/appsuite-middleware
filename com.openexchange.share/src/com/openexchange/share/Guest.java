@@ -49,77 +49,75 @@
 
 package com.openexchange.share;
 
-import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Date;
 
 /**
- * Encapsulates requests for creating new shares.
+ * Describes a guest user to which a item or folder shall be shared.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class CreateRequest {
+public class Guest {
 
-    private final List<Guest> guests = new ArrayList<Guest>(4);
+    private String contactID;
 
-    private int module;
+    private String contactFolderID;
 
-    private String folder;
+    private String mailAddress;
 
-    private String item;
+    private Date expires;
+
+    private AuthenticationMode authenticationMode;
+
+    private String password;
 
 
-    private Connection connection;
-
-    public int getModule() {
-        return module;
+    public String getContactID() {
+        return contactID;
     }
 
-    public void setModule(int module) {
-        this.module = module;
+    public void setContactID(String contactID) {
+        this.contactID = contactID;
     }
 
-    public String getFolder() {
-        return folder;
+    public String getContactFolderID() {
+        return contactFolderID;
     }
 
-    public void setFolder(String folder) {
-        this.folder = folder;
+    public void setContactFolderID(String contactFolderID) {
+        this.contactFolderID = contactFolderID;
     }
 
-    /**
-     * Gets the ID of the item to be shared.
-     *
-     * @return The ID or <code>null</code>, if the whole folder shall be shared.
-     */
-    public String getItem() {
-        return item;
+    public String getMailAddress() {
+        return mailAddress;
     }
 
-    public void setItem(String item) {
-        this.item = item;
+    public void setMailAddress(String mailAddress) {
+        this.mailAddress = mailAddress;
     }
 
-    public List<Guest> getGuests() {
-        return guests;
+    public Date getExpires() {
+        return expires;
     }
 
-    public void addGuest(Guest guest) {
-        guests.add(guest);
+    public void setExpires(Date expires) {
+        this.expires = expires;
     }
 
-    /**
-     * Gets the database connection that shall be used to make the according database changed.
-     *
-     * @return The connection or <code>null</code>.
-     */
-    public Connection getConnection() {
-        return connection;
+    public AuthenticationMode getAuthenticationMode() {
+        return authenticationMode;
     }
 
-    public void setConnection(Connection connection) {
-        this.connection = connection;
+    public void setAuthenticationMode(AuthenticationMode authenticationMode) {
+        this.authenticationMode = authenticationMode;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
 }

@@ -59,7 +59,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.CreateRequest;
-import com.openexchange.share.Entity;
+import com.openexchange.share.Guest;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -123,10 +123,10 @@ public class NewAction implements AJAXActionService {
         JSONArray jEntities = json.getJSONArray("entities");
         for (int i = 0; i < jEntities.length(); i++) {
             JSONObject jEntity = jEntities.getJSONObject(i);
-            Entity entity = new Entity();
+            Guest entity = new Guest();
             entity.setMailAddress(jEntity.getString("mail_address"));
-            entity.setContactId(jEntity.optString("contact_id", null));
-            entity.setContactFolder(jEntity.optString("contact_folder", null));
+            entity.setContactID(jEntity.optString("contact_id", null));
+            entity.setContactFolderID(jEntity.optString("contact_folder", null));
 //            entity.setPermissions(jEntity.getInt("permissions"));
             int jAuthentication = jEntity.optInt("authentication", -1);
             if (0 < jAuthentication) {
@@ -140,7 +140,7 @@ public class NewAction implements AJAXActionService {
                 entity.setPassword(password);
             }
 
-            createRequest.addEntity(entity);
+            createRequest.addGuest(entity);
         }
 
         return createRequest;

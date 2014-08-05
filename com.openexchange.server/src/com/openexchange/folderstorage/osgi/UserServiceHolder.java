@@ -47,102 +47,80 @@
  *
  */
 
-package com.openexchange.share;
+package com.openexchange.folderstorage.osgi;
 
-import java.util.Date;
+import java.util.concurrent.atomic.AtomicReference;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.user.UserService;
+
 
 /**
- * {@link Entity}
+ * {@link UserServiceHolder} - allows the folder storage layer to easily access
+ * the {@link UserService}.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.x.x
+ * @since v7.6.1
  */
-public class Entity {
+public class UserServiceHolder implements ServiceTrackerCustomizer<UserService, UserService> {
 
-    // {
-    // "module":"drive",
-    // "folder":"43242",
-    // "item":null,
-    // "displayName":"Party Pictures",
-    // "entities":[
-    // {
-    // "userId":42,
-    // "permissions":268500996
-    // },
-    // {
-    // "email":"otto@example.com",
-    // "permissions":268500996,
-    // "expires":1383056574868,
-    // "auth":1
-    // },
-    // {
-    // "email":"tante.erna@example.com",
-    // "contactId":12,
-    // "contactFolder":"contacts",
-    // "permissions":268500996
-    // }
-    // ]
-    // }
+    private static AtomicReference<UserService> SERVICE = new AtomicReference<UserService>();
 
-    private String contactId;
+    private final BundleContext context;
 
-    private String contactFolder;
-
-    private String mailAddress;
-
-    private Date expires;
-
-    private AuthenticationMode authenticationMode;
-
-    private String password;
-
-
-    public String getContactId() {
-        return contactId;
+    /**
+     * Initializes a new {@link UserServiceHolder}.
+     * @param context
+     */
+    public UserServiceHolder(BundleContext context) {
+        super();
+        this.context = context;
     }
 
-    public void setContactId(String contactId) {
-        this.contactId = contactId;
+    /**
+     * Gets the {@link UserService} if available.
+     *
+     * @return The service or <code>null</code>.
+     */
+    public static UserService getUserService() {
+        return SERVICE.get();
     }
 
-    public String getContactFolder() {
-        return contactFolder;
+    /**
+     * Gets the {@link UserService}.
+     *
+     * @return The service.
+     * @throws OXException {@link ServiceExceptionCode#SERVICE_UNAVAILABLE} if service is unavailable.
+     */
+    public static UserService requireUserService() throws OXException {
+        UserService service =  SERVICE.get();
+        if (service == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName());
+        }
+
+        return service;
     }
 
-    public void setContactFolder(String contactFolder) {
-        this.contactFolder = contactFolder;
+    @Override
+    public UserService addingService(ServiceReference<UserService> reference) {
+        UserService service = context.getService(reference);
+        if (service != null) {
+            SERVICE.set(service);
+        }
+
+        return service;
     }
 
-    public String getMailAddress() {
-        return mailAddress;
+    @Override
+    public void modifiedService(ServiceReference<UserService> reference, UserService service) {
     }
 
-    public void setMailAddress(String mailAddress) {
-        this.mailAddress = mailAddress;
-    }
-
-    public Date getExpires() {
-        return expires;
-    }
-
-    public void setExpires(Date expires) {
-        this.expires = expires;
-    }
-
-    public AuthenticationMode getAuthenticationMode() {
-        return authenticationMode;
-    }
-
-    public void setAuthenticationMode(AuthenticationMode authenticationMode) {
-        this.authenticationMode = authenticationMode;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
+    @Override
+    public void removedService(ServiceReference<UserService> reference, UserService service) {
+        SERVICE.set(null);
     }
 
 }

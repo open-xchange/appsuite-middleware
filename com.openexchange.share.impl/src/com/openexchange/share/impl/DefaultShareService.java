@@ -54,6 +54,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.CreateRequest;
+import com.openexchange.share.DeleteRequest;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.storage.ShareStorage;
@@ -83,13 +84,18 @@ public class DefaultShareService implements ShareService {
 
     @Override
     public List<Share> create(CreateRequest shareRequest, Session session) throws OXException {
-        return new ShareCreator(services, shareRequest, ServerSessionAdapter.valueOf(session)).perform();
+        return new CreateHandler(shareRequest, ServerSessionAdapter.valueOf(session), services).processRequest();
     }
 
     @Override
     public Share resolveToken(String token) throws OXException {
         int contextID = ShareTool.extractContextId(token);
         return services.getService(ShareStorage.class).loadShare(contextID, token, StorageParameters.NO_PARAMETERS);
+    }
+
+    @Override
+    public void delete(DeleteRequest deleteRequest, Session session) throws OXException {
+        new DeleteHandler(deleteRequest, ServerSessionAdapter.valueOf(session), services).processRequest();
     }
 
 }

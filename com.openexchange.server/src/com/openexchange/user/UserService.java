@@ -180,6 +180,23 @@ public interface UserService {
     void deleteUser(Connection con, Context context, User user) throws OXException;
 
     /**
+     * Deletes a user from the underlying storage.
+     *
+     * @param context The context
+     * @param user The id of the user to delete
+     */
+    void deleteUser(Context context, int userId) throws OXException;
+
+    /**
+     * Deletes a user from the underlying storage.
+     *
+     * @param con A (writable) database connection
+     * @param context The context
+     * @param user The id of the user to delete
+     */
+    void deleteUser(Connection con, Context context, int userId) throws OXException;
+
+    /**
      * Writes a new user into the database.
      *
      * @param context The context.

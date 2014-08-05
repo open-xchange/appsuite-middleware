@@ -81,6 +81,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.share.ShareService;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.UserService;
 
 /**
  * {@link FolderStorageActivator} - {@link BundleActivator Activator} for folder storage framework.
@@ -221,6 +222,10 @@ public final class FolderStorageActivator implements BundleActivator {
                 context,
                 ShareService.class.getName(),
                 new ShareServiceHolder(context)));
+            serviceTrackers.add(new ServiceTracker<UserService, UserService>(
+                context,
+                UserService.class,
+                new UserServiceHolder(context)));
             for (final ServiceTracker<?, ?> serviceTracker : serviceTrackers) {
                 serviceTracker.open();
             }

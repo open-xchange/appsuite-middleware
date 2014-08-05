@@ -68,11 +68,24 @@ public class StorageParameters {
 
     private final Map<String, Object> parameters;
 
+
     /**
-     * Initializes a new {@link StorageParameters}.
+     * Creates a new empty instance of {@link StorageParameters}.
      */
-    public StorageParameters() {
-        this(new HashMap<String, Object>());
+    public static StorageParameters newInstance() {
+        return new StorageParameters(new HashMap<String, Object>());
+    }
+
+    /**
+     * Creates a new instance of {@link StorageParameters} with an initial key-value-pair.
+     *
+     * @param key The key, not <code>null</code>
+     * @param value The value, not <code>null</code>
+     */
+    public static StorageParameters newInstance(String key, Object value) {
+        StorageParameters parameters = new StorageParameters(new HashMap<String, Object>());
+        parameters.put(key, value);
+        return parameters;
     }
 
     /**
@@ -96,23 +109,6 @@ public class StorageParameters {
         parameters.put(key, value);
         return this;
     }
-
-//    public Object get(String key) {
-//        return parameters.get(key);
-//    }
-//
-//    public <T> T get(String key, Class<T> type) {
-//        Object object = parameters.get(key);
-//        if (object == null) {
-//            return null;
-//        }
-//
-//        if (type.isAssignableFrom(object.getClass())) {
-//            return type.cast(object);
-//        }
-//
-//        return null;
-//    }
 
     /**
      * Gets a parameter identified by its key.

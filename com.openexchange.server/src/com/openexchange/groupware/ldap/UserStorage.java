@@ -107,6 +107,15 @@ public abstract class UserStorage {
         return getUser(userId, ContextStorage.getInstance().getContext(contextId));
     }
 
+    public User getUser(final int userId, final int contextId, Connection con) throws OXException {
+        if (con == null) {
+            return getUser(userId, contextId);
+        }
+
+        // TODO: re-use connection for context storage
+        return getUser(ContextStorage.getInstance().getContext(contextId), userId, con);
+    }
+
     /**
      * Reads the data from a user from the underlying persistent data storage.
      * @param uid User identifier.

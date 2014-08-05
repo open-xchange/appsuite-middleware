@@ -55,8 +55,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -70,7 +68,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.CreateRequest;
 import com.openexchange.share.DefaultShare;
-import com.openexchange.share.Entity;
+import com.openexchange.share.Guest;
 import com.openexchange.share.Share;
 import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.share.storage.StorageParameters;
@@ -79,57 +77,51 @@ import com.openexchange.user.UserService;
 
 
 /**
- * {@link ShareCreator}
+ * {@link CreateHandler}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class ShareCreator extends SharePerformer<List<Share>> {
-
-    protected final CreateRequest createRequest;
+public class CreateHandler extends RequestHandler<CreateRequest, List<Share>> {
 
     /**
-     * Initializes a new {@link ShareCreator}.
+     * Initializes a new {@link CreateHandler}.
      * @param createRequest
      * @param entity
      * @param session
      */
-    public ShareCreator(ServiceLookup services, CreateRequest createRequest, ServerSession session) {
-        super(services, session);
-        this.createRequest = createRequest;
+    public CreateHandler(CreateRequest createRequest, ServerSession session, ServiceLookup services) {
+        super(createRequest, session, services);
     }
 
     @Override
-    protected List<Share> perform() throws OXException {
+    protected List<Share> processRequest() throws OXException {
         DatabaseService dbService = getDatabaseService();
         UserService userService = getUserService();
         ShareStorage shareStorage = getShareStorage();
 
         Context context = session.getContext();
         boolean ownsConnection = false;
-        Connection con = createRequest.getConnection();
+        Connection con = request.getConnection();
         if (con == null) {
             con = dbService.getWritable(context);
             ownsConnection = true;
         }
 
-        List<Entity> entities = createRequest.getEntities();
-        List<Share> shares = new ArrayList<Share>(entities.size());
-        // TODO: can possibly removed if OXFolderManagerImpl doesn't try to commit foreign connections anymore...
-//        ResilientConnection con = new ResilientConnection(dbService.getWritable(context));
+        List<Guest> guests = request.getGuests();
+        List<Share> shares = new ArrayList<Share>(guests.size());
         try {
             if (ownsConnection) {
                 Databases.startTransaction(con);
             }
 
-            for (Entity entity : entities) {
-                User guest = prepareGuest(entity);
-                int guestId = userService.createUser(con, context, guest);
-                UserPermissionBitsStorage.getInstance().saveUserPermissionBits(con, getUserPermissionBits(entity), guestId, context); // FIXME: to service layer
-                if (createRequest.getItem() == null) {
-                    Share share = createShare(guestId);
-                    StorageParameters parameters = new StorageParameters()
-                        .put(Connection.class.getName(), con);
+            for (Guest guest : guests) {
+                User guestUser = prepareGuestUser(guest);
+                int guestUserId = userService.createUser(con, context, guestUser);
+                UserPermissionBitsStorage.getInstance().saveUserPermissionBits(con, getUserPermissionBits(), guestUserId, context); // FIXME: to service layer
+                if (request.getItem() == null) {
+                    Share share = createShare(guestUserId);
+                    StorageParameters parameters = StorageParameters.newInstance(Connection.class.getName(), con);
                     shareStorage.storeShare(share, parameters);
                     shares.add(share);
                 } else {
@@ -154,18 +146,18 @@ public class ShareCreator extends SharePerformer<List<Share>> {
         }
     }
 
-    private int getUserPermissionBits(Entity entity) {
-        Set<com.openexchange.groupware.userconfiguration.Permission> perms = new HashSet<com.openexchange.groupware.userconfiguration.Permission>();
-        perms.add(com.openexchange.groupware.userconfiguration.Permission.DENIED_PORTAL);
-        perms.add(com.openexchange.groupware.userconfiguration.Permission.READ_CREATE_SHARED_FOLDERS);
-        Permission modulePermission = Module.getForFolderConstant(createRequest.getModule()).getPermission();
+    private int getUserPermissionBits() {
+        Set<Permission> perms = new HashSet<Permission>();
+        perms.add(Permission.DENIED_PORTAL);
+        perms.add(Permission.READ_CREATE_SHARED_FOLDERS);
+        Permission modulePermission = Module.getForFolderConstant(request.getModule()).getPermission();
         if (modulePermission != null) {
             perms.add(modulePermission);
         }
-        return com.openexchange.groupware.userconfiguration.Permission.toBits(perms);
+        return Permission.toBits(perms);
     }
 
-    private Share createShare(int guestId) {
+    private Share createShare(int guestUserId) {
         int contextId = session.getContextId();
         int userId = session.getUserId();
         Date created = new Date();
@@ -177,14 +169,14 @@ public class ShareCreator extends SharePerformer<List<Share>> {
         share.setLastModified(created);
         share.setCreatedBy(userId);
         share.setModifiedBy(userId);
-        share.setGuest(guestId);
-        share.setModule(createRequest.getModule());
-        share.setFolder(createRequest.getFolder());
+        share.setGuest(guestUserId);
+        share.setModule(request.getModule());
+        share.setFolder(request.getFolder());
 
         return share;
     }
 
-    private User prepareGuest(Entity entity) throws OXException {
+    private User prepareGuestUser(Guest entity) throws OXException {
         User user = session.getUser();
         UserImpl guest = new UserImpl();
         guest.setCreatedBy(session.getUserId());
@@ -196,18 +188,9 @@ public class ShareCreator extends SharePerformer<List<Share>> {
         guest.setPasswordMech("{CRYPTO_SERVICE}");
         AuthenticationMode authenticationMode = entity.getAuthenticationMode();
         if (authenticationMode != null && authenticationMode != AuthenticationMode.ANONYMOUS) {
-            guest.setUserPassword(encrypt(entity.getPassword()));
+            guest.setUserPassword(getShareCryptoService().encrypt(entity.getPassword()));
         }
         return guest;
-    }
-
-    // FIXME: centralize, see Authenticator in JSON bundle
-    private static String encrypt(String value) throws OXException {
-        CryptoService cryptoService = ShareServiceLookup.getService(CryptoService.class, true);
-        String cryptKey = ShareServiceLookup.getService(ConfigurationService.class, true).getProperty(
-            "com.openexchange.share.cryptKey",
-            "erE2e8OhAo71");
-        return cryptoService.encrypt(value, cryptKey);
     }
 
 }

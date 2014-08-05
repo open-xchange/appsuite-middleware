@@ -47,61 +47,79 @@
  *
  */
 
-package com.openexchange.share.impl;
+package com.openexchange.share;
 
-import com.openexchange.contact.ContactService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.storage.ShareStorage;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.user.UserService;
-
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * {@link SharePerformer}
+ * Encapsulates requests for deleting shares.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public abstract class SharePerformer<R> {
+public class DeleteRequest {
 
-    protected final ServerSession session;
-    protected final ServiceLookup services;
+    private final List<Integer> guestIDs = new ArrayList<Integer>(4);
+
+    private int module;
+
+    private String folder;
+
+    private String item;
 
 
-    protected SharePerformer(ServiceLookup services, ServerSession session) {
-        super();
-        this.services = services;
-        this.session = session;
+    private Connection connection;
+
+    public int getModule() {
+        return module;
     }
 
-    protected abstract R perform() throws OXException;
-
-    protected ShareStorage getShareStorage() throws OXException {
-        return getService(ShareStorage.class, true);
+    public void setModule(int module) {
+        this.module = module;
     }
 
-    protected UserService getUserService() throws OXException {
-        return getService(UserService.class, true);
+    public String getFolder() {
+        return folder;
     }
 
-    protected ContactService getContactService() throws OXException {
-        return getService(ContactService.class, true);
+    public void setFolder(String folder) {
+        this.folder = folder;
     }
 
-    protected DatabaseService getDatabaseService() throws OXException {
-        return getService(DatabaseService.class, true);
+    /**
+     * Gets the ID of the item to be shared.
+     *
+     * @return The ID or <code>null</code>, if the whole folder shall be shared.
+     */
+    public String getItem() {
+        return item;
     }
 
-    protected <S> S getService(Class<S> serviceClass, boolean failIfAbsent) throws OXException {
-        S service = services.getService(serviceClass);
-        if (service == null && failIfAbsent) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(serviceClass.getName());
-        }
+    public void setItem(String item) {
+        this.item = item;
+    }
 
-        return service;
+    public List<Integer> getGuestIDs() {
+        return guestIDs;
+    }
+
+    public void addGuestID(int guestID) {
+        guestIDs.add(guestID);
+    }
+
+    /**
+     * Gets the database connection that shall be used to make the according database changed.
+     *
+     * @return The connection or <code>null</code>.
+     */
+    public Connection getConnection() {
+        return connection;
+    }
+
+    public void setConnection(Connection connection) {
+        this.connection = connection;
     }
 
 }

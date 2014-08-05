@@ -65,6 +65,8 @@ public interface ShareService {
 
     List<Share> create(CreateRequest shareRequest, Session session) throws OXException;
 
+    void delete(DeleteRequest deleteRequest, Session session) throws OXException;
+
     Share resolveToken(String token) throws OXException;
 
 }

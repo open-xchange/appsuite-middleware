@@ -52,6 +52,7 @@ package com.openexchange.folderstorage.internal.performers;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
@@ -61,11 +62,21 @@ import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
+import com.openexchange.folderstorage.GuestPermission;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.internal.PermissionImpl;
+import com.openexchange.folderstorage.osgi.ShareServiceHolder;
+import com.openexchange.folderstorage.osgi.UserServiceHolder;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.share.AuthenticationMode;
+import com.openexchange.share.CreateRequest;
+import com.openexchange.share.DeleteRequest;
+import com.openexchange.share.Guest;
+import com.openexchange.share.Share;
+import com.openexchange.share.ShareService;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -116,6 +127,8 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
     public UpdatePerformer(final User user, final Context context, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
         super(user, context, decorator, folderStorageDiscoverer);
     }
+
+    private static final String RECURSION_MARKER = UpdatePerformer.class.getName() + ".RECURSION_MARKER";
 
     /**
      * Performs the <code>UPDATE</code> request.
@@ -184,39 +197,14 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     }
                 }
             }
-            final boolean changePermissions;
-            {
-                final Permission[] newPerms = stripSystemPermissions(folder.getPermissions());
-                if (null == newPerms) {
-                    changePermissions = false;
-                } else {
-                    final Permission[] oldPerms = stripSystemPermissions(storageFolder.getPermissions());
-                    if (newPerms.length != oldPerms.length) {
-                        changePermissions = true;
-                    } else {
-                        boolean equals = true;
-                        for (int i = 0; equals && i < oldPerms.length; i++) {
-                            final Permission oldPerm = oldPerms[i];
-                            if (0 == oldPerm.getSystem()) {
-                                final int entity = oldPerm.getEntity();
-                                Permission compareWith = null;
-                                for (int j = 0; null == compareWith && j < newPerms.length; j++) {
-                                    final Permission newPerm = newPerms[j];
-                                    if (newPerm.getEntity() == entity) {
-                                        compareWith = newPerm;
-                                    }
-                                }
-                                equals = (null != compareWith && compareWith.equals(oldPerm));
-                            }
-                        }
-                        changePermissions = !equals;
-                    }
-                }
-            }
-            final boolean changeSubscription;
-            {
-                changeSubscription = (storageFolder.isSubscribed() != folder.isSubscribed());
-            }
+
+            final boolean changeSubscription = (storageFolder.isSubscribed() != folder.isSubscribed());
+            final ComparedPermissions comparedPermissions = new ComparedPermissions(
+                getContextId(),
+                folder,
+                storageFolder,
+                UserServiceHolder.requireUserService());
+
             /*
              * Do move?
              */
@@ -305,23 +293,54 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                 } else {
                     doRenameVirtual(folder, storage, openedStorages);
                 }
-            } else if (changePermissions) {
-                /*
-                 * Change permissions either in real or in virtual storage
-                 */
-                if (FolderStorage.REAL_TREE_ID.equals(folder.getTreeID())) {
-                    storage.updateFolder(folder, storageParameters);
-                } else {
-                    final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, folder.getID());
-                    if (null == realStorage) {
-                        throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folder.getID());
+            } else if (comparedPermissions.hasChanges()) {
+                boolean addedDecorator = false;
+                FolderServiceDecorator decorator = storageParameters.getDecorator();
+                if (decorator == null) {
+                    decorator = new FolderServiceDecorator();
+                    storageParameters.setDecorator(decorator);
+                    addedDecorator = true;
+                }
+
+                boolean isRecursion = decorator.containsProperty(RECURSION_MARKER);
+                if (!isRecursion) {
+                    decorator.put(RECURSION_MARKER, true);
+                }
+
+                try {
+                    if (!isRecursion && comparedPermissions.hasNewGuests()) {
+                        prepareNewShares(folder, storageFolder, comparedPermissions.getAddedGuests());
                     }
-                    if (storage.equals(realStorage)) {
+
+                    /*
+                     * Change permissions either in real or in virtual storage
+                     */
+                    if (FolderStorage.REAL_TREE_ID.equals(folder.getTreeID())) {
                         storage.updateFolder(folder, storageParameters);
                     } else {
-                        checkOpenedStorage(realStorage, openedStorages);
-                        realStorage.updateFolder(folder, storageParameters);
-                        storage.updateFolder(folder, storageParameters);
+                        final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, folder.getID());
+                        if (null == realStorage) {
+                            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folder.getID());
+                        }
+                        if (storage.equals(realStorage)) {
+                            storage.updateFolder(folder, storageParameters);
+                        } else {
+                            checkOpenedStorage(realStorage, openedStorages);
+                            realStorage.updateFolder(folder, storageParameters);
+                            storage.updateFolder(folder, storageParameters);
+                        }
+                    }
+
+                    if (!isRecursion && comparedPermissions.hasRemovedGuests()) {
+                        deleteObsoleteShares(folder, storageFolder, comparedPermissions.getRemovedGuests());
+                    }
+                } finally {
+                    if (!isRecursion) {
+                        decorator.remove(RECURSION_MARKER);
+                    }
+
+                    if (addedDecorator) {
+                        storageParameters.setDecorator(null);
                     }
                 }
             } else if (changeSubscription) {
@@ -371,6 +390,54 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
         }
 
     } // End of doUpdate()
+
+    private void deleteObsoleteShares(Folder folder, Folder storageFolder, LinkedList<Permission> removedGuests) throws OXException {
+        DeleteRequest deleteRequest = new DeleteRequest();
+        deleteRequest.setModule(storageFolder.getContentType().getModule());
+        deleteRequest.setFolder(storageFolder.getID());
+        for (Permission permission : removedGuests) {
+            deleteRequest.addGuestID(permission.getEntity());
+        }
+
+        ShareService shareService = ShareServiceHolder.requireShareService();
+        shareService.delete(deleteRequest, session);
+    }
+
+    private void prepareNewShares(Folder folder, Folder storageFolder, List<GuestPermission> addedGuests) throws OXException {
+        CreateRequest createRequest = new CreateRequest();
+        createRequest.setModule(storageFolder.getContentType().getModule());
+        createRequest.setFolder(storageFolder.getID());
+        for (GuestPermission permission : addedGuests) {
+            Guest guest = new Guest();
+            guest.setAuthenticationMode(AuthenticationMode.ANONYMOUS); // TODO
+            guest.setMailAddress(permission.getEmailAddress());
+            // TODO: display name
+            guest.setContactID(permission.getContactID());
+            guest.setContactFolderID(permission.getContactFolderID());
+            createRequest.addGuest(guest);
+        }
+
+        ShareService shareService = ShareServiceHolder.requireShareService();
+        List<Share> shares = shareService.create(createRequest, session);
+
+        // TODO: still necessary or covered by recursion marker?
+        Permission[] origPermissions = folder.getPermissions();
+        Permission[] resolvedPermissions = new Permission[origPermissions.length];
+        for (int i = 0; i < origPermissions.length; i++) {
+            Permission origPermission = origPermissions[i];
+            int index = addedGuests.indexOf(origPermission);
+            if (index < 0) {
+                resolvedPermissions[i] = origPermission;
+            } else {
+                int entity = shares.get(index).getGuest();
+                Permission converted = new PermissionImpl(origPermission);
+                converted.setEntity(entity);
+                resolvedPermissions[i] = converted;
+            }
+        }
+
+        folder.setPermissions(resolvedPermissions);
+    }
 
     private void checkForDuplicateOnMove(final Folder folder, final String treeId, final List<FolderStorage> openedStorages, final Folder storageFolder, final String newParentId) throws OXException {
         /*
