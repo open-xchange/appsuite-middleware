@@ -221,6 +221,22 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
+    /**
+     * Deletes a user from the database.
+     *
+     * @param context The context
+     * @param userId The identifier of the user to delete
+     */
+    public void deleteUser(Context context, int userId) throws OXException {
+        Connection con = null;
+        try {
+            con = DBPool.pickupWriteable(context);
+            deleteUser(con, context, userId);
+        } finally {
+            DBPool.closeWriterSilent(context, con);
+        }
+    }
+
     @Override
     public void deleteUser(Connection con, Context context, int userId) throws OXException {
         try {
@@ -296,8 +312,6 @@ public class RdbUserStorage extends UserStorage {
                 stmt.setInt(1, context.getContextId());
                 stmt.setInt(2, userId);
                 stmt.executeUpdate();
-            } catch (SQLException e) {
-                throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
             } finally {
                 closeSQLStuff(stmt);
             }

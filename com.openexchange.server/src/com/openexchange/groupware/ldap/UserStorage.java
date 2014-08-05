@@ -390,15 +390,7 @@ public abstract class UserStorage {
      * @param context The context
      * @param userId The identifier of the user to delete
      */
-    public void deleteUser(Context context, int userId) throws OXException {
-        Connection con = null;
-        try {
-            con = DBPool.pickupWriteable(context);
-            deleteUser(con, context, userId);
-        } finally {
-            DBPool.closeWriterSilent(context, con);
-        }
-    }
+    public abstract void deleteUser(Context context, int userId) throws OXException;
 
     /**
      * Deletes a user from the database.
@@ -406,7 +398,6 @@ public abstract class UserStorage {
      * @param con A (writable) database connection
      * @param context The context
      * @param userId The identifier of the user to delete
-     * @return The ID of the created user.
      */
     public abstract void deleteUser(Connection con, Context context, int userId) throws OXException;
 

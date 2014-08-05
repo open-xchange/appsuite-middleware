@@ -117,6 +117,11 @@ public class CachingUserStorage extends UserStorage {
     }
 
     @Override
+    public void deleteUser(Context context, int userId) throws OXException {
+        delegate.deleteUser(context, userId);
+    }
+
+    @Override
     public void deleteUser(final Connection con, final Context context, int userId) throws OXException {
         delegate.deleteUser(con, context, userId);
     }

@@ -159,6 +159,22 @@ public final class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void deleteUser(Context context, User user) throws OXException {
+        List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
+        beforeDelete(context, user, interceptors);
+        UserStorage.getInstance().deleteUser(context, user.getId());
+        afterDelete(context, user, interceptors);
+    }
+
+    @Override
+    public void deleteUser(Connection con, Context context, User user) throws OXException {
+        List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
+        beforeDelete(context, user, interceptors);
+        UserStorage.getInstance().deleteUser(con, context, user.getId());
+        afterDelete(context, user, interceptors);
+    }
+
+    @Override
     public int getUserId(final String loginInfo, final Context context) throws OXException {
         return UserStorage.getInstance().getUserId(loginInfo, context);
     }
@@ -251,6 +267,22 @@ public final class UserServiceImpl implements UserService {
             try {
                 interceptor.afterUpdate(context, user, null, properties);
             } catch(OXException e) {
+                LOG.error("Error while calling interceptor.", e);
+            }
+        }
+    }
+
+    private void beforeDelete(Context context, User user, List<UserServiceInterceptor> interceptors) throws OXException {
+        for (UserServiceInterceptor interceptor : interceptors) {
+            interceptor.beforeDelete(context, user, null);
+        }
+    }
+
+    private void afterDelete(Context context, User user, List<UserServiceInterceptor> interceptors) {
+        for (UserServiceInterceptor interceptor : interceptors) {
+            try {
+                interceptor.afterDelete(context, user, null);
+            } catch (OXException e) {
                 LOG.error("Error while calling interceptor.", e);
             }
         }
