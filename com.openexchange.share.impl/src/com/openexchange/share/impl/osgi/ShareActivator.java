@@ -97,14 +97,17 @@ public class ShareActivator extends HousekeepingActivator {
          * register services
          */
         registerService(ShareService.class, new DefaultShareService(this));
-
+        /*
+         * register share crypto service based on underyling crypto service
+         */
         track(CryptoService.class, new ServiceTrackerCustomizer<CryptoService, CryptoService>() {
 
             private volatile ServiceRegistration<ShareCryptoService> registration;
 
             @Override
             public CryptoService addingService(ServiceReference<CryptoService> serviceReference) {
-                String cryptKey = ShareServiceLookup.getService(ConfigurationService.class).getProperty("com.openexchange.share.cryptKey", "erE2e8OhAo71");
+                String cryptKey = ShareServiceLookup.getService(ConfigurationService.class).getProperty(
+                    "com.openexchange.share.cryptKey", "erE2e8OhAo71");
                 CryptoService service = context.getService(serviceReference);
                 registration = context.registerService(ShareCryptoService.class, new ShareCryptoServiceImpl(service, cryptKey), null);
                 return service;
@@ -126,10 +129,6 @@ public class ShareActivator extends HousekeepingActivator {
             }
         });
         openTrackers();
-
-
-//        String cryptKey = getService(ConfigurationService.class).getProperty("com.openexchange.share.cryptKey", "erE2e8OhAo71");
-//        registerService(ShareCryptoService.class, new ShareCryptoServiceImpl(getService(CryptoService.class), cryptKey));
     }
 
     @Override
