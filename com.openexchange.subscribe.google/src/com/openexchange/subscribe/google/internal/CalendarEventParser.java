@@ -65,6 +65,8 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.container.participants.ConfirmStatus;
+import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.subscribe.google.osgi.Services;
@@ -76,7 +78,26 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class CalendarEventParser {
-    
+
+    private enum ResponseStatus {
+        needsAction, accepted, declined, tentative;
+
+        final static ConfirmStatus parse(final String status) {
+            if (status.equals(ResponseStatus.needsAction.toString())) {
+                return ConfirmStatus.NONE;
+            } else if (status.equals(ResponseStatus.accepted.toString())) {
+                return ConfirmStatus.ACCEPT;
+            } else if (status.equals(ResponseStatus.declined.toString())) {
+                return ConfirmStatus.DECLINE;
+            } else if (status.equals(ResponseStatus.tentative.toString())) {
+                return ConfirmStatus.TENTATIVE;
+            } else {
+                throw new IllegalArgumentException("The provided status \"" + status + "\" cannot be parsed to a valid ConfirmStatus");
+            }
+        }
+
+    }
+
     final Logger logger = LoggerFactory.getLogger(CalendarEventParser.class);
 
     private Context context;
@@ -136,22 +157,35 @@ public class CalendarEventParser {
             calendarObject.setAlarm(eventReminder.getMinutes());
         }
 
-        // Participants
+        // Participants and confirmations
         final List<EventAttendee> attendees = event.getAttendees();
         final List<Participant> participants = new ArrayList<Participant>(attendees.size());
+        final List<ConfirmableParticipant> confParts = new ArrayList<ConfirmableParticipant>(attendees.size());
         for (EventAttendee a : attendees) {
             final Participant p;
             if (!a.getResource()) {
                 p = new ExternalUserParticipant(a.getEmail());
+
+                // Confirmations
+                final ConfirmStatus confirmStatus = ResponseStatus.parse(a.getResponseStatus());
+                final String confirmMessage = a.getComment();
+                final ConfirmableParticipant cp = new ExternalUserParticipant(a.getEmail());
+                cp.setStatus(confirmStatus);
+                cp.setMessage(confirmMessage);
+
                 if (a.getDisplayName() != null) {
                     p.setDisplayName(a.getDisplayName());
+                    cp.setDisplayName(a.getDisplayName());
                 }
+                confParts.add(cp);
+
                 if (a.getOrganizer()) {
                     calendarObject.setOrganizer(a.getEmail());
                 }
                 participants.add(p);
             }
         }
+        calendarObject.setConfirmations(confParts);
         calendarObject.setParticipants(participants);
         convertExternalToInternal(calendarObject);
     }
@@ -166,7 +200,7 @@ public class CalendarEventParser {
         if (participants == null || participants.length == 0) {
             return;
         }
-        
+
         final UserService userService = Services.getService(UserService.class);
         for (int pos = 0; pos < participants.length; pos++) {
             final Participant part = participants[pos];
