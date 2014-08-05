@@ -59,9 +59,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.fields.Header;
 import com.openexchange.authentication.GuestAuthenticated;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.context.ContextService;
-import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -70,11 +67,11 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.login.internal.LoginMethodClosure;
 import com.openexchange.login.internal.LoginResultImpl;
 import com.openexchange.share.Share;
+import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
 import com.openexchange.tools.servlet.http.Authorization;
 import com.openexchange.tools.servlet.http.Authorization.Credentials;
 import com.openexchange.tools.webdav.digest.DigestUtility;
-import com.openexchange.user.UserService;
 
 /**
  * {@link ShareLoginMethod}
@@ -85,15 +82,21 @@ import com.openexchange.user.UserService;
 public class ShareLoginMethod implements LoginMethodClosure {
 
     private final Share share;
+    private final Context context;
+    private final User user;
 
     /**
      * Initializes a new {@link ShareLoginMethod}.
      *
      * @param share The underlying share
+     * @param context The context
+     * @param user The user
      */
-    public ShareLoginMethod(Share share) {
+    public ShareLoginMethod(Share share, Context context, User user) {
         super();
         this.share = share;
+        this.context = context;
+        this.user = user;
     }
 
     @Override
@@ -121,8 +124,6 @@ public class ShareLoginMethod implements LoginMethodClosure {
     }
 
     private ShareAuthenticated anonymous(LoginResultImpl loginResult) throws OXException {
-        Context context = ShareServiceLookup.getService(ContextService.class, true).getContext(share.getContextID());
-        User user = ShareServiceLookup.getService(UserService.class, true).getUser(share.getGuest(), context);
         return new ShareAuthenticated(user, context);
     }
 
@@ -135,9 +136,6 @@ public class ShareLoginMethod implements LoginMethodClosure {
         if (null == credentials || false == Authorization.checkLogin(credentials.getPassword())) {
             return null;
         }
-        Context context = ShareServiceLookup.getService(ContextService.class, true).getContext(share.getContextID());
-        UserService userService = ShareServiceLookup.getService(UserService.class, true);
-        User user = userService.getUser(share.getGuest(), context);
         if (Strings.isEmpty(credentials.getLogin()) || false == credentials.getLogin().equalsIgnoreCase(user.getMail()) ||
             Strings.isEmpty(credentials.getPassword()) || false == credentials.getPassword().equals(decrypt(user.getUserPassword()))) {
             return null;
@@ -152,9 +150,6 @@ public class ShareLoginMethod implements LoginMethodClosure {
         }
         com.openexchange.tools.webdav.digest.Authorization parsed = DigestUtility.getInstance().parseDigestAuthorization(authHeader);
         String username = parsed.getUser();
-        Context context = ShareServiceLookup.getService(ContextService.class, true).getContext(share.getContextID());
-        UserService userService = ShareServiceLookup.getService(UserService.class, true);
-        User user = userService.getUser(share.getGuest(), context);
         if (Strings.isEmpty(username) || false == username.equalsIgnoreCase(user.getMail())) {
             return null;
         }
@@ -165,18 +160,8 @@ public class ShareLoginMethod implements LoginMethodClosure {
         return new ShareAuthenticated(user, context);
     }
 
-//    private static String encrypt(String value) throws OXException {
-//        CryptoService cryptoService = ShareServiceLookup.getService(CryptoService.class, true);
-//        String cryptKey = ShareServiceLookup.getService(ConfigurationService.class, true).getProperty(
-//            "com.openexchange.share.cryptKey", "erE2e8OhAo71");
-//        return cryptoService.encrypt(value, cryptKey);
-//    }
-
     private static String decrypt(String value) throws OXException {
-        CryptoService cryptoService = ShareServiceLookup.getService(CryptoService.class, true);
-        String cryptKey = ShareServiceLookup.getService(ConfigurationService.class, true).getProperty(
-            "com.openexchange.share.cryptKey", "erE2e8OhAo71");
-        return cryptoService.decrypt(value, cryptKey);
+        return ShareServiceLookup.getService(ShareCryptoService.class, true).decrypt(value);
     }
 
     public void sendUnauthorized(HttpServletRequest request, HttpServletResponse response) throws IOException {

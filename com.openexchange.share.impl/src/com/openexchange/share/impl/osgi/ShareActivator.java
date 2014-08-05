@@ -49,11 +49,15 @@
 
 package com.openexchange.share.impl.osgi;
 
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.ContactService;
+import com.openexchange.crypto.CryptoService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.impl.DefaultShareService;
+import com.openexchange.share.impl.ShareCryptoServiceImpl;
 import com.openexchange.share.impl.ShareServiceLookup;
 import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.user.UserService;
@@ -76,7 +80,8 @@ public class ShareActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, ContactService.class, FolderService.class, ShareStorage.class };
+        return new Class<?>[] { UserService.class, ContactService.class, FolderService.class, ShareStorage.class,
+            CryptoService.class, ConfigurationService.class };
     }
 
     @Override
@@ -90,6 +95,8 @@ public class ShareActivator extends HousekeepingActivator {
          * register services
          */
         registerService(ShareService.class, new DefaultShareService(this));
+        String cryptKey = getService(ConfigurationService.class).getProperty("com.openexchange.share.cryptKey", "erE2e8OhAo71");
+        registerService(ShareCryptoService.class, new ShareCryptoServiceImpl(getService(CryptoService.class), cryptKey));
     }
 
     @Override

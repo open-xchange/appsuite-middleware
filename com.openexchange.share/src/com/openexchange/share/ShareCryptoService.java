@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,46 +47,33 @@
  *
  */
 
-package com.openexchange.share.servlet.osgi;
+package com.openexchange.share;
 
-import org.osgi.service.http.HttpService;
-import com.openexchange.ajax.osgi.AbstractServletActivator;
-import com.openexchange.context.ContextService;
-import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.share.ShareCryptoService;
-import com.openexchange.share.ShareService;
-import com.openexchange.share.servlet.internal.ShareServiceLookup;
-import com.openexchange.share.servlet.internal.ShareServlet;
-import com.openexchange.user.UserService;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link ShareServletActivator}
+ * {@link ShareCryptoService}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ShareServletActivator extends AbstractServletActivator {
+public interface ShareCryptoService {
 
-    private static final String ALIAS = "/ajax/share";
+    /**
+     * Encrypts the supplied string using the configured share encryption key.
+     *
+     * @param value The value to encrypt
+     * @return The encrypted value
+     * @throws OXException
+     */
+    String encrypt(String value) throws OXException;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ShareService.class, UserService.class, ContextService.class, DispatcherPrefixService.class,
-            HttpService.class, SessiondService.class, ShareCryptoService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        org.slf4j.LoggerFactory.getLogger(ShareServletActivator.class).info("starting bundle: \"com.openexchange.share.servlet\"");
-        ShareServiceLookup.set(this);
-        super.registerServlet(ALIAS, new ShareServlet(), getService(HttpService.class));
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        org.slf4j.LoggerFactory.getLogger(ShareServletActivator.class).info("stopping bundle: \"com.openexchange.share.servlet\"");
-        ShareServiceLookup.set(this);
-        super.stopBundle();
-    }
+    /**
+     * Decrypts the supplied string using the configured share encryption key.
+     *
+     * @param value The value to decrypt
+     * @return The decrpyted value
+     * @throws OXException
+     */
+    String decrypt(String value) throws OXException;
 
 }

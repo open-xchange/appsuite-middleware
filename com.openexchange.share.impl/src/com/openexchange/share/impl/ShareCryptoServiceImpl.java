@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,46 +47,44 @@
  *
  */
 
-package com.openexchange.share.servlet.osgi;
+package com.openexchange.share.impl;
 
-import org.osgi.service.http.HttpService;
-import com.openexchange.ajax.osgi.AbstractServletActivator;
-import com.openexchange.context.ContextService;
-import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.sessiond.SessiondService;
+import com.openexchange.crypto.CryptoService;
+import com.openexchange.exception.OXException;
 import com.openexchange.share.ShareCryptoService;
-import com.openexchange.share.ShareService;
-import com.openexchange.share.servlet.internal.ShareServiceLookup;
-import com.openexchange.share.servlet.internal.ShareServlet;
-import com.openexchange.user.UserService;
+
 
 /**
- * {@link ShareServletActivator}
+ * {@link ShareCryptoServiceImpl}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.6.1
  */
-public class ShareServletActivator extends AbstractServletActivator {
+public class ShareCryptoServiceImpl implements ShareCryptoService {
 
-    private static final String ALIAS = "/ajax/share";
+    private final CryptoService cryptoService;
+    private final String cryptKey;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ShareService.class, UserService.class, ContextService.class, DispatcherPrefixService.class,
-            HttpService.class, SessiondService.class, ShareCryptoService.class };
+    /**
+     * Initializes a new {@link ShareCryptoServiceImpl}.
+     *
+     * @param cryptoService The underlying crypto service
+     * @param cryptKey The key use to encrypt / decrypt data
+     */
+    public ShareCryptoServiceImpl(CryptoService cryptoService, String cryptKey) {
+        super();
+        this.cryptoService = cryptoService;
+        this.cryptKey = cryptKey;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        org.slf4j.LoggerFactory.getLogger(ShareServletActivator.class).info("starting bundle: \"com.openexchange.share.servlet\"");
-        ShareServiceLookup.set(this);
-        super.registerServlet(ALIAS, new ShareServlet(), getService(HttpService.class));
+    public String encrypt(String value) throws OXException {
+        return cryptoService.encrypt(value, cryptKey);
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        org.slf4j.LoggerFactory.getLogger(ShareServletActivator.class).info("stopping bundle: \"com.openexchange.share.servlet\"");
-        ShareServiceLookup.set(this);
-        super.stopBundle();
+    public String decrypt(String value) throws OXException {
+        return cryptoService.decrypt(value, cryptKey);
     }
 
 }

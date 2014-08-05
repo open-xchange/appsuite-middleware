@@ -64,6 +64,7 @@ import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginRequestImpl;
 import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.Strings;
@@ -77,6 +78,7 @@ import com.openexchange.tools.servlet.RateLimitedException;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.webdav.OXServlet;
+import com.openexchange.user.UserService;
 
 /**
  * {@link ShareServlet}
@@ -158,11 +160,19 @@ public class ShareServlet extends HttpServlet {
      * @return The login result, or <code>null</code> if not successful
      */
     private static LoginResult login(Share share, HttpServletRequest request, HttpServletResponse response) throws OXException, IOException {
+        /*
+         * parse login request
+         */
+        Context context = ShareServiceLookup.getService(UserService.class, true).getContext(share.getContextID());
+        User user = ShareServiceLookup.getService(UserService.class, true).getUser(share.getGuest(), context);
         LoginConfiguration loginConfig = LoginServlet.getLoginConfiguration();
-        LoginRequestImpl loginRequest = LoginTools.parseLogin(request, share.getToken(), null, false, loginConfig.getDefaultClient(),
-            loginConfig.isCookieForceHTTPS(), false);
+        LoginRequestImpl loginRequest = LoginTools.parseLogin(request, user.getMail(), user.getUserPassword(), false,
+            loginConfig.getDefaultClient(), loginConfig.isCookieForceHTTPS(), false);
         loginRequest.setTransient(true);
-        ShareLoginMethod loginMethod = new ShareLoginMethod(share);
+        /*
+         * login
+         */
+        ShareLoginMethod loginMethod = new ShareLoginMethod(share, context, user);
         Map<String, Object> properties = new HashMap<String, Object>();
         LoginResult loginResult = LoginPerformer.getInstance().doLogin(loginRequest, properties, loginMethod);
         if (null == loginResult || null == loginResult.getSession()) {
@@ -235,34 +245,39 @@ public class ShareServlet extends HttpServlet {
      * @return The redirect URL
      */
     private static String getRedirectURL(Session session, User user, Share share) {
-//        StringBuilder stringBuilder = new StringBuilder()
-//            .append("/ox6/")
-//    //        .append(ShareServiceLookup.getService(DispatcherPrefixService.class).getPrefix())
-//            .append("#session=").append(session.getSessionID())
-//            .append("&user=").append(user.getMail())
-//            .append("&user_id=").append(session.getUserId())
-//            .append("&language=").append(user.getLocale())
-//            .append("&store=true")
-//            .append("&m=").append(getApp(share.getModule()))
-//            .append("&f=").append(share.getFolder())
-//        ;
-//        if (false == share.isFolder()) {
-//            stringBuilder.append("&id=").append(share.getItem());
-//        }
-//        return stringBuilder.toString();
-        StringBuilder stringBuilder = new StringBuilder()
-            .append("/appsuite/")
-//            .append(ShareServiceLookup.getService(DispatcherPrefixService.class).getPrefix())
-            .append("#session=").append(session.getSessionID())
-            .append("&user=").append(session.getLogin())
-            .append("&user_id=").append(session.getUserId())
-            .append("&language=").append(user.getLocale())
-            .append("&store=true")
-            .append("&app=").append(getApp(share.getModule()))
-            .append("&folder=").append(share.getFolder())
-        ;
-        if (false == share.isFolder()) {
-            stringBuilder.append("&id=").append(share.getItem());
+
+        boolean ox6 = false;
+
+        StringBuilder stringBuilder = new StringBuilder();
+        if (ox6) {
+            stringBuilder.append("/ox6/")
+        //        .append(ShareServiceLookup.getService(DispatcherPrefixService.class).getPrefix())
+                .append("#session=").append(session.getSessionID())
+                .append("&user=").append(user.getMail())
+                .append("&user_id=").append(session.getUserId())
+                .append("&language=").append(user.getLocale())
+                .append("&store=true")
+                .append("&m=").append(getApp(share.getModule()))
+                .append("&f=").append(share.getFolder())
+                ;
+            if (false == share.isFolder()) {
+                stringBuilder.append("&id=").append(share.getItem());
+            }
+        } else {
+            stringBuilder
+                .append("/appsuite/")
+    //            .append(ShareServiceLookup.getService(DispatcherPrefixService.class).getPrefix())
+                .append("#session=").append(session.getSessionID())
+                .append("&user=").append(session.getLogin())
+                .append("&user_id=").append(session.getUserId())
+                .append("&language=").append(user.getLocale())
+                .append("&store=true")
+                .append("&app=").append(getApp(share.getModule()))
+                .append("&folder=").append(share.getFolder())
+            ;
+            if (false == share.isFolder()) {
+                stringBuilder.append("&id=").append(share.getItem());
+            }
         }
         return stringBuilder.toString();
     }
