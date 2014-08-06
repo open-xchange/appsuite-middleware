@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage;
 
+import com.openexchange.share.AuthenticationMode;
 
 /**
  * {@link GuestPermission}
@@ -58,12 +59,46 @@ package com.openexchange.folderstorage;
  */
 public interface GuestPermission extends Permission {
 
+    /**
+     * Gets the e-mail address of the guest.
+     *
+     * @return the e-mail address
+     */
     String getEmailAddress();
 
+    /**
+     * Gets the identifier of a known, existing contact representing the guest if available.
+     *
+     * @return The contact ID, or <code>null</code> if not known
+     */
     String getContactID();
 
+    /**
+     * Gets the identifier of the parent folder where the known contact is located in.
+     *
+     * @return The ID of the parent contact folder, or <code>null</code> if not known
+     */
     String getContactFolderID();
 
+    /**
+     * Gets the display name of the guest if available.
+     *
+     * @return The display name, or <code>null</code> if not known
+     */
     String getDisplayName();
+
+    /**
+     * Gets the authentication mode used for the guest.
+     *
+     * @return The authentication mode
+     */
+    AuthenticationMode getAuthenticationMode();
+
+    /**
+     * Gets the password used for authentication if available.
+     *
+     * @return The password, or <code>null</code> if not known
+     */
+    String getPassword();
 
 }

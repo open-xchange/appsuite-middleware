@@ -50,155 +50,30 @@
 package com.openexchange.folder.json.parser;
 
 import com.openexchange.folderstorage.GuestPermission;
-import com.openexchange.folderstorage.Permission;
-
+import com.openexchange.share.AuthenticationMode;
 
 /**
+ * {@link ParsedGuestPermission}
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class ParsedGuestPermission implements GuestPermission {
+public class ParsedGuestPermission extends ParsedPermission implements GuestPermission {
 
-    private int system;
-
-    private int deletePermission;
-
-    private int folderPermission;
-
-    private int readPermission;
-
-    private int writePermission;
-
-    private boolean admin;
-
-    private int entity = -1;
-
-    private boolean group;
+    private static final long serialVersionUID = 7203618073266628866L;
 
     private String mailAddress;
-
     private String contactID;
-
     private String contactFolderID;
-
     private String displayName;
+    private AuthenticationMode authenticationMode;
+    private String password;
 
     /**
      * Initializes an empty {@link ParsedGuestPermission}.
      */
     public ParsedGuestPermission() {
         super();
-    }
-
-    @Override
-    public boolean isVisible() {
-        return isAdmin() || getFolderPermission() > NO_PERMISSIONS;
-    }
-
-    @Override
-    public int getDeletePermission() {
-        return deletePermission;
-    }
-
-    @Override
-    public int getEntity() {
-        return entity;
-    }
-
-    @Override
-    public int getFolderPermission() {
-        return folderPermission;
-    }
-
-    @Override
-    public int getReadPermission() {
-        return readPermission;
-    }
-
-    @Override
-    public int getSystem() {
-        return system;
-    }
-
-    @Override
-    public int getWritePermission() {
-        return writePermission;
-    }
-
-    @Override
-    public boolean isAdmin() {
-        return admin;
-    }
-
-    @Override
-    public boolean isGroup() {
-        return group;
-    }
-
-    @Override
-    public void setAdmin(final boolean admin) {
-        this.admin = admin;
-    }
-
-    @Override
-    public void setAllPermissions(final int folderPermission, final int readPermission, final int writePermission, final int deletePermission) {
-        this.folderPermission = folderPermission;
-        this.readPermission = readPermission;
-        this.deletePermission = deletePermission;
-        this.writePermission = writePermission;
-    }
-
-    @Override
-    public void setDeletePermission(final int permission) {
-        deletePermission = permission;
-    }
-
-    @Override
-    public void setEntity(final int entity) {
-        this.entity = entity;
-    }
-
-    @Override
-    public void setFolderPermission(final int permission) {
-        folderPermission = permission;
-    }
-
-    @Override
-    public void setGroup(final boolean group) {
-        this.group = group;
-    }
-
-    @Override
-    public void setMaxPermissions() {
-        folderPermission = Permission.MAX_PERMISSION;
-        readPermission = Permission.MAX_PERMISSION;
-        deletePermission = Permission.MAX_PERMISSION;
-        writePermission = Permission.MAX_PERMISSION;
-        admin = true;
-    }
-
-    @Override
-    public void setNoPermissions() {
-        folderPermission = Permission.NO_PERMISSIONS;
-        readPermission = Permission.NO_PERMISSIONS;
-        deletePermission = Permission.NO_PERMISSIONS;
-        writePermission = Permission.NO_PERMISSIONS;
-        admin = false;
-    }
-
-    @Override
-    public void setReadPermission(final int permission) {
-        readPermission = permission;
-    }
-
-    @Override
-    public void setSystem(final int system) {
-        this.system = system;
-    }
-
-    @Override
-    public void setWritePermission(final int permission) {
-        writePermission = permission;
     }
 
     @Override
@@ -239,91 +114,97 @@ public class ParsedGuestPermission implements GuestPermission {
     }
 
     @Override
-    public Object clone() {
-        try {
-            return super.clone();
-        } catch (final CloneNotSupportedException e) {
-            throw new InternalError(e.getMessage());
-        }
+    public AuthenticationMode getAuthenticationMode() {
+        return authenticationMode;
     }
 
-  @Override
-  public int hashCode() {
-      final int prime = 31;
-      int result = 1;
-      result = prime * result + (admin ? 1231 : 1237);
-      result = prime * result + deletePermission;
-      result = prime * result + entity;
-      result = prime * result + folderPermission;
-      result = prime * result + (group ? 1231 : 1237);
-      result = prime * result + readPermission;
-      result = prime * result + system;
-      result = prime * result + writePermission;
-      result = prime * result + (mailAddress == null ? 0 : mailAddress.hashCode());
-      result = prime * result + (contactID == null ? 0 : contactID.hashCode());
-      result = prime * result + (contactFolderID == null ? 0 : contactFolderID.hashCode());
-      return result;
-  }
+    /**
+     * Sets the authenticationMode
+     *
+     * @param authenticationMode The authenticationMode to set
+     */
+    public void setAuthenticationMode(AuthenticationMode authenticationMode) {
+        this.authenticationMode = authenticationMode;
+    }
 
-  @Override
-  public boolean equals(final Object obj) {
-      if (this == obj) {
-          return true;
-      }
-      if (obj == null) {
-          return false;
-      }
+    @Override
+    public String getPassword() {
+        return password;
+    }
 
-      if (!(obj instanceof Permission)) {
-          return false;
-      }
+    /**
+     * Sets the password
+     *
+     * @param password The password to set
+     */
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
-      if (obj instanceof ParsedGuestPermission) {
-          final ParsedGuestPermission parsed = (ParsedGuestPermission) obj;
-          if (contactFolderID == null) {
-              if (parsed.contactFolderID != null)
-                  return false;
-          } else if (!contactFolderID.equals(parsed.contactFolderID))
-              return false;
-          if (contactID == null) {
-              if (parsed.contactID != null)
-                  return false;
-          } else if (!contactID.equals(parsed.contactID))
-              return false;
-          if (mailAddress == null) {
-              if (parsed.mailAddress != null)
-                  return false;
-          } else if (!mailAddress.equals(parsed.mailAddress))
-              return false;
-      }
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((authenticationMode == null) ? 0 : authenticationMode.hashCode());
+        result = prime * result + ((contactFolderID == null) ? 0 : contactFolderID.hashCode());
+        result = prime * result + ((contactID == null) ? 0 : contactID.hashCode());
+        result = prime * result + ((displayName == null) ? 0 : displayName.hashCode());
+        result = prime * result + ((mailAddress == null) ? 0 : mailAddress.hashCode());
+        result = prime * result + ((password == null) ? 0 : password.hashCode());
+        return result;
+    }
 
-      final Permission other = (Permission) obj;
-      if (admin != other.isAdmin()) {
-          return false;
-      }
-      if (deletePermission != other.getDeletePermission()) {
-          return false;
-      }
-      if (entity != other.getEntity()) {
-          return false;
-      }
-      if (folderPermission != other.getFolderPermission()) {
-          return false;
-      }
-      if (group != other.isGroup()) {
-          return false;
-      }
-      if (readPermission != other.getReadPermission()) {
-          return false;
-      }
-      if (system != other.getSystem()) {
-          return false;
-      }
-      if (writePermission != other.getWritePermission()) {
-          return false;
-      }
-
-      return true;
-  }
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (!(obj instanceof ParsedGuestPermission)) {
+            return false;
+        }
+        ParsedGuestPermission other = (ParsedGuestPermission) obj;
+        if (authenticationMode != other.authenticationMode) {
+            return false;
+        }
+        if (contactFolderID == null) {
+            if (other.contactFolderID != null) {
+                return false;
+            }
+        } else if (!contactFolderID.equals(other.contactFolderID)) {
+            return false;
+        }
+        if (contactID == null) {
+            if (other.contactID != null) {
+                return false;
+            }
+        } else if (!contactID.equals(other.contactID)) {
+            return false;
+        }
+        if (displayName == null) {
+            if (other.displayName != null) {
+                return false;
+            }
+        } else if (!displayName.equals(other.displayName)) {
+            return false;
+        }
+        if (mailAddress == null) {
+            if (other.mailAddress != null) {
+                return false;
+            }
+        } else if (!mailAddress.equals(other.mailAddress)) {
+            return false;
+        }
+        if (password == null) {
+            if (other.password != null) {
+                return false;
+            }
+        } else if (!password.equals(other.password)) {
+            return false;
+        }
+        return true;
+    }
 
 }

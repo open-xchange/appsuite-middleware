@@ -56,7 +56,9 @@ import com.openexchange.folderstorage.Permission;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ParsedPermission implements Permission {
+public class ParsedPermission implements Permission {
+
+    private static final long serialVersionUID = -2384707153822857968L;
 
     private int system;
 

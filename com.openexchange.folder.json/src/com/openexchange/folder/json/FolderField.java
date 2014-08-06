@@ -177,6 +177,18 @@ public enum FolderField {
      */
     CONTACT_FOLDER_ID(-1, "contact_folder"),
     /**
+     * Authentication mode for guest access
+     */
+    GUEST_AUTH(-1, "guest_auth"),
+    /**
+     * Display name for an external permission
+     */
+    DISPLAY_NAME(-1, "display_name"),
+    /**
+     * Password for an external permission
+     */
+    PASSWORD(-1, "password"),
+    /**
      * The meta field
      */
     META(23, "meta");

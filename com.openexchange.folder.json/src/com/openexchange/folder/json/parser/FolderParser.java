@@ -63,6 +63,9 @@ import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.java.Enums;
+import com.openexchange.share.AuthenticationMode;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link FolderParser} - Parses a folder from JSON data.
@@ -192,6 +195,9 @@ public final class FolderParser {
                 final int[] permissionBits = parsePermissionBits(jPerm.getInt(FolderField.BITS.getName()));
                 final Permission oclPerm;
                 if (jPerm.hasAndNotNull(FolderField.ENTITY.getName())) {
+                    /*
+                     * parse as already known entity
+                     */
                     oclPerm = new ParsedPermission();
                     if (!jPerm.has(FolderField.GROUP.getName())) {
                         throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(FolderField.GROUP.getName());
@@ -199,15 +205,30 @@ public final class FolderParser {
 
                     oclPerm.setEntity(jPerm.getInt(FolderField.ENTITY.getName()));
                     oclPerm.setGroup(jPerm.getBoolean(FolderField.GROUP.getName()));
-                } else if (jPerm.hasAndNotNull(FolderField.MAIL_ADDRESS.getName())) {
-                    final ParsedGuestPermission perm = new ParsedGuestPermission();
-                    final String mailAddress = jPerm.getString(FolderField.MAIL_ADDRESS.getName());
-                    final String contactId = jPerm.optString(FolderField.CONTACT_ID.getName(), null);
-                    final String contactFolderId = jPerm.optString(FolderField.CONTACT_FOLDER_ID.getName(), null);
-
-                    perm.setEmailAddress(mailAddress);
-                    perm.setContactID(contactId);
-                    perm.setContactFolderID(contactFolderId);
+                } else if (jPerm.hasAndNotNull(FolderField.GUEST_AUTH.getName())) {
+                    /*
+                     * parse as newly added external permission
+                     */
+                    ParsedGuestPermission perm = new ParsedGuestPermission();
+                    String authValue = jPerm.getString(FolderField.GUEST_AUTH.getName());
+                    try {
+                        perm.setAuthenticationMode(Enums.parse(AuthenticationMode.class, authValue));
+                    } catch (IllegalArgumentException e) {
+                        throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, FolderField.GUEST_AUTH.getName(), authValue);
+                    }
+                    if (AuthenticationMode.ANONYMOUS != perm.getAuthenticationMode()) {
+                        if (false == jPerm.hasAndNotNull(FolderField.MAIL_ADDRESS.getName())) {
+                            throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(FolderField.MAIL_ADDRESS.getName());
+                        }
+                        perm.setEmailAddress(jPerm.getString(FolderField.MAIL_ADDRESS.getName()));
+                        if (false == jPerm.hasAndNotNull(FolderField.PASSWORD.getName())) {
+                            throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(FolderField.PASSWORD.getName());
+                        }
+                        perm.setEmailAddress(jPerm.getString(FolderField.PASSWORD.getName()));
+                        perm.setDisplayName(jPerm.getString(FolderField.DISPLAY_NAME.getName()));
+                        perm.setContactID(jPerm.getString(FolderField.CONTACT_ID.getName()));
+                        perm.setContactFolderID(jPerm.getString(FolderField.CONTACT_FOLDER_ID.getName()));
+                    }
                     oclPerm = perm;
                 } else {
                     throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(FolderField.ENTITY.getName());
