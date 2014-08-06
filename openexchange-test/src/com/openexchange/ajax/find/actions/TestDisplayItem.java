@@ -47,20 +47,53 @@
  *
  */
 
-package com.openexchange.find.facet;
+package com.openexchange.ajax.find.actions;
 
+import com.openexchange.find.facet.DisplayItem;
+import com.openexchange.find.facet.DisplayItemVisitor;
 
 /**
- * An abstract display item that is marked as non-localizable.
- *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.0
+ * @since v7.6.1
  */
-public abstract class DefaultDisplayItem implements DisplayItem {
+public class TestDisplayItem implements DisplayItem {
+
+    private final String name;
+
+    private final String detail;
+
+    private final String imageUrl;
+
+    /**
+     * Initializes a new {@link TestDisplayItem}.
+     *
+     * @param name
+     * @param detail
+     * @param imageUrl
+     */
+    public TestDisplayItem(String name, String detail, String imageUrl) {
+        super();
+        this.name = name;
+        this.detail = detail;
+        this.imageUrl = imageUrl;
+    }
 
     @Override
-    public boolean isLocalizable() {
-        return false;
+    public String getDisplayName() {
+        return name;
+    }
+
+    public String getDetail() {
+        return detail;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    @Override
+    public void accept(DisplayItemVisitor visitor) {
+        // no op
     }
 
 }

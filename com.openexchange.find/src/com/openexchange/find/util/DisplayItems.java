@@ -47,50 +47,46 @@
  *
  */
 
-package com.openexchange.find.common;
+package com.openexchange.find.util;
 
-import com.openexchange.find.facet.DefaultDisplayItem;
-import com.openexchange.find.facet.DisplayItemVisitor;
+import com.openexchange.find.facet.ComplexDisplayItem;
+import com.openexchange.find.facet.DisplayItem;
+import com.openexchange.groupware.contact.ContactUtil;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.image.ImageDataSource;
+import com.openexchange.image.ImageLocation;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.Pair;
+
 
 /**
+ * A helper class to create {@link DisplayItem}s for common cases.
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.0
+ * @since v7.6.1
  */
-public class ContactDisplayItem extends DefaultDisplayItem {
+public class DisplayItems {
 
-    private final Contact contact;
+    public static ComplexDisplayItem convert(Contact contact) {
+        String displayName = extractDisplayName(contact);
+        String primaryAddress = extractPrimaryMailAddress(contact);
+        if (Strings.isEmpty(displayName)) {
+            if (Strings.isEmpty(primaryAddress)) {
+                displayName = "";
+            } else {
+                displayName = primaryAddress;
+            }
+        }
 
-    private final String defaultValue;
-
-    public ContactDisplayItem(final Contact contact) {
-        super();
-        this.contact = contact;
-        this.defaultValue = extractDefaultValue(contact);
+        ComplexDisplayItem item = new ComplexDisplayItem(displayName, primaryAddress);
+        Pair<ImageDataSource, ImageLocation> imageData = ContactUtil.prepareImageData(contact);
+        if (imageData != null) {
+            item.setImageData(imageData.getFirst(), imageData.getSecond());
+        }
+        return item;
     }
 
-    @Override
-    public void accept(DisplayItemVisitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public Contact getItem() {
-        return contact;
-    }
-
-    @Override
-    public String getDefaultValue() {
-        return defaultValue;
-    }
-
-    @Override
-    public String toString() {
-        return "ContactDisplayItem [contact=" + contact.getDisplayName() + "(" + contact.getObjectID() + ")]";
-    }
-
-    public static String extractDefaultValue(Contact contact) {
+    private static String extractDisplayName(Contact contact) {
         StringBuilder sb = new StringBuilder(64);
         String displayName = contact.getDisplayName();
         if (Strings.isEmpty(displayName)) {
@@ -111,15 +107,6 @@ public class ContactDisplayItem extends DefaultDisplayItem {
             sb.append(displayName);
         }
 
-        String primaryAddress = extractPrimaryMailAddress(contact);
-        if (primaryAddress != null) {
-            if (sb.length() == 0) {
-                sb.append(primaryAddress);
-            } else if (sb.indexOf(primaryAddress) < 0) {
-                sb.append(" (").append(primaryAddress).append(')');
-            }
-        }
-
         return sb.toString();
     }
 
@@ -134,4 +121,5 @@ public class ContactDisplayItem extends DefaultDisplayItem {
 
         return address;
     }
+
 }

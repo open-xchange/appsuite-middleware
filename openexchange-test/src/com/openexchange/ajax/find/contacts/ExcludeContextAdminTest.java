@@ -66,10 +66,10 @@ import com.openexchange.ajax.user.actions.GetRequest;
 import com.openexchange.find.Document;
 import com.openexchange.find.Module;
 import com.openexchange.find.SearchResult;
-import com.openexchange.find.common.ContactDisplayItem;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
+import com.openexchange.find.util.DisplayItems;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.util.TimeZones;
 
@@ -104,7 +104,7 @@ public class ExcludeContextAdminTest extends AbstractFindTest {
         List<ActiveFacet> activeFacets = new LinkedList<ActiveFacet>();
         activeFacets.add(createQuery(adminContact.getDisplayName()));
         List<PropDocument> documents = query(activeFacets, false);
-        PropDocument adminDoc = findByProperty(documents, "display_name", ContactDisplayItem.extractDefaultValue(adminContact));
+        PropDocument adminDoc = findByProperty(documents, "display_name", DisplayItems.convert(adminContact).getDisplayName());
         assertNull("admin contact was included in query response", adminDoc);
     }
 
@@ -122,7 +122,7 @@ public class ExcludeContextAdminTest extends AbstractFindTest {
 
         String prefix = adminContact.getDisplayName().substring(0, 3);
         List<Facet> facets = autocomplete(prefix, true);
-        FacetValue found = findByDisplayName(facets, ContactDisplayItem.extractDefaultValue(adminContact));
+        FacetValue found = findByDisplayName(facets, DisplayItems.convert(adminContact).getDisplayName());
         assertNotNull("admin contact was not included in autocomplete response", found);
 
         List<ActiveFacet> activeFacets = new LinkedList<ActiveFacet>();

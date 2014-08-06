@@ -99,9 +99,7 @@ import com.openexchange.find.basic.AbstractContactFacetingModuleSearchDriver;
 import com.openexchange.find.basic.Services;
 import com.openexchange.find.basic.common.Comparison;
 import com.openexchange.find.common.CommonFacetType;
-import com.openexchange.find.common.ContactDisplayItem;
 import com.openexchange.find.common.FolderType;
-import com.openexchange.find.common.TimeFrame;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.Facet;
@@ -116,6 +114,8 @@ import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.find.mail.MailDocument;
 import com.openexchange.find.mail.MailFacetType;
 import com.openexchange.find.spi.SearchConfiguration;
+import com.openexchange.find.util.DisplayItems;
+import com.openexchange.find.util.TimeFrame;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.Pair;
@@ -318,7 +318,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         for (Contact contact : contacts) {
             String valueId = prepareFacetValueId("contact", session.getContextId(), Integer.toString(contact.getObjectID()));
             List<String> queries = extractMailAddessesFrom(contact);
-            builder.addValue(buildContactValue(valueId, queries, new ContactDisplayItem(contact), session));
+            builder.addValue(buildContactValue(valueId, queries, DisplayItems.convert(contact), session));
             valuesAdded = true;
         }
 

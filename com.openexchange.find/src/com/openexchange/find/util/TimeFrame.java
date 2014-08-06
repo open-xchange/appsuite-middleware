@@ -47,7 +47,9 @@
  *
  */
 
-package com.openexchange.find.common;
+package com.openexchange.find.util;
+
+import com.openexchange.find.common.CommonFacetType;
 
 
 /**

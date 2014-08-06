@@ -75,11 +75,11 @@ import com.openexchange.find.calendar.CalendarFacetType;
 import com.openexchange.find.calendar.CalendarFacetValues;
 import com.openexchange.find.calendar.CalendarStrings;
 import com.openexchange.find.common.CommonFacetType;
-import com.openexchange.find.common.ContactDisplayItem;
 import com.openexchange.find.common.FolderType;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
+import com.openexchange.find.util.DisplayItems;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
@@ -378,7 +378,7 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
             if (null != filter) {
                 String valueId = prepareFacetValueId("contact", session.getContextId(), Integer.toString(contact.getObjectID()));
                 contactFacets.add(FacetValue.newBuilder(valueId)
-                    .withDisplayItem(new ContactDisplayItem(contact))
+                    .withDisplayItem(DisplayItems.convert(contact))
                     .withFilter(filter)
                     .build());
             }

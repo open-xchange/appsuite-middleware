@@ -59,9 +59,10 @@ import com.openexchange.ajax.find.actions.AutocompleteRequest;
 import com.openexchange.ajax.find.actions.AutocompleteResponse;
 import com.openexchange.ajax.find.actions.QueryRequest;
 import com.openexchange.ajax.find.actions.QueryResponse;
+import com.openexchange.ajax.find.actions.TestDisplayItem;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.find.Document;
 import com.openexchange.find.Module;
 import com.openexchange.find.SearchResult;
@@ -317,24 +318,43 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
     }
 
     /**
-     * Searches a FacetValue by its display name in a list of facets that are not of "simple" style.
+     * Searches a FacetValue by its display name in a list of facets.
      *
      * @param facets The facets to check
      * @param displayName The display name to check
      */
     protected static FacetValue findByDisplayName(List<Facet> facets, String displayName) {
+        return findByDisplayName(facets, displayName, null);
+    }
+
+    /**
+     * Searches a FacetValue by its display name in a list of facets.
+     *
+     * @param facets The facets to check
+     * @param displayName The display name to check
+     * @param detail The detail string if it shall also be checked. Otherwise <code>null</code>.
+     */
+    protected static FacetValue findByDisplayName(List<Facet> facets, String displayName, String detail) {
         for (Facet facet : facets) {
             if (facet instanceof SimpleFacet) {
                 SimpleFacet ff = (SimpleFacet) facet;
                 DisplayItem displayItem = ff.getDisplayItem();
-                if (displayName.equals(displayItem.getDefaultValue())) {
-                    return new FacetValue(facet.getType().getId(), displayItem, -1, ff.getFilter());
+                if (displayName.equals(displayItem.getDisplayName())) {
+                    if (detail == null) {
+                        return new FacetValue(facet.getType().getId(), displayItem, -1, ff.getFilter());
+                    } else if (detail.equals(((TestDisplayItem)displayItem).getDetail())) {
+                        return new FacetValue(facet.getType().getId(), displayItem, -1, ff.getFilter());
+                    }
                 }
             } else {
                 List<FacetValue> values = ((DefaultFacet) facet).getValues();
                 for (FacetValue value : values) {
-                    if (displayName.equals(value.getDisplayItem().getDefaultValue())) {
-                        return value;
+                    if (displayName.equals(value.getDisplayItem().getDisplayName())) {
+                        if (detail == null) {
+                            return value;
+                        } else if (detail.equals(((TestDisplayItem)value.getDisplayItem()).getDetail())) {
+                            return value;
+                        }
                     }
                 }
             }

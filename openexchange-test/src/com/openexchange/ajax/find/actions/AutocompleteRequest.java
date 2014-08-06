@@ -76,7 +76,6 @@ import com.openexchange.find.facet.Facets.DefaultFacetBuilder;
 import com.openexchange.find.facet.Facets.ExclusiveFacetBuilder;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.facet.Option;
-import com.openexchange.find.facet.SimpleDisplayItem;
 import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.find.mail.MailFacetType;
 import com.openexchange.find.tasks.TasksFacetType;
@@ -185,8 +184,7 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
             AbstractFacet facet = null;
             if ("simple".equals(jFacet.getString("style"))) {
                 final Filter filter = parseJFilter(jFacet.getJSONObject("filter"));
-                final String displayName = extractDisplayName(jFacet);
-                facet = new SimpleFacet(facetType, new SimpleDisplayItem(displayName), filter);
+                facet = new SimpleFacet(facetType, extractDisplayItem(jFacet), filter);
             } else if ("default".equals(jFacet.getString("style"))) {
                 final JSONArray jFacetValues = jFacet.getJSONArray("values");
                 final int len = jFacetValues.length();
@@ -214,10 +212,9 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
 
         private FacetValue parseJFacetValue(final JSONObject jFacetValue) throws JSONException {
             final String id = jFacetValue.getString("id");
-            final String displayName = extractDisplayName(jFacetValue);
             final int count = jFacetValue.optInt("count", -1);
             FacetValueBuilder builder = FacetValue.newBuilder(id)
-                .withSimpleDisplayItem(displayName)
+                .withDisplayItem(extractDisplayItem(jFacetValue))
                 .withCount(count);
             if (jFacetValue.has("filter")) {
                 final JSONObject jFilter = jFacetValue.getJSONObject("filter");
@@ -235,9 +232,9 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
 
         private Option parseJOption(final JSONObject jOption) throws JSONException {
             final String id = jOption.optString("id");
-            final String displayName = extractDisplayName(jOption);
+            final String displayName = jOption.getString("name");
             final Filter filter = parseJFilter(jOption.getJSONObject("filter"));
-            return Option.newInstance(id, new SimpleDisplayItem(displayName), filter);
+            return Option.newInstance(id, displayName, filter);
         }
 
         private Filter parseJFilter(final JSONObject jFilter) throws JSONException {
@@ -292,13 +289,15 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
             return type;
         }
 
-        private static String extractDisplayName(JSONObject json) throws JSONException {
-            if (json.has("display_item")) {
-                JSONArray parts = (JSONArray) json.get("display_item");
-                return parts.getString(0) + ' ' + parts.getString(1);
-            } else {
-                return json.optString("display_name");
+        private static TestDisplayItem extractDisplayItem(JSONObject json) throws JSONException {
+            if (json.has("name")) {
+                return new TestDisplayItem(json.getString("name"), null, null);
+            } else if (json.has("item")) {
+                JSONObject jItem = json.getJSONObject("item");
+                return new TestDisplayItem(jItem.getString("name"), jItem.optString("detail"), jItem.optString("image_url"));
             }
+
+            return null;
         }
     }
 

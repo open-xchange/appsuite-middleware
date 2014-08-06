@@ -49,19 +49,65 @@
 
 package com.openexchange.find.facet;
 
-
+import com.openexchange.image.ImageDataSource;
+import com.openexchange.image.ImageLocation;
 
 /**
- * A display item that is meant to be ignored (e.g. not written out in API responses).
+ * {@link ComplexDisplayItem}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.0
+ * @since v7.6.1
  */
-public class NoDisplayItem implements DisplayItem {
+public class ComplexDisplayItem implements DisplayItem {
+
+    private final String displayName;
+
+    private final String detail;
+
+    private ImageLocation imageLocation;
+
+    private ImageDataSource imageDataSource;
+
+    /**
+     * Initializes a new {@link ComplexDisplayItem}.
+     *
+     * @param displayName
+     * @param name
+     * @param detail
+     * @param imageUrl
+     */
+    public ComplexDisplayItem(String displayName, String detail) {
+        super();
+        this.displayName = displayName;
+        this.detail = detail;
+    }
 
     @Override
     public String getDisplayName() {
-        return "";
+        return displayName;
+    }
+
+    public String getDetail() {
+        return detail;
+    }
+
+    public ImageLocation getImageLocation() {
+        return imageLocation;
+    }
+
+    public ImageDataSource getImageDataSource() {
+        return imageDataSource;
+    }
+
+    public boolean hasImageData() {
+        return imageDataSource != null && imageLocation != null;
+    }
+
+    public void setImageData(ImageDataSource imageDataSource, ImageLocation imageLocation) {
+        if (imageDataSource != null && imageLocation != null) {
+            this.imageDataSource = imageDataSource;
+            this.imageLocation = imageLocation;
+        }
     }
 
     @Override

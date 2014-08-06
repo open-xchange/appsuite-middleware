@@ -72,7 +72,6 @@ import com.openexchange.find.basic.AbstractContactFacetingModuleSearchDriver;
 import com.openexchange.find.basic.Folders;
 import com.openexchange.find.basic.Services;
 import com.openexchange.find.common.CommonFacetType;
-import com.openexchange.find.common.ContactDisplayItem;
 import com.openexchange.find.common.FolderType;
 import com.openexchange.find.contacts.ContactsDocument;
 import com.openexchange.find.contacts.ContactsFacetType;
@@ -80,6 +79,7 @@ import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Facets.DefaultFacetBuilder;
 import com.openexchange.find.facet.Filter;
+import com.openexchange.find.util.DisplayItems;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
@@ -246,7 +246,7 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
                     Filter filter = Filter.of(id, String.valueOf(contact.getObjectID()));
                     String valueId = prepareFacetValueId(id, session.getContextId(), Integer.toString(contact.getObjectID()));
                     builder.addValue(FacetValue.newBuilder(valueId)
-                        .withDisplayItem(new ContactDisplayItem(contact))
+                        .withDisplayItem(DisplayItems.convert(contact))
                         .withFilter(filter)
                         .build());
                 }
