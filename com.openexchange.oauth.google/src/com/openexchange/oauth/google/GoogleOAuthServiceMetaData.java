@@ -199,7 +199,8 @@ public final class GoogleOAuthServiceMetaData extends AbstractOAuthServiceMetaDa
             return authUrl;
         }
 
-        // Trim redirect URI to have an exact match to deferrer servlet path
+        // Trim redirect URI to have an exact match to deferrer servlet path,
+        // which should be the one defined as "Redirect URL" in Google app account
         StringBuilder authUrlBuilder;
         {
             int nextPos = authUrl.indexOf('&', pos + 1);
