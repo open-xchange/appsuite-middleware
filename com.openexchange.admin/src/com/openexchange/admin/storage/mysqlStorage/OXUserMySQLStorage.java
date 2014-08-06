@@ -289,10 +289,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     stmt.setString(3, cap);
                     stmt.addBatch();
                     if (cap.startsWith("-")) {
-                        stmt.setString(2, cap.substring(1));
+                        stmt.setString(3, cap.substring(1));
                         stmt.addBatch();
                     } else {
-                        stmt.setString(2, "-"+cap);
+                        stmt.setString(3, "-"+cap);
                         stmt.addBatch();
                     }
                 }

@@ -2,6 +2,10 @@
 
  - Fix for bug 30599: Ical export stumbles over bad reccurring appointment.
 
+* 2014-08-06 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 33914: Corrected parameter index when dropping the +/- variants of user capabilities
+
 * 2014-08-06 - steffen.templin@open-xchange.com
 
  - Fix for bug 33918: Translate display names of subscription sources only if necessary
