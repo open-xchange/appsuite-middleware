@@ -51,7 +51,6 @@ package com.openexchange.subscribe.google;
 import junit.framework.TestCase;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
@@ -87,9 +86,6 @@ public class GoogleConnectionTest extends TestCase {
     private static final String CLIENT_ID = "CLIENT_ID";
     private static final String ACCESS_TOKEN = "ACCESS_TOKEN";
 
-    @Mock
-    private MockGoogleService simGoogleService;
-
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -104,11 +100,8 @@ public class GoogleConnectionTest extends TestCase {
         SimServerSession simServer = new SimServerSession(1, 1);
         Subscription subscription = new Subscription();
         subscription.setSession(simServer);
-
-        // Initialize transport
-        NetHttpTransport transport;
         try {
-            transport = new NetHttpTransport.Builder().doNotValidateCertificate().build();
+            NetHttpTransport transport = new NetHttpTransport.Builder().doNotValidateCertificate().build();
             JsonFactory jsonFactory = new JacksonFactory();
 
             GoogleCredential credential = new GoogleCredential.Builder()
@@ -121,7 +114,6 @@ public class GoogleConnectionTest extends TestCase {
             PowerMockito.doReturn(credential).when(GoogleApiClients.class, "getCredentials", Matchers.any(Session.class));
 
             gcss.getContent(subscription);
-
         } catch (Exception e) {
             assertFalse(e.getMessage(), true);
         }
