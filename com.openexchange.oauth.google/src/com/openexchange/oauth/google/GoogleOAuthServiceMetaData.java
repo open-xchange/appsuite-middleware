@@ -89,6 +89,7 @@ public final class GoogleOAuthServiceMetaData extends AbstractOAuthServiceMetaDa
     private static final String[] PROPERTIES = new String[] {"com.openexchange.oauth.google.apiKey", "com.openexchange.oauth.google.apiSecret"};
 
     private final ServiceLookup services;
+    private final String redirectUrl;
 
     /**
      * Initializes a new {@link GoogleOAuthServiceMetaData}.
@@ -101,21 +102,29 @@ public final class GoogleOAuthServiceMetaData extends AbstractOAuthServiceMetaDa
         setAPIKeyName("com.openexchange.oauth.google.apiKey");
         setAPISecretName("com.openexchange.oauth.google.apiSecret");
 
-        final ConfigurationService configService = services.getService(ConfigurationService.class);
+        ConfigurationService configService = services.getService(ConfigurationService.class);
         if (null == configService) {
             throw new IllegalStateException("Missing configuration service");
         }
-        final String apiKey = configService.getProperty("com.openexchange.oauth.google.apiKey");
+        String apiKey = configService.getProperty("com.openexchange.oauth.google.apiKey");
         if (Strings.isEmpty(apiKey)) {
             throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.google.apiKey");
         }
         this.apiKey = apiKey;
 
-        final String apiSecret = configService.getProperty("com.openexchange.oauth.google.apiSecret");
+        String apiSecret = configService.getProperty("com.openexchange.oauth.google.apiSecret");
         if (Strings.isEmpty(apiSecret)) {
             throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.google.apiSecret");
         }
         this.apiSecret = apiSecret;
+
+        String redirectUrl = configService.getProperty("com.openexchange.oauth.google.redirectUrl");
+        if (Strings.isEmpty(redirectUrl)) {
+            throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.google.redirectUrl");
+        }
+        // Basic URL encoding
+        redirectUrl = redirectUrl.replaceAll(":", "%3A").replaceAll("/", "%2F");
+        this.redirectUrl = redirectUrl;
     }
 
     @Override
@@ -212,7 +221,7 @@ public final class GoogleOAuthServiceMetaData extends AbstractOAuthServiceMetaDa
     }
 
     private String trimRedirectUri(String redirectUri) {
-        String prefix = "https%3A%2F%2Fgoogle.oxoe.int%2Fajax%2Fdefer";
+        String prefix = this.redirectUrl;
         return redirectUri.startsWith(prefix) ? redirectUri.substring(0, prefix.length()) : redirectUri;
     }
 
