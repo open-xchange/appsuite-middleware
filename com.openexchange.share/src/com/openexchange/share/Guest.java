@@ -65,6 +65,8 @@ public class Guest {
 
     private String mailAddress;
 
+    private String displayName;
+
     private Date expires;
 
     private AuthenticationMode authenticationMode;
@@ -118,6 +120,24 @@ public class Guest {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    /**
+     * Gets the displayName
+     *
+     * @return The displayName
+     */
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    /**
+     * Sets the displayName
+     *
+     * @param displayName The displayName to set
+     */
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
 }

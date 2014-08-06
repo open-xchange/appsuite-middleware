@@ -51,6 +51,7 @@ package com.openexchange.folder.json.parser;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONArray;
@@ -224,10 +225,13 @@ public final class FolderParser {
                         if (false == jPerm.hasAndNotNull(FolderField.PASSWORD.getName())) {
                             throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(FolderField.PASSWORD.getName());
                         }
-                        perm.setEmailAddress(jPerm.getString(FolderField.PASSWORD.getName()));
-                        perm.setDisplayName(jPerm.getString(FolderField.DISPLAY_NAME.getName()));
-                        perm.setContactID(jPerm.getString(FolderField.CONTACT_ID.getName()));
-                        perm.setContactFolderID(jPerm.getString(FolderField.CONTACT_FOLDER_ID.getName()));
+                        perm.setPassword(jPerm.optString(FolderField.PASSWORD.getName(), null));
+                        perm.setDisplayName(jPerm.optString(FolderField.DISPLAY_NAME.getName(), null));
+                        perm.setContactID(jPerm.optString(FolderField.CONTACT_ID.getName(), null));
+                        perm.setContactFolderID(jPerm.optString(FolderField.CONTACT_FOLDER_ID.getName(), null));
+                        if (jPerm.hasAndNotNull(FolderField.EXPIRES.getName())) {
+                            perm.setExpires(new Date(jPerm.getLong(FolderField.EXPIRES.getName())));
+                        }
                     }
                     oclPerm = perm;
                 } else {

@@ -51,9 +51,12 @@ package com.openexchange.share.impl;
 
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
@@ -64,6 +67,7 @@ import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.CreateRequest;
@@ -114,14 +118,13 @@ public class CreateHandler extends RequestHandler<CreateRequest, List<Share>> {
             if (ownsConnection) {
                 Databases.startTransaction(con);
             }
-
+            StorageParameters parameters = StorageParameters.newInstance(Connection.class.getName(), con);
             for (Guest guest : guests) {
                 User guestUser = prepareGuestUser(guest);
                 int guestUserId = userService.createUser(con, context, guestUser);
                 UserPermissionBitsStorage.getInstance().saveUserPermissionBits(con, getUserPermissionBits(), guestUserId, context); // FIXME: to service layer
                 if (request.getItem() == null) {
-                    Share share = createShare(guestUserId);
-                    StorageParameters parameters = StorageParameters.newInstance(Connection.class.getName(), con);
+                    Share share = createShare(guest, guestUserId);
                     shareStorage.storeShare(share, parameters);
                     shares.add(share);
                 } else {
@@ -157,13 +160,14 @@ public class CreateHandler extends RequestHandler<CreateRequest, List<Share>> {
         return Permission.toBits(perms);
     }
 
-    private Share createShare(int guestUserId) {
+    private Share createShare(Guest guest, int guestUserId) {
         int contextId = session.getContextId();
         int userId = session.getUserId();
         Date created = new Date();
         DefaultShare share = new DefaultShare();
         share.setToken(ShareTool.generateToken(contextId));
-        share.setAuthentication(AuthenticationMode.ANONYMOUS.getID()); // TODO
+        share.setAuthentication(guest.getAuthenticationMode().getID());
+        share.setExpires(guest.getExpires());
         share.setContextID(contextId);
         share.setCreated(created);
         share.setLastModified(created);
@@ -182,13 +186,22 @@ public class CreateHandler extends RequestHandler<CreateRequest, List<Share>> {
         guest.setCreatedBy(session.getUserId());
         guest.setPreferredLanguage(user.getPreferredLanguage());
         guest.setTimeZone(user.getTimeZone());
-        guest.setDisplayName(entity.getMailAddress());
+        guest.setDisplayName(entity.getDisplayName());
         guest.setMail(entity.getMailAddress());
         guest.setMailEnabled(true);
         guest.setPasswordMech("{CRYPTO_SERVICE}");
         AuthenticationMode authenticationMode = entity.getAuthenticationMode();
         if (authenticationMode != null && authenticationMode != AuthenticationMode.ANONYMOUS) {
             guest.setUserPassword(getShareCryptoService().encrypt(entity.getPassword()));
+        }
+        if (false == Strings.isEmpty(entity.getContactID()) && false == Strings.isEmpty(entity.getContactFolderID())) {
+            Map<String, Set<String>> attributes = guest.getAttributes();
+            if (null == attributes) {
+                attributes = new HashMap<String, Set<String>>(2);
+                attributes.put("com.openexchange.user.guestContactFolderID", Collections.singleton(entity.getContactFolderID()));
+                attributes.put("com.openexchange.user.guestContactID", Collections.singleton(entity.getContactID()));
+            }
+            guest.setAttributes(attributes);
         }
         return guest;
     }

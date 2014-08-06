@@ -181,6 +181,10 @@ public enum FolderField {
      */
     GUEST_AUTH(-1, "guest_auth"),
     /**
+     * The date when an external permission should expire
+     */
+    EXPIRES(-1, "expires"),
+    /**
      * Display name for an external permission
      */
     DISPLAY_NAME(-1, "display_name"),

@@ -49,6 +49,7 @@
 
 package com.openexchange.folder.json.parser;
 
+import java.util.Date;
 import com.openexchange.folderstorage.GuestPermission;
 import com.openexchange.share.AuthenticationMode;
 
@@ -68,6 +69,7 @@ public class ParsedGuestPermission extends ParsedPermission implements GuestPerm
     private String displayName;
     private AuthenticationMode authenticationMode;
     private String password;
+    private Date expires;
 
     /**
      * Initializes an empty {@link ParsedGuestPermission}.
@@ -142,6 +144,20 @@ public class ParsedGuestPermission extends ParsedPermission implements GuestPerm
     }
 
     @Override
+    public Date getExpires() {
+        return expires;
+    }
+
+    /**
+     * Sets the expires
+     *
+     * @param expires The expires to set
+     */
+    public void setExpires(Date expires) {
+        this.expires = expires;
+    }
+
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
@@ -151,6 +167,7 @@ public class ParsedGuestPermission extends ParsedPermission implements GuestPerm
         result = prime * result + ((displayName == null) ? 0 : displayName.hashCode());
         result = prime * result + ((mailAddress == null) ? 0 : mailAddress.hashCode());
         result = prime * result + ((password == null) ? 0 : password.hashCode());
+        result = prime * result + ((expires == null) ? 0 : expires.hashCode());
         return result;
     }
 
@@ -202,6 +219,13 @@ public class ParsedGuestPermission extends ParsedPermission implements GuestPerm
                 return false;
             }
         } else if (!password.equals(other.password)) {
+            return false;
+        }
+        if (expires == null) {
+            if (other.expires != null) {
+                return false;
+            }
+        } else if (!expires.equals(other.expires)) {
             return false;
         }
         return true;

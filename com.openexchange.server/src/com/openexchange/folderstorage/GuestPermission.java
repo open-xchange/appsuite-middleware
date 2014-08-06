@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage;
 
+import java.util.Date;
 import com.openexchange.share.AuthenticationMode;
 
 /**
@@ -100,5 +101,12 @@ public interface GuestPermission extends Permission {
      * @return The password, or <code>null</code> if not known
      */
     String getPassword();
+
+    /**
+     * Gets the date when this guest permission should expire.
+     *
+     * @return The expiry date of the share, or <code>null</code> if not defined
+     */
+    Date getExpires();
 
 }

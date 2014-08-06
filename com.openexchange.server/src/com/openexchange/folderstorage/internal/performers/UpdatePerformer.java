@@ -71,7 +71,6 @@ import com.openexchange.folderstorage.osgi.UserServiceHolder;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.CreateRequest;
 import com.openexchange.share.DeleteRequest;
 import com.openexchange.share.Guest;
@@ -408,13 +407,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
         createRequest.setModule(storageFolder.getContentType().getModule());
         createRequest.setFolder(storageFolder.getID());
         for (GuestPermission permission : addedGuests) {
-            Guest guest = new Guest();
-            guest.setAuthenticationMode(AuthenticationMode.ANONYMOUS); // TODO
-            guest.setMailAddress(permission.getEmailAddress());
-            // TODO: display name
-            guest.setContactID(permission.getContactID());
-            guest.setContactFolderID(permission.getContactFolderID());
-            createRequest.addGuest(guest);
+            createRequest.addGuest(createGuest(permission));
         }
 
         ShareService shareService = ShareServiceHolder.requireShareService();
@@ -437,6 +430,24 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
         }
 
         folder.setPermissions(resolvedPermissions);
+    }
+
+    /**
+     * Creates a guest using the properties found in the supplied guest permissions.
+     *
+     * @param permission The guest permissions to create the guest for
+     * @return The guest
+     */
+    private static Guest createGuest(GuestPermission permission) {
+        Guest guest = new Guest();
+        guest.setAuthenticationMode(permission.getAuthenticationMode());
+        guest.setContactFolderID(permission.getContactFolderID());
+        guest.setContactID(permission.getContactID());
+        guest.setDisplayName(permission.getDisplayName());
+        guest.setExpires(permission.getExpires());
+        guest.setMailAddress(permission.getEmailAddress());
+        guest.setPassword(permission.getPassword());
+        return guest;
     }
 
     private void checkForDuplicateOnMove(final Folder folder, final String treeId, final List<FolderStorage> openedStorages, final Folder storageFolder, final String newParentId) throws OXException {
