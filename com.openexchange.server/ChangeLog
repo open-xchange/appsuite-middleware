@@ -2,6 +2,10 @@
 
  - Fix for bug 33818: Added update task to check foreign keys and drop them if necessary
 
+* 2014-08-06 - steffen.templin@open-xchange.com
+
+ - Fix for bug 33918: Translate display names of subscription sources only if necessary
+
 * 2014-08-04 - marc.arens@open-xchange.com
 
  - Fix for bug 33697: Respect destination folder for folder owners

@@ -94,6 +94,7 @@ public class SubcriptionServicesActivator extends HousekeepingActivator {
 
         final SubscriptionSource contactSubscriptionSource = new SubscriptionSource();
         contactSubscriptionSource.setDisplayName(SOURCE_NAME_CONTACTS);
+        contactSubscriptionSource.setLocalizableDisplayName();
         contactSubscriptionSource.setId("com.openexchange.subscribe.microformats.contacts.http");
         contactSubscriptionSource.setFolderModule(FolderObject.CONTACT);
 
@@ -116,6 +117,7 @@ public class SubcriptionServicesActivator extends HousekeepingActivator {
 
         final SubscriptionSource infostoreSubscriptionSource = new SubscriptionSource();
         infostoreSubscriptionSource.setDisplayName(SOURCE_NAME_INFOSTORE);
+        infostoreSubscriptionSource.setLocalizableDisplayName();
         infostoreSubscriptionSource.setId("com.openexchange.subscribe.microformats.infostore.http");
         infostoreSubscriptionSource.setFolderModule(FolderObject.INFOSTORE);
 
