@@ -1,3 +1,7 @@
+* 2014-08-06 - steffen.templin@open-xchange.com
+
+ - Fix for bug 33918: Translate display names of subscription sources only if necessary
+
 * 2014-08-04 - marcus.klein@open-xchange.com
 
  - Fix for bug 33891: Removed superfluous line throwing always an exception.
