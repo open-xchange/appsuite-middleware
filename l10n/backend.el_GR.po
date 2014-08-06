@@ -21,7 +21,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2014-08-06 15:18+0000\n"
+"PO-Revision-Date: 2014-08-06 15:39+0000\n"
 "Last-Translator: ioannis.chouklis <ioannis.chouklis@open-xchange.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: el_GR\n"
@@ -30,7 +30,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1407338284.000000\n"
+"X-POOTLE-MTIME: 1407339599.000000\n"
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
 #. %1$s will be replaced with a detailed exception message.
@@ -125,7 +125,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.textxtraction/src/com/openexchange/textxtraction/TextXtractExceptionMessages.java:69
 msgid "An I/O error occurred: %1$s"
-msgstr "   / (I/O error): %1$s"
+msgstr "Λάθος  Ε/Ε : %1$s"
 
 #. Missing configuration property: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caching/src/com/openexchange/caching/CacheExceptionMessage.java:78
