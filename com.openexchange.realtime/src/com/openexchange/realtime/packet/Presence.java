@@ -148,6 +148,9 @@ public class Presence extends Stanza {
         defaultElements.add(STATUS_PATH);
         defaultElements.add(PRIORITY_PATH);
         defaultElements.add(ERROR_PATH);
+        setMessage(message);
+        setState(state);
+        setPriority(priority);
     }
 
     /**

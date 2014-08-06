@@ -606,32 +606,40 @@ public abstract class Stanza implements Serializable {
      * @param data The payload data to write into the root node.
      */
     protected void writeThrough(ElementPath path, Object data) {
-        List<PayloadTree> payloadTrees = payloads.get(path);
-        if (payloadTrees == null) {
-            payloadTrees = new ArrayList<PayloadTree>();
-        }
-        if (payloadTrees.size() > 1) {
-            throw new IllegalStateException("Stanza shouldn't contain more than one PayloadTree per basic ElementPath");
-        }
-        PayloadTree tree;
-        if (payloadTrees.isEmpty()) {
-            PayloadElement payloadElement = new PayloadElement(
-                data,
-                data.getClass().getSimpleName(),
-                path.getNamespace(),
-                path.getElement());
-            PayloadTreeNode payloadTreeNode = new PayloadTreeNode(payloadElement);
-            tree = new PayloadTree(payloadTreeNode);
-            addPayload(tree);
-        } else {
-            tree = payloadTrees.get(0);
-            PayloadTreeNode node = tree.getRoot();
-            if (node == null) {
-                throw new IllegalStateException("PayloadTreeNode removed? This shouldn't happen!");
+        if (data == null) {
+            Collection<PayloadTree> payloadTrees = getPayloadTrees(path);
+            if (payloadTrees.size() == 1) {
+                removePayload(payloadTrees.iterator().next());
+            } else {
+                throw new IllegalStateException("Number of basic elementPaths should have been equal to 1.");
             }
-            node.setData(data, data.getClass().getSimpleName());
+        } else {
+            List<PayloadTree> payloadTrees = payloads.get(path);
+            if (payloadTrees == null) {
+                payloadTrees = new ArrayList<PayloadTree>();
+            }
+            if (payloadTrees.size() > 1) {
+                throw new IllegalStateException("Stanza shouldn't contain more than one PayloadTree per basic ElementPath");
+            }
+            PayloadTree tree;
+            if (payloadTrees.isEmpty()) {
+                PayloadElement payloadElement = new PayloadElement(
+                    data,
+                    data.getClass().getSimpleName(),
+                    path.getNamespace(),
+                    path.getElement());
+                PayloadTreeNode payloadTreeNode = new PayloadTreeNode(payloadElement);
+                tree = new PayloadTree(payloadTreeNode);
+                addPayload(tree);
+            } else {
+                tree = payloadTrees.get(0);
+                PayloadTreeNode node = tree.getRoot();
+                if (node == null) {
+                    throw new IllegalStateException("PayloadTreeNode removed? This shouldn't happen!");
+                }
+                node.setData(data, data.getClass().getSimpleName());
+            }
         }
-
     }
     /**
      * Init default fields from values found in the PayloadTrees of the Stanza.
