@@ -1,4 +1,3 @@
-package com.openexchange.subscribe.google;
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -48,6 +47,9 @@ package com.openexchange.subscribe.google;
  *
  */
 
+package com.openexchange.subscribe.google;
+
+import java.util.LinkedList;
 import junit.framework.TestCase;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
@@ -61,8 +63,8 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.exception.OXException;
 import com.openexchange.google.api.client.GoogleApiClients;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.google.GoogleOAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
@@ -71,7 +73,7 @@ import com.openexchange.subscribe.Subscription;
 import com.openexchange.tools.session.SimServerSession;
 
 /**
- * {@link GoogleConnectionTest}
+ * {@link GoogleSubscribeTest}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  * @since v7.6.1
@@ -79,27 +81,30 @@ import com.openexchange.tools.session.SimServerSession;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({GoogleApiClients.class})
 @PowerMockIgnore("javax.net.ssl.*")
-public class GoogleConnectionTest extends TestCase {
-    private static final String GOOGLE_API_KEY = "GOOGLE_API_KEY";
-    private static final String GOOGLE_API_SECRET = "GOOGLE_API_SECRET";
-    private static final String CLIENT_SECRET = "CLIENT_SECRET";
-    private static final String CLIENT_ID = "CLIENT_ID";
-    private static final String ACCESS_TOKEN = "ACCESS_TOKEN";
+public class GoogleSubscribeTest extends TestCase {
+    private static final String GOOGLE_API_KEY = "";
+    private static final String GOOGLE_API_SECRET = "";
+    private static final String CLIENT_SECRET = "";
+    private static final String CLIENT_ID = "ox";
+    private static final String ACCESS_TOKEN = "";
+
+    private Subscription subscription;
+    private GoogleContactSubscribeService gcss;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         MockitoAnnotations.initMocks(this);
-    }
-
-    public void testPreparationExample() throws OXException {
         ConfigurationService cs = new MockConfigurationService(GOOGLE_API_KEY, GOOGLE_API_SECRET);
         ServiceLookup sl = new MockServiceLookup(cs);
         OAuthServiceMetaData oasdm = new GoogleOAuthServiceMetaData(sl);
-        GoogleContactSubscribeService gcss = new GoogleContactSubscribeService(oasdm, sl);
+        gcss = new GoogleContactSubscribeService(oasdm, sl);
         SimServerSession simServer = new SimServerSession(1, 1);
-        Subscription subscription = new Subscription();
+        subscription = new Subscription();
         subscription.setSession(simServer);
+    }
+
+    public void testContacts() throws Exception {
         try {
             NetHttpTransport transport = new NetHttpTransport.Builder().doNotValidateCertificate().build();
             JsonFactory jsonFactory = new JacksonFactory();
@@ -113,9 +118,16 @@ public class GoogleConnectionTest extends TestCase {
             PowerMockito.mockStatic(GoogleApiClients.class);
             PowerMockito.doReturn(credential).when(GoogleApiClients.class, "getCredentials", Matchers.any(Session.class));
 
-            gcss.getContent(subscription);
+            @SuppressWarnings("unchecked")
+            LinkedList<Contact> contact = (LinkedList<Contact>) gcss.getContent(subscription);
+
+            assertFalse("Received an empty contact list", contact.isEmpty());
+            //test some existent contacts
+
+
         } catch (Exception e) {
             assertFalse(e.getMessage(), true);
+            throw e;
         }
     }
 }
