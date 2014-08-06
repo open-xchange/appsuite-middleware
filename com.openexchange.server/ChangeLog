@@ -1,3 +1,7 @@
+* 2014-08-06 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 33921: Don't cache filestore references in image preview cache
+
 * 2014-08-05 - lars.hoogestraat@open-xchange.com
 
  - Fix for bug 33869: Added missing description in CLT for quota module 'attachment'.
