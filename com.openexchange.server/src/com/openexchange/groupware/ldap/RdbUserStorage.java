@@ -85,7 +85,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.i18n.Users;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.passwordchange.PasswordMechanism;
@@ -227,6 +230,7 @@ public class RdbUserStorage extends UserStorage {
      * @param context The context
      * @param userId The identifier of the user to delete
      */
+    @Override
     public void deleteUser(Context context, int userId) throws OXException {
         Connection con = null;
         try {
@@ -428,6 +432,8 @@ public class RdbUserStorage extends UserStorage {
                         users.put(user.getId(), user);
                         if (false == user.isGuest()) {
                             regularUsers.put(user.getId(), user);
+                        } else if (Strings.isEmpty(user.getMail()) && Strings.isEmpty(user.getDisplayName())) {
+                            user.setDisplayName(StringHelper.valueOf(user.getLocale()).getString(Users.GUEST));
                         }
                     }
                 } finally {

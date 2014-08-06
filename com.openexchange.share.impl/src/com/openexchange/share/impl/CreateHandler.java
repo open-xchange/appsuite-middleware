@@ -187,12 +187,14 @@ public class CreateHandler extends RequestHandler<CreateRequest, List<Share>> {
         guest.setPreferredLanguage(user.getPreferredLanguage());
         guest.setTimeZone(user.getTimeZone());
         guest.setDisplayName(entity.getDisplayName());
-        guest.setMail(entity.getMailAddress());
         guest.setMailEnabled(true);
         guest.setPasswordMech("{CRYPTO_SERVICE}");
         AuthenticationMode authenticationMode = entity.getAuthenticationMode();
         if (authenticationMode != null && authenticationMode != AuthenticationMode.ANONYMOUS) {
+            guest.setMail(entity.getMailAddress());
             guest.setUserPassword(getShareCryptoService().encrypt(entity.getPassword()));
+        } else {
+            guest.setMail(""); // not null
         }
         if (false == Strings.isEmpty(entity.getContactID()) && false == Strings.isEmpty(entity.getContactFolderID())) {
             Map<String, Set<String>> attributes = guest.getAttributes();
