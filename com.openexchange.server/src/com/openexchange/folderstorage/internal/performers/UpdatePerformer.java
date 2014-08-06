@@ -65,7 +65,6 @@ import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.GuestPermission;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.internal.PermissionImpl;
 import com.openexchange.folderstorage.osgi.ShareServiceHolder;
 import com.openexchange.folderstorage.osgi.UserServiceHolder;
 import com.openexchange.folderstorage.type.PublicType;
@@ -412,24 +411,10 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
 
         ShareService shareService = ShareServiceHolder.requireShareService();
         List<Share> shares = shareService.create(createRequest, session);
-
-        // TODO: still necessary or covered by recursion marker?
-        Permission[] origPermissions = folder.getPermissions();
-        Permission[] resolvedPermissions = new Permission[origPermissions.length];
-        for (int i = 0; i < origPermissions.length; i++) {
-            Permission origPermission = origPermissions[i];
-            int index = addedGuests.indexOf(origPermission);
-            if (index < 0) {
-                resolvedPermissions[i] = origPermission;
-            } else {
-                int entity = shares.get(index).getGuest();
-                Permission converted = new PermissionImpl(origPermission);
-                converted.setEntity(entity);
-                resolvedPermissions[i] = converted;
-            }
+        for (int i = 0; i < addedGuests.size(); i++) {
+            GuestPermission guestPermission = addedGuests.get(i);
+            guestPermission.setEntity(shares.get(i).getGuest());
         }
-
-        folder.setPermissions(resolvedPermissions);
     }
 
     /**
