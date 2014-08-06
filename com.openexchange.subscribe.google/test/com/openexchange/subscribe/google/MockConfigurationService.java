@@ -76,6 +76,7 @@ public class MockConfigurationService implements ConfigurationService{
         props = new HashMap<String,String>();
         props.put("com.openexchange.oauth.google.apiKey", apiSecret);
         props.put("com.openexchange.oauth.google.apiSecret", apiKey);
+        props.put("com.openexchange.oauth.google.productName", apiKey);
     }
 
     @Override

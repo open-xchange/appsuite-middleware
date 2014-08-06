@@ -48,16 +48,28 @@ package com.openexchange.subscribe.google;
  *
  */
 
-
-
 import junit.framework.TestCase;
+import org.junit.runner.RunWith;
+import org.mockito.Matchers;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.google.api.client.GoogleApiClients;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.google.GoogleOAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
-
+import com.openexchange.session.Session;
+import com.openexchange.subscribe.Subscription;
+import com.openexchange.tools.session.SimServerSession;
 
 /**
  * {@link GoogleConnectionTest}
@@ -65,20 +77,53 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  * @since v7.6.1
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({GoogleApiClients.class})
+@PowerMockIgnore("javax.net.ssl.*")
 public class GoogleConnectionTest extends TestCase {
-    private static final String GOOGLE_API_KEY = "";
-    private static final String GOOGLE_API_SECRET = "";
+    private static final String GOOGLE_API_KEY = "GOOGLE_API_KEY";
+    private static final String GOOGLE_API_SECRET = "GOOGLE_API_SECRET";
+    private static final String CLIENT_SECRET = "CLIENT_SECRET";
+    private static final String CLIENT_ID = "CLIENT_ID";
+    private static final String ACCESS_TOKEN = "ACCESS_TOKEN";
 
-    private GoogleCredential googleCreds;
+    @Mock
+    private MockGoogleService simGoogleService;
 
     @Override
-    public void setUp() throws OXException {
-
+    protected void setUp() throws Exception {
+        super.setUp();
+        MockitoAnnotations.initMocks(this);
     }
 
-    public void testContacts() throws OXException {
+    public void testPreparationExample() throws OXException {
         ConfigurationService cs = new MockConfigurationService(GOOGLE_API_KEY, GOOGLE_API_SECRET);
         ServiceLookup sl = new MockServiceLookup(cs);
         OAuthServiceMetaData oasdm = new GoogleOAuthServiceMetaData(sl);
+        GoogleContactSubscribeService gcss = new GoogleContactSubscribeService(oasdm, sl);
+        SimServerSession simServer = new SimServerSession(1, 1);
+        Subscription subscription = new Subscription();
+        subscription.setSession(simServer);
+
+        // Initialize transport
+        NetHttpTransport transport;
+        try {
+            transport = new NetHttpTransport.Builder().doNotValidateCertificate().build();
+            JsonFactory jsonFactory = new JacksonFactory();
+
+            GoogleCredential credential = new GoogleCredential.Builder()
+            .setTransport(transport)
+            .setJsonFactory(jsonFactory)
+            .setClientSecrets(CLIENT_ID, CLIENT_SECRET).build();
+            credential.setAccessToken(ACCESS_TOKEN);
+
+            PowerMockito.mockStatic(GoogleApiClients.class);
+            PowerMockito.doReturn(credential).when(GoogleApiClients.class, "getCredentials", Matchers.any(Session.class));
+
+            gcss.getContent(subscription);
+
+        } catch (Exception e) {
+            assertFalse(e.getMessage(), true);
+        }
     }
 }

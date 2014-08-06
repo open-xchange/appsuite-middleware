@@ -212,7 +212,7 @@ public final class GoogleOAuthServiceMetaData extends AbstractOAuthServiceMetaDa
     }
 
     private String trimRedirectUri(String redirectUri) {
-        String prefix = "https%3A%2F%2Fappsuite.open-xchange.com%2Fajax%2Fdefer";
+        String prefix = "https%3A%2F%2Fgoogle.oxoe.int%2Fajax%2Fdefer";
         return redirectUri.startsWith(prefix) ? redirectUri.substring(0, prefix.length()) : redirectUri;
     }
 
