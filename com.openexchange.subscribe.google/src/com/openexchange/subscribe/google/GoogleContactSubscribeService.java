@@ -62,7 +62,6 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.activation.FileTypeMap;
@@ -211,29 +210,29 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
         void handlePhoto(ContactEntry entry, Contact contact) throws OXException;
     }
 
-    private final class CollectingPhotoHandler implements PhotoHandler {
-
-        private final Map<String, String> photoUrlsMap;
-
-        /**
-         * Initializes a new {@link CollectingPhotoHandler}.
-         */
-        CollectingPhotoHandler(Map<String, String> photoUrlsMap) {
-            super();
-            this.photoUrlsMap = photoUrlsMap;
-        }
-
-        @Override
-        public void handlePhoto(ContactEntry entry, Contact contact) throws OXException {
-            Link photoLink = entry.getContactPhotoLink();
-            if (photoLink != null) {
-                String photoLinkHref = photoLink.getHref();
-                if (null != photoLinkHref) {
-                    photoUrlsMap.put(entry.getId(), photoLinkHref);
-                }
-            }
-        }
-    }
+//    private final class CollectingPhotoHandler implements PhotoHandler {
+//
+//        private final Map<String, String> photoUrlsMap;
+//
+//        /**
+//         * Initializes a new {@link CollectingPhotoHandler}.
+//         */
+//        CollectingPhotoHandler(Map<String, String> photoUrlsMap) {
+//            super();
+//            this.photoUrlsMap = photoUrlsMap;
+//        }
+//
+//        @Override
+//        public void handlePhoto(ContactEntry entry, Contact contact) throws OXException {
+//            Link photoLink = entry.getContactPhotoLink();
+//            if (photoLink != null) {
+//                String photoLinkHref = photoLink.getHref();
+//                if (null != photoLinkHref) {
+//                    photoUrlsMap.put(entry.getId(), photoLinkHref);
+//                }
+//            }
+//        }
+//    }
 
     private final PhotoHandler loadingPhotoHandler = new PhotoHandler() {
 
@@ -575,53 +574,49 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
                 }
             }
 
-            photoHandler.handlePhoto(entry, contact);
+            loadingPhotoHandler.handlePhoto(entry, contact);
 
-            /*-
+            /**
+                        List<PhoneNumber> phoneNumbers = entry.getPhoneNumbers();
+                        for (PhoneNumber phoneNumber : phoneNumbers) {
+
+
+                            String rel = phoneNumber.getRel() != null ? phoneNumber.getRel() : (phoneNumber.getLabel() != null ? phoneNumber.getLabel() : "");
+                            if (rel.contains("#")) {
+                                rel = rel.substring(rel.indexOf("#") + 1);
+                            }
+                            contact.setRel(rel);
+                            rel = StringUtils.isBlank(rel) ? "" : "[" + rel + "]";
+                            contact.setName(name + " <" + phoneNumber.getPhoneNumber() + ">" + " " + rel + " ");
+                            contact.setPhotoLink(photoLinkHref);
+                            contact.setValue(phoneNumber.getPhoneNumber());
+                            contacts.add(contact);
+                            if (StringUtils.isBlank(mainContactId)) {
+                                mainContactId = contactId;
+                            }
+                            if (Rel.MOBILE.equalsIgnoreCase(phoneNumber.getRel())) {
+                                mainContactId = contactId;
+                            }
+                            if (phoneNumber.getPrimary()) {
+                                mainContactId = contactId;
+                            }
+                        }
+
+                        //Note: mainContactId will be "" in case if the contact doesn't have any phone number.
+                        if (!Strings.isEmpty(mainContactId)) {
+                            List<GroupMembershipInfo> groupMembershipInfos = entry.getGroupMembershipInfos();
+                            for (GroupMembershipInfo groupMembershipInfo : groupMembershipInfos) {
+                                String groupId = groupMembershipInfo.getHref();
+                                if (groupId.contains("/")) {
+                                    groupId = groupId.substring(groupId.lastIndexOf("/") + 1);
+                                }
+                                String contactIds = (groupContactMap.get(groupId) != null ? groupContactMap.get(groupId) : "") + mainContactId + ",";
+                                groupContactMap.put(groupId, contactIds);
+                            }
+                        }
+
              *
-            Link photoLink = entry.getContactPhotoLink();
-            if (photoLink != null && !Strings.isEmpty(photoLink.getEtag())) {
-                photoLinkHref = photoLink.getHref();
-            }
-
-            List<PhoneNumber> phoneNumbers = entry.getPhoneNumbers();
-            for (PhoneNumber phoneNumber : phoneNumbers) {
-
-
-                String rel = phoneNumber.getRel() != null ? phoneNumber.getRel() : (phoneNumber.getLabel() != null ? phoneNumber.getLabel() : "");
-                if (rel.contains("#")) {
-                    rel = rel.substring(rel.indexOf("#") + 1);
-                }
-                contact.setRel(rel);
-                rel = StringUtils.isBlank(rel) ? "" : "[" + rel + "]";
-                contact.setName(name + " <" + phoneNumber.getPhoneNumber() + ">" + " " + rel + " ");
-                contact.setPhotoLink(photoLinkHref);
-                contact.setValue(phoneNumber.getPhoneNumber());
-                contacts.add(contact);
-                if (StringUtils.isBlank(mainContactId)) {
-                    mainContactId = contactId;
-                }
-                if (Rel.MOBILE.equalsIgnoreCase(phoneNumber.getRel())) {
-                    mainContactId = contactId;
-                }
-                if (phoneNumber.getPrimary()) {
-                    mainContactId = contactId;
-                }
-            }
-
-            //Note: mainContactId will be "" in case if the contact doesn't have any phone number.
-            if (!Strings.isEmpty(mainContactId)) {
-                List<GroupMembershipInfo> groupMembershipInfos = entry.getGroupMembershipInfos();
-                for (GroupMembershipInfo groupMembershipInfo : groupMembershipInfos) {
-                    String groupId = groupMembershipInfo.getHref();
-                    if (groupId.contains("/")) {
-                        groupId = groupId.substring(groupId.lastIndexOf("/") + 1);
-                    }
-                    String contactIds = (groupContactMap.get(groupId) != null ? groupContactMap.get(groupId) : "") + mainContactId + ",";
-                    groupContactMap.put(groupId, contactIds);
-                }
-            }
-            */
+             */
 
             contacts.add(contact);
         }
