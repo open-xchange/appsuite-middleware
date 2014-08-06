@@ -88,15 +88,11 @@ public class ShareActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        LOG.info("starting bundle: \"com.openexchange.share\"");
+        LOG.info("starting bundle: \"com.openexchange.share.impl\"");
         /*
          * set references
          */
         ShareServiceLookup.set(this);
-        /*
-         * register services
-         */
-        registerService(ShareService.class, new DefaultShareService(this));
         /*
          * register share crypto service based on underyling crypto service
          */
@@ -104,7 +100,6 @@ public class ShareActivator extends HousekeepingActivator {
         track(CryptoService.class, new ServiceTrackerCustomizer<CryptoService, CryptoService>() {
 
             private volatile ServiceRegistration<ShareCryptoService> cryptoRegistration;
-
             private volatile ServiceRegistration<ShareService> shareRegistration;
 
             @Override
@@ -114,7 +109,6 @@ public class ShareActivator extends HousekeepingActivator {
                 CryptoService service = context.getService(serviceReference);
                 ShareCryptoServiceImpl shareCryptoService = new ShareCryptoServiceImpl(service, cryptKey);
                 serviceLookup.addService(ShareCryptoService.class, shareCryptoService);
-
                 cryptoRegistration = context.registerService(ShareCryptoService.class, shareCryptoService, null);
                 shareRegistration = context.registerService(ShareService.class, new DefaultShareService(serviceLookup), null);
                 return service;
@@ -132,7 +126,6 @@ public class ShareActivator extends HousekeepingActivator {
                     shareRegistration.unregister();
                     this.shareRegistration = null;
                 }
-
                 ServiceRegistration<ShareCryptoService> cryptoRegistration = this.cryptoRegistration;
                 if (null != cryptoRegistration) {
                     cryptoRegistration.unregister();
@@ -147,7 +140,7 @@ public class ShareActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: \"com.openexchange.share\"");
+        LOG.info("stopping bundle: \"com.openexchange.share.impl\"");
         ShareServiceLookup.set(null);
         super.stopBundle();
     }
