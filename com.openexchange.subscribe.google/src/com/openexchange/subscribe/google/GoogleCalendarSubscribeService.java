@@ -50,7 +50,6 @@
 package com.openexchange.subscribe.google;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -83,7 +82,7 @@ import com.openexchange.tools.iterator.SearchIteratorDelegator;
 public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeService {
 
     private static final int PAGE_SIZE = 25;
-    
+
     private final SubscriptionSource source;
 
     public GoogleCalendarSubscribeService(final OAuthServiceMetaData googleMetaData, ServiceLookup services) {
@@ -103,69 +102,74 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
 
     @Override
     public Collection<?> getContent(final Subscription subscription) throws OXException {
-        final GoogleCredential googleCreds = GoogleApiClients.getCredentials(subscription.getSession());
-        final Calendar googleCalendarService = new Calendar(
-            googleCreds.getTransport(),
-            googleCreds.getJsonFactory(),
-            googleCreds.getRequestInitializer());
-        
-        final List<CalendarObject> calObjList = new LinkedList<CalendarObject>();
-
-        final String tmp = (String) subscription.getConfiguration().get("calendarId");
-        final String calendarId = (tmp == null) ? "primary" : tmp;
-
         try {
+            GoogleCredential googleCreds = GoogleApiClients.getCredentials(subscription.getSession());
+            final Calendar googleCalendarService = new Calendar(googleCreds.getTransport(), googleCreds.getJsonFactory(), googleCreds.getRequestInitializer());
+
+            final String calendarId;
+            {
+                final String tmp = (String) subscription.getConfiguration().get("calendarId");
+                calendarId = (tmp == null) ? "primary" : tmp;
+            }
+
             // Fetch calendar metadata
             // com.google.api.services.calendar.model.Calendar calendar = googleCalendarService.calendars().get(calendarId).setOauthToken(googleCreds.getAccessToken()).execute();
             final CalendarEventParser parser = new CalendarEventParser(subscription.getSession().getContext());
 
-            final Events events = googleCalendarService.events().list(calendarId).setOauthToken(googleCreds.getAccessToken()).setMaxResults(PAGE_SIZE).execute();
+            final String accessToken = googleCreds.getAccessToken();
+            final Integer pageSize = Integer.valueOf(PAGE_SIZE);
+            Events events = googleCalendarService.events().list(calendarId).setOauthToken(accessToken).setMaxResults(pageSize).execute();
+            List<CalendarObject> calObjList = new LinkedList<CalendarObject>();
             parseAndAdd(events, parser, calObjList);
 
-            if (events.getNextPageToken() == null) {
+            String nextToken = events.getNextPageToken();
+            if (nextToken == null) {
                 return calObjList;
-            } else {
-                final ThreadPoolService threadPool = services.getOptionalService(ThreadPoolService.class);
-                final FolderUpdaterRegistry folderUpdaterRegistry = services.getOptionalService(FolderUpdaterRegistry.class);
-                final FolderUpdaterService<CalendarObject> folderUpdater = null == folderUpdaterRegistry ? null : folderUpdaterRegistry.<CalendarObject> getFolderUpdater(subscription);
-
-                if (null == threadPool || null == folderUpdater) {
-                    // Fetch all in one thread
-                    do {
-                        final Events e = googleCalendarService.events().list(calendarId).setOauthToken(googleCreds.getAccessToken()).setMaxResults(PAGE_SIZE).setPageToken(
-                            events.getNextPageToken()).execute();
-                        parseAndAdd(e, parser, calObjList);
-                    } while (events.getNextPageToken() != null);
-                    return calObjList;
-                }
-
-                // Or spawn background thread
-                threadPool.submit(new AbstractTask<Void>() {
-
-                    @Override
-                    public Void call() throws Exception {
-                        do {
-                            final Events e = googleCalendarService.events().list(calendarId).setOauthToken(googleCreds.getAccessToken()).setMaxResults(PAGE_SIZE).setPageToken(
-                                events.getNextPageToken()).execute();
-                            final List<CalendarObject> appointments = new ArrayList<CalendarObject>(e.getItems().size());
-                            parseAndAdd(e, parser, appointments);
-                            folderUpdater.save(new SearchIteratorDelegator<CalendarObject>(appointments), subscription);
-                        } while (events.getNextPageToken() != null);
-                        return null;
-                    }
-                });
             }
+
+            // More pages available
+            final ThreadPoolService threadPool = services.getOptionalService(ThreadPoolService.class);
+            final FolderUpdaterRegistry folderUpdaterRegistry = services.getOptionalService(FolderUpdaterRegistry.class);
+            final FolderUpdaterService<CalendarObject> folderUpdater = null == folderUpdaterRegistry ? null : folderUpdaterRegistry.<CalendarObject> getFolderUpdater(subscription);
+
+            if (null == threadPool || null == folderUpdater) {
+                // Fetch all in one thread
+                do {
+                    events = googleCalendarService.events().list(calendarId).setOauthToken(accessToken).setMaxResults(pageSize).setPageToken(nextToken).execute();
+                    parseAndAdd(events, parser, calObjList);
+                } while ((nextToken = events.getNextPageToken()) != null);
+                return calObjList;
+            }
+
+            // Or spawn background thread
+            final String tmp = nextToken;
+            threadPool.submit(new AbstractTask<Void>() {
+
+                @Override
+                public Void call() throws Exception {
+                    String nextPageToken = tmp;
+                    Events e;
+                    do {
+                        e = googleCalendarService.events().list(calendarId).setOauthToken(accessToken).setMaxResults(pageSize).setPageToken(nextPageToken).execute();
+                        List<CalendarObject> appointments = new LinkedList<CalendarObject>();
+                        parseAndAdd(e, parser, appointments);
+                        folderUpdater.save(new SearchIteratorDelegator<CalendarObject>(appointments), subscription);
+                    } while ((nextPageToken = e.getNextPageToken()) != null);
+                    return null;
+                }
+            });
+            return calObjList;
         } catch (IOException e) {
             throw SubscriptionErrorMessage.IO_ERROR.create(e, e.getMessage());
         }
-        return calObjList;
     }
 
-    private void parseAndAdd(final Events events, final CalendarEventParser parser, final List<CalendarObject> calendarObjectsList) {
+    protected void parseAndAdd(final Events events, final CalendarEventParser parser, final List<CalendarObject> calendarObjectsList) {
         for (Event event : events.getItems()) {
             final CalendarDataObject calenderObject = new CalendarDataObject();
             parser.parseCalendarEvent(event, calenderObject);
             calendarObjectsList.add(calenderObject);
         }
     }
+
 }
