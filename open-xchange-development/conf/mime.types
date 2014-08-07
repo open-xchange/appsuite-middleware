@@ -243,9 +243,16 @@ application/vnd.ms-project mpp mpt
 application/vnd.ms-works wps wks wcm wdb
 application/vnd.ms-word.document.macroEnabled.12 docm
 application/vnd.ms-word.template dotm
-application/vnd.openxmlformats-officedocument.wordprocessingml.template dotx
-application/vnd.openxmlformats-officedocument.presentationml.template potx
 application/vnd.openxmlformats-officedocument.spreadsheetml.sheet xlsx
+application/vnd.openxmlformats-officedocument.spreadsheetml.template xltx
+application/vnd.openxmlformats-officedocument.presentationml.template potx
+application/vnd.openxmlformats-officedocument.presentationml.slideshow ppsx
+application/vnd.openxmlformats-officedocument.presentationml.presentation pptx
+application/vnd.openxmlformats-officedocument.presentationml.slide sldx
+application/vnd.openxmlformats-officedocument.wordprocessingml.document docx
+application/vnd.openxmlformats-officedocument.wordprocessingml.template dotx
+application/vnd.ms-excel.addin.macroEnabled.12 xlam
+application/vnd.ms-excel.sheet.binary.macroEnabled.12 xlsb
 application/vnd.ms-wpl wpl
 application/vnd.ms-xpsdocument xps
 application/vnd.mseq mseq
@@ -281,7 +288,6 @@ application/vnd.oasis.opendocument.text-web oth
 application/vnd.olpc-sugar xo
 application/vnd.oma.dd2+xml dd2
 application/vnd.openofficeorg.extension oxt
-application/vnd.openxmlformats-officedocument.wordprocessingml.document docx
 application/vnd.osgi.dp dp
 application/vnd.palm prc pdb pqa oprc
 application/vnd.pg.format str
