@@ -389,12 +389,7 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
     }
     
     private int fetchResults(final ContactsService contactsService, final Query query, final List<Contact> contacts) throws OXException, IOException, ServiceException {
-        ContactFeed resultFeed = contactsService.getFeed(query, ContactFeed.class);
-        handleContactFeed(resultFeed, contacts);
-        return resultFeed.getEntries().size();
-    }
-
-    protected void handleContactFeed(final ContactFeed contactFeed, final List<Contact> contacts) throws OXException {
+        ContactFeed contactFeed = contactsService.getFeed(query, ContactFeed.class);
         for (ContactEntry entry : contactFeed.getEntries()) {
             Contact contact = new Contact();
             parser.parseContact(entry, contact);
@@ -444,5 +439,6 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
 
             contacts.add(contact);
         }
+        return contactFeed.getEntries().size();
     }
 }
