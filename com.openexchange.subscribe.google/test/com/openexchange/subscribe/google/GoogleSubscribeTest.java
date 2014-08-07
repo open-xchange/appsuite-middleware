@@ -84,6 +84,7 @@ import com.openexchange.tools.session.SimServerSession;
 public class GoogleSubscribeTest extends TestCase {
     private static final String GOOGLE_API_KEY = "";
     private static final String GOOGLE_API_SECRET = "";
+    private static final String REDIRECT_URL = "";
     private static final String CLIENT_SECRET = "";
     private static final String CLIENT_ID = "ox";
     private static final String ACCESS_TOKEN = "";
@@ -95,7 +96,7 @@ public class GoogleSubscribeTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         MockitoAnnotations.initMocks(this);
-        ConfigurationService cs = new MockConfigurationService(GOOGLE_API_KEY, GOOGLE_API_SECRET);
+        ConfigurationService cs = new MockConfigurationService(GOOGLE_API_KEY, GOOGLE_API_SECRET, REDIRECT_URL);
         ServiceLookup sl = new MockServiceLookup(cs);
         OAuthServiceMetaData oasdm = new GoogleOAuthServiceMetaData(sl);
         gcss = new GoogleContactSubscribeService(oasdm, sl);

@@ -72,11 +72,12 @@ import com.openexchange.exception.OXException;
 public class MockConfigurationService implements ConfigurationService{
     private final Map<String,String> props;
 
-    public MockConfigurationService(String apiKey, String apiSecret){
+    public MockConfigurationService(String apiKey, String apiSecret, String redirectUrl){
         props = new HashMap<String,String>();
         props.put("com.openexchange.oauth.google.apiKey", apiSecret);
         props.put("com.openexchange.oauth.google.apiSecret", apiKey);
         props.put("com.openexchange.oauth.google.productName", apiKey);
+        props.put("com.openexchange.oauth.google.redirectUrl", redirectUrl);
     }
 
     @Override
