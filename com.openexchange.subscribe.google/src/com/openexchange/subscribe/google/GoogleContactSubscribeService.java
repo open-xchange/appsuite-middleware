@@ -53,8 +53,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
-import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -65,6 +63,7 @@ import javax.activation.FileTypeMap;
 import org.slf4j.Logger;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.gdata.client.Query;
+import com.google.gdata.client.Service.GDataRequest;
 import com.google.gdata.client.contacts.ContactsService;
 import com.google.gdata.data.Link;
 import com.google.gdata.data.contacts.ContactEntry;
@@ -107,68 +106,54 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
      * Open a new {@link URLConnection URL connection} to specified parameter's value which indicates to be an URI/URL. The image's data and
      * its MIME type is then read from opened connection.
      *
-     * @param url The URI parameter's value
+     * @param photoLink The image URL
      * @return The appropriate file holder
-     * @throws IOException If converting image's data fails
+     * @throws ServiceException
+     * @throws IOException
      */
-    static IFileHolder loadImageFromURL(final String url) throws IOException {
-        try {
-            return loadImageFromURL(new URL(url));
-        } catch (final MalformedURLException e) {
-            throw new IOException("Problem loading photo from URL: " + url, e);
-        }
-    }
-
-    /**
-     * Open a new {@link URLConnection URL connection} to specified parameter's value which indicates to be an URI/URL. The image's data and
-     * its MIME type is then read from opened connection.
-     *
-     * @param url The image URL
-     * @return The appropriate file holder
-     * @throws XingException If converting image's data fails
-     */
-    private static IFileHolder loadImageFromURL(final URL url) throws IOException {
-        String mimeType = null;
-        byte[] bytes = null;
-        try {
-            final URLConnection urlCon = url.openConnection();
-            urlCon.setConnectTimeout(2500);
-            urlCon.setReadTimeout(2500);
-            urlCon.connect();
-            mimeType = urlCon.getContentType();
-            final InputStream in = urlCon.getInputStream();
+    static IFileHolder loadImageFromLink(final ContactsService contactsService, final ContactEntry entry, final Link photoLink) throws IOException, ServiceException {
+        if (photoLink != null && photoLink.getEtag() != null) {
+            String mimeType = null;
+            byte[] bytes = null;
+            GDataRequest gRequest = null;
+            InputStream in = null;
             try {
-                final ByteArrayOutputStream buffer = Streams.newByteArrayOutputStream(in.available());
-                transfer(in, buffer);
-                bytes = buffer.toByteArray();
+                gRequest = contactsService.createLinkQueryRequest(photoLink);
+                gRequest.execute();
+                in = gRequest.getResponseStream();
+                ByteArrayOutputStream out = Streams.newByteArrayOutputStream(in.available());
+                transfer(in, out);
+
+                com.google.gdata.util.ContentType ct = gRequest.getResponseContentType();
+                if(ct != null) {
+                    mimeType = ct.getMediaType();
+                }
+                bytes = out.toByteArray();
             } finally {
                 Streams.close(in);
+                gRequest.end();
             }
-        } catch (final SocketTimeoutException e) {
-            throw e;
-        } catch (final IOException e) {
-            throw e;
-        }
-        if (null != bytes) {
-            final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
-            if (mimeType == null) {
-                mimeType = ImageTypeDetector.getMimeType(bytes);
-                if ("application/octet-stream".equals(mimeType)) {
-                    mimeType = getMimeType(url.toString());
+
+            if(null != bytes) {
+                final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
+                if (mimeType == null) {
+                    mimeType = ImageTypeDetector.getMimeType(bytes);
+                    if ("application/octet-stream".equals(mimeType)) {
+                        mimeType = getMimeType(photoLink.toString());
+                    }
                 }
-            }
-            if (isValidImage(bytes)) {
-                // Mime type should be of image type. Otherwise web server send some error page instead of 404 error code.
-                if (null == mimeType) {
-                    mimeType = "image/jpeg";
+                if (isValidImage(bytes)) {
+                    // Mime type should be of image type. Otherwise web server send some error page instead of 404 error code.
+                    if (null == mimeType) {
+                        mimeType = "image/jpeg";
+                    }
+                    fileHolder.setContentType(mimeType);
                 }
-                fileHolder.setContentType(mimeType);
+                return fileHolder;
             }
-            return fileHolder;
         }
         return null;
     }
-
     private static void transfer(final InputStream in, final OutputStream out) throws IOException {
         final byte[] buffer = new byte[4096];
         int length;
@@ -198,60 +183,29 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
 
     private interface PhotoHandler {
 
-        void handlePhoto(ContactEntry entry, Contact contact) throws OXException;
+        void handlePhoto(ContactsService contactsService, ContactEntry entry, Contact contact) throws OXException;
     }
-
-//    private final class CollectingPhotoHandler implements PhotoHandler {
-//
-//        private final Map<String, String> photoUrlsMap;
-//
-//        /**
-//         * Initializes a new {@link CollectingPhotoHandler}.
-//         */
-//        CollectingPhotoHandler(Map<String, String> photoUrlsMap) {
-//            super();
-//            this.photoUrlsMap = photoUrlsMap;
-//        }
-//
-//        @Override
-//        public void handlePhoto(ContactEntry entry, Contact contact) throws OXException {
-//            Link photoLink = entry.getContactPhotoLink();
-//            if (photoLink != null) {
-//                String photoLinkHref = photoLink.getHref();
-//                if (null != photoLinkHref) {
-//                    photoUrlsMap.put(entry.getId(), photoLinkHref);
-//                }
-//            }
-//        }
-//    }
 
     private final PhotoHandler loadingPhotoHandler = new PhotoHandler() {
 
         @Override
-        public void handlePhoto(ContactEntry entry, Contact contact) throws OXException {
+        public void handlePhoto(ContactsService contactsService, ContactEntry entry, Contact contact) throws OXException {
             if (null == entry || null == contact) {
                 return;
             }
 
-            String url = null;
-            {
+            try {
                 Link photoLink = entry.getContactPhotoLink();
-                if (photoLink != null) {
-                    url = photoLink.getHref();
+                IFileHolder photo = loadImageFromLink(contactsService, entry, photoLink);
+                if (photo != null) {
+                    byte[] bytes = Streams.stream2bytes(photo.getStream());
+                    contact.setImage1(bytes);
+                    contact.setImageContentType(photo.getContentType());
                 }
-            }
-
-            if (url != null) {
-                try {
-                    IFileHolder photo = loadImageFromURL(url);
-                    if (photo != null) {
-                        byte[] bytes = Streams.stream2bytes(photo.getStream());
-                        contact.setImage1(bytes);
-                        contact.setImageContentType(photo.getContentType());
-                    }
-                } catch (IOException e) {
-                    throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
-                }
+            } catch(ServiceException e) {
+                throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } catch (IOException e) {
+                throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
     };
@@ -279,7 +233,7 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
     // ------------------------------------------------------------------------------------------------------------------- //
 
     private final SubscriptionSource source;
-    
+
     private final ContactEntryParser parser;
 
     public GoogleContactSubscribeService(final OAuthServiceMetaData googleMetaData, ServiceLookup services) {
@@ -382,57 +336,32 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
             throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
-    
+
     private void adjustQuery(final Query query, final int page, final int pageSize) {
         query.setStartIndex((page - 1) * pageSize + 1);
         query.setMaxResults(pageSize);
     }
-    
+
     private int fetchResults(final ContactsService contactsService, final Query query, final List<Contact> contacts) throws OXException, IOException, ServiceException {
         ContactFeed contactFeed = contactsService.getFeed(query, ContactFeed.class);
         for (ContactEntry entry : contactFeed.getEntries()) {
             Contact contact = new Contact();
             parser.parseContact(entry, contact);
-            loadingPhotoHandler.handlePhoto(entry, contact);
+            loadingPhotoHandler.handlePhoto(contactsService, entry, contact);
 
             /**
-                        List<PhoneNumber> phoneNumbers = entry.getPhoneNumbers();
-                        for (PhoneNumber phoneNumber : phoneNumbers) {
-
-
-                            String rel = phoneNumber.getRel() != null ? phoneNumber.getRel() : (phoneNumber.getLabel() != null ? phoneNumber.getLabel() : "");
-                            if (rel.contains("#")) {
-                                rel = rel.substring(rel.indexOf("#") + 1);
-                            }
-                            contact.setRel(rel);
-                            rel = StringUtils.isBlank(rel) ? "" : "[" + rel + "]";
-                            contact.setName(name + " <" + phoneNumber.getPhoneNumber() + ">" + " " + rel + " ");
-                            contact.setPhotoLink(photoLinkHref);
-                            contact.setValue(phoneNumber.getPhoneNumber());
-                            contacts.add(contact);
-                            if (StringUtils.isBlank(mainContactId)) {
-                                mainContactId = contactId;
-                            }
-                            if (Rel.MOBILE.equalsIgnoreCase(phoneNumber.getRel())) {
-                                mainContactId = contactId;
-                            }
-                            if (phoneNumber.getPrimary()) {
-                                mainContactId = contactId;
-                            }
+                //Note: mainContactId will be "" in case if the contact doesn't have any phone number.
+                if (!Strings.isEmpty(mainContactId)) {
+                    List<GroupMembershipInfo> groupMembershipInfos = entry.getGroupMembershipInfos();
+                    for (GroupMembershipInfo groupMembershipInfo : groupMembershipInfos) {
+                        String groupId = groupMembershipInfo.getHref();
+                        if (groupId.contains("/")) {
+                            groupId = groupId.substring(groupId.lastIndexOf("/") + 1);
                         }
-
-                        //Note: mainContactId will be "" in case if the contact doesn't have any phone number.
-                        if (!Strings.isEmpty(mainContactId)) {
-                            List<GroupMembershipInfo> groupMembershipInfos = entry.getGroupMembershipInfos();
-                            for (GroupMembershipInfo groupMembershipInfo : groupMembershipInfos) {
-                                String groupId = groupMembershipInfo.getHref();
-                                if (groupId.contains("/")) {
-                                    groupId = groupId.substring(groupId.lastIndexOf("/") + 1);
-                                }
-                                String contactIds = (groupContactMap.get(groupId) != null ? groupContactMap.get(groupId) : "") + mainContactId + ",";
-                                groupContactMap.put(groupId, contactIds);
-                            }
-                        }
+                        String contactIds = (groupContactMap.get(groupId) != null ? groupContactMap.get(groupId) : "") + mainContactId + ",";
+                        groupContactMap.put(groupId, contactIds);
+                    }
+                }
 
              *
              */
