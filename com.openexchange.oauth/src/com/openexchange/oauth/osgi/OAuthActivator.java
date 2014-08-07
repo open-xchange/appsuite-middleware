@@ -138,19 +138,24 @@ public final class OAuthActivator extends HousekeepingActivator {
              */
             final CallbackRegistry cbRegistry = new CallbackRegistry();
             {
-                final ScheduledTimerTask timerTask = getService(TimerService.class).scheduleAtFixedRate(cbRegistry, 600000, 600000);
+                final TimerService timerService = getService(TimerService.class);
+                final ScheduledTimerTask timerTask = timerService.scheduleAtFixedRate(cbRegistry, 600000, 600000);
                 this.timerTask = new ScheduledTimerTask() {
 
                     @Override
                     public boolean cancel() {
                         cbRegistry.clear();
-                        return timerTask.cancel();
+                        boolean retval = timerTask.cancel();
+                        timerService.purge();
+                        return retval;
                     }
 
                     @Override
                     public boolean cancel(boolean mayInterruptIfRunning) {
                         cbRegistry.clear();
-                        return timerTask.cancel(mayInterruptIfRunning);
+                        boolean retval = timerTask.cancel(mayInterruptIfRunning);
+                        timerService.purge();
+                        return retval;
                     }
                 };
             }
