@@ -187,6 +187,18 @@ public class RdbShareStorage implements ShareStorage {
         }
     }
 
+    @Override
+    public List<Share> loadSharesForGuest(int contextID, int guestID, StorageParameters parameters) throws OXException {
+        ConnectionProvider provider = getReadProvider(contextID, parameters);
+        try {
+            return selectSharesForGuest(provider.get(), contextID, guestID);
+        } catch (SQLException e) {
+            throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            provider.close();
+        }
+    }
+
     private static int insertShare(Connection connection, Share share) throws SQLException {
         PreparedStatement stmt = null;
         try {
@@ -424,6 +436,41 @@ public class RdbShareStorage implements ShareStorage {
                 share.setExpires(new Date(resultSet.getLong(9)));
                 share.setGuest(resultSet.getInt(10));
                 share.setAuthentication(resultSet.getInt(11));
+                shares.add(share);
+            } else {
+                return null;
+            }
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+        return shares;
+    }
+
+    private static List<Share> selectSharesForGuest(Connection connection, int cid, int guestID) throws SQLException {
+        List<Share> shares = new ArrayList<Share>();
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(SQL.SELECT_SHARES_FOR_GUEST_STMT);
+            stmt.setInt(1, cid);
+            stmt.setInt(2, guestID);
+            ResultSet resultSet = logExecuteQuery(stmt);
+            if (resultSet.next()) {
+                DefaultShare share = new DefaultShare();
+                share.setContextID(cid);
+                share.setGuest(guestID);
+                share.setToken(UUIDs.getUnformattedString(UUIDs.toUUID(resultSet.getBytes(1))));
+                share.setModule(resultSet.getInt(2));
+                share.setFolder(resultSet.getString(3));
+                share.setItem(resultSet.getString(4));
+                share.setCreated(new Date(resultSet.getLong(5)));
+                share.setCreatedBy(resultSet.getInt(6));
+                share.setLastModified(new Date(resultSet.getLong(7)));
+                share.setModifiedBy(resultSet.getInt(8));
+                long expires = resultSet.getLong(9);
+                if (false == resultSet.wasNull()) {
+                    share.setExpires(new Date(expires));
+                }
+                share.setAuthentication(resultSet.getInt(10));
                 shares.add(share);
             } else {
                 return null;

@@ -141,4 +141,14 @@ public interface ShareStorage {
      */
     List<Share> loadSharesExpiredAfter(int contextID, Date expires, StorageParameters parameters) throws OXException;
 
+    /**
+     * Loads all shares that were created for a specific guest user ID.
+     *
+     * @param contextID The context ID
+     * @param guestID The ID of the guest user to whom the share is for
+     * @param parameters The storage parameters
+     * @return The shares
+     */
+    List<Share> loadSharesForGuest(int contextID, int guestID, StorageParameters parameters) throws OXException;
+
 }

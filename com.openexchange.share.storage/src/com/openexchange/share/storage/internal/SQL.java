@@ -123,6 +123,12 @@ public class SQL {
         "WHERE cid=? AND expires IS NOT NULL AND expires>?;"
     ;
 
+    public static final String SELECT_SHARES_FOR_GUEST_STMT =
+        "SELECT token,module,folder,item,created,createdBy,lastModified,modifiedBy,expires,auth " +
+        "FROM share " +
+        "WHERE cid=? AND guest=?;"
+    ;
+
     public static final String INSERT_SHARE_STMT =
         "INSERT INTO share (token,cid,module,folder,item,created,createdBy,lastModified,modifiedBy,expires,guest,auth) " +
         "VALUES (?,?,?,?,?,?,?,?,?,?,?,?);"
