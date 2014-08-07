@@ -318,22 +318,19 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
 
             // Compose the appropriate query for contacts
             final Query contactQuery = new Query(CONTACT_URL);
+            contactQuery.setStringCustomParameter("orderby", "lastmodified");
+            contactQuery.setStringCustomParameter("sortorder", "descending");
 
             // First page with this thread
             final int pageSize = PAGE_SIZE;
             int page = 1;
-            contactQuery.setStartIndex((page - 1) * pageSize + 1);
-            contactQuery.setMaxResults(pageSize);
-            contactQuery.setStringCustomParameter("orderby", "lastmodified");
-            contactQuery.setStringCustomParameter("sortorder", "descending");
+            adjustQuery(contactQuery, page, pageSize);
 
             List<Contact> contacts;
             int resultsFound;
             {
-                ContactFeed resultFeed = contactsService.getFeed(contactQuery, ContactFeed.class);
-                resultsFound = resultFeed.getEntries().size();
                 contacts = new LinkedList<Contact>();
-                handleContactFeed(resultFeed, contacts, loadingPhotoHandler);
+                resultsFound = fetchResults(contactsService, contactQuery, contacts);
             }
 
             if (resultsFound != pageSize) {
@@ -351,14 +348,8 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
             if (null == threadPool || null == folderUpdater) {
                 // All with this thread
                 do {
-                    contactQuery.setStartIndex((page - 1) * pageSize + 1);
-                    contactQuery.setMaxResults(pageSize);
-                    contactQuery.setStringCustomParameter("orderby", "lastmodified");
-                    contactQuery.setStringCustomParameter("sortorder", "descending");
-
-                    ContactFeed resultFeed = contactsService.getFeed(contactQuery, ContactFeed.class);
-                    resultsFound = resultFeed.getEntries().size();
-                    handleContactFeed(resultFeed, contacts, loadingPhotoHandler);
+                    adjustQuery(contactQuery, page, pageSize);
+                    resultsFound = fetchResults(contactsService, contactQuery, contacts);
                     page++;
                 } while (resultsFound == pageSize);
                 return contacts;
@@ -367,27 +358,20 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
             // Query more in the background and...
             {
                 final int pageOffset = page;
-                final PhotoHandler ph = loadingPhotoHandler;
                 threadPool.submit(new AbstractTask<Void>() {
 
                     @Override
                     public Void call() throws Exception {
-                        int myPage = pageOffset;
+                        int page = pageOffset;
                         int resultsFound = pageSize;
                         while (resultsFound == pageSize) {
                             List<Contact> contacts = new ArrayList<Contact>();
-                            contactQuery.setStartIndex((myPage - 1) * pageSize + 1);
-                            contactQuery.setMaxResults(pageSize);
-                            contactQuery.setStringCustomParameter("orderby", "lastmodified");
-                            contactQuery.setStringCustomParameter("sortorder", "descending");
-
-                            ContactFeed resultFeed = contactsService.getFeed(contactQuery, ContactFeed.class);
-                            handleContactFeed(resultFeed, contacts, ph);
-
+                            adjustQuery(contactQuery, page, pageSize);
+                            fetchResults(contactsService, contactQuery, contacts);
                             folderUpdater.save(new SearchIteratorDelegator<Contact>(contacts), subscription);
 
                             // Next page...
-                            myPage++;
+                            page++;
                         }
                         return null;
                     }
@@ -403,6 +387,17 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
         } catch (RuntimeException e) {
             throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+    
+    private void adjustQuery(final Query query, final int page, final int pageSize) {
+        query.setStartIndex((page - 1) * pageSize + 1);
+        query.setMaxResults(pageSize);
+    }
+    
+    private int fetchResults(final ContactsService contactsService, final Query query, final List<Contact> contacts) throws OXException, IOException, ServiceException {
+        ContactFeed resultFeed = contactsService.getFeed(query, ContactFeed.class);
+        handleContactFeed(resultFeed, contacts, loadingPhotoHandler);
+        return resultFeed.getEntries().size();
     }
 
     protected void handleContactFeed(ContactFeed contactFeed, List<Contact> contacts, PhotoHandler photoHandler) throws OXException {
