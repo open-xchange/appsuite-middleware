@@ -122,7 +122,7 @@ public final class GetAction extends AbstractUserAction {
             ContactService contactService = ServiceRegistry.getInstance().getService(ContactService.class, true);
             contact = contactService.getUser(session, userId, contactFields);
         } else {
-            contact = getVirtualContact(user);
+            contact = getVirtualContact(session, user);
         }
         /*
          * Return appropriate result

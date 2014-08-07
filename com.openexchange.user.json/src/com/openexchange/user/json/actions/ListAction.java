@@ -157,7 +157,7 @@ public final class ListAction extends AbstractUserAction {
         for (final User user : users) {
             Contact contact = contacts.get(user.getId());
             if (null == contact) {
-                contact = getVirtualContact(user);
+                contact = getVirtualContact(session, user);
             }
             userContacts.add(new UserContact(contact, user));
             final Date contactLastModified = contact.getLastModified();

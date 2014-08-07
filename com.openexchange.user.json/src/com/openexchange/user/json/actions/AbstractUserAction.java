@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -63,7 +64,9 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.i18n.Users;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -281,18 +284,29 @@ public abstract class AbstractUserAction implements AJAXActionService {
     /**
      * Creates a virtual contact based on some properties available in the supplied user.
      *
+     * @param session The session
      * @param user The user to create the contact for
      * @return The contact
      */
-    protected static Contact getVirtualContact(User user) {
+    protected static Contact getVirtualContact(ServerSession session, User user) {
         Contact contact = new Contact();
         contact.setInternalUserId(user.getId());
         contact.setObjectID(user.getContactId());
-        contact.setEmail1(user.getMail());
         contact.setCreatedBy(user.getCreatedBy());
-        contact.setDisplayName(Strings.isEmpty(user.getDisplayName()) ? user.getMail() : user.getDisplayName());
+        contact.setEmail1(user.getMail());
         contact.setGivenName(user.getGivenName());
         contact.setSurName(user.getSurname());
+        if (user.isGuest() && Strings.isEmpty(user.getMail()) &&
+            (Strings.isEmpty(user.getDisplayName()) || Users.GUEST.equals(user.getDisplayName()))) {
+            Locale locale = session.getUser().getLocale();
+            if (null != locale) {
+                contact.setDisplayName(StringHelper.valueOf(locale).getString(Users.GUEST));
+            } else {
+                contact.setDisplayName(Users.GUEST);
+            }
+        } else {
+            contact.setDisplayName(Strings.isEmpty(user.getDisplayName()) ? user.getMail() : user.getDisplayName());
+        }
         return contact;
     }
 
