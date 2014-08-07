@@ -316,7 +316,7 @@ public class RdbShareStorage implements ShareStorage {
             stmt.setInt(1, cid);
             stmt.setInt(2, createdBy);
             ResultSet resultSet = logExecuteQuery(stmt);
-            if (resultSet.next()) {
+            while (resultSet.next()) {
                 DefaultShare share = new DefaultShare();
                 share.setContextID(cid);
                 share.setCreatedBy(createdBy);
@@ -334,8 +334,6 @@ public class RdbShareStorage implements ShareStorage {
                 share.setGuest(resultSet.getInt(9));
                 share.setAuthentication(resultSet.getInt(10));
                 shares.add(share);
-            } else {
-                return null;
             }
         } finally {
             DBUtils.closeSQLStuff(stmt);
@@ -351,7 +349,7 @@ public class RdbShareStorage implements ShareStorage {
             stmt.setInt(1, cid);
             stmt.setString(2, folder);
             ResultSet resultSet = logExecuteQuery(stmt);
-            if (resultSet.next()) {
+            while (resultSet.next()) {
                 DefaultShare share = new DefaultShare();
                 share.setContextID(cid);
                 share.setFolder(folder);
@@ -369,8 +367,6 @@ public class RdbShareStorage implements ShareStorage {
                 share.setGuest(resultSet.getInt(9));
                 share.setAuthentication(resultSet.getInt(10));
                 shares.add(share);
-            } else {
-                return null;
             }
         } finally {
             DBUtils.closeSQLStuff(stmt);
@@ -387,7 +383,7 @@ public class RdbShareStorage implements ShareStorage {
             stmt.setString(2, folder);
             stmt.setString(3, item);
             ResultSet resultSet = logExecuteQuery(stmt);
-            if (resultSet.next()) {
+            while (resultSet.next()) {
                 DefaultShare share = new DefaultShare();
                 share.setContextID(cid);
                 share.setFolder(folder);
@@ -405,8 +401,6 @@ public class RdbShareStorage implements ShareStorage {
                 share.setGuest(resultSet.getInt(8));
                 share.setAuthentication(resultSet.getInt(9));
                 shares.add(share);
-            } else {
-                return null;
             }
         } finally {
             DBUtils.closeSQLStuff(stmt);
@@ -422,7 +416,7 @@ public class RdbShareStorage implements ShareStorage {
             stmt.setInt(1, cid);
             stmt.setLong(2, expired);
             ResultSet resultSet = logExecuteQuery(stmt);
-            if (resultSet.next()) {
+            while (resultSet.next()) {
                 DefaultShare share = new DefaultShare();
                 share.setToken(UUIDs.getUnformattedString(UUIDs.toUUID(resultSet.getBytes(1))));
                 share.setContextID(cid);
@@ -437,8 +431,6 @@ public class RdbShareStorage implements ShareStorage {
                 share.setGuest(resultSet.getInt(10));
                 share.setAuthentication(resultSet.getInt(11));
                 shares.add(share);
-            } else {
-                return null;
             }
         } finally {
             DBUtils.closeSQLStuff(stmt);
@@ -454,7 +446,7 @@ public class RdbShareStorage implements ShareStorage {
             stmt.setInt(1, cid);
             stmt.setInt(2, guestID);
             ResultSet resultSet = logExecuteQuery(stmt);
-            if (resultSet.next()) {
+            while (resultSet.next()) {
                 DefaultShare share = new DefaultShare();
                 share.setContextID(cid);
                 share.setGuest(guestID);
@@ -472,8 +464,6 @@ public class RdbShareStorage implements ShareStorage {
                 }
                 share.setAuthentication(resultSet.getInt(10));
                 shares.add(share);
-            } else {
-                return null;
             }
         } finally {
             DBUtils.closeSQLStuff(stmt);

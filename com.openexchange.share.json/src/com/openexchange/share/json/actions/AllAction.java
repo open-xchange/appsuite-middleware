@@ -47,60 +47,76 @@
  *
  */
 
-package com.openexchange.share.impl;
+package com.openexchange.share.json.actions;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
-import com.openexchange.share.CreateRequest;
-import com.openexchange.share.DeleteRequest;
 import com.openexchange.share.Share;
+import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareService;
-import com.openexchange.share.storage.ShareStorage;
-import com.openexchange.share.storage.StorageParameters;
-import com.openexchange.tools.session.ServerSessionAdapter;
-
+import com.openexchange.share.json.GuestShare;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.UserService;
 
 /**
- * {@link DefaultShareService}
+ * {@link AllAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.6.1
  */
-public class DefaultShareService implements ShareService {
+public class AllAction implements AJAXActionService {
 
     private final ServiceLookup services;
 
     /**
-     * Initializes a new {@link DefaultShareService}.
-     *
-     * @param storage The underlying share storage
+     * Initializes a new {@link AllAction}.
+     * @param services
      */
-    public DefaultShareService(ServiceLookup services) {
+    public AllAction(ServiceLookup services) {
         super();
         this.services = services;
     }
 
     @Override
-    public List<Share> create(CreateRequest shareRequest, Session session) throws OXException {
-        return new CreateHandler(shareRequest, ServerSessionAdapter.valueOf(session), services).processRequest();
-    }
-
-    @Override
-    public Share resolveToken(String token) throws OXException {
-        int contextID = ShareTool.extractContextId(token);
-        return services.getService(ShareStorage.class).loadShare(contextID, token, StorageParameters.NO_PARAMETERS);
-    }
-
-    @Override
-    public List<Share> getAllShares(Session session) throws OXException {
-        return services.getService(ShareStorage.class).loadSharesCreatedBy(session.getContextId(), session.getUserId(), StorageParameters.NO_PARAMETERS);
-    }
-
-    @Override
-    public void delete(DeleteRequest deleteRequest, Session session) throws OXException {
-        new DeleteHandler(deleteRequest, ServerSessionAdapter.valueOf(session), services).processRequest();
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        List<Share> shares = services.getService(ShareService.class).getAllShares(session);
+        Date lastModified = null;
+        Set<Integer> guestIDs = new HashSet<Integer>();
+        for (Share share : shares) {
+            Date shareLastModified = share.getLastModified();
+            if (null == lastModified || null != shareLastModified && shareLastModified.after(lastModified)) {
+                lastModified = shareLastModified;
+            }
+            guestIDs.add(Integer.valueOf(share.getGuest()));
+        }
+        int[] ids = new int[guestIDs.size()];
+        int i = 0;
+        for (Integer guestID : guestIDs) {
+            ids[i++] = guestID.intValue();
+        }
+        User[] guestUsers = services.getService(UserService.class).getUser(session.getContext(), ids);
+        Map<Integer, User> guestUsersByID = new HashMap<Integer, User>();
+        for (User user : guestUsers) {
+            guestUsersByID.put(Integer.valueOf(user.getId()), user);
+        }
+        ShareCryptoService cryptoService = services.getService(ShareCryptoService.class);
+        List<GuestShare> guestShares = new ArrayList<GuestShare>(shares.size());
+        for (Share share : shares) {
+            User guestUser = guestUsersByID.get(Integer.valueOf(share.getGuest()));
+            guestShares.add(new GuestShare(share, guestUser, cryptoService.decrypt(guestUser.getUserPassword())));
+        }
+        return new AJAXRequestResult(guestShares, lastModified, "guestshare");
     }
 
 }

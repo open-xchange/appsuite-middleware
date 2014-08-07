@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,47 +47,60 @@
  *
  */
 
-package com.openexchange.share.json.osgi;
+package com.openexchange.share.json;
 
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.context.ContextService;
-import com.openexchange.crypto.CryptoService;
-import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.share.ShareService;
-import com.openexchange.share.json.ShareActionFactory;
-import com.openexchange.user.UserService;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.share.Share;
 
 /**
- * {@link ServletActivator}
+ * {@link GuestShare}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ServletActivator extends AJAXModuleActivator {
+public class GuestShare {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServletActivator.class);
+    private final Share share;
+    private final User guest;
+    private final String guestPassword;
 
     /**
-     * Initializes a new {@link ServletActivator}.
+     * Initializes a new {@link GuestShare}.
+     *
+     * @param share The share
+     * @param guest The guest user
      */
-    public ServletActivator() {
+    public GuestShare(Share share, User guest, String guestPassword) {
         super();
+        this.share = share;
+        this.guest = guest;
+        this.guestPassword = guestPassword;
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ShareService.class, UserService.class, ContextService.class, DispatcherPrefixService.class,
-            SessiondService.class, CryptoService.class, ConfigurationService.class };
+    /**
+     * Gets the share
+     *
+     * @return The share
+     */
+    public Share getShare() {
+        return share;
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("starting bundle: \"com.openexchange.share.json\"");
-        /*
-         * set references
-         */
-        registerModule(new ShareActionFactory(this), "share/management");
+    /**
+     * Gets the guest
+     *
+     * @return The guest
+     */
+    public User getGuest() {
+        return guest;
+    }
+
+    /**
+     * Gets the guestPassword
+     *
+     * @return The guestPassword
+     */
+    public String getGuestPassword() {
+        return guestPassword;
     }
 
 }

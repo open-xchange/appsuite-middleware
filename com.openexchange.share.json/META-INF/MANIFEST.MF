@@ -45,4 +45,4 @@ Import-Package: com.openexchange.ajax,
  org.osgi.framework,
  org.osgi.service.http,
  org.slf4j
-Bundle-Activator: com.openexchange.share.json.osgi.ServletActivator
+Bundle-Activator: com.openexchange.share.json.osgi.ShareJsonActivator

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,28 +47,48 @@
  *
  */
 
-package com.openexchange.share;
+package com.openexchange.share.json.osgi;
 
-import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
-
-
+import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.context.ContextService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.sessiond.SessiondService;
+import com.openexchange.share.ShareCryptoService;
+import com.openexchange.share.ShareService;
+import com.openexchange.share.json.GuestShareResultConverter;
+import com.openexchange.share.json.ShareActionFactory;
+import com.openexchange.share.json.ShareResultConverter;
+import com.openexchange.user.UserService;
 
 /**
- * {@link ShareService}
+ * {@link ShareJsonActivator}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.1
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface ShareService {
+public class ShareJsonActivator extends AJAXModuleActivator {
 
-    List<Share> create(CreateRequest shareRequest, Session session) throws OXException;
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ShareJsonActivator.class);
 
-    void delete(DeleteRequest deleteRequest, Session session) throws OXException;
+    /**
+     * Initializes a new {@link ShareJsonActivator}.
+     */
+    public ShareJsonActivator() {
+        super();
+    }
 
-    Share resolveToken(String token) throws OXException;
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ShareService.class, UserService.class, ContextService.class, DispatcherPrefixService.class,
+            SessiondService.class, ShareCryptoService.class };
+    }
 
-    List<Share> getAllShares(Session session) throws OXException;
+    @Override
+    protected void startBundle() throws Exception {
+        LOG.info("starting bundle: \"com.openexchange.share.json\"");
+        registerModule(new ShareActionFactory(this), "share/management");
+        registerService(ResultConverter.class, new ShareResultConverter());
+        registerService(ResultConverter.class, new GuestShareResultConverter());
+    }
 
 }
