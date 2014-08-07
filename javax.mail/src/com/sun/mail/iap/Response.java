@@ -177,7 +177,7 @@ public class Response {
 
     /**
      * Sets the BYE exception.
-     * 
+     *
      * @see #byeResponse(Exception)
      */
     public Response setByeException(final Exception byeException) {
@@ -281,23 +281,21 @@ public class Response {
 	    return null;
 	index++; // skip '('
 
-	Vector v = new Vector();
+	List<String> v = new LinkedList<String>();
 	do {
-	    v.addElement(atom ? readAtomString() : readString());
+	    v.add(atom ? readAtomString() : readString());
 	} while (buffer[index++] != ')');
 
 	int size = v.size();
 	if (size > 0) {
-	    String[] s = new String[size];
-	    v.copyInto(s);
-	    return s;
+	    return v.toArray(new String[size]);
 	} else  // empty list
 	    return null;
     }
 
     /**
      * Extract an integer, starting at the current position. Updates the
-     * internal index to beyond the number. Returns -1 if  a number was 
+     * internal index to beyond the number. Returns -1 if  a number was
      * not found.
      *
      * @return  a number
@@ -401,7 +399,7 @@ public class Response {
      * ASTRING := QuotedString | Literal | 1*ASTRING_CHAR
      *
      * @return a String
-     */ 
+     */
     public String readAtomString() {
 	return (String)parseString(true, true);
     }
@@ -416,7 +414,7 @@ public class Response {
 
 	// Skip leading spaces
 	skipSpaces();
-	
+
 	b = buffer[index];
 	if (b == '"') { // QuotedString
 	    index++; // skip the quote
@@ -427,7 +425,7 @@ public class Response {
 		if (b == '\\') // skip escaped byte
 		    index++;
 		if (index != copyto) { // only copy if we need to
-		    // Beware: this is a destructive copy. I'm 
+		    // Beware: this is a destructive copy. I'm
 		    // pretty sure this is OK, but ... ;>
 		    buffer[copyto] = buffer[index];
 		}
@@ -442,7 +440,7 @@ public class Response {
 	    } else
 		index++; // skip past the terminating quote
 
-	    if (returnString) 
+	    if (returnString)
 		return ASCIIUtility.toString(buffer, start, copyto);
 	    else
 		return new ByteArray(buffer, start, copyto-start);
@@ -455,7 +453,7 @@ public class Response {
 	    int count = 0;
 	    try {
 		count = ASCIIUtility.parseInt(buffer, start, index);
-	    } catch (NumberFormatException nex) { 
+	    } catch (NumberFormatException nex) {
 	   	// throw new ParsingException();
 		return null;
 	    }

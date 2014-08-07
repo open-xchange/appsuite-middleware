@@ -47,21 +47,21 @@
  *
  */
 
-package com.openexchange.find.drive;
+package com.openexchange.find.common;
 
 
 /**
- * Provides constants for "Drive" driver for find module.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.0
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.6.1
  */
-public class DriveConstants {
+public class CommonConstants {
 
-    public final static String FACET_VALUE_LAST_WEEK = "last_week";
+    public final static String FIELD_TIME = "time";
 
-    public final static String FACET_VALUE_LAST_MONTH = "last_month";
+    public final static String QUERY_LAST_WEEK = "last_week";
 
-    public final static String FACET_VALUE_LAST_YEAR = "last_year";
+    public final static String QUERY_LAST_MONTH = "last_month";
+
+    public final static String QUERY_LAST_YEAR = "last_year";
 
 }

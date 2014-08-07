@@ -49,21 +49,7 @@
 
 package com.openexchange.ajax.writer;
 
-import static com.openexchange.ajax.fields.ResponseFields.ARGUMENTS;
-import static com.openexchange.ajax.fields.ResponseFields.CONTINUATION;
-import static com.openexchange.ajax.fields.ResponseFields.DATA;
-import static com.openexchange.ajax.fields.ResponseFields.ERROR;
-import static com.openexchange.ajax.fields.ResponseFields.ERROR_CATEGORIES;
-import static com.openexchange.ajax.fields.ResponseFields.ERROR_CATEGORY;
-import static com.openexchange.ajax.fields.ResponseFields.ERROR_CODE;
-import static com.openexchange.ajax.fields.ResponseFields.ERROR_DESC;
-import static com.openexchange.ajax.fields.ResponseFields.ERROR_ID;
-import static com.openexchange.ajax.fields.ResponseFields.ERROR_PARAMS;
-import static com.openexchange.ajax.fields.ResponseFields.ERROR_STACK;
-import static com.openexchange.ajax.fields.ResponseFields.PROBLEMATIC;
-import static com.openexchange.ajax.fields.ResponseFields.TIMESTAMP;
-import static com.openexchange.ajax.fields.ResponseFields.TRUNCATED;
-import static com.openexchange.ajax.fields.ResponseFields.WARNINGS;
+import static com.openexchange.ajax.fields.ResponseFields.*;
 import static com.openexchange.ajax.requesthandler.Utils.getUnsignedInteger;
 import java.io.IOException;
 import java.io.Writer;
@@ -201,6 +187,36 @@ public final class ResponseWriter {
                         }
                     }));
                     includeStackTraceOnError = b;
+                }
+            }
+        }
+        return b.booleanValue();
+    }
+
+    static volatile Boolean includeArguments;
+    private static boolean includeArguments() {
+        Boolean b = includeArguments;
+        if (null == b) {
+            synchronized (ResponseWriter.class) {
+                b = includeArguments;
+                if (null == b) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null == service) {
+                        return false;
+                    }
+                    b = Boolean.valueOf(service.getBoolProperty("com.openexchange.ajax.response.includeArguments", false, new PropertyListener() {
+
+                        @Override
+                        public void onPropertyChange(PropertyEvent event) {
+                            final Type type = event.getType();
+                            if (Type.DELETED == type) {
+                                includeArguments = Boolean.FALSE;
+                            } else if (Type.CHANGED == type) {
+                                includeArguments = Boolean.valueOf(event.getValue().trim());
+                            }
+                        }
+                    }));
+                    includeArguments = b;
                 }
             }
         }
@@ -815,7 +831,9 @@ public final class ResponseWriter {
         writer.key(ERROR_DESC).value(exc.getSoleMessage());
         writeProblematic(exc, writer);
         writeTruncated(exc, writer);
-        writeArguments(exc, writer);
+        if (includeArguments()) {
+            writeArguments(exc, writer);
+        }
         if (exc.getLogArgs() != null) {
             final JSONArray array = new JSONArray();
             for (final Object tmp : exc.getLogArgs()) {

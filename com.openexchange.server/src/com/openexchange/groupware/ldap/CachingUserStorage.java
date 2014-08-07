@@ -80,7 +80,7 @@ public class CachingUserStorage extends UserStorage {
      */
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CachingUserStorage.class);
 
-    private static final String REGION_NAME = "User";
+    static final String REGION_NAME = "User";
 
     /**
      * Proxy attribute for the object implementing the persistent methods.

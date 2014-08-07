@@ -51,6 +51,7 @@ package com.openexchange.push.imapidle;
 
 import java.sql.Connection;
 import java.util.Map;
+import org.slf4j.Logger;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
 
 /**
@@ -73,8 +74,18 @@ public final class ImapIdleMailAccountDeleteListener implements MailAccountDelet
 
     @Override
     public void onBeforeMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) {
-        if (ImapIdlePushListener.getAccountId() == id) {
-            ImapIdlePushListenerRegistry.getInstance().purgeUserPushListener(cid, user);
+        ImapIdlePushManagerService instance = ImapIdlePushManagerService.getInstance();
+        if (null == instance) {
+            return;
+        }
+
+        if (instance.getAccountId() == id) {
+            try {
+                instance.stopListener(false, user, cid);
+            } catch (Exception e) {
+                Logger logger = org.slf4j.LoggerFactory.getLogger(ImapIdleMailAccountDeleteListener.class);
+                logger.warn("Failed to stop IMAP-IDLE listener for user {} in context {}", user, cid);
+            }
         }
     }
 

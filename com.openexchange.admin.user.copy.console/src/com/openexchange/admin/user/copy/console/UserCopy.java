@@ -119,7 +119,7 @@ public class UserCopy extends ObjectNamingAbstraction {
             final Context dest = contextParsing(parser, toContextOption);
 
             final User result = rsi.copyUser(user, src, dest, auth);
-            displayMovedMessage(user.getId(), result.getId(), src.getId(), dest.getId(), parser);
+            displaySuccessMessage(user, result, src.getId(), dest.getId(), parser);
             sysexit(0);
         } catch (final Exception e) {
             printErrors(null, null, e, parser);
@@ -127,11 +127,15 @@ public class UserCopy extends ObjectNamingAbstraction {
         }
     }
 
-    protected final void displayMovedMessage(final Integer srcuserid, final Integer destuserid, final Integer srcctxid, final Integer destcontext, final AdminParser parser) {
+    protected final void displaySuccessMessage(final User srcuser, final User destuser, final Integer srcctxid, final Integer destcontext, final AdminParser parser) {
         final StringBuilder sb = new StringBuilder(getObjectName());
-        if (null != srcuserid) {
-            sb.append(" ");
-            sb.append(srcuserid);
+        sb.append(" ");
+        String srcUserName = srcuser.getName();
+        Integer srcUserId = srcuser.getId();
+        if (srcUserName == null) {
+            sb.append(srcUserId);
+        } else {
+            sb.append(srcUserName);
         }
         sb.append(" copied");
         if (null != srcctxid) {
@@ -142,6 +146,7 @@ public class UserCopy extends ObjectNamingAbstraction {
             sb.append(" to context ");
             sb.append(destcontext);
         }
+        Integer destuserid = destuser.getId();
         if (null != destuserid) {
             sb.append(" with new user id ");
             sb.append(destuserid);

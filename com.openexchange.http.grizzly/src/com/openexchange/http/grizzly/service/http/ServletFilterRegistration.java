@@ -49,7 +49,6 @@
 
 package com.openexchange.http.grizzly.service.http;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -58,24 +57,28 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.Filter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * {@link ServletFilterRegistration}
- *
+ * {@link ServletFilterRegistration} - Keeps the path -> {@link FilterProxy} mappings and updates the central {@link OSGiMainHandler} when
+ * mappings change so they are respected for new incoming requests.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since v7.6.1
  */
 public class ServletFilterRegistration {
 
+    private static final Logger LOG = LoggerFactory.getLogger(ServletFilterRegistration.class);
     private static volatile ServletFilterRegistration instance;
 
     /**
      * Initializes the instance using given configuration service instance
      *
      * @param configService The configuration service instance
-     * @throws IOException If initialization fails
      */
-    public static void initInstance() throws IOException {
+    public static void initInstance() {
         instance = new ServletFilterRegistration();
     }
 
@@ -125,7 +128,14 @@ public class ServletFilterRegistration {
     }
 
     /**
-     * Gets all filters for given path
+     * Gets all filters for given path. The filters are ordered by their service ranking. If multiple filters have the same service ranking
+     * the are ordered as follows:
+     * 
+     * <ol>
+     *   <li>filters that match all paths e.g. were registered without a path or with the /* wildcard</li>
+     *   <li>filters that match a prefix of a path e.g. filters that are registered for /a/b should be used for requests to /a/b/c, too</li>
+     *   <li>filters that match a path e.g. filters that are registered for /a/b should be used for requests to /a/b</li>
+     * </ol> 
      *
      * @param path The Servlet path
      * @return All sorted filters for the path
@@ -140,7 +150,14 @@ public class ServletFilterRegistration {
     }
 
     /**
-     * Gets all filters for given path
+     * Gets all filters for given path. The filters are ordered by their service ranking. If multiple filters have the same service ranking
+     * the are ordered as follows:
+     * 
+     * <ol>
+     *   <li>filters that match all paths e.g. were registered without a path or with the /* wildcard</li>
+     *   <li>filters that match a prefix of a path e.g. filters that are registered for /a/b should be used for requests to /a/b/c, too</li>
+     *   <li>filters that match a path e.g. filters that are registered for /a/b should be used for requests to /a/b</li>
+     * </ol> 
      *
      * @param path The Servlet path
      * @return All sorted filters for the path
@@ -168,22 +185,31 @@ public class ServletFilterRegistration {
             }
         }
 
-        // Add the handlers for matching topic names
+        // Add the handlers for matching 
         List<FilterProxy> proxies = this.matchingPath.get(path);
         if (proxies != null) {
             filters.addAll(proxies);
         }
 
-        // Now order them according to service ranking file
+        // Now order them according to service ranking
         if (null != comparator) {
             Collections.sort(filters, comparator);
+        } else {
+            LOG.error("Missing comparator, unable to sort servlet filters properly");
         }
 
         return filters;
     }
 
     /**
-     * Gets all filters
+     * Gets all filters. The filters are ordered by their service ranking. If multiple filters have the same service ranking
+     * the are ordered as follows:
+     * 
+     * <ol>
+     *   <li>filters that match all paths e.g. were registered without a path or with the /* wildcard</li>
+     *   <li>filters that match a prefix of a path e.g. filters that are registered for /a/b should be used for requests to /a/b/c, too</li>
+     *   <li>filters that match a path e.g. filters that are registered for /a/b should be used for requests to /a/b</li>
+     * </ol> 
      *
      * @return All filters
      */
@@ -206,13 +232,35 @@ public class ServletFilterRegistration {
             }
         }
 
+        // Now order them according to service ranking
+        if (null != comparator) {
+            Collections.sort(filters, comparator);
+        } else {
+            LOG.error("Missing comparator, unable to sort servlet filters properly");
+        }
+
         return filters;
     }
 
     /**
-     * Puts given filter proxy
-     *
-     * @param proxy The filter proxy
+     * Puts given servlet filter proxy into this registration. Depending on the paths specified in the proxy the servlet filters will be
+     * registered like follows:
+     * <ul>
+     *   <li>
+     *     There is no path specified for the filter or the path equals <strong>/*</strong>: This filter will be applied to all request
+     *   </li>
+     *   <li>
+     *     The path ends with <strong>/*</strong> wildcard but doesn't equal <strong>/*</strong> e.g. <strong>/a/b/*</strong>: This filter
+     *     will be used for requests to all URLs starting with <strong>/a/b</strong> e.g <strong>/a/b/c</strong>, <strong>/a/b/c/d</strong>
+     *     and so on
+     *   </li>
+     *   <li>
+     *     The path doesn't end with the <strong>/*</strong> wildcard: This filter will only be used for requests that match this path
+     *     exactly
+     *   </li>
+     * </ul>
+     * 
+     * @param proxy The filter proxy to register
      */
     public synchronized void put(final FilterProxy proxy) {
         String[] paths = proxy.getPaths();
@@ -224,23 +272,27 @@ public class ServletFilterRegistration {
             Map<String, List<FilterProxy>> newMatchingPath = null;
             Map<String, List<FilterProxy>> newMatchingPrefixPath = null;
             for (int i = 0; i < paths.length; i++) {
-                final String topic = paths[i];
-
-                if (topic.endsWith("/*")) {
-                    // prefix topic: we remove the /*
-                    if (newMatchingPrefixPath == null) {
-                        newMatchingPrefixPath = new HashMap<String, List<FilterProxy>>(this.matchingPrefixPath);
+                final String servletPath = paths[i];
+                if (servletPath.endsWith("/*")) {
+                    // prefix servletPath: we remove the /*
+                    final String prefix = servletPath.substring(0, servletPath.length() - 2);
+                    //corner case: a filterproxy with path '/*' should be applied to all requests
+                    if(prefix.isEmpty()) {
+                        final List<FilterProxy> newMatchingAllPaths = new ArrayList<FilterProxy>(this.matchingAllPaths);
+                        newMatchingAllPaths.add(proxy);
+                        this.matchingAllPaths = newMatchingAllPaths;
+                    } else {
+                        if (newMatchingPrefixPath == null) {
+                            newMatchingPrefixPath = new HashMap<String, List<FilterProxy>>(this.matchingPrefixPath);
+                        }
+                        this.updateMap(newMatchingPrefixPath, prefix, proxy, true);
                     }
-
-                    final String prefix = topic.substring(0, topic.length() - 2);
-                    this.updateMap(newMatchingPrefixPath, prefix, proxy, true);
                 } else {
                     // exact match
                     if (newMatchingPath == null) {
                         newMatchingPath = new HashMap<String, List<FilterProxy>>(this.matchingPath);
                     }
-
-                    this.updateMap(newMatchingPath, topic, proxy, true);
+                    this.updateMap(newMatchingPath, servletPath, proxy, true);
                 }
             }
             if (newMatchingPath != null) {
@@ -250,8 +302,11 @@ public class ServletFilterRegistration {
                 this.matchingPrefixPath = newMatchingPrefixPath;
             }
         }
-
-        handler.updateTrackedServletFilters(this);
+        if (handler != null) {
+            handler.updateTrackedServletFilters(this);
+        } else {
+            LOG.error("OSGIMainHandler not set, unable to update servlet filters");
+        }
     }
 
     /**
@@ -269,23 +324,29 @@ public class ServletFilterRegistration {
             Map<String, List<FilterProxy>> newMatchingPath = null;
             Map<String, List<FilterProxy>> newMatchingPrefixPath = null;
             for (int i = 0; i < paths.length; i++) {
-                final String topic = paths[i];
-
-                if (topic.endsWith("/*")) {
-                    // prefix topic: we remove the /*
-                    if (newMatchingPrefixPath == null) {
-                        newMatchingPrefixPath = new HashMap<String, List<FilterProxy>>(this.matchingPrefixPath);
+                final String servletPath = paths[i];
+                if (servletPath.endsWith("/*")) {
+                    // prefix servlet path: we remove the /*
+                    final String prefix = servletPath.substring(0, servletPath.length() - 2);
+                    //corner case: a filterproxy with path '/*' should be applied to all requests
+                    if(prefix.isEmpty()) {
+                        final List<FilterProxy> newMatchingAllPaths = new ArrayList<FilterProxy>(this.matchingAllPaths);
+                        if(!newMatchingAllPaths.remove(proxy)) {
+                            LOG.error("Failed to remove FilterProxy: {}", proxy);
+                        }
+                        this.matchingAllPaths = newMatchingAllPaths;
+                    } else {
+                        if (newMatchingPrefixPath == null) {
+                            newMatchingPrefixPath = new HashMap<String, List<FilterProxy>>(this.matchingPrefixPath);
+                        }
+                        this.updateMap(newMatchingPrefixPath, prefix, proxy, false);
                     }
-
-                    final String prefix = topic.substring(0, topic.length() - 2);
-                    this.updateMap(newMatchingPrefixPath, prefix, proxy, false);
                 } else {
                     // exact match
                     if (newMatchingPath == null) {
                         newMatchingPath = new HashMap<String, List<FilterProxy>>(this.matchingPath);
                     }
-
-                    this.updateMap(newMatchingPath, topic, proxy, false);
+                    this.updateMap(newMatchingPath, servletPath, proxy, false);
                 }
             }
             if (newMatchingPath != null) {
@@ -295,12 +356,23 @@ public class ServletFilterRegistration {
                 this.matchingPrefixPath = newMatchingPrefixPath;
             }
         }
-
-        handler.removeTrackedServletFilter(proxy);
+        if (handler != null) {
+            handler.removeTrackedServletFilter(proxy);
+        } else {
+            LOG.error("OSGIMainHandler not set, unable to update servlet filters");
+        }
     }
 
-    private void updateMap(final Map<String, List<FilterProxy>> proxyListMap, final String key, final FilterProxy proxy, final boolean add) {
-        List<FilterProxy> proxies = proxyListMap.get(key);
+    /**
+     * Update the map keeping the path -> FilterProxy associations by adding or removing a path, {@link FilterProxy} pair.
+     * 
+     * @param proxyListMap The current mapping that has to be updated
+     * @param path The path that should be modified
+     * @param proxy The FilterProxy that should be updated for the given path
+     * @param add if true add the {@link FilterProxy} to the given path, else remove it from the path.
+     */
+    private void updateMap(final Map<String, List<FilterProxy>> proxyListMap, final String path, final FilterProxy proxy, final boolean add) {
+        List<FilterProxy> proxies = proxyListMap.get(path);
         if (proxies == null) {
             if (!add) {
                 return;
@@ -315,9 +387,9 @@ public class ServletFilterRegistration {
             proxies.remove(proxy);
         }
         if (proxies.size() == 0) {
-            proxyListMap.remove(key);
+            proxyListMap.remove(path);
         } else {
-            proxyListMap.put(key, proxies);
+            proxyListMap.put(path, proxies);
         }
     }
 

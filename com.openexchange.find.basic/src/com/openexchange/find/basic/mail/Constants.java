@@ -74,14 +74,6 @@ public class Constants {
 
     final static String FIELD_FOLDER = "folder";
 
-    final static String FIELD_TIME = "time";
-
-    final static String QUERY_LAST_WEEK = "last_week";
-
-    final static String QUERY_LAST_MONTH = "last_month";
-
-    final static String QUERY_LAST_YEAR = "last_year";
-
     static final List<String> FROM_FIELDS = asList(FIELD_FROM);
 
     static final List<String> TO_FIELDS = Arrays.asList(new String[] { FIELD_TO, FIELD_CC });

@@ -1804,7 +1804,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     }
 
     protected void setQuotaModule(final AdminParser parser) {
-        this.quotaModule = setLongOpt(parser,OPT_QUOTA_MODULE,"The (comma-separated) list of identifiers for those modules to which to apply the quota value; currently supported values: [task, calendar, contact, infostore]", true, false,false);
+        this.quotaModule = setLongOpt(parser,OPT_QUOTA_MODULE,"The (comma-separated) list of identifiers for those modules to which to apply the quota value; currently supported values: [task, calendar, contact, infostore, attachment]", true, false,false);
     }
 
     protected void setQuotaValue(final AdminParser parser) {

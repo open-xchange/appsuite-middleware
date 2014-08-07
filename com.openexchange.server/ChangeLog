@@ -1,3 +1,31 @@
+* 2014-08-06 - steffen.templin@open-xchange.com
+
+ - Fix for bug 33918: Translate display names of subscription sources only if necessary
+
+* 2014-08-06 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 33921: Don't cache filestore references in image preview cache
+ - Fix for bug 33914: Corrected parameter index when dropping the +/- variants of user capabilities
+
+* 2014-08-05 - lars.hoogestraat@open-xchange.com
+
+ - Fix for bug 33869: Added missing description in CLT for quota module 'attachment'.
+
+* 2014-08-04 - marcus.klein@open-xchange.com
+
+ - Fix for bug 33891: Removed superfluous line throwing always an exception.
+
+* 2014-08-01 - thorben.betten@open-xchange.com
+
+ - Fix for bug 33857: Do not log a warning in case Content-Type misses any charset information; just detect it and continue
+ - Fix for bug 33715: Accept new parameter "attach_src" for action=get request to let the client signal RFC822 source is supposed to be
+                      attached to generated JSON mail representation
+
+* 2014-07-31 - thorben.betten@open-xchange.com
+
+ - Fix for bug 33839: Escape site information when generating the publication site from selected template
+ - Fix for bug 33850: Keep "Message-Id" header if present
+
 * 2014-07-30 - thorben.betten@open-xchange.com
 
  - Fix for bug 27711: Output standard HTML error page if requested resource appears not to be in JSON output format

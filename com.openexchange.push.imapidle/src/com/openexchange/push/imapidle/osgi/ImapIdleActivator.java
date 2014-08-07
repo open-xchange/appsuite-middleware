@@ -49,35 +49,34 @@
 
 package com.openexchange.push.imapidle.osgi;
 
-import org.osgi.service.event.EventAdmin;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.context.ContextService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.imap.notify.IMAPNotifierRegistryService;
+import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.push.PushManagerService;
+import com.openexchange.push.imapidle.ImapIdleConfiguration;
 import com.openexchange.push.imapidle.ImapIdleDeleteListener;
 import com.openexchange.push.imapidle.ImapIdleMailAccountDeleteListener;
-import com.openexchange.push.imapidle.ImapIdlePushListener;
-import com.openexchange.push.imapidle.ImapIdlePushListener.PushMode;
-import com.openexchange.push.imapidle.ImapIdlePushListenerRegistry;
 import com.openexchange.push.imapidle.ImapIdlePushManagerService;
-import com.openexchange.push.imapidle.Services;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.timer.TimerService;
+
 
 /**
- * {@link ImapIdleActivator} - The IMAP IDLE activator.
+ * {@link ImapIdleActivator}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.6.1
  */
-public final class ImapIdleActivator extends HousekeepingActivator {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ImapIdleActivator.class);
-
-    private String folder;
-
-    private int errordelay;
+public class ImapIdleActivator extends HousekeepingActivator {
 
     /**
      * Initializes a new {@link ImapIdleActivator}.
@@ -88,106 +87,56 @@ public final class ImapIdleActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {
-            MailService.class, EventAdmin.class,
-            ConfigurationService.class, ContextService.class,
-            ThreadPoolService.class, SessiondService.class };
-    }
-
-    @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        LOG.info("Re-available service: {}", clazz.getName());
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        LOG.warn("Absent service: {}", clazz.getName());
+        return new Class<?>[] { DatabaseService.class, TimerService.class, MailService.class, ConfigurationService.class, HazelcastConfigurationService.class, SessiondService.class, ThreadPoolService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        try {
-            Services.setServiceLookup(this);
-            /*
-             * Initialize & open tracker for SessionD service
-             */
-            track(SessiondService.class);
-            track(IMAPNotifierRegistryService.class);
-            openTrackers();
-            /*
-             * Read configuration
-             */
-            final ConfigurationService configurationService = getService(ConfigurationService.class);
-            folder = "INBOX";
-            {
-                final String tmp = configurationService.getProperty("com.openexchange.push.imapidle.folder");
-                if (null != tmp) {
-                    folder = tmp.trim();
+        HazelcastConfigurationService hzConfigService = getService(HazelcastConfigurationService.class);
+
+        final boolean hzEnabled = hzConfigService.isEnabled();
+        if (hzEnabled) {
+            final BundleContext context = this.context;
+            ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance> stc = new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
+
+                @Override
+                public HazelcastInstance addingService(ServiceReference<HazelcastInstance> reference) {
+                    HazelcastInstance hzInstance = context.getService(reference);
+                    addService(HazelcastInstance.class, hzInstance);
+                    return hzInstance;
                 }
-            }
 
-            final String modestr =configurationService.getProperty("com.openexchange.push.imapidle.pushmode", PushMode.ALWAYS.toString());
-            PushMode pushmode = PushMode.fromString(modestr);
-            if( pushmode == null ) {
-                LOG.info("WARNING: {} is an invalid setting for com.openexchange.push.imapidle.pushmode, using default", modestr);
-                pushmode = PushMode.ALWAYS;
-            }
+                @Override
+                public void modifiedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance service) {
+                    // Nothing
+                }
 
-            errordelay = configurationService.getIntProperty("com.openexchange.push.imapidle.errordelay", 1000);
-
-            final boolean debug = configurationService.getBoolProperty("com.openexchange.push.imapidle.debug", true);
-            ImapIdlePushListener.setFolder(folder);
-            ImapIdlePushListener.setDebugEnabled(debug);
-            ImapIdlePushListener.setPushmode(pushmode);
-
-            /*
-             * Start-up
-             */
-            /*
-             * Register push manager
-             */
-            registerService(PushManagerService.class, new ImapIdlePushManagerService(), null);
-            registerService(MailAccountDeleteListener.class, new ImapIdleMailAccountDeleteListener(), null);
-            registerService(DeleteListener.class, new ImapIdleDeleteListener(), null);
-            LOG.info("com.openexchange.push.imapidle bundle started");
-            LOG.info(debug ? " debugging enabled" : "debugging disabled");
-            LOG.info("Foldername: {}", folder);
-            LOG.info("Error delay: {}", errordelay);
-            LOG.info("pushmode: {}", pushmode);
-        } catch (final Exception e) {
-            LOG.error("", e);
-            throw e;
+                @Override
+                public void removedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance service) {
+                    removeService(HazelcastInstance.class);
+                    context.ungetService(reference);
+                }
+            };
+            track(HazelcastInstance.class, stc);
+            openTrackers();
         }
+
+        ImapIdleConfiguration configuration = new ImapIdleConfiguration();
+        configuration.init(this);
+        registerService(PushManagerService.class, ImapIdlePushManagerService.newInstance(configuration, this));
+
+        registerService(MailAccountDeleteListener.class, new ImapIdleMailAccountDeleteListener());
+        registerService(DeleteListener.class, new ImapIdleDeleteListener());
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        try {
-            /*
-             * Unregister push manager
-             */
-            cleanUp();
-            /*
-             * Clear all running listeners
-             */
-            ImapIdlePushListenerRegistry.getInstance().purgeAllPushListener();
-            /*
-             * Shut down
-             */
-            ImapIdlePushListener.setFolder(null);
-            ImapIdlePushListenerRegistry.getInstance().clear();
-            /*
-             * Clear service registry
-             */
-            Services.setServiceLookup(null);
-            /*
-             * Reset
-             */
-            folder = null;
-        } catch (final Exception e) {
-            LOG.error("", e);
-            throw e;
-        }
+    public <S> boolean addService(Class<S> clazz, S service) {
+        return super.addService(clazz, service);
+    }
+
+    @Override
+    public <S> boolean removeService(Class<? extends S> clazz) {
+        return super.removeService(clazz);
     }
 
 }

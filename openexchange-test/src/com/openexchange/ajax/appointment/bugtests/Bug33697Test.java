@@ -52,6 +52,7 @@ package com.openexchange.ajax.appointment.bugtests;
 import java.util.Collections;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.appointment.AbstractAppointmentTest;
@@ -179,6 +180,11 @@ public class Bug33697Test extends AbstractAppointmentTest {
     }
 
     /*
+     * 
+     * Move from SHARED to SHARED folder isn't implemented, yet 
+     * com.openexchange.calendar.api.CalendarCollection.detectFolderMoveAction(CalendarDataObject, CalendarDataObject)
+     * 
+     * 
      * - UserX shares a subfolder named "Bug33697SubfolderX" from his private calendar to UserY with the following permissions:
      *   Folder permissions: create objects and subfolders.
      *   Object permissions: read all objects, edit all objects, delete all objects.
@@ -203,7 +209,8 @@ public class Bug33697Test extends AbstractAppointmentTest {
      *  - UserZ:
      *    - sees appointment "Bug33697Appointment" in folder "Bug33697AppointmentSubfolderZ"
      *    - became a participant
-     */
+     
+    @Ignore
     public void testMoveFromUserXSharedSubFolderToUserZPrivateSubFolder() throws Exception {
         bug33697Appointment.setParentFolderID(bug33697SubfolderZ.getObjectID());
         Pair<Appointment, FolderObject> pair = new Pair<Appointment, FolderObject>(bug33697Appointment, bug33697SubfolderX);
@@ -245,5 +252,6 @@ public class Bug33697Test extends AbstractAppointmentTest {
         Arrays.sort(clientIds);
         assertTrue("Participants and clients should be equal for the moved appointment", Arrays.equals(participantIds, clientIds));
     }
+    */
 
 }

@@ -17,22 +17,20 @@
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:88
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:90
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:92
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2010-11-24 16:49+0100\n"
-"Last-Translator: Nikolaos Sarris <nsarris@techknowlogy.gr>\n"
+"PO-Revision-Date: 2014-08-06 15:39+0000\n"
+"Last-Translator: ioannis.chouklis <ioannis.chouklis@open-xchange.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"Language: el_GR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"#-#-#-#-#  server.el_GR.po (PACKAGE VERSION)  #-#-#-#-#\n"
-"X-Generator: Pootle 1.1.0\n"
-"#-#-#-#-#  errors.el_GR.po (PACKAGE VERSION)  #-#-#-#-#\n"
-"X-Generator: Pootle 1.1.0\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Pootle 2.5.1.1\n"
+"X-POOTLE-MTIME: 1407339599.000000\n"
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
 #. %1$s will be replaced with a detailed exception message.
@@ -44,7 +42,7 @@ msgstr ""
 #. %1$s is replaced by some own message that will not be translated.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:67
 msgid "Unknown problem: \"%1$s\"."
-msgstr ""
+msgstr "Αγνωστο πρόβλημα: \"%1$s\"."
 
 #. The Kerberos ticket granting service denied to issue a delegate ticket for the client.
 #. %1$s will be replaced with the Kerberos name of the client.
@@ -127,7 +125,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.textxtraction/src/com/openexchange/textxtraction/TextXtractExceptionMessages.java:69
 msgid "An I/O error occurred: %1$s"
-msgstr "   / (I/O error): %1$s"
+msgstr "Λάθος  Ε/Ε : %1$s"
 
 #. Missing configuration property: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caching/src/com/openexchange/caching/CacheExceptionMessage.java:78
@@ -11383,7 +11381,6 @@ msgid "Africa/Johannesburg"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:28
-#, fuzzy
 msgid "Africa/Juba"
 msgstr ""
 
@@ -11588,7 +11585,6 @@ msgid "America/Bahia"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:79
-#, fuzzy
 msgid "America/Bahia Banderas"
 msgstr ""
 
@@ -11673,7 +11669,6 @@ msgid "America/Costa Rica"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:100
-#, fuzzy
 msgid "America/Creston"
 msgstr ""
 
@@ -11850,7 +11845,6 @@ msgid "America/Knox IN"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:144
-#, fuzzy
 msgid "America/Kralendijk"
 msgstr ""
 
@@ -11896,7 +11890,6 @@ msgid "America/Martinique"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:155
-#, fuzzy
 msgid "America/Matamoros"
 msgstr ""
 
@@ -11917,7 +11910,6 @@ msgid "America/Merida"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:160
-#, fuzzy
 msgid "America/Metlakatla"
 msgstr ""
 
@@ -11983,7 +11975,6 @@ msgid "America/North Dakota/New Salem"
 msgstr "/ / "
 
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:176
-#, fuzzy
 msgid "America/Ojinaga"
 msgstr ""
 
@@ -12052,7 +12043,6 @@ msgid "America/Rosario"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:193
-#, fuzzy
 msgid "America/Santa Isabel"
 msgstr ""
 
@@ -12081,7 +12071,6 @@ msgid "America/Shiprock"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:200
-#, fuzzy
 msgid "America/Sitka"
 msgstr ""
 
@@ -12174,7 +12163,6 @@ msgid "Antarctica/DumontDUrville"
 msgstr "/  "
 
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:223
-#, fuzzy
 msgid "Antarctica/Macquarie"
 msgstr ""
 
@@ -12323,7 +12311,6 @@ msgid "Asia/Harbin"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:260
-#, fuzzy
 msgid "Asia/Hebron"
 msgstr ""
 
@@ -12432,7 +12419,6 @@ msgid "Asia/Nicosia"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:287
-#, fuzzy
 msgid "Asia/Novokuznetsk"
 msgstr ""
 
@@ -13145,7 +13131,6 @@ msgid "Pacific/Chatham"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:465
-#, fuzzy
 msgid "Pacific/Chuuk"
 msgstr ""
 
@@ -13250,7 +13235,6 @@ msgid "Pacific/Pitcairn"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:491
-#, fuzzy
 msgid "Pacific/Pohnpei"
 msgstr ""
 

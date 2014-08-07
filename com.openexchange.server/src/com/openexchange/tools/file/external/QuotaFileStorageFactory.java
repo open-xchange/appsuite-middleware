@@ -57,9 +57,18 @@ import com.openexchange.groupware.contexts.Context;
  * {@link QuotaFileStorageFactory}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 public interface QuotaFileStorageFactory {
 
-    public QuotaFileStorage getQuotaFileStorage(Context context, URI uri) throws OXException;
+    /**
+     * Creates a {@link QuotaFileStorage} instance from specified URI and context.
+     *
+     * @param context The associated context
+     * @param uri The file store URI; e.g. <code>"file:/var/open-xchange/filestore/"</code>
+     * @return An appropriate {@code QuotaFileStorage} instance
+     * @throws OXException If an appropriate {@code QuotaFileStorage} instance cannot be returned
+     */
+    QuotaFileStorage getQuotaFileStorage(Context context, URI uri) throws OXException;
 
 }

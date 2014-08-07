@@ -55,6 +55,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import javax.mail.MessagingException;
 import javax.mail.internet.idn.IDNA;
@@ -249,8 +250,25 @@ public final class IMAPConfig extends MailConfig {
                 }
                 try {
                     final CapabilitiesResponse response = CapabilitiesCache.getCapabilitiesResponse(imapStore, this, session, accountId);
-                    imapCapabilities = response.getImapCapabilities();
-                    capabilities = imapStore.getCapabilities();
+
+                    IMAPCapabilities imapCaps = response.getImapCapabilities();
+                    Map<String, String> caps = imapStore.getCapabilities();
+
+                    BoolCapVal supportsACLs = IMAPProperties.getInstance().getSupportsACLs();
+                    if (BoolCapVal.FALSE.equals(supportsACLs)) {
+                        imapCaps.setACL(false);
+                        caps = new HashMap<String, String>(caps);
+                        caps.remove("ACL");
+                        caps = Collections.unmodifiableMap(caps);
+                    } else if (BoolCapVal.TRUE.equals(supportsACLs)) {
+                        imapCaps.setACL(true);
+                        caps = new HashMap<String, String>(caps);
+                        caps.put("ACL", "ACL");
+                        caps = Collections.unmodifiableMap(caps);
+                    }
+
+                    imapCapabilities = imapCaps;
+                    capabilities = caps;
                     aclExtension = response.getAclExtension();
                 } catch (final MessagingException e) {
                     throw MailConfigException.create(e);
