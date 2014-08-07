@@ -58,12 +58,9 @@ import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.activation.FileTypeMap;
 import org.slf4j.Logger;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
@@ -72,12 +69,6 @@ import com.google.gdata.client.contacts.ContactsService;
 import com.google.gdata.data.Link;
 import com.google.gdata.data.contacts.ContactEntry;
 import com.google.gdata.data.contacts.ContactFeed;
-import com.google.gdata.data.extensions.Email;
-import com.google.gdata.data.extensions.Im;
-import com.google.gdata.data.extensions.Name;
-import com.google.gdata.data.extensions.Organization;
-import com.google.gdata.data.extensions.PhoneNumber;
-import com.google.gdata.data.extensions.StructuredPostalAddress;
 import com.google.gdata.util.ServiceException;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.container.IFileHolder;
@@ -90,12 +81,12 @@ import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.java.ImageTypeDetector;
 import com.openexchange.java.Streams;
-import com.openexchange.java.util.TimeZones;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionSource;
+import com.openexchange.subscribe.google.internal.ContactEntryParser;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
@@ -288,10 +279,13 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
     // ------------------------------------------------------------------------------------------------------------------- //
 
     private final SubscriptionSource source;
+    
+    private final ContactEntryParser parser;
 
     public GoogleContactSubscribeService(final OAuthServiceMetaData googleMetaData, ServiceLookup services) {
         super(googleMetaData, services);
         source = initSS(FolderObject.CONTACT, "contact");
+        parser = new ContactEntryParser();
     }
 
     @Override
@@ -396,179 +390,14 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
     
     private int fetchResults(final ContactsService contactsService, final Query query, final List<Contact> contacts) throws OXException, IOException, ServiceException {
         ContactFeed resultFeed = contactsService.getFeed(query, ContactFeed.class);
-        handleContactFeed(resultFeed, contacts, loadingPhotoHandler);
+        handleContactFeed(resultFeed, contacts);
         return resultFeed.getEntries().size();
     }
 
-    protected void handleContactFeed(ContactFeed contactFeed, List<Contact> contacts, PhotoHandler photoHandler) throws OXException {
+    protected void handleContactFeed(final ContactFeed contactFeed, final List<Contact> contacts) throws OXException {
         for (ContactEntry entry : contactFeed.getEntries()) {
             Contact contact = new Contact();
-
-            {
-                String emailId = null;
-                for (Email email : entry.getEmailAddresses()) {
-                    if (email.getPrimary()) {
-                        emailId = email.getAddress();
-                        break;
-                    }
-                }
-                if (null != emailId) {
-                    contact.setEmail1(emailId);
-                }
-            }
-
-            if(entry.hasName()) {
-                Name name = entry.getName();
-                if (name.hasFullName()) {
-                    contact.setDisplayName(name.getFullName().getValue());
-                }
-                if (name.hasNamePrefix()) {
-                    contact.setTitle(name.getNamePrefix().getValue());
-                }
-                if (name.hasGivenName()) {
-                    contact.setGivenName(name.getGivenName().getValue());
-                }
-                if (name.hasAdditionalName()) {
-                    contact.setMiddleName(name.getAdditionalName().getValue());
-                }
-                if (name.hasFamilyName()) {
-                    contact.setSurName(name.getFamilyName().getValue());
-                }
-                if (name.hasNameSuffix()) {
-                    contact.setSuffix(name.getNameSuffix().getValue());
-                }
-            }
-
-            if (entry.hasOrganizations()) {
-                for (final Organization o : entry.getOrganizations()) {
-                    if (o.hasOrgName()) {
-                        contact.setCompany(o.getOrgName().getValue());
-                    }
-                    if (o.hasOrgJobDescription()) {
-                        contact.setTitle(o.getOrgJobDescription().getValue());
-                    }
-                }
-            }
-
-            if (entry.hasEmailAddresses()) {
-                for (final Email email : entry.getEmailAddresses()) {
-                    if (email.getRel() != null) {
-                        if (email.getRel().endsWith("work")) {
-                            contact.setEmail1(email.getAddress());
-                        } else if (email.getRel().endsWith("home")) {
-                            contact.setEmail2(email.getAddress());
-                        } else if (email.getRel().endsWith("other")) {
-                            contact.setEmail3(email.getAddress());
-                        }
-                    }
-                }
-            }
-
-            if (entry.hasPhoneNumbers()) {
-                boolean mobile1Vacant = true;
-                boolean mobile2Vacant = true;
-                boolean otherVacant = true;
-                for (final PhoneNumber pn : entry.getPhoneNumbers()) {
-                    final String rel = pn.getRel();
-                    if (rel != null) {
-                        if (rel.endsWith("work")) {
-                            contact.setTelephoneBusiness1(pn.getPhoneNumber());
-                        } else if (rel.endsWith("home")) {
-                            contact.setTelephoneHome1(pn.getPhoneNumber());
-                        } else if (rel.endsWith("other")) {
-                            contact.setTelephoneOther(pn.getPhoneNumber());
-                            otherVacant = false;
-                        } else if (rel.endsWith("work_fax")) {
-                            contact.setFaxBusiness(pn.getPhoneNumber());
-                        } else if (rel.endsWith("home_fax")) {
-                            contact.setFaxHome(pn.getPhoneNumber());
-                        } else if (rel.endsWith("mobile")) {
-                            if (mobile1Vacant) {
-                                contact.setCellularTelephone1(pn.getPhoneNumber());
-                                mobile1Vacant = false;
-                            } else if (mobile2Vacant) {
-                                contact.setCellularTelephone2(pn.getPhoneNumber());
-                                mobile2Vacant = false;
-                            } else if (otherVacant) {
-                                contact.setTelephoneOther(pn.getPhoneNumber());
-                                // No, don't set 'otherVacant = false'
-                            } else {
-                                LOG.debug("Could not map \"mobile\" number {} to a vacant contact field", pn.getPhoneNumber());
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (entry.getBirthday() != null) {
-                setBirthday(contact, entry.getBirthday().getValue());
-            }
-
-            if (entry.hasStructuredPostalAddresses()) {
-                for (final StructuredPostalAddress pa : entry.getStructuredPostalAddresses()) {
-                    if (pa.getRel() != null) {
-                        if (pa.getRel().endsWith("work")) {
-                            if (pa.getStreet() != null) {
-                                contact.setStreetBusiness(pa.getStreet().getValue());
-                            }
-                            if (pa.getPostcode() != null) {
-                                contact.setPostalCodeBusiness(pa.getPostcode().getValue());
-                            }
-                            if (pa.getCity() != null) {
-                                contact.setCityBusiness(pa.getCity().getValue());
-                            }
-                            if (pa.getCountry() != null) {
-                                contact.setCountryBusiness(pa.getCountry().getValue());
-                                // TODO: This will be used to write the address to the contacts note-field if the data is not
-                                // structured
-                                // System.out.println("***** "+"Work:\n"+pa.getFormattedAddress().getValue()+"\n");
-                            }
-                        }
-                        if (pa.getRel().endsWith("home")) {
-                            if (pa.getStreet() != null) {
-                                contact.setStreetHome(pa.getStreet().getValue());
-                            }
-                            if (pa.getPostcode() != null) {
-                                contact.setPostalCodeHome(pa.getPostcode().getValue());
-                            }
-                            if (pa.getCity() != null) {
-                                contact.setCityHome(pa.getCity().getValue());
-                            }
-                            if (pa.getCountry() != null) {
-                                contact.setCountryHome(pa.getCountry().getValue());
-                            }
-                        }
-                        if (pa.getRel().endsWith("other")) {
-                            if (pa.getStreet() != null) {
-                                contact.setStreetOther(pa.getStreet().getValue());
-                            }
-                            if (pa.getPostcode() != null) {
-                                contact.setPostalCodeOther(pa.getPostcode().getValue());
-                            }
-                            if (pa.getCity() != null) {
-                                contact.setCityOther(pa.getCity().getValue());
-                            }
-                            if (pa.getCountry() != null) {
-                                contact.setCountryOther(pa.getCountry().getValue());
-                            }
-                        }
-                    }
-                }
-            }
-            if (entry.hasImAddresses()) {
-                for (final Im im : entry.getImAddresses()) {
-                    if (im.getProtocol() != null) {
-                        final String regex = "[^#]*#([a-zA-Z\u00e4\u00f6\u00fc\u00c4\u00d6\u00dc]*)";
-                        final Pattern pattern = Pattern.compile(regex);
-                        final Matcher matcher = pattern.matcher(im.getProtocol());
-                        if (matcher.matches()) {
-                            contact.setInstantMessenger1(im.getAddress() + " (" + matcher.group(1) + ")");
-                        }
-                    }
-
-                }
-            }
-
+            parser.parseContact(entry, contact);
             loadingPhotoHandler.handlePhoto(entry, contact);
 
             /**
@@ -614,34 +443,6 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
              */
 
             contacts.add(contact);
-        }
-    }
-
-    /**
-     * Sets the birthday for the contact based on the google information
-     *
-     * @param contact - the {@link Contact} to set the birthday for
-     * @param birthday - the string the birthday is included in
-     */
-    protected void setBirthday(Contact contact, String birthday) {
-        if (birthday != null) {
-
-            final String regex = "([0-9]{4})\\-([0-9]{2})\\-([0-9]{2})";
-            if (birthday.matches(regex)) {
-                final Pattern pattern = Pattern.compile(regex);
-                final Matcher matcher = pattern.matcher(birthday);
-                if (matcher.matches() && matcher.groupCount() == 3) {
-                    final int year = Integer.parseInt(matcher.group(1));
-                    final int month = Integer.parseInt(matcher.group(2));
-                    final int day = Integer.parseInt(matcher.group(3));
-                    final Calendar cal = Calendar.getInstance(TimeZones.UTC);
-                    cal.clear();
-                    cal.set(Calendar.DAY_OF_MONTH, day);
-                    cal.set(Calendar.MONTH, month - 1);
-                    cal.set(Calendar.YEAR, year);
-                    contact.setBirthday(cal.getTime());
-                }
-            }
         }
     }
 }
