@@ -51,9 +51,12 @@ package com.openexchange.subscribe.google;
 
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
+import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.AbstractSubscribeService;
+import com.openexchange.subscribe.Subscription;
+import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionSource;
 
 /**
@@ -69,6 +72,9 @@ public abstract class AbstractGoogleSubscribeService extends AbstractSubscribeSe
 
     /** The service look-up */
     protected final ServiceLookup services;
+
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractGoogleSubscribeService.class);
 
     /**
      * Initializes a new {@link AbstractGoogleSubscribeService}.
@@ -95,14 +101,58 @@ public abstract class AbstractGoogleSubscribeService extends AbstractSubscribeSe
         source.setFolderModule(module);
         source.setId("com.openexchange.subscribe.google." + appendix);
         source.setSubscribeService(this);
-        
+
         final DynamicFormDescription form = new DynamicFormDescription();
         final FormElement oauthAccount = FormElement.custom("oauthAccount", "account", FormStrings.ACCOUNT_LABEL);
         oauthAccount.setOption("type", googleMetaData.getId());
         form.add(oauthAccount);
-        
+
         source.setFormDescription(form);
         return source;
+    }
+
+    @Override
+    public void modifyIncoming(final Subscription subscription) throws OXException {
+        if(subscription != null) {
+            super.modifyIncoming(subscription);
+            if (subscription.getConfiguration() != null){
+                if (subscription.getConfiguration().get("account") != null && !subscription.getConfiguration().get("account").toString().equals("null")){
+                    subscription.getConfiguration().put("account", subscription.getConfiguration().get("account").toString());
+                }else {
+                    throw SubscriptionErrorMessage.MISSING_ARGUMENT.create("account");
+                }
+            } else {
+                LOG.error("subscription.getConfiguration() is null");
+            }
+        } else {
+            LOG.error("subscription is null");
+        }
+    }
+
+    @Override
+    public void modifyOutgoing(final Subscription subscription) throws OXException {
+        final String accountId = (String) subscription.getConfiguration().get("account");
+        if (null != accountId){
+            try {
+                final Integer accountIdInt = Integer.valueOf(accountId);
+                if (null != accountIdInt) {
+                    subscription.getConfiguration().put("account",accountIdInt);
+                }
+            } catch (final NumberFormatException x) {
+                // Invalid account, but at least allow people to delete it.
+            }
+            String displayName = null;
+            if(subscription.getSecret() != null) {
+                displayName = googleMetaData.getDisplayName();
+            }
+            if (null != displayName && !"".equals(displayName)){
+                subscription.setDisplayName(displayName);
+            } else {
+                subscription.setDisplayName("Google");
+            }
+
+        }
+        super.modifyOutgoing(subscription);
     }
 
 }
