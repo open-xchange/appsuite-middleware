@@ -3,6 +3,7 @@ package com.openexchange.realtime.hazelcast.serialization.osgi;
 
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.realtime.hazelcast.serialization.PortableContextPredicateFactory;
 import com.openexchange.realtime.hazelcast.serialization.PortableIDFactory;
 import com.openexchange.realtime.hazelcast.serialization.PortableMemberPredicateFactory;
 import com.openexchange.realtime.hazelcast.serialization.PortableNotInternalPredicateFactory;
