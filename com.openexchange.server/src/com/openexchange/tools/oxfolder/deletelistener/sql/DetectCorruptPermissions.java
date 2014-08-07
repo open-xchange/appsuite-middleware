@@ -55,6 +55,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import com.openexchange.group.GroupStorage;
 import com.openexchange.tools.oxfolder.deletelistener.CorruptPermission;
 
 /**
@@ -125,9 +126,10 @@ public final class DetectCorruptPermissions {
 		}
 	}
 
-	private static final String SQL_SEL_INVALID_GROUP_PERM = "SELECT cid, fuid, permission_id FROM oxfolder_permissions AS op "
-			+ "WHERE op.cid = ? AND op.group_flag = 1 AND op.permission_id != 0 AND op.permission_id NOT IN ("
-			+ "SELECT id FROM groups AS g WHERE g.cid = op.cid)";
+    private static final String SQL_SEL_INVALID_GROUP_PERM = "SELECT cid, fuid, permission_id FROM oxfolder_permissions AS op "
+        + "WHERE op.cid = ? AND op.group_flag = 1 AND op.permission_id != " + GroupStorage.GROUP_ZERO_IDENTIFIER + " AND "
+        + "op.permission_id != " + GroupStorage.GUEST_GROUP_IDENTIFIER + " AND op.permission_id NOT IN ("
+        + "SELECT id FROM groups AS g WHERE g.cid = op.cid)";
 
 	/**
 	 * Detects corrupt group permissions existing in folders' permission table
