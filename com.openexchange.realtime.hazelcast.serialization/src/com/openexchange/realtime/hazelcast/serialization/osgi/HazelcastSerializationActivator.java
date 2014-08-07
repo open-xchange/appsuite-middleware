@@ -20,6 +20,7 @@ public class HazelcastSerializationActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        registerService(CustomPortableFactory.class, new PortableContextPredicateFactory());
         registerService(CustomPortableFactory.class, new PortableIDFactory());
         registerService(CustomPortableFactory.class, new PortableMemberPredicateFactory());
         registerService(CustomPortableFactory.class, new PortableNotInternalPredicateFactory());

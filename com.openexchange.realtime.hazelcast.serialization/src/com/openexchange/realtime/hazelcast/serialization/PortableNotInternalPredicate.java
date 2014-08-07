@@ -50,7 +50,6 @@
 package com.openexchange.realtime.hazelcast.serialization;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.Map.Entry;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
@@ -65,15 +64,15 @@ import com.openexchange.realtime.packet.ID;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.1
  */
-public class PortableNotInternalPredicate implements Predicate<String, Map<String,Object>>, CustomPortable{
+public class PortableNotInternalPredicate implements Predicate<PortableID, PortableResource>, CustomPortable{
 
     private static final long serialVersionUID = -4738251095093967960L;
 
     public static final int CLASS_ID = 7;
 
     @Override
-    public boolean apply(Entry<String, Map<String, Object>> event) {
-        ID id = new ID(event.getKey());
+    public boolean apply(Entry<PortableID, PortableResource> event) {
+        PortableID id = event.getKey();
         return !id.isInternal();
     }
 

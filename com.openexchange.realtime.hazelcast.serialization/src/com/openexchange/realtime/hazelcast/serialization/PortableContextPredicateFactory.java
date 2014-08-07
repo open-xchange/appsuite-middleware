@@ -49,62 +49,26 @@
 
 package com.openexchange.realtime.hazelcast.serialization;
 
-import java.io.IOException;
-import java.util.Map.Entry;
-import com.hazelcast.core.Member;
-import com.hazelcast.nio.serialization.PortableReader;
-import com.hazelcast.nio.serialization.PortableWriter;
-import com.hazelcast.query.Predicate;
-import com.openexchange.hazelcast.serialization.CustomPortable;
+import com.hazelcast.nio.serialization.Portable;
+import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 
 
 /**
- * {@link MemberPredicate} - Filters resources that are located on a member node via a distributed query.
+ * {@link PortableContextPredicateFactory}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.1
  */
-public class PortableMemberPredicate implements Predicate<PortableID, PortableResource>, CustomPortable {
-
-    private static final long serialVersionUID = -3149448521057961502L;
-
-    public static final int CLASS_ID = 8;
-
-    private String uuid;
-    private final static String UUID="uuid";
-
-    public PortableMemberPredicate() {
-        super();
-    }
-
-    public PortableMemberPredicate(Member member) {
-        this.uuid = member.getUuid();
-    }
+public class PortableContextPredicateFactory implements CustomPortableFactory {
 
     @Override
-    public boolean apply(Entry<PortableID, PortableResource> mapEntry) {
-        PortableResource resource = mapEntry.getValue();
-        return uuid.equals(resource.getRoutingInfo().getId());
-    }
-
-    @Override
-    public void writePortable(PortableWriter writer) throws IOException {
-        writer.writeUTF(UUID, uuid);
-    }
-
-    @Override
-    public void readPortable(PortableReader reader) throws IOException {
-        uuid = reader.readUTF(UUID);
-    }
-
-    @Override
-    public int getFactoryId() {
-        return FACTORY_ID;
+    public Portable create() {
+        return new PortableMemberPredicate();
     }
 
     @Override
     public int getClassId() {
-        return CLASS_ID;
+        return PortableMemberPredicate.CLASS_ID;
     }
 
 }
