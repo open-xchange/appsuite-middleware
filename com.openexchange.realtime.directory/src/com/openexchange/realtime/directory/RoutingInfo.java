@@ -49,107 +49,106 @@
 
 package com.openexchange.realtime.directory;
 
-import java.util.Date;
-import com.openexchange.realtime.packet.Presence;
+import java.net.InetSocketAddress;
+import org.apache.commons.lang.Validate;
 
 /**
- * {@link AbstractResource} - Abstract {@link Resource} to carry Presence and timestamp.
+ * {@link RoutingInfo} - Infos needed to distinguish and address different nodes, immutable.
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since 7.6.1
  */
-public abstract class AbstractResource implements Resource {
+public class RoutingInfo {
 
-    private static final long serialVersionUID = -3993166412663679093L;
+    protected InetSocketAddress socketAddress;
 
-    protected Presence presence;
-
-    protected Date timestamp;
+    protected String id;
 
     /**
-     * Initializes a new {@link AbstractResource} without associated {@link Presence}
+     * Initializes a new {@link RoutingInfo}.
      */
-    public AbstractResource() {
-        this(null);
+    protected RoutingInfo() {
+        super();
     }
 
     /**
-     * Initializes a new {@link AbstractResource}.
+     * Initializes a new {@link RoutingInfo}.
      * 
-     * @param state The presence state
-     * @param timestamp The timestamp
+     * @param routingInfo must not be null
      */
-    public AbstractResource(Presence presence) {
-        this(presence, new Date());
+    public RoutingInfo(RoutingInfo routingInfo) {
+        Validate.notNull(routingInfo, "Mandatory argument missing: routingInfo");
+        this.socketAddress = routingInfo.socketAddress;
+        this.id = routingInfo.id;
 
     }
 
     /**
-     * Initializes a new {@link AbstractResource}.
+     * Initializes a new {@link RoutingInfo}.
      * 
-     * @param presence The presence state
-     * @param timestamp The timestamp
+     * @param socketAddress The address of the routing info, must not be null
+     * @param id The unique id of the routing info
      */
-    public AbstractResource(Presence presence, Date timestamp) {
-        this.presence = presence;
-        this.timestamp = timestamp;
+    public RoutingInfo(InetSocketAddress socketAddress, String id) {
+        super();
+        Validate.notNull(socketAddress, "Mandatory argument missing: socketAddress");
+        this.socketAddress = socketAddress;
+        this.id = id;
     }
 
-    @Override
-    public Presence getPresence() {
-        return this.presence;
+    /**
+     * Get the {@link InetSocketAddress} of this {@link RoutingInfo}
+     * 
+     * @return the {@link InetSocketAddress} of this {@link RoutingInfo}
+     */
+    public InetSocketAddress getSocketAddress() {
+        return socketAddress;
     }
 
-    @Override
-    public void setPresence(Presence presence) {
-        this.presence = presence;
-    }
-
-    @Override
-    public Date getTimestamp() {
-        return this.timestamp;
-    }
-
-    @Override
-    public void setTimestamp(Date timestamp) {
-        this.timestamp = timestamp;
+    /**
+     * Get the id of this {@link RoutingInfo}
+     * 
+     * @return the id of this {@link RoutingInfo}, might be null if the node represented by this routing info doesn't provide an
+     *         unique identifier.
+     */
+    public String getId() {
+        return id;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((presence == null) ? 0 : presence.hashCode());
-        result = prime * result + ((timestamp == null) ? 0 : timestamp.hashCode());
+        result = prime * result + ((socketAddress == null) ? 0 : socketAddress.hashCode());
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
         return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
+        if (this == obj)
             return true;
-        }
-        if (obj == null) {
+        if (obj == null)
             return false;
-        }
-        if (!(obj instanceof AbstractResource)) {
+        if (!(obj instanceof RoutingInfo))
             return false;
-        }
-        AbstractResource other = (AbstractResource) obj;
-        if (presence == null) {
-            if (other.presence != null) {
+        RoutingInfo other = (RoutingInfo) obj;
+        if (socketAddress == null) {
+            if (other.socketAddress != null)
                 return false;
-            }
-        } else if (!presence.equals(other.presence)) {
+        } else if (!socketAddress.equals(other.socketAddress))
             return false;
-        }
-        if (timestamp == null) {
-            if (other.timestamp != null) {
+        if (id == null) {
+            if (other.id != null)
                 return false;
-            }
-        } else if (!timestamp.equals(other.timestamp)) {
+        } else if (!id.equals(other.id))
             return false;
-        }
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return "RoutingInfo [address=" + socketAddress + ", id=" + id + "]";
     }
 
 }

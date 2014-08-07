@@ -50,59 +50,77 @@
 package com.openexchange.realtime.hazelcast.serialization;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Date;
+import org.apache.commons.lang.Validate;
 import com.hazelcast.core.Member;
+import com.hazelcast.nio.serialization.Portable;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
-import com.hazelcast.query.Predicate;
 import com.openexchange.hazelcast.serialization.CustomPortable;
-
+import com.openexchange.realtime.directory.DefaultResource;
+import com.openexchange.realtime.directory.Resource;
+import com.openexchange.realtime.directory.RoutingInfo;
 
 /**
- * {@link MemberPredicate} - Filters resources that are located on a member node via a distributed query.
- *
+ * {@link PortableResource} Hazelcast specific {@link Portable}{@link Resource} implementation. Can be initialized from an existing
+ * DefaultResource.
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.1
  */
-public class PortableMemberPredicate implements Predicate<String, Map<String, Object>>, CustomPortable {
+public class PortableResource extends DefaultResource implements CustomPortable {
 
-    private static final long serialVersionUID = -3149448521057961502L;
+    public static final int CLASS_ID = 10;
 
-    public static final int CLASS_ID = 8;
+    private final static String PRESENCE = "presence";
 
-    private InetSocketAddress memberAddress;
+    private final static String TIMESTAMP = "timestamp";
 
-    public PortableMemberPredicate() {
+    private final static String ROUTINGINFO = "routinginfo";
+
+    // routingInfo from Hazelcast member
+    private RoutingInfo routingInfo;
+
+    protected PortableResource() {
+        // creates a resource without presence but with timestamp
         super();
     }
 
-    public PortableMemberPredicate(InetSocketAddress memberAddress) {
-        this.memberAddress = memberAddress;
+    public PortableResource(Resource resource, Member member) {
+        Validate.notNull(resource, "Mandatory argument missing: resource");
+        Validate.notNull(member, "Mandatory argument missing: member");
+        this.presence = resource.getPresence();
+        this.timestamp = resource.getTimestamp();
+        this.routingInfo = new RoutingInfo(member.getSocketAddress(), member.getUuid());
     }
 
     @Override
-    public boolean apply(Entry<String, Map<String, Object>> mapEntry) {
-        Map<String, Object> resourceMap = mapEntry.getValue();
-        if(resourceMap != null) {
-            Member resourceMember = (Member) resourceMap.get("routingInfo");
-            return memberAddress.equals(resourceMember.getSocketAddress());
-        }
-        return false;
+    public RoutingInfo getRoutingInfo() {
+        return routingInfo;
+    }
+
+    @Override
+    public void setRoutingInfo(RoutingInfo routingInfo) {
+        this.routingInfo = routingInfo;
     }
 
     @Override
     public void writePortable(PortableWriter writer) throws IOException {
-        writer.writeUTF("memberAddressHostname", memberAddress.getHostName());
-        writer.writeInt("memberAddressPort", memberAddress.getPort());
+        if(presence != null) {
+            writer.writePortable(PRESENCE, new PortablePresence(presence));
+        }
+        writer.writeLong(TIMESTAMP, timestamp.getTime());
+        if(routingInfo!=null) {
+            writer.writePortable(ROUTINGINFO, new PortableRoutingInfo(routingInfo));
+        }
     }
 
     @Override
     public void readPortable(PortableReader reader) throws IOException {
-        String hostname = reader.readUTF("memberAddressHostname");
-        int port = reader.readInt("memberAddressPort");
-        memberAddress = new InetSocketAddress(hostname, port);
+        PortablePresence portablePresence = reader.readPortable(PRESENCE);
+        presence = portablePresence.getPresence();
+        timestamp = new Date(reader.readLong(TIMESTAMP));
+        routingInfo = reader.readPortable(ROUTINGINFO);
     }
 
     @Override
@@ -113,6 +131,36 @@ public class PortableMemberPredicate implements Predicate<String, Map<String, Ob
     @Override
     public int getClassId() {
         return CLASS_ID;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((routingInfo == null) ? 0 : routingInfo.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (!(obj instanceof PortableResource))
+            return false;
+        PortableResource other = (PortableResource) obj;
+        if (routingInfo == null) {
+            if (other.routingInfo != null)
+                return false;
+        } else if (!routingInfo.equals(other.routingInfo))
+            return false;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "PortableResource [routingInfo=" + routingInfo + ", presence=" + presence + ", timestamp=" + timestamp + "]";
     }
 
 }

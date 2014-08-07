@@ -79,9 +79,9 @@ public class CleanupStatus implements Serializable {
     public CleanupStatus(Member cleaningMember, Member memberToClean) {
         super();
         this.cleaningMemberId = cleaningMember.getUuid();
-        this.cleaningMemberAddress = cleaningMember.getInetSocketAddress();
+        this.cleaningMemberAddress = cleaningMember.getSocketAddress();
         this.memberToCleanId = memberToClean.getUuid();
-        this.memberToCleanAddress = memberToClean.getInetSocketAddress();
+        this.memberToCleanAddress = memberToClean.getSocketAddress();
         this.cleaningStartTime = System.currentTimeMillis();
         this.cleaningFinishTime = -1;
     }

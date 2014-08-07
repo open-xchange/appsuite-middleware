@@ -99,6 +99,9 @@ public interface CustomPortable extends Portable {
      * <li><code>  8</code>: com.openexchange.realtime.hazelcast.serialization.PortableMemberPredicate</li>
      * <li><code>  9</code>: com.openexchange.report.appsuite.internal.PortableReport, used via
      * {@link com.openexchange.hazelcast.serialization.CustomPortable.PORTABLEREPORT_CLASS_ID}</li>
+     * <li><code>  10</code>: com.openexchange.realtime.hazelcast.serialization.PortableHazelcastResource</li>
+     * <li><code>  11</code>: com.openexchange.realtime.hazelcast.serialization.PortablePresence</li>
+     * <li><code>  11</code>: com.openexchange.realtime.hazelcast.serialization.PortableRoutingInfo</li>
      * </ul>
      *
      * @return The class ID
