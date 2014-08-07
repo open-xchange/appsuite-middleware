@@ -54,7 +54,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -103,13 +102,14 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
     // -------------------------------------------------------------------------------------------------------------------------- //
 
     /**
-     * Open a new {@link URLConnection URL connection} to specified parameter's value which indicates to be an URI/URL. The image's data and
-     * its MIME type is then read from opened connection.
+     * Sends an image request to Google service. Reads the mime type of the photo and return the result the corresponding photo as binary content.
      *
+     * @param contactsService The contact service
+     * @param entry The contact entry
      * @param photoLink The image URL
      * @return The appropriate file holder
-     * @throws ServiceException
-     * @throws IOException
+     * @throws ServiceException if creation of request failed
+     * @throws IOException if an error during the communication occured
      */
     static IFileHolder loadImageFromLink(final ContactsService contactsService, final ContactEntry entry, final Link photoLink) throws IOException, ServiceException {
         if (photoLink != null && photoLink.getEtag() != null) {
