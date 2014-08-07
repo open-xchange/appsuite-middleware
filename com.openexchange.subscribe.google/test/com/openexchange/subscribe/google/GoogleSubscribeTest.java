@@ -196,48 +196,48 @@ public class GoogleSubscribeTest extends TestCase {
                     else if(c.getDisplayName().equals(testAccount2)) {
                         assertNotNullAndEquals("given name", "Maria", c.getGivenName());
                         assertNotNullAndEquals("surname", "Meier", c.getSurName());
-                        assertFieldIsNotNull("title", c.getTitle());
-                        assertFieldIsNotNull("middle name", c.getMiddleName());
-                        assertFieldIsNotNull("suffix", c.getSuffix());
+                        assertFieldIsNull("title", c.getTitle());
+                        assertFieldIsNull("middle name", c.getMiddleName());
+                        assertFieldIsNull("suffix", c.getSuffix());
 
                         //email
                         assertNotNullAndEquals("email1", "mariameier@example.com", c.getEmail1());
                         assertNotNullAndEquals("email2", "mariameier@example.com", c.getEmail2());
-                        assertFieldIsNotNull("email3", c.getEmail3());
+                        assertFieldIsNull("email3", c.getEmail3());
 
                         //organisation
-                        assertFieldIsNotNull("company", c.getCompany());
+                        assertFieldIsNull("company", c.getCompany());
                         // TODO: if a job title is provided this would override the title (Herr)
                         //assertNotNullAndEquals("job title", c.get(), "DJ");
 
-                        assertFieldIsNotNull("telephone business 1", c.getTelephoneBusiness1());
+                        assertFieldIsNull("telephone business 1", c.getTelephoneBusiness1());
                         assertNotNullAndEquals("cellular telephone 1", "+4213371337133701", c.getTelephoneHome1());
-                        assertFieldIsNotNull("telephone other", c.getTelephoneOther());
-                        assertFieldIsNotNull("fax business", c.getFaxBusiness());
-                        assertFieldIsNotNull("fax home",  c.getFaxHome());
-                        assertFieldIsNotNull("cellular telephone 1", c.getCellularTelephone1());
-                        assertFieldIsNotNull("cellular telephone 2", c.getCellularTelephone2());
+                        assertFieldIsNull("telephone other", c.getTelephoneOther());
+                        assertFieldIsNull("fax business", c.getFaxBusiness());
+                        assertFieldIsNull("fax home",  c.getFaxHome());
+                        assertFieldIsNull("cellular telephone 1", c.getCellularTelephone1());
+                        assertFieldIsNull("cellular telephone 2", c.getCellularTelephone2());
 
-                        assertFieldIsNotNull("birthday", c.getBirthday());
+                        assertFieldIsNull("birthday", c.getBirthday());
 
                         //location
-                        assertFieldIsNotNull("street business", c.getStreetBusiness());
-                        assertFieldIsNotNull("postal code business", c.getPostalCodeBusiness());
-                        assertFieldIsNotNull("city business", c.getCityBusiness());
-                        assertFieldIsNotNull("country business", c.getCountryBusiness());
-                        assertFieldIsNotNull("street home", c.getStreetHome());
-                        assertFieldIsNotNull("postal code home", c.getPostalCodeHome());
-                        assertFieldIsNotNull("city home", c.getCityHome());
-                        assertFieldIsNotNull("country home", c.getCountryHome());
-                        assertFieldIsNotNull("street other", c.getStreetOther());
-                        assertFieldIsNotNull("postal code other", c.getPostalCodeOther());
-                        assertFieldIsNotNull("city other", c.getCityOther());
-                        assertFieldIsNotNull("country other", c.getCountryOther());
+                        assertFieldIsNull("street business", c.getStreetBusiness());
+                        assertFieldIsNull("postal code business", c.getPostalCodeBusiness());
+                        assertFieldIsNull("city business", c.getCityBusiness());
+                        assertFieldIsNull("country business", c.getCountryBusiness());
+                        assertFieldIsNull("street home", c.getStreetHome());
+                        assertFieldIsNull("postal code home", c.getPostalCodeHome());
+                        assertFieldIsNull("city home", c.getCityHome());
+                        assertFieldIsNull("country home", c.getCountryHome());
+                        assertFieldIsNull("street other", c.getStreetOther());
+                        assertFieldIsNull("postal code other", c.getPostalCodeOther());
+                        assertFieldIsNull("city other", c.getCityOther());
+                        assertFieldIsNull("country other", c.getCountryOther());
 
-                        assertFieldIsNotNull("instant messenger", c.getInstantMessenger1());
+                        assertFieldIsNull("instant messenger", c.getInstantMessenger1());
 
-                        assertFieldIsNotNull("Image does not equals", c.getImage1());
-                        assertFieldIsNotNull("content type", c.getImageContentType());
+                        assertFieldIsNull("Image does not equals", c.getImage1());
+                        assertFieldIsNull("content type", c.getImageContentType());
                         testAccount2Success = true;
                     }
 
@@ -252,7 +252,7 @@ public class GoogleSubscribeTest extends TestCase {
         }
     }
 
-    private void assertFieldIsNotNull(String fieldDesc, Object valueToCheck) {
+    private void assertFieldIsNull(String fieldDesc, Object valueToCheck) {
         assertNull("The field " + fieldDesc + " should be empty, but is not", valueToCheck);
     }
 
