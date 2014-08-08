@@ -1,7 +1,11 @@
+* 2014-08-08 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 33818: Added update task to check foreign keys and drop them if necessary
+
 * 2014-08-04 - marc.arens@open-xchange.com
 
  - Fix for bug 33697: Respect destination folder for folder owners
- 
+
 * 2014-08-01 - thorben.betten@open-xchange.com
 
  - Fix for bug 33715: Accept new parameter "attach_src" for action=get request to let the client signal RFC822 source is supposed to be
