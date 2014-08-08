@@ -1,3 +1,7 @@
+* 2014-08-08 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 30599: Ical export stumbles over bad reccurring appointment.
+
 * 2014-08-08 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 33920: Introduced update task to ensure required indices on 'prg_dates' exist
