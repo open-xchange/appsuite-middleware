@@ -71,4 +71,6 @@ public interface ShareService {
 
     List<Share> getAllShares(Session session) throws OXException;
 
+    List<Share> getSharesForFolder(int contextID, String folder) throws OXException;
+
 }

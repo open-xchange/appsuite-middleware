@@ -109,6 +109,12 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
+    public List<Share> getSharesForFolder(int contextID, String folder) throws OXException {
+        List<Share> shares = services.getService(ShareStorage.class).loadSharesForFolder(contextID, folder, StorageParameters.NO_PARAMETERS);
+        return removeExpired(shares);
+    }
+
+    @Override
     public void delete(DeleteRequest deleteRequest, Session session) throws OXException {
         new DeleteHandler(deleteRequest, ServerSessionAdapter.valueOf(session), services).processRequest();
     }
