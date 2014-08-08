@@ -180,4 +180,17 @@ public final class Arrays {
         }
         return retval;
     }
+
+    /**
+     * Reverses the order of the elements contained in the supplied array.
+     *
+     * @param array The array to reverse
+     */
+    public static <T> void reverse(T[] array) {
+        for (int i = 0; i < array.length / 2; i++) {
+            T t = array[i];
+            array[i] = array[array.length - i - 1];
+            array[array.length - i - 1] = t;
+        }
+    }
 }

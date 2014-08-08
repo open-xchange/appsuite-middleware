@@ -57,9 +57,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.config.cascade.ComposedConfigProperty;
@@ -67,6 +72,7 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ParsedDisplayName;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactMerger;
 import com.openexchange.groupware.container.Contact;
@@ -94,10 +100,9 @@ public class ContactHaloImpl implements ContactHalo {
 
     private final Map<String, HaloContactDataSource> contactDataSources;
     private final List<HaloContactImageSource> imageSources;
-
     private final Lock imageSourcesLock = new ReentrantLock();
-
     private final ServiceLookup services;
+    private final Cache<ContactHaloQueryKey, HaloContactQuery> queryCache;
 
     /**
      * Initializes a new {@link ContactHaloImpl}.
@@ -109,6 +114,7 @@ public class ContactHaloImpl implements ContactHalo {
         contactDataSources = new ConcurrentHashMap<String, HaloContactDataSource>(8);
         imageSources = new ArrayList<HaloContactImageSource>();
         this.services = ExceptionOnAbsenceServiceLookup.valueOf(services);
+        queryCache = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.SECONDS).build();
     }
 
     @Override
@@ -171,6 +177,25 @@ public class ContactHaloImpl implements ContactHalo {
 
     // Friendly for testing
     HaloContactQuery buildQuery(final Contact contact, final ServerSession session, final boolean withBytes) throws OXException {
+        ContactHaloQueryKey key = new ContactHaloQueryKey(session.getSessionID(), contact, withBytes);
+        try {
+            return queryCache.get(key, new Callable<HaloContactQuery>() {
+
+                @Override
+                public HaloContactQuery call() throws Exception {
+                    return createQuery(contact, session, withBytes);
+                }
+            });
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (null != cause && OXException.class.isInstance(e.getCause())) {
+                throw (OXException)cause;
+            }
+            throw HaloExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private HaloContactQuery createQuery(final Contact contact, final ServerSession session, final boolean withBytes) throws OXException {
         final UserService userService = services.getService(UserService.class);
         final ContactService contactService = services.getService(ContactService.class);
         final HaloContactQuery contactQuery = new HaloContactQuery();
@@ -260,6 +285,15 @@ public class ContactHaloImpl implements ContactHalo {
         for (final Contact c : contactsToMerge) {
             resultContact = contactMerger.merge(resultContact, c);
         }
+        /*
+         * try to decompose display name if no other "name" properties are already set and the contact is "new"
+         */
+        if (false == resultContact.containsObjectID() &&
+            resultContact.containsDisplayName() && false == Strings.isEmpty(resultContact.getDisplayName()) &&
+            false == resultContact.containsGivenName() && false == resultContact.containsSurName() &&
+            false == resultContact.containsNickname() && false == resultContact.containsCompany()) {
+            new ParsedDisplayName(resultContact.getDisplayName()).applyTo(resultContact);
+        }
         contactQuery.setContact(resultContact);
         return contactQuery;
     }
@@ -329,6 +363,64 @@ public class ContactHaloImpl implements ContactHalo {
         } finally {
             imageSourcesLock.unlock();
         }
+    }
+
+    private static class ContactHaloQueryKey {
+
+        private final String sessionID;
+        private final Contact contact;
+        private final boolean withBytes;
+        private final int hashCode;
+
+        /**
+         * Initializes a new {@link ContactHaloQueryKey}.
+         *
+         * @param sessionID The session ID
+         * @param contact The contact
+         * @param withBytes The withBytes flag
+         */
+        public ContactHaloQueryKey(String sessionID, Contact contact, boolean withBytes) {
+            super();
+            this.sessionID = sessionID;
+            this.contact = contact;
+            this.withBytes = withBytes;
+            final int prime = 31;
+            int hash = 1;
+            hash = prime * hash + ((contact == null) ? 0 : contact.hashCode());
+            hash = prime * hash + ((sessionID == null) ? 0 : sessionID.hashCode());
+            hash = prime * hash + (withBytes ? 1231 : 1237);
+            this.hashCode = hash;
+        }
+
+        @Override
+        public int hashCode() {
+            return hashCode;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            ContactHaloQueryKey other = (ContactHaloQueryKey) obj;
+            if (contact == null) {
+                if (other.contact != null)
+                    return false;
+            } else if (!contact.equals(other.contact))
+                return false;
+            if (sessionID == null) {
+                if (other.sessionID != null)
+                    return false;
+            } else if (!sessionID.equals(other.sessionID))
+                return false;
+            if (withBytes != other.withBytes)
+                return false;
+            return true;
+        }
+
     }
 
 }

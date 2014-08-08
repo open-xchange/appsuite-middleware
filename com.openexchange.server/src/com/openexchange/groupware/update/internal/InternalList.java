@@ -749,6 +749,12 @@ public final class InternalList {
         // Adds the column 'guestCreatedBy' to the tables 'user' and 'del_user'
         list.add(new com.openexchange.groupware.update.tasks.UserAddGuestCreatedByTask());
 
+        // (Re-)adds indexes in prg_contacts for "auto-complete" queries
+        list.add(new com.openexchange.groupware.update.tasks.ContactsAddIndex4AutoCompleteSearchV2());
+
+        // Check if foreign keys in date tables are dropped and drop them if necessary
+        list.add(new com.openexchange.groupware.update.tasks.CheckAndDropDateExternalForeignKeysUpdateTask());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 

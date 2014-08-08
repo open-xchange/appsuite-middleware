@@ -1,3 +1,17 @@
+* 2014-08-08 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 33818: Added update task to check foreign keys and drop them if necessary
+
+* 2014-08-08 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 30599: Ical export stumbles over bad reccurring appointment.
+
+* 2014-08-08 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 33920: Introduced update task to ensure required indices on 'prg_dates' exist
+ - Fix for bug 33898: Added basic decomposition of display- to first- and lastname for collected contacts
+ - Fix for bug 33897: Added basic decomposition of display- to first- and lastname for halo contact investigations
+
 * 2014-08-06 - steffen.templin@open-xchange.com
 
  - Fix for bug 33918: Translate display names of subscription sources only if necessary
