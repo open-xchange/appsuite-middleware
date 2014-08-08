@@ -71,6 +71,7 @@ import com.hazelcast.config.SemaphoreConfig;
 import com.hazelcast.config.SymmetricEncryptionConfig;
 import com.hazelcast.config.TopicConfig;
 import com.hazelcast.instance.GroupProperties;
+import com.hazelcast.nio.serialization.ClassDefinition;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.WildcardNamePropertyFilter;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
@@ -314,8 +315,15 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         /*
          * Register serialization factory
          */
+        DynamicPortableFactory dynamicPortableFactory = Services.getService(DynamicPortableFactory.class, true);
+
         config.getSerializationConfig().addPortableFactory(DynamicPortableFactory.FACTORY_ID,
-            Services.getService(DynamicPortableFactory.class, true));
+            dynamicPortableFactory);
+
+        for(ClassDefinition classDefinition : dynamicPortableFactory.getClassDefinitions()) {
+            config.getSerializationConfig().addClassDefinition(classDefinition);
+        }
+
         /*
          * Config ready
          */

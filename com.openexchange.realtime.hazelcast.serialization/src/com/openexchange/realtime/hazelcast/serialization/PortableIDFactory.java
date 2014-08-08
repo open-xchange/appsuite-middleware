@@ -49,17 +49,17 @@
 
 package com.openexchange.realtime.hazelcast.serialization;
 
+import com.hazelcast.nio.serialization.ClassDefinition;
 import com.hazelcast.nio.serialization.Portable;
-import com.openexchange.hazelcast.serialization.CustomPortableFactory;
-
+import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
 
 /**
  * {@link PortableIDFactory}
- *
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.0
  */
-public class PortableIDFactory implements CustomPortableFactory {
+public class PortableIDFactory extends AbstractCustomPortableFactory {
 
     @Override
     public Portable create() {
@@ -69,6 +69,11 @@ public class PortableIDFactory implements CustomPortableFactory {
     @Override
     public int getClassId() {
         return PortableID.CLASS_ID;
+    }
+
+    @Override
+    public ClassDefinition getClassDefinition() {
+        return PortableID.CLASS_DEFINITION;
     }
 
 }

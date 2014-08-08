@@ -49,8 +49,9 @@
 
 package com.openexchange.realtime.hazelcast.serialization;
 
+import com.hazelcast.nio.serialization.ClassDefinition;
 import com.hazelcast.nio.serialization.Portable;
-import com.openexchange.hazelcast.serialization.CustomPortableFactory;
+import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
 
 /**
  * {@link PortableResourceFactory}
@@ -58,7 +59,7 @@ import com.openexchange.hazelcast.serialization.CustomPortableFactory;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.1
  */
-public class PortableResourceFactory implements CustomPortableFactory {
+public class PortableResourceFactory extends AbstractCustomPortableFactory {
 
     @Override
     public Portable create() {
@@ -68,6 +69,11 @@ public class PortableResourceFactory implements CustomPortableFactory {
     @Override
     public int getClassId() {
         return PortableResource.CLASS_ID;
+    }
+
+    @Override
+    public ClassDefinition getClassDefinition() {
+        return PortableResource.CLASS_DEFINITION;
     }
 
 }

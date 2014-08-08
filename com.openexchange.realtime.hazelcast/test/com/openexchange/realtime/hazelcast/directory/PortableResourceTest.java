@@ -62,6 +62,7 @@ import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.Member;
+import com.hazelcast.nio.serialization.ClassDefinition;
 import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.serialization.DynamicPortableFactory;
 import com.openexchange.realtime.directory.DefaultResource;
@@ -130,6 +131,9 @@ public class PortableResourceTest {
         dynamicPortableFactory.register(new PortableRoutingInfoFactory());
         dynamicPortableFactory.register(new PortableResourceFactory());
         config.getSerializationConfig().addPortableFactory(DynamicPortableFactory.FACTORY_ID, dynamicPortableFactory);
+        for(ClassDefinition cd : dynamicPortableFactory.getClassDefinitions()) {
+            config.getSerializationConfig().addClassDefinition(cd);
+        }
         hzInstance = Hazelcast.newHazelcastInstance(config);
         localMember = hzInstance.getCluster().getLocalMember();
 
@@ -141,17 +145,20 @@ public class PortableResourceTest {
 
     @Test
     public void testPortableHazelcastResource() throws OXException {
-        PortableResource portableHazelcastResource = new PortableResource(defaultResource, localMember);
-        assertNull(portableHazelcastResource.getPresence());
-        RoutingInfo routingInfo = portableHazelcastResource.getRoutingInfo();
+        PortableResource portableResource = new PortableResource(localMember);
+        assertNull(portableResource.getPresence());
+        RoutingInfo routingInfo = portableResource.getRoutingInfo();
         assertEquals(localMember.getSocketAddress(), routingInfo.getSocketAddress());
         assertEquals(localMember.getUuid(), routingInfo.getId());
-        assertNotNull(portableHazelcastResource.getTimestamp());
+        assertNotNull(portableResource.getTimestamp());
+        IMap<PortableID, PortableResource> resourceMap = hzInstance.getMap(RESOURCE_MAP);
+        resourceMap.put(portableMarensID, portableResource);
+        PortableResource deserializedPortableResource = resourceMap.get(portableMarensID);
+        assertEquals(portableResource, deserializedPortableResource);
     }
 
     @Test
     public void testPortableHazelcastResourcePresence() throws OXException {
-        DefaultResource defaultResource = new DefaultResource(onlinePresence);
         PortableResource portableResource = new PortableResource(defaultResource, localMember);
         assertEquals(onlinePresence, portableResource.getPresence());
         RoutingInfo routingInfo = portableResource.getRoutingInfo();

@@ -51,6 +51,8 @@ package com.openexchange.realtime.hazelcast.serialization;
 
 import java.io.IOException;
 import org.apache.commons.lang.Validate;
+import com.hazelcast.nio.serialization.ClassDefinition;
+import com.hazelcast.nio.serialization.ClassDefinitionBuilder;
 import com.hazelcast.nio.serialization.Portable;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
@@ -70,19 +72,31 @@ public class PortablePresence implements CustomPortable {
     public static final int CLASS_ID = 11;
 
     private PortableID from;
-    private static final String FROM = "from";
+    private static final String FIELD_FROM = "from";
 
     private Presence.Type type;
-    private static final String TYPE = "type";
+    private static final String FIELD_TYPE = "type";
 
     private PresenceState state;
-    private static final String STATE = "state";
+    private static final String FIELD_STATE = "state";
 
     private String message;
-    private static final String MESSAGE = "message";
+    private static final String FIELD_MESSAGE = "message";
 
     private byte priority;
-    private static final String PRIORITY = "priority";
+    private static final String FIELD_PRIORITY = "priority";
+
+    public static ClassDefinition CLASS_DEFINITION = null;
+
+    static {
+        CLASS_DEFINITION = new ClassDefinitionBuilder(FACTORY_ID, CLASS_ID)
+        .addPortableField(FIELD_FROM, PortableID.CLASS_DEFINITION)
+        .addUTFField(FIELD_TYPE)
+        .addUTFField(FIELD_STATE)
+        .addUTFField(FIELD_MESSAGE)
+        .addByteField(FIELD_PRIORITY)
+        .build();
+    }
 
     public PortablePresence() {
         super();
@@ -99,20 +113,20 @@ public class PortablePresence implements CustomPortable {
 
     @Override
     public void writePortable(PortableWriter writer) throws IOException {
-        writer.writePortable(FROM, from);
-        writer.writeUTF(TYPE, type.name());
-        writer.writeUTF(STATE, state.name());
-        writer.writeUTF(MESSAGE, message);
-        writer.writeByte(PRIORITY, priority);
+        writer.writePortable(FIELD_FROM, from);
+        writer.writeUTF(FIELD_TYPE, type.name());
+        writer.writeUTF(FIELD_STATE, state.name());
+        writer.writeUTF(FIELD_MESSAGE, message);
+        writer.writeByte(FIELD_PRIORITY, priority);
     }
 
     @Override
     public void readPortable(PortableReader reader) throws IOException {
-        from = reader.readPortable(FROM);
-        type = getType(reader.readUTF(TYPE));
-        state = getState(reader.readUTF(STATE));
-        message = reader.readUTF(MESSAGE);
-        priority = reader.readByte(PRIORITY);
+        from = reader.readPortable(FIELD_FROM);
+        type = getType(reader.readUTF(FIELD_TYPE));
+        state = getState(reader.readUTF(FIELD_STATE));
+        message = reader.readUTF(FIELD_MESSAGE);
+        priority = reader.readByte(FIELD_PRIORITY);
     }
 
     @Override

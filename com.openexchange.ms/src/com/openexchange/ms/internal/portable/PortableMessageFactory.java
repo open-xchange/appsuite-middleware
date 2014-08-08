@@ -50,14 +50,14 @@
 package com.openexchange.ms.internal.portable;
 
 import com.hazelcast.nio.serialization.Portable;
-import com.openexchange.hazelcast.serialization.CustomPortableFactory;
+import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
 
 /**
  * {@link PortableMessageFactory}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class PortableMessageFactory implements CustomPortableFactory {
+public class PortableMessageFactory extends AbstractCustomPortableFactory {
 
     @Override
     public Portable create() {

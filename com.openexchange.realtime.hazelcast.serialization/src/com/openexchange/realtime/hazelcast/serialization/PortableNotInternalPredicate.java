@@ -57,14 +57,13 @@ import com.hazelcast.query.Predicate;
 import com.openexchange.hazelcast.serialization.CustomPortable;
 import com.openexchange.realtime.packet.ID;
 
-
 /**
  * {@link PortableNotInternalPredicate} - Filter out internal {@link ID}s.
- *
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.1
  */
-public class PortableNotInternalPredicate implements Predicate<PortableID, PortableResource>, CustomPortable{
+public class PortableNotInternalPredicate implements Predicate<PortableID, PortableResource>, CustomPortable {
 
     private static final long serialVersionUID = -4738251095093967960L;
 
@@ -77,10 +76,12 @@ public class PortableNotInternalPredicate implements Predicate<PortableID, Porta
     }
 
     @Override
-    public void writePortable(PortableWriter writer) throws IOException {}
+    public void writePortable(PortableWriter writer) throws IOException {
+    }
 
     @Override
-    public void readPortable(PortableReader reader) throws IOException {}
+    public void readPortable(PortableReader reader) throws IOException {
+    }
 
     @Override
     public int getFactoryId() {

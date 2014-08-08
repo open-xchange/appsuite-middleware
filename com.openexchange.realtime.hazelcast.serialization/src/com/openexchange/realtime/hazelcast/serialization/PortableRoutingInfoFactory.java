@@ -49,8 +49,9 @@
 
 package com.openexchange.realtime.hazelcast.serialization;
 
+import com.hazelcast.nio.serialization.ClassDefinition;
 import com.hazelcast.nio.serialization.Portable;
-import com.openexchange.hazelcast.serialization.CustomPortableFactory;
+import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
 
 
 /**
@@ -59,7 +60,7 @@ import com.openexchange.hazelcast.serialization.CustomPortableFactory;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.1
  */
-public class PortableRoutingInfoFactory implements CustomPortableFactory {
+public class PortableRoutingInfoFactory extends AbstractCustomPortableFactory {
 
     @Override
     public Portable create() {
@@ -69,6 +70,11 @@ public class PortableRoutingInfoFactory implements CustomPortableFactory {
     @Override
     public int getClassId() {
         return PortableRoutingInfo.CLASS_ID;
+    }
+
+    @Override
+    public ClassDefinition getClassDefinition() {
+        return PortableRoutingInfo.CLASS_DEFINITION;
     }
 
 }

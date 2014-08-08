@@ -50,8 +50,8 @@
 package com.openexchange.report.appsuite.serialization;
 
 import com.hazelcast.nio.serialization.Portable;
+import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
 import com.openexchange.hazelcast.serialization.CustomPortable;
-import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 
 /**
  * {@link PortableReportFactory} registered in {@link ReportActivator} to provide a {@link PortableReport} for distribution in a cluster.
@@ -59,7 +59,7 @@ import com.openexchange.hazelcast.serialization.CustomPortableFactory;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.1
  */
-public class PortableReportFactory implements CustomPortableFactory {
+public class PortableReportFactory extends AbstractCustomPortableFactory {
 
     /**
      * {@inheritDoc}

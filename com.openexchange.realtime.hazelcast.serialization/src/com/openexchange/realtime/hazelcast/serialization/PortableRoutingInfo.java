@@ -52,6 +52,8 @@ package com.openexchange.realtime.hazelcast.serialization;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import com.hazelcast.nio.serialization.ClassDefinition;
+import com.hazelcast.nio.serialization.ClassDefinitionBuilder;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 import com.openexchange.hazelcast.serialization.CustomPortable;
@@ -67,11 +69,21 @@ public class PortableRoutingInfo extends RoutingInfo implements CustomPortable {
 
     public static final int CLASS_ID = 12;
 
-    private static final String HOSTBYTES = "hostbytes";
+    private static final String FIELD_HOSTBYTES = "hostbytes";
 
-    private static final String PORT = "port";
+    private static final String FIELD_PORT = "port";
 
-    private static final String ID = "id";
+    private static final String FIELD_ID = "id";
+
+    public static ClassDefinition CLASS_DEFINITION = null;
+
+    static {
+        CLASS_DEFINITION = new ClassDefinitionBuilder(FACTORY_ID, CLASS_ID)
+        .addByteArrayField(FIELD_HOSTBYTES)
+        .addIntField(FIELD_PORT)
+        .addUTFField(FIELD_ID)
+        .build();
+    }
 
     /**
      * Initializes a new {@link PortableRoutingInfo}.
@@ -102,16 +114,16 @@ public class PortableRoutingInfo extends RoutingInfo implements CustomPortable {
     @Override
     public void writePortable(PortableWriter writer) throws IOException {
         final InetAddress inetAddress = socketAddress.getAddress();
-        writer.writeByteArray(HOSTBYTES, inetAddress.getAddress());
-        writer.writeInt(PORT, socketAddress.getPort());
-        writer.writeUTF(ID, id);
+        writer.writeByteArray(FIELD_HOSTBYTES, inetAddress.getAddress());
+        writer.writeInt(FIELD_PORT, socketAddress.getPort());
+        writer.writeUTF(FIELD_ID, id);
     }
 
     @Override
     public void readPortable(PortableReader reader) throws IOException {
-        final InetAddress inetAddress = InetAddress.getByAddress(reader.readByteArray(HOSTBYTES));
-        socketAddress = new InetSocketAddress(inetAddress, reader.readInt(PORT));
-        id = reader.readUTF(ID);
+        final InetAddress inetAddress = InetAddress.getByAddress(reader.readByteArray(FIELD_HOSTBYTES));
+        socketAddress = new InetSocketAddress(inetAddress, reader.readInt(FIELD_PORT));
+        id = reader.readUTF(FIELD_ID);
     }
 
     @Override

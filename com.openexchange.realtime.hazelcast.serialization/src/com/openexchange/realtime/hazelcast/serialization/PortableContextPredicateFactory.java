@@ -50,7 +50,7 @@
 package com.openexchange.realtime.hazelcast.serialization;
 
 import com.hazelcast.nio.serialization.Portable;
-import com.openexchange.hazelcast.serialization.CustomPortableFactory;
+import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
 
 
 /**
@@ -59,16 +59,16 @@ import com.openexchange.hazelcast.serialization.CustomPortableFactory;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.1
  */
-public class PortableContextPredicateFactory implements CustomPortableFactory {
+public class PortableContextPredicateFactory extends AbstractCustomPortableFactory {
 
     @Override
     public Portable create() {
-        return new PortableMemberPredicate();
+        return new PortableContextPredicate();
     }
 
     @Override
     public int getClassId() {
-        return PortableMemberPredicate.CLASS_ID;
+        return PortableContextPredicate.CLASS_ID;
     }
 
 }

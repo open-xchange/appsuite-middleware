@@ -50,6 +50,8 @@
 package com.openexchange.realtime.hazelcast.serialization;
 
 import java.io.IOException;
+import com.hazelcast.nio.serialization.ClassDefinition;
+import com.hazelcast.nio.serialization.ClassDefinitionBuilder;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 import com.openexchange.hazelcast.serialization.CustomPortable;
@@ -66,9 +68,35 @@ import com.openexchange.realtime.packet.IDComponentsParser.IDComponents;
  */
 public class PortableID extends ID implements CustomPortable {
 
+
     private static final long serialVersionUID = -6140097121581373922L;
-    
+
     public static final int CLASS_ID = 5;
+
+    private static final String FIELD_ID = "id";
+
+    public static ClassDefinition CLASS_DEFINITION = null;
+
+    static {
+        CLASS_DEFINITION = new ClassDefinitionBuilder(FACTORY_ID, CLASS_ID)
+            .addUTFField(FIELD_ID)
+            .build();
+    }
+
+    /**
+     * Initializes a new {@link PortableID}.
+     */
+    public PortableID() {
+        super();
+    }
+
+    /**
+     * Initializes a new {@link PortableID} based on an existing non portable ID.
+     * @param id The non portable ID to use as base for this PortableID.
+     */
+    public PortableID(ID id) {
+        super(id.getProtocol(), id.getComponent(), id.getUser(), id.getContext(), id.getResource());
+    }
 
     /**
      * Initializes a new {@link PortableID}.
@@ -110,19 +138,9 @@ public class PortableID extends ID implements CustomPortable {
         super(protocol, component, user, context, resource);
     }
 
-    /**
-     * Initializes a new {@link PortableID} based on an existing non portable ID.
-     * @param id The non portable ID to use as base for this PortableID.
-     */
-    public PortableID(ID id) {
-        super(id.getProtocol(), id.getComponent(), id.getUser(), id.getContext(), id.getResource());
-    }
-
-    /**
-     * Initializes a new {@link PortableID}.
-     */
-    public PortableID() {
-        super();
+    @Override
+    public PortableID toGeneralForm() {
+        return new PortableID(null, component, user, context, null);
     }
 
     @Override
@@ -137,12 +155,12 @@ public class PortableID extends ID implements CustomPortable {
 
     @Override
     public void writePortable(PortableWriter writer) throws IOException {
-        writer.writeUTF("idString", this.toString());
+        writer.writeUTF(FIELD_ID, this.toString());
     }
 
     @Override
     public void readPortable(PortableReader reader) throws IOException {
-        String idString = reader.readUTF("idString");
+        String idString = reader.readUTF(FIELD_ID);
         IDComponents idComponents = IDComponentsParser.parse(idString);
         protocol = idComponents.protocol;
         component = idComponents.component;

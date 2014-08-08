@@ -53,6 +53,8 @@ import java.io.IOException;
 import java.util.Date;
 import org.apache.commons.lang.Validate;
 import com.hazelcast.core.Member;
+import com.hazelcast.nio.serialization.ClassDefinition;
+import com.hazelcast.nio.serialization.ClassDefinitionBuilder;
 import com.hazelcast.nio.serialization.Portable;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
@@ -72,20 +74,46 @@ public class PortableResource extends DefaultResource implements CustomPortable 
 
     public static final int CLASS_ID = 10;
 
-    private final static String PRESENCE = "presence";
+    private final static String FIELD_PRESENCE = "presence";
 
-    private final static String TIMESTAMP = "timestamp";
+    private final static String FIELD_TIMESTAMP = "timestamp";
 
-    private final static String ROUTINGINFO = "routinginfo";
+    private final static String FIELD_ROUTINGINFO = "routinginfo";
 
-    // routingInfo from Hazelcast member
+    public static ClassDefinition CLASS_DEFINITION = null;
+
+    static {
+        CLASS_DEFINITION = new ClassDefinitionBuilder(FACTORY_ID, CLASS_ID)
+        .addPortableField(FIELD_PRESENCE, PortablePresence.CLASS_DEFINITION)
+        .addLongField(FIELD_TIMESTAMP)
+        .addPortableField(FIELD_ROUTINGINFO, PortableRoutingInfo.CLASS_DEFINITION)
+        .build();
+    }
+
     private RoutingInfo routingInfo;
 
+    /**
+     * Initializes a new {@link PortableResource} without Presence but with the current time.
+     */
     protected PortableResource() {
-        // creates a resource without presence but with timestamp
         super();
     }
 
+    /**
+     * Initializes a new {@link PortableResource} based on a new DefaultResource and the given member identifying the cluster node.
+     * 
+     * @param member The member identifying the cluster node
+     */
+    public PortableResource(Member member) {
+        this(new DefaultResource(), member);
+    }
+
+    /**
+     * Initializes a new {@link PortableResource} based on another Resource instance and the given member identifying the cluster node.
+     * 
+     * @param resource The other resource
+     * @param member The member identifying the cluster node
+     */
     public PortableResource(Resource resource, Member member) {
         Validate.notNull(resource, "Mandatory argument missing: resource");
         Validate.notNull(member, "Mandatory argument missing: member");
@@ -106,21 +134,19 @@ public class PortableResource extends DefaultResource implements CustomPortable 
 
     @Override
     public void writePortable(PortableWriter writer) throws IOException {
-        if(presence != null) {
-            writer.writePortable(PRESENCE, new PortablePresence(presence));
-        }
-        writer.writeLong(TIMESTAMP, timestamp.getTime());
-        if(routingInfo!=null) {
-            writer.writePortable(ROUTINGINFO, new PortableRoutingInfo(routingInfo));
-        }
+        writer.writePortable(FIELD_PRESENCE, presence == null ? null : new PortablePresence(presence));
+        writer.writeLong(FIELD_TIMESTAMP, timestamp.getTime());
+        writer.writePortable(FIELD_ROUTINGINFO, new PortableRoutingInfo(routingInfo));
     }
 
     @Override
     public void readPortable(PortableReader reader) throws IOException {
-        PortablePresence portablePresence = reader.readPortable(PRESENCE);
-        presence = portablePresence.getPresence();
-        timestamp = new Date(reader.readLong(TIMESTAMP));
-        routingInfo = reader.readPortable(ROUTINGINFO);
+        PortablePresence portablePresence = reader.readPortable(FIELD_PRESENCE);
+        if (portablePresence != null) {
+            presence = portablePresence.getPresence();
+        }
+        timestamp = new Date(reader.readLong(FIELD_TIMESTAMP));
+        routingInfo = reader.readPortable(FIELD_ROUTINGINFO);
     }
 
     @Override

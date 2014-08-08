@@ -50,14 +50,14 @@
 package com.openexchange.drive.events.ms;
 
 import com.hazelcast.nio.serialization.Portable;
-import com.openexchange.hazelcast.serialization.CustomPortableFactory;
+import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
 
 /**
  * {@link PortableDriveEventFactory}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class PortableDriveEventFactory implements CustomPortableFactory {
+public class PortableDriveEventFactory extends AbstractCustomPortableFactory {
 
     @Override
     public int getClassId() {
