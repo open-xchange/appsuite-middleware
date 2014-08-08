@@ -85,6 +85,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteRegistry;
 import com.openexchange.groupware.i18n.Users;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.i18n.tools.StringHelper;
@@ -244,6 +246,11 @@ public class RdbUserStorage extends UserStorage {
     @Override
     public void deleteUser(Connection con, Context context, int userId) throws OXException {
         try {
+            /*
+             * fire delete event beforehand
+             */
+            DeleteEvent deleteEvent = new DeleteEvent(this, userId, DeleteEvent.TYPE_USER, context.getContextId());
+            DeleteRegistry.getInstance().fireDeleteEvent(deleteEvent, con, con);
             /*
              * fetch data to copy into del_user table
              */
