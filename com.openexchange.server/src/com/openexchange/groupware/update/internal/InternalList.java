@@ -745,6 +745,9 @@ public final class InternalList {
 
         // (Re-)adds indexes in prg_contacts for "auto-complete" queries
         list.add(new com.openexchange.groupware.update.tasks.ContactsAddIndex4AutoCompleteSearchV2());
+        
+        // Check if foreign keys in date tables are dropped and drop them if necessary
+        list.add(new com.openexchange.groupware.update.tasks.CheckAndDropDateExternalForeignKeysUpdateTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
