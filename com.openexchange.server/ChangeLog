@@ -1,6 +1,7 @@
 * 2014-08-08 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 33920: Introduced update task to ensure required indices on 'prg_dates' exist
+ - Fix for bug 33898: Added basic decomposition of display- to first- and lastname for collected contacts
 
 * 2014-08-06 - steffen.templin@open-xchange.com
 

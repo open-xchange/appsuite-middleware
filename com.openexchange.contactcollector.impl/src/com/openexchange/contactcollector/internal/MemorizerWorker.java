@@ -78,6 +78,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.java.Strings;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
@@ -479,16 +480,16 @@ public final class MemorizerWorker {
 
     private static Contact transformInternetAddress(final InternetAddress address, final Session session) throws ParseException, UnsupportedEncodingException {
         final Contact retval = new Contact();
+        retval.setParentFolderID(getFolderId(session));
         final String addr = decodeMultiEncodedValue(IDNA.toIDN(address.getAddress()));
         retval.setEmail1(addr);
-        final String displayName;
-        if (address.getPersonal() != null && !"".equals(address.getPersonal().trim())) {
-            displayName = decodeMultiEncodedValue(address.getPersonal());
+        if (false == Strings.isEmpty(address.getPersonal())) {
+            String displayName = decodeMultiEncodedValue(address.getPersonal());
+//            new ParsedDisplayName(displayName).applyTo(retval);
+            retval.setDisplayName(displayName);
         } else {
-            displayName = addr;
+            retval.setDisplayName(addr);
         }
-        retval.setDisplayName(displayName);
-        retval.setParentFolderID(getFolderId(session));
         return retval;
     }
 
