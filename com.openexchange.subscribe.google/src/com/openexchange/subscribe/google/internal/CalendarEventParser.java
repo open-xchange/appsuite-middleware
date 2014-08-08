@@ -49,6 +49,7 @@
 
 package com.openexchange.subscribe.google.internal;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -160,7 +161,7 @@ public class CalendarEventParser {
             }
         }
         if (event.getEnd() != null) {
-            final EventDateTime eventDateTime = event.getStart();
+            final EventDateTime eventDateTime = event.getEnd();
             final long endDate;
             if (eventDateTime.getDate() != null) {
                 endDate = eventDateTime.getDate().getValue();
