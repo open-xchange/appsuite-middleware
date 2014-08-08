@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Event.Creator;
@@ -80,7 +79,9 @@ import com.openexchange.user.UserService;
  */
 public class CalendarEventParser {
 
-    private enum ResponseStatus {
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CalendarEventParser.class);
+
+    private static enum ResponseStatus {
         needsAction, accepted, declined, tentative;
 
         final static ConfirmStatus parse(final String status) {
@@ -99,9 +100,9 @@ public class CalendarEventParser {
 
     }
 
-    final Logger logger = LoggerFactory.getLogger(CalendarEventParser.class);
+    // ------------------------------------------------------------------------------------------------------------------ //
 
-    private ServerSession session;
+    private final ServerSession session;
 
     /**
      * Initializes a new {@link CalendarEventParser}.
@@ -113,7 +114,7 @@ public class CalendarEventParser {
 
     /**
      * Parse an Event to a CalendarDataObject
-     * 
+     *
      * @param event The Event
      * @param calendarObject The CalendarDataObject
      * @throws OXException
@@ -218,7 +219,7 @@ public class CalendarEventParser {
 
     /**
      * Convert the external participants to internal users if possible.
-     * 
+     *
      * @param calendarObject The calendar object that contains the participant list
      */
     private void convertExternalToInternal(final CalendarDataObject calendarObject) {
@@ -244,7 +245,7 @@ public class CalendarEventParser {
                     }
 
                 } catch (final OXException e) {
-                    logger.debug("Couldn't resolve E-Mail address to an internal user: {}", part.getEmailAddress(), e);
+                    LOGGER.debug("Couldn't resolve E-Mail address to an internal user: {}", part.getEmailAddress(), e);
                 }
             }
         }
