@@ -848,6 +848,10 @@ PFILE=/opt/open-xchange/etc/mail.properties
 KEY=com.openexchange.mail.imageHost
 ox_add_property $KEY "" $PFILE
 
+
+# SoftwareChagne_Request-2110
+ox_add_property html.tag.strike '""' /opt/open-xchange/etc/whitelist.properties
+
 setConfigFilePermissions() {
     PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
     for FILE in $PROTECT
