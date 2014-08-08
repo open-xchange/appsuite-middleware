@@ -2,6 +2,10 @@
 
  - Fix for bug 33818: Added update task to check foreign keys and drop them if necessary
 
+* 2014-08-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 33899: Added missing project dependencies to "com.openexchange.report.client" classpath
+
 * 2014-08-08 - martin.herfurth@open-xchange.com
 
  - Fix for bug 30599: Ical export stumbles over bad reccurring appointment.
