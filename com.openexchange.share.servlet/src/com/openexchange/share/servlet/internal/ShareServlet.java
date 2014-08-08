@@ -203,17 +203,7 @@ public class ShareServlet extends HttpServlet {
              */
             Matcher matcher = PATH_PATTERN.matcher(pathInfo);
             if (matcher.matches()) {
-                Share share = ShareServiceLookup.getService(ShareService.class, true).resolveToken(matcher.group(1));
-                if (null != share) {
-                    /*
-                     * check if share expired
-                     */
-                    if (null != share.getExpires() && System.currentTimeMillis() > share.getExpires().getTime()) {
-                        //TODO share is expired, delete it
-                    } else {
-                        return share;
-                    }
-                }
+                return ShareServiceLookup.getService(ShareService.class, true).resolveToken(matcher.group(1));
             }
         }
         return null;

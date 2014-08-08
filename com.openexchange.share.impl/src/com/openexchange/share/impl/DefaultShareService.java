@@ -49,8 +49,11 @@
 
 package com.openexchange.share.impl;
 
+import java.util.Iterator;
 import java.util.List;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.CreateRequest;
@@ -90,17 +93,49 @@ public class DefaultShareService implements ShareService {
     @Override
     public Share resolveToken(String token) throws OXException {
         int contextID = ShareTool.extractContextId(token);
-        return services.getService(ShareStorage.class).loadShare(contextID, token, StorageParameters.NO_PARAMETERS);
+        Share share = services.getService(ShareStorage.class).loadShare(contextID, token, StorageParameters.NO_PARAMETERS);
+        if (share.isExpired()) {
+            removeShare(share);
+            return null;
+        }
+        return share;
     }
 
     @Override
     public List<Share> getAllShares(Session session) throws OXException {
-        return services.getService(ShareStorage.class).loadSharesCreatedBy(session.getContextId(), session.getUserId(), StorageParameters.NO_PARAMETERS);
+        List<Share> shares = services.getService(ShareStorage.class).loadSharesCreatedBy(
+            session.getContextId(), session.getUserId(), StorageParameters.NO_PARAMETERS);
+        return removeExpired(shares);
     }
 
     @Override
     public void delete(DeleteRequest deleteRequest, Session session) throws OXException {
         new DeleteHandler(deleteRequest, ServerSessionAdapter.valueOf(session), services).processRequest();
+    }
+
+    private List<Share> removeExpired(List<Share> shares) throws OXException {
+        if (null != shares && 0 < shares.size()) {
+            Iterator<Share> iterator = shares.iterator();
+            while (iterator.hasNext()) {
+                Share share = iterator.next();
+                if (share.isExpired()) {
+                    removeShare(share);
+                    iterator.remove();
+                }
+            }
+        }
+        return shares;
+    }
+
+    private void removeShare(Share share) throws OXException {
+        ContextService contextService = services.getService(ContextService.class);
+        Context context = contextService.getContext(share.getContextID());
+        DeleteRequest deleteRequest = new DeleteRequest();
+        deleteRequest.setModule(share.getModule());
+        deleteRequest.setFolder(share.getFolder());
+        deleteRequest.setItem(share.getItem());
+        deleteRequest.addGuestID(share.getGuest());
+        new DeleteHandler(deleteRequest, context, services).processRequest();
     }
 
 }

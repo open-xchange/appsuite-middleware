@@ -74,11 +74,30 @@ import com.openexchange.user.UserService;
  */
 public class DeleteHandler extends RequestHandler<DeleteRequest, Void> {
 
+    private final Context context;
+
     /**
      * Initializes a new {@link DeleteHandler}.
+     *
+     * @param deleteRequest The delete request
+     * @param session The server session
+     * @param services The service lookup
      */
     public DeleteHandler(DeleteRequest deleteRequest, ServerSession session, ServiceLookup services) {
         super(deleteRequest, session, services);
+        this.context = session.getContext();
+    }
+
+    /**
+     * Initializes a new {@link DeleteHandler}.
+     *
+     * @param deleteRequest The delete request
+     * @param context The context
+     * @param services The service lookup
+     */
+    public DeleteHandler(DeleteRequest deleteRequest, Context context, ServiceLookup services) {
+        super(deleteRequest, null, services);
+        this.context = context;
     }
 
     @Override
@@ -87,7 +106,6 @@ public class DeleteHandler extends RequestHandler<DeleteRequest, Void> {
         UserService userService = getUserService();
         ShareStorage shareStorage = getShareStorage();
 
-        Context context = session.getContext();
         boolean ownsConnection = false;
         Connection con = request.getConnection();
         if (con == null) {
