@@ -7,6 +7,7 @@
  - Fix for bug 33899: Added missing project dependencies to "com.openexchange.report.client" classpath
  - Fix for bug 33772: Added <strike> tag to whitelist.properties file
  - Fix for bug 33941: Added appropriate entries for password settings to "paths.perfMap" file
+ - Fix for bug 33044: Properly decode (encoded and folded) Subject header
 
 * 2014-08-08 - martin.herfurth@open-xchange.com
 

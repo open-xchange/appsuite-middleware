@@ -767,11 +767,6 @@ public final class MimeMessageUtility {
     }
 
     /**
-     * The max. length of a RFC 2047 style encoded word.
-     */
-    private static final int ENCODED_WORD_LEN = 75;
-
-    /**
      * Internal method to decode a string header obtained from ENVELOPE fetch item.
      *
      * @param value The header value
@@ -782,7 +777,7 @@ public final class MimeMessageUtility {
         /*
          * Passes possibly encoded-word is greater than 75 characters and contains no CR?LF
          */
-        if ((length > ENCODED_WORD_LEN) && (value.indexOf('\r') < 0) && (value.indexOf('\n') < 0)) {
+        if ((value.indexOf('\r') < 0) && (value.indexOf('\n') < 0)) {
             final StringBuilder sb = new StringBuilder(length).append(value);
             final String pattern = "?= =?";
             int i;

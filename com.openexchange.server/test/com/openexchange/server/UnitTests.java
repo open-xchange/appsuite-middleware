@@ -85,6 +85,7 @@ import org.junit.runners.Suite.SuiteClasses;
     com.openexchange.mail.mime.MimeStructureFixerTest.class,
     com.openexchange.mail.mime.MimeSmilFixerTest.class,
     com.openexchange.mail.mime.QuotedInternetAddressTest.class,
+    com.openexchange.mail.mime.utils.MimeMessageUtilityTest.class,
     com.openexchange.mail.parser.handlers.JsonMessageHandlerTest.class,
     com.openexchange.groupware.notify.ParticipantNotifyTest.class,
     com.openexchange.mail.json.actions.GetAttachmentActionTest.class,
