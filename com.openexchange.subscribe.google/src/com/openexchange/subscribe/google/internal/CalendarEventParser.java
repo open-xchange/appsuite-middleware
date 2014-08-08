@@ -56,6 +56,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.Event.Creator;
 import com.google.api.services.calendar.model.Event.Reminders;
 import com.google.api.services.calendar.model.EventAttendee;
 import com.google.api.services.calendar.model.EventDateTime;
@@ -67,9 +68,9 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmStatus;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.subscribe.google.osgi.Services;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
 /**
@@ -100,14 +101,14 @@ public class CalendarEventParser {
 
     final Logger logger = LoggerFactory.getLogger(CalendarEventParser.class);
 
-    private Context context;
+    private ServerSession session;
 
     /**
      * Initializes a new {@link CalendarEventParser}.
      */
-    public CalendarEventParser(final Context context) {
+    public CalendarEventParser(final ServerSession session) {
         super();
-        this.context = context;
+        this.session = session;
     }
 
     /**
@@ -115,9 +116,11 @@ public class CalendarEventParser {
      * 
      * @param event The Event
      * @param calendarObject The CalendarDataObject
+     * @throws OXException
      */
-    public void parseCalendarEvent(final Event event, final CalendarDataObject calendarObject) {
-        calendarObject.setContext(context);
+    public void parseCalendarEvent(final Event event, final CalendarDataObject calendarObject) throws OXException {
+        calendarObject.setContext(session.getContext());
+        calendarObject.setUid(event.getICalUID());
 
         // Common stuff
         if (event.getSummary() != null) {
@@ -131,23 +134,45 @@ public class CalendarEventParser {
         }
 
         // Start, end and creation time
-        if (event.getOriginalStartTime() != null) {
-            final EventDateTime eventDateTime = event.getOriginalStartTime();
-            calendarObject.setStartDate(new Date(eventDateTime.getDate().getValue()));
-            calendarObject.setTimezone(eventDateTime.getTimeZone());
+        if (event.getStart() != null) {
+            final EventDateTime eventDateTime = event.getStart();
+            final long startDate;
+            if (eventDateTime.getDate() != null) {
+                startDate = eventDateTime.getDate().getValue();
+            } else if (eventDateTime.getDateTime() != null) {
+                startDate = eventDateTime.getDateTime().getValue();
+            } else {
+                throw new OXException();
+            }
+            calendarObject.setStartDate(new Date(startDate));
+            if (eventDateTime.getTimeZone() != null) {
+                calendarObject.setTimezone(eventDateTime.getTimeZone());
+            }
         }
         if (event.getEnd() != null) {
-            calendarObject.setEndDate(new Date(event.getEnd().getDate().getValue()));
+            final EventDateTime eventDateTime = event.getStart();
+            final long endDate;
+            if (eventDateTime.getDate() != null) {
+                endDate = eventDateTime.getDate().getValue();
+            } else if (eventDateTime.getDateTime() != null) {
+                endDate = eventDateTime.getDateTime().getValue();
+            } else {
+                throw new OXException();
+            }
+            calendarObject.setEndDate(new Date(endDate));
         }
         if (event.getCreated() != null) {
             final DateTime dateTime = event.getCreated();
             calendarObject.setCreationDate(new Date(dateTime.getValue()));
         }
 
-        try {
-            calendarObject.setCreatedBy(fetchUserByEmail(event.getCreator().getEmail()).getId());
-        } catch (OXException e) {
-            logger.warn("The calendar object {} has no creator assigned to it.", calendarObject.toString());
+        if (event.getCreator() != null) {
+            final Creator creator = event.getCreator();
+            if (creator.getSelf() != null && creator.getSelf()) {
+                calendarObject.setCreatedBy(session.getUserId());
+            } else {
+                // add external creator?
+            }
         }
 
         // We only support one reminder per calendar Object, thus the first one of the event
@@ -159,11 +184,11 @@ public class CalendarEventParser {
 
         // Participants and confirmations
         final List<EventAttendee> attendees = event.getAttendees();
-        final List<Participant> participants = new ArrayList<Participant>(attendees.size());
-        final List<ConfirmableParticipant> confParts = new ArrayList<ConfirmableParticipant>(attendees.size());
-        for (EventAttendee a : attendees) {
-            final Participant p;
-            if (!a.getResource()) {
+        if (attendees != null) {
+            final List<Participant> participants = new ArrayList<Participant>(attendees.size());
+            final List<ConfirmableParticipant> confParts = new ArrayList<ConfirmableParticipant>(attendees.size());
+            for (EventAttendee a : attendees) {
+                final Participant p;
                 p = new ExternalUserParticipant(a.getEmail());
 
                 // Confirmations
@@ -179,14 +204,15 @@ public class CalendarEventParser {
                 }
                 confParts.add(cp);
 
-                if (a.getOrganizer()) {
+                if (a.getOrganizer() != null && a.getOrganizer()) {
                     calendarObject.setOrganizer(a.getEmail());
                 }
                 participants.add(p);
             }
+            calendarObject.setConfirmations(confParts);
+            calendarObject.setParticipants(participants);
         }
-        calendarObject.setConfirmations(confParts);
-        calendarObject.setParticipants(participants);
+
         convertExternalToInternal(calendarObject);
     }
 
@@ -207,7 +233,7 @@ public class CalendarEventParser {
             if (part.getType() == Participant.EXTERNAL_USER) {
                 User foundUser;
                 try {
-                    foundUser = userService.searchUser(part.getEmailAddress(), context);
+                    foundUser = userService.searchUser(part.getEmailAddress(), session.getContext());
                     if (foundUser == null) {
                         continue;
                     }
@@ -223,10 +249,5 @@ public class CalendarEventParser {
             }
         }
         calendarObject.setParticipants(participants);
-    }
-
-    private User fetchUserByEmail(final String email) throws OXException {
-        final UserService userService = Services.getService(UserService.class);
-        return userService.searchUser(email, context);
     }
 }
