@@ -232,7 +232,11 @@ public class ICalExporter implements Exporter {
                             if (!appointment.containsTimezone()) {
                                 appointment.setTimezone(user.getTimeZone());
                             }
-                            recColl.replaceDatesWithFirstOccurence(appointment);
+                            try {
+                                recColl.replaceDatesWithFirstOccurence(appointment);
+                            } catch (OXException e) {
+                                LOG.error("Failed to calculate recurring appointment " + appointment.getObjectID(), e);
+                            }
                             //appointments need a UID to ensure that exceptions can be associated with them.
                             if(appointment.getUid() == null){
                             	appointment.setUid(UUID.randomUUID().toString());
