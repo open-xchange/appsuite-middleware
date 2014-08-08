@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.halo
 Bundle-Version: 7.6.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.ajax.container,
+Import-Package: com.google.common.cache,
+ com.openexchange.ajax.container,
  com.openexchange.ajax.requesthandler,
  com.openexchange.config.cascade,
  com.openexchange.contact,
