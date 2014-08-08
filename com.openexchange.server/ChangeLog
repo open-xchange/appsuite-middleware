@@ -5,6 +5,7 @@
 * 2014-08-08 - thorben.betten@open-xchange.com
 
  - Fix for bug 33899: Added missing project dependencies to "com.openexchange.report.client" classpath
+ - Fix for bug 33772: Added <strike> tag to whitelist.properties file
 
 * 2014-08-08 - martin.herfurth@open-xchange.com
 
