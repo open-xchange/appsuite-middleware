@@ -65,7 +65,6 @@ public class AllCrawlersTestSuite{
     public static Test suite() {
         final TestSuite testSuite = new TestSuite();
         testSuite.addTestSuite(GMXTest.class);
-        testSuite.addTestSuite(GoogleMailTest.class);
         testSuite.addTestSuite(WebDeTest.class);
         testSuite.addTestSuite(TOnlineDETEst.class);
         return testSuite;
