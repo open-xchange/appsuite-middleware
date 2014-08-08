@@ -719,6 +719,9 @@ public final class InternalList {
         // Adds/corrects user mail index: INDEX (mail) -> INDEX (cid, mail(255))
         list.add(new com.openexchange.groupware.update.tasks.UserAddMailIndexTask());
 
+        // Check if foreign keys in date tables are dropped and drop them if necessary
+        list.add(new com.openexchange.groupware.update.tasks.CheckAndDropDateExternalForeignKeysUpdateTask());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 }
