@@ -51,31 +51,11 @@ package com.openexchange.subscribe.google;
 
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.LinkedList;
-import junit.framework.TestCase;
-import org.junit.runner.RunWith;
-import org.mockito.Matchers;
-import org.mockito.MockitoAnnotations;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.google.api.client.GoogleApiClients;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.util.TimeZones;
-import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.oauth.google.GoogleOAuthServiceMetaData;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
-import com.openexchange.subscribe.Subscription;
-import com.openexchange.tools.session.SimServerSession;
 
 /**
  * {@link GoogleContactsTest}
@@ -83,47 +63,12 @@ import com.openexchange.tools.session.SimServerSession;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  * @since v7.6.1
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({GoogleApiClients.class})
-@PowerMockIgnore({"javax.net.ssl.*", "javax.imageio.*"})
-public class GoogleContactsTest extends TestCase {
-
-    private static final String REDIRECT_URL = "";
-    private static final String GOOGLE_API_KEY = "";
-    private static final String GOOGLE_API_SECRET = "";
-    private static final String ACCESS_TOKEN = "";
-
-    private Subscription subscription;
-    private GoogleContactSubscribeService gcss;
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        MockitoAnnotations.initMocks(this);
-        ConfigurationService cs = new MockConfigurationService(GOOGLE_API_KEY, GOOGLE_API_SECRET, REDIRECT_URL);
-        ServiceLookup sl = new MockServiceLookup(cs);
-        OAuthServiceMetaData oasdm = new GoogleOAuthServiceMetaData(sl);
-        gcss = new GoogleContactSubscribeService(oasdm, sl);
-        SimServerSession simServer = new SimServerSession(1, 1);
-        subscription = new Subscription();
-        subscription.setSession(simServer);
-    }
+@PowerMockIgnore({"javax.imageio.*"})
+public class GoogleContactsTest extends AbstractGoogleTest {
 
     public void testContacts() throws Exception {
         try {
-            NetHttpTransport transport = new NetHttpTransport.Builder().doNotValidateCertificate().build();
-            JsonFactory jsonFactory = new JacksonFactory();
-
-            GoogleCredential credential = new GoogleCredential.Builder()
-            .setTransport(transport)
-            .setJsonFactory(jsonFactory).build();
-            credential.setAccessToken(ACCESS_TOKEN).setRefreshToken(null);
-
-            PowerMockito.mockStatic(GoogleApiClients.class);
-            PowerMockito.doReturn(credential).when(GoogleApiClients.class, "getCredentials", Matchers.any(Session.class));
-
-            @SuppressWarnings("unchecked")
-            LinkedList<Contact> contacts = (LinkedList<Contact>) gcss.getContent(subscription);
+            LinkedList<Contact> contacts = getGoogleContacts();
 
             assertFalse("Received an empty contact list", contacts.isEmpty());
 
@@ -249,20 +194,6 @@ public class GoogleContactsTest extends TestCase {
         } catch (OXException e) {
             assertFalse(e.getMessage(), true);
         }
-    }
-
-    private void assertFieldIsNull(String fieldDesc, Object valueToCheck) {
-        assertNull("The field " + fieldDesc + " should be empty, but is not", valueToCheck);
-    }
-
-    private void assertNotNullAndEquals(String fieldDesc, String expected, String actual) {
-        assertNotNull("Could not find expected contact mapping for " + fieldDesc, actual);
-        assertEquals("Mapping for contact field '" + fieldDesc + "' differs -->", expected, actual);
-    }
-
-    private void assertNotNullAndEquals(String fieldDesc, Date expected, Date actual) {
-        assertNotNull("Could not find expected contact mapping for " + fieldDesc, actual);
-        assertEquals("Mapping for contact field '" + fieldDesc + "' differs -->", expected, actual);
     }
 
     private byte[] getBytesOfPaulsImage(){
