@@ -139,9 +139,13 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
         }
         final String retval;
         {
-            final int mlen = contentType.length() - 1;
-            if (0 == contentType.indexOf('"') && mlen == contentType.lastIndexOf('"')) {
-                retval = contentType.substring(1, mlen);
+            if (0 == contentType.indexOf('"')) {
+                final int mlen = contentType.length() - 1;
+                if (mlen == contentType.lastIndexOf('"')) {
+                    retval = contentType.substring(1, mlen);
+                } else {
+                    retval = contentType;
+                }
             } else {
                 retval = contentType;
             }
