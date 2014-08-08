@@ -49,7 +49,6 @@
 
 package com.openexchange.subscribe.google.internal;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -178,8 +177,9 @@ public class CalendarEventParser {
         }
 
         if (event.getCreator() != null) {
-            final Creator creator = event.getCreator();
-            if (creator.getSelf() != null && creator.getSelf()) {
+            Creator creator = event.getCreator();
+            Boolean isSelf = creator.getSelf();
+            if (isSelf != null && isSelf.booleanValue()) {
                 calendarObject.setCreatedBy(session.getUserId());
             } else {
                 // add external creator?
@@ -190,7 +190,7 @@ public class CalendarEventParser {
         final Reminders reminders = event.getReminders();
         if (reminders.getOverrides() != null && reminders.getOverrides().size() > 0) {
             final EventReminder eventReminder = reminders.getOverrides().get(0);
-            calendarObject.setAlarm(eventReminder.getMinutes());
+            calendarObject.setAlarm(eventReminder.getMinutes().intValue());
         }
 
         // Participants and confirmations
@@ -199,29 +199,32 @@ public class CalendarEventParser {
             final List<Participant> participants = new ArrayList<Participant>(attendees.size());
             final List<ConfirmableParticipant> confParts = new ArrayList<ConfirmableParticipant>(attendees.size());
             for (EventAttendee a : attendees) {
-                final Participant p;
-                p = new ExternalUserParticipant(a.getEmail());
+                String emailAddress = a.getEmail();
+                Participant p = new ExternalUserParticipant(emailAddress);
 
                 // Confirmations
-                ConfirmStatus confirmStatus = ResponseStatus.parse(a.getResponseStatus());
+                String status = a.getResponseStatus();
+                ConfirmStatus confirmStatus = ResponseStatus.parse(status);
                 if (null == confirmStatus) {
-                    LOGGER.warn("The provided status \"{}\" cannot be parsed to a valid {}", a.getResponseStatus(), ConfirmStatus.class.getSimpleName());
+                    LOGGER.warn("The provided status \"{}\" cannot be parsed to a valid {}", status, ConfirmStatus.class.getSimpleName());
                     confirmStatus = ConfirmStatus.NONE;
                 }
 
                 String confirmMessage = a.getComment();
-                ConfirmableParticipant cp = new ExternalUserParticipant(a.getEmail());
+                ConfirmableParticipant cp = new ExternalUserParticipant(emailAddress);
                 cp.setStatus(confirmStatus);
                 cp.setMessage(confirmMessage);
 
-                if (a.getDisplayName() != null) {
-                    p.setDisplayName(a.getDisplayName());
-                    cp.setDisplayName(a.getDisplayName());
+                String displayName = a.getDisplayName();
+                if (displayName != null) {
+                    p.setDisplayName(displayName);
+                    cp.setDisplayName(displayName);
                 }
                 confParts.add(cp);
 
-                if (a.getOrganizer() != null && a.getOrganizer()) {
-                    calendarObject.setOrganizer(a.getEmail());
+                Boolean isOrganizer = a.getOrganizer();
+                if (isOrganizer != null && isOrganizer.booleanValue()) {
+                    calendarObject.setOrganizer(emailAddress);
                 }
                 participants.add(p);
             }
