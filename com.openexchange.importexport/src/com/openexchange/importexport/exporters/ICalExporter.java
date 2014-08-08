@@ -228,22 +228,22 @@ public class ICalExporter implements Exporter {
                 try {
                     while (searchIterator.hasNext()) {
                         final Appointment appointment = searchIterator.next();
-                        if (CalendarObject.NO_RECURRENCE != appointment.getRecurrenceType()) {
-                            if (!appointment.containsTimezone()) {
-                                appointment.setTimezone(user.getTimeZone());
-                            }
-                            try {
+                        try {
+                            if (CalendarObject.NO_RECURRENCE != appointment.getRecurrenceType()) {
+                                if (!appointment.containsTimezone()) {
+                                    appointment.setTimezone(user.getTimeZone());
+                                }
                                 recColl.replaceDatesWithFirstOccurence(appointment);
-                            } catch (OXException e) {
-                                LOG.error("Failed to calculate recurring appointment " + appointment.getObjectID(), e);
+                                // appointments need a UID to ensure that exceptions can be associated with them.
+                                if (appointment.getUid() == null) {
+                                    appointment.setUid(UUID.randomUUID().toString());
+                                }
                             }
-                            //appointments need a UID to ensure that exceptions can be associated with them.
-                            if(appointment.getUid() == null){
-                            	appointment.setUid(UUID.randomUUID().toString());
-                            }
+                            appointments.add(appointment);
+                        } catch (OXException e) {
+                            LOG.error("Failed to calculate recurring appointment " + appointment.getObjectID(), e);
                         }
-                        appointments.add(appointment);
-                       }
+                    }
                     final List<ConversionError> errors = new LinkedList<ConversionError>();
                     final List<ConversionWarning> warnings = new LinkedList<ConversionWarning>();
                     icalText = emitter.writeAppointments(appointments, sessObj.getContext(), errors, warnings);
