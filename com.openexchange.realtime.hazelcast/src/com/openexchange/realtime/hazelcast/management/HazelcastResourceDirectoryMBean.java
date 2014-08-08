@@ -70,11 +70,11 @@ public interface HazelcastResourceDirectoryMBean {
     public Map<String, List<String>> getIDMapping() throws OXException;
 
     /**
-     * Get the mapping of full IDs to the Resource e.g. ox://marc.arens@premium/random <-> ResourceMap.
+     * Get the mapping of full IDs to the Resource e.g. ox://marc.arens@premium/random <-> Resource.
      *
-     * @return the map used for mapping full IDs to ResourceMaps.
+     * @return the map used for mapping full IDs to Resources.
      * @throws OXException if the map couldn't be fetched from hazelcast
      */
-    public Map<String, Map<String, Object>> getResourceMapping() throws OXException;
+    public Map<String, String> getResourceMapping() throws OXException;
 
 }

@@ -49,16 +49,16 @@
 
 package com.openexchange.realtime.hazelcast.group;
 
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 import com.hazelcast.core.EntryEvent;
 import com.hazelcast.query.Predicate;
 import com.openexchange.realtime.cleanup.RealtimeJanitor;
-import com.openexchange.realtime.hazelcast.directory.ResourceMappingEntryListener;
+import com.openexchange.realtime.hazelcast.directory.ResourceMappingEntryAdapter;
+import com.openexchange.realtime.hazelcast.serialization.PortableID;
 import com.openexchange.realtime.hazelcast.serialization.PortableNotInternalPredicate;
-import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.hazelcast.serialization.PortableResource;
 
 
 /**
@@ -68,41 +68,33 @@ import com.openexchange.realtime.packet.ID;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.0
  */
-public class DistributedGroupManagerCleaner implements ResourceMappingEntryListener {
+public class DistributedGroupManagerCleaner extends ResourceMappingEntryAdapter {
 
     private static final Logger LOG = LoggerFactory.getLogger(DistributedGroupManagerCleaner.class);
-    Predicate<String, Map<String, Object>> notInternalPredicate;
+    Predicate<PortableID, PortableResource> notInternalPredicate;
     private RealtimeJanitor janitor;
-    
+
     public DistributedGroupManagerCleaner(RealtimeJanitor janitor) {
         notInternalPredicate = new PortableNotInternalPredicate();
         this.janitor = janitor;
     }
 
     @Override
-    public void entryAdded(EntryEvent<String, Map<String, Object>> event) {
-    }
-
-    @Override
-    public void entryRemoved(EntryEvent<String, Map<String, Object>> event) {
-        ID id = new ID(event.getKey());
+    public void entryRemoved(EntryEvent<PortableID, PortableResource> event) {
+        PortableID id = event.getKey();
         LOG.debug("Removal of key {}", id);
         janitor.cleanupForId(id);
     }
 
     @Override
-    public void entryUpdated(EntryEvent<String, Map<String, Object>> event) {
-    }
-
-    @Override
-    public void entryEvicted(EntryEvent<String, Map<String, Object>> event) {
-        ID id = new ID(event.getKey());
+    public void entryEvicted(EntryEvent<PortableID, PortableResource> event) {
+        PortableID id = event.getKey();
         LOG.debug("Eviction of key {}", id);
         janitor.cleanupForId(id);
     }
 
     @Override
-    public Optional<Predicate<String, Map<String, Object>>> getPredicate() {
+    public Optional<Predicate<PortableID, PortableResource>> getPredicate() {
         return Optional.of(notInternalPredicate);
     }
 

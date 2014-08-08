@@ -49,31 +49,45 @@
 
 package com.openexchange.realtime.hazelcast.directory;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import com.openexchange.realtime.packet.ID;
+import com.google.common.base.Optional;
+import com.hazelcast.core.EntryEvent;
+import com.hazelcast.query.Predicate;
+import com.openexchange.realtime.hazelcast.serialization.PortableID;
+import com.openexchange.realtime.hazelcast.serialization.PortableResource;
 
 
 /**
- * {@link IDWrapper} - Helper class to map/unmap IDs from and to String
- * hazelcast.
- *
+ * {@link ResourceMappingEntryAdapter} - An abstract adapter class for receiving ResourceMappingEntry events. The methods in this class are
+ * empty. This class exists as convenience for creating listener objects.
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since 7.6.1
  */
-public class IDWrapper {
+public abstract class ResourceMappingEntryAdapter implements ResourceMappingEntryListener {
 
-    /**
-     * Transform a Collection of IDs to a Set of Strings
-     * @param ids the collection of IDs
-     * @return the collection of Strings representing the IDs
-     */
-    public static Set<String> idsToStringSet(Collection<ID> ids) {
-        Set<String> stringList = new HashSet<String>(ids.size());
-        
-        for (ID id : ids) {
-            stringList.add(id.toString());
-        }
-        return stringList;
+    @Override
+    public void entryAdded(EntryEvent<PortableID, PortableResource> event) {
+        // Do nothing
     }
+
+    @Override
+    public void entryRemoved(EntryEvent<PortableID, PortableResource> event) {
+     // Do nothing
+    }
+
+    @Override
+    public void entryUpdated(EntryEvent<PortableID, PortableResource> event) {
+     // Do nothing
+    }
+
+    @Override
+    public void entryEvicted(EntryEvent<PortableID, PortableResource> event) {
+     // Do nothing
+    }
+
+    @Override
+    public Optional<Predicate<PortableID, PortableResource>> getPredicate() {
+        return Optional.absent();
+    }
+
 }
