@@ -78,7 +78,7 @@ import com.openexchange.subscribe.Subscription;
 import com.openexchange.tools.session.SimServerSession;
 
 /**
- * {@link GoogleSubscribeTest}
+ * {@link GoogleContactsTest}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  * @since v7.6.1
@@ -86,7 +86,8 @@ import com.openexchange.tools.session.SimServerSession;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({GoogleApiClients.class})
 @PowerMockIgnore({"javax.net.ssl.*", "javax.imageio.*"})
-public class GoogleSubscribeTest extends TestCase {
+public class GoogleContactsTest extends TestCase {
+
     private static final String REDIRECT_URL = "";
     private static final String GOOGLE_API_KEY = "";
     private static final String GOOGLE_API_SECRET = "";
@@ -151,8 +152,7 @@ public class GoogleSubscribeTest extends TestCase {
 
                         //organisation
                         assertNotNullAndEquals("company", "OX", c.getCompany());
-                        // TODO: if a job title is provided this would override the title (Herr)
-                        //assertNotNullAndEquals("job title", c.get(), "DJ");
+                        assertNotNullAndEquals("job title", "DJ", c.getPosition());
 
                         assertNotNullAndEquals("telephone business 1", "+4913371337133709", c.getTelephoneBusiness1());
                         assertNotNullAndEquals("telephone home 1", "+4913371337133702", c.getTelephoneHome1());
@@ -207,8 +207,7 @@ public class GoogleSubscribeTest extends TestCase {
 
                         //organisation
                         assertFieldIsNull("company", c.getCompany());
-                        // TODO: if a job title is provided this would override the title (Herr)
-                        //assertNotNullAndEquals("job title", c.get(), "DJ");
+                        assertFieldIsNull("job title", c.getPosition());
 
                         assertFieldIsNull("telephone business 1", c.getTelephoneBusiness1());
                         assertNotNullAndEquals("cellular telephone 1", "+4213371337133701", c.getTelephoneHome1());

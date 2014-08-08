@@ -120,9 +120,13 @@ public class ContactEntryParser {
                 if (o.hasOrgName()) {
                     contact.setCompany(o.getOrgName().getValue());
                 }
-                if (o.hasOrgJobDescription()) {
-                    contact.setTitle(o.getOrgJobDescription().getValue());
+                if(o.hasOrgTitle()) {
+                    contact.setPosition(o.getOrgTitle().getValue());
                 }
+
+                // if(o.hasOrgJobDescription()) {
+                //    contact.setTitle(o.getOrgJobDescription().getValue());
+                // }
             }
         }
 
