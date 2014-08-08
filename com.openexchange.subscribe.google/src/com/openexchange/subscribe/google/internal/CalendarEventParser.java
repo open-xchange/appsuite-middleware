@@ -82,20 +82,29 @@ public class CalendarEventParser {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CalendarEventParser.class);
 
     private static enum ResponseStatus {
-        needsAction, accepted, declined, tentative;
+        NEEDS_ACTION("needsAction", ConfirmStatus.NONE),
+        ACCEPTED("accepted", ConfirmStatus.ACCEPT),
+        DECLINED("declined", ConfirmStatus.DECLINE),
+        TENTATIVE("tentative", ConfirmStatus.TENTATIVE);
 
-        final static ConfirmStatus parse(final String status) {
-            if (status.equals(ResponseStatus.needsAction.toString())) {
-                return ConfirmStatus.NONE;
-            } else if (status.equals(ResponseStatus.accepted.toString())) {
-                return ConfirmStatus.ACCEPT;
-            } else if (status.equals(ResponseStatus.declined.toString())) {
-                return ConfirmStatus.DECLINE;
-            } else if (status.equals(ResponseStatus.tentative.toString())) {
-                return ConfirmStatus.TENTATIVE;
-            } else {
-                throw new IllegalArgumentException("The provided status \"" + status + "\" cannot be parsed to a valid ConfirmStatus");
+        private final String str;
+        private final ConfirmStatus confirmStatus;
+
+        private ResponseStatus(String str, ConfirmStatus confirmStatus) {
+            this.str = str;
+            this.confirmStatus = confirmStatus;
+        }
+
+        static ConfirmStatus parse(final String status) {
+            if (null == status) {
+                return null;
             }
+            for (ResponseStatus rs : ResponseStatus.values()) {
+                if (rs.str.equalsIgnoreCase(status)) {
+                    return rs.confirmStatus;
+                }
+            }
+            return null;
         }
 
     }
@@ -193,9 +202,14 @@ public class CalendarEventParser {
                 p = new ExternalUserParticipant(a.getEmail());
 
                 // Confirmations
-                final ConfirmStatus confirmStatus = ResponseStatus.parse(a.getResponseStatus());
-                final String confirmMessage = a.getComment();
-                final ConfirmableParticipant cp = new ExternalUserParticipant(a.getEmail());
+                ConfirmStatus confirmStatus = ResponseStatus.parse(a.getResponseStatus());
+                if (null == confirmStatus) {
+                    LOGGER.warn("The provided status \"{}\" cannot be parsed to a valid {}", a.getResponseStatus(), ConfirmStatus.class.getSimpleName());
+                    confirmStatus = ConfirmStatus.NONE;
+                }
+
+                String confirmMessage = a.getComment();
+                ConfirmableParticipant cp = new ExternalUserParticipant(a.getEmail());
                 cp.setStatus(confirmStatus);
                 cp.setMessage(confirmMessage);
 
