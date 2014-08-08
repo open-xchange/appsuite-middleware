@@ -67,6 +67,7 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ParsedDisplayName;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactMerger;
 import com.openexchange.groupware.container.Contact;
@@ -259,6 +260,15 @@ public class ContactHaloImpl implements ContactHalo {
         final ContactMerger contactMerger = new ContactMerger(false);
         for (final Contact c : contactsToMerge) {
             resultContact = contactMerger.merge(resultContact, c);
+        }
+        /*
+         * try to decompose display name if no other "name" properties are already set and the contact is "new"
+         */
+        if (false == resultContact.containsObjectID() &&
+            resultContact.containsDisplayName() && false == Strings.isEmpty(resultContact.getDisplayName()) &&
+            false == resultContact.containsGivenName() && false == resultContact.containsSurName() &&
+            false == resultContact.containsNickname() && false == resultContact.containsCompany()) {
+            new ParsedDisplayName(resultContact.getDisplayName()).applyTo(resultContact);
         }
         contactQuery.setContact(resultContact);
         return contactQuery;
