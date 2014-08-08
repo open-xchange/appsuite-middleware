@@ -743,6 +743,9 @@ public final class InternalList {
         // Corrects values in the 'changing_date' column that are set to {@link Long#MAX_VALUE}.
         list.add(new com.openexchange.groupware.update.tasks.FolderCorrectChangingDateTask());
 
+        // (Re-)adds indexes in prg_contacts for "auto-complete" queries
+        list.add(new com.openexchange.groupware.update.tasks.ContactsAddIndex4AutoCompleteSearchV2());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 }
