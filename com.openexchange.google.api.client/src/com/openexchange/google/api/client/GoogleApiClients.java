@@ -52,15 +52,9 @@ package com.openexchange.google.api.client;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.Google2v2Api;
-import org.scribe.model.OAuthRequest;
-import org.scribe.model.Response;
 import org.scribe.model.Token;
-import org.scribe.model.Verb;
-import org.scribe.utils.OAuthEncoder;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
@@ -134,7 +128,7 @@ public class GoogleApiClients {
             Google2v2Api.GoogleOAuth2Service scribeOAuthService = (Google2v2Api.GoogleOAuth2Service) serviceBuilder.build();
 
             // Check expiry
-            int expiry = getExpiry(defaultAccount.getToken());
+            int expiry = scribeOAuthService.getExpiry(defaultAccount.getToken());
             if (expiry < 300) {
                 // Less than 5 minutes to live
                 Token accessToken = scribeOAuthService.getAccessToken(
@@ -179,22 +173,5 @@ public class GoogleApiClients {
             throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
-    
-    private static int getExpiry(final String accessToken) {
-        OAuthRequest request = new OAuthRequest(Verb.POST, "https://www.googleapis.com/oauth2/v1/tokeninfo");
-        request.addBodyParameter("access_token", accessToken);
-        Response response = request.send();
-        if (response.getCode() == 400) {
-            // Expired
-            return -1;
-        }
 
-        int expiry = -1;
-        Matcher expiryMatcher = Pattern.compile("\"expires_in\": ([0-9]+)").matcher(response.getBody());
-        if (expiryMatcher.find()) {
-            int lifeTime = Integer.parseInt(OAuthEncoder.decode(expiryMatcher.group(1)));
-            expiry = lifeTime;
-        }
-        return expiry;
-    }
 }
