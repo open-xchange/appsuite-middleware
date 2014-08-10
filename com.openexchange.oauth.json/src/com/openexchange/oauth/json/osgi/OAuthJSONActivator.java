@@ -131,6 +131,7 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
                 oAuthService.stop();
                 this.oAuthService = null;
             }
+            UtilizerRegistry.freeInstance();
             AbstractOAuthAJAXActionService.setOAuthService(null);
             AbstractOAuthAJAXActionService.PREFIX.set(null);
             Services.setServiceLookup(null);
