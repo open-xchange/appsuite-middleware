@@ -120,7 +120,7 @@ public final class CreateAction extends AbstractOAuthTokenAction {
             if (AJAXRequestDataTools.parseBoolParameter("auto_create", request, true)) {
                 UtilizerRegistry registry = UtilizerRegistry.getInstance();
                 if (null != registry) {
-                    for (OAuthUtilizerCreator creator : registry.getCreators()) {
+                    for (OAuthUtilizerCreator creator : registry.getCreatorsFor(service.getAPI())) {
                         creator.createUtilizer(newAccount, session);
                     }
                 }

@@ -158,6 +158,11 @@ public final class DropboxFileStorageService implements AccountAware, OAuthUtili
     }
 
     @Override
+    public API getApplicableApi() {
+        return API.DROPBOX;
+    }
+
+    @Override
     public String createUtilizer(OAuthAccount oauthAccount, Session session) throws OXException {
         if (false == API.DROPBOX.equals(oauthAccount.getAPI())) {
             return null;

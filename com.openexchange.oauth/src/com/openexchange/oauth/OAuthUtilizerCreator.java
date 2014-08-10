@@ -71,4 +71,11 @@ public interface OAuthUtilizerCreator {
      */
     String createUtilizer(OAuthAccount oauthAccount, Session session) throws OXException;
 
+    /**
+     * Gets the applicable OAuth API
+     *
+     * @return The applicable API
+     */
+    API getApplicableApi();
+
 }

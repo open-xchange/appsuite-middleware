@@ -51,11 +51,14 @@ package com.openexchange.oauth.json.osgi;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthUtilizerCreator;
 
 /**
@@ -65,8 +68,6 @@ import com.openexchange.oauth.OAuthUtilizerCreator;
  * @since 7.6.1
  */
 public final class UtilizerRegistry implements ServiceTrackerCustomizer<OAuthUtilizerCreator, OAuthUtilizerCreator> {
-
-    private static final Object PRESENT = new Object();
 
     private static volatile UtilizerRegistry instance;
 
@@ -101,7 +102,7 @@ public final class UtilizerRegistry implements ServiceTrackerCustomizer<OAuthUti
     // ------------------------------------------------------------------------------------------------------------------------- //
 
     private final BundleContext context;
-    private final ConcurrentMap<OAuthUtilizerCreator, Object> map;
+    private final ConcurrentMap<API, Queue<OAuthUtilizerCreator>> map;
 
     /**
      * Initializes a new {@link UtilizerRegistry}.
@@ -109,7 +110,7 @@ public final class UtilizerRegistry implements ServiceTrackerCustomizer<OAuthUti
     private UtilizerRegistry(BundleContext context) {
         super();
         this.context = context;
-        map = new ConcurrentHashMap<OAuthUtilizerCreator, Object>(8);
+        map = new ConcurrentHashMap<API, Queue<OAuthUtilizerCreator>>(8);
     }
 
     /**
@@ -117,14 +118,25 @@ public final class UtilizerRegistry implements ServiceTrackerCustomizer<OAuthUti
      *
      * @return The creators
      */
-    public Collection<OAuthUtilizerCreator> getCreators() {
-        return Collections.unmodifiableCollection(map.keySet());
+    public Collection<OAuthUtilizerCreator> getCreatorsFor(API oauthApi) {
+        return Collections.unmodifiableCollection(map.get(oauthApi));
     }
 
     @Override
     public OAuthUtilizerCreator addingService(ServiceReference<OAuthUtilizerCreator> reference) {
         OAuthUtilizerCreator creator = context.getService(reference);
-        if (null == map.putIfAbsent(creator, PRESENT)) {
+
+        API api = creator.getApplicableApi();
+        Queue<OAuthUtilizerCreator> queue = map.get(api);
+        if (null == queue) {
+            Queue<OAuthUtilizerCreator> newqueue = new ConcurrentLinkedQueue<OAuthUtilizerCreator>();
+            queue = map.putIfAbsent(api, newqueue);
+            if (null == queue) {
+                queue = newqueue;
+            }
+        }
+
+        if (queue.offer(creator)) {
             return creator;
         }
 
@@ -139,7 +151,10 @@ public final class UtilizerRegistry implements ServiceTrackerCustomizer<OAuthUti
 
     @Override
     public void removedService(ServiceReference<OAuthUtilizerCreator> reference, OAuthUtilizerCreator creator) {
-        map.remove(creator);
+        Queue<OAuthUtilizerCreator> queue = map.get(creator.getApplicableApi());
+        if (null != queue) {
+            queue.remove(creator);
+        }
         context.ungetService(reference);
     }
 
