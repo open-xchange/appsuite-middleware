@@ -49,13 +49,18 @@
 
 package com.openexchange.file.storage.dropbox;
 
+import java.io.Serializable;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.ReadOnlyDynamicFormDescription;
@@ -70,6 +75,7 @@ import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.generic.DefaultFileStorageAccount;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthUtilizerCreator;
 import com.openexchange.session.Session;
 
@@ -78,7 +84,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DropboxFileStorageService implements AccountAware, OAuthUtilizerCreator {
+public final class DropboxFileStorageService implements AccountAware, OAuthUtilizerCreator, OAuthAccountDeleteListener {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DropboxFileStorageService.class);
 
@@ -157,6 +163,36 @@ public final class DropboxFileStorageService implements AccountAware, OAuthUtili
         return compositeAccountManager;
     }
 
+    // --------------------------------------------------------------------------------------------------------------------------------- //
+
+    @Override
+    public void onBeforeOAuthAccountDeletion(int oauthAccountId, Map<String, Object> eventProps, int user, int cid, Connection con) {
+        // Nothing
+    }
+
+    @Override
+    public void onAfterOAuthAccountDeletion(int oauthAccountId, Map<String, Object> eventProps, int user, int cid, Connection con) {
+        try {
+            // Acquire account manager
+            FileStorageAccountManager accountManager = getAccountManager();
+
+            List<FileStorageAccount> toDelete = new LinkedList<FileStorageAccount>();
+            FakeSession session = new FakeSession(null, user, cid);
+            for (FileStorageAccount account : accountManager.getAccounts(session)) {
+                Object obj = account.getConfiguration().get("account");
+                if (null != obj && Integer.toString(oauthAccountId).equals(obj.toString())) {
+                    toDelete.add(account);
+                }
+            }
+
+            for (FileStorageAccount deleteMe : toDelete) {
+                accountManager.deleteAccount(deleteMe, session);
+            }
+        } catch (Exception e) {
+            LOG.warn("Could not delete possibly existing Dropbox accounts associated with deleted OAuth account {} for user {} in context {}", oauthAccountId, user, cid, e);
+        }
+    }
+
     @Override
     public API getApplicableApi() {
         return API.DROPBOX;
@@ -189,6 +225,8 @@ public final class DropboxFileStorageService implements AccountAware, OAuthUtili
         // Add that account
         return accountManager.addAccount(fileStorageAccount, session);
     }
+
+    // --------------------------------------------------------------------------------------------------------------------------------- //
 
     @Override
     public String getId() {
@@ -278,6 +316,131 @@ public final class DropboxFileStorageService implements AccountAware, OAuthUtili
             }
         }
         return new DropboxAccountAccess(this, account, session);
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------- //
+
+    private static final class FakeSession implements Session, Serializable {
+
+        private static final long serialVersionUID = -4527564586038651789L;
+
+        private final String password;
+        private final int userId;
+        private final int contextId;
+        private final ConcurrentMap<String, Object> parameters;
+
+        FakeSession(final String password, final int userId, final int contextId) {
+            super();
+            this.password = password;
+            this.userId = userId;
+            this.contextId = contextId;
+            parameters = new ConcurrentHashMap<String, Object>(8);
+        }
+
+        @Override
+        public int getContextId() {
+            return contextId;
+        }
+
+        @Override
+        public String getLocalIp() {
+            return null;
+        }
+
+        @Override
+        public void setLocalIp(final String ip) {
+            // Nothing to do
+        }
+
+        @Override
+        public String getLoginName() {
+            return null;
+        }
+
+        @Override
+        public boolean containsParameter(final String name) {
+            return parameters.containsKey(name);
+        }
+
+        @Override
+        public Object getParameter(final String name) {
+            return parameters.get(name);
+        }
+
+        @Override
+        public String getPassword() {
+            return password;
+        }
+
+        @Override
+        public String getRandomToken() {
+            return null;
+        }
+
+        @Override
+        public String getSecret() {
+            return null;
+        }
+
+        @Override
+        public String getSessionID() {
+            return null;
+        }
+
+        @Override
+        public int getUserId() {
+            return userId;
+        }
+
+        @Override
+        public String getUserlogin() {
+            return null;
+        }
+
+        @Override
+        public String getLogin() {
+            return null;
+        }
+
+        @Override
+        public void setParameter(final String name, final Object value) {
+            if (null == value) {
+                parameters.remove(name);
+            } else {
+                parameters.put(name, value);
+            }
+        }
+
+        @Override
+        public String getAuthId() {
+            return null;
+        }
+
+        @Override
+        public String getHash() {
+            return null;
+        }
+
+        @Override
+        public void setHash(final String hash) {
+            // Nope
+        }
+
+        @Override
+        public String getClient() {
+            return null;
+        }
+
+        @Override
+        public void setClient(final String client) {
+            // Nothing to do
+        }
+
+        @Override
+        public boolean isTransient() {
+            return false;
+        }
+
     }
 
 }
