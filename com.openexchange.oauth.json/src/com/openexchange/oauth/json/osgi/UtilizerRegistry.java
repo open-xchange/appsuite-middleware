@@ -119,7 +119,8 @@ public final class UtilizerRegistry implements ServiceTrackerCustomizer<OAuthUti
      * @return The creators
      */
     public Collection<OAuthUtilizerCreator> getCreatorsFor(API oauthApi) {
-        return Collections.unmodifiableCollection(map.get(oauthApi));
+        Queue<OAuthUtilizerCreator> queue = map.get(oauthApi);
+        return null == queue ? Collections.<OAuthUtilizerCreator>emptyList() : Collections.<OAuthUtilizerCreator>unmodifiableCollection(queue);
     }
 
     @Override
