@@ -56,6 +56,7 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.oauth.OAuthHTTPClientFactory;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.OAuthUtilizerCreator;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.Services;
 import com.openexchange.oauth.json.oauthaccount.actions.AccountActionFactory;
@@ -106,6 +107,10 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
             getService(CapabilityService.class).declareCapability("oauth");
 
             trackService(HostnameService.class);
+            UtilizerRegistry registry = UtilizerRegistry.initInstance(context);
+            track(OAuthUtilizerCreator.class, registry);
+
+            openTrackers();
         } catch (final Exception e) {
             LOG.error("", e);
             throw e;
@@ -115,12 +120,12 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
     @Override
     public void stopBundle() throws Exception {
         try {
+            super.stopBundle();
             final WhiteboardSecretService secretService = this.secretService;
             if (secretService != null) {
                 secretService.close();
                 this.secretService = null;
             }
-            cleanUp();
             final OSGiOAuthService oAuthService = this.oAuthService;
             if (null != oAuthService) {
                 oAuthService.stop();
