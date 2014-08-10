@@ -64,7 +64,7 @@ public interface OAuthUtilizerCreator {
     /**
      * Creates an appropriate utilizer if this creator handles specified OAuth account.
      *
-     * @param oauthAccount The OAuth account
+     * @param oauthAccount The OAuth account (compliant to {@link #getApplicableApi()})
      * @param session The associated session
      * @return The utilizer's identifier or <code>null</code> if no utilizer has been created
      * @throws OXException If create operation fails
