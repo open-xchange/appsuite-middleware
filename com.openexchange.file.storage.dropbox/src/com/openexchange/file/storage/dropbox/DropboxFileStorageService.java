@@ -223,7 +223,9 @@ public final class DropboxFileStorageService implements AccountAware, OAuthUtili
         fileStorageAccount.setConfiguration(configuration);
 
         // Add that account
-        return accountManager.addAccount(fileStorageAccount, session);
+        String accountId = accountManager.addAccount(fileStorageAccount, session);
+        LOG.info("Created Dropbox account with ID {} for user {} in context {}", accountId, session.getUserId(), session.getContextId());
+        return accountId;
     }
 
     // --------------------------------------------------------------------------------------------------------------------------------- //
