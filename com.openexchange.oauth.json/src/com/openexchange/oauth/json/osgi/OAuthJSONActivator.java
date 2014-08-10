@@ -71,8 +71,6 @@ import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
  */
 public class OAuthJSONActivator extends AJAXModuleActivator {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OAuthJSONActivator.class);
-
     private volatile OSGiOAuthService oAuthService;
     private volatile WhiteboardSecretService secretService;
 
@@ -112,7 +110,7 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
 
             openTrackers();
         } catch (final Exception e) {
-            LOG.error("", e);
+            org.slf4j.LoggerFactory.getLogger(OAuthJSONActivator.class).error("", e);
             throw e;
         }
     }
