@@ -177,7 +177,7 @@ public final class DropboxFileStorageService implements AccountAware, OAuthUtili
 
         // Create file storage account instance
         DefaultFileStorageAccount fileStorageAccount = new DefaultFileStorageAccount();
-        fileStorageAccount.setDisplayName("My Dropbox account");
+        fileStorageAccount.setDisplayName("Dropbox");
         fileStorageAccount.setFileStorageService(this);
         fileStorageAccount.setServiceId(SERVICE_ID);
 
