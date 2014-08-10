@@ -51,6 +51,7 @@ package com.openexchange.file.storage.dropbox;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +67,10 @@ import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
+import com.openexchange.file.storage.generic.DefaultFileStorageAccount;
+import com.openexchange.oauth.API;
+import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthUtilizerCreator;
 import com.openexchange.session.Session;
 
 /**
@@ -73,7 +78,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DropboxFileStorageService implements AccountAware {
+public final class DropboxFileStorageService implements AccountAware, OAuthUtilizerCreator {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DropboxFileStorageService.class);
 
@@ -150,6 +155,34 @@ public final class DropboxFileStorageService implements AccountAware {
      */
     public CompositeFileStorageAccountManagerProvider getCompositeAccountManager() {
         return compositeAccountManager;
+    }
+
+    @Override
+    public String createUtilizer(OAuthAccount oauthAccount, Session session) throws OXException {
+        if (false == API.DROPBOX.equals(oauthAccount.getAPI())) {
+            return null;
+        }
+
+        if (false == getAccounts(session).isEmpty()) {
+            return null;
+        }
+
+        // Acquire account manager
+        FileStorageAccountManager accountManager = getAccountManager();
+
+        // Create file storage account instance
+        DefaultFileStorageAccount fileStorageAccount = new DefaultFileStorageAccount();
+        fileStorageAccount.setDisplayName("My Dropbox account");
+        fileStorageAccount.setFileStorageService(this);
+        fileStorageAccount.setServiceId(SERVICE_ID);
+
+        // Set its configuration
+        Map<String, Object> configuration = new HashMap<String, Object>(2);
+        configuration.put("account", Integer.valueOf(oauthAccount.getId()));
+        fileStorageAccount.setConfiguration(configuration);
+
+        // Add that account
+        return accountManager.addAccount(fileStorageAccount, session);
     }
 
     @Override
