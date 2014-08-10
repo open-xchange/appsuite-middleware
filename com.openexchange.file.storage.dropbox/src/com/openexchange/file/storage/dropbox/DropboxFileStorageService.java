@@ -183,7 +183,7 @@ public final class DropboxFileStorageService implements AccountAware, OAuthUtili
 
         // Set its configuration
         Map<String, Object> configuration = new HashMap<String, Object>(2);
-        configuration.put("account", Integer.valueOf(oauthAccount.getId()));
+        configuration.put("account", Integer.toString(oauthAccount.getId()));
         fileStorageAccount.setConfiguration(configuration);
 
         // Add that account
