@@ -56,6 +56,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.json.JSONArray;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -91,6 +92,9 @@ public class AllAction implements AJAXActionService {
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         List<Share> shares = services.getService(ShareService.class).getAllShares(session);
+        if (null == shares || 0 == shares.size()) {
+            return new AJAXRequestResult(new JSONArray());
+        }
         Date lastModified = null;
         Set<Integer> guestIDs = new HashSet<Integer>();
         for (Share share : shares) {
