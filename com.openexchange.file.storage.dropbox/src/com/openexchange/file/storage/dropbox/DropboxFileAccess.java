@@ -141,7 +141,9 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             if (404 == e.error) {
                 return false;
             }
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+            com.dropbox.client2.exception.DropboxServerException.Error body = e.body;
+            int error = e.error;
+            throw DropboxExceptionCodes.DROPBOX_SERVER_ERROR.create(e, Integer.valueOf(error), null == body.userError ? body.error : body.userError);
         } catch (final DropboxException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -161,10 +163,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             }
             return new DropboxFile(entry.parentPath(), entry.path, userId).parseDropboxFile(entry);
         } catch (final DropboxServerException e) {
-            if (404 == e.error) {
-                throw DropboxExceptionCodes.NOT_FOUND.create(e, id);
-            }
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+            throw handleServerError(id, e);
         } catch (final DropboxException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -196,10 +195,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             final Entry entry = dropboxAPI.copy(id, pos > 0 ? new StringBuilder(destPath).append('/').append(name).toString() : name);
             return new IDTuple(entry.parentPath(), entry.path);
         } catch (final DropboxServerException e) {
-            if (404 == e.error) {
-                throw DropboxExceptionCodes.NOT_FOUND.create(e, id);
-            }
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+            throw handleServerError(id, e);
         } catch (final DropboxException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -218,10 +214,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             final Entry entry = dropboxAPI.move(id, pos > 0 ? new StringBuilder(destPath).append('/').append(name).toString() : name);
             return new IDTuple(entry.parentPath(), entry.path);
         } catch (final DropboxServerException e) {
-            if (404 == e.error) {
-                throw DropboxExceptionCodes.NOT_FOUND.create(e, id);
-            }
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+            throw handleServerError(id, e);
         } catch (final DropboxException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -234,10 +227,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         try {
             return dropboxAPI.getFileStream(id, version);
         } catch (final DropboxServerException e) {
-            if (404 == e.error) {
-                throw DropboxExceptionCodes.NOT_FOUND.create(e, id);
-            }
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+            throw handleServerError(id, e);
         } catch (final DropboxException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -250,10 +240,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         try {
             return dropboxAPI.getThumbnailStream(id, ThumbSize.ICON_128x128, ThumbFormat.JPEG);
         } catch (final DropboxServerException e) {
-            if (404 == e.error) {
-                throw DropboxExceptionCodes.NOT_FOUND.create(e, id);
-            }
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+            throw handleServerError(id, e);
         } catch (final DropboxException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -287,10 +274,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             }
             file.setId(entry.path);
         } catch (final DropboxServerException e) {
-            if (404 == e.error) {
-                throw DropboxExceptionCodes.NOT_FOUND.create(e, id);
-            }
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+            throw handleServerError(id, e);
         } catch (final DropboxException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -311,10 +295,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                 }
             }
         } catch (final DropboxServerException e) {
-            if (404 == e.error) {
-                throw DropboxExceptionCodes.NOT_FOUND.create(e, folderId);
-            }
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+            throw handleServerError(folderId, e);
         } catch (final DropboxException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -342,7 +323,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             }
             return ret;
         } catch (final DropboxServerException e) {
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+            throw handleServerError(null, e);
         } catch (final DropboxException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -367,7 +348,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             if (404 == e.error) {
                 return new String[0];
             }
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+            throw handleServerError(null, e);
         } catch (final DropboxException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -406,10 +387,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             }
             return new FileTimedResult(files);
         } catch (final DropboxServerException e) {
-            if (404 == e.error) {
-                throw DropboxExceptionCodes.NOT_FOUND.create(e, folderId);
-            }
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+            throw handleServerError(folderId, e);
         } catch (final DropboxException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -440,10 +418,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             Collections.sort(files, order.comparatorBy(sort));
             return new FileTimedResult(files);
         } catch (final DropboxServerException e) {
-            if (404 == e.error) {
-                throw DropboxExceptionCodes.NOT_FOUND.create(e, folderId);
-            }
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+            throw handleServerError(folderId, e);
         } catch (final DropboxException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -461,10 +436,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             }
             return new FileTimedResult(files);
         } catch (final DropboxServerException e) {
-            if (404 == e.error) {
-                throw DropboxExceptionCodes.NOT_FOUND.create(e, id);
-            }
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+            throw handleServerError(id, e);
         } catch (final DropboxException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -489,10 +461,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             Collections.sort(files, order.comparatorBy(sort));
             return new FileTimedResult(files);
         } catch (final DropboxServerException e) {
-            if (404 == e.error) {
-                throw DropboxExceptionCodes.NOT_FOUND.create(e, id);
-            }
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+            throw handleServerError(id, e);
         } catch (final DropboxException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -515,7 +484,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             if (404 == e.error) {
                 throw DropboxExceptionCodes.NOT_FOUND.create(e, e.reason);
             }
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+            throw handleServerError(null, e);
         } catch (final DropboxException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -614,7 +583,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             }
             return new SearchIteratorAdapter<File>(files.iterator(), files.size());
         } catch (final DropboxServerException e) {
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+            throw handleServerError(null, e);
         } catch (final DropboxException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {

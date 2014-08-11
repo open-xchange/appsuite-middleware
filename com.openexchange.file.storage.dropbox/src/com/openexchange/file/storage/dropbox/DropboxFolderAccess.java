@@ -110,10 +110,7 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
             }
             return new DropboxFolder(userId).parseDirEntry(entry);
         } catch (final DropboxServerException e) {
-            if (404 == e.error) {
-                throw DropboxExceptionCodes.NOT_FOUND.create(e, folderId);
-            }
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+            throw handleServerError(folderId, e);
         } catch (final DropboxException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -151,10 +148,7 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
             }
             return list.toArray(new FileStorageFolder[0]);
         } catch (final DropboxServerException e) {
-            if (404 == e.error) {
-                throw DropboxExceptionCodes.NOT_FOUND.create(e, parentIdentifier);
-            }
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+            throw handleServerError(parentIdentifier, e);
         } catch (final DropboxException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -175,7 +169,7 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
                 dropboxAPI.createFolder(new StringBuilder("/".equals(parentPath) ? "" : parentPath).append('/').append(toCreate.getName()).toString());
             return toId(entry.path);
         } catch (final DropboxServerException e) {
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+            throw handleServerError(null, e);
         } catch (final DropboxException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -207,10 +201,7 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
                         null != newName ? newName : (pos < 0 ? path : path.substring(pos + 1))).toString());
             return toId(moved.path);
         } catch (final DropboxServerException e) {
-            if (404 == e.error) {
-                throw DropboxExceptionCodes.NOT_FOUND.create(e, folderId);
-            }
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+            throw handleServerError(folderId, e);
         } catch (final DropboxException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -229,10 +220,7 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
                     pos <= 0 ? newName : new StringBuilder(path.substring(0, pos)).append('/').append(newName).toString());
             return toId(moved.path);
         } catch (final DropboxServerException e) {
-            if (404 == e.error) {
-                throw DropboxExceptionCodes.NOT_FOUND.create(e, folderId);
-            }
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+            throw handleServerError(folderId, e);
         } catch (final DropboxException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -250,7 +238,7 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
             if (404 == e.error) {
                 return folderId;
             }
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+            throw handleServerError(null, e);
         } catch (final DropboxException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -277,10 +265,7 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
                 }
             }
         } catch (final DropboxServerException e) {
-            if (404 == e.error) {
-                throw DropboxExceptionCodes.NOT_FOUND.create(e, folderId);
-            }
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+            throw handleServerError(folderId, e);
         } catch (final DropboxException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -310,10 +295,7 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
             }
             return list.toArray(new FileStorageFolder[list.size()]);
         } catch (final DropboxServerException e) {
-            if (404 == e.error) {
-                throw DropboxExceptionCodes.NOT_FOUND.create(e, folderId);
-            }
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+            throw handleServerError(folderId, e);
         } catch (final DropboxException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
