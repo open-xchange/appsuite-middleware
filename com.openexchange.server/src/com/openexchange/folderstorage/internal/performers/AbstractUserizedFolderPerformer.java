@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.TimeZone;
@@ -76,11 +77,15 @@ import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.internal.UserizedFolderImpl;
+import com.openexchange.folderstorage.osgi.ShareServiceHolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.share.DeleteRequest;
+import com.openexchange.share.Share;
+import com.openexchange.share.ShareService;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.session.ServerSession;
 
@@ -396,6 +401,45 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
             }
         }
         return userizedFolder;
+    }
+
+    /**
+     * Deletes shares that are no longer valid as a consequence of removed guest permission entities. This also includes deleting the
+     * corresponding guest user.
+     *
+     * @param folderID The ID of the parent folder
+     * @param contentType The content type / module of the parent folder
+     * @param removedPermissions The removed permissions
+     * @throws OXException
+     */
+    protected void processRemovedGuestPermissions(String folderID, ContentType contentType, List<Permission> removedPermissions) throws OXException {
+        ShareService shareService = ShareServiceHolder.requireShareService();
+        List<Share> shares = shareService.getSharesForFolder(context.getContextId(), folderID);
+        if (null != shares && 0 < shares.size()) {
+            /*
+             * check corresponding guest permission entities
+             */
+            DeleteRequest deleteRequest = new DeleteRequest();
+            for (Permission permission : removedPermissions) {
+                for (Share share : shares) {
+                    if (permission.getEntity() == share.getGuest()) {
+                        /*
+                         * matching share, remove corresponding guest user and share
+                         */
+                        deleteRequest.addGuestID(permission.getEntity());
+                    }
+                }
+            }
+            if (0 < deleteRequest.getGuestIDs().size()) {
+                /*
+                 * delete via share service
+                 */
+                deleteRequest.setModule(contentType.getModule());
+                deleteRequest.setFolder(folderID);
+                // TODO: pass connection from storage parameters?
+                shareService.delete(deleteRequest, session);
+            }
+        }
     }
 
     private void hasVisibleSubfolderIDs(final Folder folder, final String treeId, final boolean all, final UserizedFolder userizedFolder, final boolean nullIsPublicAccess, final StorageParameters storageParameters, final java.util.Collection<FolderStorage> openedStorages) throws OXException {

@@ -62,6 +62,7 @@ import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.internal.CalculatePermission;
+import com.openexchange.folderstorage.osgi.UserServiceHolder;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
@@ -145,7 +146,7 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
                 /*
                  * Real delete
                  */
-                folderStorage.deleteFolder(treeId, folderId, storageParameters);
+                deleteRealFolder(folderId, folderStorage);
             } else {
                 /*-
                  * Virtual delete:
@@ -158,7 +159,7 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
                     throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folderId);
                 }
                 if (folderStorage.equals(realStorage)) {
-                    folderStorage.deleteFolder(treeId, folderId, storageParameters);
+                    deleteRealFolder(folderId, realStorage);
                 } else {
                     /*
                      * Delete from virtual storage
@@ -238,11 +239,30 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folderId);
         }
         checkOpenedStorage(realStorage, openedStorages);
-        realStorage.deleteFolder(FolderStorage.REAL_TREE_ID, folderId, storageParameters);
+        deleteRealFolder(folder, realStorage);
         /*
          * And now from virtual storage
          */
         folderStorage.deleteFolder(treeId, folderId, storageParameters);
+    }
+
+    private void deleteRealFolder(String id, FolderStorage storage) throws OXException {
+        deleteRealFolder(storage.getFolder(FolderStorage.REAL_TREE_ID, id, storageParameters), storage);
+    }
+
+    private void deleteRealFolder(Folder folder, FolderStorage storage) throws OXException {
+        /*
+         * check for any present guest permissions
+         */
+        ComparedPermissions comparedPermissions = new ComparedPermissions(
+            session.getContextId(), new Permission[0], folder.getPermissions(), UserServiceHolder.requireUserService());
+        if (comparedPermissions.hasRemovedGuests()) {
+            processRemovedGuestPermissions(folder.getID(), folder.getContentType(), comparedPermissions.getRemovedGuests());
+        }
+        /*
+         * delete folder
+         */
+        storage.deleteFolder(FolderStorage.REAL_TREE_ID, folder.getID(), storageParameters);
     }
 
     private boolean canDeleteAllObjects(final Permission permission, final String folderId, final String treeId, final FolderStorage folderStorage) throws OXException {
