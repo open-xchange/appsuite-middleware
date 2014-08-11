@@ -56,6 +56,8 @@ ox_set_property com.openexchange.capability.drive false /opt/open-xchange/etc/dr
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Mon Aug 04 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Build for patch 2014-08-11
 * Mon Jul 28 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Build for patch 2014-07-30
 * Mon Jul 21 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>

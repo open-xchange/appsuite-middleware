@@ -36,6 +36,10 @@
 
  - Fix for bug 33891: Removed superfluous line throwing always an exception.
 
+* 2014-08-04 - marc.arens@open-xchange.com
+
+ - Fix for bug 33697: Respect destination folder for folder owners
+ 
 * 2014-08-01 - thorben.betten@open-xchange.com
 
  - Fix for bug 33857: Do not log a warning in case Content-Type misses any charset information; just detect it and continue

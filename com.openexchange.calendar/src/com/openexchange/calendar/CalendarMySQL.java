@@ -3516,10 +3516,10 @@ public class CalendarMySQL implements CalendarSqlImp {
                                              *    - Set to target folder ID for the folder owner
                                              *    - Set to default folder ID for non-folder-owners 
                                              */
-                                            if(new_userparticipant.getIdentifier() == access.getFolderOwner(cdao.getParentFolderID())) {
+                                            if(new_userparticipants[a].getIdentifier() == access.getFolderOwner(cdao.getParentFolderID())) {
                                                 pfid = cdao.getParentFolderID();
                                             } else {
-                                                pfid = access.getDefaultFolder(new_userparticipant.getIdentifier(), FolderObject.CALENDAR).getObjectID();
+                                                pfid = access.getDefaultFolder(new_userparticipants[a].getIdentifier(), FolderObject.CALENDAR).getObjectID();
                                             }
                                         }
                                     } else {

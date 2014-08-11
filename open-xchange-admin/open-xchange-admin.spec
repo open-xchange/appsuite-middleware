@@ -201,6 +201,8 @@ fi
 %doc com.openexchange.admin/ChangeLog
 
 %changelog
+* Mon Aug 04 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-08-11
 * Mon Jul 28 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-07-30
 * Mon Jul 21 2014 Marcus Klein <marcus.klein@open-xchange.com>
