@@ -200,9 +200,9 @@ public class CreateHandler extends RequestHandler<CreateRequest, List<Share>> {
             Map<String, Set<String>> attributes = guest.getAttributes();
             if (null == attributes) {
                 attributes = new HashMap<String, Set<String>>(2);
-                attributes.put("com.openexchange.user.guestContactFolderID", Collections.singleton(entity.getContactFolderID()));
-                attributes.put("com.openexchange.user.guestContactID", Collections.singleton(entity.getContactID()));
             }
+            attributes.put("com.openexchange.user.guestContactFolderID", Collections.singleton(entity.getContactFolderID()));
+            attributes.put("com.openexchange.user.guestContactID", Collections.singleton(entity.getContactID()));
             guest.setAttributes(attributes);
         }
         return guest;
