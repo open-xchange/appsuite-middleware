@@ -18,6 +18,7 @@ Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        The Open Xchange backend Dropbox file storage extension
 Autoreqprov:   no
 Requires:       open-xchange-core >= @OXVERSION@
+Requires:       open-xchange-oauth >= @OXVERSION@
 Provides:       open-xchange-file-storage-dropbox = %{version}
 
 %description
