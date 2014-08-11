@@ -57,6 +57,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.database.DatabaseService;
@@ -129,9 +130,14 @@ public class RdbShareStorage implements ShareStorage {
 
     @Override
     public void deleteShare(int contextID, String token, StorageParameters parameters) throws OXException {
+        deleteShares(contextID, Collections.singletonList(token), parameters);
+    }
+
+    @Override
+    public void deleteShares(int contextID, List<String> tokens, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getWriteProvider(contextID, parameters);
         try {
-            deleteShare(provider.get(), contextID, token);
+            deleteShares(provider.get(), contextID, tokens);
         } catch (SQLException e) {
             throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -296,12 +302,14 @@ public class RdbShareStorage implements ShareStorage {
         }
     }
 
-    private static int deleteShare(Connection connection, int cid, String token) throws SQLException {
+    private static int deleteShares(Connection connection, int cid, List<String> tokens) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            stmt = connection.prepareStatement(SQL.DELETE_SHARE_STMT);
+            stmt = connection.prepareStatement(SQL.DELETE_SHARES_STMT(tokens.size()));
             stmt.setInt(1, cid);
-            stmt.setBytes(2, UUIDs.toByteArray(UUIDs.fromUnformattedString(token)));
+            for (int i = 0; i < tokens.size(); i++) {
+                stmt.setBytes(2 + i, UUIDs.toByteArray(UUIDs.fromUnformattedString(tokens.get(i))));
+            }
             return logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);

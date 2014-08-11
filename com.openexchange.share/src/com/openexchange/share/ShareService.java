@@ -53,8 +53,6 @@ import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
-
-
 /**
  * {@link ShareService}
  *
@@ -72,5 +70,17 @@ public interface ShareService {
     List<Share> getAllShares(Session session) throws OXException;
 
     List<Share> getSharesForFolder(int contextID, String folder) throws OXException;
+
+    /**
+     * Deletes shares for a specific folder that were bound to one of the supplied guest user IDs.
+     *
+     * @param session The session
+     * @param folder The identifier of the folder to remove the shares for
+     * @param module The module of the folder
+     * @param guests The user identifiers of the guests
+     * @return The identifiers of the guest users that have been removed through the removal of the share
+     * @throws OXException
+     */
+    int[] deleteSharesForFolder(Session session, String folder, int module, int[] guests) throws OXException;
 
 }

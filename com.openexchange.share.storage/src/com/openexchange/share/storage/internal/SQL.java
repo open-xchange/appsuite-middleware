@@ -145,6 +145,16 @@ public class SQL {
         "WHERE cid=? AND token=?;"
     ;
 
+    /**
+     * DELETE FROM share
+     * WHERE cid=? AND token IN (...);"
+     */
+    public static final String DELETE_SHARES_STMT(int length) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("DELETE FROM share WHERE cid=? AND token");
+        return appendPlaceholders(stringBuilder, length).append(';').toString();
+    }
+
     public static final String SELECT_EXPIRED_SHARES_STMT =
         "SELECT token,cid,module,folder,item,created,createdBy,lastModified,modifiedBy,expires,guest,auth " +
         "FROM share " +
@@ -172,6 +182,30 @@ public class SQL {
             LOG.debug("executeUpdate: {} - {} rows affected, {} ms elapsed.", stmt.toString(), rowCount, (System.currentTimeMillis() - start));
             return rowCount;
         }
+    }
+
+    /**
+     * Appends a SQL clause for the given number of placeholders, i.e. either <code>=?</code> if <code>count</code> is <code>1</code>, or
+     * an <code>IN</code> clause like <code>IN (?,?,?,?)</code> in case <code>count</code> is greater than <code>1</code>.
+     *
+     * @param stringBuilder The string builder to append the clause
+     * @param count The number of placeholders to append
+     * @return The string builder
+     */
+    private static StringBuilder appendPlaceholders(StringBuilder stringBuilder, int count) {
+        if (0 >= count) {
+            throw new IllegalArgumentException("count");
+        }
+        if (1 == count) {
+            stringBuilder.append("=?");
+        } else {
+            stringBuilder.append(" IN (?");
+            for (int i = 1; i < count; i++) {
+                stringBuilder.append(",?");
+            }
+            stringBuilder.append(')');
+        }
+        return stringBuilder;
     }
 
     private SQL() {

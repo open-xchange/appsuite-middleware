@@ -49,11 +49,17 @@
 
 package com.openexchange.share.impl;
 
+import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.context.ContextService;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.userconfiguration.RdbUserPermissionBitsStorage;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.CreateRequest;
@@ -62,7 +68,9 @@ import com.openexchange.share.Share;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.share.storage.StorageParameters;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.UserService;
 
 
 /**
@@ -94,7 +102,7 @@ public class DefaultShareService implements ShareService {
     public Share resolveToken(String token) throws OXException {
         int contextID = ShareTool.extractContextId(token);
         Share share = services.getService(ShareStorage.class).loadShare(contextID, token, StorageParameters.NO_PARAMETERS);
-        if (share.isExpired()) {
+        if (null != share && share.isExpired()) {
             removeShare(share);
             return null;
         }
@@ -118,6 +126,70 @@ public class DefaultShareService implements ShareService {
     public void delete(DeleteRequest deleteRequest, Session session) throws OXException {
         new DeleteHandler(deleteRequest, ServerSessionAdapter.valueOf(session), services).processRequest();
     }
+
+    @Override
+    public int[] deleteSharesForFolder(Session session, String folder, int module, int[] guests) throws OXException {
+
+        ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+        DatabaseService dbService = services.getService(DatabaseService.class);
+        UserService userService = services.getService(UserService.class);
+        ShareStorage shareStorage = services.getService(ShareStorage.class);
+        Context context = serverSession.getContext();
+
+        Connection con = dbService.getWritable(context);
+        boolean ownsConnection = true;
+        try {
+            if (ownsConnection) {
+                Databases.startTransaction(con);
+            }
+            StorageParameters parameters = StorageParameters.newInstance(Connection.class.getName(), con);
+
+            List<Share> shares = services.getService(ShareStorage.class).loadSharesForFolder(session.getContextId(), folder, parameters);
+            if (null == shares || 0 == shares.size()) {
+                return new int[0];
+            }
+            List<Integer> deletedGuests = new ArrayList<Integer>(guests.length);
+            List<String> tokens = new LinkedList<String>();
+            for (Share share : shares) {
+                for (int i = 0; i < guests.length; i++) {
+                    int guestID = guests[i];
+                    if (guestID == share.getGuest()) {
+                        RdbUserPermissionBitsStorage.deleteUserPermissionBits(guestID, con, context); // TODO: service layer
+                        userService.deleteUser(con, context, guestID);
+                        deletedGuests.add(Integer.valueOf(guestID));
+                        tokens.add(share.getToken());
+                        break;
+                    }
+                }
+            }
+            if (0 < tokens.size()) {
+                shareStorage.deleteShares(context.getContextId(), tokens, parameters);
+            }
+            if (ownsConnection) {
+                con.commit();
+            }
+            if (0 < deletedGuests.size()) {
+                int[] retval = new int[deletedGuests.size()];
+                for (int i = 0; i < deletedGuests.size(); i++) {
+                    retval[i] = deletedGuests.get(i).intValue();
+                }
+                return retval;
+            } else {
+                return new int[0];
+            }
+        } catch (Exception e) {
+            if (ownsConnection) {
+                Databases.rollback(con);
+            }
+            throw new OXException(e); // TODO
+        } finally {
+            if (ownsConnection) {
+                Databases.autocommit(con);
+                dbService.backWritable(context, con);
+            }
+        }
+    }
+
 
     private List<Share> removeExpired(List<Share> shares) throws OXException {
         if (null != shares && 0 < shares.size()) {
