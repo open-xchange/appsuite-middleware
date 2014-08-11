@@ -145,8 +145,7 @@ public final class DropboxFolder extends DefaultFileStorageFolder implements Typ
                     }
                 }
                 {
-                    final List<com.dropbox.client2.DropboxAPI.Entry> contents = entry.contents;
-                    final boolean hasSubfolders = contents != null && !contents.isEmpty();
+                    final boolean hasSubfolders = hasSubfolder(entry);
                     setSubfolders(hasSubfolders);
                     setSubscribedSubfolders(hasSubfolders);
                 }
@@ -155,6 +154,20 @@ public final class DropboxFolder extends DefaultFileStorageFolder implements Typ
             }
         }
         return this;
+    }
+
+    private boolean hasSubfolder(com.dropbox.client2.DropboxAPI.Entry entry) {
+        List<com.dropbox.client2.DropboxAPI.Entry> contents = entry.contents;
+        if (contents == null || contents.isEmpty()) {
+            return false;
+        }
+
+        for (com.dropbox.client2.DropboxAPI.Entry subEntry : contents) {
+            if (subEntry.isDir) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }
