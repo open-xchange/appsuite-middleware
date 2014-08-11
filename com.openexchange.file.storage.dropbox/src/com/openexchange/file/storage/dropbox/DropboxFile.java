@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import org.slf4j.Logger;
 import com.dropbox.client2.DropboxAPI.Entry;
 import com.dropbox.client2.RESTUtility;
 import com.openexchange.exception.OXException;
@@ -128,7 +129,7 @@ public final class DropboxFile extends DefaultFile {
                 setFileName(name);
                 setVersion(entry.rev);
                 final Set<Field> set = null == fields || fields.isEmpty() ? EnumSet.allOf(Field.class) : EnumSet.copyOf(fields);
-                {
+                try {
                     final Date date = RESTUtility.parseDate(entry.modified);
                     if (set.contains(Field.CREATED)) {
                         setCreated(new Date(date.getTime()));
@@ -136,6 +137,9 @@ public final class DropboxFile extends DefaultFile {
                     if (set.contains(Field.LAST_MODIFIED) || set.contains(Field.LAST_MODIFIED_UTC)) {
                         setLastModified(new Date(date.getTime()));
                     }
+                } catch (NumberFormatException nfe) {
+                    Logger logger = org.slf4j.LoggerFactory.getLogger(DropboxFile.class);
+                    logger.warn("Cannot parse date from: {}", entry.modified, nfe);
                 }
                 if (set.contains(Field.FILE_MIMETYPE)) {
                     String contentType = entry.mimeType;
