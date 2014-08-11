@@ -189,10 +189,32 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         }
         final String id = source.getId();
         try {
-            final String name = id.substring(id.lastIndexOf('/') + 1);
-            final String destPath = toPath(destFolder);
-            final int pos = destPath.lastIndexOf('/');
-            final Entry entry = dropboxAPI.copy(id, pos > 0 ? new StringBuilder(destPath).append('/').append(name).toString() : name);
+            String name = id.substring(id.lastIndexOf('/') + 1);
+            String destPath = toPath(destFolder);
+
+            int pos = destPath.lastIndexOf('/');
+            String toPath = pos > 0 ? new StringBuilder(destPath).append('/').append(name).toString() : new StringBuilder(name.length() + 1).append('/').append(name).toString();
+
+            String baseName;
+            String ext;
+            {
+                int dotPos = name.lastIndexOf('.');
+                if (dotPos > 0) {
+                    baseName = name.substring(0, dotPos);
+                    ext = name.substring(dotPos);
+                } else {
+                    baseName = name;
+                    ext = "";
+                }
+            }
+            int count = 1;
+            while (exists(destFolder, toPath, version)) {
+                name = new StringBuilder(baseName).append(" (").append(count++).append(')').append(ext).toString();
+                pos = toPath.lastIndexOf('/');
+                toPath = pos > 0 ? new StringBuilder(toPath.substring(0, pos)).append('/').append(name).toString() : new StringBuilder(name.length() + 1).append('/').append(name).toString();
+            }
+
+            Entry entry = dropboxAPI.copy(id, toPath);
             return new IDTuple(entry.parentPath(), entry.path);
         } catch (final DropboxServerException e) {
             throw handleServerError(id, e);
