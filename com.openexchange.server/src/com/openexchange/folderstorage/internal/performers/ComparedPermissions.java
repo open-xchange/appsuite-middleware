@@ -71,22 +71,34 @@ import com.openexchange.user.UserService;
 public class ComparedPermissions {
 
     private final int contextId;
-
-    private final Folder newFolder;
-
-    private final Folder origFolder;
-
     private final UserService userService;
-
     private final List<GuestPermission> addedGuests;
-
     private final LinkedList<Permission> removedGuests;
-
     private final LinkedList<Permission> modifiedGuests;
-
     private final boolean hasChanges;
+    private final Permission[] newPermissions;
+    private final Permission[] originalPermissions;
 
-
+    /**
+     * Initializes a new {@link ComparedPermissions}.
+     *
+     * @param contextId The context ID
+     * @param newPermissions The new permissions
+     * @param originalPermissions The original permissions
+     * @param userService The user service
+     * @throws OXException
+     */
+    public ComparedPermissions(int contextId, Permission[] newPermissions, Permission[] originalPermissions, UserService userService) throws OXException {
+        super();
+        this.contextId = contextId;
+        this.newPermissions = newPermissions;
+        this.originalPermissions = originalPermissions;
+        this.userService = userService;
+        addedGuests = new LinkedList<GuestPermission>();
+        removedGuests = new LinkedList<Permission>();
+        modifiedGuests = new LinkedList<Permission>();
+        hasChanges = calc();
+    }
 
     /**
      * Initializes a new {@link ComparedPermissions}.
@@ -98,19 +110,10 @@ public class ComparedPermissions {
      * @throws OXException If errors occur when loading additional data for the comparison
      */
     public ComparedPermissions(int contextId, Folder newFolder, Folder origFolder, UserService userService) throws OXException {
-        super();
-        this.contextId = contextId;
-        this.newFolder = newFolder;
-        this.origFolder = origFolder;
-        this.userService = userService;
-        addedGuests = new LinkedList<GuestPermission>();
-        removedGuests = new LinkedList<Permission>();
-        modifiedGuests = new LinkedList<Permission>();
-        hasChanges = calc();
+        this(contextId, newFolder.getPermissions(), origFolder.getPermissions(), userService);
     }
 
     private boolean calc() throws OXException {
-        Permission[] newPermissions = newFolder.getPermissions();
         if (newPermissions == null) {
             return false;
         }
@@ -140,12 +143,14 @@ public class ComparedPermissions {
          */
         final Map<Integer, Permission> oldUsers = new HashMap<Integer, Permission>();
         final Map<Integer, Permission> oldGroups = new HashMap<Integer, Permission>();
-        for (Permission permission : origFolder.getPermissions()) {
-            if (permission.getSystem() == 0) {
-                if (permission.isGroup()) {
-                    oldGroups.put(permission.getEntity(), permission);
-                } else {
-                    oldUsers.put(permission.getEntity(), permission);
+        if (null != originalPermissions) {
+            for (Permission permission : originalPermissions) {
+                if (permission.getSystem() == 0) {
+                    if (permission.isGroup()) {
+                        oldGroups.put(permission.getEntity(), permission);
+                    } else {
+                        oldUsers.put(permission.getEntity(), permission);
+                    }
                 }
             }
         }
