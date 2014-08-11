@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,18 +47,29 @@
  *
  */
 
-package com.openexchange.subscribe.crawler;
+package com.openexchange.file.storage;
+
+import java.io.InputStream;
+import com.openexchange.exception.OXException;
 
 
 /**
- * {@link GoogleCalendarTest}
+ * {@link ThumbnailAware}
  *
- * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.6.1
  */
-public class GoogleCalendarTest extends GenericSubscribeServiceTestHelpers {
+public interface ThumbnailAware extends FileStorageFileAccess {
 
-    public void testGoogleCalendar(){
-        checkSingleCrawler("GoogleCalendar");
-    }
+    /**
+     * Loads the thumbnail content
+     *
+     * @param folderId The folder identifier
+     * @param id The id of the file which thumbnail shall be returned
+     * @param version The version of the file. Pass in CURRENT_VERSION for the current version of the file.
+     * @return The thumbnail stream
+     * @throws OXException If operation fails
+     */
+    InputStream getThumbnailStream(String folderId, String id, String version) throws OXException;
 
 }

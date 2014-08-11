@@ -47,39 +47,35 @@
  *
  */
 
-package com.openexchange.subscribe.crawler;
+package com.openexchange.oauth;
 
-import java.util.LinkedList;
-import java.util.List;
-import org.ho.yaml.Yaml;
-import com.openexchange.subscribe.crawler.internal.Step;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 
 /**
- * {@link GenericSubscribeServiceForGoogleAPITest}
- * Preferred way to crawl Google.
- * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ * {@link OAuthUtilizerCreator}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.6.1
  */
-public class GenericSubscribeServiceForGoogleAPITest extends GenericSubscribeServiceTestHelpers {
-    public void testGenericSubscribeServiceForGoogleAPI() {
-        // insert valid credentials here
-        String username = "";
-        String password = "";
+public interface OAuthUtilizerCreator {
 
-        // create a CrawlerDescription
-        CrawlerDescription crawler = new CrawlerDescription();
-        crawler.setDisplayName("GoogleMail");
-        crawler.setId("com.openexchange.subscribe.crawler.googlemail");
-        List<Step<?, ?>> steps = new LinkedList<Step<?, ?>>();
+    /**
+     * Creates an appropriate utilizer if this creator handles specified OAuth account.
+     *
+     * @param oauthAccount The OAuth account (compliant to {@link #getApplicableApi()})
+     * @param session The associated session
+     * @return The utilizer's identifier or <code>null</code> if no utilizer has been created
+     * @throws OXException If create operation fails
+     */
+    String createUtilizer(OAuthAccount oauthAccount, Session session) throws OXException;
 
-        steps.add(new GoogleAPIStep());
+    /**
+     * Gets the applicable OAuth API
+     *
+     * @return The applicable API
+     */
+    API getApplicableApi();
 
-
-        Workflow workflow = new Workflow(steps);
-        crawler.setWorkflowString(Yaml.dump(workflow));
-
-        findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
-        // uncomment this if the if the crawler description was updated to get the new config-files
-        //dumpThis(crawler, crawler.getDisplayName());
-    }
 }

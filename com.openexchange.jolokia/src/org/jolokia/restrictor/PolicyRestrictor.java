@@ -6,7 +6,11 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import org.jolokia.restrictor.policy.*;
+import org.jolokia.restrictor.policy.CorsChecker;
+import org.jolokia.restrictor.policy.HttpMethodChecker;
+import org.jolokia.restrictor.policy.MBeanAccessChecker;
+import org.jolokia.restrictor.policy.NetworkChecker;
+import org.jolokia.restrictor.policy.RequestTypeChecker;
 import org.jolokia.util.HttpMethod;
 import org.jolokia.util.RequestType;
 import org.w3c.dom.Document;
@@ -91,11 +95,17 @@ public class PolicyRestrictor implements Restrictor {
         Exception exp = null;
         try {
             Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
-            
+
             Element host = document.createElement("host");
             host.setTextContent("localhost");
+            Element hostByIp = document.createElement("host");
+            hostByIp.setTextContent("127.0.0.0/8");
+            Element hostByIpV6 = document.createElement("host");
+            hostByIpV6.setTextContent("0:0:0:0:0:0:0:1");
             Element remote = document.createElement("remote");
             remote.appendChild(host);
+            remote.appendChild(hostByIp);
+            remote.appendChild(hostByIpV6);
             Element restrict = document.createElement("restrict");
             restrict.appendChild(remote);
             document.appendChild(restrict);
@@ -105,8 +115,8 @@ public class PolicyRestrictor implements Restrictor {
             mbeanAccessChecker = new MBeanAccessChecker(document);
             corsChecker = new CorsChecker(document);
         }
-        catch (MalformedObjectNameException e) { exp = e; } 
-        catch (ParserConfigurationException e) { exp = e; } 
+        catch (MalformedObjectNameException e) { exp = e; }
+        catch (ParserConfigurationException e) { exp = e; }
 
         if (exp != null) {
             throw new SecurityException("Cannot parse document: " + exp,exp);
@@ -114,36 +124,43 @@ public class PolicyRestrictor implements Restrictor {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean isHttpMethodAllowed(HttpMethod method) {
         return httpChecker.check(method);
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean isTypeAllowed(RequestType pType) {
         return requestTypeChecker.check(pType);
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean isRemoteAccessAllowed(String ... pHostOrAddress) {
         return networkChecker.check(pHostOrAddress);
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean isCorsAccessAllowed(String pOrigin) {
         return corsChecker.check(pOrigin);
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean isAttributeReadAllowed(ObjectName pName, String pAttribute) {
         return check(RequestType.READ,pName,pAttribute);
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean isAttributeWriteAllowed(ObjectName pName, String pAttribute) {
         return check(RequestType.WRITE,pName, pAttribute);
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean isOperationAllowed(ObjectName pName, String pOperation) {
         return check(RequestType.EXEC,pName, pOperation);
     }

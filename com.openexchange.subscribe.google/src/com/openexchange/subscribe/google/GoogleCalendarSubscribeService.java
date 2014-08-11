@@ -114,7 +114,7 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
 
             // Fetch calendar metadata
             // com.google.api.services.calendar.model.Calendar calendar = googleCalendarService.calendars().get(calendarId).setOauthToken(googleCreds.getAccessToken()).execute();
-            final CalendarEventParser parser = new CalendarEventParser(subscription.getSession().getContext());
+            final CalendarEventParser parser = new CalendarEventParser(subscription.getSession());
 
             final String accessToken = googleCreds.getAccessToken();
             final Integer pageSize = Integer.valueOf(PAGE_SIZE);
@@ -164,7 +164,7 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
         }
     }
 
-    protected void parseAndAdd(final Events events, final CalendarEventParser parser, final List<CalendarObject> calendarObjectsList) {
+    protected void parseAndAdd(final Events events, final CalendarEventParser parser, final List<CalendarObject> calendarObjectsList) throws OXException {
         for (Event event : events.getItems()) {
             final CalendarDataObject calenderObject = new CalendarDataObject();
             parser.parseCalendarEvent(event, calenderObject);

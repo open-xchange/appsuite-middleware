@@ -47,17 +47,31 @@
  *
  */
 
-package com.openexchange.subscribe.crawler;
+package com.openexchange.mail.mime.utils;
+
+import junit.framework.TestCase;
 
 
 /**
- * {@link GoogleMailTest}
+ * {@link MimeMessageUtilityTest}
  *
- * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.6.1
  */
-public class GoogleMailTest extends GenericSubscribeServiceTestHelpers {
+public class MimeMessageUtilityTest extends TestCase{
 
-    public void testGoogleMail(){
-        checkSingleCrawler("GoogleMail");
+    /**
+     * Initializes a new {@link MimeMessageUtilityTest}.
+     */
+    public MimeMessageUtilityTest() {
+        super();
     }
+
+    public void testForBug33044_SubjectUnfolding() {
+        String s = "=?UTF-8?B?UG90d2llcmR6ZW5pZSB6YW3Ds3dp?=\r\n =?UTF-8?B?ZW5pYQ==?=";
+        s = MimeMessageUtility.decodeEnvelopeSubject(s);
+
+        assertEquals("Subject nor properly unfolded/decoded.", "Potwierdzenie zam\u00f3wienia", s);
+    }
+
 }

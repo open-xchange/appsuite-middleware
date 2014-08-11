@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.google.gdata
 Bundle-Version: 1.47.1
 Bundle-Vendor: Google Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.google.common.annotations,
+Import-Package: com.google.api.client.auth.oauth2,
+ com.google.common.annotations,
  com.google.common.base,
  com.google.common.base.internal,
  com.google.common.cache,
@@ -20,7 +21,10 @@ Import-Package: com.google.common.annotations,
  com.google.common.primitives,
  com.google.common.reflect,
  com.google.common.util.concurrent,
- com.google.common.xml
+ com.google.common.xml,
+ javax.xml.parsers,
+ org.xml.sax,
+ org.xml.sax.helpers
 Bundle-ClassPath: .,
  lib/gdata-base-1.0.jar,
  lib/gdata-calendar-2.0.jar,

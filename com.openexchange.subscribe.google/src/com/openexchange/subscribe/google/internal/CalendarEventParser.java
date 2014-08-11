@@ -53,9 +53,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.Event.Creator;
 import com.google.api.services.calendar.model.Event.Reminders;
 import com.google.api.services.calendar.model.EventAttendee;
 import com.google.api.services.calendar.model.EventDateTime;
@@ -67,9 +67,9 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmStatus;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.subscribe.google.osgi.Services;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
 /**
@@ -79,45 +79,58 @@ import com.openexchange.user.UserService;
  */
 public class CalendarEventParser {
 
-    private enum ResponseStatus {
-        needsAction, accepted, declined, tentative;
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CalendarEventParser.class);
 
-        final static ConfirmStatus parse(final String status) {
-            if (status.equals(ResponseStatus.needsAction.toString())) {
-                return ConfirmStatus.NONE;
-            } else if (status.equals(ResponseStatus.accepted.toString())) {
-                return ConfirmStatus.ACCEPT;
-            } else if (status.equals(ResponseStatus.declined.toString())) {
-                return ConfirmStatus.DECLINE;
-            } else if (status.equals(ResponseStatus.tentative.toString())) {
-                return ConfirmStatus.TENTATIVE;
-            } else {
-                throw new IllegalArgumentException("The provided status \"" + status + "\" cannot be parsed to a valid ConfirmStatus");
+    private static enum ResponseStatus {
+        NEEDS_ACTION("needsAction", ConfirmStatus.NONE),
+        ACCEPTED("accepted", ConfirmStatus.ACCEPT),
+        DECLINED("declined", ConfirmStatus.DECLINE),
+        TENTATIVE("tentative", ConfirmStatus.TENTATIVE);
+
+        private final String str;
+        private final ConfirmStatus confirmStatus;
+
+        private ResponseStatus(String str, ConfirmStatus confirmStatus) {
+            this.str = str;
+            this.confirmStatus = confirmStatus;
+        }
+
+        static ConfirmStatus parse(final String status) {
+            if (null == status) {
+                return null;
             }
+            for (ResponseStatus rs : ResponseStatus.values()) {
+                if (rs.str.equalsIgnoreCase(status)) {
+                    return rs.confirmStatus;
+                }
+            }
+            return null;
         }
 
     }
 
-    final Logger logger = LoggerFactory.getLogger(CalendarEventParser.class);
+    // ------------------------------------------------------------------------------------------------------------------ //
 
-    private Context context;
+    private final ServerSession session;
 
     /**
      * Initializes a new {@link CalendarEventParser}.
      */
-    public CalendarEventParser(final Context context) {
+    public CalendarEventParser(final ServerSession session) {
         super();
-        this.context = context;
+        this.session = session;
     }
 
     /**
      * Parse an Event to a CalendarDataObject
-     * 
+     *
      * @param event The Event
      * @param calendarObject The CalendarDataObject
+     * @throws OXException
      */
-    public void parseCalendarEvent(final Event event, final CalendarDataObject calendarObject) {
-        calendarObject.setContext(context);
+    public void parseCalendarEvent(final Event event, final CalendarDataObject calendarObject) throws OXException {
+        calendarObject.setContext(session.getContext());
+        calendarObject.setUid(event.getICalUID());
 
         // Common stuff
         if (event.getSummary() != null) {
@@ -131,68 +144,100 @@ public class CalendarEventParser {
         }
 
         // Start, end and creation time
-        if (event.getOriginalStartTime() != null) {
-            final EventDateTime eventDateTime = event.getOriginalStartTime();
-            calendarObject.setStartDate(new Date(eventDateTime.getDate().getValue()));
-            calendarObject.setTimezone(eventDateTime.getTimeZone());
+        if (event.getStart() != null) {
+            final EventDateTime eventDateTime = event.getStart();
+            final long startDate;
+            if (eventDateTime.getDate() != null) {
+                startDate = eventDateTime.getDate().getValue();
+            } else if (eventDateTime.getDateTime() != null) {
+                startDate = eventDateTime.getDateTime().getValue();
+            } else {
+                throw new OXException();
+            }
+            calendarObject.setStartDate(new Date(startDate));
+            if (eventDateTime.getTimeZone() != null) {
+                calendarObject.setTimezone(eventDateTime.getTimeZone());
+            }
         }
         if (event.getEnd() != null) {
-            calendarObject.setEndDate(new Date(event.getEnd().getDate().getValue()));
+            final EventDateTime eventDateTime = event.getEnd();
+            final long endDate;
+            if (eventDateTime.getDate() != null) {
+                endDate = eventDateTime.getDate().getValue();
+            } else if (eventDateTime.getDateTime() != null) {
+                endDate = eventDateTime.getDateTime().getValue();
+            } else {
+                throw new OXException();
+            }
+            calendarObject.setEndDate(new Date(endDate));
         }
         if (event.getCreated() != null) {
             final DateTime dateTime = event.getCreated();
             calendarObject.setCreationDate(new Date(dateTime.getValue()));
         }
 
-        try {
-            calendarObject.setCreatedBy(fetchUserByEmail(event.getCreator().getEmail()).getId());
-        } catch (OXException e) {
-            logger.warn("The calendar object {} has no creator assigned to it.", calendarObject.toString());
+        if (event.getCreator() != null) {
+            Creator creator = event.getCreator();
+            Boolean isSelf = creator.getSelf();
+            if (isSelf != null && isSelf.booleanValue()) {
+                calendarObject.setCreatedBy(session.getUserId());
+            } else {
+                // add external creator?
+            }
         }
 
         // We only support one reminder per calendar Object, thus the first one of the event
         final Reminders reminders = event.getReminders();
         if (reminders.getOverrides() != null && reminders.getOverrides().size() > 0) {
             final EventReminder eventReminder = reminders.getOverrides().get(0);
-            calendarObject.setAlarm(eventReminder.getMinutes());
+            calendarObject.setAlarm(eventReminder.getMinutes().intValue());
         }
 
         // Participants and confirmations
         final List<EventAttendee> attendees = event.getAttendees();
-        final List<Participant> participants = new ArrayList<Participant>(attendees.size());
-        final List<ConfirmableParticipant> confParts = new ArrayList<ConfirmableParticipant>(attendees.size());
-        for (EventAttendee a : attendees) {
-            final Participant p;
-            if (!a.getResource()) {
-                p = new ExternalUserParticipant(a.getEmail());
+        if (attendees != null) {
+            final List<Participant> participants = new ArrayList<Participant>(attendees.size());
+            final List<ConfirmableParticipant> confParts = new ArrayList<ConfirmableParticipant>(attendees.size());
+            for (EventAttendee a : attendees) {
+                String emailAddress = a.getEmail();
+                Participant p = new ExternalUserParticipant(emailAddress);
 
                 // Confirmations
-                final ConfirmStatus confirmStatus = ResponseStatus.parse(a.getResponseStatus());
-                final String confirmMessage = a.getComment();
-                final ConfirmableParticipant cp = new ExternalUserParticipant(a.getEmail());
+                String status = a.getResponseStatus();
+                ConfirmStatus confirmStatus = ResponseStatus.parse(status);
+                if (null == confirmStatus) {
+                    LOGGER.warn("The provided status \"{}\" cannot be parsed to a valid {}", status, ConfirmStatus.class.getSimpleName());
+                    confirmStatus = ConfirmStatus.NONE;
+                }
+
+                String confirmMessage = a.getComment();
+                ConfirmableParticipant cp = new ExternalUserParticipant(emailAddress);
                 cp.setStatus(confirmStatus);
                 cp.setMessage(confirmMessage);
 
-                if (a.getDisplayName() != null) {
-                    p.setDisplayName(a.getDisplayName());
-                    cp.setDisplayName(a.getDisplayName());
+                String displayName = a.getDisplayName();
+                if (displayName != null) {
+                    p.setDisplayName(displayName);
+                    cp.setDisplayName(displayName);
                 }
                 confParts.add(cp);
 
-                if (a.getOrganizer()) {
-                    calendarObject.setOrganizer(a.getEmail());
+                Boolean isOrganizer = a.getOrganizer();
+                if (isOrganizer != null && isOrganizer.booleanValue()) {
+                    calendarObject.setOrganizer(emailAddress);
                 }
                 participants.add(p);
             }
+            calendarObject.setConfirmations(confParts);
+            calendarObject.setParticipants(participants);
         }
-        calendarObject.setConfirmations(confParts);
-        calendarObject.setParticipants(participants);
+
         convertExternalToInternal(calendarObject);
     }
 
     /**
      * Convert the external participants to internal users if possible.
-     * 
+     *
      * @param calendarObject The calendar object that contains the participant list
      */
     private void convertExternalToInternal(final CalendarDataObject calendarObject) {
@@ -207,7 +252,7 @@ public class CalendarEventParser {
             if (part.getType() == Participant.EXTERNAL_USER) {
                 User foundUser;
                 try {
-                    foundUser = userService.searchUser(part.getEmailAddress(), context);
+                    foundUser = userService.searchUser(part.getEmailAddress(), session.getContext());
                     if (foundUser == null) {
                         continue;
                     }
@@ -218,15 +263,10 @@ public class CalendarEventParser {
                     }
 
                 } catch (final OXException e) {
-                    logger.debug("Couldn't resolve E-Mail address to an internal user: {}", part.getEmailAddress(), e);
+                    LOGGER.debug("Couldn't resolve E-Mail address to an internal user: {}", part.getEmailAddress(), e);
                 }
             }
         }
         calendarObject.setParticipants(participants);
-    }
-
-    private User fetchUserByEmail(final String email) throws OXException {
-        final UserService userService = Services.getService(UserService.class);
-        return userService.searchUser(email, context);
     }
 }
