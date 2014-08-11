@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,55 +47,84 @@
  *
  */
 
-package com.openexchange.drive.json.action;
-
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.drive.DriveSession;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
+package com.openexchange.java.util;
 
 
 /**
- * {@link UpdateTokenAction}
+ * A generic pair class.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.6.0
  */
-public class UpdateTokenAction extends AbstractDriveAction {
+public class Pair<T, V> {
 
-    @Override
-    protected boolean requiresRootFolderID() {
-        return false;
+    private T first = null;
+
+    private V second = null;
+
+    public Pair() {
+        super();
+    }
+
+    public Pair(T first, V second) {
+        super();
+        this.first = first;
+        this.second = second;
+    }
+
+
+    public T getFirst() {
+        return first;
+    }
+
+
+    public void setFirst(T first) {
+        this.first = first;
+    }
+
+
+    public V getSecond() {
+        return second;
+    }
+
+
+    public void setSecond(V second) {
+        this.second = second;
     }
 
     @Override
-    public AJAXRequestResult doPerform(AJAXRequestData requestData, DriveSession session) throws OXException {
-        /*
-         * get parameters
-         */
-        String token = requestData.getParameter("token");
-        if (Strings.isEmpty(token)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("token");
-        }
-        String newToken = requestData.getParameter("newToken");
-        if (Strings.isEmpty(newToken)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("newToken");
-        }
-        String serviceID = requestData.getParameter("service");
-        // workaround for bug #33652
-        // if (Strings.isEmpty(serviceID)) {
-        //     throw AjaxExceptionCodes.MISSING_PARAMETER.create("service");
-        // }
-        /*
-         * update token
-         */
-        getSubscriptionStore().updateToken(session.getServerSession(), serviceID, token, newToken);
-        /*
-         * return empty json object to indicate success
-         */
-        return new AJAXRequestResult(new JSONObject(0), "json");
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((first == null) ? 0 : first.hashCode());
+        result = prime * result + ((second == null) ? 0 : second.hashCode());
+        return result;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Pair<?, ?> other = (Pair<?, ?>) obj;
+        if (first == null) {
+            if (other.first != null)
+                return false;
+        } else if (!first.equals(other.first))
+            return false;
+        if (second == null) {
+            if (other.second != null)
+                return false;
+        } else if (!second.equals(other.second))
+            return false;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "Pair [first=" + first + ", second=" + second + "]";
+    }
 }
