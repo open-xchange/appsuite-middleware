@@ -49,9 +49,13 @@
 
 package com.openexchange.subscribe.google.internal;
 
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
+import java.util.UUID;
 import org.slf4j.Logger;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
@@ -60,6 +64,9 @@ import com.google.api.services.calendar.model.Event.Reminders;
 import com.google.api.services.calendar.model.EventAttendee;
 import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.EventReminder;
+import com.google.ical.values.Frequency;
+import com.google.ical.values.RRule;
+import com.google.ical.values.WeekdayNum;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -88,6 +95,7 @@ public class CalendarEventParser {
         TENTATIVE("tentative", ConfirmStatus.TENTATIVE);
 
         private final String str;
+
         private final ConfirmStatus confirmStatus;
 
         private ResponseStatus(String str, ConfirmStatus confirmStatus) {
@@ -130,7 +138,7 @@ public class CalendarEventParser {
      */
     public void parseCalendarEvent(final Event event, final CalendarDataObject calendarObject) throws OXException {
         calendarObject.setContext(session.getContext());
-        calendarObject.setUid(event.getICalUID());
+        calendarObject.setUid(UUID.randomUUID().toString());// event.getICalUID());
 
         // Common stuff
         if (event.getSummary() != null) {
@@ -191,6 +199,12 @@ public class CalendarEventParser {
         if (reminders.getOverrides() != null && reminders.getOverrides().size() > 0) {
             final EventReminder eventReminder = reminders.getOverrides().get(0);
             calendarObject.setAlarm(eventReminder.getMinutes().intValue());
+        }
+
+        // Set recurrences
+        final List<String> recurrence = event.getRecurrence();
+        if (recurrence != null && recurrence.size() > 0) {
+            handleRecurrence(recurrence.get(0), calendarObject);
         }
 
         // Participants and confirmations
@@ -268,5 +282,70 @@ public class CalendarEventParser {
             }
         }
         calendarObject.setParticipants(participants);
+    }
+
+    /**
+     * @param recurrence
+     */
+    private void handleRecurrence(final String recurrence, final CalendarDataObject calendarObject) {
+        try {
+            final RRule r = new RRule(recurrence);
+
+            // Set recurrence type
+            // No support for secondly, minutely and hourly recurrences, set as dailies ?
+            {
+                final Frequency f = r.getFreq();
+                if (f.ordinal() > 2) {
+                    calendarObject.setRecurrenceType(f.ordinal() - 2);
+                }
+            }
+
+            // Set the interval
+            calendarObject.setInterval((r.getInterval() > 0) ? r.getInterval() : 1);
+
+            // Meet preconditions for the relevant recurrence type
+            if (calendarObject.getRecurrenceType() == CalendarDataObject.DAILY && r.getUntil() != null) {
+                // DAILY
+
+            } else if (calendarObject.getRecurrenceType() == CalendarDataObject.WEEKLY && r.getByDay() != null && r.getByDay().size() > 0) {
+                // WEEKLY
+                final List<WeekdayNum> weekdays = r.getByDay();
+                int days = 0;
+                for (WeekdayNum w : weekdays) {
+                    days |= w.wday.javaDayNum;
+                }
+                calendarObject.setDays(days);
+
+            } else if (calendarObject.getRecurrenceType() == CalendarDataObject.MONTHLY) {
+                // MONTHLY
+                final List<WeekdayNum> weekdays = r.getByDay();
+                // When it comes to monthly events, the rule should only contain one entry
+                if (weekdays.size() == 1) {
+                    final WeekdayNum weekdayNum = weekdays.get(0);
+                    calendarObject.setDayInMonth(weekdayNum.num);
+                    calendarObject.setDays(weekdayNum.wday.javaDayNum);
+                }
+            } else if (calendarObject.getRecurrenceType() == CalendarDataObject.YEARLY) {
+                // YEARLY
+                final Calendar c = Calendar.getInstance(TimeZone.getTimeZone(calendarObject.getTimezone()));
+                c.setTime(calendarObject.getStartDate());
+                calendarObject.setDayInMonth(c.get(Calendar.DAY_OF_WEEK_IN_MONTH));
+                calendarObject.setDays(c.get(Calendar.DAY_OF_WEEK));
+                calendarObject.setMonth(c.get(Calendar.MONTH));
+            }
+
+            // Set occurrence or until
+            if (r.getUntil() != null) {
+                final Calendar cal = Calendar.getInstance(TimeZone.getTimeZone(calendarObject.getTimezone()));
+                cal.set(Calendar.YEAR, r.getUntil().year());
+                cal.set(Calendar.MONTH, r.getUntil().month());
+                cal.set(Calendar.DAY_OF_MONTH, r.getUntil().day());
+                calendarObject.setUntil(cal.getTime());
+            } else if (r.getCount() > 0) {
+                calendarObject.setOccurrence(r.getCount());
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 }

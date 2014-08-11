@@ -171,5 +171,4 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
             calendarObjectsList.add(calenderObject);
         }
     }
-
 }

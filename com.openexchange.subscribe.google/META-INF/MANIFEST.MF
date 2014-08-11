@@ -90,3 +90,5 @@ Import-Package: com.google.api.client.auth.oauth2,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.subscribe.google.osgi.GoogleSubscribeActivator
+Bundle-ClassPath: .,
+ lib/google-rfc2445.jar
