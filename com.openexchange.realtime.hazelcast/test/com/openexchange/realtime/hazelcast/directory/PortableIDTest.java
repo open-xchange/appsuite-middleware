@@ -47,31 +47,52 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast;
+package com.openexchange.realtime.hazelcast.directory;
 
-
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.realtime.hazelcast.directory.HazelcastResourceDirectoryTest;
-import com.openexchange.realtime.hazelcast.directory.PortableIDTest;
-import com.openexchange.realtime.hazelcast.directory.PortablePresenceTest;
-import com.openexchange.realtime.hazelcast.directory.PortableResourceTest;
-import com.openexchange.realtime.hazelcast.directory.PortableRoutingInfoTest;
-import com.openexchange.realtime.hazelcast.group.DistributedGroupManagerImplTest;
+import static org.junit.Assert.*;
+import java.util.ArrayList;
+import java.util.List;
+import org.junit.Before;
+import org.junit.Test;
+import com.openexchange.realtime.hazelcast.serialization.PortableID;
+import com.openexchange.realtime.packet.ID;
 
 /**
- * {@link UnitTests}
+ * {@link PortableIDTest}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since 7.6.1
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    HazelcastResourceDirectoryTest.class,
-    PortableIDTest.class,
-    PortablePresenceTest.class,
-    PortableResourceTest.class,
-    PortableRoutingInfoTest.class,
-    DistributedGroupManagerImplTest.class
-})
-public class UnitTests {}
+public class PortableIDTest {
+    private ID marensID;
+    private PortableID portableMarensID;
+
+    @Before
+    public void setUp() {
+        marensID = new ID("ox", "marens", "premium", "desktop");
+        portableMarensID = new PortableID(marensID);
+    }
+
+    @Test
+    public void testEquals() {
+        assertEquals("IDs should be equal", marensID, portableMarensID);
+    }
+
+    @Test
+    public void testToGeneralEquals() {
+        ID generalMarensID = marensID.toGeneralForm();
+        PortableID generalPortableMarensID = portableMarensID.toGeneralForm();
+        assertTrue(generalPortableMarensID instanceof PortableID);
+        assertEquals(generalMarensID, generalPortableMarensID);
+    }
+
+    @Test
+    public void testListRemoval() {
+        List<ID> idList = new ArrayList<ID>() ;
+        PortableID portableMarensID = new PortableID(marensID);
+        idList.add(marensID);
+        idList.remove(portableMarensID);
+        assertTrue(idList.isEmpty());
+    }
+
+}

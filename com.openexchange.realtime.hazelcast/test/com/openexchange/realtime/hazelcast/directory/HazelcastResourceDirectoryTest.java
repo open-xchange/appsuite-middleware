@@ -55,7 +55,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -71,17 +70,28 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.EntryEvent;
-import com.hazelcast.core.EntryListener;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
+import com.hazelcast.core.Member;
 import com.hazelcast.core.MultiMap;
+import com.hazelcast.nio.serialization.ClassDefinition;
 import com.openexchange.exception.OXException;
+import com.openexchange.hazelcast.serialization.DynamicPortableFactory;
 import com.openexchange.realtime.directory.DefaultResource;
 import com.openexchange.realtime.directory.Resource;
+import com.openexchange.realtime.directory.RoutingInfo;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
+import com.openexchange.realtime.hazelcast.group.helper.DynamicPortableFactoryImpl;
+import com.openexchange.realtime.hazelcast.serialization.PortableID;
+import com.openexchange.realtime.hazelcast.serialization.PortableIDFactory;
+import com.openexchange.realtime.hazelcast.serialization.PortablePresenceFactory;
+import com.openexchange.realtime.hazelcast.serialization.PortableResource;
+import com.openexchange.realtime.hazelcast.serialization.PortableResourceFactory;
+import com.openexchange.realtime.hazelcast.serialization.PortableRoutingInfoFactory;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.IDManager;
 import com.openexchange.realtime.packet.Presence;
@@ -118,11 +128,21 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-        HazelcastInstance hazelcast = Hazelcast.newHazelcastInstance();
+        Config config = new Config();
+        DynamicPortableFactoryImpl dynamicPortableFactory = new DynamicPortableFactoryImpl();
+        dynamicPortableFactory.register(new PortableIDFactory());
+        dynamicPortableFactory.register(new PortablePresenceFactory());
+        dynamicPortableFactory.register(new PortableRoutingInfoFactory());
+        dynamicPortableFactory.register(new PortableResourceFactory());
+        config.getSerializationConfig().addPortableFactory(DynamicPortableFactory.FACTORY_ID, dynamicPortableFactory);
+        for(ClassDefinition cd : dynamicPortableFactory.getClassDefinitions()) {
+            config.getSerializationConfig().addClassDefinition(cd);
+        }
+        MapConfig mapConfig = new MapConfig(RESOURCE_MAP_NAME);
+        mapConfig.setMaxIdleSeconds(1);
+        config.addMapConfig(mapConfig);
+        HazelcastInstance hazelcast = Hazelcast.newHazelcastInstance(config);
         HazelcastAccess.setHazelcastInstance(hazelcast);
-        MapConfig config = new MapConfig(RESOURCE_MAP_NAME);
-        config.setMaxIdleSeconds(1);
-        hazelcast.getConfig().addMapConfig(config);
         executorService = Executors.newFixedThreadPool(25);
         random = new Random();
     }
@@ -153,19 +173,18 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
         Assert.assertEquals("Wrong id", reloadedId, concreteId);
 
         Resource reloaded = resources.get(concreteId);
-        Assert.assertEquals("Wrong routing info", HazelcastAccess.getLocalMember(), reloaded.getRoutingInfo());
+        RoutingInfo routingInfo = reloaded.getRoutingInfo();
+        Member localMember = HazelcastAccess.getLocalMember();
+        Assert.assertEquals("Wrong UUID in reloaded routing info", localMember.getUuid(), routingInfo.getId());
+        Assert.assertEquals("Wrong SocketAddress in reloaded routing info", localMember.getSocketAddress(), routingInfo.getSocketAddress());
     }
 
     @Test
     public void testResourceEviction() throws Exception {
         final CyclicBarrier barrier = new CyclicBarrier(2);
-        final EntryListener<String, Map<String,Object>> listener = new EntryListener<String, Map<String,Object>>() {
+        final ResourceMappingEntryAdapter listener = new ResourceMappingEntryAdapter() {
             @Override
-            public void entryUpdated(EntryEvent<String, Map<String, Object>> event) {}
-            @Override
-            public void entryRemoved(EntryEvent<String, Map<String, Object>> event) {}
-            @Override
-            public void entryEvicted(EntryEvent<String, Map<String, Object>> event) {
+            public void entryEvicted(EntryEvent<PortableID, PortableResource> event) {
                 try {
                     barrier.await();
                 } catch (InterruptedException e) {
@@ -174,8 +193,6 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
                     e.printStackTrace();
                 }
             }
-            @Override
-            public void entryAdded(EntryEvent<String, Map<String, Object>> event) {}
         };
 
         String listenerID = getResourceMapping().addEntryListener(listener, false);
@@ -269,8 +286,8 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
         IDMap<Resource> remove2 = remove(toRemove);
         Assert.assertEquals("Wrong size", 2, remove2.size());
 
-        MultiMap<String,String> idMapping = getIDMapping();
-        IMap<String, Map<String, Object>> resources = getResourceMapping();
+        MultiMap<PortableID,PortableID> idMapping = getIDMapping();
+        IMap<PortableID,PortableResource> resources = getResourceMapping();
         Assert.assertEquals("Id mapping not empty", 0, idMapping.size());
         Assert.assertEquals("Resources not empty", 0, resources.size());
     }
@@ -317,8 +334,8 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
         IDMap<Resource> removed2 = remove(id4);
         Assert.assertEquals("Wrong size", 1, removed2.size());
 
-        MultiMap<String,String> idMapping = getIDMapping();
-        IMap<String, Map<String, Object>> resources = getResourceMapping();
+        MultiMap<PortableID,PortableID> idMapping = getIDMapping();
+        IMap<PortableID,PortableResource> resources = getResourceMapping();
         Assert.assertEquals("Id mapping not empty", 0, idMapping.size());
         Assert.assertEquals("Resources not empty", 0, resources.size());
     }
