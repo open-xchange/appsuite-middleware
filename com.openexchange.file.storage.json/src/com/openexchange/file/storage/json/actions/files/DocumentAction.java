@@ -126,20 +126,38 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
             return result;
         }
 
+
         final File fileMetadata = fileAccess.getFileMetadata(id, version);
 
-        // Download file
-        final IFileHolder.InputStreamClosure isClosure = new IFileHolder.InputStreamClosure() {
+        IFileHolder.InputStreamClosure isClosure;
+        if (seemsLikeThumbnailRequest(request.getRequestData())) {
+            isClosure = new IFileHolder.InputStreamClosure() {
 
-            @Override
-            public InputStream newStream() throws OXException, IOException {
-                final InputStream inputStream = fileAccess.getDocument(id, version);
-                if ((inputStream instanceof BufferedInputStream) || (inputStream instanceof ByteArrayInputStream)) {
-                    return inputStream;
+                @Override
+                public InputStream newStream() throws OXException, IOException {
+                    InputStream inputStream = fileAccess.optThumbnailStream(id, version);
+                    if (null == inputStream) {
+                        inputStream = fileAccess.getDocument(id, version);
+                    }
+                    if ((inputStream instanceof BufferedInputStream) || (inputStream instanceof ByteArrayInputStream)) {
+                        return inputStream;
+                    }
+                    return new BufferedInputStream(inputStream, 65536);
                 }
-                return new BufferedInputStream(inputStream, 65536);
-            }
-        };
+            };
+        } else {
+            isClosure = new IFileHolder.InputStreamClosure() {
+
+                @Override
+                public InputStream newStream() throws OXException, IOException {
+                    InputStream inputStream = fileAccess.getDocument(id, version);
+                    if ((inputStream instanceof BufferedInputStream) || (inputStream instanceof ByteArrayInputStream)) {
+                        return inputStream;
+                    }
+                    return new BufferedInputStream(inputStream, 65536);
+                }
+            };
+        }
 
         final FileHolder fileHolder = new FileHolder(isClosure, fileMetadata.getFileSize(), fileMetadata.getFileMIMEType(), fileMetadata.getFileName());
 
@@ -152,6 +170,10 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
         }
 
         return result;
+    }
+
+    private boolean seemsLikeThumbnailRequest(AJAXRequestData requestData) {
+        return requestData.isSet("scaleType") && requestData.isSet("width") && requestData.isSet("height");
     }
 
     private void createAndSetETag(File fileMetadata, InfostoreRequest request, AJAXRequestResult result) throws OXException {

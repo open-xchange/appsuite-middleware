@@ -121,13 +121,25 @@ public interface IDBasedFileAccess extends TransactionAware {
     String copy(String sourceId, String version, String destFolderId, File update, InputStream newData, List<File.Field> modifiedFields) throws OXException;
 
     /**
-     * Load the documents content
+     * Loads the documents content
+     *
      * @param id The id of the document
      * @param version The version of the document. Pass in CURRENT_VERSION for the current version of the document.
-     * @return
+     * @return The content
      * @throws OXException If operation fails
      */
     InputStream getDocument(String id, String version) throws OXException;
+
+    /**
+     * (Optionally) Loads the thumbnail content
+     *
+     * @param folderId The folder identifier
+     * @param id The id of the file which thumbnail shall be returned
+     * @param version The version of the file. Pass in CURRENT_VERSION for the current version of the file.
+     * @return The thumbnail stream or <code>null</code> if not supported
+     * @throws OXException If operation fails
+     */
+    InputStream optThumbnailStream(String id, String version) throws OXException;
 
     /**
      * Tries to load the documents content and associated metadata. Returns null if the underlying implementation cannot satisfy this call
