@@ -4,7 +4,7 @@ Bundle-Name: Open-Xchange Realtime Hazelcast Serialization
 Bundle-SymbolicName: com.openexchange.realtime.hazelcast.serialization
 Bundle-Version: 7.6.1
 Bundle-Activator: com.openexchange.realtime.hazelcast.serialization.osgi.HazelcastSerializationActivator
-Bundle-Vendor: OPENEXCHANGE
+Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.hazelcast.core,
  com.hazelcast.nio.serialization,

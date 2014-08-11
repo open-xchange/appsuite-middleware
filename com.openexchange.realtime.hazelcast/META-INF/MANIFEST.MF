@@ -1,5 +1,4 @@
 Manifest-Version: 1.0
-Eclipse-RegisterBuddy: com.hazelcast
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Hazelcast Realtime Components
 Bundle-SymbolicName: com.openexchange.realtime.hazelcast
