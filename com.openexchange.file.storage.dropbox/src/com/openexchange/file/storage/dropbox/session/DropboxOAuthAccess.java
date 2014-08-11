@@ -53,6 +53,7 @@ import java.util.Map;
 import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.DropboxAPI.Account;
 import com.dropbox.client2.exception.DropboxException;
+import com.dropbox.client2.exception.DropboxServerException;
 import com.dropbox.client2.exception.DropboxUnlinkedException;
 import com.dropbox.client2.session.AccessTokenPair;
 import com.dropbox.client2.session.AppKeyPair;
@@ -166,15 +167,19 @@ public final class DropboxOAuthAccess {
             final Account accountInfo = dropboxApi.accountInfo();
             dropboxUserId = accountInfo.uid;
             dropboxUserName = accountInfo.displayName;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
-        } catch (final org.scribe.exceptions.OAuthException e) {
+        } catch (org.scribe.exceptions.OAuthException e) {
             throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final DropboxUnlinkedException e) {
+        } catch (DropboxUnlinkedException e) {
             throw DropboxExceptionCodes.UNLINKED_ERROR.create();
-        } catch (final DropboxException e) {
+        } catch (DropboxServerException e) {
+            com.dropbox.client2.exception.DropboxServerException.Error body = e.body;
+            int error = e.error;
+            throw DropboxExceptionCodes.DROPBOX_SERVER_ERROR.create(e, Integer.valueOf(error), null == body.userError ? body.error : body.userError);
+        } catch (DropboxException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
