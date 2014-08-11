@@ -69,7 +69,7 @@ public enum DropboxExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * A Dropbox error occurred: %1$s
      */
-    DROPBOX_ERROR(DropboxExceptionMessages.DROPBOX_ERROR_MSG, Category.CATEGORY_ERROR, 2),
+    DROPBOX_ERROR("A Dropbox error occurred: %1$s", DropboxExceptionMessages.DROPBOX_ERROR_MSG, Category.CATEGORY_ERROR, 2),
     /**
      * Invalid Dropbox URL: %1$s
      */
@@ -110,6 +110,10 @@ public enum DropboxExceptionCodes implements DisplayableOXExceptionCode {
      * Bad or expired access token. Need to re-authenticate user.
      */
     UNLINKED_ERROR("Bad or expired access token. Need to re-authenticate user.", DropboxExceptionMessages.UNLINKED_ERROR_MSG, Category.CATEGORY_CONFIGURATION, 15),
+    /**
+     * A Dropbox server error occurred with HTTP status code %1$s. Error message: %2$s
+     */
+    DROPBOX_SERVER_ERROR("A Dropbox server error occurred with HTTP status code %1$s. Error message: %2$s", DropboxExceptionMessages.DROPBOX_SERVER_ERROR_MSG, Category.CATEGORY_ERROR, 16),
 
     ;
 
@@ -118,13 +122,13 @@ public enum DropboxExceptionCodes implements DisplayableOXExceptionCode {
     private final int detailNumber;
 
     private final String message;
-    
+
     private final String displayMessage;
 
     private DropboxExceptionCodes(final String message, final Category category, final int detailNumber) {
         this(message, null, category, detailNumber);
     }
-    
+
     private DropboxExceptionCodes(final String message, final String displayMessage, final Category category, final int detailNumber) {
         this.message = message;
         this.category = category;

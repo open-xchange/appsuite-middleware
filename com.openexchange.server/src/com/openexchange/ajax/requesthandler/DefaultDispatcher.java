@@ -375,7 +375,13 @@ public class DefaultDispatcher implements Dispatcher {
 
     // private static final Pattern SPLIT_SLASH = Pattern.compile("/");
 
-    private AJAXActionServiceFactory lookupFactory(final String module) {
+    /**
+     * Looks-up denoted factory
+     *
+     * @param module The module to look-up for
+     * @return The factory or <code>null</code>
+     */
+    public AJAXActionServiceFactory lookupFactory(final String module) {
         AJAXActionServiceFactory serviceFactory = actionFactories.get(module);
         if (null == serviceFactory) {
             final int pos = module.indexOf('/');

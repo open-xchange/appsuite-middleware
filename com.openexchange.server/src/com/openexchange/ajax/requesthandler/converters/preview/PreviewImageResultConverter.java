@@ -55,9 +55,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
+import com.openexchange.ajax.container.ModifyableFileHolder;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -72,6 +75,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.InterruptibleInputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.preview.ContentTypeChecker;
 import com.openexchange.preview.Delegating;
 import com.openexchange.preview.PreviewDocument;
@@ -101,9 +105,10 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
 
     static PreviewDocument getPreviewDocument(IFileHolder fileHolder, InputStream stream, AJAXRequestData requestData, String previewLanguage, PreviewOutput previewOutput, ServerSession session, PreviewService previewService) throws OXException {
         try {
-            // Obtain preview
-            final DataProperties dataProperties = new DataProperties(12);
-            dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, getContentType(fileHolder, previewService instanceof ContentTypeChecker ? (ContentTypeChecker) previewService : null));
+            // Prepare properties for preview generation
+            DataProperties dataProperties = new DataProperties(12);
+            String mimeType = getContentType(fileHolder, previewService instanceof ContentTypeChecker ? (ContentTypeChecker) previewService : null);
+            dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, mimeType);
             dataProperties.put(DataProperties.PROPERTY_DISPOSITION, fileHolder.getDisposition());
             dataProperties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
             dataProperties.put(DataProperties.PROPERTY_SIZE, Long.toString(fileHolder.getLength()));
@@ -113,7 +118,12 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
             dataProperties.put("PreviewDelivery", requestData.getParameter("delivery"));
             dataProperties.put("PreviewScaleType", requestData.getParameter("scaleType"));
             dataProperties.put("PreviewLanguage", previewLanguage);
-            return previewService.getPreviewFor(new SimpleData<InputStream>(stream, dataProperties), previewOutput, session, 1);
+
+            // Generate preview
+            PreviewDocument previewDocument = previewService.getPreviewFor(new SimpleData<InputStream>(stream, dataProperties), previewOutput, session, 1);
+            LOG.debug("Obtained preview for file {} with MIME type {} from {} for user {} in context {}", fileHolder.getName(), mimeType, previewService.getClass().getSimpleName(), session.getUserId(), session.getContextId());
+
+            return previewDocument;
         } catch (RuntimeException rte) {
             throw PreviewExceptionCodes.ERROR.create(rte, rte.getMessage());
         }
@@ -190,21 +200,30 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                 final CachedResource cachedPreview = resourceCache.get(cacheKey, 0, session.getContextId());
                 if (null != cachedPreview) {
                     requestData.setFormat("file");
-                    // Create appropriate IFileHolder
+
+                    // Determine MIME type
                     String contentType = cachedPreview.getFileType();
                     if (null == contentType) {
                         contentType = "image/jpeg";
                     }
-                    final InputStream inputStream = cachedPreview.getInputStream();
-                    if (null == inputStream) {
-                        final ByteArrayFileHolder responseFileHolder = new ByteArrayFileHolder(cachedPreview.getBytes());
-                        responseFileHolder.setContentType(contentType);
-                        responseFileHolder.setName(cachedPreview.getFileName());
-                        result.setResultObject(responseFileHolder, "file");
-                    } else {
-                        final FileHolder responseFileHolder = new FileHolder(inputStream, cachedPreview.getSize(), contentType, cachedPreview.getFileName());
-                        result.setResultObject(responseFileHolder, "file");
+
+                    // Create appropriate IFileHolder
+                    IFileHolder responseFileHolder;
+                    {
+                        InputStream inputStream = cachedPreview.getInputStream();
+                        if (null == inputStream) {
+                            final ByteArrayFileHolder bafh = new ByteArrayFileHolder(cachedPreview.getBytes());
+                            bafh.setContentType(contentType);
+                            bafh.setName(cachedPreview.getFileName());
+                            responseFileHolder = bafh;
+                        } else {
+                            responseFileHolder = new FileHolder(inputStream, cachedPreview.getSize(), contentType, cachedPreview.getFileName());
+                        }
                     }
+
+                    // Apply result
+                    result.setResultObject(responseFileHolder, "file");
+                    LOG.debug("Returned preview for file {} with MIME type {} from cache using ETag {} for user {} in context {}", cachedPreview.getFileName(), contentType, eTag, session.getUserId(), session.getContextId());
                     return;
                 }
             }
@@ -243,16 +262,27 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
 
                     // Obtain preview either using running or separate thread
                     PreviewService previewService = ServerServiceRegistry.getInstance().getService(PreviewService.class);
+
+                    // Name-wise MIME type detection
+                    String mimeType = MimeType2ExtMap.getContentType(fileHolder.getName(), null);
+                    if (null == mimeType) {
+                        // Unknown. Then detect MIME type by content.
+                        fileHolder = new ThresholdFileHolder().write(stream).setContentInfo(fileHolder);
+                        mimeType = AJAXUtility.detectMimeType(fileHolder.getStream());
+                        LOG.debug("Determined MIME type for file {} by content: {}", fileHolder.getName(), mimeType);
+                    } else {
+                        LOG.debug("Determined MIME type for file {} by name: {}", fileHolder.getName(), mimeType);
+                    }
+                    fileHolder = new ModifyableFileHolder(fileHolder).setContentType(mimeType);
+
                     boolean useCurrentThread = true;
                     if (previewService instanceof Delegating) {
                         // Determine candidate
-                        {
-                            String mimeType = getContentType(fileHolder, previewService instanceof ContentTypeChecker ? (ContentTypeChecker) previewService : null);
-                            PreviewService candidate = ((Delegating) previewService).getBestFitOrDelegate(mimeType, getOutput());
-                            if (null == candidate) {
-                                throw PreviewExceptionCodes.NO_PREVIEW_SERVICE.create(null == mimeType ? "" :  mimeType);
-                            }
-                            previewService = candidate;
+                        Delegating delegating = (Delegating) previewService;
+                        PreviewService candidate = delegating.getBestFitOrDelegate(mimeType, getOutput());
+                        if (null == candidate) {
+                            String name = fileHolder.getName();
+                            throw PreviewExceptionCodes.NO_PREVIEW_SERVICE2.create(null == mimeType ? "" :  mimeType, null == name ? "<unknown>" : name);
                         }
 
                         // Check for possible RemoteInternalPreviewService instance

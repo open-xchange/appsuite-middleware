@@ -87,6 +87,13 @@ public class CallbackRegistry implements CustomRedirectURLDetermination, Runnabl
     }
 
     /**
+     * Clears this registry.
+     */
+    public void clear() {
+        tokenMap.clear();
+    }
+
+    /**
      * Adds given call-back URL and token pair.
      *
      * @param token The token
@@ -119,7 +126,8 @@ public class CallbackRegistry implements CustomRedirectURLDetermination, Runnabl
         try {
             final long threshhold = System.currentTimeMillis() - 600000;
             for (final Iterator<UrlAndStamp> iter = tokenMap.values().iterator(); iter.hasNext();) {
-                if (threshhold < iter.next().stamp) {
+                if (threshhold > iter.next().stamp) {
+                    // Older than threshold
                     iter.remove();
                 }
             }

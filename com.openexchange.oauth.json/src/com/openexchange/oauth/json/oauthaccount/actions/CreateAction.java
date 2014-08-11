@@ -53,6 +53,7 @@ import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.documentation.RequestMethod;
@@ -64,8 +65,10 @@ import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
+import com.openexchange.oauth.OAuthUtilizerCreator;
 import com.openexchange.oauth.json.oauthaccount.AccountField;
 import com.openexchange.oauth.json.oauthaccount.AccountWriter;
+import com.openexchange.oauth.json.osgi.UtilizerRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -82,8 +85,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "displayName", description = "The display name for the new account.")
 }, responseDescription = "A JSON object describing the newly created OAuth account as specified in OAuth account data.")
 @DispatcherNotes(noSecretCallback = true)
-public final class CreateAction extends
-AbstractOAuthTokenAction {
+public final class CreateAction extends AbstractOAuthTokenAction {
 
     /**
      * Initializes a new {@link CreateAction}.
@@ -95,16 +97,13 @@ AbstractOAuthTokenAction {
     @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         try {
-            /*
-             * The meta data identifier
-             */
+            // The meta data identifier
             final String serviceId = request.getParameter(AccountField.SERVICE_ID.getName());
             if (serviceId == null) {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create(AccountField.SERVICE_ID.getName());
             }
-            /*
-             * Get service meta data
-             */
+
+            // Get service meta data
             final OAuthService oAuthService = getOAuthService();
             final OAuthServiceMetaData service;
             {
@@ -112,17 +111,25 @@ AbstractOAuthTokenAction {
                 service = registry.getService(serviceId, session.getUserId(), session.getContextId());
             }
             final Map<String, Object> arguments = processOAuthArguments(request, session, service);
-            /*
-             * By now it doesn't matter which interaction type is passed
-             */
+
+            // By now it doesn't matter which interaction type is passed
             final OAuthAccount newAccount = oAuthService.createAccount(serviceId, OAuthInteractionType.CALLBACK, arguments, session.getUserId(), session.getContextId());
-            /*
-             * Write as JSON
-             */
+
+            // Shall we create an account utilizer?
+            // TODO: Change default to false once appropriate file storage account managing is supported by clients
+            if (AJAXRequestDataTools.parseBoolParameter("auto_create", request, true)) {
+                UtilizerRegistry registry = UtilizerRegistry.getInstance();
+                if (null != registry) {
+                    for (OAuthUtilizerCreator creator : registry.getCreatorsFor(service.getAPI())) {
+                        creator.createUtilizer(newAccount, session);
+                    }
+                }
+            }
+
+            // Write as JSON
             final JSONObject jsonAccount = AccountWriter.write(newAccount);
-            /*
-             * Return appropriate result
-             */
+
+            // Return appropriate result
             return new AJAXRequestResult(jsonAccount);
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());

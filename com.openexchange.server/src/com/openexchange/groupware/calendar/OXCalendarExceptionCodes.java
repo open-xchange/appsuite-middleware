@@ -47,7 +47,6 @@
  *
  */
 
-
 package com.openexchange.groupware.calendar;
 
 import com.openexchange.exception.Category;
@@ -149,7 +148,8 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     PRIVATE_FLAG_IN_PRIVATE_FOLDER(OXCalendarExceptionCodes.PRIVATE_FLAG_IN_PRIVATE_FOLDER_MSG, OXCalendarExceptionMessage.PRIVATE_FLAG_IN_PRIVATE_FOLDER_MSG, 22, Category.CATEGORY_USER_INPUT),
     /**
-     * Appointments marked as 'Private' can only be scheduled for the respective user (or owner of the calendar). Please remove additional participants or remove the \"Private\" mark.
+     * Appointments marked as 'Private' can only be scheduled for the respective user (or owner of the calendar). Please remove additional
+     * participants or remove the \"Private\" mark.
      */
     PRIVATE_FLAG_AND_PARTICIPANTS(OXCalendarExceptionCodes.PRIVATE_FLAG_AND_PARTICIPANTS_MSG, OXCalendarExceptionMessage.PRIVATE_FLAG_AND_PARTICIPANTS_MSG, 23, Category.CATEGORY_USER_INPUT),
     /**
@@ -161,7 +161,7 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     UNSUPPORTED_SHOWN_AS(OXCalendarExceptionCodes.UNSUPPORTED_SHOWN_AS_MSG, OXCalendarExceptionMessage.UNSUPPORTED_SHOWN_AS_MSG, 25, Category.CATEGORY_USER_INPUT),
     /**
-     * Required  value \"Start Date\" was not supplied.
+     * Required value \"Start Date\" was not supplied.
      */
     MANDATORY_FIELD_START_DATE(OXCalendarExceptionCodes.MANDATORY_FIELD_START_DATE_MSG, OXCalendarExceptionMessage.MANDATORY_FIELD_START_DATE_MSG, 26, Category.CATEGORY_USER_INPUT),
     /**
@@ -281,7 +281,7 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     RECURRING_MISSING_OR_WRONG_VALUE_INTERVAL(OXCalendarExceptionCodes.RECURRING_MISSING_OR_WRONG_VALUE_INTERVAL_MSG, 55, Category.CATEGORY_USER_INPUT),
     /**
-     * The required \"days\"  value is missing or wrong: %d
+     * The required \"days\" value is missing or wrong: %d
      */
     RECURRING_MISSING_OR_WRONG_VALUE_DAYS(OXCalendarExceptionCodes.RECURRING_MISSING_OR_WRONG_VALUE_DAYS_MSG, 56, Category.CATEGORY_USER_INPUT),
     /**
@@ -373,7 +373,7 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     RECURRING_VALUE_CONSTRAINT(OXCalendarExceptionCodes.RECURRING_VALUE_CONSTRAINT_MSG, 78, Category.CATEGORY_USER_INPUT),
     /**
-     * Unable to calculate first occurrence.
+     * Unable to calculate first occurrence of appointment %1$d.
      */
     UNABLE_TO_CALCULATE_FIRST_RECURRING(OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_FIRST_RECURRING_MSG, 79, Category.CATEGORY_ERROR),
     /**
@@ -655,7 +655,7 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
 
     private static final String RECURRING_VALUE_CONSTRAINT_MSG = "Value %1$d exceeds max. supported value of %2$d.";
 
-    private static final String UNABLE_TO_CALCULATE_FIRST_RECURRING_MSG = "Unable to calculate first occurrence.";
+    private static final String UNABLE_TO_CALCULATE_FIRST_RECURRING_MSG = "Unable to calculate first occurrence of appointment %1$d.";
 
     private static final String RECURRENCE_PATTERN_TOO_COMPLEX_MSG = "The recurrence pattern is too complex. Giving up.";
 

@@ -52,7 +52,7 @@ package com.openexchange.report.appsuite.management;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.tools.JSONCoercion;
-import com.openexchange.report.appsuite.Report;
+import com.openexchange.report.appsuite.serialization.Report;
 import com.openexchange.version.Version;
 
 

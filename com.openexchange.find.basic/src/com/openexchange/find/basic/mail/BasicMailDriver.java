@@ -54,28 +54,28 @@ import static com.openexchange.find.basic.mail.Constants.FIELD_BODY;
 import static com.openexchange.find.basic.mail.Constants.FIELD_CC;
 import static com.openexchange.find.basic.mail.Constants.FIELD_FROM;
 import static com.openexchange.find.basic.mail.Constants.FIELD_SUBJECT;
-import static com.openexchange.find.basic.mail.Constants.FIELD_TIME;
 import static com.openexchange.find.basic.mail.Constants.FIELD_TO;
-import static com.openexchange.find.basic.mail.Constants.QUERY_LAST_MONTH;
-import static com.openexchange.find.basic.mail.Constants.QUERY_LAST_WEEK;
-import static com.openexchange.find.basic.mail.Constants.QUERY_LAST_YEAR;
-import static com.openexchange.find.basic.mail.Constants.TO_FIELDS;
 import static com.openexchange.find.basic.mail.Constants.FROM_AND_TO_FIELDS;
 import static com.openexchange.find.basic.mail.Constants.FROM_FIELDS;
+import static com.openexchange.find.basic.mail.Constants.TO_FIELDS;
+import static com.openexchange.find.common.CommonConstants.FIELD_TIME;
+import static com.openexchange.find.common.CommonConstants.QUERY_LAST_MONTH;
+import static com.openexchange.find.common.CommonConstants.QUERY_LAST_WEEK;
+import static com.openexchange.find.common.CommonConstants.QUERY_LAST_YEAR;
 import static com.openexchange.find.common.CommonFacetType.GLOBAL;
+import static com.openexchange.find.common.CommonFacetType.TIME;
+import static com.openexchange.find.common.CommonStrings.LAST_MONTH;
+import static com.openexchange.find.common.CommonStrings.LAST_WEEK;
+import static com.openexchange.find.common.CommonStrings.LAST_YEAR;
 import static com.openexchange.find.facet.Facets.newSimpleBuilder;
 import static com.openexchange.find.mail.MailFacetType.CONTACTS;
 import static com.openexchange.find.mail.MailFacetType.MAIL_TEXT;
 import static com.openexchange.find.mail.MailFacetType.SUBJECT;
-import static com.openexchange.find.mail.MailFacetType.TIME;
 import static com.openexchange.find.mail.MailStrings.FACET_FROM;
 import static com.openexchange.find.mail.MailStrings.FACET_FROM_AND_TO;
 import static com.openexchange.find.mail.MailStrings.FACET_MAIL_TEXT;
 import static com.openexchange.find.mail.MailStrings.FACET_SUBJECT;
 import static com.openexchange.find.mail.MailStrings.FACET_TO;
-import static com.openexchange.find.mail.MailStrings.LAST_MONTH;
-import static com.openexchange.find.mail.MailStrings.LAST_WEEK;
-import static com.openexchange.find.mail.MailStrings.LAST_YEAR;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -97,9 +97,11 @@ import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.AbstractContactFacetingModuleSearchDriver;
 import com.openexchange.find.basic.Services;
+import com.openexchange.find.basic.common.Comparison;
 import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.common.ContactDisplayItem;
 import com.openexchange.find.common.FolderType;
+import com.openexchange.find.common.TimeFrame;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.Facet;
@@ -375,7 +377,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         SearchTerm<?> queryTerm = prepareQueryTerm(folder, queryFields, searchRequest.getQueries());
 
         List<SearchTerm<?>> facetTerms = new LinkedList<SearchTerm<?>>();
-        SearchTerm<?> timeTerm = prepareTermForFacet(searchRequest, MailFacetType.TIME, folder, OP.OR, OP.OR, OP.OR);
+        SearchTerm<?> timeTerm = prepareTimeTerm(searchRequest, folder);
         if (timeTerm != null) {
             facetTerms.add(timeTerm);
         }
@@ -432,6 +434,48 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         }
 
         return termFor(fields, queries, OP.OR, OP.AND, folder.isSent());
+    }
+
+    private static SearchTerm<?> prepareTimeTerm(SearchRequest searchRequest, MailFolder folder) throws OXException {
+        List<ActiveFacet> timeFacets = searchRequest.getActiveFacets(TIME);
+        if (timeFacets != null && !timeFacets.isEmpty()) {
+            ActiveFacet timeFacet = timeFacets.get(0);
+            Filter filter = timeFacet.getFilter();
+            if (filter == Filter.NO_FILTER) {
+                String timeFramePattern = timeFacet.getValueId();
+                TimeFrame timeFrame = TimeFrame.valueOf(timeFramePattern);
+                if (timeFrame == null) {
+                    throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(timeFramePattern, FIELD_TIME);
+                }
+
+                Comparison fromComparison;
+                Comparison toComparison;
+                if (timeFrame.isInclusive()) {
+                    fromComparison = Comparison.GREATER_EQUALS;
+                    toComparison = Comparison.LOWER_EQUALS;
+                } else {
+                    fromComparison = Comparison.GREATER_THAN;
+                    toComparison = Comparison.LOWER_THAN;
+                }
+
+                long from = timeFrame.getFrom();
+                long to = timeFrame.getTo();
+                if (to < 0L) {
+                    return buildTimeTerm(fromComparison, from, folder.isSent());
+                }
+
+                SearchTerm<?> fromTerm = buildTimeTerm(fromComparison, from, folder.isSent());
+                SearchTerm<?> toTerm = buildTimeTerm(toComparison, to, folder.isSent());
+                return new ANDTerm(fromTerm, toTerm);
+            } else {
+                Pair<Comparison, Long> parsed = parseTimeQuery(filter.getQueries().get(0));
+                Comparison comparison = parsed.getFirst();
+                Long timestamp = parsed.getSecond();
+                return buildTimeTerm(comparison, timestamp, folder.isSent());
+            }
+        }
+
+        return null;
     }
 
     private static SearchTerm<?> prepareTermForFacet(SearchRequest searchRequest, FacetType type, MailFolder folder, OP filterOP, OP fieldOP, OP queryOP) throws OXException {
@@ -522,10 +566,6 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         return termForQuery(field, queries.iterator().next(), isOutgoingFolder);
     }
 
-    private static enum Comparison {
-        GREATER_THAN, GREATER_EQUALS, EQUALS, LOWER_THAN, LOWER_EQUALS;
-    }
-
     private static SearchTerm<?> termForQuery(String field, String query, boolean isOutgoingFolder) throws OXException {
         if (FIELD_FROM.equals(field)) {
             return new FromTerm(query);
@@ -592,6 +632,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         return new ReceivedDateTerm(comparisonType, date);
     }
 
+
     private static Pair<Comparison, Long> parseTimeQuery(String query) throws OXException {
         if (Strings.isEmpty(query)) {
             throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, FIELD_TIME);
@@ -613,53 +654,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             comparison = Comparison.GREATER_EQUALS;
             timestamp = cal.getTime().getTime();
         } else {
-            /*
-             * This block just preserves the code, as we likely have to implement
-             * custom time ranges in the future. Currently this else path should
-             * never be called.
-             *
-             * Idea: Introduce an additional custom time facet that might be set,
-             * but is not part of autocomplete responses. If it is set, we also
-             * should not deliver the normal time facet in autocomplete responses.
-             *
-             * {
-             *   'facet':'time_custom',
-             *   'value':'>=12345678900'
-             * }
-             */
-            char[] chars = query.toCharArray();
-            String sTimestamp;
-            if (chars.length > 1) {
-                int offset = 0;
-                if (chars[0] == '<') {
-                    offset = 1;
-                    comparison = Comparison.LOWER_THAN;
-                    if (chars[1] == '=') {
-                        offset = 2;
-                        comparison = Comparison.LOWER_EQUALS;
-                    }
-                } else if (chars[0] == '>') {
-                    offset = 1;
-                    comparison = Comparison.GREATER_THAN;
-                    if (chars[1] == '=') {
-                        offset = 2;
-                        comparison = Comparison.GREATER_EQUALS;
-                    }
-                } else {
-                    comparison = Comparison.EQUALS;
-                }
-
-                sTimestamp = String.copyValueOf(chars, offset, chars.length);
-            } else {
-                comparison = Comparison.EQUALS;
-                sTimestamp = query;
-            }
-
-            try {
-                timestamp = Long.parseLong(sTimestamp);
-            } catch (NumberFormatException e) {
-                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, FIELD_TIME);
-            }
+            return null;
         }
 
         return new Pair<Comparison, Long>(comparison, timestamp);

@@ -1,6 +1,4 @@
 opt/open-xchange/etc/crawlers/gmx.de.yml
-opt/open-xchange/etc/crawlers/GoogleCalendar.yml
-opt/open-xchange/etc/crawlers/GoogleMail.yml
 opt/open-xchange/etc/crawlers/Sun Calendar.yml
 opt/open-xchange/etc/crawlers/Sun Contacts.yml
 opt/open-xchange/etc/crawlers/Sun Tasks.yml

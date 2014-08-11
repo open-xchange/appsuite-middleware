@@ -93,6 +93,7 @@ import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
 import com.openexchange.file.storage.FileStorageRandomFileAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FileStreamHandler;
 import com.openexchange.file.storage.composition.FileStreamHandlerRegistry;
@@ -414,6 +415,14 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
             inputStream = streamHandler.handleDocumentStream(inputStream, fileID, version, session.getContextId());
         }
         return inputStream;
+    }
+
+    @Override
+    public InputStream optThumbnailStream(String id, String version) throws OXException {
+        final FileID fileID = new FileID(id);
+        FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
+
+        return fileAccess instanceof ThumbnailAware ? ((ThumbnailAware) fileAccess).getThumbnailStream(fileID.getFolderId(), fileID.getFileId(), version) : null;
     }
 
     @Override

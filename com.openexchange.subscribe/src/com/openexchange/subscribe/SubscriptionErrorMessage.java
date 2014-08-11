@@ -113,6 +113,10 @@ public enum SubscriptionErrorMessage implements DisplayableOXExceptionCode {
      */
     EMAIL_ADDR_LOGIN(CATEGORY_TRY_AGAIN, 13, SubscriptionErrorMessage.EMAIL_ADDR_LOGIN_MSG, SubscriptionErrorStrings.EMAIL_ADDR_LOGIN_DISPLAY),
     /**
+     * An I/O error occurred: %1$s
+     */
+    IO_ERROR(CATEGORY_ERROR, 14, "An I/O error occurred: %1$s"),
+    /**
      * An unexpected error occurred: %1$s.
      */
     UNEXPECTED_ERROR(CATEGORY_ERROR, 9999, SubscriptionErrorMessage.UNEXPECTED_ERROR_MSG),
@@ -156,14 +160,25 @@ public enum SubscriptionErrorMessage implements DisplayableOXExceptionCode {
 
     private static final String NO_OAUTH_ACCOUNT_GIVEN_MSG = "User does not have an OAuth-account to access this service.";
 
-    private Category category;
-    private int errorCode;
-    private String message;
+    // ---------------------------------------------------------------------------------------------------------------------------- //
+
+    private static final String PREFIX = "SUB";
 
     /**
-     * Message displayed to the user
+     * Gets the static prefix for this error code.
+     *
+     * @return The prefix
      */
-    private String displayMessage;
+    public static String prefix() {
+        return PREFIX;
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------------------- //
+
+    private final Category category;
+    private final int errorCode;
+    private final String message;
+    private final String displayMessage;
 
     /**
      * Initializes a new {@link SubscriptionErrorMessage}.
@@ -174,7 +189,7 @@ public enum SubscriptionErrorMessage implements DisplayableOXExceptionCode {
      * @param message
      * @param displayMessage
      */
-    private SubscriptionErrorMessage(final Category category, final int errorCode, final String message, final String displayMessage) {
+    private SubscriptionErrorMessage(Category category, int errorCode, String message, String displayMessage) {
         this.category = category;
         this.errorCode = errorCode;
         this.message = message;
@@ -195,7 +210,7 @@ public enum SubscriptionErrorMessage implements DisplayableOXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "SUB";
+        return PREFIX;
     }
 
     @Override

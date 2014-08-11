@@ -53,16 +53,49 @@ import java.io.InputStream;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 
+/**
+ * {@link QuotaFileStorage} - A {@link FileStorage file storage} that is quota aware.
+ */
 public interface QuotaFileStorage extends FileStorage {
 
+    /**
+     * Gets the total available quota
+     *
+     * @return The total quota
+     */
     long getQuota();
 
+    /**
+     * Gets the currently used quota
+     *
+     * @return The currently used quota
+     * @throws OXException
+     */
     long getUsage() throws OXException;
 
+    /**
+     * Recalculates the used quota
+     *
+     * @throws OXException If calculation fails
+     */
     void recalculateUsage() throws OXException;
 
+    /**
+     * Recalculates the used quota ignoring specified files.
+     *
+     * @param filesToIgnore The files to ignore
+     * @throws OXException If calculation fails
+     */
     void recalculateUsage(Set<String> filesToIgnore) throws OXException;
 
+    /**
+     * Saves a new file
+     *
+     * @param file The file to save
+     * @param sizeHint The appr. file size
+     * @return The identifier of the newly saved file
+     * @throws OXException If save operation fails
+     */
     String saveNewFile(InputStream file, long sizeHint) throws OXException;
 
     /**

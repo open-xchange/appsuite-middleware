@@ -38,8 +38,22 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 
 %post
 . /opt/open-xchange/lib/oxfunctions.sh
+
+# prevent bash from expanding, see bug 13316
+GLOBIGNORE='*'
+
 ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc push_imapidle.properties
 
+# SoftwareChange_Request-2103
+PFILE=/opt/open-xchange/etc/push_imapidle.properties
+ox_add_property com.openexchange.push.imapidle.delay "5000" $PFILE
+ox_add_property com.openexchange.push.imapidle.clusterLock "hz" $PFILE
+if ox_exists_property com.openexchange.push.imapidle.errordelay  $PFILE; then
+    ox_remove_property com.openexchange.push.imapidle.errordelay  $PFILE
+fi
+if ox_exists_property com.openexchange.push.imapidle.debug $PFILE; then
+    ox_remove_property com.openexchange.push.imapidle.debug $PFILE
+fi
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -54,6 +68,8 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc push_i
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Mon Jul 28 2014 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2014-07-30
 * Mon Jul 21 2014 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2014-07-28
 * Tue Jul 15 2014 Carsten Hoeger <choeger@open-xchange.com>

@@ -13,6 +13,13 @@ identifier > identifier
 # Timezones
 availableTimeZones > io.ox/core/settingOptions//availableTimeZones
 
+# Password
+modules/com.openexchange.user.passwordchange/showStrength > io.ox/core/password//showStrength
+modules/com.openexchange.user.passwordchange/maxLength > io.ox/core/password//maxLength
+modules/com.openexchange.user.passwordchange/minLength > io.ox/core/password//minLength
+modules/com.openexchange.user.passwordchange/regexp > io.ox/core/password//regexp
+modules/com.openexchange.user.passwordchange/special > io.ox/core/password//special
+
 # Contact Collector
 modules/mail/contactCollectOnMailAccess > io.ox/mail//contactCollectOnMailAccess
 modules/mail/contactCollectOnMailTransport > io.ox/mail//contactCollectOnMailTransport

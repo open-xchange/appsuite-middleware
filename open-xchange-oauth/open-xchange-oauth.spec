@@ -39,7 +39,7 @@ The Open-Xchange OAuth implementation.
 Authors:
 --------
     Open-Xchange
-    
+
 %prep
 %setup -q
 
@@ -112,6 +112,7 @@ fi
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/dropboxoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/facebookoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/linkedinoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/msnoauth.properties
@@ -124,6 +125,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/settings/*
 
 %changelog
+* Mon Jul 28 2014 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2014-07-30
 * Mon Jul 21 2014 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2014-07-28
 * Tue Jul 15 2014 Steffen Templin <marcus.klein@open-xchange.com>

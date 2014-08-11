@@ -49,70 +49,110 @@
 
 package com.openexchange.push.imapidle;
 
-import java.util.EnumSet;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
-import com.google.common.util.concurrent.RateLimiter;
-import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
-import com.googlecode.concurrentlinkedhashmap.Weighers;
+import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.imap.IMAPFolderStorage;
 import com.openexchange.imap.IMAPProvider;
 import com.openexchange.mail.Protocol;
+import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageDelegator;
+import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
-import com.openexchange.push.PushClientWhitelist;
 import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushUtility;
+import com.openexchange.push.imapidle.locking.ImapIdleClusterLock;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.AbstractSessionMatcher;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 
 /**
- * {@link ImapIdlePushListener} - The IMAP IDLE {@link PushListener}.
+ * {@link ImapIdlePushListener}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.6.1
  */
 public final class ImapIdlePushListener implements PushListener, Runnable {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ImapIdlePushListener.class);
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ImapIdlePushListener.class);
 
     /**
-     * @author choeger
-     *
+     * A simple task that actually performs the {@link IMAPFolder#idle() IMAP IDLE call}.
+     */
+    private static final class ImapIdleTask extends AbstractTask<Void> {
+
+        private final IMAPFolder imapFolder;
+
+        ImapIdleTask(IMAPFolder imapFolder) {
+            super();
+            this.imapFolder = imapFolder;
+        }
+
+        @Override
+        public Void call() throws MessagingException {
+            imapFolder.idle(true);
+            return null;
+        }
+    }
+
+    /**
+     * The push mode; either <code>"newmail"</code> or <code>"always"</code>.
      */
     public static enum PushMode {
+
+        /**
+         * Only propagate a push event if at least one new message has arrived in mailbox
+         */
         NEWMAIL("newmail"),
+        /**
+         * Propagate push event on any change to mailbox
+         */
         ALWAYS("always");
 
-        private final String text;
+        private final String identifier;
 
         private PushMode(final String text) {
-            this.text = text;
+            this.identifier = text;
         }
 
-        public final String getText() {
-            return text;
+        /**
+         * Gets the push mode identifier
+         *
+         * @return The identifier
+         */
+        public String getIdentifier() {
+            return identifier;
         }
 
-        public static final PushMode fromString(final String text) {
-            if( text != null ) {
-                for(final PushMode m : PushMode.values()) {
-                    if(text.equals(m.text)) {
+        /**
+         * Gets the push mode by specified identifier.
+         *
+         * @param id The identifier
+         * @return The push mode or <code>null</code>
+         */
+        public static PushMode fromIdentifier(String id) {
+            if (id != null) {
+                for (final PushMode m : PushMode.values()) {
+                    if (id.equalsIgnoreCase(m.identifier)) {
                         return m;
                     }
                 }
@@ -121,566 +161,332 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         }
     }
 
-    private static volatile Boolean DEBUG_ENABLED;
+    // ------------------------------------------------------------------------------------------------------- //
 
-    /**
-     * @param debugEnabled the debugEnabled to set
-     */
-    public static final void setDebugEnabled(final boolean debugEnabled) {
-        DEBUG_ENABLED = Boolean.valueOf(debugEnabled);
-        ImapIdlePushListenerRegistry.setDebugEnabled(debugEnabled);
-    }
-
-    private static boolean isDebugEnabled() {
-        final Boolean debug = DEBUG_ENABLED;
-        return null == debug ? LOG.isDebugEnabled() : debug.booleanValue();
-    }
-
-    private static volatile PushMode pushMode;
-
-    /**
-     * @param pushmode the pushmode to set
-     */
-    public static final void setPushmode(final PushMode pushmode) {
-        pushMode = pushmode;
-    }
-
-    /**
-     * A placeholder constant for account ID.
-     */
-    private static final int ACCOUNT_ID = 0;
-
-    private static volatile String folder;
-
-    private static volatile int errordelay;
-
-    /**
-     * Gets the account ID constant.
-     *
-     * @return The account ID constant
-     */
-    public static int getAccountId() {
-        return ACCOUNT_ID;
-    }
-
-    /**
-     * Sets static folder full name.
-     *
-     * @param folder The folder full name
-     */
-    public static void setFolder(final String folder) {
-        ImapIdlePushListener.folder = folder;
-    }
-
-    /**
-     * Gets static folder full name.
-     *
-     * @return The folder full name
-     */
-    public static String getFolder() {
-        return folder;
-    }
-
-    /**
-     * Initializes a new {@link ImapIdlePushListener}.
-     *
-     * @param session The user session
-     * @return A new {@link ImapIdlePushListener}.
-     */
-    public static ImapIdlePushListener newInstance(final Session session) {
-        return new ImapIdlePushListener(session);
-    }
-
-    /**
-     * Initializes a new {@link ImapIdlePushListener}.
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return A new {@link ImapIdlePushListener}.
-     */
-    public static ImapIdlePushListener newInstance(final int userId, final int contextId) {
-        return new ImapIdlePushListener(userId, contextId);
-    }
-
-    /*
-     * Member section
-     */
-
-    private final AtomicBoolean running;
-
-    private final AtomicReference<Session> sessionRef;
-
-    private final ConcurrentMap<String, String> invalidSessionIds;
-
-    private final int userId;
-
-    private final int contextId;
-
-    private volatile Future<Object> imapIdleFuture;
+    private final ServiceLookup services;
+    private final Session session;
+    private ScheduledTimerTask timerTask;
+    private final int accountId;
+    private final String fullName;
+    private final long delay;
+    private final PushMode pushMode;
+    private final AtomicBoolean canceled;
     private volatile IMAPFolder imapFolderInUse;
 
-    private MailService mailService;
-
-    private volatile boolean shutdown;
-
     /**
      * Initializes a new {@link ImapIdlePushListener}.
      */
-    private ImapIdlePushListener(final Session session) {
+    public ImapIdlePushListener(String fullName, int accountId, PushMode pushMode, long delay, Session session, ServiceLookup services) {
         super();
-        running = new AtomicBoolean();
-        sessionRef = new AtomicReference<Session>(session);
-        invalidSessionIds = new ConcurrentLinkedHashMap.Builder<String, String>().initialCapacity(2).maximumWeightedCapacity(100).weigher(Weighers.entrySingleton()).build();
-        userId = session.getUserId();
-        contextId = session.getContextId();
-        mailService = null;
-        errordelay = 2000;
-        shutdown = false;
-    }
-
-    /**
-     * Initializes a new {@link ImapIdlePushListener}.
-     */
-    private ImapIdlePushListener(final int userId, final int contextId) {
-        super();
-        running = new AtomicBoolean();
-        sessionRef = new AtomicReference<Session>();
-        invalidSessionIds = new ConcurrentHashMap<String, String>(2);
-        this.userId = userId;
-        this.contextId = contextId;
-        mailService = null;
-        errordelay = 2000;
-        shutdown = false;
-    }
-
-    /**
-     * @return The context identifier
-     */
-    public int getContextId() {
-        return contextId;
-    }
-
-    /**
-     * @return The user identifier
-     */
-    public int getUserId() {
-        return userId;
-    }
-
-    /**
-     * @return the errordelay
-     */
-    public static final int getErrordelay() {
-        return errordelay;
-    }
-
-    /**
-     * @param errordelay the errordelay to set
-     */
-    public static final void setErrordelay(final int errordelay) {
-        ImapIdlePushListener.errordelay = errordelay;
+        canceled = new AtomicBoolean();
+        this.fullName = fullName;
+        this.accountId = accountId;
+        this.session = session;
+        this.delay = delay <= 0 ? 5000L : delay;
+        this.services = services;
+        this.pushMode = pushMode;
     }
 
     @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder(128).append("user=").append(userId).append(", context=").append(contextId);
-        final Session session = sessionRef.get();
-        sb.append(", session=").append(null == session ? "null" : session.getSessionID());
-        sb.append(", imapIdleFuture=").append(imapIdleFuture);
-        return sb.toString();
-    }
-
-    /**
-     * Gets the currently referenced session
-     *
-     * @return The currently referenced session or <code>null</code>
-     */
-    public Session getSessionRef() {
-        return sessionRef.get();
-    }
-
-    /**
-     * Gets the session; trying to obtain a new one if currently referenced session is invalid/obsolete.
-     *
-     * @return The session or <code>null</code>
-     */
-    public Session getSession() {
-        final SessiondService service = Services.getService(SessiondService.class);
-        Session session = sessionRef.get();
-        if (null == session) {
-            final ConcurrentMap<String, String> invalidSessionIds = this.invalidSessionIds;
-            session = service.findFirstMatchingSessionForUser(userId, contextId, new AbstractSessionMatcher() {
-
-                @Override
-                public boolean accepts(final Session tmp) {
-                    return !invalidSessionIds.containsKey(tmp.getSessionID()) && PushUtility.allowedClient(tmp.getClient());
-                }
-
-                @Override
-                public Set<Flag> flags() {
-                    return EnumSet.of(Flag.IGNORE_SESSION_STORAGE);
-                }
-
-            });
-            if (!sessionRef.compareAndSet(null, session)) {
-                session = sessionRef.get();
-            }
-        } else if (null == service.getSession(session.getSessionID())) {
-            sessionRef.set(null);
-            final ConcurrentMap<String, String> invalidSessionIds = this.invalidSessionIds;
-            session = service.findFirstMatchingSessionForUser(userId, contextId, new AbstractSessionMatcher() {
-
-                @Override
-                public boolean accepts(final Session tmp) {
-                    return !invalidSessionIds.containsKey(tmp.getSessionID()) && PushUtility.allowedClient(tmp.getClient());
-                }
-
-                @Override
-                public Set<Flag> flags() {
-                    return EnumSet.of(Flag.IGNORE_SESSION_STORAGE);
-                }
-
-            });
-            if (null != session) {
-                sessionRef.set(session);
-            }
-        }
-        return session;
-    }
-
-    private void dropSessionRef(final boolean failedAuth) {
-        Session session;
-        do {
-            session = sessionRef.get();
-            if (null == session) {
-                return;
-            }
-        } while (!sessionRef.compareAndSet(session, null));
-        if (failedAuth) {
-            final String sessionID = session.getSessionID();
-            invalidSessionIds.put(sessionID, sessionID);
-        }
-    }
-
-    /**
-     * Opens this listener
-     *
-     * @throws OXException If listener cannot be opened
-     */
-    public void open() throws OXException {
-        shutdown = false;
-        final ThreadPoolService threadPool = Services.getService(ThreadPoolService.class);
-        {
-            mailService = Services.getService(MailService.class);
-            final Session session = getSession();
-            if (null == session) {
-                throw PushExceptionCodes.UNEXPECTED_ERROR.create("Cannot find an appropriate session with a client identifier matching pattern(s): " + PushClientWhitelist.getInstance().getPatterns());
-            }
-            /*
-             * Get access
-             */
-            MailAccess<?, ?> access = null;
-            try {
-                access = mailService.getMailAccess(session, MailAccount.DEFAULT_ID);
-                /*
-                 * Check protocol
-                 */
-                final Protocol protocol = access.getProvider().getProtocol();
-                if (null == protocol || (!Protocol.ALL.equals(protocol.getName()) && !IMAPProvider.PROTOCOL_IMAP.equals(protocol))) {
-                    throw PushExceptionCodes.UNEXPECTED_ERROR.create("Primary mail account is not IMAP, but " + (null == protocol ? "is missing." : protocol.getName()));
-                }
-                /*
-                 * Check for IDLE capability
-                 */
-                access.connect(false);
-                final IMAPCapabilities capabilities = (IMAPCapabilities) access.getMailConfig().getCapabilities();
-                if (!capabilities.hasIdle()) {
-                    throw PushExceptionCodes.UNEXPECTED_ERROR.create("Primary IMAP account does not support \"IDLE\" capability!");
-                }
-                /*-
-                 * No more needed because watcher recognizes IDLE state if properly set via MailAccess.setWaiting(boolean).
-                 *
-                 *
-                final IMailProperties imcf = IMAPAccess.getInstance(session).getMailConfig().getMailProperties();
-                if( imcf.isWatcherEnabled() ) {
-                    LOG.error("com.openexchange.mail.watcherEnabled is enabled, please disable it!");
-                    throw PushExceptionCodes.UNEXPECTED_ERROR.create("com.openexchange.mail.watcherEnabled is enabled, please disable it!");
-                }
-                 */
-            } finally {
-                if (null != access) {
-                    access.close(true);
-                }
-            }
-        }
-        imapIdleFuture = threadPool.submit(ThreadPools.task(this, ImapIdlePushListener.class.getSimpleName()));
-    }
-
-    /**
-     * Closes this listener.
-     */
-    public void close() {
-        if (shutdown) {
-            return;
-        }
-        shutdown = true;
-        if (isDebugEnabled()) {
-            final Session session = getSessionRef();
-            LOG.info("stopping IDLE for Context: {}, Login: {}", Integer.valueOf(contextId), (null == session ? "unknown" : session.getLoginName()), new Throwable("Closing IMAP IDLE push listener"));
-        }
-        // Close IMAP resources, too
-        final IMAPFolder imapFolderInUse = this.imapFolderInUse;
-        if (null != imapFolderInUse) {
-            this.imapFolderInUse = null;
-            try {
-                imapFolderInUse.close(false);
-            } catch (final Exception e) {
-                // Ignore
-            }
-        }
-        final Future<Object> imapIdleFuture = this.imapIdleFuture;
-        if (null != imapIdleFuture) {
-            // Cancel task
-            imapIdleFuture.cancel(true);
-            this.imapIdleFuture = null;
-        }
+    public void notifyNewMail() throws OXException {
+        PushUtility.triggerOSGiEvent(MailFolderUtility.prepareFullname(accountId, fullName), session);
     }
 
     @Override
     public void run() {
-        /*
-         * Periodically invoke #checkNewMail() unless not shut-down
-         */
+        if (canceled.get()) {
+            return;
+        }
+
+        String sContextId = Integer.toString(session.getContextId());
+        String sUserId = Integer.toString(session.getUserId());
+
         try {
-            Run: while (!shutdown) {
-                try {
-                    // Checks for new mails with a rate of 1 permit per 5 seconds
-                    final RateLimiter rateLimiter = RateLimiter.create(0.2); // rate is "0.2 permits per second"
-                    boolean keepOnChecking = true;
-                    while (keepOnChecking) {
-                        rateLimiter.acquire(); // may wait
-                        keepOnChecking = checkNewMail();
-                    }
-                } catch (final MissingSessionException e) {
-                    LOG.info(e.getMessage());
-                    /*
-                     * Bind ImapIdlePushListener to another session
-                     */
-                    final Session session = getSession();
-                    if (null == session) {
-                        if (isDebugEnabled()) {
-                            LOG.info("IDLE: Found no other valid & active session for user {} in context {}. Therefore shutting down associated IMAP IDLE push listener.", Integer.valueOf(userId), Integer.valueOf(contextId), new Throwable());
-                        } else {
-                            LOG.info("IDLE: Found no other valid & active session for user {} in context {}. Therefore shutting down associated IMAP IDLE push listener.", Integer.valueOf(userId), Integer.valueOf(contextId));
-                        }
-                        return;
-                    }
-                    LOG.info("IDLE: Found another valid & active session for user {} in context {}. Reactivating IMAP IDLE push listener.", Integer.valueOf(userId), Integer.valueOf(contextId));
-                    continue Run;
-                }
-                if (shutdown) {
-                    LOG.info("IDLE: Listener has been shut down for user {} in context {}", Integer.valueOf(userId), Integer.valueOf(contextId));
+            boolean error = true;
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+            try {
+                MailService mailService = services.getOptionalService(MailService.class);
+                if (null == mailService) {
+                    // Currently no MailService available
+                    error = false;
                     return;
                 }
-                LOG.info("IDLE: Orderly left checkNewMail() method for user {} in context {}", Integer.valueOf(userId), Integer.valueOf(contextId));
+
+                mailAccess = mailService.getMailAccess(session, accountId);
+                mailAccess.connect(false);
+
+                boolean notified = false;
+
+                IMAPStore imapStore = getImapFolderStorageFrom(mailAccess).getImapStore();
+                final IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(fullName);
+                this.imapFolderInUse = imapFolder;
+                try {
+                    imapFolder.open(Folder.READ_WRITE);
+                    LOGGER.debug("Starting IMAP-IDLE run for user {} in context {}.", sUserId, sContextId);
+
+                    // Acquire folder counts
+                    int deletedCount = 0;
+                    int totalCount = 0;
+                    final PushMode pushMode = this.pushMode;
+                    if (PushMode.ALWAYS == pushMode) {
+                        // Operations may be expensive, so only do them in always mode.
+                        deletedCount = imapFolder.getDeletedMessageCount();
+                        totalCount = imapFolder.getMessageCount();
+                    }
+
+                    // Check if canceled meanwhile
+                    if (canceled.get()) {
+                        error = false;
+                        return;
+                    }
+
+                    // Refresh lock prior to entering IMAP-IDLE
+                    ImapIdlePushManagerService.getInstance().refreshLock(session);
+
+                    // Do the IMAP IDLE connect
+                    mailAccess.setWaiting(true);
+                    try {
+                        if (false == doImapIdleTimeoutAware(imapFolder)) {
+                            // Timeout elapsed
+                            error = false;
+                            return;
+                        }
+                    } finally {
+                        mailAccess.setWaiting(false);
+                    }
+
+                    // Check if canceled meanwhile
+                    if (canceled.get()) {
+                        error = false;
+                        return;
+                    }
+
+                    // Do the push dependent on mode
+                    switch (pushMode) {
+                    case NEWMAIL:
+                        {
+                            int newMessageCount = imapFolder.getNewMessageCount();
+                            if (newMessageCount > 0) {
+                                LOGGER.debug("IMAP-IDLE result for user {} in context {}: Doing push due to {} new mail(s)", sUserId, sContextId, Integer.toString(newMessageCount));
+                                notifyNewMail();
+                                notified = true;
+                            }
+                        }
+                        break;
+                    case ALWAYS:
+                        // Fall-through
+                    default:
+                        // Check new message counter
+                        {
+                            int newMessageCount = imapFolder.getNewMessageCount();
+                            if (newMessageCount > 0) {
+                                LOGGER.debug("IMAP-IDLE result for user {} in context {}: Doing push due to {} new mail(s)", sUserId, sContextId, Integer.toString(newMessageCount));
+                                notifyNewMail();
+                                notified = true;
+                                break;
+                            }
+                        }
+
+                        // Compare deleted message counters
+                        {
+                            int newDeletedCount = imapFolder.getDeletedMessageCount();
+                            if (imapFolder.getDeletedMessageCount() != deletedCount) {
+                                LOGGER.debug("IMAP-IDLE result for user {} in context {}: Doing push due to differing message counts. Current deleted count {} vs. old deleted count {}", Integer.toString(newDeletedCount), Integer.toString(deletedCount));
+                                notifyNewMail();
+                                notified = true;
+                                break;
+                            }
+                        }
+
+                        // Compare total message counters
+                        {
+                            int newTotalCount = imapFolder.getMessageCount();
+                            if (newTotalCount != totalCount) {
+                                LOGGER.debug("IMAP-IDLE result for user {} in context {}: Doing push due to differing message counts. Current total count {} vs. old total count {}", Integer.toString(newTotalCount), Integer.toString(totalCount));
+                                notifyNewMail();
+                                notified = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (notified) {
+                        LOGGER.debug("Performed IMAP-IDLE run having new messages for user {} in context {}. ", sUserId, sContextId);
+                    } else {
+                        LOGGER.debug("Performed IMAP-IDLE run with no result for user {} in context {}. ", sUserId, sContextId);
+                    }
+                } finally {
+                    this.imapFolderInUse = null;
+                    try {
+                        imapFolder.close(false);
+                    } catch (final Exception e) {
+                        // Ignore
+                    }
+                }
+            } catch (OXException e) {
+                launderOXException(e);
+            } catch (javax.mail.AuthenticationFailedException e) {
+                // Definitely cancel...
+                throw e;
+            } catch (javax.mail.NoSuchProviderException e) {
+                // Definitely cancel...
+                throw e;
+            } catch (javax.mail.MethodNotSupportedException e) {
+                // Definitely cancel...
+                throw e;
+            } catch (javax.mail.MessagingException e) {
+                LOGGER.debug("Awaiting next IMAP-IDLE run for user {} in context {}.", sUserId, sContextId);
+                // Try again
+            } finally {
+                closeMailAccess(mailAccess);
+                mailAccess = null;
+
+                if (false == error) {
+                    // Perform next run
+                    LOGGER.debug("Awaiting next IMAP-IDLE run for user {} in context {}.", sUserId, sContextId);
+                }
             }
-        } catch (final Exception e) {
-            LOG.error("IDLE: Unexpectedly left run() method for user {} in context {}", Integer.valueOf(userId), Integer.valueOf(contextId), e);
-        } finally {
-            try {
-                ImapIdlePushListenerRegistry.getInstance().removePushListener(contextId, userId);
-            } catch (final Exception e) {
-                LOG.error("", e);
-            }
+        } catch (InterruptedException e) {
+            // Thread interrupted - keep interrupted flag
+            Thread.currentThread().interrupt();
+            LOGGER.debug("Thread interrupted during IMAP-IDLE run for user {} in context {}. Therefore going to cancel associated listener permanently.", sUserId, sContextId, e);
+            cancel(true);
+        } catch (Exception e) {
+            // Any aborting error
+            LOGGER.warn("Severe error during IMAP-IDLE run for user {} in context {}. Therefore going to cancel associated listener permanently.", sUserId, sContextId, e);
+            cancel(true);
         }
     }
 
     /**
-     * Check for new mails
+     * Actually enters the IMAP-IDLE to IMAP server with respect to frequent cluster lock <i><tt>touch</tt></i>ing.
+     * <p>
+     * IMAP-IDLE is performed until either
+     * <ol>
+     * <li>A notification is yielded by IMAP server (new messages, whatever...)</li>
+     * <li>The timeout elapses leading to a forced abortion of IMAP-IDLE</li>
+     * </ol>
+     * <p>
+     * For the first condition <code>true</code> is returned; otherwise <code>false</code> for the second case.
      *
-     * @throws OXException If check for new mails fails
-     * @throws MissingSessionException If session is <code>null</code>
+     * @param imapFolder The associated mailbox for which to enter the IMAP-IDLE command
+     * @return <code>true</code> in case an IMAP server notification terminated the IMAP-IDLE; otherwise <code>false</code> if timeout elapsed
+     * @throws InterruptedException If idle'ing thread has been interrupted
+     * @throws MessagingException If IMAP-IDLE fails for any reason
      */
-    public boolean checkNewMail() throws OXException {
-        if (shutdown) {
-            if (isDebugEnabled()) {
-                LOG.info("IDLE: Listener was requested to shut-down for associated user {} in context {}. Abort...", Integer.valueOf(userId), Integer.valueOf(contextId), new Throwable());
-            } else {
-                LOG.info("IDLE: Listener was requested to shut-down for associated user {} in context {}. Abort...", Integer.valueOf(userId), Integer.valueOf(contextId));
-            }
-            return false;
-        }
-        if (!running.compareAndSet(false, true)) {
-            /*
-             * Still in process...
-             */
-            if (isDebugEnabled()) {
-                LOG.info("Listener still in process for user {} in context {}. Return immediately.", Integer.valueOf(userId), Integer.valueOf(contextId));
-            }
-            return true;
-        }
-        final int errDelay = errordelay;
-        MailAccess<?, ?> mailAccess = null;
-        IMAPStore imapStore = null;
+    private boolean doImapIdleTimeoutAware(final IMAPFolder imapFolder) throws InterruptedException, MessagingException {
         try {
-            final Session session = getSession();
-            if (null == session) {
-                // No active session found for associated user. Abort...
-                throw new MissingSessionException("IDLE: Found no other valid & active session for user " + userId + " in context " + contextId + ". Abort...");
+            Future<Void> f = ThreadPools.getThreadPool().submit(new ImapIdleTask(imapFolder), CallerRunsBehavior.<Void> getInstance());
+            f.get(ImapIdleClusterLock.TIMEOUT_MILLIS - 60000, TimeUnit.MILLISECONDS);
+            return true;
+        } catch (TimeoutException e) {
+            // Next run...
+            return false;
+        } catch (ExecutionException e) {
+            throw ThreadPools.launderThrowable(e, MessagingException.class);
+        }
+    }
+
+    /**
+     * Starts this listener.
+     *
+     * @throws OXException If start-up fails
+     */
+    public synchronized void start() throws OXException {
+        TimerService timerService = services.getOptionalService(TimerService.class);
+        if (null == timerService) {
+            throw ServiceExceptionCode.absentService(TimerService.class);
+        }
+
+        // Check primary mail account's nature
+        MailAccess<?, ?> access = null;
+        try {
+            MailService mailService = services.getOptionalService(MailService.class);
+            if (null == mailService) {
+                throw ServiceExceptionCode.absentService(MailService.class);
             }
-            mailAccess = mailService.getMailAccess(session, ACCOUNT_ID);
-            mailAccess.connect(false);
-            final IMAPFolderStorage istore;
-            {
-                Object fstore = mailAccess.getFolderStorage();
-                if (!(fstore instanceof IMAPFolderStorage)) {
-                    if (!(fstore instanceof IMailFolderStorageDelegator)) {
-                        throw PushExceptionCodes.UNEXPECTED_ERROR.create("Unknown MAL implementation");
-                    }
-                    fstore = ((IMailFolderStorageDelegator) fstore).getDelegateFolderStorage();
-                    if (!(fstore instanceof IMAPFolderStorage)) {
-                        throw PushExceptionCodes.UNEXPECTED_ERROR.create("Unknown MAL implementation");
-                    }
-                }
-                istore = (IMAPFolderStorage) fstore;
+            access = mailService.getMailAccess(session, MailAccount.DEFAULT_ID);
+            /*
+             * Check protocol
+             */
+            final Protocol protocol = access.getProvider().getProtocol();
+            if (null == protocol || (!Protocol.ALL.equals(protocol.getName()) && !IMAPProvider.PROTOCOL_IMAP.equals(protocol))) {
+                throw PushExceptionCodes.UNEXPECTED_ERROR.create("Primary mail account is not IMAP, but " + (null == protocol ? "is missing." : protocol.getName()));
             }
-            imapStore = istore.getImapStore();
-            final IMAPFolder inbox = (IMAPFolder) imapStore.getFolder(folder);
-            this.imapFolderInUse = inbox;
-            try {
-                inbox.open(Folder.READ_WRITE);
-                if (isDebugEnabled()) {
-                    LOG.info("starting IDLE for Context: {}, Login: {}, Session: {}", session.getContextId(), session.getLoginName(), session.getSessionID());
-                }
-                int deletedCount = 0;
-                int totalCount = 0;
-                int unreadCount = 0;
-                final PushMode pushMode = ImapIdlePushListener.pushMode;
-                if (PushMode.ALWAYS == pushMode) {
-                    // Operations may be expensive, so only do them in always mode.
-                    deletedCount = inbox.getDeletedMessageCount();
-                    totalCount = inbox.getMessageCount();
-                    unreadCount = inbox.getUnreadMessageCount();
-                }
-                mailAccess.setWaiting(true);
-                try {
-                    inbox.idle(true);
-                } finally {
-                    mailAccess.setWaiting(false);
-                }
-                switch (pushMode) {
-                case NEWMAIL:
-                    if (inbox.getNewMessageCount() > 0) {
-                        if (isDebugEnabled()) {
-                            final int nmails = inbox.getNewMessageCount();
-                            LOG.info("IDLE: {} new mail(s) for Context: {}, Login: {}", nmails, session.getContextId(), session.getLoginName());
-                        }
-                        notifyNewMail();
-                    }
-                    break;
-                case ALWAYS:
-                default:
-                    if (inbox.getNewMessageCount() > 0) {
-                        if (isDebugEnabled()) {
-                            final int nmails = inbox.getNewMessageCount();
-                            LOG.info("IDLE: {} new mail(s) for Context: {}, Login: {}", nmails, session.getContextId(), session.getLoginName());
-                        }
-                        notifyNewMail();
-                        break;
-                    }
-                    final int newDeletedCount = inbox.getDeletedMessageCount();
-                    final int newTotalCount = inbox.getMessageCount();
-                    final int newUnreadCount = inbox.getUnreadMessageCount();
-                    if (!(newDeletedCount == deletedCount && newTotalCount == totalCount && newUnreadCount == unreadCount)) {
-                        if (isDebugEnabled()) {
-                            final StringBuilder sb = new StringBuilder("IDLE: Mail event for Context: ");
-                            sb.append(session.getContextId());
-                            sb.append(", Login: ");
-                            sb.append(session.getLoginName());
-                            sb.append(", Total: ");
-                            sb.append(totalCount);
-                            sb.append(',');
-                            sb.append(newTotalCount);
-                            sb.append(", Unread: ");
-                            sb.append(unreadCount);
-                            sb.append(',');
-                            sb.append(newUnreadCount);
-                            sb.append(", Deleted: ");
-                            sb.append(deletedCount);
-                            sb.append(',');
-                            sb.append(newDeletedCount);
-                            LOG.info(sb.toString());
-                        }
-                        notifyNewMail();
-                    }
-                    break;
-                }
-                /*
-                 * NOTE: we cannot throw Exceptions because that would stop the IDLE'ing when e.g. IMAP server is down/busy for a moment or
-                 * if e.g. cyrus client timeout happens (idling for too long)
-                 */
-            } finally {
+            /*
+             * Check for IDLE capability
+             */
+            access.connect(false);
+            final IMAPCapabilities capabilities = (IMAPCapabilities) access.getMailConfig().getCapabilities();
+            if (!capabilities.hasIdle()) {
+                throw PushExceptionCodes.UNEXPECTED_ERROR.create("Primary IMAP account does not support \"IDLE\" capability!");
+            }
+        } finally {
+            if (null != access) {
+                access.close(false);
+            }
+        }
+
+        timerTask = timerService.scheduleAtFixedRate(this, delay, delay);
+    }
+
+    /**
+     * Cancels this IMAP IDLE listener.
+     *
+     * @return <code>true</code> if reconnected; otherwise <code>false</code> if terminated
+     */
+    public synchronized boolean cancel(boolean tryToReconnect) {
+        boolean reconnected = false;
+        try {
+            // Mark as canceled
+            canceled.set(true);
+
+            // Close IMAP resources, too
+            final IMAPFolder imapFolderInUse = this.imapFolderInUse;
+            if (null != imapFolderInUse) {
                 this.imapFolderInUse = null;
                 try {
-                    inbox.close(false);
+                    imapFolderInUse.close(false);
                 } catch (final Exception e) {
                     // Ignore
                 }
             }
-        } catch (final OXException e) {
-            launderOXException(e);
-            // Non-aborting OXException
-            dropSessionRef("MSG".equals(e.getPrefix()) && (1001 == e.getCode() || 1000 == e.getCode()));
-            // Close & sleep
-            closeMailAccess(mailAccess);
-            mailAccess = null;
-            sleep(errDelay, e);
-        } catch (final MessagingException e) {
-            dropSessionRef(e instanceof javax.mail.AuthenticationFailedException);
-            // Close & sleep
-            closeMailAccess(mailAccess);
-            mailAccess = null;
-            sleep(errDelay, e);
-        } catch (final MissingSessionException e) {
-            throw e;
-        } catch (final RuntimeException e) {
-            dropSessionRef(false);
-            // Close & sleep
-            closeMailAccess(mailAccess);
-            mailAccess = null;
-            sleep(errDelay, e);
+
+            // Cancel time task
+            ScheduledTimerTask timerTask = this.timerTask;
+            if (null != timerTask) {
+                this.timerTask = null;
+                timerTask.cancel();
+            }
         } finally {
-            closeMailAccess(mailAccess);
-            mailAccess = null;
-            running.set(false);
-        }
-        return true;
-    }
-
-    private void closeMailAccess(final MailAccess<?, ?> mailAccess) {
-        if (null != mailAccess) {
-            try {
-                mailAccess.close(false);
-            } catch (final Exception x) {
-                // Ignore
+            ImapIdlePushManagerService instance = ImapIdlePushManagerService.getInstance();
+            if (null != instance) {
+                ImapIdlePushListener anotherListener = tryToReconnect ? instance.injectAnotherListenerFor(session) : null;
+                if (null == anotherListener) {
+                    // No other listener available
+                    // Give up lock and return
+                    try {
+                        instance.releaseLock(session);
+                    } catch (Exception e) {
+                        LOGGER.warn("Failed to release lock for user {} in context {}.", session.getUserId(), session.getContextId(), e);
+                    }
+                } else {
+                    try {
+                        anotherListener.start();
+                        reconnected = true;
+                    } catch (Exception e) {
+                        LOGGER.warn("Failed to start new listener for user {} in context {}.", session.getUserId(), session.getContextId(), e);
+                        // Give up lock and return
+                        try {
+                            instance.releaseLock(session);
+                        } catch (Exception x) {
+                            LOGGER.warn("Failed to release DB lock for user {} in context {}.", session.getUserId(), session.getContextId(), x);
+                        }
+                    }
+                }
             }
         }
-    }
-
-    private void sleep(final int errDelay, final Exception e) {
-        if (isDebugEnabled()) {
-            LOG.debug("Interrupted while IDLE'ing: {}, sleeping for {}ms", e.getMessage(), errDelay, e);
-        } else {
-            LOG.debug("Interrupted while IDLE'ing: {}, sleeping for {}ms", e.getMessage(), errDelay);
-        }
-        try {
-            Thread.sleep(errDelay);
-        } catch (final InterruptedException e1) {
-            Thread.currentThread().interrupt();
-            if (isDebugEnabled()) {
-                LOG.error("ERROR in IDLE'ing: {}", e1.getMessage(), e1);
-            }
-        }
+        return reconnected;
     }
 
     private void launderOXException(OXException e) throws OXException {
@@ -691,7 +497,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
             /*
              * Missing mail account; drop listener
              */
-            LOG.debug("Missing (default) mail account for user {}. Stopping obsolete IMAP-IDLE listener.", userId);
+            LOGGER.debug("Missing (default) mail account for user {} in context {}. Stopping obsolete IMAP-IDLE listener.", session.getUserId(), session.getContextId());
             throw e;
         }
         if ("DBP".equals(e.getPrefix())) {
@@ -699,29 +505,28 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         }
     }
 
-    @Override
-    public void notifyNewMail() throws OXException {
-        PushUtility.triggerOSGiEvent(MailFolderUtility.prepareFullname(ACCOUNT_ID, folder), getSession());
+    private static void closeMailAccess(final MailAccess<?, ?> mailAccess) {
+        if (null != mailAccess) {
+            try {
+                mailAccess.close(false);
+            } catch (final Exception x) {
+                // Ignore
+            }
+        }
     }
 
-    private static final class MissingSessionException extends RuntimeException {
-
-        private static final long serialVersionUID = -6008627356112015806L;
-
-        /**
-         * Initializes a new {@link MissingSessionException}.
-         *
-         * @param message The message
-         */
-        public MissingSessionException(final String message) {
-            super(message);
+    private static IMAPFolderStorage getImapFolderStorageFrom(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+        IMailFolderStorage fstore = mailAccess.getFolderStorage();
+        if (!(fstore instanceof IMAPFolderStorage)) {
+            if (!(fstore instanceof IMailFolderStorageDelegator)) {
+                throw PushExceptionCodes.UNEXPECTED_ERROR.create("Unknown MAL implementation: " + fstore.getClass().getName());
+            }
+            fstore = ((IMailFolderStorageDelegator) fstore).getDelegateFolderStorage();
+            if (!(fstore instanceof IMAPFolderStorage)) {
+                throw PushExceptionCodes.UNEXPECTED_ERROR.create("Unknown MAL implementation: " + fstore.getClass().getName());
+            }
         }
-
-        @Override
-        public synchronized Throwable fillInStackTrace() {
-            return this;
-        }
-
+        return (IMAPFolderStorage) fstore;
     }
 
 }

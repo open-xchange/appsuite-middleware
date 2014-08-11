@@ -68,8 +68,6 @@ import java.util.regex.Pattern;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.tika.Tika;
-import org.apache.tika.config.TikaConfig;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
@@ -140,7 +138,6 @@ public class FileResponseRenderer implements ResponseRenderer {
 
     private static final Pattern PATTERN_BYTE_RANGES = Pattern.compile("^bytes=\\d*-\\d*(,\\d*-\\d*)*$");
 
-    private final Tika tika;
     private final AtomicReference<File> tmpDirReference;
 
     /**
@@ -148,7 +145,6 @@ public class FileResponseRenderer implements ResponseRenderer {
      */
     public FileResponseRenderer() {
         super();
-        tika = new Tika(TikaConfig.getDefaultConfig());
         final AtomicReference<File> tmpDirReference = new AtomicReference<File>();
         this.tmpDirReference = tmpDirReference;
         final ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
@@ -673,16 +669,7 @@ public class FileResponseRenderer implements ResponseRenderer {
     }
 
     private String getContentTypeByFileName(final String fileName) {
-        if (null == fileName) {
-            // Not known
-            return null;
-        }
-        final String contentTypeByFileName = MimeType2ExtMap.getContentType(fileName);
-        if (SAVE_AS_TYPE.equals(contentTypeByFileName)) {
-            // Not known
-            return null;
-        }
-        return contentTypeByFileName;
+        return null == fileName ? null : MimeType2ExtMap.getContentType(fileName, null);
     }
 
     private void sendErrorSafe(int sc, String msg, final HttpServletResponse resp) {
@@ -1044,14 +1031,7 @@ public class FileResponseRenderer implements ResponseRenderer {
     }
 
     private String detectMimeType(final InputStream in) throws IOException {
-        if (null == in) {
-            return null;
-        }
-        try {
-            return tika.detect(in);
-        } finally {
-            close(in);
-        }
+        return AJAXUtility.detectMimeType(in);
     }
 
     /**

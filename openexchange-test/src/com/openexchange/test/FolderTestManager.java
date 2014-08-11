@@ -203,16 +203,17 @@ public class FolderTestManager implements TestManager{
      * identifying folders is different for normal folders and mail folders
      */
     private void removeFolderFromCleanupList(final FolderObject folderToDelete) {
-        final LinkedList<FolderObject> createdItemsCopy = new LinkedList<FolderObject>(createdItems);
-        for (final FolderObject folder : createdItemsCopy) {
+        Iterator<FolderObject> it = createdItems.iterator();
+        while (it.hasNext()) {
+            FolderObject folder = it.next();
             // normal folder
             if (folder.getObjectID() == folderToDelete.getObjectID() && !folder.containsFullName() && !folderToDelete.containsFullName()) {
-                createdItems.remove(folder);
+                it.remove();
             }
             // mail folder:
             if (folder.containsFullName() && folderToDelete.containsFullName() && !folder.containsObjectID() && !folderToDelete.containsObjectID() && folder.getFullName().equals(
                 folderToDelete.getFullName())) {
-                createdItemsCopy.remove(folder);
+                it.remove();
             }
         }
     }

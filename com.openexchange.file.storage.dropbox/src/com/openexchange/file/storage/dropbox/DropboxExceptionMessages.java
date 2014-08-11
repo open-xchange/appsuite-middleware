@@ -61,6 +61,9 @@ public final class DropboxExceptionMessages implements LocalizableStrings {
     // A Dropbox error occurred: %1$s
     public static final String DROPBOX_ERROR_MSG = "A Dropbox error occurred: %1$s";
 
+    // A Dropbox error occurred: %1$s
+    public static final String DROPBOX_SERVER_ERROR_MSG = "A Dropbox server error occurred with HTTP status code %1$s. Error message: %2$s";
+
     // Invalid Dropbox URL: %1$s
     public static final String INVALID_DROPBOX_URL_MSG = "The provided Dropbox URL: %1$s is invalid";
 

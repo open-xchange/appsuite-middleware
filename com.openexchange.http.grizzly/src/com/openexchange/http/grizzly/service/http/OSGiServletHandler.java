@@ -93,9 +93,11 @@ package com.openexchange.http.grizzly.service.http;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.EventListener;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -143,7 +145,7 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
     private String servletPath;
 
-    private CopyOnWriteArrayList<Filter> servletFilters;
+    private volatile CopyOnWriteArrayList<Filter> servletFilters;
 
     private FilterChainFactory filterChainFactory;
 
@@ -240,6 +242,41 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
         try {
             filter.init(createFilterConfig(getServletCtx(), name, initParams));
             servletFilters.add(filter);
+        } catch (Exception e) {
+            LOG.error(e.toString(), e);
+        }
+    }
+
+    /**
+     * Updates the chain of Filters this ServletHandler manages.
+     *
+     * @param filtersToRemove The filters to remove
+     * @param filtersToRemove The filters to add
+     */
+    protected void updateFilters(final Collection<Filter> filtersToRemove, final Collection<Filter> filtersToAdd) {
+        try {
+            List<Filter> list = new LinkedList<Filter>(servletFilters);
+            list.removeAll(filtersToRemove);
+
+            for (Filter filter : filtersToAdd) {
+                filter.init(createFilterConfig(getServletCtx(), filter.getClass().getName(), null));
+                list.add(filter);
+            }
+
+            servletFilters = new CopyOnWriteArrayList<Filter>(list);
+        } catch (Exception e) {
+            LOG.error(e.toString(), e);
+        }
+    }
+
+    /**
+     * Removes a filter from the chain of Filters this ServletHandler manages.
+     *
+     * @param filter Instance of the Filter to remove
+     */
+    protected void removeFilter(final Filter filter) {
+        try {
+            servletFilters.remove(filter);
         } catch (Exception e) {
             LOG.error(e.toString(), e);
         }

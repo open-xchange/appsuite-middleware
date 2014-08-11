@@ -2,13 +2,14 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange File Storage Dropbox Bundle
 Bundle-SymbolicName: com.openexchange.file.storage.dropbox
-Bundle-Version: 7.0.0
+Bundle-Version: 7.6.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
  com.openexchange.datatypes.genericonf,
  com.openexchange.exception,
  com.openexchange.file.storage,
+ com.openexchange.file.storage.generic,
  com.openexchange.file.storage.search,
  com.openexchange.groupware,
  com.openexchange.groupware.results,

@@ -68,7 +68,7 @@ public class DefaultAlarmVtodoDate extends SingleXMLPropertyMixin {
 
     @Override
     protected String getValue() {
-    	return "BEGIN:VALARM&#xD;\r\nEND:VALARM&#xD;\r\n";
+        return "";
     }
 
 }

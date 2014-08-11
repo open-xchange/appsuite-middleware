@@ -1002,6 +1002,28 @@ PFILE=/opt/open-xchange/etc/mail.properties
 KEY=com.openexchange.mail.imageHost
 ox_add_property $KEY "" $PFILE
 
+# SoftwareChagne_Request-2110
+ox_add_property html.tag.strike '""' /opt/open-xchange/etc/whitelist.properties
+
+# SoftwareChange_Request-2108
+pfile=/opt/open-xchange/etc/mime.types
+if ! grep vnd.openxmlformats-officedocument.spreadsheetml.template $pfile > /dev/null; then
+   ptmp=${pfile}.$$
+   cp $pfile $ptmp
+   cat<<EOF >> $ptmp
+application/vnd.openxmlformats-officedocument.spreadsheetml.template xltx 
+application/vnd.openxmlformats-officedocument.presentationml.slideshow ppsx 
+application/vnd.openxmlformats-officedocument.presentationml.presentation pptx 
+application/vnd.openxmlformats-officedocument.presentationml.slide sldx 
+application/vnd.ms-excel.addin.macroEnabled.12 xlam 
+application/vnd.ms-excel.sheet.binary.macroEnabled.12 xlsb
+EOF
+   if [ -s $ptmp ]; then
+      cp $ptmp $pfile
+   fi
+   rm -f $ptmp
+fi
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
@@ -1041,6 +1063,8 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Mon Jul 28 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-07-30
 * Mon Jul 21 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-07-28
 * Tue Jul 15 2014 Marcus Klein <marcus.klein@open-xchange.com>

@@ -113,8 +113,10 @@ public class DelegationPreviewService implements Delegating, SimpleRegistryListe
         InputStream is = null;
         try {
             final File file = new File(arg);
+            String name = null;
             if (file.isFile()) {
                 is = new BufferedInputStream(new FileInputStream(new File(arg)), 65536);
+                name = file.getName();
             } else {
                 final URL url = new URL(arg);
                 final URLConnection connection = url.openConnection();
@@ -128,7 +130,7 @@ public class DelegationPreviewService implements Delegating, SimpleRegistryListe
              */
             final PreviewService previewService = getBestFitOrDelegate(toLowerCase(mimeType), output);
             if (previewService == null) {
-                throw PreviewExceptionCodes.NO_PREVIEW_SERVICE.create(null == mimeType ? "" :  mimeType);
+                throw PreviewExceptionCodes.NO_PREVIEW_SERVICE2.create(null == mimeType ? "" :  mimeType, null == name ? "<unknown>" : name);
             }
             return previewService.getPreviewFor(arg, output, session, pages);
         } catch (final IOException e) {
@@ -143,7 +145,8 @@ public class DelegationPreviewService implements Delegating, SimpleRegistryListe
         final String mimeType = documentData.getDataProperties().get(DataProperties.PROPERTY_CONTENT_TYPE);
         final PreviewService previewService = getBestFitOrDelegate(toLowerCase(mimeType), output);
         if (previewService == null) {
-            throw PreviewExceptionCodes.NO_PREVIEW_SERVICE.create(null == mimeType ? "" :  mimeType);
+            String name = documentData.getDataProperties().get(DataProperties.PROPERTY_NAME);
+            throw PreviewExceptionCodes.NO_PREVIEW_SERVICE2.create(null == mimeType ? "" :  mimeType, null == name ? "<unknown>" : name);
         }
         return previewService.getPreviewFor(documentData, output, session, pages);
     }
