@@ -114,9 +114,10 @@ public final class DropboxFolder extends DefaultFileStorageFolder implements Typ
      * Parses specified Dropbox entry.
      *
      * @param entry The Dropbox entry denoting the directory
+     * @param accountDisplayName The account'S display name
      * @throws OXException If parsing Dropbox entry fails
      */
-    public DropboxFolder parseDirEntry(final com.dropbox.client2.DropboxAPI.Entry entry) throws OXException {
+    public DropboxFolder parseDirEntry(final com.dropbox.client2.DropboxAPI.Entry entry, String accountDisplayName) throws OXException {
         if (null != entry) {
             try {
                 final String path = entry.path;
@@ -126,7 +127,7 @@ public final class DropboxFolder extends DefaultFileStorageFolder implements Typ
                         rootFolder = true;
                         id = FileStorageFolder.ROOT_FULLNAME;
                         setParentId(null);
-                        setName(entry.root);
+                        setName(null == accountDisplayName ? entry.root : accountDisplayName);
                     } else {
                         rootFolder = false;
                         final int pos = path.lastIndexOf('/');
