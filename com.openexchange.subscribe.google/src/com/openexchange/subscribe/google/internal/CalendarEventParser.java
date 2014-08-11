@@ -138,7 +138,7 @@ public class CalendarEventParser {
      */
     public void parseCalendarEvent(final Event event, final CalendarDataObject calendarObject) throws OXException {
         calendarObject.setContext(session.getContext());
-        calendarObject.setUid(UUID.randomUUID().toString());// event.getICalUID());
+        calendarObject.setUid(event.getICalUID());
 
         // Common stuff
         if (event.getSummary() != null) {
