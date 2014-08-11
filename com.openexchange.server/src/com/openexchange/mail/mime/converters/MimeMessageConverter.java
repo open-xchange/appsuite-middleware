@@ -665,12 +665,13 @@ public final class MimeMessageConverter {
      */
     public static void saveChanges(final MimeMessage mimeMessage, final String hostName) throws OXException {
         try {
+            String name = "Message-ID";
+            String prevMessageId = mimeMessage.getHeader(name, null);
             saveChanges(mimeMessage);
-            /*
-             * Change Message-Id header appropriately
-             */
-            if (null != hostName) {
-                final String name = "Message-ID";
+            if (null != prevMessageId) {
+                mimeMessage.setHeader(name, prevMessageId);
+            } else if (null != hostName) {
+                // Change Message-Id header appropriately
                 final String messageId = mimeMessage.getHeader(name, null);
                 if (null != messageId) {
                     /*

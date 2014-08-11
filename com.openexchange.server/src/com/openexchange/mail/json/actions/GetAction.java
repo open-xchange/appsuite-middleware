@@ -65,6 +65,7 @@ import org.json.JSONObject;
 import org.json.JSONStringOutputStream;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
+import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -75,6 +76,7 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.CharsetDetector;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
@@ -82,6 +84,7 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailRequest;
+import com.openexchange.mail.json.converters.MailConverter;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeFilter;
@@ -126,7 +129,7 @@ public final class GetAction extends AbstractMailAction {
     }
 
     @Override
-    protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+    protected AJAXRequestResult perform(final MailRequest req) throws OXException, JSONException {
         final JSONArray paths = (JSONArray) req.getRequest().getData();
         if (null == paths) {
             return performGet(req);
@@ -157,7 +160,7 @@ public final class GetAction extends AbstractMailAction {
 
     private static final Pattern SPLIT = Pattern.compile(" *, *");
 
-    private AJAXRequestResult performGet(final MailRequest req) throws OXException {
+    private AJAXRequestResult performGet(final MailRequest req) throws OXException, JSONException {
         try {
             final ServerSession session = req.getSession();
             /*
@@ -201,6 +204,8 @@ public final class GetAction extends AbstractMailAction {
                     mimeFilter = MimeFilter.filterFor(ignorableContentTypes);
                 }
             }
+            tmp = req.getParameter("attach_src");
+            final boolean attachMessageSource = ("1".equals(tmp) || Boolean.parseBoolean(tmp));
             tmp = null;
             /*
              * Warnings container
@@ -275,110 +280,86 @@ public final class GetAction extends AbstractMailAction {
                 /*-
                  * The regular way...
                  */
-                @SuppressWarnings("resource")
-                ThresholdFileHolder fileHolder = new ThresholdFileHolder();
+                ThresholdFileHolder fileHolder = getMimeSource(mail, mimeFilter);
                 try {
-                    mail.writeTo(fileHolder.asOutputStream());
-                } catch (final OXException e) {
-                    if (!MailExceptionCode.NO_CONTENT.equals(e)) {
-                        throw e;
+                    // Proceed
+                    final boolean wasUnseen = (mail.containsPrevSeen() && !mail.isPrevSeen());
+                    final boolean doUnseen = (unseen && wasUnseen);
+                    if (doUnseen) {
+                        mail.setFlag(MailMessage.FLAG_SEEN, false);
+                        final int unreadMsgs = mail.getUnreadMessages();
+                        mail.setUnreadMessages(unreadMsgs < 0 ? 0 : unreadMsgs + 1);
                     }
-                    LOG.debug("", e);
-                    fileHolder = new ThresholdFileHolder();
-                    fileHolder.write(new byte[0]);
-                }
-                // Filter
-                if (null != mimeFilter) {
-                    InputStream is = fileHolder.getStream();
-                    try {
-                        // Store to MIME message
-                        MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession(), is);
-                        // Clean-up
-                        Streams.close(is);
-                        is = null;
-                        fileHolder.close();
-                        // Filter MIME message
-                        MimeMessageConverter.saveChanges(mimeMessage);
-                        mimeMessage = mimeFilter.filter(mimeMessage);
-                        fileHolder = new ThresholdFileHolder();
-                        mimeMessage.writeTo(fileHolder.asOutputStream());
-                    } finally {
-                        Streams.close(is);
-                    }
-                }
-                // Proceed
-                final boolean wasUnseen = (mail.containsPrevSeen() && !mail.isPrevSeen());
-                final boolean doUnseen = (unseen && wasUnseen);
-                if (doUnseen) {
-                    mail.setFlag(MailMessage.FLAG_SEEN, false);
-                    final int unreadMsgs = mail.getUnreadMessages();
-                    mail.setUnreadMessages(unreadMsgs < 0 ? 0 : unreadMsgs + 1);
-                }
-                if (doUnseen) {
-                    /*
-                     * Leave mail as unseen
-                     */
-                    mailInterface.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, false);
-                } else if (wasUnseen) {
-                    /*
-                     * Trigger contact collector
-                     */
-                    try {
-                        final ServerUserSetting setting = ServerUserSetting.getInstance();
-                        final int contextId = session.getContextId();
-                        final int userId = session.getUserId();
-                        if (setting.isContactCollectOnMailAccess(contextId, userId).booleanValue()) {
-                            triggerContactCollector(session, mail);
-                        }
-                    } catch (final OXException e) {
-                        LOG.warn("Contact collector could not be triggered.", e);
-                    }
-                }
-                if (saveToDisk) {
-                    /*
-                     * Create appropriate file holder
-                     */
-                    final AJAXRequestData requestData = req.getRequest();
-                    if (requestData.setResponseHeader("Content-Type", "application/octet-stream")) {
-                        final OutputStream directOutputStream = requestData.optOutputStream();
-                        if (null != directOutputStream) {
-                            // Direct output
-                            final StringBuilder sb = new StringBuilder(64).append("attachment");
-                            {
-                                final String subject = mail.getSubject();
-                                final String fileName = isEmpty(subject) ? "mail.eml" : saneForFileName(subject) + ".eml";
-                                DownloadUtility.appendFilenameParameter(fileName, requestData.getUserAgent(), sb);
+                    if (doUnseen) {
+                        /*
+                         * Leave mail as unseen
+                         */
+                        mailInterface.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, false);
+                    } else if (wasUnseen) {
+                        /*
+                         * Trigger contact collector
+                         */
+                        try {
+                            final ServerUserSetting setting = ServerUserSetting.getInstance();
+                            final int contextId = session.getContextId();
+                            final int userId = session.getUserId();
+                            if (setting.isContactCollectOnMailAccess(contextId, userId).booleanValue()) {
+                                triggerContactCollector(session, mail);
                             }
-                            requestData.setResponseHeader("Content-Disposition",  sb.toString());
-                            requestData.removeCachingHeader();
-                            final InputStream is = fileHolder.getStream();
-                            try {
-                                final int len = 2048;
-                                final byte[] buf = new byte[len];
-                                for (int read; (read = is.read(buf, 0, len)) > 0;) {
-                                    directOutputStream.write(buf, 0, read);
+                        } catch (final OXException e) {
+                            LOG.warn("Contact collector could not be triggered.", e);
+                        }
+                    }
+                    if (saveToDisk) {
+                        /*
+                         * Create appropriate file holder
+                         */
+                        final AJAXRequestData requestData = req.getRequest();
+                        if (requestData.setResponseHeader("Content-Type", "application/octet-stream")) {
+                            final OutputStream directOutputStream = requestData.optOutputStream();
+                            if (null != directOutputStream) {
+                                // Direct output
+                                final StringBuilder sb = new StringBuilder(64).append("attachment");
+                                {
+                                    final String subject = mail.getSubject();
+                                    final String fileName = isEmpty(subject) ? "mail.eml" : saneForFileName(subject) + ".eml";
+                                    DownloadUtility.appendFilenameParameter(fileName, requestData.getUserAgent(), sb);
                                 }
-                            } finally {
-                                Streams.close(is);
+                                requestData.setResponseHeader("Content-Disposition",  sb.toString());
+                                requestData.removeCachingHeader();
+                                final InputStream is = fileHolder.getStream();
+                                try {
+                                    final int len = 2048;
+                                    final byte[] buf = new byte[len];
+                                    for (int read; (read = is.read(buf, 0, len)) > 0;) {
+                                        directOutputStream.write(buf, 0, read);
+                                    }
+                                } finally {
+                                    Streams.close(is);
+                                }
+                                directOutputStream.flush();
+                                return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct");
                             }
-                            directOutputStream.flush();
-                            return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct");
                         }
+                        // As file holder
+                        requestData.setFormat("file");
+                        fileHolder.setContentType("application/octet-stream");
+                        fileHolder.setDelivery("download");
+                        // Set file name
+                        final String subject = mail.getSubject();
+                        fileHolder.setName(new StringBuilder(isEmpty(subject) ? "mail" : saneForFileName(subject)).append(".eml").toString());
+                        IFileHolder temp = fileHolder;
+                        fileHolder = null; // Avoid premature closing
+                        return new AJAXRequestResult(temp, "file");
                     }
-                    // As file holder
-                    requestData.setFormat("file");
-                    fileHolder.setContentType("application/octet-stream");
-                    fileHolder.setDelivery("download");
-                    // Set file name
-                    final String subject = mail.getSubject();
-                    fileHolder.setName(new StringBuilder(isEmpty(subject) ? "mail" : saneForFileName(subject)).append(".eml").toString());
-                    return new AJAXRequestResult(fileHolder, "file");
-                }
-                final ContentType ct = mail.getContentType();
-                if (ct.containsCharsetParameter() && CharsetDetector.isValid(ct.getCharsetParameter())) {
-                    data = new AJAXRequestResult(new String(fileHolder.toByteArray(), ct.getCharsetParameter()), "string");
-                } else {
-                    data = new AJAXRequestResult(new String(fileHolder.toByteArray(), "UTF-8"), "string");
+                    final ContentType ct = mail.getContentType();
+                    if (ct.containsCharsetParameter() && CharsetDetector.isValid(ct.getCharsetParameter())) {
+                        data = new AJAXRequestResult(new String(fileHolder.toByteArray(), ct.getCharsetParameter()), "string");
+                    } else {
+                        data = new AJAXRequestResult(new String(fileHolder.toByteArray(), "UTF-8"), "string");
+                    }
+                } finally {
+                    Streams.close(fileHolder);
                 }
                 // final ContentType rct = new ContentType("text/plain");
                 // if (ct.containsCharsetParameter() && CharsetDetector.isValid(ct.getCharsetParameter())) {
@@ -442,20 +423,47 @@ public final class GetAction extends AbstractMailAction {
                 if (!mail.containsAccountId()) {
                     mail.setAccountId(mailInterface.getAccountID());
                 }
-                final boolean wasUnseen = (unseen ? !mail.isSeen() : mail.containsPrevSeen() && !mail.isPrevSeen());
-                if (wasUnseen) {
-                    try {
-                        final ServerUserSetting setting = ServerUserSetting.getInstance();
-                        final int contextId = session.getContextId();
-                        final int userId = session.getUserId();
-                        if (setting.isContactCollectOnMailAccess(contextId, userId).booleanValue()) {
-                            triggerContactCollector(session, mail);
-                        }
-                    } catch (final OXException e) {
-                        LOG.warn("Contact collector could not be triggered.", e);
+                /*
+                 * Check if source shall be attached
+                 */
+                ThresholdFileHolder fileHolder = null;
+                try {
+                    if (attachMessageSource) {
+                        fileHolder = getMimeSource(mail, mimeFilter);
                     }
+                    /*
+                     * Restore \Seen flag
+                     */
+                    final boolean wasUnseen = (unseen ? !mail.isSeen() : mail.containsPrevSeen() && !mail.isPrevSeen());
+                    if (wasUnseen) {
+                        try {
+                            final ServerUserSetting setting = ServerUserSetting.getInstance();
+                            final int contextId = session.getContextId();
+                            final int userId = session.getUserId();
+                            if (setting.isContactCollectOnMailAccess(contextId, userId).booleanValue()) {
+                                triggerContactCollector(session, mail);
+                            }
+                        } catch (final OXException e) {
+                            LOG.warn("Contact collector could not be triggered.", e);
+                        }
+                    }
+                    /*
+                     * Create result dependent on "attachMessageSource" flag
+                     */
+                    if (null == fileHolder) {
+                        data = new AJAXRequestResult(mail, "mail");
+                    } else {
+                        AJAXRequestResult requestResult = new AJAXRequestResult(mail, "mail");
+                        MailConverter.getInstance().convert2JSON(req.getRequest(), requestResult, session);
+                        JSONObject jMail = (JSONObject) requestResult.getResultObject();
+                        if (null != jMail) {
+                            jMail.put("source", new String(fileHolder.toByteArray(), Charsets.ISO_8859_1));
+                        }
+                        data = requestResult;
+                    }
+                } finally {
+                    Streams.close(fileHolder);
                 }
-                data = new AJAXRequestResult(mail, "mail");
             }
             data.addWarnings(warnings);
             return data;
@@ -485,6 +493,40 @@ public final class GetAction extends AbstractMailAction {
             LogProperties.remove(LogProperties.Name.MAIL_MAIL_ID);
             LogProperties.remove(LogProperties.Name.MAIL_FULL_NAME);
         }
+    }
+
+    private ThresholdFileHolder getMimeSource(final MailMessage mail, final MimeFilter mimeFilter) throws OXException, MessagingException, IOException {
+        ThresholdFileHolder fileHolder = new ThresholdFileHolder();
+        try {
+            mail.writeTo(fileHolder.asOutputStream());
+        } catch (final OXException e) {
+            if (!MailExceptionCode.NO_CONTENT.equals(e)) {
+                throw e;
+            }
+            LOG.debug("", e);
+            fileHolder = new ThresholdFileHolder();
+            fileHolder.write(new byte[0]);
+        }
+        // Filter
+        if (null != mimeFilter) {
+            InputStream is = fileHolder.getStream();
+            try {
+                // Store to MIME message
+                MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession(), is);
+                // Clean-up
+                Streams.close(is);
+                is = null;
+                fileHolder.close();
+                // Filter MIME message
+                MimeMessageConverter.saveChanges(mimeMessage);
+                mimeMessage = mimeFilter.filter(mimeMessage);
+                fileHolder = new ThresholdFileHolder();
+                mimeMessage.writeTo(fileHolder.asOutputStream());
+            } finally {
+                Streams.close(is);
+            }
+        }
+        return fileHolder;
     }
 
     private static final String formatMessageHeaders(final Iterator<Map.Entry<String, String>> iter) {

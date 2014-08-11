@@ -55,9 +55,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
+import com.openexchange.ajax.container.ModifyableFileHolder;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -72,6 +75,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.InterruptibleInputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.preview.ContentTypeChecker;
 import com.openexchange.preview.Delegating;
 import com.openexchange.preview.PreviewDocument;
@@ -243,16 +247,24 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
 
                     // Obtain preview either using running or separate thread
                     PreviewService previewService = ServerServiceRegistry.getInstance().getService(PreviewService.class);
+
+                    // Name-wise MIME type detection
+                    String mimeType = MimeType2ExtMap.getContentType(fileHolder.getName(), null);
+                    if (null == mimeType) {
+                        // Unknown. Then detect MIME type by content.
+                        fileHolder = new ThresholdFileHolder().write(stream).setContentInfo(fileHolder);
+                        mimeType = AJAXUtility.detectMimeType(fileHolder.getStream());
+                    }
+                    fileHolder = new ModifyableFileHolder(fileHolder).setContentType(mimeType);
+
                     boolean useCurrentThread = true;
                     if (previewService instanceof Delegating) {
                         // Determine candidate
-                        {
-                            String mimeType = getContentType(fileHolder, previewService instanceof ContentTypeChecker ? (ContentTypeChecker) previewService : null);
-                            PreviewService candidate = ((Delegating) previewService).getBestFitOrDelegate(mimeType, getOutput());
-                            if (null == candidate) {
-                                throw PreviewExceptionCodes.NO_PREVIEW_SERVICE.create(null == mimeType ? "" :  mimeType);
-                            }
-                            previewService = candidate;
+                        Delegating delegating = (Delegating) previewService;
+                        PreviewService candidate = delegating.getBestFitOrDelegate(mimeType, getOutput());
+                        if (null == candidate) {
+                            String name = fileHolder.getName();
+                            throw PreviewExceptionCodes.NO_PREVIEW_SERVICE2.create(null == mimeType ? "" :  mimeType, null == name ? "<unknown>" : name);
                         }
 
                         // Check for possible RemoteInternalPreviewService instance

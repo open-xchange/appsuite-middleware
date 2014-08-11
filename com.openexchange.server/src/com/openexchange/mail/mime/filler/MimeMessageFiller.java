@@ -704,7 +704,7 @@ public class MimeMessageFiller {
             return true;
         }
         final String lc = toLowerCase(headerName);
-        return "references".equals(lc) || "in-reply-to".equals(lc);
+        return "references".equals(lc) || "in-reply-to".equals(lc) || "message-id".equals(lc);
     }
 
     /**

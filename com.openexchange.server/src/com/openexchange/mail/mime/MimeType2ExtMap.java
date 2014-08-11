@@ -274,24 +274,32 @@ public final class MimeType2ExtMap {
      * @return The MIME type associated with given file name or <code>application/octet-stream</code> if none found
      */
     public static String getContentType(final String fileName) {
+        return getContentType(fileName, MIME_APPL_OCTET);
+    }
+
+    /**
+     * Gets the MIME type associated with given file name.
+     *
+     * @param fileName The file name; e.g. <code>"file.html"</code>
+     * @param fallBack The fall-back value to return in case file extension is unknown
+     * @return The MIME type associated with given <code>fallBack</code> if none found
+     */
+    public static String getContentType(final String fileName, final String fallBack) {
         init();
         if (Strings.isEmpty(fileName)) {
-            return MIME_APPL_OCTET;
+            return fallBack;
         }
         final String fn = Strings.unquote(fileName);
         final int pos = fn.lastIndexOf('.');
         if (pos < 0) {
-            return MIME_APPL_OCTET;
+            return fallBack;
         }
         final String s1 = fn.substring(pos + 1);
         if (s1.length() == 0) {
-            return MIME_APPL_OCTET;
+            return fallBack;
         }
         final String type = typeMap.get(toLowerCase(s1));
-        if (null == type) {
-            return MIME_APPL_OCTET;
-        }
-        return type;
+        return null == type ? fallBack : type;
     }
 
     /**
