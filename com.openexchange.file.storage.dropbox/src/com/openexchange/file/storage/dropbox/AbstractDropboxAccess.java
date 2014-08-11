@@ -51,7 +51,6 @@ package com.openexchange.file.storage.dropbox;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.regex.Pattern;
 import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.exception.DropboxServerException;
 import com.dropbox.client2.session.WebAuthSession;
@@ -96,42 +95,6 @@ public abstract class AbstractDropboxAccess {
      */
     public String getDropboxUserName() {
         return dropboxUserName;
-    }
-
-    private static final Pattern P_SLASH = Pattern.compile("%2F", Pattern.LITERAL);
-
-    /**
-     * URL-encodes given identifier
-     *
-     * @param identifier The identifier to encode
-     * @return The encoded identifier
-     */
-    protected static String urlEncode(String identifier) {
-        try {
-            String result = P_SLASH.matcher(URLEncoder.encode(identifier, "UTF-8")).replaceAll("/");
-            int length = result.length();
-            StringBuilder sb = new StringBuilder(length + 16);
-            for (int i = 0; i < length; i++) {
-                char c = result.charAt(i);
-                switch (c) {
-                case '*':
-                    sb.append("%2A");
-                    break;
-                case '+':
-                    sb.append("%20");
-                    break;
-                case ' ':
-                    sb.append("%20");
-                    break;
-                default:
-                    sb.append(c);
-                    break;
-                }
-            }
-            return sb.toString();
-        } catch (UnsupportedEncodingException e) {
-            return identifier;
-        }
     }
 
     /**
