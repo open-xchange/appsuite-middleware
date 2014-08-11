@@ -315,6 +315,21 @@ public final class MimeType2ExtMap {
         final String type = typeMap.get(toLowerCase(s1));
         return null == type ? fallBack : type;
     }
+    
+    /**
+     * Gets the MIME type associated with given file extension.
+     * 
+     * <p>
+     * This is a convenience method that invokes {@link #getContentTypeByExtension(String, String)} with latter argument set to <code>"application/octet-stream"</code>.
+     *
+     * @param extension The file extension; e.g. <code>"txt"</code>
+     * @param fallBack The fall-back value to return in case file extension is unknown
+     * @return The MIME type associated with given file extension or <code>application/octet-stream</code> if none found
+     * @see #getContentTypeByExtension(String, String)
+     */
+    public static String getContentTypeByExtension(String extension) {
+        return getContentTypeByExtension(extension, MIME_APPL_OCTET);
+    }
 
     /**
      * Gets the MIME type associated with given file extension.
