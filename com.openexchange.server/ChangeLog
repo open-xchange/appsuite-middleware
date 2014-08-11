@@ -45,6 +45,7 @@
  - Fix for bug 33857: Do not log a warning in case Content-Type misses any charset information; just detect it and continue
  - Fix for bug 33715: Accept new parameter "attach_src" for action=get request to let the client signal RFC822 source is supposed to be
                       attached to generated JSON mail representation
+ - Fix for bug 33850: Keep "Message-Id" header on message transport
 
 * 2014-07-31 - thorben.betten@open-xchange.com
 
