@@ -141,9 +141,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             if (404 == e.error) {
                 return false;
             }
-            com.dropbox.client2.exception.DropboxServerException.Error body = e.body;
-            int error = e.error;
-            throw DropboxExceptionCodes.DROPBOX_SERVER_ERROR.create(e, Integer.valueOf(error), null == body.userError ? body.error : body.userError);
+            throw handleServerError(null, e);
         } catch (final DropboxException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
