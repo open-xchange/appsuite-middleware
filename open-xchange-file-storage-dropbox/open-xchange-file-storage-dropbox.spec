@@ -5,6 +5,7 @@ BuildArch:      noarch
 BuildRequires:  ant
 BuildRequires:  ant-nodeps
 BuildRequires:  open-xchange-core
+BuildRequires:  open-xchange-oauth
 BuildRequires:  java-devel >= 1.6.0
 Version:        @OXVERSION@
 %define         ox_release 0
