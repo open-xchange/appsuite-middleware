@@ -248,7 +248,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     @Override
     public InputStream getThumbnailStream(String folderId, String id, String version) throws OXException {
         try {
-            return dropboxAPI.getThumbnailStream(id, ThumbSize.ICON_256x256, ThumbFormat.JPEG);
+            return dropboxAPI.getThumbnailStream(id, ThumbSize.ICON_128x128, ThumbFormat.JPEG);
         } catch (final DropboxServerException e) {
             if (404 == e.error) {
                 throw DropboxExceptionCodes.NOT_FOUND.create(e, id);
