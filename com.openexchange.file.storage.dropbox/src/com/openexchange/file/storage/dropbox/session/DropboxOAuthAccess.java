@@ -172,7 +172,7 @@ public final class DropboxOAuthAccess {
         } catch (org.scribe.exceptions.OAuthException e) {
             throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (DropboxUnlinkedException e) {
-            throw DropboxExceptionCodes.UNLINKED_ERROR.create();
+            throw DropboxExceptionCodes.UNLINKED_ERROR.create(e, new Object[0]);
         } catch (DropboxServerException e) {
             com.dropbox.client2.exception.DropboxServerException.Error body = e.body;
             int error = e.error;
