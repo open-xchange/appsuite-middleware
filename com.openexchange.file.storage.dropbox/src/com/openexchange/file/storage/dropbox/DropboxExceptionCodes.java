@@ -81,7 +81,7 @@ public enum DropboxExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * The Dropbox resource does not exist: %1$s
      */
-    NOT_FOUND("he Dropbox resource does not exist: %1$s", DropboxExceptionMessages.NOT_FOUND_MSG, Category.CATEGORY_ERROR, 5),
+    NOT_FOUND("The Dropbox resource does not exist: %1$s", DropboxExceptionMessages.NOT_FOUND_MSG, Category.CATEGORY_ERROR, 5),
     /**
      * Update denied for Dropbox resource: %1$s
      */
