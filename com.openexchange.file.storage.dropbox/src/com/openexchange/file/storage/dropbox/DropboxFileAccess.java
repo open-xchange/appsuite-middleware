@@ -229,11 +229,15 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     public IDTuple move(IDTuple source, String destFolder, long sequenceNumber, File update, List<File.Field> modifiedFields) throws OXException {
         final String id = source.getId();
         try {
-            final String name = null != update && null != modifiedFields && modifiedFields.contains(Field.FILENAME) ?
-                update.getFileName() : id.substring(id.lastIndexOf('/') + 1);
-            final String destPath = toPath(destFolder);
-            final int pos = destPath.lastIndexOf('/');
-            final Entry entry = dropboxAPI.move(id, pos > 0 ? new StringBuilder(destPath).append('/').append(name).toString() : name);
+            String name = null != update && null != modifiedFields && modifiedFields.contains(Field.FILENAME) ? update.getFileName() : id.substring(id.lastIndexOf('/') + 1);
+            String destPath = toPath(destFolder);
+            if (!destPath.endsWith("/")) {
+                destPath = new StringBuilder(destPath.length() + 1).append(destPath).append('/').toString();
+            }
+
+            int pos = destPath.lastIndexOf('/');
+            Entry entry = dropboxAPI.move(id, pos > 0 ? new StringBuilder(destPath).append('/').append(name).toString() : new StringBuilder(name.length() + 1).append('/').append(name).toString());
+
             return new IDTuple(entry.parentPath(), entry.path);
         } catch (final DropboxServerException e) {
             throw handleServerError(id, e);
