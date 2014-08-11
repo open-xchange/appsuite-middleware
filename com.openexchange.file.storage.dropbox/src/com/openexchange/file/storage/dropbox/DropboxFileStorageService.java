@@ -187,7 +187,9 @@ public final class DropboxFileStorageService implements AccountAware, OAuthUtili
 
             for (FileStorageAccount deleteMe : toDelete) {
                 accountManager.deleteAccount(deleteMe, session);
+                LOG.info("Deleted Dropbox account with ID {} as OAuth account {} was deleted for user {} in context {}", deleteMe.getId(), oauthAccountId, user, cid);
             }
+
         } catch (Exception e) {
             LOG.warn("Could not delete possibly existing Dropbox accounts associated with deleted OAuth account {} for user {} in context {}", oauthAccountId, user, cid, e);
         }
