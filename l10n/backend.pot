@@ -5849,6 +5849,11 @@ msgstr ""
 msgid "Weekday"
 msgstr ""
 
+#. Display name of the anonymous guest user.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Users.java:69
+msgid "Guest"
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/importexport/csv/CsvExceptionMessages.java:57
 msgid "Broken CSV file."
 msgstr ""
