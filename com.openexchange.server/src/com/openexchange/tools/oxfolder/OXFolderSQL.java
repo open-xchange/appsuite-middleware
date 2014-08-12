@@ -71,8 +71,6 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import org.json.JSONException;
 import org.json.JSONInputStream;
 import org.json.JSONObject;
@@ -1934,67 +1932,6 @@ public final class OXFolderSQL {
             if (closeWriteCon) {
                 DBPool.closeWriterSilent(ctx, writeCon);
             }
-        }
-    }
-
-    private static final Lock NEXTSERIAL_LOCK = new ReentrantLock();
-
-    /**
-     * Fetches an unique id from underlying storage. NOTE: This method assumes that given writable connection is set to auto-commit! In any
-     * case the <code>commit()</code> will be invoked, so any surrounding BEGIN-COMMIT mechanisms will be canceled.
-     *
-     * @param ctx The context
-     * @param callWriteConArg A writable connection
-     * @return A unique folder id from underlying storage
-     * @throws SQLException If a SQL error occurs
-     * @throws OXException If writable connection cannot be obtained from/put back into pool
-     */
-    public static int getNextSerial(final Context ctx, final Connection callWriteConArg) throws SQLException, OXException {
-        NEXTSERIAL_LOCK.lock();
-        try {
-            Connection callWriteCon = callWriteConArg;
-            boolean closeCon = false;
-            boolean isAuto = false;
-            try {
-                try {
-                    if (callWriteCon == null) {
-                        callWriteCon = DBPool.pickupWriteable(ctx);
-                        closeCon = true;
-                    }
-                    isAuto = callWriteCon.getAutoCommit();
-                    if (isAuto) {
-                        callWriteCon.setAutoCommit(false); // BEGIN
-                    } else {
-                        /*
-                         * Commit connection to ensure an unique ID is going to be returned
-                         */
-                        callWriteCon.commit();
-                    }
-                    final int id = IDGenerator.getId(ctx, Types.FOLDER, callWriteCon);
-                    if (isAuto) {
-                        callWriteCon.commit(); // COMMIT
-                        callWriteCon.setAutoCommit(true);
-                    } else {
-                        /*
-                         * Commit connection to ensure an unique ID is going to be returned
-                         */
-                        callWriteCon.commit();
-                    }
-                    return id;
-                } finally {
-                    if (closeCon && callWriteCon != null) {
-                        DBPool.pushWrite(ctx, callWriteCon);
-                    }
-                }
-            } catch (final OXException e) {
-                if (isAuto && callWriteCon != null) {
-                    callWriteCon.rollback(); // ROLLBACK
-                    callWriteCon.setAutoCommit(true);
-                }
-                throw e;
-            }
-        } finally {
-            NEXTSERIAL_LOCK.unlock();
         }
     }
 
