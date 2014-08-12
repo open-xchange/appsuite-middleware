@@ -49,6 +49,9 @@
 
 package com.openexchange.subscribe.google;
 
+import static com.openexchange.subscribe.google.utility.AssertField.assertFieldIsNull;
+import static com.openexchange.subscribe.google.utility.AssertField.assertFieldNotNull;
+import static com.openexchange.subscribe.google.utility.AssertField.assertNotNullAndEquals;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
@@ -112,9 +115,9 @@ public class GoogleCalendarTest extends AbstractGoogleTest {
                 }
             }
 
-            assertTrue(successSingleAppointment);
-            assertTrue(successAllDayAppointment);
-            assertTrue(successRecurrenceAppointment);
+            assertTrue("Appointment: " + singleAppointment + " not found", successSingleAppointment);
+            assertTrue("Appointment: " + successAllDayAppointment + " not found", successAllDayAppointment);
+            assertTrue("Appointment: " + recurrenceAppointment + " not found", successRecurrenceAppointment);
         } catch(OXException e) {
             assertFalse(e.getMessage() ,true);
         }
@@ -122,7 +125,7 @@ public class GoogleCalendarTest extends AbstractGoogleTest {
 
     private void testSingleAppointment(CalendarDataObject co) {
         assertNotNullAndEquals("context", 1, co.getContext().getContextId());
-        assertNotNull("user id", 1, co.getUid());
+        assertFieldNotNull("user id", 1, co.getUid());
         assertNotNullAndEquals("location", "Olpe, Deutschland" , co.getLocation());
         assertNotNullAndEquals("note", "Single appointment - only organizer - 29 Jan 2014 \n\nSome text..." , co.getNote());
         assertNotNullAndEquals("start date", getDateTime(29, 1, 2014, 13, 30), co.getStartDate());
@@ -155,7 +158,7 @@ public class GoogleCalendarTest extends AbstractGoogleTest {
 
     private void testAllDayAppointment(CalendarDataObject co) {
         assertNotNullAndEquals("context", 1, co.getContext().getContextId());
-        assertNotNull("user id", 1, co.getUid());
+        assertFieldNotNull("user id", 1, co.getUid());
         assertNotNullAndEquals("location", "Bremen, Deutschland" , co.getLocation());
         assertNotNullAndEquals("note", "All day appointment - only organizer - 30 Jan 2014" , co.getNote());
         assertNotNullAndEquals("start date", getDateTime(28, 1, 2014, 1, 0), co.getStartDate());
@@ -172,7 +175,7 @@ public class GoogleCalendarTest extends AbstractGoogleTest {
 
     private void testRecurrenceAppointment(CalendarDataObject co) {
         assertNotNullAndEquals("context", 1, co.getContext().getContextId());
-        assertNotNull("user id", 1, co.getUid());
+        assertFieldNotNull("user id", 1, co.getUid());
         assertNotNullAndEquals("location", "Köln" , co.getLocation());
         assertNotNullAndEquals("note", "Appointment (with recurrence workday) with organizer 27 Jan 2014 - 14 March 2014" , co.getNote());
         assertNotNullAndEquals("start date", getDateTime(27, 1, 2014, 15, 30), co.getStartDate());
@@ -255,6 +258,5 @@ public class GoogleCalendarTest extends AbstractGoogleTest {
         PowerMockito.mockStatic(com.openexchange.subscribe.google.osgi.Services.class);
         PowerMockito.doReturn(simUser).when(com.openexchange.subscribe.google.osgi.Services.class, "getService", Matchers.any(UserService.class));
     }
-
 
 }

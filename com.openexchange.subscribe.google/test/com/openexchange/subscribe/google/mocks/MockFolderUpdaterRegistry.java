@@ -47,35 +47,33 @@
  *
  */
 
-package com.openexchange.subscribe.google;
+package com.openexchange.subscribe.google.mocks;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.generic.FolderUpdaterRegistry;
+import com.openexchange.groupware.generic.FolderUpdaterService;
+import com.openexchange.groupware.generic.TargetFolderDefinition;
 
 
 /**
- * {@link MockServiceLookup}
+ * {@link MockFolderUpdaterRegistry}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
+ * @since v7.6.1
  */
-public class MockServiceLookup implements ServiceLookup {
+public class MockFolderUpdaterRegistry<T> implements FolderUpdaterRegistry {
 
-    private final ConfigurationService csService;
-
-    public MockServiceLookup(final ConfigurationService csService) {
-        super();
-        this.csService = csService;
+    private FolderUpdaterService<T> fus;
+    /**
+     * Initializes a new {@link MockFolderUpdaterRegistry}.
+     */
+    public MockFolderUpdaterRegistry(FolderUpdaterService<T> fus) {
+        this.fus = fus;
     }
 
     @Override
-    public <S> S getService(final Class<? extends S> clazz) {
-        return (S) csService;
-    }
-
-    @Override
-    public <S> S getOptionalService(final Class<? extends S> clazz) {
-        // Nothing to do
-        return null;
+    public <T> FolderUpdaterService<T> getFolderUpdater(TargetFolderDefinition target) throws OXException {
+        return (FolderUpdaterService<T>) fus;
     }
 
 }

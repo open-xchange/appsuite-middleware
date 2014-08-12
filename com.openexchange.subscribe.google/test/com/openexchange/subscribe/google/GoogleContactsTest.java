@@ -49,6 +49,8 @@
 
 package com.openexchange.subscribe.google;
 
+import static com.openexchange.subscribe.google.utility.AssertField.assertFieldIsNull;
+import static com.openexchange.subscribe.google.utility.AssertField.assertNotNullAndEquals;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.LinkedList;
@@ -95,8 +97,8 @@ public class GoogleContactsTest extends AbstractGoogleTest {
                         assertNotNullAndEquals("suffix", "Ende", c.getSuffix());
 
                         //email
-                        assertNotNullAndEquals("email1", "business@example.com", c.getEmail1());
-                        assertNotNullAndEquals("email2", "privat@example.com", c.getEmail2());
+                        assertNotNullAndEquals("email1", "privat@example.com", c.getEmail1());
+                        assertNotNullAndEquals("email2", "business@example.com", c.getEmail2());
                         assertNotNullAndEquals("email3", "other@example.com", c.getEmail3());
 
                         //organisation
@@ -151,7 +153,6 @@ public class GoogleContactsTest extends AbstractGoogleTest {
 
                         //email
                         assertNotNullAndEquals("email1", "mariameier@example.com", c.getEmail1());
-                        //TODO: currently here will apper the mariameier@example again, because it is the primary mail and home mail...
                         assertFieldIsNull("email2", c.getEmail2());
                         assertFieldIsNull("email3", c.getEmail3());
 
@@ -196,7 +197,7 @@ public class GoogleContactsTest extends AbstractGoogleTest {
                         assertNotNullAndEquals("suffix", "Mail", c.getSuffix());
 
                         //email
-                        assertNotNullAndEquals("email1",  "noprimarybuthomeaddress@example.com", c.getEmail1());
+                        assertNotNullAndEquals("email1", "noprimarybuthomeaddress@example.com" ,c.getEmail1());
                         assertFieldIsNull("email2", c.getEmail2());
                         assertFieldIsNull("email3", c.getEmail3());
 
@@ -232,7 +233,7 @@ public class GoogleContactsTest extends AbstractGoogleTest {
 
                         assertFieldIsNull("Image does not equals", c.getImage1());
                         assertFieldIsNull("content type", c.getImageContentType());
-                        testAccount2Success = true;
+                        testAccount3Success = true;
                     }
 
                 if(testAccount1Success && testAccount2Success && testAccount3Success) {
