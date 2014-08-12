@@ -57,6 +57,7 @@ import com.openexchange.contact.ContactService;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareService;
@@ -98,6 +99,7 @@ public class ShareActivator extends HousekeepingActivator {
          * register share crypto service based on underyling crypto service
          */
         final ShareActivator serviceLookup = this;
+        final DefaultShareService shareService = new DefaultShareService(serviceLookup);
         track(CryptoService.class, new ServiceTrackerCustomizer<CryptoService, CryptoService>() {
 
             private volatile ServiceRegistration<ShareCryptoService> cryptoRegistration;
@@ -111,7 +113,7 @@ public class ShareActivator extends HousekeepingActivator {
                 ShareCryptoServiceImpl shareCryptoService = new ShareCryptoServiceImpl(service, cryptKey);
                 serviceLookup.addService(ShareCryptoService.class, shareCryptoService);
                 cryptoRegistration = context.registerService(ShareCryptoService.class, shareCryptoService, null);
-                shareRegistration = context.registerService(ShareService.class, new DefaultShareService(serviceLookup), null);
+                shareRegistration = context.registerService(ShareService.class, shareService, null);
                 return service;
             }
 
@@ -136,6 +138,9 @@ public class ShareActivator extends HousekeepingActivator {
                 context.ungetService(serviceReference);
             }
         });
+        
+        track(ManagementService.class, new ManagementServiceTracker(context, shareService));
+        
         openTrackers();
     }
 
