@@ -139,7 +139,7 @@ public class CalendarEventParser {
      */
     public void parseCalendarEvent(final Event event, final CalendarDataObject calendarObject) throws OXException {
         calendarObject.setContext(session.getContext());
-        calendarObject.setUid(event.getICalUID());
+        calendarObject.setUid(UUID.randomUUID().toString());//event.getICalUID());
 
         // Common stuff
         if (event.getSummary() != null) {
@@ -205,7 +205,10 @@ public class CalendarEventParser {
         // Set recurrences
         final List<String> recurrence = event.getRecurrence();
         if (recurrence != null && recurrence.size() > 0) {
+            // Recurrence string is the first element
             handleRecurrence(recurrence.get(0), calendarObject);
+        } else if (event.getRecurringEventId() != null) { // Series exception
+            //calendarObject.setE
         }
 
         // Participants and confirmations
@@ -285,10 +288,7 @@ public class CalendarEventParser {
         calendarObject.setParticipants(participants);
     }
 
-    /**
-     * @param recurrence
-     */
-    private void handleRecurrence(final String recurrence, final CalendarDataObject calendarObject) {
+    private void handleRecurrence(final String recurrence, final CalendarDataObject calendarObject) throws OXException {
         try {
             final RRule r = new RRule(recurrence);
 
@@ -316,7 +316,6 @@ public class CalendarEventParser {
                     days |= w.wday.javaDayNum;
                 }
                 calendarObject.setDays(days);
-
             } else if (calendarObject.getRecurrenceType() == CalendarDataObject.MONTHLY) {
                 // MONTHLY
                 final List<WeekdayNum> weekdays = r.getByDay();
