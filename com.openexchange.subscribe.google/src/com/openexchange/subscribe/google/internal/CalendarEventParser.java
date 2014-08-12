@@ -75,6 +75,7 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmStatus;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.google.osgi.Services;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
@@ -345,7 +346,7 @@ public class CalendarEventParser {
                 calendarObject.setOccurrence(r.getCount());
             }
         } catch (ParseException e) {
-            e.printStackTrace();
+            throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 }
