@@ -60,6 +60,7 @@ import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.Header;
+import com.openexchange.folder.json.FolderField;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Strings;
 import com.openexchange.server.impl.OCLPermission;
@@ -95,8 +96,23 @@ abstract class AbstractFolderRequest<T extends AbstractAJAXResponse> implements 
         final JSONArray jsonPerms = new JSONArray();
         for (final OCLPermission perm : folder.getPermissions()) {
             final JSONObject jsonPermission = new JSONObject();
-            jsonPermission.put(FolderFields.ENTITY, perm.getEntity());
-            jsonPermission.put(FolderFields.GROUP, perm.isGroupPermission());
+            if (OCLGuestPermission.class.isInstance(perm)) {
+                OCLGuestPermission guestPerm = (OCLGuestPermission) perm;
+                if (null != guestPerm.getAuthenticationMode()) {
+                    jsonPermission.put(FolderField.GUEST_AUTH.getName(), guestPerm.getAuthenticationMode().toString());
+                }
+                jsonPermission.putOpt(FolderField.MAIL_ADDRESS.getName(), guestPerm.getEmailAddress());
+                jsonPermission.putOpt(FolderField.PASSWORD.getName(), guestPerm.getPassword());
+                jsonPermission.putOpt(FolderField.DISPLAY_NAME.getName(), guestPerm.getDisplayName());
+                jsonPermission.putOpt(FolderField.CONTACT_FOLDER_ID.getName(), guestPerm.getContactFolderID());
+                jsonPermission.putOpt(FolderField.CONTACT_ID.getName(), guestPerm.getContactID());
+                if (null != guestPerm.getExpires()) {
+                    jsonPermission.put(FolderField.EXPIRES.getName(), guestPerm.getExpires().getTime());
+                }
+            } else {
+                jsonPermission.put(FolderFields.ENTITY, perm.getEntity());
+                jsonPermission.put(FolderFields.GROUP, perm.isGroupPermission());
+            }
             jsonPermission.put(FolderFields.BITS, FolderTest.createPermissionBits(
                 perm.getFolderPermission(),
                 perm.getReadPermission(),

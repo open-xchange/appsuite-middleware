@@ -136,6 +136,8 @@ public class ShareServlet extends HttpServlet {
             LoginServlet.writeSecretCookie(request, response, session, session.getHash(), request.isSecure(), request.getServerName(),
                 LoginServlet.getLoginConfiguration());
             response.addCookie(new Cookie("sessionid", session.getSessionID()));
+            response.addCookie(new Cookie("JSESSIONID", request.getSession().getId()));
+
             /*
              * construct redirect URL
              */
@@ -235,7 +237,7 @@ public class ShareServlet extends HttpServlet {
      * @return The redirect URL
      */
     private static String getRedirectURL(Session session, User user, Share share) {
-        boolean ox6 = false;
+        boolean ox6 = true;
 
         StringBuilder stringBuilder = new StringBuilder();
         if (ox6) {
