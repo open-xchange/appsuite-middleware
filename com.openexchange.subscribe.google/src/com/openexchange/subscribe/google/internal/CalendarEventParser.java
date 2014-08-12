@@ -55,7 +55,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-import java.util.UUID;
 import org.slf4j.Logger;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
@@ -209,7 +208,7 @@ public class CalendarEventParser {
             handleRecurrence(recurrence.get(0), calendarObject);
         } else if (event.getRecurringEventId() != null) { // Series exception
             //calendarObject.setE
-            
+
         }
 
         // Participants and confirmations
