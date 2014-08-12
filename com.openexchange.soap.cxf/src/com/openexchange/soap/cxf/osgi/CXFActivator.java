@@ -195,7 +195,7 @@ public class CXFActivator extends HousekeepingActivator {
                                         httpService.registerServlet(servletAlias, cxfServlet, config, null);
                                         log.info("Registered CXF Servlet under: {}", alias2);
                                     } catch (MalformedURLException e) {
-                                        throw new IllegalStateException("Invalid URL specified in property \"com.openexchange.soap.cxf.baseAddress\".", e);
+                                        throw new IllegalStateException("Invalid URL specified in property \"com.openexchange.soap.cxf.baseAddress\": \"" + baseAddress + "\"", e);
                                     }
                                 }
                                 servletRegistered = true;
