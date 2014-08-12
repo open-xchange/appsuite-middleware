@@ -1750,7 +1750,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         } else {
             permissions = new ArrayList<OCLPermission>(virtualPerms.length);
             for (OCLPermission permission : virtualPerms) {
-                if (virtualPerms != null) {
+                if (permission != null) {
                     permissions.add(permission);
                 }
             }
@@ -1800,7 +1800,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         } else {
             permissions = new ArrayList<OCLPermission>(virtualPerms.length);
             for (OCLPermission permission : virtualPerms) {
-                if (virtualPerms != null) {
+                if (permission != null) {
                     permissions.add(permission);
                 }
             }
