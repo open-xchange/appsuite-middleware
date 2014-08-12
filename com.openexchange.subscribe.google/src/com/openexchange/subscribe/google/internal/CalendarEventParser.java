@@ -150,7 +150,7 @@ public class CalendarEventParser {
         if (event.getDescription() != null) {
             calendarObject.setNote(event.getDescription());
         }
-
+        
         // Start, end and creation time
         if (event.getStart() != null) {
             final EventDateTime eventDateTime = event.getStart();
@@ -206,7 +206,6 @@ public class CalendarEventParser {
             handleRecurrence(recurrence.get(0), calendarObject);
         } else if (event.getRecurringEventId() != null) { // Series exception
             //calendarObject.setE
-
         }
 
         // Participants and confirmations

@@ -51,8 +51,11 @@ package com.openexchange.subscribe.google;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
@@ -152,6 +155,7 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
                         if (!seriesExceptions.isEmpty()) {
                             singleAppointments.addAll(seriesExceptions);
                         }
+                        folderUpdater.save(new SearchIteratorDelegator<CalendarObject>(singleAppointments), subscription);
                         return null;
                     }
                 });
@@ -172,17 +176,27 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
                     Events e;
                     List<CalendarObject> appointments = new LinkedList<CalendarObject>();
                     do {
-                        e = googleCalendarService.events().list(calendarId).setOauthToken(accessToken).setMaxResults(pageSize).setPageToken(nextPageToken).execute();
+                        e = googleCalendarService.events().list(calendarId).setOauthToken(accessToken).setMaxResults(pageSize).setPageToken(
+                            nextPageToken).execute();
                         parseAndAdd(e, parser, appointments, series, seriesExceptions);
+                        folderUpdater.save(new SearchIteratorDelegator<CalendarObject>(appointments), subscription);
                     } while ((nextPageToken = e.getNextPageToken()) != null);
-                    
+
                     if (!series.isEmpty()) {
-                        appointments.addAll(series);
+                        folderUpdater.save(new SearchIteratorDelegator<CalendarObject>(series), subscription);
+                        final Map<String, CalendarObject> exceptionMap = new HashMap<String, CalendarObject>();
+                        for (CalendarObject co : series) {
+                            exceptionMap.put(co.getExtendedProperties().get("iCalUID").toString(), co);
+                        }
                         if (!seriesExceptions.isEmpty()) {
-                            appointments.addAll(seriesExceptions);
+                            for (CalendarObject co : seriesExceptions) {
+                                CalendarObject cdo = exceptionMap.get(co.getExtendedProperties().get("iCalUID"));
+                                co.setChangeExceptions(Collections.singletonList(co.getStartDate()));
+                                co.setRecurrenceID(cdo.getRecurrenceID());
+                            }
+                            folderUpdater.save(new SearchIteratorDelegator<CalendarObject>(seriesExceptions), subscription);
                         }
                     }
-                    folderUpdater.save(new SearchIteratorDelegator<CalendarObject>(appointments), subscription);
 
                     return null;
                 }
@@ -194,12 +208,18 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
     }
 
     protected void parseAndAdd(final Events events, final CalendarEventParser parser, final List<CalendarObject> singleAppointments, final List<CalendarObject> series, final List<CalendarObject> seriesExceptions) throws OXException {
+        final Map<String, CalendarDataObject> exceptionMap = new HashMap<String, CalendarDataObject>();
+
         for (Event event : events.getItems()) {
             final CalendarDataObject calendarObject = new CalendarDataObject();
             parser.parseCalendarEvent(event, calendarObject);
+            calendarObject.addExtendedProperty("iCalUID", event.getICalUID());
             if (event.getRecurrence() != null) {
                 series.add(calendarObject);
+                exceptionMap.put(event.getICalUID(), calendarObject);
             } else if (event.getRecurringEventId() != null) {
+                CalendarDataObject cdo = exceptionMap.get(event.getICalUID());
+                cdo.addChangeException(calendarObject.getStartDate());
                 seriesExceptions.add(calendarObject);
             } else {
                 singleAppointments.add(calendarObject);
