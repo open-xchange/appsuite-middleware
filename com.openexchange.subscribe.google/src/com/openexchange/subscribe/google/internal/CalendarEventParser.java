@@ -184,6 +184,7 @@ public class CalendarEventParser {
             calendarObject.setCreationDate(new Date(dateTime.getValue()));
         }
 
+        // Set creator and organizer
         if (event.getCreator() != null) {
             Creator creator = event.getCreator();
             Boolean isSelf = creator.getSelf();
@@ -191,7 +192,12 @@ public class CalendarEventParser {
                 calendarObject.setCreatedBy(session.getUserId());
             }
         }
-
+        
+        if (event.getOrganizer().isSelf()) {
+            calendarObject.setOrganizerId(session.getUserId());
+        }
+        calendarObject.setOrganizer(event.getOrganizer().getEmail());
+        
         // We only support one reminder per calendar Object, thus the first one of the event
         final Reminders reminders = event.getReminders();
         if (reminders.getOverrides() != null && reminders.getOverrides().size() > 0) {
