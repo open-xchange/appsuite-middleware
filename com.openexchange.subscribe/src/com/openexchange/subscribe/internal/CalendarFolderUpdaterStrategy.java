@@ -179,11 +179,11 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
         userInfo.put(TARGET, target);
         // Clear Folder
 
-        try {
-            calendarSql.deleteAppointmentsInFolder(target.getFolderIdAsInt());
-        } catch (SQLException e) {
-
-        }
+//        try {
+//            calendarSql.deleteAppointmentsInFolder(target.getFolderIdAsInt());
+//        } catch (SQLException e) {
+//
+//        }
 
 
         return userInfo;
