@@ -138,7 +138,7 @@ public class CalendarEventParser {
      */
     public void parseCalendarEvent(final Event event, final CalendarDataObject calendarObject) throws OXException {
         calendarObject.setContext(session.getContext());
-        calendarObject.setUid(event.getICalUID());
+        calendarObject.setUid(event.getId());
 
         // Common stuff
         if (event.getSummary() != null) {
@@ -189,8 +189,6 @@ public class CalendarEventParser {
             Boolean isSelf = creator.getSelf();
             if (isSelf != null && isSelf.booleanValue()) {
                 calendarObject.setCreatedBy(session.getUserId());
-            } else {
-                // add external creator?
             }
         }
 
