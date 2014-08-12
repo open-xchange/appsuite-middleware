@@ -1,3 +1,7 @@
+* 2014-08-12 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 34006: Corrected hashCode() calculation for contacts 
+
 * 2014-08-08 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 33818: Added update task to check foreign keys and drop them if necessary
