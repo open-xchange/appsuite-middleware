@@ -209,6 +209,7 @@ public class CalendarEventParser {
             handleRecurrence(recurrence.get(0), calendarObject);
         } else if (event.getRecurringEventId() != null) { // Series exception
             //calendarObject.setE
+            
         }
 
         // Participants and confirmations
@@ -313,7 +314,7 @@ public class CalendarEventParser {
                 final List<WeekdayNum> weekdays = r.getByDay();
                 int days = 0;
                 for (WeekdayNum w : weekdays) {
-                    days |= w.wday.javaDayNum;
+                    days |= (int)Math.pow(2, w.wday.jsDayNum);
                 }
                 calendarObject.setDays(days);
             } else if (calendarObject.getRecurrenceType() == CalendarDataObject.MONTHLY) {
@@ -323,7 +324,7 @@ public class CalendarEventParser {
                 if (weekdays.size() == 1) {
                     final WeekdayNum weekdayNum = weekdays.get(0);
                     calendarObject.setDayInMonth(weekdayNum.num);
-                    calendarObject.setDays(weekdayNum.wday.javaDayNum);
+                    calendarObject.setDays((int)Math.pow(2, weekdayNum.wday.javaDayNum));
                 }
             } else if (calendarObject.getRecurrenceType() == CalendarDataObject.YEARLY) {
                 // YEARLY
