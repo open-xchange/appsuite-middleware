@@ -50,6 +50,8 @@
 package com.openexchange.subscribe.google.internal;
 
 import java.util.Calendar;
+import java.util.Comparator;
+import java.util.PriorityQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
@@ -80,19 +82,6 @@ public class ContactEntryParser {
     }
 
     public void parseContact(final ContactEntry entry, final Contact contact) {
-        {
-            String emailId = null;
-            for (Email email : entry.getEmailAddresses()) {
-                if (email.getPrimary()) {
-                    emailId = email.getAddress();
-                    break;
-                }
-            }
-            if (null != emailId) {
-                contact.setEmail1(emailId);
-            }
-        }
-
         if (entry.hasName()) {
             Name name = entry.getName();
             if (name.hasFullName()) {
@@ -123,25 +112,52 @@ public class ContactEntryParser {
                 if(o.hasOrgTitle()) {
                     contact.setPosition(o.getOrgTitle().getValue());
                 }
+            }
+        }
 
-                // if(o.hasOrgJobDescription()) {
-                //    contact.setTitle(o.getOrgJobDescription().getValue());
-                // }
+        PriorityQueue<Emails> pqEmails = new PriorityQueue<Emails>(3, new Comparator<Emails>() {
+            @Override
+            public int compare(Emails o1, Emails o2) {
+                return o2.getPriority() - o1.getPriority();
+            }
+        });
+
+
+        String primaryAddress = null;
+        for (Email email : entry.getEmailAddresses()) {
+            if (email.getPrimary()) {
+                pqEmails.add(new Emails(email.getAddress(), 10));
+                //save primary email to test if there are duplicates
+                primaryAddress = email.getAddress();
             }
         }
 
         if (entry.hasEmailAddresses()) {
             for (final Email email : entry.getEmailAddresses()) {
                 if (email.getRel() != null) {
-                    if (email.getRel().endsWith("work")) {
-                        contact.setEmail1(email.getAddress());
-                    } else if (email.getRel().endsWith("home")) {
-                        contact.setEmail2(email.getAddress());
-                    } else if (email.getRel().endsWith("other")) {
-                        contact.setEmail3(email.getAddress());
+                    //test duplicates
+                    if (email.getRel().endsWith("work") && false == isEqualsToPrimaryAddress(primaryAddress, email.getAddress())) {
+                        pqEmails.add(new Emails(email.getAddress(), 9));
+                    } else if (email.getRel().endsWith("home") && false == isEqualsToPrimaryAddress(primaryAddress, email.getAddress())) {
+                        pqEmails.add(new Emails(email.getAddress(), 8));
+                    } else if (email.getRel().endsWith("other") && false == isEqualsToPrimaryAddress(primaryAddress, email.getAddress())) {
+                        pqEmails.add(new Emails(email.getAddress(), 7));
                     }
                 }
             }
+        }
+
+        while(pqEmails.size() > 0) {
+            contact.setEmail1(pqEmails.poll().getEmail());
+            if(pqEmails.peek() == null) {
+                break;
+            }
+            contact.setEmail2(pqEmails.poll().getEmail());
+            if(pqEmails.peek() == null) {
+                break;
+            }
+            contact.setEmail3(pqEmails.poll().getEmail());
+            break;
         }
 
         if (entry.hasPhoneNumbers()) {
@@ -250,6 +266,15 @@ public class ContactEntryParser {
         }
     }
 
+    private boolean isEqualsToPrimaryAddress(String primaryAddress, String email) {
+        if(primaryAddress != null) {
+            if(primaryAddress.equals(email)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Sets the birthday for the contact based on the google information
      *
@@ -275,6 +300,27 @@ public class ContactEntryParser {
                     contact.setBirthday(cal.getTime());
                 }
             }
+        }
+    }
+
+    private class Emails {
+        private String emailAddress;
+        private int priority;
+
+        public Emails(String emailAddress, int priority) {
+            if(emailAddress == null) {
+                throw new IllegalStateException("Parameter emailAddress can't be null");
+            }
+            this.emailAddress = emailAddress;
+            this.priority = priority;
+        }
+
+        public String getEmail() {
+            return emailAddress;
+        }
+
+        private int getPriority() {
+            return priority;
         }
     }
 }
