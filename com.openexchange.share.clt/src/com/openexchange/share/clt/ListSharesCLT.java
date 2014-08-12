@@ -98,7 +98,7 @@ public class ListSharesCLT extends AbstractMBeanCLI<Void> {
             int cid;
             try {
                 cid = Integer.parseInt(contextId);
-                authenticator.doUserAuthentication(login, password, cid);
+                authenticator.doAuthentication(login, password, cid);
             } catch (NumberFormatException e) {
                 throw new MBeanException(e);
             }
