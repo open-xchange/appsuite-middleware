@@ -161,9 +161,9 @@ public class GoogleCalendarTest extends AbstractGoogleTest {
         assertFieldNotNull("user id", 1, co.getUid());
         assertNotNullAndEquals("location", "Bremen, Deutschland" , co.getLocation());
         assertNotNullAndEquals("note", "All day appointment - only organizer - 30 Jan 2014" , co.getNote());
-        assertNotNullAndEquals("start date", getDateTime(28, 1, 2014, 1, 0), co.getStartDate());
+        assertNotNullAndEquals("start date", getDateTime(28, 1, 2014, 0, 0, 0, TimeZone.getTimeZone("UTC")), co.getStartDate());
         assertFieldIsNull("timezone", co.getTimezone());
-        assertNotNullAndEquals("end date", getDateTime(29, 1, 2014, 1, 0), co.getEndDate());
+        assertNotNullAndEquals("end date", getDateTime(29, 1, 2014, 0, 0, 0, TimeZone.getTimeZone("UTC")), co.getEndDate());
         assertNotNullAndEquals("creation date", getDateTime(8, 8, 2014, 15, 34, 07), co.getCreationDate());
         assertNotNullAndEquals("created by", 1, co.getCreatedBy());
         assertNotNullAndEquals("alarm", 0, co.getAlarm());
