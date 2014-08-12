@@ -491,7 +491,9 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                 files.add(new DropboxFile(folderId, id, userId).parseDropboxFile(revisionEntry));
             }
             // Sort collection
-            Collections.sort(files, order.comparatorBy(sort));
+            if (null != sort && 1 < files.size()) {
+                Collections.sort(files, order.comparatorBy(sort));
+            }
             return new FileTimedResult(files);
         } catch (final DropboxServerException e) {
             throw handleServerError(id, e);
@@ -550,7 +552,9 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                 List<File> files = new LinkedList<File>();
                 gatherAllFiles("/", files);
                 // Sort collection
-                Collections.sort(files, order.comparatorBy(sort));
+                if (null != sort && 1 < files.size()) {
+                    Collections.sort(files, order.comparatorBy(sort));
+                }
                 if ((start != NOT_SET) && (end != NOT_SET)) {
                     final int size = files.size();
                     if ((start) > size) {
@@ -596,7 +600,9 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                 }
             }
             // Sort collection
-            Collections.sort(files, order.comparatorBy(sort));
+            if (null != sort && 1 < files.size()) {
+                Collections.sort(files, order.comparatorBy(sort));
+            }
             if ((start != NOT_SET) && (end != NOT_SET)) {
                 final int size = files.size();
                 if ((start) > size) {
