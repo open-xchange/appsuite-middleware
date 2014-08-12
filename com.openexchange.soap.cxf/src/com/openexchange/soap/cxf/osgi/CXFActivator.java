@@ -67,6 +67,7 @@ import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.soap.cxf.interceptor.TransformGenericElementsInterceptor;
 
@@ -161,6 +162,7 @@ public class CXFActivator extends HousekeepingActivator {
                                 Dictionary<String, Object> config = null;
                                 if (null != configService) {
                                     baseAddress = configService.getProperty("com.openexchange.soap.cxf.baseAddress");
+                                    baseAddress = Strings.isEmpty(baseAddress) ? null : baseAddress.trim();
                                     if (null != baseAddress) {
                                         config = new Hashtable<String, Object>(4);
                                         config.put("base-address", baseAddress);
