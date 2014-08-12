@@ -126,6 +126,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.sessiond"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.sessionstorage"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.share"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.share.clt"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.share.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.share.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.share.servlet"/>
