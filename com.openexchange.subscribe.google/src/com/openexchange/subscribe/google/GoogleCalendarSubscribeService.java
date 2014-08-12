@@ -225,5 +225,11 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
                 singleAppointments.add(calendarObject);
             }
         }
+        
+        for (CalendarObject co : seriesExceptions) {
+            CalendarDataObject prime = exceptionMap.get(co.getExtendedProperties().get("iCalUID"));
+            int seq = prime.getSequence();
+            prime.setSequence(++seq);
+        }
     }
 }
