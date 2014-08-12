@@ -311,7 +311,7 @@ public class ContactEntryParser {
         private String emailAddress;
         private int priority;
 
-        public Emails(String emailAddress, int priority) {
+        private Emails(String emailAddress, int priority) {
             if(emailAddress == null) {
                 throw new IllegalStateException("Parameter emailAddress can't be null");
             }
@@ -319,7 +319,7 @@ public class ContactEntryParser {
             this.priority = priority;
         }
 
-        public String getEmail() {
+        private String getEmail() {
             return emailAddress;
         }
 
