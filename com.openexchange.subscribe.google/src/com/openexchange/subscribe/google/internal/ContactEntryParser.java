@@ -144,6 +144,10 @@ public class ContactEntryParser {
                         pqEmails.add(new Emails(email.getAddress(), 7));
                     }
                 }
+                // if there are other user tagged mail addresses add them with low priority
+                else if (false == isEqualsToPrimaryAddress(primaryAddress, email.getAddress())) {
+                    pqEmails.add(new Emails(email.getAddress(), 1));
+                }
             }
         }
 
