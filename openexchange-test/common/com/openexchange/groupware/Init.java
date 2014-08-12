@@ -495,8 +495,8 @@ public final class Init {
             } catch (final IllegalAccessException e) {
                 throw getWrappingOXException(e);
             }
-            services.put(UserConfigurationService.class, new UserConfigurationServiceImpl((UserService) services.get(UserService.class)));
-            services.put(UserPermissionService.class, new UserPermissionServiceImpl((UserService) services.get(UserService.class)));
+            services.put(UserConfigurationService.class, new UserConfigurationServiceImpl());
+            services.put(UserPermissionService.class, new UserPermissionServiceImpl());
             TestServiceRegistry.getInstance().addService(UserConfigurationService.class, services.get(UserConfigurationService.class));
             TestServiceRegistry.getInstance().addService(UserPermissionService.class, services.get(UserPermissionService.class));
         }
