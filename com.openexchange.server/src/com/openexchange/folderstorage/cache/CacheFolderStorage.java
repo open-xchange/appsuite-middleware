@@ -475,12 +475,7 @@ public final class CacheFolderStorage implements FolderStorage {
             /*
              * Perform create operation via non-cache storage
              */
-            final CreatePerformer createPerformer;
-            if (null == session) {
-                createPerformer = new CreatePerformer(storageParameters.getUser(), storageParameters.getContext(), storageParameters.getDecorator(), registry);
-            } else {
-                createPerformer = new CreatePerformer(ServerSessionAdapter.valueOf(session), storageParameters.getDecorator(), registry);
-            }
+            final CreatePerformer createPerformer = new CreatePerformer(storageParameters, registry);
             createPerformer.setCheck4Duplicates(false);
             final String folderId = createPerformer.doCreate(folder);
             /*
@@ -879,17 +874,10 @@ public final class CacheFolderStorage implements FolderStorage {
             /*
              * Perform delete
              */
-            if (null == session) {
-                new DeletePerformer(storageParameters.getUser(), storageParameters.getContext(), storageParameters.getDecorator(), registry).doDelete(
-                    treeId,
-                    folderId,
-                    storageParameters.getTimeStamp());
-            } else {
-                new DeletePerformer(ServerSessionAdapter.valueOf(session), storageParameters.getDecorator(), registry).doDelete(
-                    treeId,
-                    folderId,
-                    storageParameters.getTimeStamp());
-            }
+            new DeletePerformer(storageParameters, registry).doDelete(
+                treeId,
+                folderId,
+                storageParameters.getTimeStamp());
             /*
              * Refresh
              */

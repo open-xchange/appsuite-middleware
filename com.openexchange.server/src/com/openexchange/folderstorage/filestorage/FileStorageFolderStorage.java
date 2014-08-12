@@ -453,7 +453,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
 
         boolean started = parameters.putParameterIfAbsent(FileStorageFolderType.getInstance(), PARAM, factory.createAccess(parameters.getSession()));
         if (started && TransactionManager.isManagedTransaction(parameters)) {
-            TransactionManager.getTransactionManager(parameters).addOpenedStorage(this);
+            TransactionManager.getTransactionManager(parameters).transactionStarted(this);
             return false;
         }
 

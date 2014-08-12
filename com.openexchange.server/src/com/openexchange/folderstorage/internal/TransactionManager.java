@@ -51,9 +51,8 @@ package com.openexchange.folderstorage.internal;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.LinkedHashSet;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -69,7 +68,46 @@ import com.openexchange.folderstorage.database.DatabaseServiceRegistry;
 
 
 /**
- * {@link TransactionManager}
+ * The {@link TransactionManager} helps to control transactional {@link FolderStorage} operations
+ * for write operations.<br>
+ * <br>
+ * Usage:
+ *
+ * <pre>
+ * TransactionManager transactionManager = TransactionManager.initTransaction(storageParameters);
+ * boolean started = false;
+ * try {
+ *     FolderStorage folderStorage = getFolderStorage();
+ *     started = folderStorage.startTransaction(parameters, true);
+ *     // Operate on folderStorage...
+ *
+ *     if (started) {
+ *         folderStorage.commitTransaction(parameters);
+ *     }
+ *
+ *     transactionManager.commit();
+ * } catch (Exception e) {
+ *     if (started) {
+ *         folderStorage.rollback(parameters);
+ *     }
+ *
+ *     transactionManager.rollback();
+ *     throw e;
+ * }
+ * </pre>
+ *
+ * The {@link TransactionManager} will only function correctly, if every {@link FolderStorage} respects
+ * its existence. That means {@link FolderStorage#startTransaction(StorageParameters, boolean)} must be
+ * constructed in this way:<br>
+ * <pre>
+ * // Prepare transaction...
+ * TransactionManager.isManagedTransaction(parameters)) {
+ *     TransactionManager.getTransactionManager(parameters).transactionStarted(this);
+ *     return false;
+ * }
+ *
+ * return true;
+ * </pre>
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
@@ -78,7 +116,7 @@ public class TransactionManager {
 
     public static final String PARAMETER_KEY = TransactionManager.class.getName();
 
-    private final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
+    private final Collection<FolderStorage> openedStorages = new LinkedHashSet<FolderStorage>(6);
 
     private final StorageParameters storageParameters;
 
@@ -110,6 +148,14 @@ public class TransactionManager {
         }
     }
 
+    /**
+     * Initializes a new {@link TransactionManager} or returns the currently active one if already instantiated.
+     * On initialization a writable {@link Connection} is acquired and put into the {@link StorageParameters} for
+     * {@link DatabaseFolderType} and {@link DatabaseParameterConstants#PARAM_CONNECTION} as key.
+     *
+     * @param storageParameters The {@link StorageParameters}, never <code>null</code>.
+     * @return The {@link TransactionManager}.
+     */
     public static TransactionManager initTransaction(StorageParameters storageParameters) throws OXException {
         TransactionManager transactionManager = getTransactionManager(storageParameters);
         if (transactionManager == null) {
@@ -121,26 +167,53 @@ public class TransactionManager {
         return transactionManager;
     }
 
+    /**
+     * Checks whether the current transaction is managed by a {@link TransactionManager} or not.
+     *
+     * @param storageParameters The {@link StorageParameters}, never <code>null</code>.
+     * @return <code>true</code> if the transaction is managed. Otherwise <code>false</code>.
+     */
     public static boolean isManagedTransaction(StorageParameters storageParameters) {
         return getTransactionManager(storageParameters) != null;
     }
 
+    /**
+     * Gets the currently active {@link TransactionManager}.
+     *
+     * @param storageParameters The {@link StorageParameters}, never <code>null</code>.
+     * @return The {@link TransactionManager} or <code>null</code> if this transaction is not managed.
+     */
     public static TransactionManager getTransactionManager(StorageParameters storageParameters) {
         return storageParameters.getParameter(FolderType.GLOBAL, PARAMETER_KEY);
     }
 
-    public void addOpenedStorage(FolderStorage storage) throws OXException {
+    /**
+     * Adds a {@link FolderStorage} to the list of storages that need to be commited or rolled back.
+     *
+     * @param The {@link FolderStorage}, never <code>null</code>.
+     */
+    public void transactionStarted(FolderStorage storage) {
         openedStorages.add(storage);
     }
 
-    public void addOpenedStorages(Collection<FolderStorage> storages) throws OXException {
-        openedStorages.addAll(storages);
-    }
-
+    /**
+     * Gets the active database connection, if it is controlled by this {@link TransactionManager}.
+     * A connections is not controlled by the manager, if the {@link StorageParameters} contain a
+     * {@link ConnectionMode} for type {@link DatabaseFolderType} and key {@link DatabaseParameterConstants#PARAM_CONNECTION}.
+     */
     public Connection getConnection() {
         return connection;
     }
 
+
+    /**
+     * Rolls back this transaction via calling rollback on the managed database connection
+     * and {@link FolderStorage#rollback(StorageParameters)} on every {@link FolderStorage}
+     * that has been submitted via {@link TransactionManager#transactionStarted(FolderStorage)}.
+     *
+     * The transaction is only rolled back if the caller initialized this {@link TransactionManager} instance.
+     * Otherwise the call has no effect.
+     */
     public void rollback() {
         if (--initCount <= 0) {
             if (connection != null) {
@@ -155,6 +228,17 @@ public class TransactionManager {
         }
     }
 
+    /**
+     * Commits this transaction via calling commit on the managed database connection
+     * and {@link FolderStorage#commitTransaction(StorageParameters)} on every {@link FolderStorage}
+     * that has been submitted via {@link TransactionManager#transactionStarted(FolderStorage)}.
+     *
+     * The transaction is only committed if the caller initialized this {@link TransactionManager} instance.
+     * Otherwise the call has no effect.
+     *
+     * @throws OXException If any underlying commit operation fails.
+     *         If so, {@link TransactionManager#rollback()} must be called.
+     */
     public void commit() throws OXException {
         if (--initCount == 0) {
             if (connection != null) {

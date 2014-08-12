@@ -1548,7 +1548,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             }
 
             if (TransactionManager.isManagedTransaction(parameters)) {
-                TransactionManager.getTransactionManager(parameters).addOpenedStorage(this);
+                TransactionManager.getTransactionManager(parameters).transactionStarted(this);
                 return false;
             }
 

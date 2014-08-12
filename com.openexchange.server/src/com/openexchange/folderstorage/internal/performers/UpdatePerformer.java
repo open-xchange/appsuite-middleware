@@ -51,6 +51,7 @@ package com.openexchange.folderstorage.internal.performers;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -151,9 +152,13 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
         }
 
         TransactionManager transactionManager = TransactionManager.initTransaction(storageParameters);
-        final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
+        /*
+         * Throws an exception if someone tries to add an element. If this happens, you found a bug.
+         * As long as a TransactionManager is present, every storage has to add itself to the
+         * TransactionManager in FolderStorage.startTransaction() and must return false.
+         */
+        final List<FolderStorage> openedStorages = Collections.emptyList();
         checkOpenedStorage(storage, openedStorages);
-        transactionManager.addOpenedStorages(openedStorages);
         try {
             /*
              * Load storage folder

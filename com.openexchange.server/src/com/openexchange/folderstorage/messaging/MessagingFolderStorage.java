@@ -868,7 +868,7 @@ public final class MessagingFolderStorage implements FolderStorage {
             new ConcurrentHashMap<Key, MessagingAccountAccess>());
 
         if (started && TransactionManager.isManagedTransaction(parameters)) {
-            TransactionManager.getTransactionManager(parameters).addOpenedStorage(this);
+            TransactionManager.getTransactionManager(parameters).transactionStarted(this);
             return false;
         }
 
