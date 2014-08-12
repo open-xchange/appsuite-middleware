@@ -61,11 +61,13 @@ import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
+import com.openexchange.folderstorage.GuestPermission;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
+import com.openexchange.folderstorage.osgi.UserServiceHolder;
 import com.openexchange.folderstorage.outlook.DuplicateCleaner;
 import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.folderstorage.type.PublicType;
@@ -323,7 +325,39 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
                 Integer.valueOf(user.getId()),
                 Integer.valueOf(context.getContextId()));
         }
-        parentStorage.createFolder(toCreate, storageParameters);
+        /*
+         * check for any present guest permissions
+         */
+        ComparedPermissions comparedPermissions = new ComparedPermissions(
+            session.getContextId(), toCreate.getPermissions(), new Permission[0], UserServiceHolder.requireUserService());
+        if (comparedPermissions.hasNewGuests()) {
+            /*
+             * create "plain" folder without guests first...
+             */
+            List<GuestPermission> addedGuests = comparedPermissions.getAddedGuests();
+            List<Permission> plainPermissions = new ArrayList<Permission>();
+            for (Permission permission : toCreate.getPermissions()) {
+                if (false == addedGuests.contains(permission)) {
+                    plainPermissions.add(permission);
+                }
+            }
+            Folder plainFolder = (Folder) toCreate.clone();
+            plainFolder.setPermissions(plainPermissions.toArray(new Permission[plainPermissions.size()]));
+            parentStorage.createFolder(plainFolder, storageParameters);
+            String folderID = plainFolder.getID();
+            /*
+             * setup shares and guest users
+             */
+            processAddedGuestPermissions(folderID, plainFolder.getContentType(), addedGuests);
+            /*
+             * update with re-added guest permissions (guest permissions are enriched with real entities now)
+             */
+            toCreate.setID(folderID);
+            toCreate.setLastModified(plainFolder.getLastModified());
+            parentStorage.updateFolder(toCreate, storageParameters);
+        } else {
+            parentStorage.createFolder(toCreate, storageParameters);
+        }
         return toCreate.getID();
     }
 
@@ -331,7 +365,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
         final ContentType folderContentType = toCreate.getContentType();
         final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, parentId);
         if (realStorage.equals(virtualStorage)) {
-            virtualStorage.createFolder(toCreate, storageParameters);
+            doCreateReal(toCreate, parentId, FolderStorage.REAL_TREE_ID, realStorage);
         } else {
             /*
              * Check if real storage supports folder's content types
@@ -341,7 +375,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
                 /*
                  * 1. Create in real storage
                  */
-                realStorage.createFolder(toCreate, storageParameters);
+                doCreateReal(toCreate, parentId, FolderStorage.REAL_TREE_ID, realStorage);
                 /*
                  * 2. Create in virtual storage
                  */
@@ -448,7 +482,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
                             }
                         }
                     }
-                    capStorage.createFolder(clone4Real, storageParameters);
+                    doCreateReal(clone4Real, realParentId, FolderStorage.REAL_TREE_ID, capStorage);
                     toCreate.setID(clone4Real.getID());
                 }
                 /*

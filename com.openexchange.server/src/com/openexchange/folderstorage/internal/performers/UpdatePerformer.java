@@ -52,7 +52,6 @@ package com.openexchange.folderstorage.internal.performers;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
@@ -62,19 +61,12 @@ import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
-import com.openexchange.folderstorage.GuestPermission;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.osgi.ShareServiceHolder;
 import com.openexchange.folderstorage.osgi.UserServiceHolder;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.share.CreateRequest;
-import com.openexchange.share.DeleteRequest;
-import com.openexchange.share.Guest;
-import com.openexchange.share.Share;
-import com.openexchange.share.ShareService;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -306,10 +298,12 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                 }
 
                 try {
+                    /*
+                     * prepare new shares for added guest permissions
+                     */
                     if (!isRecursion && comparedPermissions.hasNewGuests()) {
-                        prepareNewShares(folder, storageFolder, comparedPermissions.getAddedGuests());
+                        processAddedGuestPermissions(folderId, storageFolder.getContentType(), comparedPermissions.getAddedGuests());
                     }
-
                     /*
                      * Change permissions either in real or in virtual storage
                      */
@@ -328,10 +322,11 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                             storage.updateFolder(folder, storageParameters);
                         }
                     }
-
+                    /*
+                     * delete existing shares for removed guest permissions
+                     */
                     if (!isRecursion && comparedPermissions.hasRemovedGuests()) {
                         processRemovedGuestPermissions(folderId, storageFolder.getContentType(), comparedPermissions.getRemovedGuests());
-//                        deleteObsoleteShares(folder, storageFolder, comparedPermissions.getRemovedGuests());
                     }
                 } finally {
                     if (!isRecursion) {
@@ -389,52 +384,6 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
         }
 
     } // End of doUpdate()
-
-    private void deleteObsoleteShares(Folder folder, Folder storageFolder, LinkedList<Permission> removedGuests) throws OXException {
-        DeleteRequest deleteRequest = new DeleteRequest();
-        deleteRequest.setModule(storageFolder.getContentType().getModule());
-        deleteRequest.setFolder(storageFolder.getID());
-        for (Permission permission : removedGuests) {
-            deleteRequest.addGuestID(permission.getEntity());
-        }
-
-        ShareService shareService = ShareServiceHolder.requireShareService();
-        shareService.delete(deleteRequest, session);
-    }
-
-    private void prepareNewShares(Folder folder, Folder storageFolder, List<GuestPermission> addedGuests) throws OXException {
-        CreateRequest createRequest = new CreateRequest();
-        createRequest.setModule(storageFolder.getContentType().getModule());
-        createRequest.setFolder(storageFolder.getID());
-        for (GuestPermission permission : addedGuests) {
-            createRequest.addGuest(createGuest(permission));
-        }
-
-        ShareService shareService = ShareServiceHolder.requireShareService();
-        List<Share> shares = shareService.create(createRequest, session);
-        for (int i = 0; i < addedGuests.size(); i++) {
-            GuestPermission guestPermission = addedGuests.get(i);
-            guestPermission.setEntity(shares.get(i).getGuest());
-        }
-    }
-
-    /**
-     * Creates a guest using the properties found in the supplied guest permissions.
-     *
-     * @param permission The guest permissions to create the guest for
-     * @return The guest
-     */
-    private static Guest createGuest(GuestPermission permission) {
-        Guest guest = new Guest();
-        guest.setAuthenticationMode(permission.getAuthenticationMode());
-        guest.setContactFolderID(permission.getContactFolderID());
-        guest.setContactID(permission.getContactID());
-        guest.setDisplayName(permission.getDisplayName());
-        guest.setExpires(permission.getExpires());
-        guest.setMailAddress(permission.getEmailAddress());
-        guest.setPassword(permission.getPassword());
-        return guest;
-    }
 
     private void checkForDuplicateOnMove(final Folder folder, final String treeId, final List<FolderStorage> openedStorages, final Folder storageFolder, final String newParentId) throws OXException {
         /*

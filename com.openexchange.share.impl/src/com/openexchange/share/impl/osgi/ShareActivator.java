@@ -54,6 +54,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.ContactService;
+import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -83,7 +84,7 @@ public class ShareActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, ContactService.class, ShareStorage.class, ConfigurationService.class, DatabaseService.class };
+        return new Class<?>[] { UserService.class, ContextService.class, ContactService.class, ShareStorage.class, ConfigurationService.class, DatabaseService.class };
     }
 
     @Override

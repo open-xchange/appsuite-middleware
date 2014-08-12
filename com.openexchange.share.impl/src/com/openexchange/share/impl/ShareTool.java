@@ -49,8 +49,29 @@
 
 package com.openexchange.share.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserImpl;
+import com.openexchange.groupware.modules.Module;
+import com.openexchange.groupware.userconfiguration.Permission;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.AuthenticationMode;
+import com.openexchange.share.DefaultShare;
+import com.openexchange.share.Guest;
+import com.openexchange.share.Share;
+import com.openexchange.share.ShareCryptoService;
 
 
 /**
@@ -78,6 +99,111 @@ public class ShareTool {
         mostSignificantBits |= (((long)contextId) << 32);
         String token = UUIDs.getUnformattedString(new UUID(mostSignificantBits, randomUUID.getLeastSignificantBits()));
         return token;
+    }
+
+    /**
+     * Gets permission bits suitable for a guest user being allowed to access a module.
+     *
+     * @param module The identifier of the module that should be added to the permissions
+     * @return The permission bits
+     */
+    public static int getUserPermissionBits(int module) {
+        Set<Permission> perms = new HashSet<Permission>();
+        perms.add(Permission.DENIED_PORTAL);
+        perms.add(Permission.READ_CREATE_SHARED_FOLDERS);
+        Permission modulePermission = Module.getForFolderConstant(module).getPermission();
+        if (null != modulePermission) {
+            perms.add(modulePermission);
+        }
+        return Permission.toBits(perms);
+    }
+
+    /**
+     * Prepares a new share for a folder.
+     *
+     * @param contextID The context ID
+     * @param guestUser The guest user
+     * @param module The module ID
+     * @param folder The folder ID
+     * @param expires The expiry date, or <code>null</code> if not defined
+     * @param authenticationMode The authentication mode
+     * @return The share
+     */
+    public static Share prepareShare(int contextID, User guestUser, int module, String folder, Date expires, AuthenticationMode authenticationMode) {
+        Date now = new Date();
+        DefaultShare share = new DefaultShare();
+        share.setToken(ShareTool.generateToken(contextID));
+        share.setAuthentication(authenticationMode.getID());
+        share.setExpires(expires);
+        share.setContextID(contextID);
+        share.setCreated(now);
+        share.setLastModified(now);
+        share.setCreatedBy(guestUser.getCreatedBy());
+        share.setModifiedBy(guestUser.getCreatedBy());
+        share.setGuest(guestUser.getId());
+        share.setModule(module);
+        share.setFolder(folder);
+        return share;
+    }
+
+    /**
+     * Prepares a guest user instance.
+     *
+     * @param services The service lookup reference
+     * @param sharingUser The sharing user
+     * @param guest The guest description
+     * @return The guest user
+     * @throws OXException
+     */
+    public static UserImpl prepareGuestUser(ServiceLookup services, User sharingUser, Guest guest) throws OXException {
+        UserImpl guestUser = new UserImpl();
+        guestUser.setCreatedBy(sharingUser.getId());
+        guestUser.setPreferredLanguage(sharingUser.getPreferredLanguage());
+        guestUser.setTimeZone(sharingUser.getTimeZone());
+        guestUser.setDisplayName(guest.getDisplayName());
+        guestUser.setMailEnabled(true);
+        guestUser.setPasswordMech("{CRYPTO_SERVICE}");
+        AuthenticationMode authenticationMode = guest.getAuthenticationMode();
+        if (authenticationMode != null && authenticationMode != AuthenticationMode.ANONYMOUS) {
+            guestUser.setMail(guest.getMailAddress());
+            guestUser.setUserPassword(services.getService(ShareCryptoService.class).encrypt(guest.getPassword()));
+        } else {
+            guestUser.setMail(""); // not null
+        }
+        if (false == Strings.isEmpty(guest.getContactID()) && false == Strings.isEmpty(guest.getContactFolderID())) {
+            Map<String, Set<String>> attributes = guestUser.getAttributes();
+            if (null == attributes) {
+                attributes = new HashMap<String, Set<String>>(2);
+            }
+            attributes.put("com.openexchange.user.guestContactFolderID", Collections.singleton(guest.getContactFolderID()));
+            attributes.put("com.openexchange.user.guestContactID", Collections.singleton(guest.getContactID()));
+            guestUser.setAttributes(attributes);
+        }
+        return guestUser;
+    }
+
+    /**
+     * Filters out all expired shares from the supplied list.
+     *
+     * @param shares The shares to filter
+     * @return The expired shares that were removed from the supplied list, or <code>null</code> if no shares were expired
+     */
+    public static List<Share> filterExpiredShares(List<Share> shares) {
+        List<Share> expiredShares = null;
+        if (null != shares && 0 < shares.size()) {
+            Iterator<Share> iterator = shares.iterator();
+            while (iterator.hasNext()) {
+                Share share = iterator.next();
+                if (share.isExpired()) {
+                    if (null == expiredShares) {
+                        expiredShares = new ArrayList<Share>();
+                    }
+                    iterator.remove();
+                    expiredShares.add(share);
+                }
+            }
+        }
+        return expiredShares;
     }
 
 }

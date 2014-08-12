@@ -260,7 +260,8 @@ public class DefaultShare implements Share {
 
     @Override
     public String toString() {
-        return "DefaultShare [token=" + token + ", contextID=" + contextID + ", module=" + module + ", folder=" + folder + ", item=" + item + "]";
+        return "DefaultShare [token=" + token + ", contextID=" + contextID + ", guest=" + guest + ", folder=" + folder
+            + null != item ? (", item=" + item) : "" + "]";
     }
 
 }

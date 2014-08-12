@@ -50,6 +50,7 @@
 package com.openexchange.share;
 
 import java.util.Date;
+import com.openexchange.java.Strings;
 
 /**
  * Describes a guest user to which a item or folder shall be shared.
@@ -138,6 +139,11 @@ public class Guest {
      */
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    @Override
+    public String toString() {
+        return Strings.isEmpty(mailAddress) ? "Anonymous" : mailAddress;
     }
 
 }

@@ -61,15 +61,23 @@ import com.openexchange.session.Session;
  */
 public interface ShareService {
 
-    List<Share> create(CreateRequest shareRequest, Session session) throws OXException;
-
-    void delete(DeleteRequest deleteRequest, Session session) throws OXException;
-
+    /**
+     * Resolves the supplied token to a share.
+     *
+     * @param token The token to resolve
+     * @return The share, or <code>null</code> if no valid share could be looked up
+     * @throws OXException
+     */
     Share resolveToken(String token) throws OXException;
 
+    /**
+     * Gets all shares created by the supplied session's user.
+     *
+     * @param session The session
+     * @return The shares
+     * @throws OXException
+     */
     List<Share> getAllShares(Session session) throws OXException;
-
-    List<Share> getSharesForFolder(int contextID, String folder) throws OXException;
 
     /**
      * Deletes shares for a specific folder that were bound to one of the supplied guest user IDs.
@@ -82,5 +90,17 @@ public interface ShareService {
      * @throws OXException
      */
     int[] deleteSharesForFolder(Session session, String folder, int module, int[] guests) throws OXException;
+
+    /**
+     * Creates shares for a specific folder for the supplied guest users.
+     *
+     * @param session The session
+     * @param folder The identifier of the folder to remove the shares for
+     * @param module The module of the folder
+     * @param guests The guest users for the shares
+     * @return The created shares, where each share corresponds to a guest user that has been added through the creation of the shares,
+     *         in the same order as the supplied guests list
+     */
+    List<Share> addSharesToFolder(Session session, String folder, int module, List<Guest> guests) throws OXException;
 
 }

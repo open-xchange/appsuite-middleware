@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.internal.performers;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -61,9 +62,11 @@ import java.util.TimeZone;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
+import com.openexchange.folderstorage.GuestPermission;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
@@ -83,6 +86,8 @@ import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.share.Guest;
+import com.openexchange.share.Share;
 import com.openexchange.share.ShareService;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.session.ServerSession;
@@ -417,6 +422,50 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         }
         ShareService shareService = ShareServiceHolder.requireShareService();
         return shareService.deleteSharesForFolder(session, folderID, contentType.getModule(), guests);
+    }
+
+    /**
+     * Adds shares as a consequence of added guest permission entities. This also includes creating the corresponding guest user.
+     *
+     * @param folderID The ID of the parent folder
+     * @param contentType The content type / module of the parent folder
+     * @param addedPermissions The added permissions; the entity identifiers of the corresponding guest users will be inserted implicitly
+     *                         upon share creation
+     * @return The created shares, where each share corresponds to a guest user that has been added through the creation of the shares,
+     *         in the same order as the supplied guest permissions list
+     */
+    protected List<Share> processAddedGuestPermissions(String folderID, ContentType contentType, List<GuestPermission> addedPermissions) throws OXException {
+        List<Guest> guests = new ArrayList<Guest>(addedPermissions.size());
+        for (GuestPermission permission : addedPermissions) {
+            guests.add(createGuest(permission));
+        }
+        ShareService shareService = ShareServiceHolder.requireShareService();
+        List<Share> shares = shareService.addSharesToFolder(session, folderID, contentType.getModule(), guests);
+        if (null == shares || shares.size() != addedPermissions.size()) {
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Shares not created as expected");
+        }
+        for (int i = 0; i < shares.size(); i++) {
+            addedPermissions.get(i).setEntity(shares.get(i).getGuest());
+        }
+        return shares;
+    }
+
+    /**
+     * Creates a guest using the properties found in the supplied guest permissions.
+     *
+     * @param permission The guest permissions to create the guest for
+     * @return The guest
+     */
+    private static Guest createGuest(GuestPermission permission) {
+        Guest guest = new Guest();
+        guest.setAuthenticationMode(permission.getAuthenticationMode());
+        guest.setContactFolderID(permission.getContactFolderID());
+        guest.setContactID(permission.getContactID());
+        guest.setDisplayName(permission.getDisplayName());
+        guest.setExpires(permission.getExpires());
+        guest.setMailAddress(permission.getEmailAddress());
+        guest.setPassword(permission.getPassword());
+        return guest;
     }
 
     private void hasVisibleSubfolderIDs(final Folder folder, final String treeId, final boolean all, final UserizedFolder userizedFolder, final boolean nullIsPublicAccess, final StorageParameters storageParameters, final java.util.Collection<FolderStorage> openedStorages) throws OXException {
