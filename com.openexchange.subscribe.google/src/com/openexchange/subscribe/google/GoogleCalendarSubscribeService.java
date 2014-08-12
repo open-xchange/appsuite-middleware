@@ -123,22 +123,7 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
             final List<CalendarObject> seriesExceptions = new LinkedList<CalendarObject>();
             final List<CalendarObject> series = new LinkedList<CalendarObject>();
 
-            // Fetch the events
-            final String accessToken = googleCreds.getAccessToken();
-            final Integer pageSize = Integer.valueOf(PAGE_SIZE);
-            Events events = googleCalendarService.events().list(calendarId).setOauthToken(accessToken).setMaxResults(pageSize).execute();
-            parseAndAdd(events, parser, singleAppointments, series, seriesExceptions);
-
-            if (!series.isEmpty()) {
-                // handle series and series exceptions in background thread
-            }
-
-            String nextToken = events.getNextPageToken();
-            if (nextToken == null) {
-                return singleAppointments;
-            }
-
-            // More pages available
+            // Initialize folderUpdater and thread pool services
             final ThreadPoolService threadPool = services.getOptionalService(ThreadPoolService.class);
             final FolderUpdaterRegistry folderUpdaterRegistry = services.getOptionalService(FolderUpdaterRegistry.class);
             final FolderUpdaterService<CalendarObject> folderUpdater = null == folderUpdaterRegistry ? null : folderUpdaterRegistry.<CalendarObject> getFolderUpdater(subscription);
@@ -151,6 +136,33 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
                 throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("FolderUpdaterService");
             }
 
+            // Fetch the events
+            final String accessToken = googleCreds.getAccessToken();
+            final Integer pageSize = Integer.valueOf(PAGE_SIZE);
+            Events events = googleCalendarService.events().list(calendarId).setOauthToken(accessToken).setMaxResults(pageSize).execute();
+            parseAndAdd(events, parser, singleAppointments, series, seriesExceptions);
+
+            if (!series.isEmpty()) {
+                // handle series and series exceptions in background thread
+                threadPool.submit(new AbstractTask<Void>() {
+
+                    @Override
+                    public Void call() throws Exception {
+                        folderUpdater.save(new SearchIteratorDelegator<CalendarObject>(series), subscription);
+                        if (!seriesExceptions.isEmpty()) {
+                            folderUpdater.save(new SearchIteratorDelegator<CalendarObject>(seriesExceptions), subscription);
+                        }
+                        return null;
+                    }
+
+                });
+            }
+
+            String nextToken = events.getNextPageToken();
+            if (nextToken == null) {
+                return singleAppointments;
+            }
+
             // Or spawn background thread
             final String tmp = nextToken;
             threadPool.submit(new AbstractTask<Void>() {
@@ -160,14 +172,18 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
                     String nextPageToken = tmp;
                     Events e;
                     do {
-                        e = googleCalendarService.events().list(calendarId).setOauthToken(accessToken).setMaxResults(pageSize).setPageToken(nextPageToken).execute();
+                        e = googleCalendarService.events().list(calendarId).setOauthToken(accessToken).setMaxResults(pageSize).setPageToken(
+                            nextPageToken).execute();
                         List<CalendarObject> appointments = new LinkedList<CalendarObject>();
                         parseAndAdd(e, parser, appointments, series, seriesExceptions);
                         folderUpdater.save(new SearchIteratorDelegator<CalendarObject>(appointments), subscription);
                     } while ((nextPageToken = e.getNextPageToken()) != null);
 
                     if (!series.isEmpty()) {
-                        // handle series and series exceptions
+                        folderUpdater.save(new SearchIteratorDelegator<CalendarObject>(series), subscription);
+                        if (!seriesExceptions.isEmpty()) {
+                            folderUpdater.save(new SearchIteratorDelegator<CalendarObject>(seriesExceptions), subscription);
+                        }
                     }
 
                     return null;
