@@ -445,8 +445,10 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                     files.add(new DropboxFile(folderId, childEntry.path, userId).parseDropboxFile(childEntry));
                 }
             }
-            // Sort collection
-            Collections.sort(files, order.comparatorBy(sort));
+            // Sort collection if needed
+            if (null != sort && 1 < files.size()) {
+                Collections.sort(files, order.comparatorBy(sort));
+            }
             return new FileTimedResult(files);
         } catch (final DropboxServerException e) {
             throw handleServerError(folderId, e);
