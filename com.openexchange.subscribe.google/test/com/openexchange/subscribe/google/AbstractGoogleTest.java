@@ -73,8 +73,6 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.tools.session.SimServerSession;
-import com.openexchange.user.SimUserService;
-import com.openexchange.user.UserService;
 
 
 /**
@@ -88,10 +86,11 @@ import com.openexchange.user.UserService;
 @PrepareForTest({GoogleApiClients.class})
 @PowerMockIgnore({"javax.net.ssl.*"})
 public abstract class AbstractGoogleTest extends TestCase {
-    protected static final String REDIRECT_URL = "";
-    protected static final String GOOGLE_API_KEY = "";
-    protected static final String GOOGLE_API_SECRET = "";
-    protected static final String ACCESS_TOKEN = "";
+
+    private static final String REDIRECT_URL = "";
+    private static final String GOOGLE_API_KEY = "";
+    private static final String GOOGLE_API_SECRET = "";
+    private static final String ACCESS_TOKEN = "";
 
     private Subscription subscription;
     private GoogleCalendarSubscribeService gcass;
@@ -121,22 +120,7 @@ public abstract class AbstractGoogleTest extends TestCase {
         return (LinkedList<Contact>) gcoss.getContent(subscription);
     }
 
-    protected void assertFieldIsNull(String fieldDesc, Object valueToCheck) {
-        assertNull("The field " + fieldDesc + " should be empty, but is not", valueToCheck);
-    }
-
-    protected void assertNotNullAndEquals(String fieldDesc, Object expected, Object actual) {
-        assertNotNull("Could not find expected mapping for " + fieldDesc, actual);
-        assertEquals("Mapping for field '" + fieldDesc + "' differs -->", expected, actual);
-    }
-
-    protected void assertNotNull(String fieldDesc, Object expected, Object actual) {
-        super.assertNotNull("Could not find expected mapping for " + fieldDesc, actual);
-    }
-
     private void prepareMocks() throws Exception {
-        final UserService simUser = new SimUserService();
-
         NetHttpTransport transport = new NetHttpTransport.Builder().doNotValidateCertificate().build();
         JsonFactory jsonFactory = new JacksonFactory();
 
@@ -154,4 +138,18 @@ public abstract class AbstractGoogleTest extends TestCase {
     protected void prepareAdditionalMocks() throws Exception {
 
     }
+
+    protected void assertFieldIsNull(String fieldDesc, Object valueToCheck) {
+        assertNull("The field " + fieldDesc + " should be empty, but is not ", valueToCheck);
+    }
+
+    protected void assertNotNullAndEquals(String fieldDesc, Object expected, Object actual) {
+        assertNotNull("Could not find expected mapping for " + fieldDesc, actual);
+        assertEquals("Mapping for field '" + fieldDesc + "' differs -->", expected, actual);
+    }
+
+    protected void assertNotNull(String fieldDesc, Object expected, Object actual) {
+        super.assertNotNull("Could not find expected mapping for " + fieldDesc, actual);
+    }
+
 }
