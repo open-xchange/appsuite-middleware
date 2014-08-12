@@ -187,7 +187,11 @@ public final class FileStorageFolderImpl extends AbstractFolder {
             final int size = fsPermissions.size();
             permissions = new Permission[size];
             for (int i = 0; i < size; i++) {
-                permissions[i] = new FileStoragePermissionImpl(fsPermissions.get(i));
+                FileStoragePermissionImpl permissionImpl = new FileStoragePermissionImpl(fsPermissions.get(i));
+                if (permissionImpl.isAdmin() && !permissionImpl.isGroup()) {
+                    createdBy = permissionImpl.getEntity();
+                }
+                permissions[i] = permissionImpl;
             }
         }
         type = SystemType.getInstance();
