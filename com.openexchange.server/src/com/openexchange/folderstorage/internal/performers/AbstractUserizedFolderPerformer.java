@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.internal.performers;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -162,6 +163,17 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         super(user, context, folderStorageDiscoverer);
         this.decorator = decorator;
         storageParameters.setDecorator(decorator);
+    }
+
+    /**
+     * Initializes a new {@link AbstractUserizedFolderPerformer}.
+     * @param storageParameters
+     * @param folderStorageDiscoverer
+     * @throws OXException
+     */
+    public AbstractUserizedFolderPerformer(StorageParameters storageParameters, FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
+        super(storageParameters, folderStorageDiscoverer);
+        this.decorator = storageParameters.getDecorator();
     }
 
     /**
@@ -413,15 +425,21 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * @param folderID The ID of the parent folder
      * @param contentType The content type / module of the parent folder
      * @param removedPermissions The removed permissions
+     * @param connection The database connection to use or <code>null</code>
      * @return The identifiers of the guest users that have been removed through the removal of a share
      */
-    protected int[] processRemovedGuestPermissions(String folderID, ContentType contentType, List<Permission> removedPermissions) throws OXException {
+    protected int[] processRemovedGuestPermissions(String folderID, ContentType contentType, List<Permission> removedPermissions, Connection connection) throws OXException {
         int[] guests = new int[removedPermissions.size()];
         for (int i = 0; i < removedPermissions.size(); i++) {
             guests[i] = removedPermissions.get(i).getEntity();
         }
-        ShareService shareService = ShareServiceHolder.requireShareService();
-        return shareService.deleteSharesForFolder(session, folderID, contentType.getModule(), guests);
+        try {
+            ShareService shareService = ShareServiceHolder.requireShareService();
+            session.setParameter(Connection.class.getName(), connection);
+            return shareService.deleteSharesForFolder(session, folderID, contentType.getModule(), guests);
+        } finally {
+            session.setParameter(Connection.class.getName(), null);
+        }
     }
 
     /**
@@ -431,23 +449,29 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * @param contentType The content type / module of the parent folder
      * @param addedPermissions The added permissions; the entity identifiers of the corresponding guest users will be inserted implicitly
      *                         upon share creation
+     * @param connection The database connection to use or <code>null</code>
      * @return The created shares, where each share corresponds to a guest user that has been added through the creation of the shares,
      *         in the same order as the supplied guest permissions list
      */
-    protected List<Share> processAddedGuestPermissions(String folderID, ContentType contentType, List<GuestPermission> addedPermissions) throws OXException {
+    protected List<Share> processAddedGuestPermissions(String folderID, ContentType contentType, List<GuestPermission> addedPermissions, Connection connection) throws OXException {
         List<Guest> guests = new ArrayList<Guest>(addedPermissions.size());
         for (GuestPermission permission : addedPermissions) {
             guests.add(createGuest(permission));
         }
-        ShareService shareService = ShareServiceHolder.requireShareService();
-        List<Share> shares = shareService.addSharesToFolder(session, folderID, contentType.getModule(), guests);
-        if (null == shares || shares.size() != addedPermissions.size()) {
-            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Shares not created as expected");
+        try {
+            ShareService shareService = ShareServiceHolder.requireShareService();
+            session.setParameter(Connection.class.getName(), connection);
+            List<Share> shares = shareService.addSharesToFolder(session, folderID, contentType.getModule(), guests);
+            if (null == shares || shares.size() != addedPermissions.size()) {
+                throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Shares not created as expected");
+            }
+            for (int i = 0; i < shares.size(); i++) {
+                addedPermissions.get(i).setEntity(shares.get(i).getGuest());
+            }
+            return shares;
+        } finally {
+            session.setParameter(Connection.class.getName(), null);
         }
-        for (int i = 0; i < shares.size(); i++) {
-            addedPermissions.get(i).setEntity(shares.get(i).getGuest());
-        }
-        return shares;
     }
 
     /**

@@ -87,6 +87,7 @@ import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
+import com.openexchange.folderstorage.internal.TransactionManager;
 import com.openexchange.folderstorage.type.FileStorageType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
@@ -449,7 +450,14 @@ public final class FileStorageFolderStorage implements FolderStorage {
         if (null == factory) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IDBasedFolderAccessFactory.class.getName());
         }
-        return parameters.putParameterIfAbsent(FileStorageFolderType.getInstance(), PARAM, factory.createAccess(parameters.getSession()));
+
+        boolean started = parameters.putParameterIfAbsent(FileStorageFolderType.getInstance(), PARAM, factory.createAccess(parameters.getSession()));
+        if (started && TransactionManager.isManagedTransaction(parameters)) {
+            TransactionManager.getTransactionManager(parameters).addOpenedStorage(this);
+            return false;
+        }
+
+        return started;
     }
 
     @Override

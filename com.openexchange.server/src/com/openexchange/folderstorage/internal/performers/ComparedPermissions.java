@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.internal.performers;
 
+import java.sql.Connection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -59,6 +60,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.GuestPermission;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.user.UserService;
 
@@ -70,7 +72,7 @@ import com.openexchange.user.UserService;
  */
 public class ComparedPermissions {
 
-    private final int contextId;
+    private final Context context;
     private final UserService userService;
     private final List<GuestPermission> addedGuests;
     private final LinkedList<Permission> removedGuests;
@@ -78,22 +80,25 @@ public class ComparedPermissions {
     private final boolean hasChanges;
     private final Permission[] newPermissions;
     private final Permission[] originalPermissions;
+    private final Connection connection;
 
     /**
      * Initializes a new {@link ComparedPermissions}.
      *
-     * @param contextId The context ID
+     * @param context The context
      * @param newPermissions The new permissions
      * @param originalPermissions The original permissions
      * @param userService The user service
+     * @param connection The database connection used to load users, or <code>null</code>
      * @throws OXException
      */
-    public ComparedPermissions(int contextId, Permission[] newPermissions, Permission[] originalPermissions, UserService userService) throws OXException {
+    public ComparedPermissions(Context context, Permission[] newPermissions, Permission[] originalPermissions, UserService userService, Connection connection) throws OXException {
         super();
-        this.contextId = contextId;
+        this.context = context;
         this.newPermissions = newPermissions;
         this.originalPermissions = originalPermissions;
         this.userService = userService;
+        this.connection = connection;
         addedGuests = new LinkedList<GuestPermission>();
         removedGuests = new LinkedList<Permission>();
         modifiedGuests = new LinkedList<Permission>();
@@ -103,14 +108,15 @@ public class ComparedPermissions {
     /**
      * Initializes a new {@link ComparedPermissions}.
      *
-     * @param contextId The context id
+     * @param context The context
      * @param newFolder The modified object sent by the client; not <code>null</code>
      * @param origFolder The original object loaded from the storage; not <code>null</code>
      * @param userService The user service; not <code>null</code>
+     * @param connection The database connection used to load users, or <code>null</code>
      * @throws OXException If errors occur when loading additional data for the comparison
      */
-    public ComparedPermissions(int contextId, Folder newFolder, Folder origFolder, UserService userService) throws OXException {
-        this(contextId, newFolder.getPermissions(), origFolder.getPermissions(), userService);
+    public ComparedPermissions(Context context, Folder newFolder, Folder origFolder, UserService userService, Connection connection) throws OXException {
+        this(context, newFolder.getPermissions(), origFolder.getPermissions(), userService, connection);
     }
 
     private boolean calc() throws OXException {
@@ -179,7 +185,13 @@ public class ComparedPermissions {
             Permission oldPermission = oldUsers.get(newPermission.getEntity());
             if (!newPermission.equals(oldPermission)) {
                 permissionsChanged = true;
-                User user = userService.getUser(newPermission.getEntity(), contextId);
+                User user;
+                if (connection == null) {
+                    user = userService.getUser(newPermission.getEntity(), context.getContextId());
+                } else {
+                    user = userService.getUser(connection, newPermission.getEntity(), context);
+                }
+
                 if (user.isGuest()) {
                     modifiedGuests.add(newPermission);
                 }
@@ -198,7 +210,13 @@ public class ComparedPermissions {
          * Calculate removed guest permissions
          */
         for (Integer removed : removedUsers) {
-            User user = userService.getUser(removed, contextId);
+            User user;
+            if (connection == null) {
+                user = userService.getUser(removed, context.getContextId());
+            } else {
+                user = userService.getUser(connection, removed, context);
+            }
+
             if (user.isGuest()) {
                 removedGuests.add(oldUsers.get(removed));
             }

@@ -463,7 +463,6 @@ public final class CacheFolderStorage implements FolderStorage {
 
     @Override
     public void commitTransaction(final StorageParameters params) throws OXException {
-        // Nothing to do
     }
 
     @Override
@@ -1384,7 +1383,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
     @Override
     public void rollback(final StorageParameters params) {
-        // Nothing to do
+
     }
 
     @Override
@@ -1408,9 +1407,9 @@ public final class CacheFolderStorage implements FolderStorage {
                 storageVersion = getFolder(treeId, oldFolderId, storageParameters);
             }
             final boolean isMove = null != folder.getParentID();
-            final String oldParentId = isMove ? getFolder(treeId, oldFolderId, storageParameters).getParentID() : null;
+            final String oldParentId = isMove ? storageVersion.getParentID() : null;
             if (null == session) {
-                final UpdatePerformer updatePerformer = new UpdatePerformer(storageParameters.getUser(), storageParameters.getContext(), storageParameters.getDecorator(), registry);
+                final UpdatePerformer updatePerformer = new UpdatePerformer(storageParameters, registry);
                 updatePerformer.setCheck4Duplicates(false);
                 updatePerformer.doUpdate(folder, storageParameters.getTimeStamp());
 
@@ -1421,7 +1420,7 @@ public final class CacheFolderStorage implements FolderStorage {
                     }
                 }
             } else {
-                final UpdatePerformer updatePerformer = new UpdatePerformer(ServerSessionAdapter.valueOf(session), storageParameters.getDecorator(), registry);
+                final UpdatePerformer updatePerformer = new UpdatePerformer(storageParameters, registry);
                 updatePerformer.setCheck4Duplicates(false);
                 updatePerformer.doUpdate(folder, storageParameters.getTimeStamp());
 

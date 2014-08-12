@@ -329,7 +329,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
          * check for any present guest permissions
          */
         ComparedPermissions comparedPermissions = new ComparedPermissions(
-            session.getContextId(), toCreate.getPermissions(), new Permission[0], UserServiceHolder.requireUserService());
+            session.getContext(), toCreate.getPermissions(), new Permission[0], UserServiceHolder.requireUserService(), null);
         if (comparedPermissions.hasNewGuests()) {
             /*
              * create "plain" folder without guests first...
@@ -348,7 +348,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
             /*
              * setup shares and guest users
              */
-            processAddedGuestPermissions(folderID, plainFolder.getContentType(), addedGuests);
+            processAddedGuestPermissions(folderID, plainFolder.getContentType(), addedGuests, null);
             /*
              * update with re-added guest permissions (guest permissions are enriched with real entities now)
              */

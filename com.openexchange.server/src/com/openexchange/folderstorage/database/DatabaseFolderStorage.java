@@ -112,6 +112,7 @@ import com.openexchange.folderstorage.database.getfolder.SystemPublicFolder;
 import com.openexchange.folderstorage.database.getfolder.SystemRootFolder;
 import com.openexchange.folderstorage.database.getfolder.SystemSharedFolder;
 import com.openexchange.folderstorage.database.getfolder.VirtualListFolder;
+import com.openexchange.folderstorage.internal.TransactionManager;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
@@ -1545,6 +1546,12 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                     connectionMode.close(databaseService, context.getContextId());
                 }
             }
+
+            if (TransactionManager.isManagedTransaction(parameters)) {
+                TransactionManager.getTransactionManager(parameters).addOpenedStorage(this);
+                return false;
+            }
+
             return true;
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());

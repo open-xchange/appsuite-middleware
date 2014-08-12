@@ -62,7 +62,9 @@ import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.internal.TransactionManager;
 import com.openexchange.folderstorage.osgi.UserServiceHolder;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.contexts.Context;
@@ -118,6 +120,10 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
         super(user, context, decorator, folderStorageDiscoverer);
     }
 
+    public UpdatePerformer(final StorageParameters storageParameters, final FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
+        super(storageParameters, folderStorageDiscoverer);
+    }
+
     private static final String RECURSION_MARKER = UpdatePerformer.class.getName() + ".RECURSION_MARKER";
 
     /**
@@ -143,28 +149,27 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
         if (null != timeStamp) {
             storageParameters.setTimeStamp(timeStamp);
         }
+
+        TransactionManager transactionManager = TransactionManager.initTransaction(storageParameters);
         final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
         checkOpenedStorage(storage, openedStorages);
-
+        transactionManager.addOpenedStorages(openedStorages);
         try {
             /*
              * Load storage folder
              */
             final Folder storageFolder = storage.getFolder(treeId, folderId, storageParameters);
+            if (null == folder.getName()) {
+                folder.setName(storageFolder.getName());
+            }
+
             final boolean move;
             final String oldParentId = storageFolder.getParentID();
             {
                 final String newParentId = folder.getParentID();
                 move = (null != newParentId && !newParentId.equals(oldParentId));
                 if (move) {
-                    if (null == folder.getName()) {
-                        folder.setName(storageFolder.getName());
-                    }
-                    if ("infostore".equals(storageFolder.getContentType().toString())) { // Maybe something special to consider as not synchronized with OL
-                        checkForDuplicateOnMove(folder, treeId, openedStorages, storageFolder, newParentId);
-                    } else {
-                        checkForDuplicateOnMove(folder, treeId, openedStorages, storageFolder, newParentId);
-                    }
+                    checkForDuplicateOnMove(folder, treeId, openedStorages, storageFolder, newParentId);
                 }
             }
             final boolean rename;
@@ -172,28 +177,17 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                 final String newName = folder.getName();
                 rename = (null != newName && !newName.equals(storageFolder.getName()));
                 if (rename) {
-                    if ("infostore".equals(storageFolder.getContentType().toString())) { // Maybe something special to consider as not synchronized with OL
-                        if (move) {
-                            checkForDuplicateOnMove(folder, treeId, openedStorages, storageFolder, folder.getParentID());
-                        } else {
-                            checkForDuplicateOnRename(folder, treeId, openedStorages, storageFolder, newName, false);
-                        }
-                    } else {
-                        if (move) {
-                            checkForDuplicateOnMove(folder, treeId, openedStorages, storageFolder, folder.getParentID());
-                        } else {
-                            checkForDuplicateOnRename(folder, treeId, openedStorages, storageFolder, newName, false);
-                        }
-                    }
+                    checkForDuplicateOnRename(folder, treeId, openedStorages, storageFolder, newName, false);
                 }
             }
 
             final boolean changeSubscription = (storageFolder.isSubscribed() != folder.isSubscribed());
             final ComparedPermissions comparedPermissions = new ComparedPermissions(
-                getContextId(),
+                getContext(),
                 folder,
                 storageFolder,
-                UserServiceHolder.requireUserService());
+                UserServiceHolder.requireUserService(),
+                transactionManager.getConnection());
 
             /*
              * Do move?
@@ -203,8 +197,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                  * Move folder dependent on folder is virtual or not
                  */
                 final String newParentId = folder.getParentID();
-                final FolderStorage newRealParentStorage =
-                    folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, newParentId);
+                final FolderStorage newRealParentStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, newParentId);
                 if (null == newRealParentStorage) {
                     throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, newParentId);
                 }
@@ -217,10 +210,6 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                 /*
                  * Check for a folder with the same name below parent
                  */
-                if (!rename) {
-                    final String newName = folder.getName();
-                    folder.setName(newName == null ? storageFolder.getName() : newName);
-                }
                 if (equallyNamedSibling(folder.getName(), treeId, newParentId, openedStorages)) {
                     String parentName = newParentId;
                     try {
@@ -237,22 +226,22 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                  * Check for forbidden public mail folder
                  */
                 {
-                    final boolean started2 = newRealParentStorage.startTransaction(storageParameters, true);
+                    final boolean started = newRealParentStorage.startTransaction(storageParameters, true);
                     try {
                         final Folder newParent = newRealParentStorage.getFolder(FolderStorage.REAL_TREE_ID, newParentId, storageParameters);
                         if ((FolderStorage.PUBLIC_ID.equals(newParent.getID()) || PublicType.getInstance().equals(newParent.getType())) && "mail".equals(storageFolder.getContentType().toString())) {
                             throw FolderExceptionErrorMessage.NO_PUBLIC_MAIL_FOLDER.create();
                         }
-                        if (started2) {
+                        if (started) {
                             newRealParentStorage.commitTransaction(storageParameters);
                         }
                     } catch (final OXException e) {
-                        if (started2) {
+                        if (started) {
                             newRealParentStorage.rollback(storageParameters);
                         }
                         throw e;
                     } catch (final Exception e) {
-                        if (started2) {
+                        if (started) {
                             newRealParentStorage.rollback(storageParameters);
                         }
                         throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -302,7 +291,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                      * prepare new shares for added guest permissions
                      */
                     if (!isRecursion && comparedPermissions.hasNewGuests()) {
-                        processAddedGuestPermissions(folderId, storageFolder.getContentType(), comparedPermissions.getAddedGuests());
+                        processAddedGuestPermissions(folderId, storageFolder.getContentType(), comparedPermissions.getAddedGuests(), transactionManager.getConnection());
                     }
                     /*
                      * Change permissions either in real or in virtual storage
@@ -326,7 +315,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                      * delete existing shares for removed guest permissions
                      */
                     if (!isRecursion && comparedPermissions.hasRemovedGuests()) {
-                        processRemovedGuestPermissions(folderId, storageFolder.getContentType(), comparedPermissions.getRemovedGuests());
+                        processRemovedGuestPermissions(folderId, storageFolder.getContentType(), comparedPermissions.getRemovedGuests(), transactionManager.getConnection());
                     }
                 } finally {
                     if (!isRecursion) {
@@ -360,9 +349,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
             /*
              * Commit
              */
-            for (final FolderStorage fs : openedStorages) {
-                fs.commitTransaction(storageParameters);
-            }
+            transactionManager.commit();
 
             final Set<OXException> warnings = storageParameters.getWarnings();
             if (null != warnings) {
@@ -372,17 +359,12 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
             }
 
         } catch (final OXException e) {
-            for (final FolderStorage fs : openedStorages) {
-                fs.rollback(storageParameters);
-            }
+            transactionManager.rollback();
             throw e;
         } catch (final Exception e) {
-            for (final FolderStorage fs : openedStorages) {
-                fs.rollback(storageParameters);
-            }
+            transactionManager.rollback();
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-
     } // End of doUpdate()
 
     private void checkForDuplicateOnMove(final Folder folder, final String treeId, final List<FolderStorage> openedStorages, final Folder storageFolder, final String newParentId) throws OXException {
