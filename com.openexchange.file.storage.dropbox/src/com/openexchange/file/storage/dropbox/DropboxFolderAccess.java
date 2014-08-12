@@ -108,7 +108,7 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
             if (!entry.isDir || entry.isDeleted) {
                 throw DropboxExceptionCodes.NOT_FOUND.create(folderId);
             }
-            return new DropboxFolder(userId).parseDirEntry(entry);
+            return new DropboxFolder(userId).parseDirEntry(entry, accountAccess.getAccount().getDisplayName());
         } catch (final DropboxServerException e) {
             throw handleServerError(folderId, e);
         } catch (final DropboxException e) {
@@ -141,9 +141,10 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
                 throw DropboxExceptionCodes.NOT_FOUND.create(parentIdentifier);
             }
             final List<FileStorageFolder> list = new LinkedList<FileStorageFolder>();
+            String accDisplayName = accountAccess.getAccount().getDisplayName();
             for (final Entry childEntry : entry.contents) {
                 if (childEntry.isDir && !childEntry.isDeleted) {
-                    list.add(new DropboxFolder(userId).parseDirEntry(childEntry));
+                    list.add(new DropboxFolder(userId).parseDirEntry(childEntry, accDisplayName));
                 }
             }
             return list.toArray(new FileStorageFolder[0]);
@@ -286,7 +287,7 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
                 throw DropboxExceptionCodes.NOT_A_FOLDER.create(folderId);
             }
             final List<FileStorageFolder> list = new ArrayList<FileStorageFolder>();
-            FileStorageFolder f = new DropboxFolder(userId).parseDirEntry(directoryEntry);
+            FileStorageFolder f = new DropboxFolder(userId).parseDirEntry(directoryEntry, accountAccess.getAccount().getDisplayName());
             list.add(f);
             String parentId;
             while (null != (parentId = f.getParentId())) {

@@ -52,6 +52,10 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc change
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Tue Aug 05 2014 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2014-08-06
+* Mon Aug 04 2014 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2014-08-11
 * Mon Jul 28 2014 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2014-07-30
 * Mon Jul 21 2014 Carsten Hoeger <choeger@open-xchange.com>

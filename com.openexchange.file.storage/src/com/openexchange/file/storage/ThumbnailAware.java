@@ -67,7 +67,7 @@ public interface ThumbnailAware extends FileStorageFileAccess {
      * @param folderId The folder identifier
      * @param id The id of the file which thumbnail shall be returned
      * @param version The version of the file. Pass in CURRENT_VERSION for the current version of the file.
-     * @return The thumbnail stream
+     * @return The thumbnail stream or <code>null</code> if not applicable
      * @throws OXException If operation fails
      */
     InputStream getThumbnailStream(String folderId, String id, String version) throws OXException;

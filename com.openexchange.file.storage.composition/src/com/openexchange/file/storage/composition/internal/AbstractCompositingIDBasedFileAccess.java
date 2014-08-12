@@ -57,6 +57,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -177,8 +178,8 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
     protected Session session;
 
     private final ThreadLocal<Map<String, FileStorageAccountAccess>> connectedAccounts = new ThreadLocal<Map<String, FileStorageAccountAccess>>();
-
     private final ThreadLocal<List<FileStorageAccountAccess>> accessesToClose = new ThreadLocal<List<FileStorageAccountAccess>>();
+    private final Comparator<FileStorageFileAccess> infostoreFirstFileAccessComparator;
 
     /**
      * Initializes a new {@link AbstractCompositingIDBasedFileAccess}.
@@ -190,6 +191,22 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
         this.session = session;
         connectedAccounts.set(new HashMap<String, FileStorageAccountAccess>());
         accessesToClose.set(new LinkedList<FileStorageAccountAccess>());
+        infostoreFirstFileAccessComparator = new Comparator<FileStorageFileAccess>() {
+
+            @Override
+            public int compare(FileStorageFileAccess fa1, FileStorageFileAccess fa2) {
+                String id1 = fa1.getAccountAccess().getService().getId();
+                String id2 = fa2.getAccountAccess().getService().getId();
+
+                if (INFOSTORE_SERVICE_ID.equals(id1)) {
+                    return INFOSTORE_SERVICE_ID.equals(id2) ? 0 : -1;
+                }
+                if (INFOSTORE_SERVICE_ID.equals(id2)) {
+                    return INFOSTORE_SERVICE_ID.equals(id1) ? 0 : 1;
+                }
+                return 0;
+            }
+        };
     }
 
     @Override
@@ -1183,16 +1200,18 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
          *
          * Poll them concurrently...
          */
+        Collections.sort(all, infostoreFirstFileAccessComparator);
         final ConcurrentTIntObjectHashMap<SearchIterator<File>> resultMap = new ConcurrentTIntObjectHashMap<SearchIterator<File>>(numOfStorages);
         final CompletionService<Void> completionService;
         {
-            final ThreadPoolService threadPool = ThreadPools.getThreadPool();
+            ThreadPoolService threadPool = ThreadPools.getThreadPool();
             if (null == threadPool) {
-                completionService = new CallerRunsCompletionService<Void>();
+                CallerRunsCompletionService<Void> cCompletionService = new CallerRunsCompletionService<Void>();
+                completionService = cCompletionService;
                 for (int i = 0; i < numOfStorages; i++) {
                     final FileStorageFileAccess files = all.get(i);
                     final int index = i;
-                    completionService.submit(new Callable<Void>() {
+                    cCompletionService.submit(new Callable<Void>() {
 
                         @Override
                         public Void call() throws Exception {
@@ -1210,7 +1229,8 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
                     });
                 }
             } else {
-                final ThreadPoolCompletionService<Void> tcompletionService = new ThreadPoolCompletionService<Void>(threadPool);
+                ThreadPoolCompletionService<Void> tcompletionService = new ThreadPoolCompletionService<Void>(threadPool);
+                completionService = tcompletionService;
                 for (int i = 0; i < numOfStorages; i++) {
                     final FileStorageFileAccess files = all.get(i);
                     final int index = i;
@@ -1231,19 +1251,17 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
                         }
                     });
                 }
-                completionService = tcompletionService;
             }
         }
-        /*
+        /*-
          * Take from completion service
+         *
+         * Take first from InfoStore
          */
-        for (int i = 0; i < numOfStorages; i++) {
-            try {
-                completionService.take();
-            } catch (final InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            }
+        takeInterruptionAware(completionService);
+        // Take from rest
+        for (int i = 1; i < numOfStorages; i++) {
+            takeInterruptionAware(completionService);
         }
         final List<SearchIterator<File>> results = new ArrayList<SearchIterator<File>>(numOfStorages);
         for (int i = 0; i < numOfStorages; i++) {
@@ -1253,6 +1271,15 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
             }
         }
         return new MergingSearchIterator<File>(order.comparatorBy(sort), results);
+    }
+
+    private void takeInterruptionAware(CompletionService<Void> completionService) throws OXException {
+        try {
+            completionService.take();
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     @Override
