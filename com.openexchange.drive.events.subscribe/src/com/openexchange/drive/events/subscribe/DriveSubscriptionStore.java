@@ -148,4 +148,13 @@ public interface DriveSubscriptionStore {
      */
     boolean removeSubscription(Subscription subscription) throws OXException;
 
+    /**
+     * Gets all subscription for a service.
+     *
+     * @param serviceID The service ID
+     * @return The subscriptions
+     * @throws OXException
+     */
+    List<Subscription> getSubscriptions(String serviceID) throws OXException;
+
 }
