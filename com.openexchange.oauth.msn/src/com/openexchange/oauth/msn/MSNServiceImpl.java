@@ -54,6 +54,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -89,7 +90,7 @@ public class MSNServiceImpl implements MSNService {
 
     @Override
     public List<Contact> getContacts(final Session session, final int user, final int contextId, final int accountId) {
-        List<Contact> contacts = new ArrayList<Contact>();
+        List<Contact> contacts = new LinkedList<Contact>();
 
         OAuthAccount account = null;
         try {
