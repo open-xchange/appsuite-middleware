@@ -133,7 +133,6 @@ public class GroupDispatcher implements ComponentHandle {
         super();
         this.groupId = id;
         this.handler = handler;
-        final AtomicReference<Set<ID>> idsRef = this.idsRef;
     }
 
     /**
