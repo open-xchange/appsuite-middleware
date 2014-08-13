@@ -70,10 +70,10 @@ public interface ShareMBean {
     
     List<Share> listShares(int contextId, int userId) throws OXException;
     
-    boolean removeShares(String[] tokens) throws OXException;
+    void removeShares(String[] tokens) throws OXException;
     
-    boolean removeShares(int contextId) throws OXException;
+    void removeShares(int contextId) throws OXException;
     
-    boolean removeShares(int contextId, int userId) throws OXException;
+    void removeShares(int contextId, int userId) throws OXException;
 
 }

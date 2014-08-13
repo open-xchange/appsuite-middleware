@@ -128,18 +128,17 @@ public class RemoveSharesCLT extends AbstractMBeanCLI<Void> {
 
     @Override
     protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        boolean result;
         ObjectName objectName = getObjectName(ShareMBean.class.getName(), ShareMBean.DOMAIN);
         ShareMBean mbean = MBeanServerInvocationHandler.newProxyInstance(mbsc, objectName, ShareMBean.class, false);
         try {
             if (null != token && !token.isEmpty()) {
                 String[] tokens = token.trim().split(",");
-                result = mbean.removeShares(tokens);
+                mbean.removeShares(tokens);
             } else if (null != contextId && !contextId.isEmpty()) {
                 if (null != userId && !userId.isEmpty()) {
-                    result = mbean.removeShares(Integer.parseInt(contextId), Integer.parseInt(userId));
+                    mbean.removeShares(Integer.parseInt(contextId), Integer.parseInt(userId));
                 } else {
-                    result = mbean.removeShares(Integer.parseInt(contextId));
+                    mbean.removeShares(Integer.parseInt(contextId));
                 }
             }
         } catch (NumberFormatException e) {

@@ -298,4 +298,40 @@ public class DefaultShareService implements ShareService {
         return guestUserIDs;
     }
 
+    @Override
+    public List<Share> getAllShares() throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<Share> getAllShares(int contextId) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<Share> getAllShares(int contextId, int userId) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void removeShares(String[] tokens) throws OXException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void removeShares(int contextId) throws OXException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void removeShares(int contextId, int userId) throws OXException {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

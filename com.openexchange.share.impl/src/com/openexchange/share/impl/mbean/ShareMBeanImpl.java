@@ -74,38 +74,32 @@ public class ShareMBeanImpl extends StandardMBean implements ShareMBean {
 
     @Override
     public List<Share> listShares() throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return shareService.getAllShares();
     }
 
     @Override
     public List<Share> listShares(int contextId) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return shareService.getAllShares(contextId);
     }
 
     @Override
     public List<Share> listShares(int contextId, int userId) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return shareService.getAllShares(contextId, userId);
     }
 
     @Override
-    public boolean removeShares(String[] tokens) throws OXException {
-        // TODO Auto-generated method stub
-        return false;
+    public void removeShares(String[] tokens) throws OXException {
+        shareService.removeShares(tokens);
     }
 
     @Override
-    public boolean removeShares(int contextId) throws OXException {
-        // TODO Auto-generated method stub
-        return false;
+    public void removeShares(int contextId) throws OXException {
+        shareService.removeShares(contextId);
     }
 
     @Override
-    public boolean removeShares(int contextId, int userId) throws OXException {
-        // TODO Auto-generated method stub
-        return false;
+    public void removeShares(int contextId, int userId) throws OXException {
+        removeShares(contextId, userId);
     }
 
 }
