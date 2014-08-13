@@ -54,6 +54,7 @@ import javax.management.MBeanServerConnection;
 import javax.management.MBeanServerInvocationHandler;
 import javax.management.ObjectName;
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.MissingOptionException;
 import org.apache.commons.cli.Options;
 import com.openexchange.auth.mbean.AuthenticatorMBean;
 import com.openexchange.cli.AbstractMBeanCLI;
@@ -95,16 +96,12 @@ public class RemoveSharesCLT extends AbstractMBeanCLI<Void> {
 
     @Override
     protected void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) throws MBeanException {
-        if (null != cmd && cmd.hasOption("c")) {
-            int cid;
-            try {
-                cid = Integer.parseInt(contextId);
-                authenticator.doAuthentication(login, password, cid);
-            } catch (NumberFormatException e) {
-                throw new MBeanException(e);
-            }
-        } else {
-            authenticator.doAuthentication(login, password);
+        int cid;
+        try {
+            cid = Integer.parseInt(contextId);
+            authenticator.doAuthentication(login, password, cid);
+        } catch (NumberFormatException e) {
+            throw new MBeanException(e);
         }
     }
 
@@ -128,6 +125,9 @@ public class RemoveSharesCLT extends AbstractMBeanCLI<Void> {
 
     @Override
     protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
+        if ((null == contextId || contextId.isEmpty()) && (null == token || token.isEmpty())) {
+            throw new MissingOptionException("ContextId and/or token is missing.");
+        }
         ObjectName objectName = getObjectName(ShareMBean.class.getName(), ShareMBean.DOMAIN);
         ShareMBean mbean = MBeanServerInvocationHandler.newProxyInstance(mbsc, objectName, ShareMBean.class, false);
         try {

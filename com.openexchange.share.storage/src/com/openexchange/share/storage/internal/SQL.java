@@ -110,6 +110,18 @@ public class SQL {
         "FROM share " +
         "WHERE cid=? AND folder=?;"
     ;
+    
+    public static final String SELECT_SHARES_BY_CONTEXT_STMT =
+        "SELECT token,module,folder,item,created,createdBy,lastModified,modifiedBy,expires,guest,auth " +
+        "FROM share " +
+        "WHERE cid=?;"
+    ;
+    
+    public static final String SELECT_SHARES_BY_USER_STMT =
+        "SELECT token,module,folder,item,created,createdBy,lastModified,modifiedBy,expires,guest,auth " +
+        "FROM share " +
+        "WHERE cid=? AND createdBy=?;"
+    ;
 
     public static final String SELECT_SHARES_BY_ITEM_STMT =
         "SELECT token,module,created,createdBy,lastModified,modifiedBy,expires,guest,auth " +
@@ -143,6 +155,16 @@ public class SQL {
     public static final String DELETE_SHARE_STMT =
         "DELETE FROM share " +
         "WHERE cid=? AND token=?;"
+    ;
+    
+    public static final String DELETE_SHARE_CONTEXT_STMT =
+        "DELETE FROM share " +
+        "WHERE cid=?;"
+    ;
+    
+    public static final String DELETE_SHARE_USER_STMT =
+        "DELETE FROM share " +
+        "WHERE cid=? AND createdBy=?;"
     ;
 
     /**

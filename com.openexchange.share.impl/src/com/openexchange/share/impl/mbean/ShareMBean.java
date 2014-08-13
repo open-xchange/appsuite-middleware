@@ -64,8 +64,6 @@ public interface ShareMBean {
     
     public final static String DOMAIN = "com.openexchange.share";
     
-    List<Share> listShares() throws OXException;
-    
     List<Share> listShares(int contextId) throws OXException;
     
     List<Share> listShares(int contextId, int userId) throws OXException;

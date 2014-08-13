@@ -307,17 +307,6 @@ public class DefaultShareService implements ShareService {
     }
 
     /**
-     * Gets all shares.
-     *
-     * @return The shares
-     * @throws OXException
-     */
-    public List<Share> getAllShares() throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /**
      * Gets all shares created in the supplied context.
      *
      * @param contextId The contextId
@@ -325,8 +314,11 @@ public class DefaultShareService implements ShareService {
      * @throws OXException
      */
     public List<Share> getAllShares(int contextId) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        List<Share> result = new ArrayList<Share>();
+        ShareStorage shareStorage = services.getService(ShareStorage.class);
+        ConnectionHelper helper = new ConnectionHelper(contextId, services, false);
+        result.addAll(shareStorage.loadSharesForContext(contextId, helper.getParameters()));
+        return result;
     }
 
     /**
@@ -338,8 +330,11 @@ public class DefaultShareService implements ShareService {
      * @throws OXException
      */
     public List<Share> getAllShares(int contextId, int userId) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        List<Share> result = new ArrayList<Share>();
+        ShareStorage shareStorage = services.getService(ShareStorage.class);
+        ConnectionHelper helper = new ConnectionHelper(contextId, services, false);
+        result.addAll(shareStorage.loadSharesForUser(contextId, userId, helper.getParameters()));
+        return result;
     }
 
     /**
@@ -349,8 +344,12 @@ public class DefaultShareService implements ShareService {
      * @throws OXException If removal fails
      */
     public void removeShares(String[] tokens) throws OXException {
-        // TODO Auto-generated method stub
-
+        for (String token : tokens) {
+            int contextId = ShareTool.extractContextId(token);
+            ShareStorage shareStorage = services.getService(ShareStorage.class);
+            ConnectionHelper helper = new ConnectionHelper(contextId, services, false);
+            shareStorage.deleteShare(contextId, token, helper.getParameters());
+        }
     }
 
     /**
@@ -360,8 +359,9 @@ public class DefaultShareService implements ShareService {
      * @throws OXException If removal fails.
      */
     public void removeShares(int contextId) throws OXException {
-        // TODO Auto-generated method stub
-
+        ShareStorage shareStorage = services.getService(ShareStorage.class);
+        ConnectionHelper helper = new ConnectionHelper(contextId, services, false);
+        shareStorage.deleteSharesFromContext(contextId, helper.getParameters());
     }
 
     /**
@@ -372,8 +372,9 @@ public class DefaultShareService implements ShareService {
      * @throws OXException If removal fails
      */
     public void removeShares(int contextId, int userId) throws OXException {
-        // TODO Auto-generated method stub
-
+        ShareStorage shareStorage = services.getService(ShareStorage.class);
+        ConnectionHelper helper = new ConnectionHelper(contextId, services, false);
+        shareStorage.deleteSharesFromUser(contextId, userId, helper.getParameters());
     }
 
 }

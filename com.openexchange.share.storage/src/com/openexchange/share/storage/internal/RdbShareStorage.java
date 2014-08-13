@@ -144,6 +144,30 @@ public class RdbShareStorage implements ShareStorage {
             provider.close();
         }
     }
+    
+    @Override
+    public void deleteSharesFromContext(int contextId, StorageParameters parameters) throws OXException {
+        ConnectionProvider provider = getWriteProvider(contextId, parameters);
+        try {
+            deleteSharesFromContext(provider.get(), contextId);
+        } catch (SQLException e) {
+            throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            provider.close();
+        }
+    }
+    
+    @Override
+    public void deleteSharesFromUser(int contextId, int userId, StorageParameters parameters) throws OXException {
+        ConnectionProvider provider = getWriteProvider(contextId, parameters);
+        try {
+            deleteSharesFromUser(provider.get(), contextId, userId);
+        } catch (SQLException e) {
+            throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            provider.close();
+        }
+    }
 
     @Override
     public List<Share> loadSharesCreatedBy(int contextID, int createdBy, StorageParameters parameters) throws OXException {
@@ -174,6 +198,30 @@ public class RdbShareStorage implements ShareStorage {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
             return selectSharesByItem(provider.get(), contextID, folder, item);
+        } catch (SQLException e) {
+            throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            provider.close();
+        }
+    }
+    
+    @Override
+    public List<Share> loadSharesForContext(int contextID, StorageParameters parameters) throws OXException {
+        ConnectionProvider provider = getReadProvider(contextID, parameters);
+        try {
+            return selectSharesForContext(provider.get(), contextID);
+        } catch (SQLException e) {
+            throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            provider.close();
+        }
+    }
+    
+    @Override
+    public List<Share> loadSharesForUser(int contextID, int userId, StorageParameters parameters) throws OXException {
+        ConnectionProvider provider = getReadProvider(contextID, parameters);
+        try {
+            return selectSharesForUser(provider.get(), contextID, userId);
         } catch (SQLException e) {
             throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -315,6 +363,31 @@ public class RdbShareStorage implements ShareStorage {
             DBUtils.closeSQLStuff(stmt);
         }
     }
+    
+
+    private void deleteSharesFromContext(Connection connection, int contextId) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(SQL.DELETE_SHARE_CONTEXT_STMT);
+            stmt.setInt(1, contextId);
+            logExecuteUpdate(stmt);
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
+    
+
+    private void deleteSharesFromUser(Connection connection, int contextId, int userId) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(SQL.DELETE_SHARE_USER_STMT);
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            logExecuteUpdate(stmt);
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
 
     private static List<Share> selectSharesCreatedBy(Connection connection, int cid, int createdBy) throws SQLException {
         List<Share> shares = new ArrayList<Share>();
@@ -341,6 +414,72 @@ public class RdbShareStorage implements ShareStorage {
                 }
                 share.setGuest(resultSet.getInt(9));
                 share.setAuthentication(resultSet.getInt(10));
+                shares.add(share);
+            }
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+        return shares;
+    }
+    
+    private List<Share> selectSharesForContext(Connection connection, int contextID) throws SQLException {
+        List<Share> shares = new ArrayList<Share>();
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(SQL.SELECT_SHARES_BY_CONTEXT_STMT);
+            stmt.setInt(1, contextID);
+            ResultSet resultSet = logExecuteQuery(stmt);
+            while (resultSet.next()) {
+                DefaultShare share = new DefaultShare();
+                share.setContextID(contextID);
+                share.setToken(UUIDs.getUnformattedString(UUIDs.toUUID(resultSet.getBytes(1))));
+                share.setModule(resultSet.getInt(2));
+                share.setFolder(resultSet.getString(3));
+                share.setItem(resultSet.getString(4));
+                share.setCreated(new Date(resultSet.getLong(5)));
+                share.setCreatedBy(resultSet.getInt(6));
+                share.setLastModified(new Date(resultSet.getLong(7)));
+                share.setModifiedBy(resultSet.getInt(8));
+                long expires = resultSet.getLong(9);
+                if (false == resultSet.wasNull()) {
+                    share.setExpires(new Date(expires));
+                }
+                share.setGuest(resultSet.getInt(10));
+                share.setAuthentication(resultSet.getInt(11));
+                shares.add(share);
+            }
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+        return shares;
+    }
+    
+
+    private List<Share> selectSharesForUser(Connection connection, int contextID, int userId) throws SQLException {
+        List<Share> shares = new ArrayList<Share>();
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(SQL.SELECT_SHARES_BY_USER_STMT);
+            stmt.setInt(1, contextID);
+            stmt.setInt(2, userId);
+            ResultSet resultSet = logExecuteQuery(stmt);
+            while (resultSet.next()) {
+                DefaultShare share = new DefaultShare();
+                share.setContextID(contextID);
+                share.setToken(UUIDs.getUnformattedString(UUIDs.toUUID(resultSet.getBytes(1))));
+                share.setModule(resultSet.getInt(2));
+                share.setFolder(resultSet.getString(3));
+                share.setItem(resultSet.getString(4));
+                share.setCreated(new Date(resultSet.getLong(5)));
+                share.setCreatedBy(resultSet.getInt(6));
+                share.setLastModified(new Date(resultSet.getLong(7)));
+                share.setModifiedBy(resultSet.getInt(8));
+                long expires = resultSet.getLong(9);
+                if (false == resultSet.wasNull()) {
+                    share.setExpires(new Date(expires));
+                }
+                share.setGuest(resultSet.getInt(10));
+                share.setAuthentication(resultSet.getInt(11));
                 shares.add(share);
             }
         } finally {

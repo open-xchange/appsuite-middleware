@@ -73,11 +73,6 @@ public class ShareMBeanImpl extends StandardMBean implements ShareMBean {
     }
 
     @Override
-    public List<Share> listShares() throws OXException {
-        return shareService.getAllShares();
-    }
-
-    @Override
     public List<Share> listShares(int contextId) throws OXException {
         return shareService.getAllShares(contextId);
     }

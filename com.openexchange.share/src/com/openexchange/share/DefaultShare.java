@@ -49,6 +49,7 @@
 
 package com.openexchange.share;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -57,7 +58,7 @@ import java.util.Date;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.6.1
  */
-public class DefaultShare implements Share {
+public class DefaultShare implements Share, Serializable {
 
     private String token;
     private int contextID;
