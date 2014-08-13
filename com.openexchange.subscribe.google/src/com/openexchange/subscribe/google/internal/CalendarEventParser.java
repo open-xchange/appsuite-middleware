@@ -138,7 +138,7 @@ public class CalendarEventParser {
      */
     public void parseCalendarEvent(final Event event, final CalendarDataObject calendarObject) throws OXException {
         calendarObject.setContext(session.getContext());
-        calendarObject.setUid(event.getId());
+        calendarObject.setUid(event.getICalUID());
 
         // Common stuff
         if (event.getSummary() != null) {
@@ -149,6 +149,9 @@ public class CalendarEventParser {
         }
         if (event.getDescription() != null) {
             calendarObject.setNote(event.getDescription());
+        }
+        if (event.getColorId() != null) {
+            calendarObject.set(CalendarDataObject.COLOR_LABEL, event.getColorId());
         }
         
         // Start, end and creation time
@@ -253,6 +256,8 @@ public class CalendarEventParser {
             calendarObject.setConfirmations(confParts);
             calendarObject.setParticipants(participants);
         }
+        
+        calendarObject.setIgnoreConflicts(true);
 
         convertExternalToInternal(calendarObject);
     }
