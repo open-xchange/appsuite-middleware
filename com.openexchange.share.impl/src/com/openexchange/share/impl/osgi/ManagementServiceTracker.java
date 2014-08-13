@@ -56,7 +56,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
-import com.openexchange.share.ShareService;
+import com.openexchange.share.impl.DefaultShareService;
 import com.openexchange.share.impl.mbean.ShareMBean;
 import com.openexchange.share.impl.mbean.ShareMBeanImpl;
 
@@ -73,12 +73,12 @@ public class ManagementServiceTracker implements ServiceTrackerCustomizer<Manage
 
     private ObjectName objectName;
 
-    private final ShareService shareService;
+    private final DefaultShareService defaultShareService;
 
-    ManagementServiceTracker(final BundleContext context, ShareService shareService) {
+    ManagementServiceTracker(final BundleContext context, DefaultShareService shareService) {
         super();
         this.context = context;
-        this.shareService = shareService;
+        this.defaultShareService = shareService;
     }
 
     @Override
@@ -105,7 +105,7 @@ public class ManagementServiceTracker implements ServiceTrackerCustomizer<Manage
             final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ManagementServiceTracker.class);
             try {
                 objectName = getObjectName(ShareMBean.class.getName(), ShareMBean.DOMAIN);
-                management.registerMBean(objectName, new ShareMBeanImpl(ShareMBean.class, shareService));
+                management.registerMBean(objectName, new ShareMBeanImpl(ShareMBean.class, defaultShareService));
             } catch (final MalformedObjectNameException e) {
                 logger.error("", e);
             } catch (final OXException e) {

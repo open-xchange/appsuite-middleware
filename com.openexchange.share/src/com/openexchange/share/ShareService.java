@@ -71,33 +71,6 @@ public interface ShareService {
     Share resolveToken(String token) throws OXException;
 
     /**
-     * Gets all shares.
-     *
-     * @return The shares
-     * @throws OXException
-     */
-    List<Share> getAllShares() throws OXException;
-    
-    /**
-     * Gets all shares created in the supplied context.
-     *
-     * @param contextId The contextId
-     * @return The shares
-     * @throws OXException
-     */
-    List<Share> getAllShares(int contextId) throws OXException;
-    
-    /**
-     * Gets all shares created in the supplied context by supplied user.
-     *
-     * @param contextId The contextId
-     * @param userId The userId
-     * @return The shares
-     * @throws OXException
-     */
-    List<Share> getAllShares(int contextId, int userId) throws OXException;
-    
-    /**
      * Gets all shares created by the supplied session's user.
      *
      * @param session The session
@@ -129,30 +102,5 @@ public interface ShareService {
      *         in the same order as the supplied guests list
      */
     List<Share> addSharesToFolder(Session session, String folder, int module, List<Guest> guests) throws OXException;
-    
-    /**
-     * Remove all shares identified by supplied tokens.
-     * 
-     * @param tokens The tokens
-     * @throws OXException If removal fails
-     */
-    void removeShares(String[] tokens) throws OXException;
-    
-    /**
-     * Remove all shares in supplied context.
-     * 
-     * @param contextId The contextId
-     * @throws OXException If removal fails.
-     */
-    void removeShares(int contextId) throws OXException;
-    
-    /**
-     * Remove all shares created by supplied user in supplied context.
-     * 
-     * @param contextId The contextId
-     * @param userId The userId
-     * @throws OXException If removal fails
-     */
-    void removeShares(int contextId, int userId) throws OXException;
 
 }
