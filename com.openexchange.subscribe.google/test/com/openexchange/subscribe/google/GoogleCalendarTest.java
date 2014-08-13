@@ -59,9 +59,15 @@ import java.util.TimeZone;
 import org.mockito.Matchers;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.participants.ConfirmableParticipant;
+import com.openexchange.session.Session;
+import com.openexchange.subscribe.google.mocks.MockServiceLookup;
 import com.openexchange.user.SimUserService;
 import com.openexchange.user.UserService;
 
@@ -72,28 +78,27 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  * @since v7.6.1
  */
-
 @PrepareForTest({com.openexchange.subscribe.google.osgi.Services.class})
 public class GoogleCalendarTest extends AbstractGoogleTest {
     public void testCalendar() throws Exception {
         try {
-            LinkedList<CalendarDataObject> calendarObjects = getGoogleCalendarObjects();
+            LinkedList<CalendarDataObject> calendarObjects = getGoogleCalendar();
 
             // appointments for testing
-            final String singleAppointment = "Single appointment - only organizer - 29 Jan 2014";
+            final String singleAppointment = "Single appointment | 29 Jan 2014";
             boolean successSingleAppointment = false;
 
-            final String allDayAppointment = "All day appointment - only organizer - 30 Jan 2014";
+            final String allDayAppointment = "All day appointment | 30 Jan 2014";
             boolean successAllDayAppointment = false;
 
-            final String recurrenceAppointment = "Appointment (with recurrence workday) with organizer 27 Jan 2014 - 14 March 2014";
-            boolean successRecurrenceAppointment = false;
+            final String recurrenceDailyAppointment = "Daily recurrence appointment | 27 Jan 2014 - 14 March 2014";
+            boolean successRecurrenceDailyAppointment = false;
 
-//            final String recurrenceAppointmentWithParts = "Recurrence appointment - with internal / external participants - 15 March 2014 - Never ending";
-//            boolean successRecurrenceAppointmentWithParts = false;
+            final String recurrenceMonthlyAppointment = "Every third month recurrence appointment | 15 March 2014 - Never ending";
+            boolean successMonthlyRecurrenceAppointment = false;
 
-//            final String recurrenceAppointmentWithExceptions = "Recurrence appointment - with exceptions - internal / external participants - 14 March 2014 - Never ending";
-//            boolean successRecurrenceAppointmentWithExceptions = false;
+            final String recurrenceYearlyAppointment = "Yearly recurrence appointment | 14 March 2014 - 14 March 2016";
+            boolean successYearlyRecurrenceAppointment = false;
 
             for(CalendarDataObject co : calendarObjects) {
                 if(co.getTitle() != null) {
@@ -103,21 +108,31 @@ public class GoogleCalendarTest extends AbstractGoogleTest {
                     } else if(co.getTitle().equals(allDayAppointment)) {
                         testAllDayAppointment(co);
                         successAllDayAppointment = true;
-                    } else if(co.getTitle().equals(recurrenceAppointment)) {
-                        testRecurrenceAppointment(co);
-                        successRecurrenceAppointment = true;
+                    } else if(co.getTitle().equals(recurrenceDailyAppointment)) {
+                        testDailyRecurrenceAppointment(co);
+                        successRecurrenceDailyAppointment = true;
+                    } else if(co.getTitle().equals(recurrenceMonthlyAppointment)) {
+                        testMonthlyRecurrenceAppointment(co);
+                        successMonthlyRecurrenceAppointment = true;
+                    } else if(co.getTitle().equals(recurrenceYearlyAppointment)) {
+                        testYearlyRecurrenceAppointment(co);
+                        successYearlyRecurrenceAppointment = true;
                     }
                 }
 
                 // if all appointments were succeeded break out
-                if(successSingleAppointment && successAllDayAppointment && successRecurrenceAppointment) {
+                if(successSingleAppointment && successAllDayAppointment &&
+                    successRecurrenceDailyAppointment && successMonthlyRecurrenceAppointment &&
+                    successYearlyRecurrenceAppointment) {
                     return;
                 }
             }
 
             assertTrue("Appointment: " + singleAppointment + " not found", successSingleAppointment);
             assertTrue("Appointment: " + successAllDayAppointment + " not found", successAllDayAppointment);
-            assertTrue("Appointment: " + recurrenceAppointment + " not found", successRecurrenceAppointment);
+            assertTrue("Appointment: " + recurrenceDailyAppointment + " not found", successRecurrenceDailyAppointment);
+            assertTrue("Appointment: " + recurrenceMonthlyAppointment + " not found", successMonthlyRecurrenceAppointment);
+            assertTrue("Appointment: " + recurrenceYearlyAppointment + " not found", successYearlyRecurrenceAppointment);
         } catch(OXException e) {
             assertFalse(e.getMessage() ,true);
         }
@@ -127,7 +142,7 @@ public class GoogleCalendarTest extends AbstractGoogleTest {
         assertNotNullAndEquals("context", 1, co.getContext().getContextId());
         assertFieldNotNull("user id", 1, co.getUid());
         assertNotNullAndEquals("location", "Olpe, Deutschland" , co.getLocation());
-        assertNotNullAndEquals("note", "Single appointment - only organizer - 29 Jan 2014 \n\nSome text..." , co.getNote());
+        assertNotNullAndEquals("note", "Single appointment | 29 Jan 2014\n\nSome text..." , co.getNote());
         assertNotNullAndEquals("start date", getDateTime(29, 1, 2014, 13, 30), co.getStartDate());
         assertNotNullAndEquals("timezone", "America/Santiago", co.getTimezone());
         assertNotNullAndEquals("end date", getDateTime(29, 1, 2014, 15, 30), co.getEndDate());
@@ -137,30 +152,14 @@ public class GoogleCalendarTest extends AbstractGoogleTest {
         assertNull("This appointment has no confirmation, but the mapping exist", co.getConfirmations());
         assertNull("This appointment has no participants, but the mapping exist", co.getParticipants());
         assertNotNullAndEquals("recurrence type", CalendarObject.NO_RECURRENCE, co.getRecurrenceType());
-        // confirmations and participants
-
-        // assertNotNullAndEquals("organizer", 1, co.getOrganizer());
-
-        // TODO: currently not tested
-        //        for(ConfirmableParticipant cp : co.getConfirmations()) {
-        //            cp.getStatus();
-        //            cp.getMessage();
-        //            cp.getDisplayName();
-        //        }
-
-        //        for(Participant p : co.getParticipants()) {
-        //            p.getDisplayName();
-        //        }
-        //        co.getOrganizer();
-        //        co.getCategories();
-        //        String confirmMessage = a.getComment();
+        assertNotNullAndEquals("fulltime", false, co.getFullTime());
     }
 
     private void testAllDayAppointment(CalendarDataObject co) {
         assertNotNullAndEquals("context", 1, co.getContext().getContextId());
         assertFieldNotNull("user id", 1, co.getUid());
         assertNotNullAndEquals("location", "Bremen, Deutschland" , co.getLocation());
-        assertNotNullAndEquals("note", "All day appointment - only organizer - 30 Jan 2014" , co.getNote());
+        assertNotNullAndEquals("note", "All day appointment | 30 Jan 2014" , co.getNote());
         assertNotNullAndEquals("start date", getDateTime(28, 1, 2014, 0, 0, 0, TimeZone.getTimeZone("UTC")), co.getStartDate());
         assertFieldIsNull("timezone", co.getTimezone());
         assertNotNullAndEquals("end date", getDateTime(29, 1, 2014, 0, 0, 0, TimeZone.getTimeZone("UTC")), co.getEndDate());
@@ -173,11 +172,11 @@ public class GoogleCalendarTest extends AbstractGoogleTest {
         assertNotNullAndEquals("fulltime", true, co.getFullTime());
     }
 
-    private void testRecurrenceAppointment(CalendarDataObject co) {
+    private void testDailyRecurrenceAppointment(CalendarDataObject co) {
         assertNotNullAndEquals("context", 1, co.getContext().getContextId());
         assertFieldNotNull("user id", 1, co.getUid());
         assertNotNullAndEquals("location", "Köln" , co.getLocation());
-        assertNotNullAndEquals("note", "Appointment (with recurrence workday) with organizer 27 Jan 2014 - 14 March 2014" , co.getNote());
+        assertNotNullAndEquals("note", "Daily recurrence appointment | 27 Jan 2014 - 14 March 2014" , co.getNote());
         assertNotNullAndEquals("start date", getDateTime(27, 1, 2014, 15, 30), co.getStartDate());
         assertNotNullAndEquals("timezone", "Europe/Berlin", co.getTimezone());
         assertNotNullAndEquals("end date", getDateTime(27, 1, 2014, 17, 30), co.getEndDate());
@@ -186,6 +185,7 @@ public class GoogleCalendarTest extends AbstractGoogleTest {
         assertNotNullAndEquals("alarm", 30, co.getAlarm());
         assertNull("This appointment has no confirmation, but the mapping exist", co.getConfirmations());
         assertNull("This appointment has no participants, but the mapping exist", co.getParticipants());
+        assertNotNullAndEquals("fulltime", false, co.getFullTime());
 
         assertNotNullAndEquals("recurrence type", CalendarObject.WEEKLY, co.getRecurrenceType());
         assertNotNullAndEquals("days", 62, co.getDays());
@@ -193,24 +193,28 @@ public class GoogleCalendarTest extends AbstractGoogleTest {
         assertNotNullAndEquals("occurrence", 35, co.getOccurrence());
     }
 
-//    private void testRecurrenceAppointmentWithInternalsAndExternals(CalendarDataObject co) {
-//        assertNotNullAndEquals("context", 1, co.getContext().getContextId());
-//        assertNotNull("user id", 1, co.getUid());
-//        assertNotNullAndEquals("location", "Bochum, Deutschland" , co.getLocation());
-//        assertNotNullAndEquals("note", "Recurrence appointment - with internal / external participants - 15 March 2014 - Never ending" , co.getNote());
-//        assertNotNullAndEquals("start date", setDateTime(28, 1, 2014, 15, 30), co.getStartDate());
-//        assertFieldIsNull("timezone", co.getTimezone());
-//        assertNotNullAndEquals("end date", setDateTime(29, 1, 2014, 1, 0), co.getEndDate());
-//        assertNotNullAndEquals("creation date", setDateTime(8, 8, 2014, 15, 34, 07), co.getCreationDate());
-//        assertNotNullAndEquals("created by", 1, co.getCreatedBy());
-//        assertNotNullAndEquals("alarm", 0, co.getAlarm());
+    private void testMonthlyRecurrenceAppointment(CalendarDataObject co) {
+        assertNotNullAndEquals("context", 1, co.getContext().getContextId());
+        assertFieldNotNull("user id", 1, co.getUid());
+        assertFieldIsNull("location", co.getLocation());
+        assertNotNullAndEquals("note", "Every third month recurrence appointment | 15 March 2014 - Never ending" , co.getNote());
+        assertNotNullAndEquals("start date", getDateTime(15, 3, 2014, 19, 00), co.getStartDate());
+        assertFieldIsNull("timezone", co.getTimezone());
+        assertNotNullAndEquals("end date", getDateTime(15, 3, 2014, 21, 30), co.getEndDate());
+        assertNotNullAndEquals("creation date", getDateTime(8, 8, 2014, 14, 11, 07), co.getCreationDate());
+        assertNotNullAndEquals("created by", 1, co.getCreatedBy());
+        assertNotNullAndEquals("alarm", 10, co.getAlarm());
+        assertNotNullAndEquals("fulltime", false, co.getFullTime());
+
+        assertNotNullAndEquals("recurrence type", CalendarObject.MONTHLY, co.getRecurrenceType());
+        assertNotNullAndEquals("day in month", 15, co.getDayInMonth());
+        assertNotNullAndEquals("interval", 3, co.getInterval());
+        assertFieldIsNull("occurrence", co.getOccurrence());
+        assertFieldIsNull("days", co.getDays());
+
+        // TODO
 //        assertNull("This appointment has no confirmation, but the mapping exist", co.getConfirmations());
 //        assertNull("This appointment has no participants, but the mapping exist", co.getParticipants());
-//        assertNotNullAndEquals("recurrence type", CalendarObject.WEEKLY, co.getRecurrenceType());
-//
-//        // confirmations and participants
-//        co.getRecurrenceType();
-//
 //        for(ConfirmableParticipant cp : co.getConfirmations()) {
 //            cp.getStatus();
 //            cp.getMessage();
@@ -224,8 +228,44 @@ public class GoogleCalendarTest extends AbstractGoogleTest {
 //        }
 //        co.getOrganizer();
 //        co.getCategories();
-//    }
+    }
 
+    private void testYearlyRecurrenceAppointment(CalendarDataObject co) {
+        assertNotNullAndEquals("context", 1, co.getContext().getContextId());
+        assertFieldNotNull("user id", 1, co.getUid());
+        assertFieldIsNull("location", co.getLocation());
+        assertNotNullAndEquals("note", "Yearly recurrence appointment | 14 March 2014 - 14 March 2016" , co.getNote());
+        assertNotNullAndEquals("start date", getDateTime(14, 3, 2014, 19, 00), co.getStartDate());
+        assertFieldIsNull("timezone", co.getTimezone());
+        assertNotNullAndEquals("end date", getDateTime(14, 3, 2014, 20, 30), co.getEndDate());
+        assertNotNullAndEquals("creation date", getDateTime(8, 8, 2014, 14, 11, 07), co.getCreationDate());
+        assertNotNullAndEquals("created by", 1, co.getCreatedBy());
+        assertNotNullAndEquals("alarm", 0, co.getAlarm());
+        assertNotNullAndEquals("fulltime", false, co.getFullTime());
+
+        assertNotNullAndEquals("recurrence type", CalendarObject.YEARLY, co.getRecurrenceType());
+        assertFieldIsNull("days", co.getDays());
+        assertNotNullAndEquals("interval", 1, co.getInterval());
+        assertNotNullAndEquals("occurrence", 2, co.getOccurrence());
+
+        // TODO
+//        assertNull("This appointment has no confirmation, but the mapping exist", co.getConfirmations());
+//        assertNull("This appointment has no participants, but the mapping exist", co.getParticipants());
+//        co.getRecurrenceType();
+//        for(ConfirmableParticipant cp : co.getConfirmations()) {
+//            cp.getStatus();
+//            cp.getMessage();
+//            cp.getDisplayName();
+//            cp.getEmailAddress();
+//        }
+//
+//        for(Participant p : co.getParticipants()) {
+//            p.getDisplayName();
+//
+//        }
+//        co.getOrganizer();
+//        co.getCategories();
+    }
 
     /**
      * Gets date / time with the default time zone Europe / Berlin.
@@ -253,7 +293,7 @@ public class GoogleCalendarTest extends AbstractGoogleTest {
         return cal.getTime();
     }
 
-    protected void prepareAdditionalMocks() throws Exception {
+    protected void prepareAdditionalMocks(MockServiceLookup sl) throws Exception {
         SimUserService simUser = new SimUserService();
         PowerMockito.mockStatic(com.openexchange.subscribe.google.osgi.Services.class);
         PowerMockito.doReturn(simUser).when(com.openexchange.subscribe.google.osgi.Services.class, "getService", Matchers.any(UserService.class));

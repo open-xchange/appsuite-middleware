@@ -50,6 +50,7 @@
 package com.openexchange.subscribe.google.mocks;
 
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -65,12 +66,23 @@ public class MockServiceLookup implements ServiceLookup {
     private final ConfigurationService csService;
     private final ThreadPoolService threadPoolService;
     private final FolderUpdaterRegistry fur;
+    private AppointmentSqlFactoryService as;
 
+    /**
+     * Initializes a new {@link MockServiceLookup} with generic services to mock.
+     * @param csService
+     * @param threadPoolService
+     * @param fur
+     */
     public MockServiceLookup(final ConfigurationService csService, final ThreadPoolService threadPoolService, final FolderUpdaterRegistry fur) {
         super();
         this.csService = csService;
         this.threadPoolService = threadPoolService;
         this.fur = fur;
+    }
+
+    public void setAppointmentSQLServiceMock(final AppointmentSqlFactoryService as) {
+        this.as = as;
     }
 
     @Override
@@ -87,8 +99,9 @@ public class MockServiceLookup implements ServiceLookup {
             return (S) threadPoolService;
         } else if(clazz.equals(FolderUpdaterRegistry.class)) {
             return (S) fur;
+        } else if(clazz.equals(AppointmentSqlFactoryService.class)) {
+            return (S) as;
         }
-
         return null;
     }
 

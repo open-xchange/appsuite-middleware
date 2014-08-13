@@ -62,9 +62,11 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.google.api.client.GoogleApiClients;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
@@ -77,7 +79,7 @@ import com.openexchange.subscribe.google.mocks.MockConfigurationService;
 import com.openexchange.subscribe.google.mocks.MockFolderUpdateService;
 import com.openexchange.subscribe.google.mocks.MockFolderUpdaterRegistry;
 import com.openexchange.subscribe.google.mocks.MockServiceLookup;
-import com.openexchange.subscribe.google.mocks.MockThreadPoolService;
+import com.openexchange.threadpool.SimThreadPoolService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.session.SimServerSession;
 
@@ -98,7 +100,7 @@ public abstract class AbstractGoogleTest extends TestCase {
     private static final String GOOGLE_API_KEY = "";
     private static final String GOOGLE_API_SECRET = "";
     private static final String ACCESS_TOKEN = "";
-
+    
     private Subscription subscription;
     private SubscribeService subscribeService;
     private OAuthServiceMetaData oasdm;
@@ -110,11 +112,11 @@ public abstract class AbstractGoogleTest extends TestCase {
 
         //Mocks
         ConfigurationService cs = new MockConfigurationService(GOOGLE_API_KEY, GOOGLE_API_SECRET, REDIRECT_URL);
-        ThreadPoolService tps = new MockThreadPoolService();
+        ThreadPoolService tps = new SimThreadPoolService();
+
         FolderUpdaterRegistry fur = new MockFolderUpdaterRegistry<Object>(new MockFolderUpdateService());
         sl = new MockServiceLookup(cs, tps, fur);
 
-        oasdm = new GoogleOAuthServiceMetaData(sl);
 
         SimServerSession simServer = new SimServerSession(1, 1);
         subscription = new Subscription();
@@ -122,10 +124,12 @@ public abstract class AbstractGoogleTest extends TestCase {
 
         prepareMockitoMocks();
 
-        prepareAdditionalMocks();
+        prepareAdditionalMocks(sl);
+
+        oasdm = new GoogleOAuthServiceMetaData(sl);
     }
 
-    protected LinkedList<CalendarDataObject> getGoogleCalendarObjects() throws OXException {
+    protected LinkedList<CalendarDataObject> getGoogleCalendar() throws OXException {
         subscribeService = new GoogleCalendarSubscribeService(oasdm, sl);
         return (LinkedList<CalendarDataObject>) subscribeService.getContent(subscription);
     }
@@ -148,7 +152,7 @@ public abstract class AbstractGoogleTest extends TestCase {
         PowerMockito.doReturn(credential).when(GoogleApiClients.class, "getCredentials", Matchers.any(Session.class));
     }
 
-    protected void prepareAdditionalMocks() throws Exception {
+    protected void prepareAdditionalMocks(MockServiceLookup sl) throws Exception {
 
     }
 }
