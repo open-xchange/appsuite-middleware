@@ -50,20 +50,20 @@
 package com.openexchange.ajax.share;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.util.Date;
 import java.util.UUID;
 import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONException;
 import org.junit.Assert;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.ajax.contact.action.InsertResponse;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
+import com.openexchange.ajax.folder.actions.VisibleFoldersRequest;
+import com.openexchange.ajax.folder.actions.VisibleFoldersResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
@@ -85,10 +85,10 @@ import com.openexchange.ajax.task.actions.AllRequest;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.InsertRequest;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.search.Order;
@@ -113,9 +113,24 @@ public class GuestClient extends AJAXClient {
      * @throws Exception
      */
     public GuestClient(ParsedShare share) throws Exception {
+        this(share, true);
+    }
+
+    /**
+     * Initializes a new {@link GuestClient}, trying to login via resolving the supplied share automatically.
+     *
+     * @param share The share to access as guest
+     * @param failOnNonRedirect <code>true</code> to fail if request is not redirected, <code>false</code>, otherwise
+     * @throws Exception
+     */
+    public GuestClient(ParsedShare share, boolean failOnNonRedirect) throws Exception {
         super(new AJAXSession(), true);
         getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
-        this.shareResponse = resolve(share);
+        this.shareResponse = resolve(share, failOnNonRedirect);
+    }
+
+    public ResolveShareResponse getShareResolveResponse() {
+        return shareResponse;
     }
 
     public String getUser() {
@@ -175,6 +190,25 @@ public class GuestClient extends AJAXClient {
          * check item listing
          */
         getAll(false == permissions.canReadOwnObjects());
+    }
+
+    public void checkSessionAlive(boolean expectToFail) throws Exception {
+        String contentType;
+        if ("io.ox/contacts".equals(getModule())) {
+            contentType = "contacts";
+        } else if ("io.ox/files".equals(getModule())) {
+            contentType = "infostore";
+        } else if ("io.ox/tasks".equals(getModule())) {
+            contentType = "tasks";
+        } else if ("io.ox/calendar".equals(getModule())) {
+            contentType = "calendar";
+        } else {
+            Assert.fail("no alive check for " + getModule() + " implemented");
+            return;
+        }
+        VisibleFoldersRequest request = new VisibleFoldersRequest(EnumAPI.OX_NEW, contentType, FolderObject.ALL_COLUMNS, false == expectToFail);
+        VisibleFoldersResponse response = execute(request);
+        checkResponse(response, expectToFail);
     }
 
     private static void checkResponse(AbstractAJAXResponse response, boolean expectToFail) {
@@ -345,15 +379,16 @@ public class GuestClient extends AJAXClient {
      * Resolves the supplied share, i.e. accesses the share link and authenticates using the share's credentials.
      *
      * @param share The share
+     * @param failOnNonRedirect <code>true</code> to fail if request is not redirected, <code>false</code>, otherwise
      * @return The share response
      */
-    private ResolveShareResponse resolve(ParsedShare share) throws ClientProtocolException, IOException, OXException, JSONException {
+    private ResolveShareResponse resolve(ParsedShare share, boolean failOnNonRedirect) throws Exception {
         if (AuthenticationMode.ANONYMOUS == share.getAuthentication()) {
             setCredentials(null);
         } else {
             setCredentials(share.getGuestMailAddress(), share.getGuestPassword());
         }
-        ResolveShareResponse response = Executor.execute(this, new ResolveShareRequest(share));
+        ResolveShareResponse response = Executor.execute(this, new ResolveShareRequest(share, failOnNonRedirect));
         getSession().setId(response.getSessionID());
         return response;
     }

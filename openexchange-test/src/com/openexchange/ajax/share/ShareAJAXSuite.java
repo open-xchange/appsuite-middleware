@@ -53,6 +53,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import com.openexchange.ajax.share.tests.AddGuestPermissionTest;
 import com.openexchange.ajax.share.tests.CreateWithGuestPermissionTest;
+import com.openexchange.ajax.share.tests.RemoveGuestPermissionTest;
 
 /**
  * {@link ShareAJAXSuite}
@@ -68,8 +69,9 @@ public class ShareAJAXSuite extends TestSuite {
      */
     public static Test suite() {
         TestSuite tests = new TestSuite(ShareAJAXSuite.class.getName());
-        tests.addTestSuite(AddGuestPermissionTest.class);
         tests.addTestSuite(CreateWithGuestPermissionTest.class);
+        tests.addTestSuite(AddGuestPermissionTest.class);
+        tests.addTestSuite(RemoveGuestPermissionTest.class);
         return tests;
     }
 

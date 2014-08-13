@@ -62,15 +62,18 @@ public class ResolveShareResponse extends AbstractAJAXResponse {
 
     private final String path;
     private final Map<String, String> parameters;
+    private final int statusCode;
 
     /**
      * Initializes a new {@link ResolveShareResponse}.
      *
+     * @param statusCode The HTTP status code
      * @param path The path
      * @param parameters The parameters
      */
-    public ResolveShareResponse(String path, Map<String, String> parameters) {
+    public ResolveShareResponse(int statusCode, String path, Map<String, String> parameters) {
         super(null);
+        this.statusCode = statusCode;
         this.parameters = parameters;
         this.path = path;
     }
@@ -115,6 +118,15 @@ public class ResolveShareResponse extends AbstractAJAXResponse {
 
     public String getItem() {
         return parameters.get("id");
+    }
+
+    /**
+     * Gets the HTTP status code
+     *
+     * @return The statusCode
+     */
+    public int getStatusCode() {
+        return statusCode;
     }
 
 }

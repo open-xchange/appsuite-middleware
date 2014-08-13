@@ -68,6 +68,23 @@ public class VisibleFoldersRequest extends AbstractFolderRequest<VisibleFoldersR
     private final String contentType;
 
     private final int[] columns;
+    
+    private final boolean failOnError;
+
+    /**
+     * Initializes a new {@link VisibleFoldersRequest}.
+     *
+     * @param api The API version to use
+     * @param contentType The content type as a string; e.g. "calendar", "contacts", or "tasks"
+     * @param columns The columns which shall be available in returned folder objects
+     * @param failOnError <code>true</code> to fail on errors, <code>false</code>, otherwise
+     */
+    public VisibleFoldersRequest(final API api, final String contentType, final int[] columns, boolean failOnError) {
+        super(api);
+        this.contentType = contentType;
+        this.columns = columns;
+        this.failOnError = failOnError;
+    }
 
     /**
      * Initializes a new {@link VisibleFoldersRequest}.
@@ -77,9 +94,7 @@ public class VisibleFoldersRequest extends AbstractFolderRequest<VisibleFoldersR
      * @param columns The columns which shall be available in returned folder objects
      */
     public VisibleFoldersRequest(final API api, final String contentType, final int[] columns) {
-        super(api);
-        this.contentType = contentType;
-        this.columns = columns;
+        this(api, contentType, columns, true);
     }
 
     /**
@@ -111,6 +126,6 @@ public class VisibleFoldersRequest extends AbstractFolderRequest<VisibleFoldersR
 
     @Override
     public VisibleFoldersParser getParser() {
-        return new VisibleFoldersParser(columns, true);
+        return new VisibleFoldersParser(columns, failOnError);
     }
 }

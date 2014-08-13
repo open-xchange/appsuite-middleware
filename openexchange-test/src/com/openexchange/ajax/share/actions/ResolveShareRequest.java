@@ -62,20 +62,23 @@ import com.openexchange.ajax.framework.Header;
 public class ResolveShareRequest implements AJAXRequest<ResolveShareResponse> {
 
     private final ParsedShare share;
+    private final boolean failOnNonRedirect;
 
     /**
      * Initializes a new {@link ResolveShareRequest}.
      *
      * @param share The share to resolve
+     * @param failOnNonRedirect <code>true</code> to fail if request is not redirected, <code>false</code>, otherwise
      */
-    public ResolveShareRequest(ParsedShare share) {
+    public ResolveShareRequest(ParsedShare share, boolean failOnNonRedirect) {
         super();
         this.share = share;
+        this.failOnNonRedirect = failOnNonRedirect;
     }
 
     @Override
     public ResolveShareParser getParser() {
-        return new ResolveShareParser();
+        return new ResolveShareParser(failOnNonRedirect);
     }
 
     @Override
