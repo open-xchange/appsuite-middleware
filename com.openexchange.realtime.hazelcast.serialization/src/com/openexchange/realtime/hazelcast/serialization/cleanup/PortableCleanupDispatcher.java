@@ -128,7 +128,8 @@ public class PortableCleanupDispatcher extends AbstractCustomPortable implements
 
     @Override
     public void readPortable(PortableReader reader) throws IOException {
-        id = reader.readPortable(FIELD_ID);
+        //http://bugs.java.com/view_bug.do?bug_id=6302954
+        id = reader.<PortableID>readPortable(FIELD_ID);
     }
 
     @Override

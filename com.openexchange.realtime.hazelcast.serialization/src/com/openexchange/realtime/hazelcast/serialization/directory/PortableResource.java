@@ -147,7 +147,8 @@ public class PortableResource extends DefaultResource implements CustomPortable 
             presence = portablePresence.getPresence();
         }
         timestamp = new Date(reader.readLong(FIELD_TIMESTAMP));
-        routingInfo = reader.readPortable(FIELD_ROUTINGINFO);
+        //http://bugs.java.com/view_bug.do?bug_id=6302954
+        routingInfo = reader.<PortableRoutingInfo>readPortable(FIELD_ROUTINGINFO);
     }
 
     @Override
