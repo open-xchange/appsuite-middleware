@@ -47,33 +47,65 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast.serialization;
+package com.openexchange.realtime.hazelcast.serialization.directory;
 
-import com.hazelcast.nio.serialization.ClassDefinition;
-import com.hazelcast.nio.serialization.Portable;
-import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
+import java.io.IOException;
+import java.util.Map.Entry;
+import com.hazelcast.core.Member;
+import com.hazelcast.nio.serialization.PortableReader;
+import com.hazelcast.nio.serialization.PortableWriter;
+import com.hazelcast.query.Predicate;
+import com.openexchange.hazelcast.serialization.CustomPortable;
+import com.openexchange.realtime.hazelcast.serialization.packet.PortableID;
+
 
 /**
- * {@link PortableResourceFactory}
- * 
+ * {@link MemberPredicate} - Filters resources that are located on a member node via a distributed query.
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.1
  */
-public class PortableResourceFactory extends AbstractCustomPortableFactory {
+public class PortableMemberPredicate implements Predicate<PortableID, PortableResource>, CustomPortable {
+
+    private static final long serialVersionUID = -3149448521057961502L;
+
+    public static final int CLASS_ID = 8;
+
+    private String uuid;
+    private final static String UUID="uuid";
+
+    public PortableMemberPredicate() {
+        super();
+    }
+
+    public PortableMemberPredicate(Member member) {
+        this.uuid = member.getUuid();
+    }
 
     @Override
-    public Portable create() {
-        return new PortableResource();
+    public boolean apply(Entry<PortableID, PortableResource> mapEntry) {
+        PortableResource resource = mapEntry.getValue();
+        return uuid.equals(resource.getRoutingInfo().getId());
+    }
+
+    @Override
+    public void writePortable(PortableWriter writer) throws IOException {
+        writer.writeUTF(UUID, uuid);
+    }
+
+    @Override
+    public void readPortable(PortableReader reader) throws IOException {
+        uuid = reader.readUTF(UUID);
+    }
+
+    @Override
+    public int getFactoryId() {
+        return FACTORY_ID;
     }
 
     @Override
     public int getClassId() {
-        return PortableResource.CLASS_ID;
-    }
-
-    @Override
-    public ClassDefinition getClassDefinition() {
-        return PortableResource.CLASS_DEFINITION;
+        return CLASS_ID;
     }
 
 }

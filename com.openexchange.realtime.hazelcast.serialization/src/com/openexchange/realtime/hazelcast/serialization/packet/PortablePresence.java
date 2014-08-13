@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast.serialization;
+package com.openexchange.realtime.hazelcast.serialization.packet;
 
 import java.io.IOException;
 import org.apache.commons.lang.Validate;

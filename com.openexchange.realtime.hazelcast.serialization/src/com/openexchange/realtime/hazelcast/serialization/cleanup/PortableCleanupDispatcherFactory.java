@@ -47,28 +47,28 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast.serialization;
+package com.openexchange.realtime.hazelcast.serialization.cleanup;
 
 import com.hazelcast.nio.serialization.Portable;
 import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
 
 
 /**
- * {@link PortableMemberPredicateFactory}
+ * {@link PortableCleanupDispatcherFactory}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.1
  */
-public class PortableMemberPredicateFactory extends AbstractCustomPortableFactory {
+public class PortableCleanupDispatcherFactory extends AbstractCustomPortableFactory {
 
     @Override
     public Portable create() {
-        return new PortableMemberPredicate();
+        return new PortableCleanupDispatcher();
     }
 
     @Override
     public int getClassId() {
-        return PortableMemberPredicate.CLASS_ID;
+        return PortableCleanupDispatcher.CLASS_ID;
     }
 
 }

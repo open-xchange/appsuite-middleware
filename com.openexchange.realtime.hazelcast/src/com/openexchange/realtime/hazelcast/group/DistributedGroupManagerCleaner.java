@@ -56,9 +56,9 @@ import com.hazelcast.core.EntryEvent;
 import com.hazelcast.query.Predicate;
 import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.hazelcast.directory.ResourceMappingEntryAdapter;
-import com.openexchange.realtime.hazelcast.serialization.PortableID;
-import com.openexchange.realtime.hazelcast.serialization.PortableNotInternalPredicate;
-import com.openexchange.realtime.hazelcast.serialization.PortableResource;
+import com.openexchange.realtime.hazelcast.serialization.directory.PortableResource;
+import com.openexchange.realtime.hazelcast.serialization.group.PortableNotInternalPredicate;
+import com.openexchange.realtime.hazelcast.serialization.packet.PortableID;
 
 
 /**

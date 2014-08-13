@@ -47,31 +47,31 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast.serialization;
+package com.openexchange.realtime.hazelcast.serialization.packet;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import com.hazelcast.nio.serialization.ClassDefinition;
 import com.hazelcast.nio.serialization.ClassDefinitionBuilder;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 import com.openexchange.hazelcast.serialization.CustomPortable;
-import com.openexchange.realtime.directory.RoutingInfo;
+import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.IDComponentsParser;
+import com.openexchange.realtime.packet.IDComponentsParser.IDComponents;
+
 
 /**
- * {@link PortableRoutingInfo} - A {@link RoutingInfo} implementation that can efficiently be serialized via Hazelcast's Portable mechanism.
- * 
+ * {@link PortableID} A {@link ID} implementation that can efficiently be serialized via Hazelcast's Portable mechanism.
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
- * @since 7.6.1
+ * @since 7.6.0
  */
-public class PortableRoutingInfo extends RoutingInfo implements CustomPortable {
+public class PortableID extends ID implements CustomPortable {
 
-    public static final int CLASS_ID = 12;
 
-    private static final String FIELD_HOSTBYTES = "hostbytes";
+    private static final long serialVersionUID = -6140097121581373922L;
 
-    private static final String FIELD_PORT = "port";
+    public static final int CLASS_ID = 5;
 
     private static final String FIELD_ID = "id";
 
@@ -79,51 +79,68 @@ public class PortableRoutingInfo extends RoutingInfo implements CustomPortable {
 
     static {
         CLASS_DEFINITION = new ClassDefinitionBuilder(FACTORY_ID, CLASS_ID)
-        .addByteArrayField(FIELD_HOSTBYTES)
-        .addIntField(FIELD_PORT)
-        .addUTFField(FIELD_ID)
-        .build();
+            .addUTFField(FIELD_ID)
+            .build();
     }
 
     /**
-     * Initializes a new {@link PortableRoutingInfo}.
+     * Initializes a new {@link PortableID}.
      */
-    public PortableRoutingInfo() {
+    public PortableID() {
         super();
     }
 
     /**
-     * Initializes a new {@link PortableRoutingInfo} by copying the infos from another instance.
-     * 
-     * @param routingInfo The other instance, must not be null
+     * Initializes a new {@link PortableID} based on an existing non portable ID.
+     * @param id The non portable ID to use as base for this PortableID.
      */
-    public PortableRoutingInfo(RoutingInfo routingInfo) {
-        super(routingInfo);
+    public PortableID(ID id) {
+        super(id.getProtocol(), id.getComponent(), id.getUser(), id.getContext(), id.getResource());
     }
 
     /**
-     * Initializes a new {@link PortableRoutingInfo}.
-     * 
-     * @param address The address used to initialize this RoutingInfo, must not be null
-     * @param id The unique id of the RoutingInfo
+     * Initializes a new {@link PortableID}.
+     * @param id
      */
-    public PortableRoutingInfo(InetSocketAddress address, String id) {
-        super(address, id);
+    public PortableID(String id) {
+        super(id);
+    }
+
+    /**
+     * Initializes a new {@link PortableID}.
+     * @param id
+     * @param defaultContext
+     */
+    public PortableID(String id, String defaultContext) {
+        super(id, defaultContext);
+    }
+
+    /**
+     * Initializes a new {@link PortableID}.
+     * @param protocol
+     * @param user
+     * @param context
+     * @param resource
+     */
+    public PortableID(String protocol, String user, String context, String resource) {
+        super(protocol, user, context, resource);
+    }
+
+    /**
+     * Initializes a new {@link PortableID}.
+     * @param protocol
+     * @param component
+     * @param user
+     * @param context
+     * @param resource
+     */
+    public PortableID(String protocol, String component, String user, String context, String resource) {
+        super(protocol, component, user, context, resource);
     }
 
     @Override
-    public void writePortable(PortableWriter writer) throws IOException {
-        final InetAddress inetAddress = socketAddress.getAddress();
-        writer.writeByteArray(FIELD_HOSTBYTES, inetAddress.getAddress());
-        writer.writeInt(FIELD_PORT, socketAddress.getPort());
-        writer.writeUTF(FIELD_ID, id);
-    }
-
-    @Override
-    public void readPortable(PortableReader reader) throws IOException {
-        final InetAddress inetAddress = InetAddress.getByAddress(reader.readByteArray(FIELD_HOSTBYTES));
-        socketAddress = new InetSocketAddress(inetAddress, reader.readInt(FIELD_PORT));
-        id = reader.readUTF(FIELD_ID);
+    public PortableID toGeneralForm() {
+        return new PortableID(null, component, user, context, null);
     }
 
     @Override
@@ -134,6 +151,24 @@ public class PortableRoutingInfo extends RoutingInfo implements CustomPortable {
     @Override
     public int getClassId() {
         return CLASS_ID;
+    }
+
+    @Override
+    public void writePortable(PortableWriter writer) throws IOException {
+        writer.writeUTF(FIELD_ID, this.toString());
+    }
+
+    @Override
+    public void readPortable(PortableReader reader) throws IOException {
+        String idString = reader.readUTF(FIELD_ID);
+        IDComponents idComponents = IDComponentsParser.parse(idString);
+        protocol = idComponents.protocol;
+        component = idComponents.component;
+        user = idComponents.user;
+        context = idComponents.context;
+        resource = idComponents.resource;
+        sanitize();
+        validate();
     }
 
 }

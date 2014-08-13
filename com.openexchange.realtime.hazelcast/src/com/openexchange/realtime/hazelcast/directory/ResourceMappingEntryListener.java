@@ -52,8 +52,8 @@ package com.openexchange.realtime.hazelcast.directory;
 import com.google.common.base.Optional;
 import com.hazelcast.core.EntryListener;
 import com.hazelcast.query.Predicate;
-import com.openexchange.realtime.hazelcast.serialization.PortableID;
-import com.openexchange.realtime.hazelcast.serialization.PortableResource;
+import com.openexchange.realtime.hazelcast.serialization.directory.PortableResource;
+import com.openexchange.realtime.hazelcast.serialization.packet.PortableID;
 
 
 /**

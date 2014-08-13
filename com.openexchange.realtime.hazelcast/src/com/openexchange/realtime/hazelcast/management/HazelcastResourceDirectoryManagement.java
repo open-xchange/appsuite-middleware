@@ -63,8 +63,8 @@ import com.hazelcast.core.MultiMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementObject;
 import com.openexchange.realtime.hazelcast.directory.HazelcastResourceDirectory;
-import com.openexchange.realtime.hazelcast.serialization.PortableID;
-import com.openexchange.realtime.hazelcast.serialization.PortableResource;
+import com.openexchange.realtime.hazelcast.serialization.directory.PortableResource;
+import com.openexchange.realtime.hazelcast.serialization.packet.PortableID;
 
 
 /**

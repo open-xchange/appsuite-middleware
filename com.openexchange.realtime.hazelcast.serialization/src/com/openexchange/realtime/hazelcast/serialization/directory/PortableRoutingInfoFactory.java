@@ -47,73 +47,34 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast.serialization;
+package com.openexchange.realtime.hazelcast.serialization.directory;
 
-import java.io.IOException;
-import java.util.Map.Entry;
-import com.hazelcast.nio.serialization.PortableReader;
-import com.hazelcast.nio.serialization.PortableWriter;
-import com.hazelcast.query.Predicate;
-import com.openexchange.hazelcast.serialization.CustomPortable;
-import com.openexchange.realtime.hazelcast.serialization.directory.PortableResource;
-import com.openexchange.realtime.hazelcast.serialization.packet.PortableID;
+import com.hazelcast.nio.serialization.ClassDefinition;
+import com.hazelcast.nio.serialization.Portable;
+import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
+
 
 /**
- * {@link PortableContextPredicate} - Predicate to lookup Resources based on the context identifier.
- * 
+ * {@link PortableRoutingInfoFactory}
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
- * @since 7.6.0
+ * @since 7.6.1
  */
-public class PortableContextPredicate implements Predicate<PortableID, PortableResource>, CustomPortable {
-
-    private static final long serialVersionUID = -8551722082184158155L;
-
-    public static final int CLASS_ID = 13;
-
-    private String contextId;
-
-    private static final String CONTEXT_ID = "contextid";
-
-    /**
-     * Initializes a new {@link PortableContextPredicate}.
-     * 
-     * @param contextId The contextid to use when filtering/applying the predicate
-     */
-    public PortableContextPredicate(String contextId) {
-        this.contextId = contextId.trim();
-    }
-
-    /**
-     * Initializes a new {@link PortableContextPredicate}.
-     */
-    public PortableContextPredicate() {
-        super();
-    }
+public class PortableRoutingInfoFactory extends AbstractCustomPortableFactory {
 
     @Override
-    public boolean apply(Entry<PortableID, PortableResource> mapEntry) {
-        PortableID id = mapEntry.getKey();
-        return contextId.equals(id.getContext());
-    }
-
-    @Override
-    public void writePortable(PortableWriter writer) throws IOException {
-        writer.writeUTF(CONTEXT_ID, contextId);
-    }
-
-    @Override
-    public void readPortable(PortableReader reader) throws IOException {
-        contextId = reader.readUTF(CONTEXT_ID);
-    }
-
-    @Override
-    public int getFactoryId() {
-        return FACTORY_ID;
+    public Portable create() {
+        return new PortableRoutingInfo();
     }
 
     @Override
     public int getClassId() {
-        return CLASS_ID;
+        return PortableRoutingInfo.CLASS_ID;
+    }
+
+    @Override
+    public ClassDefinition getClassDefinition() {
+        return PortableRoutingInfo.CLASS_DEFINITION;
     }
 
 }

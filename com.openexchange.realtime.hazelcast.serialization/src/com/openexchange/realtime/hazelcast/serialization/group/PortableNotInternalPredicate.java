@@ -47,34 +47,52 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast.serialization;
+package com.openexchange.realtime.hazelcast.serialization.group;
 
-import com.hazelcast.nio.serialization.ClassDefinition;
-import com.hazelcast.nio.serialization.Portable;
-import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
-
+import java.io.IOException;
+import java.util.Map.Entry;
+import com.hazelcast.nio.serialization.PortableReader;
+import com.hazelcast.nio.serialization.PortableWriter;
+import com.hazelcast.query.Predicate;
+import com.openexchange.hazelcast.serialization.CustomPortable;
+import com.openexchange.realtime.hazelcast.serialization.directory.PortableResource;
+import com.openexchange.realtime.hazelcast.serialization.packet.PortableID;
+import com.openexchange.realtime.packet.ID;
 
 /**
- * {@link PortablePresenceFactory}
- *
+ * {@link PortableNotInternalPredicate} - Filter out internal {@link ID}s.
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.1
  */
-public class PortablePresenceFactory extends AbstractCustomPortableFactory {
+public class PortableNotInternalPredicate implements Predicate<PortableID, PortableResource>, CustomPortable {
+
+    private static final long serialVersionUID = -4738251095093967960L;
+
+    public static final int CLASS_ID = 7;
 
     @Override
-    public Portable create() {
-        return new PortablePresence();
+    public boolean apply(Entry<PortableID, PortableResource> event) {
+        PortableID id = event.getKey();
+        return !id.isInternal();
+    }
+
+    @Override
+    public void writePortable(PortableWriter writer) throws IOException {
+    }
+
+    @Override
+    public void readPortable(PortableReader reader) throws IOException {
+    }
+
+    @Override
+    public int getFactoryId() {
+        return FACTORY_ID;
     }
 
     @Override
     public int getClassId() {
-        return PortablePresence.CLASS_ID;
-    }
-
-    @Override
-    public ClassDefinition getClassDefinition() {
-        return PortablePresence.CLASS_DEFINITION;
+        return CLASS_ID;
     }
 
 }

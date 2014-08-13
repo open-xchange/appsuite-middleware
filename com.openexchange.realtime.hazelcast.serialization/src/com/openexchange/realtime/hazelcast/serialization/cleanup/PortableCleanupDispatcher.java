@@ -47,77 +47,78 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast.serialization;
+package com.openexchange.realtime.hazelcast.serialization.cleanup;
 
 import java.io.IOException;
+import java.util.concurrent.Callable;
+import org.apache.commons.lang.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
-import com.openexchange.hazelcast.serialization.CustomPortable;
-import com.openexchange.realtime.group.SelectorChoice;
+import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
+import com.openexchange.realtime.cleanup.LocalRealtimeCleanup;
+import com.openexchange.realtime.exception.RealtimeExceptionCodes;
+import com.openexchange.realtime.hazelcast.serialization.osgi.Services;
+import com.openexchange.realtime.hazelcast.serialization.packet.PortableID;
 import com.openexchange.realtime.packet.ID;
 
 /**
- * {@link PortableSelectorChoice} - A {@link SelectorChoice} implementation that can efficiently be serialized via Hazelcast's Portable
+ * {@link PortableCleanupDispatcher} - Issues a cleanup on the LocalRealtimeCleanup service.
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.1
  */
-public class PortableSelectorChoice extends SelectorChoice implements CustomPortable {
+public class PortableCleanupDispatcher extends AbstractCustomPortable implements Callable<Void> {
 
-    public static final int CLASS_ID = 6;
+    private static final Logger LOG = LoggerFactory.getLogger(PortableCleanupDispatcher.class);
 
-    private static final String CLIENT_ID = "clientID";
+    public static final int CLASS_ID = 15;
 
-    private static final String GROUP_ID = "groupID";
+    private static final String FIELD_ID = "id";
 
-    private static final String SELECTOR = "selector";
+    private ID id;
 
     /**
-     * Initializes a new {@link PortableSelectorChoice}.
+     * Initializes a new {@link PortableCleanupDispatcher}.
+     * 
+     * @param id The ID to clean up for.
+     * @param cleanupScopes The scopes to clean up on the remote machines.
      */
-    protected PortableSelectorChoice() {
+    public PortableCleanupDispatcher(ID id) {
+        Validate.notNull(id, "Mandatory parameter id is missing.");
+        this.id = id;
+    }
+
+    /**
+     * Initializes a new {@link PortableCleanupDispatcher}.
+     */
+    public PortableCleanupDispatcher() {
         super();
     }
 
-    /**
-     * Initializes a new {@link PortableSelectorChoice}.
-     * 
-     * @param clientId
-     * @param groupId
-     * @param selector
-     */
-    public PortableSelectorChoice(ID clientId, ID groupId, String selector) {
-        super(clientId, groupId, selector);
-    }
-
-    /**
-     * Initializes a new {@link PortableSelectorChoice}.
-     * 
-     * @param selectorChoice
-     */
-    public PortableSelectorChoice(SelectorChoice selectorChoice) {
-        super(selectorChoice);
+    @Override
+    public Void call() throws Exception {
+        LocalRealtimeCleanup localRealtimeCleanup = Services.getService(LocalRealtimeCleanup.class);
+        if (localRealtimeCleanup != null) {
+            localRealtimeCleanup.cleanForId(id);
+        } else {
+            LOG.error(
+                "Error while trying to cleanup for ResponseChannel ID: {}",
+                id,
+                RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(LocalRealtimeCleanup.class.getName()));
+        }
+        return null;
     }
 
     @Override
     public void writePortable(PortableWriter writer) throws IOException {
-        writer.writePortable(CLIENT_ID, new PortableID(client));
-        writer.writePortable(GROUP_ID, new PortableID(group));
-        writer.writeUTF(SELECTOR, selector);
+        writer.writePortable(FIELD_ID, new PortableID(id));
     }
 
     @Override
     public void readPortable(PortableReader reader) throws IOException {
-        PortableID pCID = reader.readPortable(CLIENT_ID);
-        PortableID pGID = reader.readPortable(GROUP_ID);
-        client = pCID;
-        group = pGID;
-        selector = reader.readUTF(SELECTOR);
-    }
-
-    @Override
-    public int getFactoryId() {
-        return FACTORY_ID;
+        id = reader.readPortable(FIELD_ID);
     }
 
     @Override

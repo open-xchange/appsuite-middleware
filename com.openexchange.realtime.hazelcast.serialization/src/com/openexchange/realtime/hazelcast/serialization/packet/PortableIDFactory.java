@@ -47,54 +47,33 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast.cleanup;
+package com.openexchange.realtime.hazelcast.serialization.packet;
 
-import java.io.Serializable;
-import java.util.concurrent.Callable;
-import org.apache.commons.lang.Validate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.realtime.cleanup.LocalRealtimeCleanup;
-import com.openexchange.realtime.exception.RealtimeExceptionCodes;
-import com.openexchange.realtime.hazelcast.osgi.Services;
-import com.openexchange.realtime.packet.ID;
+import com.hazelcast.nio.serialization.ClassDefinition;
+import com.hazelcast.nio.serialization.Portable;
+import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
 
 /**
- * {@link CleanupDispatcher} - Issues a cleanup on the LocalRealtimeCleanup service.
+ * {@link PortableIDFactory}
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since 7.6.0
  */
-public class CleanupDispatcher implements Callable<Void>, Serializable {
+public class PortableIDFactory extends AbstractCustomPortableFactory {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CleanupDispatcher.class);
-    
-    private static final long serialVersionUID = 2669822501149210448L;
-
-    private final ID id;
-
-    /**
-     * Initializes a new {@link CleanupDispatcher}.
-     * 
-     * @param id The ID to clean up for.
-     * @param cleanupScopes The scopes to clean up on the remote machines. 
-     */
-    public CleanupDispatcher(ID id) {
-        Validate.notNull(id, "Mandatory parameter id is missing.");
-        this.id = id;
+    @Override
+    public Portable create() {
+        return new PortableID();
     }
 
     @Override
-    public Void call() throws Exception {
-        LocalRealtimeCleanup localRealtimeCleanup = Services.getService(LocalRealtimeCleanup.class);
-        if (localRealtimeCleanup != null) {
-            localRealtimeCleanup.cleanForId(id);
-        } else {
-            LOG.error(
-                "Error while trying to cleanup for ResponseChannel ID: {}",
-                id,
-                RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(LocalRealtimeCleanup.class.getName()));
-        }
-        return null;
+    public int getClassId() {
+        return PortableID.CLASS_ID;
+    }
+
+    @Override
+    public ClassDefinition getClassDefinition() {
+        return PortableID.CLASS_DEFINITION;
     }
 
 }

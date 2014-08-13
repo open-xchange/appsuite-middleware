@@ -47,30 +47,28 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast.cleanup;
+package com.openexchange.realtime.hazelcast.serialization.channel;
 
-import static org.junit.Assert.assertNotNull;
-import org.junit.Test;
-import com.openexchange.realtime.packet.ID;
+import com.hazelcast.nio.serialization.Portable;
+import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
 
 
 /**
- * {@link CleanupDispatcherTest}
+ * {@link PortableStanzaDispatcherFactory}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since 7.6.1
  */
-public class CleanupDispatcherTest {
+public class PortableStanzaDispatcherFactory extends AbstractCustomPortableFactory {
 
-    @Test(expected=IllegalArgumentException.class)
-    public void testCleanupDispatcherNullId() {
-        CleanupDispatcher cleanupDispatcher = new CleanupDispatcher(null);
+    @Override
+    public Portable create() {
+        return new PortableStanzaDispatcher();
     }
 
-    @Test
-    public void testCleanupDispatcher() {
-        ID marens = new ID("ox", "marc.arens", "premium", "uniqueResource");
-        CleanupDispatcher cleanupDispatcher = new CleanupDispatcher(marens);
-        assertNotNull(cleanupDispatcher);
+    @Override
+    public int getClassId() {
+        return PortableStanzaDispatcher.CLASS_ID;
     }
 
 }

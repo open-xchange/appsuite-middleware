@@ -47,52 +47,72 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast.channel;
+package com.openexchange.realtime.hazelcast.serialization.channel;
 
-import java.io.Serializable;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.hazelcast.nio.serialization.Portable;
+import com.hazelcast.nio.serialization.PortableReader;
+import com.hazelcast.nio.serialization.PortableWriter;
 import com.openexchange.exception.OXException;
+import com.openexchange.hazelcast.serialization.CustomPortable;
 import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
+import com.openexchange.realtime.dispatch.Utils;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
-import com.openexchange.realtime.hazelcast.Utils;
-import com.openexchange.realtime.hazelcast.osgi.Services;
+import com.openexchange.realtime.hazelcast.serialization.osgi.Services;
+import com.openexchange.realtime.hazelcast.serialization.packet.PortableID;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 
 /**
- * {@link StanzaDispatcher}
- *
+ * {@link PortableStanzaDispatcher}
+ * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since 7.6.1
  */
-public class StanzaDispatcher implements Callable<Map<ID, OXException>>, Serializable {
+public class PortableStanzaDispatcher implements Callable<Map<ID, OXException>>, CustomPortable {
 
-    private static final long serialVersionUID = 7824598922472715144L;
-    private static final Logger LOG = LoggerFactory.getLogger(StanzaDispatcher.class);
-    private final Stanza stanza;
-    private final Set<ID> targets;
+    private static final Logger LOG = LoggerFactory.getLogger(PortableStanzaDispatcher.class);
+
+    private static final String FIELD_TARGETS = "targets";
+
+    private static final String FIELD_STANZA = "stanza";
+
+    public static int CLASS_ID = 14;
+
+    private Stanza stanza;
+
+    private Set<ID> targets;
 
     /**
-     * Initializes a new {@link StanzaDispatcher}.
+     * Initializes a new {@link PortableStanzaDispatcher}.
+     * 
      * @throws OXException
      */
-    public StanzaDispatcher() throws OXException {
-        this(null, null);
+    public PortableStanzaDispatcher() {
+        this.stanza = null;
+        this.targets = new HashSet<ID>();
     }
 
     /**
-     * Initializes a new {@link StanzaDispatcher}.
-     *
+     * Initializes a new {@link PortableStanzaDispatcher}.
+     * 
      * @param stanza The stanza to dispatch
      * @throws OXException
      */
-    public StanzaDispatcher(Stanza stanza, Set<ID> targets) throws OXException {
+    public PortableStanzaDispatcher(Stanza stanza, Set<ID> targets) throws OXException {
         super();
         this.targets = targets;
         this.stanza = stanza;
@@ -112,7 +132,7 @@ public class StanzaDispatcher implements Callable<Map<ID, OXException>>, Seriali
          * service. This will succeed if the Channel can conjure the Resource.
          */
         if (Utils.shouldResend(exceptions, stanza)) {
-            //Can't resend without incrementing but incrementing will mess up client sequences and further communication, so set to -1
+            // Can't resend without incrementing but incrementing will mess up client sequences and further communication, so set to -1
             stanza.setSequenceNumber(-1);
             final GlobalRealtimeCleanup cleanup = Services.optService(GlobalRealtimeCleanup.class);
             final MessageDispatcher messageDispatcher = Services.optService(MessageDispatcher.class);
@@ -128,6 +148,73 @@ public class StanzaDispatcher implements Callable<Map<ID, OXException>>, Seriali
             }
         }
         return exceptions;
+    }
+
+    @Override
+    public void writePortable(PortableWriter writer) throws IOException {
+        HashSet<PortableID> portableTargets = new HashSet<PortableID>(targets.size());
+        for (ID targetID : targets) {
+            portableTargets.add(new PortableID(targetID));
+        }
+        writer.writePortableArray(FIELD_TARGETS, portableTargets.toArray(new Portable[portableTargets.size()]));
+        writer.writeByteArray(FIELD_STANZA, getBytes(stanza));
+    }
+
+    @Override
+    public void readPortable(PortableReader reader) throws IOException {
+        Portable[] portableTargets = reader.readPortableArray(FIELD_TARGETS);
+        for (Portable portableTarget : portableTargets) {
+            if (PortableID.class.isInstance(portableTarget)) {
+                targets.add(PortableID.class.cast(portableTarget));
+            } else {
+                LOG.error("Expected a PortableID instead of {}", portableTarget);
+            }
+        }
+        byte[] stanzaBytes = reader.readByteArray(FIELD_STANZA);
+        try {
+            stanza = getStanza(stanzaBytes);
+        } catch (ClassNotFoundException e) {
+            throw new IOException(e);
+        }
+    }
+
+    @Override
+    public int getFactoryId() {
+        return FACTORY_ID;
+    }
+
+    @Override
+    public int getClassId() {
+        return CLASS_ID;
+    }
+
+    /**
+     * Serialize a {@link Stanza} into a byte array
+     * @param stanza The {@link Stanza} to be serialized
+     * @return The serialized {@link Stanza} as byte array
+     * @throws IOException If the {@link Stanza} can't be serialized
+     */
+    private static byte[] getBytes(Stanza stanza) throws IOException {
+        final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        final ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
+        objectOutputStream.writeObject(stanza);
+        return byteArrayOutputStream.toByteArray();
+    }
+
+    /**
+     * Deserialize a {@link Stanza} from a byte array representation. Needs access to all the classes that make up a Stanza via proper OSGI
+     * imports.
+     * 
+     * @param stanzaBytes The byte array representation of the Stanza
+     * @return The deserialzed {@link Stanza}
+     * @throws IOException If reading the byte array fails
+     * @throws ClassNotFoundException If the OSGI imports are too restrictive and not all classes that make up a {@link Stanza} subclass are
+     *             accessible
+     */
+    private static Stanza getStanza(byte[] stanzaBytes) throws IOException, ClassNotFoundException {
+        final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(stanzaBytes);
+        final ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
+        return Stanza.class.cast(objectInputStream.readObject());
     }
 
 }

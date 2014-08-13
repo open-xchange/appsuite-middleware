@@ -75,12 +75,12 @@ import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.directory.RoutingInfo;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
+import com.openexchange.realtime.dispatch.Utils;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
-import com.openexchange.realtime.hazelcast.Utils;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
-import com.openexchange.realtime.hazelcast.channel.StanzaDispatcher;
 import com.openexchange.realtime.hazelcast.directory.HazelcastResourceDirectory;
 import com.openexchange.realtime.hazelcast.osgi.Services;
+import com.openexchange.realtime.hazelcast.serialization.channel.PortableStanzaDispatcher;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.IDMap;
@@ -224,7 +224,7 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
             LOG.debug("Sending to '{}' @ {}", stanza.getTo(), receiver);
             stanza.trace("Sending to '" + stanza.getTo() + "' @ " + receiver);
             ensureSequence(stanza, receiver);
-            Future<Map<ID, OXException>> task = executorService.submitToMember(new StanzaDispatcher(stanza, ids), receiver);
+            Future<Map<ID, OXException>> task = executorService.submitToMember(new PortableStanzaDispatcher(stanza, ids), receiver);
             futures.add(task);
         }
         // Await completion of send requests and extract their exceptions (if any)

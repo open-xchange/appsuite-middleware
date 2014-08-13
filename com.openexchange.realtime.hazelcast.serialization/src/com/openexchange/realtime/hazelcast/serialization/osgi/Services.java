@@ -47,50 +47,73 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast;
+package com.openexchange.realtime.hazelcast.serialization.osgi;
 
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.dispatch.DispatchExceptionCode;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Stanza;
-
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link Utils}
+ * {@link Services} - The static service lookup.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class Utils {
+public final class Services {
 
     /**
-     * Check if an {@link DispatchExceptionCode.RESOURCE_OFFLINE} occurred while trying to reach the exact recipient specified in the stanza
-     * iow. stanza.getTo().isGeneral() == false. This is the case when e.g. addressing synthetic resources like
-     * "synthetic.office://operations@1/28041.219886"
-     * 
-     * @param sendErrors The map of ID -> Exception that was the result when trying to send a {@link Stanza} 
-     * @param stanza The {@link Stanza} you tried to send
-     * @return true if the exact ID was offline, false otherwise
+     * Initializes a new {@link Services}.
      */
-    public static boolean shouldResend(Map<ID, OXException> sendErrors, Stanza stanza) {
-        if (sendErrors.isEmpty()) {
-            return false;
+    private Services() {
+        super();
+    }
+
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Sets the service lookup.
+     *
+     * @param serviceLookup The service lookup or <code>null</code>
+     */
+    public static void setServiceLookup(ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
+    }
+
+    /**
+     * Gets the service lookup.
+     *
+     * @return The service lookup or <code>null</code>
+     */
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
+    }
+
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or null if absent
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(Class<? extends S> clazz) {
+        ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException(
+                "Missing ServiceLookup instance. Bundle \"com.openexchange.realtime.hazelcast.serialization\" not started?");
         }
-        OXException exception = sendErrors.get(stanza.getTo());
-        if (exception == null) {
-            return false;
+        return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
         }
-        Throwable cause = exception.getCause();
-        if (cause == null) {
-            return false;
-        }
-        if (cause instanceof OXException) {
-            OXException oxexception = (OXException) cause;
-            if ( DispatchExceptionCode.RESOURCE_OFFLINE.equals(oxexception)) {
-                return true;
-            }
-        }
-        return false;
     }
 
 }

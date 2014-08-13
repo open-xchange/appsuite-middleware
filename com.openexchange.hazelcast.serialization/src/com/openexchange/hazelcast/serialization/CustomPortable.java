@@ -102,7 +102,9 @@ public interface CustomPortable extends Portable {
      * <li><code>  10</code>: com.openexchange.realtime.hazelcast.serialization.PortableHazelcastResource</li>
      * <li><code>  11</code>: com.openexchange.realtime.hazelcast.serialization.PortablePresence</li>
      * <li><code>  12</code>: com.openexchange.realtime.hazelcast.serialization.PortableRoutingInfo</li>
-     * <li><code>  13</code>: com.openexchange.realtime.hazelcast.serialization.PortableCOntextPredicate</li>
+     * <li><code>  13</code>: com.openexchange.realtime.hazelcast.serialization.PortableContextPredicate</li>
+     * <li><code>  14</code>: com.openexchange.realtime.hazelcast.serialization.channel.PortableStanzaDispatcher</li>
+     * <li><code>  15</code>: com.openexchange.realtime.hazelcast.serialization.cleanup.PortableCleanupDispatcher</li>
      * </ul>
      *
      * @return The class ID

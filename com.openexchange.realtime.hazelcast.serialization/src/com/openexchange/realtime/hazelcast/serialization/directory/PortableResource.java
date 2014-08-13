@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast.serialization;
+package com.openexchange.realtime.hazelcast.serialization.directory;
 
 import java.io.IOException;
 import java.util.Date;
@@ -62,6 +62,7 @@ import com.openexchange.hazelcast.serialization.CustomPortable;
 import com.openexchange.realtime.directory.DefaultResource;
 import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.directory.RoutingInfo;
+import com.openexchange.realtime.hazelcast.serialization.packet.PortablePresence;
 
 /**
  * {@link PortableResource} Hazelcast specific {@link Portable}{@link Resource} implementation. Can be initialized from an existing
