@@ -59,6 +59,7 @@ import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
 import com.openexchange.realtime.hazelcast.serialization.PortableContextPredicateFactory;
 import com.openexchange.realtime.hazelcast.serialization.channel.PortableStanzaDispatcherFactory;
 import com.openexchange.realtime.hazelcast.serialization.cleanup.PortableCleanupDispatcherFactory;
+import com.openexchange.realtime.hazelcast.serialization.cleanup.PortableCleanupStatusFactory;
 import com.openexchange.realtime.hazelcast.serialization.directory.PortableMemberPredicateFactory;
 import com.openexchange.realtime.hazelcast.serialization.directory.PortableResourceFactory;
 import com.openexchange.realtime.hazelcast.serialization.directory.PortableRoutingInfoFactory;
@@ -143,6 +144,7 @@ public class HazelcastSerializationActivator extends HousekeepingActivator {
         registerService(CustomPortableFactory.class, new PortableSelectorChoiceFactory());
         registerService(CustomPortableFactory.class, new PortableStanzaDispatcherFactory());
         registerService(CustomPortableFactory.class, new PortableCleanupDispatcherFactory());
+        registerService(CustomPortableFactory.class, new PortableCleanupStatusFactory());
     }
 
     @Override

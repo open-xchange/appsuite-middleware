@@ -63,6 +63,7 @@ import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
 import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.hazelcast.directory.HazelcastResourceDirectory;
+import com.openexchange.realtime.hazelcast.serialization.cleanup.PortableCleanupStatus;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.util.IDMap;
 
@@ -131,14 +132,14 @@ public class CleanupMemberShipListener implements MembershipListener {
         Member memberToClean = membershipEvent.getMember();
         String uuid = memberToClean.getUuid();
         try {
-            IMap<String, CleanupStatus> cleanupMapping = getCleanupMapping();
+            IMap<String, PortableCleanupStatus> cleanupMapping = getCleanupMapping();
             cleanupMapping.lock(uuid);
             try {
-                CleanupStatus cleanupStatus = cleanupMapping.get(uuid);
+                PortableCleanupStatus cleanupStatus = cleanupMapping.get(uuid);
                 // is somebody already cleaning up for him?
                 if (!cleanupDone(cleanupStatus)) {
                     LOG.info("Starting cleanup for member {} with IP {}", memberToClean.getUuid(), memberToClean.getSocketAddress());
-                    cleanupStatus = new CleanupStatus(HazelcastAccess.getLocalMember(), memberToClean);
+                    cleanupStatus = new PortableCleanupStatus(HazelcastAccess.getLocalMember(), memberToClean);
                     //do actual cleanup
                     IDMap<Resource> resourcesOfMember = directory.getResourcesOfMember(memberToClean);
                     LOG.debug("Found the following resources to clean up: {}", resourcesOfMember);
@@ -156,16 +157,16 @@ public class CleanupMemberShipListener implements MembershipListener {
                         "Cleanup was already started: {}", cleanupStatus);
                 }
             } catch (Exception e) {
-                LOG.error("Failed to start cleanup after member {} with IP {} left the cluster", uuid, memberToClean.getSocketAddress());
+                LOG.error("Failed to start cleanup after member {} with IP {} left the cluster", uuid, memberToClean.getSocketAddress(), e);
             } finally {
                 cleanupMapping.unlock(uuid);
             }
         } catch (OXException oxe) {
-            LOG.error("Failed to start cleanup after member {} with IP {} left the cluster", uuid, memberToClean.getSocketAddress());
+            LOG.error("Failed to start cleanup after member {} with IP {} left the cluster", uuid, memberToClean.getSocketAddress(), oxe);
         }
     }
 
-    private IMap<String, CleanupStatus> getCleanupMapping() throws OXException {
+    private IMap<String, PortableCleanupStatus> getCleanupMapping() throws OXException {
         HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
         return hazelcast.getMap(cleanupLockMapName);
     }
@@ -176,7 +177,7 @@ public class CleanupMemberShipListener implements MembershipListener {
      * @param member may be null
      * @return true if member is not null, the cleanup was finished during the last run and the last run was not more than 5 minutes ago
      */
-    private boolean cleanupDone(CleanupStatus cleanupStatus) {
+    private boolean cleanupDone(PortableCleanupStatus cleanupStatus) {
         if(cleanupStatus!= null) {
             long cleaningFinishTime = cleanupStatus.getCleaningFinishTime();
             if(cleaningFinishTime == -1) {

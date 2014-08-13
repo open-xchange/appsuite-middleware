@@ -47,22 +47,25 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast.cleanup;
+package com.openexchange.realtime.hazelcast.serialization.cleanup;
 
-import java.io.Serializable;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import com.hazelcast.core.Member;
+import com.hazelcast.nio.serialization.PortableReader;
+import com.hazelcast.nio.serialization.PortableWriter;
+import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
 
 /**
- * {@link CleanupStatus} - Holds data about a cluster wide cleanup for c.o.realtime.hazelcast resources that can be used to decide if a
+ * {@link PortableCleanupStatus} - Holds data about a cluster wide cleanup for c.o.realtime.hazelcast resources that can be used to decide if a
  * cleanup was already started. Additionally it holds data about who performed the cleanup at what time.
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.0
  */
-public class CleanupStatus implements Serializable {
+public class PortableCleanupStatus extends AbstractCustomPortable {
 
-    private static final long serialVersionUID = 411907049966171587L;
+    public static int CLASS_ID = 16;
 
     private String cleaningMemberId, memberToCleanId;
 
@@ -71,12 +74,19 @@ public class CleanupStatus implements Serializable {
     private long cleaningStartTime, cleaningFinishTime;
 
     /**
-     * Initializes a new {@link CleanupStatus}.
+     * Initializes a new {@link PortableCleanupStatus}.
+     */
+    public PortableCleanupStatus() {
+        super();
+    }
+
+    /**
+     * Initializes a new {@link PortableCleanupStatus}.
      * 
      * @param cleaningMember The member that started the cleanup.
      * @param memberToClean The member that left the cluster.
      */
-    public CleanupStatus(Member cleaningMember, Member memberToClean) {
+    public PortableCleanupStatus(Member cleaningMember, Member memberToClean) {
         super();
         this.cleaningMemberId = cleaningMember.getUuid();
         this.cleaningMemberAddress = cleaningMember.getSocketAddress();
@@ -213,9 +223,9 @@ public class CleanupStatus implements Serializable {
             return true;
         if (obj == null)
             return false;
-        if (!(obj instanceof CleanupStatus))
+        if (!(obj instanceof PortableCleanupStatus))
             return false;
-        CleanupStatus other = (CleanupStatus) obj;
+        PortableCleanupStatus other = (PortableCleanupStatus) obj;
         if (cleaningFinishTime != other.cleaningFinishTime)
             return false;
         if (cleaningMemberAddress == null) {
@@ -248,6 +258,19 @@ public class CleanupStatus implements Serializable {
         return "CleanupStatus [cleaningMemberId=" + cleaningMemberId + ", memberToCleanId=" + memberToCleanId
              + ", cleaningMemberAddress=" + cleaningMemberAddress + ", memberToCleanAddress=" + memberToCleanAddress 
              + ", cleaningStartTime=" + cleaningStartTime + ", cleaningFinishTime=" + cleaningFinishTime + "]";
+    }
+
+    @Override
+    public int getClassId() {
+        return CLASS_ID;
+    }
+
+    @Override
+    public void writePortable(PortableWriter writer) throws IOException {
+    }
+
+    @Override
+    public void readPortable(PortableReader reader) throws IOException {
     }
 
 }

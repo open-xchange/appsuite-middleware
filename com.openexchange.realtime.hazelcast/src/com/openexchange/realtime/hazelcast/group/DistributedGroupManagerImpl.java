@@ -150,7 +150,7 @@ public class DistributedGroupManagerImpl implements ManagementAware<DistributedG
 
     @Override
     public boolean removeClientToSelectorChoice(SelectorChoice selectorChoice) throws OXException {
-        MultiMap<ID, PortableSelectorChoice> clientToGroupsMapping = getClientToGroupsMapping();
+        MultiMap<PortableID,PortableSelectorChoice> clientToGroupsMapping = getClientToGroupsMapping();
 
         boolean clientAssociationRemoved = clientToGroupsMapping.remove(
             new PortableID(selectorChoice.getClient()),
@@ -262,7 +262,7 @@ public class DistributedGroupManagerImpl implements ManagementAware<DistributedG
      * 
      * @return A {@link MultiMap} of one client to many groups
      */
-    private MultiMap<ID, PortableSelectorChoice> getClientToGroupsMapping() throws OXException {
+    private MultiMap<PortableID, PortableSelectorChoice> getClientToGroupsMapping() throws OXException {
         HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
         return hazelcast.getMultiMap(client_map);
     }
