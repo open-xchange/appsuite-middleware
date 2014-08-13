@@ -194,7 +194,7 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
                     public void run() {
                         publisher.notifySilently();
                     }
-                }, 1000, interval);
+                }, interval, interval);
             } else {
                 LOG.warn("Ignoring too small value '{} for APN silent notification interval.", silentNotificationInterval);
             }
