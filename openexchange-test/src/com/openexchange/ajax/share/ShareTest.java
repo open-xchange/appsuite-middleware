@@ -50,8 +50,9 @@
 package com.openexchange.ajax.share;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.json.JSONException;
 import com.openexchange.ajax.folder.Create;
@@ -62,6 +63,7 @@ import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
+import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.share.actions.AllRequest;
 import com.openexchange.ajax.share.actions.AllResponse;
@@ -79,7 +81,14 @@ import com.openexchange.share.AuthenticationMode;
  */
 public abstract class ShareTest extends AbstractAJAXSession {
 
-    private List<FolderObject> foldersToDelete;
+    protected static final OCLGuestPermission[] TESTED_PERMISSIONS = new OCLGuestPermission[] {
+        createNamedAuthorPermission("otto@example.com", "Otto Example", "secret", AuthenticationMode.DIGEST),
+        createNamedGuestPermission("horst@example.com", "Horst Example", "secret", AuthenticationMode.BASIC),
+        createAnonymousAuthorPermission(),
+        createAnonymousGuestPermission()
+    };
+
+    private Map<Integer, FolderObject> foldersToDelete;
 
     /**
      * Initializes a new {@link ShareTest}.
@@ -93,7 +102,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        foldersToDelete = new ArrayList<FolderObject>();
+        foldersToDelete = new HashMap<Integer, FolderObject>();
     }
 
     /**
@@ -110,13 +119,54 @@ public abstract class ShareTest extends AbstractAJAXSession {
         FolderObject sharedFolder = Create.createPrivateFolder(
             UUIDs.getUnformattedString(UUID.randomUUID()), module, client.getValues().getUserId(), guestPermission);
         sharedFolder.setParentFolderID(parent);
-        InsertResponse insertResponse = client.execute(new InsertRequest(EnumAPI.OUTLOOK, sharedFolder));
-        insertResponse.fillObject(sharedFolder);
-        remember(sharedFolder);
-        GetResponse getResponse = client.execute(new GetRequest(api, sharedFolder.getObjectID()));
+        return insertFolder(api, sharedFolder);
+    }
+
+    /**
+     * Inserts and remembers a new private folder.
+     *
+     * @param api The folder tree to use
+     * @param module The module identifier
+     * @param parent The ID of the parent folder
+     * @return The inserted folder
+     * @throws Exception
+     */
+    protected FolderObject insertPrivateFolder(EnumAPI api, int module, int parent) throws Exception {
+        FolderObject privateFolder = Create.createPrivateFolder(
+            UUIDs.getUnformattedString(UUID.randomUUID()), module, client.getValues().getUserId());
+        privateFolder.setParentFolderID(parent);
+        return insertFolder(api, privateFolder);
+    }
+
+    /**
+     * Updates and remembers a folder.
+     *
+     * @param api The folder tree to use
+     * @param folder The folder to udpate
+     * @return The udpated folder
+     * @throws Exception
+     */
+    protected FolderObject updateFolder(EnumAPI api, FolderObject folder) throws Exception {
+        InsertResponse insertResponse = client.execute(new UpdateRequest(api, folder));
+        insertResponse.fillObject(folder);
+        remember(folder);
+        GetResponse getResponse = client.execute(new GetRequest(api, folder.getObjectID()));
+        FolderObject updatedFolder = getResponse.getFolder();
+        assertNotNull(updatedFolder);
+        assertEquals("Folder name wrong", folder.getFolderName(), updatedFolder.getFolderName());
+        updatedFolder.setLastModified(getResponse.getTimestamp());
+        return updatedFolder;
+    }
+
+    private FolderObject insertFolder(EnumAPI api, FolderObject folder) throws Exception {
+        InsertResponse insertResponse = client.execute(new InsertRequest(api, folder));
+        insertResponse.fillObject(folder);
+        remember(folder);
+        GetResponse getResponse = client.execute(new GetRequest(api, folder.getObjectID(), FolderObject.ALL_COLUMNS));
         FolderObject createdFolder = getResponse.getFolder();
         assertNotNull(createdFolder);
-        assertEquals("Folder name wrong", sharedFolder.getFolderName(), createdFolder.getFolderName());
+        assertEquals("Folder name wrong", folder.getFolderName(), createdFolder.getFolderName());
+        createdFolder.setLastModified(getResponse.getTimestamp());
         return createdFolder;
     }
 
@@ -126,7 +176,9 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @param folder The folder to remember
      */
     protected void remember(FolderObject folder) {
-        foldersToDelete.add(folder);
+        if (null != folder) {
+            foldersToDelete.put(Integer.valueOf(folder.getObjectID()), folder);
+        }
     }
 
     /**
@@ -151,7 +203,8 @@ public abstract class ShareTest extends AbstractAJAXSession {
     @Override
     protected void tearDown() throws Exception {
         if (null != client && null != foldersToDelete && 0 < foldersToDelete.size()) {
-            client.execute(new DeleteRequest(EnumAPI.OX_NEW, false, foldersToDelete.toArray(new FolderObject[foldersToDelete.size()])));
+            client.execute(new DeleteRequest(
+                EnumAPI.OX_NEW, false, foldersToDelete.values().toArray(new FolderObject[foldersToDelete.size()])));
         }
         super.tearDown();
     }
@@ -164,6 +217,35 @@ public abstract class ShareTest extends AbstractAJAXSession {
      */
     protected GuestClient resolveShare(ParsedShare share) throws Exception {
         return new GuestClient(share);
+    }
+
+    /**
+     * Checks the supplied OCL permissions against the expected guest permissions.
+     *
+     * @param expected The expected permissions
+     * @param actual The actual permissions
+     */
+    protected static void checkPermissions(OCLGuestPermission expected, OCLPermission actual) {
+        assertEquals("Permission wrong", expected.getDeletePermission(), actual.getDeletePermission());
+        assertEquals("Permission wrong", expected.getFolderPermission(), actual.getFolderPermission());
+        assertEquals("Permission wrong", expected.getReadPermission(), actual.getReadPermission());
+        assertEquals("Permission wrong", expected.getWritePermission(), actual.getWritePermission());
+    }
+
+    /**
+     * Checks the supplied share against the expected guest permissions.
+     *
+     * @param expected The expected permissions
+     * @param actual The actual share
+     */
+    protected static void checkShare(OCLGuestPermission expected, ParsedShare actual) {
+        assertNotNull("No share", actual);
+        assertEquals("Authentication mode wrong", expected.getAuthenticationMode(), actual.getAuthentication());
+        if (AuthenticationMode.ANONYMOUS != expected.getAuthenticationMode()) {
+            assertEquals("E-Mail address wrong", expected.getEmailAddress(), actual.getGuestMailAddress());
+//TODO            assertEquals("Display name wrong", guestPermission.getDisplayName(), share.getGuestDisplayName());
+            assertEquals("Password wrong", expected.getPassword(), actual.getGuestPassword());
+        }
     }
 
     protected static OCLGuestPermission createNamedGuestPermission(String emailAddress, String displayName, String password, AuthenticationMode authenticationMode) {

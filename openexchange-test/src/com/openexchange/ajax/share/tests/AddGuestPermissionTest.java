@@ -47,93 +47,83 @@
  *
  */
 
-package com.openexchange.ajax.share;
+package com.openexchange.ajax.share.tests;
 
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
+import com.openexchange.ajax.share.GuestClient;
+import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ParsedShare;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.share.AuthenticationMode;
 
 /**
- * {@link CreateTest}
+ * {@link AddGuestPermissionTest}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class CreateTest extends ShareTest {
-
-    private static final OCLGuestPermission[] TESTED_PERMISSIONS = new OCLGuestPermission[] {
-        createNamedAuthorPermission("otto@example.com", "Otto Example", "secret", AuthenticationMode.DIGEST),
-        createNamedGuestPermission("horst@example.com", "Horst Example", "secret", AuthenticationMode.BASIC),
-        createAnonymousAuthorPermission(),
-        createAnonymousGuestPermission()
-    };
+public class AddGuestPermissionTest extends ShareTest {
 
     /**
-     * Initializes a new {@link CreateTest}.
+     * Initializes a new {@link AddGuestPermissionTest}.
      *
      * @param name The test name
      */
-    public CreateTest(String name) {
+    public AddGuestPermissionTest(String name) {
         super(name);
     }
 
-    public void testCreateSharedContactFolders() throws Exception {
-        testCreateSharedFolders(FolderObject.CONTACT, client.getValues().getPrivateContactFolder());
+    public void testUpdateSharedContactFolders() throws Exception {
+        testUpdateSharedFolders(FolderObject.CONTACT, client.getValues().getPrivateContactFolder());
     }
 
-    public void testCreateSharedInfostoreFolders() throws Exception {
-        testCreateSharedFolders(FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder());
+    public void testUpdateSharedInfostoreFolders() throws Exception {
+        testUpdateSharedFolders(FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder());
     }
 
-    public void testCreateSharedTaskFolders() throws Exception {
-        testCreateSharedFolders(FolderObject.TASK, client.getValues().getPrivateTaskFolder());
+    public void testUpdateSharedTaskFolders() throws Exception {
+        testUpdateSharedFolders(FolderObject.TASK, client.getValues().getPrivateTaskFolder());
     }
 
-    public void testCreateSharedCalendarFolders() throws Exception {
-        testCreateSharedFolders(FolderObject.CALENDAR, client.getValues().getPrivateAppointmentFolder());
+    public void testUpdateSharedCalendarFolders() throws Exception {
+        testUpdateSharedFolders(FolderObject.CALENDAR, client.getValues().getPrivateAppointmentFolder());
     }
 
-    private void testCreateSharedFolders(int module, int parent) throws Exception {
+    private void testUpdateSharedFolders(int module, int parent) throws Exception {
         for (EnumAPI api : new EnumAPI[] { EnumAPI.OX_OLD, EnumAPI.OX_NEW, EnumAPI.OUTLOOK }) {
             for (OCLGuestPermission guestPermission : TESTED_PERMISSIONS) {
-                testCreateSharedFolder(api, module, parent, guestPermission);
+                testUpdateSharedFolder(api, module, parent, guestPermission);
             }
         }
     }
 
-    private void testCreateSharedFolder(EnumAPI api, int module, int parent, OCLGuestPermission guestPermission) throws Exception {
+    private void testUpdateSharedFolder(EnumAPI api, int module, int parent, OCLGuestPermission guestPermission) throws Exception {
         /*
-         * create folder shared to guest user
+         * create private folder
          */
-        FolderObject sharedFolder = super.insertSharedFolder(api, module, parent, guestPermission);
+        FolderObject folder = insertPrivateFolder(api, module, parent);
+        /*
+         * update folder, add permission for guest
+         */
+        folder.addPermission(guestPermission);
+        folder = updateFolder(api, folder);
         /*
          * check permissions
          */
         OCLPermission matchingPermission = null;
-        for (OCLPermission permission : sharedFolder.getPermissions()) {
+        for (OCLPermission permission : folder.getPermissions()) {
             if (permission.getEntity() != client.getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }
         }
         assertNotNull("No matching permission in created folder found", matchingPermission);
-        assertEquals("Permission wrong", guestPermission.getDeletePermission(), matchingPermission.getDeletePermission());
-        assertEquals("Permission wrong", guestPermission.getFolderPermission(), matchingPermission.getFolderPermission());
-        assertEquals("Permission wrong", guestPermission.getReadPermission(), matchingPermission.getReadPermission());
-        assertEquals("Permission wrong", guestPermission.getWritePermission(), matchingPermission.getWritePermission());
+        checkPermissions(guestPermission, matchingPermission);
         /*
-         * discover share
+         * discover & check share
          */
-        ParsedShare share = discoverShare(sharedFolder.getObjectID(), matchingPermission.getEntity());
-        assertNotNull("No matching share found", share);
-        assertEquals("Authentication mode wrong", guestPermission.getAuthenticationMode(), share.getAuthentication());
-        if (AuthenticationMode.ANONYMOUS != guestPermission.getAuthenticationMode()) {
-            assertEquals("E-Mail address wrong", guestPermission.getEmailAddress(), share.getGuestMailAddress());
-//TODO            assertEquals("Display name wrong", guestPermission.getDisplayName(), share.getGuestDisplayName());
-            assertEquals("Password wrong", guestPermission.getPassword(), share.getGuestPassword());
-        }
+        ParsedShare share = discoverShare(folder.getObjectID(), matchingPermission.getEntity());
+        checkShare(guestPermission, share);
         /*
          * check access to share
          */
