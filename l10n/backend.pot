@@ -1873,9 +1873,11 @@ msgstr ""
 msgid "Login"
 msgstr ""
 
+#. Password
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/FormStrings.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cmis/src/com/openexchange/file/storage/cmis/FormStrings.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:63
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/mail/MailStrings.java:79
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/internal/FormStrings.java:63
 msgid "Password"
 msgstr ""
@@ -7483,12 +7485,41 @@ msgstr ""
 msgid "No session found for identifier: %1$s"
 msgstr ""
 
+#. [John Doe] shared "[holiday pictures]" with you
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/mail/MailStrings.java:64
+msgid "%1$s shared \"%2$s\" with you"
+msgstr ""
+
+#. Message from [John Doe]
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/mail/MailStrings.java:67
+msgid "Message from %1$s"
+msgstr ""
+
+#. Click here to view [holiday pictures]
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/mail/MailStrings.java:70
+msgid "Click here to view %1$s"
+msgstr ""
+
+#. Please use the following credentials if asked for
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/mail/MailStrings.java:73
+msgid "Please use the following credentials if asked for"
+msgstr ""
+
+#. Username
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/mail/MailStrings.java:76
+msgid "Username"
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:63
 msgid "The requested share does not exist."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:65
 msgid "The link \"%1$s\" is invalid."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:67
+msgid "\"%1$s\" is not a valid email address."
 msgstr ""
 
 #. *
