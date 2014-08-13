@@ -52,10 +52,12 @@ package com.openexchange.subscribe.google;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
@@ -63,6 +65,7 @@ import com.google.api.services.calendar.model.Events;
 import com.openexchange.exception.OXException;
 import com.openexchange.google.api.client.GoogleApiClients;
 import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
@@ -218,18 +221,28 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
                 series.add(calendarObject);
                 exceptionMap.put(event.getICalUID(), calendarObject);
             } else if (event.getRecurringEventId() != null) {
-                CalendarDataObject cdo = exceptionMap.get(event.getICalUID());
-                cdo.addChangeException(calendarObject.getStartDate());
                 seriesExceptions.add(calendarObject);
             } else {
                 singleAppointments.add(calendarObject);
             }
         }
         
-        for (CalendarObject co : seriesExceptions) {
-            CalendarDataObject prime = exceptionMap.get(co.getExtendedProperties().get("iCalUID"));
-            int seq = prime.getSequence();
-            prime.setSequence(++seq);
+        final java.util.Calendar gmtCalendar = java.util.Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+        for (CalendarObject exception : seriesExceptions) {
+            CalendarDataObject master = exceptionMap.get(exception.getExtendedProperties().get("iCalUID"));
+            int seq = master.getSequence();
+            master.setSequence(++seq);
+            setBeginOfTheDay(exception.getStartDate(), gmtCalendar);
+            exception.setRecurrenceDatePosition(gmtCalendar.getTime());
+            master.addChangeException(gmtCalendar.getTime());
         }
+    }
+    
+    private void setBeginOfTheDay(final Date startDate, final java.util.Calendar calendar) {
+        calendar.setTime(startDate);
+        calendar.set(java.util.Calendar.HOUR_OF_DAY, 0);
+        calendar.set(java.util.Calendar.MINUTE, 0);
+        calendar.set(java.util.Calendar.SECOND, 0);
+        calendar.set(java.util.Calendar.MILLISECOND, 0);
     }
 }
