@@ -49,53 +49,72 @@
 
 package com.openexchange.ajax.share.actions;
 
+import java.util.Map;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.java.Strings;
 
 /**
  * {@link ResolveShareResponse}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ResolveShareResponse extends AbstractAJAXResponse {
 
     private final String path;
-    private final String sessionId;
-    private final String login;
-    private final int userId;
-    private final String language;
-    private final boolean store;
+    private final Map<String, String> parameters;
 
-    protected ResolveShareResponse(String path, String sessionId, String login, int userId, String language, boolean store) {
+    /**
+     * Initializes a new {@link ResolveShareResponse}.
+     *
+     * @param path The path
+     * @param parameters The parameters
+     */
+    public ResolveShareResponse(String path, Map<String, String> parameters) {
         super(null);
+        this.parameters = parameters;
         this.path = path;
-        this.sessionId = sessionId;
-        this.login = login;
-        this.userId = userId;
-        this.language = language;
-        this.store = store;
     }
 
     public String getPath() {
         return path;
     }
 
-    public String getSessionId() {
-        return sessionId;
+    public String getSessionID() {
+        return parameters.get("session");
     }
 
-    public String getLogin() {
-        return login;
+    public String getUser() {
+        return parameters.get("user");
     }
 
     public int getUserId() {
-        return userId;
+        String id = parameters.get("user_id");
+        if (false == Strings.isEmpty(id)) {
+            return Integer.valueOf(id);
+        }
+        return 0;
     }
 
     public String getLanguage() {
-        return language;
+        return parameters.get("language");
     }
 
     public boolean isStore() {
-        return store;
+        return Boolean.valueOf(parameters.get("store"));
     }
+
+    public String getModule() {
+        String app = parameters.get("app");
+        return Strings.isEmpty(app) ? parameters.get("m") : app;
+    }
+
+    public String getFolder() {
+        String folder = parameters.get("folder");
+        return Strings.isEmpty(folder) ? parameters.get("f") : folder;
+    }
+
+    public String getItem() {
+        return parameters.get("id");
+    }
+
 }

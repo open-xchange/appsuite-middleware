@@ -49,30 +49,31 @@
 
 package com.openexchange.ajax.share.actions;
 
-import static com.openexchange.ajax.AJAXServlet.PARAMETER_SESSION;
-import static com.openexchange.ajax.AJAXServlet.PARAMETER_USER;
-import static com.openexchange.ajax.AJAXServlet.PARAMETER_USER_ID;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONException;
 import com.openexchange.ajax.framework.AbstractRedirectParser;
 
 /**
- * Parses the redirect response of the formLogin action of the login servlet.
+ * {@link ResolveShareParser}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ResolveShareParser extends AbstractRedirectParser<ResolveShareResponse> {
 
-    ResolveShareParser() {
-        super();
+    /**
+     * Initializes a new {@link ResolveShareParser}.
+     */
+    public ResolveShareParser() {
+        super(false, true);
     }
 
     @Override
     protected ResolveShareResponse createResponse(String location) throws JSONException {
         int fragIndex = location.indexOf('#');
         if (-1 == fragIndex) {
-            return new ResolveShareResponse(location, null, null, -1, null, false);
+            return new ResolveShareResponse(location, Collections.<String, String>emptyMap());
         }
         String path = location.substring(0, fragIndex);
         String[] params = location.substring(fragIndex + 1).split("&");
@@ -85,25 +86,7 @@ public class ResolveShareParser extends AbstractRedirectParser<ResolveShareRespo
                 map.put(param.substring(0, assignPos), param.substring(assignPos + 1));
             }
         }
-        String userIdValue = map.get(PARAMETER_USER_ID);
-        final int userId;
-        if (null == userIdValue) {
-            userId = -1;
-        } else {
-            try {
-                userId = Integer.parseInt(userIdValue);
-            } catch (NumberFormatException e) {
-                throw new JSONException("Can not parse user_id value \"" + userIdValue + "\".", e);
-            }
-        }
-        String booleanValue = map.get("store");
-        final boolean store;
-        if (null == booleanValue) {
-            store = false;
-        } else {
-            store = Boolean.parseBoolean(booleanValue);
-        }
-        return new ResolveShareResponse(path, map.get(PARAMETER_SESSION), map.get(PARAMETER_USER), userId, map.get("language"), store);
+        return new ResolveShareResponse(path, map);
     }
 
 }

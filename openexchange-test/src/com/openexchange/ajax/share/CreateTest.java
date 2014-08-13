@@ -49,27 +49,10 @@
 
 package com.openexchange.ajax.share;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import org.json.JSONException;
-import com.openexchange.ajax.folder.Create;
-import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
-import com.openexchange.ajax.folder.actions.GetRequest;
-import com.openexchange.ajax.folder.actions.GetResponse;
-import com.openexchange.ajax.folder.actions.InsertRequest;
-import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.share.actions.AllRequest;
-import com.openexchange.ajax.share.actions.AllResponse;
 import com.openexchange.ajax.share.actions.ParsedShare;
-import com.openexchange.ajax.share.actions.ResolveShareResponse;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.AuthenticationMode;
 
@@ -78,9 +61,14 @@ import com.openexchange.share.AuthenticationMode;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class CreateTest extends AbstractAJAXSession {
+public class CreateTest extends ShareTest {
 
-    private final List<FolderObject> foldersToDelete = new ArrayList<FolderObject>();
+    private static final OCLGuestPermission[] TESTED_PERMISSIONS = new OCLGuestPermission[] {
+        createNamedAuthorPermission("otto@example.com", "Otto Example", "secret", AuthenticationMode.DIGEST),
+        createNamedGuestPermission("horst@example.com", "Horst Example", "secret", AuthenticationMode.BASIC),
+        createAnonymousAuthorPermission(),
+        createAnonymousGuestPermission()
+    };
 
     /**
      * Initializes a new {@link CreateTest}.
@@ -91,68 +79,58 @@ public class CreateTest extends AbstractAJAXSession {
         super(name);
     }
 
-    public void testCreateSharedContactFolder() throws Exception {
+    public void testCreateSharedContactFolders() throws Exception {
+        testCreateSharedFolders(FolderObject.CONTACT, client.getValues().getPrivateContactFolder());
+    }
+
+    public void testCreateSharedInfostoreFolders() throws Exception {
+        testCreateSharedFolders(FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder());
+    }
+
+    private void testCreateSharedFolders(int module, int parent) throws Exception {
+        for (EnumAPI api : new EnumAPI[] { EnumAPI.OX_OLD, EnumAPI.OX_NEW, EnumAPI.OUTLOOK }) {
+            for (OCLGuestPermission guestPermission : TESTED_PERMISSIONS) {
+                testCreateSharedFolder(api, module, parent, guestPermission);
+            }
+        }
+    }
+
+    private void testCreateSharedFolder(EnumAPI api, int module, int parent, OCLGuestPermission guestPermission) throws Exception {
         /*
          * create folder shared to guest user
          */
-        OCLGuestPermission guestPermission = new OCLGuestPermission();
-        guestPermission.setEmailAddress("otto@example.com");
-        guestPermission.setDisplayName("Otto Example");
-        guestPermission.setPassword("secret");
-        guestPermission.setAuthenticationMode(AuthenticationMode.DIGEST);
-        guestPermission.setGroupPermission(false);
-        guestPermission.setFolderAdmin(false);
-        guestPermission.setAllPermission(
-            OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
-        FolderObject sharedFolder = Create.createPrivateFolder(
-            UUIDs.getUnformattedString(UUID.randomUUID()), FolderObject.CONTACT, client.getValues().getUserId(), guestPermission);
-        sharedFolder.setParentFolderID(getClient().getValues().getPrivateContactFolder());
-        InsertResponse insertResponse = client.execute(new InsertRequest(EnumAPI.OUTLOOK, sharedFolder));
-        insertResponse.fillObject(sharedFolder);
-        foldersToDelete.add(sharedFolder);
+        FolderObject sharedFolder = super.insertSharedFolder(api, module, parent, guestPermission);
         /*
          * check permissions
          */
-        GetResponse getResponse = client.execute(new GetRequest(EnumAPI.OX_NEW, sharedFolder.getObjectID()));
-        FolderObject createdFolder = getResponse.getFolder();
-        assertNotNull(createdFolder);
-        assertEquals(sharedFolder.getFolderName(), sharedFolder.getFolderName());
-        assertEquals(2, createdFolder.getPermissions().size());
-        int guest = -1;
-        for (OCLPermission permission : createdFolder.getPermissions()) {
+        OCLPermission matchingPermission = null;
+        for (OCLPermission permission : sharedFolder.getPermissions()) {
             if (permission.getEntity() != client.getValues().getUserId()) {
-                guest = permission.getEntity();
+                matchingPermission = permission;
                 break;
             }
         }
-        assertTrue(guest != -1);
+        assertNotNull("No matching permission in created folder found", matchingPermission);
+        assertEquals("Permission wrong", guestPermission.getDeletePermission(), matchingPermission.getDeletePermission());
+        assertEquals("Permission wrong", guestPermission.getFolderPermission(), matchingPermission.getFolderPermission());
+        assertEquals("Permission wrong", guestPermission.getReadPermission(), matchingPermission.getReadPermission());
+        assertEquals("Permission wrong", guestPermission.getWritePermission(), matchingPermission.getWritePermission());
         /*
          * discover share
          */
-        ParsedShare share = discoverShare(createdFolder.getObjectID(), guest);
-        assertNotNull(share);
-        assertEquals(guestPermission.getEmailAddress(), share.getGuestMailAddress());
-        ResolveShareResponse resolvedShare = new GuestClient().resolve(share);
-    }
-
-    protected ParsedShare discoverShare(int folderID, int guest) throws OXException, IOException, JSONException {
-        String folder = String.valueOf(folderID);
-        AllResponse allResponse = client.execute(new AllRequest());
-        List<ParsedShare> shares = allResponse.getParsedShares();
-        for (ParsedShare share : shares) {
-            if (folder.equals(share.getFolder()) && guest == share.getGuest()) {
-                return share;
-            }
+        ParsedShare share = discoverShare(sharedFolder.getObjectID(), matchingPermission.getEntity());
+        assertNotNull("No matching share found", share);
+        assertEquals("Authentication mode wrong", guestPermission.getAuthenticationMode(), share.getAuthentication());
+        if (AuthenticationMode.ANONYMOUS != guestPermission.getAuthenticationMode()) {
+            assertEquals("E-Mail address wrong", guestPermission.getEmailAddress(), share.getGuestMailAddress());
+//TODO            assertEquals("Display name wrong", guestPermission.getDisplayName(), share.getGuestDisplayName());
+            assertEquals("Password wrong", guestPermission.getPassword(), share.getGuestPassword());
         }
-        return null;
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        if (null != client && null != foldersToDelete && 0 < foldersToDelete.size()) {
-            client.execute(new DeleteRequest(EnumAPI.OX_NEW, false, foldersToDelete.toArray(new FolderObject[foldersToDelete.size()])));
-        }
-        super.tearDown();
+        /*
+         * check access to share
+         */
+        GuestClient guestClient = resolveShare(share);
+        guestClient.checkShareAccessible(guestPermission);
     }
 
 }

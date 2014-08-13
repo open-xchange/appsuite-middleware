@@ -63,6 +63,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareService;
@@ -118,7 +119,11 @@ public class AllAction implements AJAXActionService {
         List<GuestShare> guestShares = new ArrayList<GuestShare>(shares.size());
         for (Share share : shares) {
             User guestUser = guestUsersByID.get(Integer.valueOf(share.getGuest()));
-            guestShares.add(new GuestShare(share, guestUser, cryptoService.decrypt(guestUser.getUserPassword())));
+            if (AuthenticationMode.ANONYMOUS != share.getAuthentication()) {
+                guestShares.add(new GuestShare(share, guestUser, cryptoService.decrypt(guestUser.getUserPassword())));
+            } else {
+                guestShares.add(new GuestShare(share, guestUser, null));
+            }
         }
         return new AJAXRequestResult(guestShares, lastModified, "guestshare");
     }

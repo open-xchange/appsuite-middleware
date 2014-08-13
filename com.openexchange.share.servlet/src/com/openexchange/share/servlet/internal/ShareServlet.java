@@ -136,7 +136,8 @@ public class ShareServlet extends HttpServlet {
             LoginServlet.writeSecretCookie(request, response, session, session.getHash(), request.isSecure(), request.getServerName(),
                 LoginServlet.getLoginConfiguration());
             response.addCookie(new Cookie("sessionid", session.getSessionID()));
-            response.addCookie(new Cookie("JSESSIONID", request.getSession().getId()));
+
+//            response.addCookie(new Cookie("JSESSIONID", request.getSession().getId()));
 
             /*
              * construct redirect URL

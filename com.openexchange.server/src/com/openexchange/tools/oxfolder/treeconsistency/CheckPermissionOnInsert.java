@@ -125,7 +125,7 @@ public final class CheckPermissionOnInsert extends CheckPermission {
                     final ToDoPermission toDoPermission = it.value();
                     final int[] users = toDoPermission.getUsers();
                     for (int j = 0; j < users.length; j++) {
-                        LOG.debug("Auto-Insert system-folder-read permission for user {} to folder {}", UserStorage.getInstance().getUser(users[j], ctx).getDisplayName(), folderId);
+                        LOG.debug("Auto-Insert system-folder-read permission for user {} to folder {}", UserStorage.getInstance().getUser(ctx, users[j], writeCon).getDisplayName(), folderId);
                         addSystemFolderReadPermission(folderId, users[j], false);
                     }
                     final int[] groups = toDoPermission.getGroups();

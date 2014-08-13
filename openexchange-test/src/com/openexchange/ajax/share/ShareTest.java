@@ -52,15 +52,25 @@ package com.openexchange.ajax.share;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import org.json.JSONException;
+import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
+import com.openexchange.ajax.folder.actions.GetRequest;
+import com.openexchange.ajax.folder.actions.GetResponse;
+import com.openexchange.ajax.folder.actions.InsertRequest;
+import com.openexchange.ajax.folder.actions.InsertResponse;
+import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.share.actions.AllRequest;
 import com.openexchange.ajax.share.actions.AllResponse;
 import com.openexchange.ajax.share.actions.ParsedShare;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.java.util.UUIDs;
+import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.share.AuthenticationMode;
 
 /**
  * {@link ShareTest}
@@ -70,7 +80,6 @@ import com.openexchange.groupware.container.FolderObject;
 public abstract class ShareTest extends AbstractAJAXSession {
 
     private List<FolderObject> foldersToDelete;
-    private GuestClient shareClient;
 
     /**
      * Initializes a new {@link ShareTest}.
@@ -83,7 +92,32 @@ public abstract class ShareTest extends AbstractAJAXSession {
 
     @Override
     public void setUp() throws Exception {
+        super.setUp();
         foldersToDelete = new ArrayList<FolderObject>();
+    }
+
+    /**
+     * Inserts and remembers a new shared folder containing the supplied guest permissions.
+     *
+     * @param api The folder tree to use
+     * @param module The module identifier
+     * @param parent The ID of the parent folder
+     * @param guestPermission The guest permission to add
+     * @return The inserted folder
+     * @throws Exception
+     */
+    protected FolderObject insertSharedFolder(EnumAPI api, int module, int parent, OCLGuestPermission guestPermission) throws Exception {
+        FolderObject sharedFolder = Create.createPrivateFolder(
+            UUIDs.getUnformattedString(UUID.randomUUID()), module, client.getValues().getUserId(), guestPermission);
+        sharedFolder.setParentFolderID(parent);
+        InsertResponse insertResponse = client.execute(new InsertRequest(EnumAPI.OUTLOOK, sharedFolder));
+        insertResponse.fillObject(sharedFolder);
+        remember(sharedFolder);
+        GetResponse getResponse = client.execute(new GetRequest(api, sharedFolder.getObjectID()));
+        FolderObject createdFolder = getResponse.getFolder();
+        assertNotNull(createdFolder);
+        assertEquals("Folder name wrong", sharedFolder.getFolderName(), createdFolder.getFolderName());
+        return createdFolder;
     }
 
     /**
@@ -95,6 +129,13 @@ public abstract class ShareTest extends AbstractAJAXSession {
         foldersToDelete.add(folder);
     }
 
+    /**
+     * Discovers a specific share amongst all available shares of the current user, based on the folder- and guest identifiers.
+     *
+     * @param folderID The folder ID to discover the share for
+     * @param guest The ID of the guest associated to the share
+     * @return The share, or <code>null</code> if not found
+     */
     protected ParsedShare discoverShare(int folderID, int guest) throws OXException, IOException, JSONException {
         String folder = String.valueOf(folderID);
         AllResponse allResponse = client.execute(new AllRequest());
@@ -116,21 +157,60 @@ public abstract class ShareTest extends AbstractAJAXSession {
     }
 
     /**
-     * Gets the shareClient
+     * Resolves the supplied share, i.e. accesses the share link and authenticates using the share's credentials.
      *
-     * @return The shareClient
+     * @param share The share
+     * @return An authenticate guest client being able to access the share
      */
-    public GuestClient getShareClient() {
-        return shareClient;
+    protected GuestClient resolveShare(ParsedShare share) throws Exception {
+        return new GuestClient(share);
     }
 
-    /**
-     * Sets the shareClient
-     *
-     * @param shareClient The shareClient to set
-     */
-    public void setShareClient(GuestClient shareClient) {
-        this.shareClient = shareClient;
+    protected static OCLGuestPermission createNamedGuestPermission(String emailAddress, String displayName, String password, AuthenticationMode authenticationMode) {
+        OCLGuestPermission guestPermission = createNamedPermission(emailAddress, displayName, password, authenticationMode);
+        guestPermission.setAllPermission(
+            OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+        return guestPermission;
+    }
+
+    protected static OCLGuestPermission createNamedAuthorPermission(String emailAddress, String displayName, String password, AuthenticationMode authenticationMode) {
+        OCLGuestPermission guestPermission = createNamedPermission(emailAddress, displayName, password, authenticationMode);
+        guestPermission.setAllPermission(
+            OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
+        return guestPermission;
+    }
+
+    protected static OCLGuestPermission createNamedPermission(String emailAddress, String displayName, String password, AuthenticationMode authenticationMode) {
+        OCLGuestPermission guestPermission = new OCLGuestPermission();
+        guestPermission.setEmailAddress(emailAddress);
+        guestPermission.setDisplayName(displayName);
+        guestPermission.setPassword(password);
+        guestPermission.setAuthenticationMode(authenticationMode);
+        guestPermission.setGroupPermission(false);
+        guestPermission.setFolderAdmin(false);
+        return guestPermission;
+    }
+
+    protected static OCLGuestPermission createAnonymousGuestPermission() {
+        OCLGuestPermission guestPermission = createAnonymousPermission();
+        guestPermission.setAllPermission(
+            OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+        return guestPermission;
+    }
+
+    protected static OCLGuestPermission createAnonymousAuthorPermission() {
+        OCLGuestPermission guestPermission = createAnonymousPermission();
+        guestPermission.setAllPermission(
+            OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
+        return guestPermission;
+    }
+
+    protected static OCLGuestPermission createAnonymousPermission() {
+        OCLGuestPermission guestPermission = new OCLGuestPermission();
+        guestPermission.setAuthenticationMode(AuthenticationMode.ANONYMOUS);
+        guestPermission.setGroupPermission(false);
+        guestPermission.setFolderAdmin(false);
+        return guestPermission;
     }
 
 }

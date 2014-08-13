@@ -57,12 +57,17 @@ import com.openexchange.ajax.framework.Header;
 /**
  * {@link ResolveShareRequest}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ResolveShareRequest implements AJAXRequest<ResolveShareResponse> {
 
     private final ParsedShare share;
 
+    /**
+     * Initializes a new {@link ResolveShareRequest}.
+     *
+     * @param share The share to resolve
+     */
     public ResolveShareRequest(ParsedShare share) {
         super();
         this.share = share;

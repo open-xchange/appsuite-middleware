@@ -49,20 +49,42 @@
 
 package com.openexchange.ajax.share;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Date;
+import java.util.UUID;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
+import org.junit.Assert;
+import com.openexchange.ajax.contact.action.GetResponse;
+import com.openexchange.ajax.contact.action.InsertResponse;
+import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
+import com.openexchange.ajax.framework.AbstractColumnsResponse;
+import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.infostore.actions.AllInfostoreRequest;
+import com.openexchange.ajax.infostore.actions.DeleteInfostoreRequest;
+import com.openexchange.ajax.infostore.actions.DeleteInfostoreResponse;
+import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
+import com.openexchange.ajax.infostore.actions.GetInfostoreResponse;
+import com.openexchange.ajax.infostore.actions.NewInfostoreRequest;
+import com.openexchange.ajax.infostore.actions.NewInfostoreResponse;
 import com.openexchange.ajax.share.actions.ParsedShare;
 import com.openexchange.ajax.share.actions.ResolveShareRequest;
 import com.openexchange.ajax.share.actions.ResolveShareResponse;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
+import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.groupware.search.Order;
+import com.openexchange.java.util.TimeZones;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.share.AuthenticationMode;
 
 /**
@@ -72,24 +94,170 @@ import com.openexchange.share.AuthenticationMode;
  */
 public class GuestClient extends AJAXClient {
 
+    private final ResolveShareResponse shareResponse;
+
     /**
-     * Initializes a new {@link GuestClient}.
+     * Initializes a new {@link GuestClient}, trying to login via resolving the supplied share automatically.
      *
+     * @param share The share to access as guest
      * @throws Exception
      */
-    public GuestClient() throws Exception {
+    public GuestClient(ParsedShare share) throws Exception {
         super(new AJAXSession(), true);
         getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
+        this.shareResponse = resolve(share);
     }
 
-    public ResolveShareResponse resolve(ParsedShare share) throws ClientProtocolException, IOException, OXException, JSONException {
+    public String getUser() {
+        return shareResponse.getUser();
+    }
+
+    public int getUserId() {
+        return shareResponse.getUserId();
+    }
+
+    public String getLanguage() {
+        return shareResponse.getLanguage();
+    }
+
+    public boolean isStore() {
+        return shareResponse.isStore();
+    }
+
+    public String getModule() {
+        return shareResponse.getModule();
+    }
+
+    public String getFolder() {
+        return shareResponse.getFolder();
+    }
+
+    public int getIntFolder() {
+        return Integer.parseInt(getFolder());
+    }
+
+    public String getItem() {
+        return shareResponse.getItem();
+    }
+
+    /**
+     * Checks that a share is accessible for the guest according to the granted permissions.
+     *
+     * @param permissions The guest permissions
+     * @throws Exception
+     */
+    public void checkShareAccessible(OCLGuestPermission permissions) throws Exception {
+        if (permissions.canReadOwnObjects()) {
+            /*
+             * verify "all" request in module
+             */
+            AbstractColumnsResponse response = performAll();
+            Assert.assertFalse("Errors in response", response.hasError());
+        }
+        if (permissions.canCreateObjects()) {
+            /*
+             * verify item creation, retrieval & deletion
+             */
+            String id = createItem();
+            Assert.assertNotNull("No ID for created item", id);
+            Object item = getItem(id);
+            Assert.assertNotNull("No created item found", item);
+            deleteItem(id);
+        }
+    }
+
+    private void deleteItem(String id) throws Exception {
+        if ("io.ox/contacts".equals(getModule())) {
+            com.openexchange.ajax.contact.action.DeleteRequest deleteRequest = new com.openexchange.ajax.contact.action.DeleteRequest(
+                getIntFolder(), Integer.parseInt(id), getFutureTimestamp());
+            CommonDeleteResponse deleteResponse = execute(deleteRequest);
+            Assert.assertFalse("Errors in response", deleteResponse.hasError());
+            return;
+        }
+        if ("io.ox/files".equals(getModule())) {
+            DeleteInfostoreRequest deleteRequest = new DeleteInfostoreRequest(Integer.parseInt(id), getIntFolder(), getFutureTimestamp());
+            DeleteInfostoreResponse deleteResponse = execute(deleteRequest);
+            Assert.assertFalse("Errors in response", deleteResponse.hasError());
+            return;
+        }
+        Assert.fail("no delete item request for " + getModule() + " implemented");
+    }
+
+    private Object getItem(String id) throws Exception {
+        if ("io.ox/contacts".equals(getModule())) {
+            Contact contact = new Contact();
+            contact.setParentFolderID(getIntFolder());
+            contact.setDisplayName(UUIDs.getUnformattedString(UUID.randomUUID()));
+            com.openexchange.ajax.contact.action.GetRequest getRequest = new com.openexchange.ajax.contact.action.GetRequest(
+                getIntFolder(), Integer.parseInt(id), TimeZones.UTC);
+            GetResponse getResponse = execute(getRequest);
+            Assert.assertFalse("Errors in response", getResponse.hasError());
+            return getResponse.getContact();
+        }
+        if ("io.ox/files".equals(getModule())) {
+            GetInfostoreRequest getRequest = new GetInfostoreRequest(Integer.parseInt(id));
+            GetInfostoreResponse getResponse = execute(getRequest);
+            Assert.assertFalse("Errors in response", getResponse.hasError());
+            return getResponse.getDocumentMetadata();
+        }
+        Assert.fail("no get item request for " + getModule() + " implemented");
+        return null;
+    }
+
+    private String createItem() throws Exception {
+        if ("io.ox/contacts".equals(getModule())) {
+            Contact contact = new Contact();
+            contact.setParentFolderID(getIntFolder());
+            contact.setDisplayName(UUIDs.getUnformattedString(UUID.randomUUID()));
+            com.openexchange.ajax.contact.action.InsertRequest insertRequest = new com.openexchange.ajax.contact.action.InsertRequest(contact);
+            InsertResponse insertResponse = execute(insertRequest);
+            Assert.assertFalse("Errors in response", insertResponse.hasError());
+            insertResponse.fillObject(contact);
+            return String.valueOf(contact.getObjectID());
+        }
+        if ("io.ox/files".equals(getModule())) {
+            byte[] data = UUIDs.toByteArray(UUID.randomUUID());
+            DocumentMetadataImpl metadata = new DocumentMetadataImpl();
+            metadata.setFolderId(getIntFolder());
+            metadata.setFileName(UUIDs.getUnformattedString(UUID.randomUUID()) + ".test");
+            NewInfostoreRequest newRequest = new NewInfostoreRequest(metadata, new ByteArrayInputStream(data));
+            NewInfostoreResponse newResponse = execute(newRequest);
+            Assert.assertFalse("Errors in response", newResponse.hasError());
+            return String.valueOf(newResponse.getID());
+        }
+        Assert.fail("no create item request for " + getModule() + " implemented");
+        return null;
+    }
+
+    private AbstractColumnsResponse performAll() throws OXException, IOException, JSONException {
+        if ("io.ox/contacts".equals(getModule())) {
+            com.openexchange.ajax.contact.action.AllRequest allRequest = new com.openexchange.ajax.contact.action.AllRequest(
+                getIntFolder(), Contact.ALL_COLUMNS);
+            return execute(allRequest);
+        }
+        if ("io.ox/files".equals(getModule())) {
+            int[] columns = new int[] { Metadata.ID, Metadata.TITLE, Metadata.DESCRIPTION, Metadata.URL, Metadata.FOLDER_ID };
+            AllInfostoreRequest allRequest = new AllInfostoreRequest(getFolder(), columns, Metadata.ID, Order.ASCENDING);
+            return execute(allRequest);
+        }
+        Assert.fail("no all request for " + getModule() + " implemented");
+        return null;
+    }
+
+    /**
+     * Resolves the supplied share, i.e. accesses the share link and authenticates using the share's credentials.
+     *
+     * @param share The share
+     * @return The share response
+     */
+    private ResolveShareResponse resolve(ParsedShare share) throws ClientProtocolException, IOException, OXException, JSONException {
         if (AuthenticationMode.ANONYMOUS == share.getAuthentication()) {
             setCredentials(null);
         } else {
             setCredentials(share.getGuestMailAddress(), share.getGuestPassword());
         }
-        ResolveShareRequest request = new ResolveShareRequest(share);
-        ResolveShareResponse response = Executor.execute(this, request);
+        ResolveShareResponse response = Executor.execute(this, new ResolveShareRequest(share));
+        getSession().setId(response.getSessionID());
         return response;
     }
 
@@ -107,6 +275,10 @@ public class GuestClient extends AJAXClient {
 
     private void setCredentials(String username, String password) {
         setCredentials(new UsernamePasswordCredentials(username, password));
+    }
+
+    private static Date getFutureTimestamp() {
+        return new Date(System.currentTimeMillis() + 1000000);
     }
 
 }
