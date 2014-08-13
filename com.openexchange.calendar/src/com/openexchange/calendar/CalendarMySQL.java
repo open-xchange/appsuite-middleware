@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -3442,8 +3442,16 @@ public class CalendarMySQL implements CalendarSqlImp {
                                                 pfid = access.getDefaultFolder(new_userparticipants[a].getIdentifier(), FolderObject.CALENDAR).getObjectID();
                                             }
                                         } else {
-                                            // A move into another private folder: Set to default folder ID for non-folder-owner
-                                            pfid = access.getDefaultFolder(new_userparticipants[a].getIdentifier(), FolderObject.CALENDAR).getObjectID();
+                                            /*
+                                             *  A move into another private folder:
+                                             *    - Set to target folder ID for the folder owner
+                                             *    - Set to default folder ID for non-folder-owners 
+                                             */
+                                            if(new_userparticipants[a].getIdentifier() == access.getFolderOwner(cdao.getParentFolderID())) {
+                                                pfid = cdao.getParentFolderID();
+                                            } else {
+                                                pfid = access.getDefaultFolder(new_userparticipants[a].getIdentifier(), FolderObject.CALENDAR).getObjectID();
+                                            }
                                         }
                                     } else {
                                         // always set the folder to the private folder of the user participant in private calendar folders.

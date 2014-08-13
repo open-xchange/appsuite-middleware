@@ -297,7 +297,7 @@ public class ReplicationMonitor {
         try {
             // Using Mysql specific functions like LAST_INSERT_ID() do not reveal any performance improvement compared to this transaction.
             // UPDATE replicationMonitor SET transaction=LAST_INSERT_ID(transaction+1) WHERE cid=?
-            // There we stick with this simple transaction, UPDATE and SELECT statement for better compatibility.
+            // Therefore we stick with this simple transaction, UPDATE and SELECT statement for better compatibility.
             stmt = con.prepareStatement("UPDATE replicationMonitor SET transaction=transaction+1 WHERE cid=?");
             stmt.setInt(1, contextId);
             stmt.execute();
@@ -378,7 +378,7 @@ public class ReplicationMonitor {
 
     void increaseTransactionCounter(AssignmentImpl assign, Connection con) {
         try {
-            if (con.isClosed()) {
+            if (!active || con.isClosed()) {
                 return;
             }
         } catch (SQLException e) {

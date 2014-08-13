@@ -2,6 +2,19 @@
 
  - Fix for bug 33891: Removed superfluous line throwing always an exception.
 
+* 2014-08-04 - marc.arens@open-xchange.com
+
+ - Fix for bug 33697: Respect destination folder for folder owners
+ 
+* 2014-08-01 - thorben.betten@open-xchange.com
+
+ - Fix for bug 33715: Accept new parameter "attach_src" for action=get request to let the client signal RFC822 source is supposed to be
+                      attached to generated JSON mail representation
+
+* 2014-07-29 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 33652: Also accept "updateToken" requests without service identifier 
+
 * 2014-07-11 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 33478: Run AttachmentCleaner without delay
