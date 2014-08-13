@@ -54,6 +54,7 @@ import java.util.Comparator;
 import java.util.PriorityQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.mail.internet.AddressException;
 import org.slf4j.Logger;
 import com.google.gdata.data.contacts.ContactEntry;
 import com.google.gdata.data.extensions.Email;
@@ -64,11 +65,13 @@ import com.google.gdata.data.extensions.PhoneNumber;
 import com.google.gdata.data.extensions.StructuredPostalAddress;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.util.TimeZones;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 
 /**
  * {@link ContactParser}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class ContactEntryParser {
 
@@ -115,38 +118,26 @@ public class ContactEntryParser {
             }
         }
 
-        PriorityQueue<Emails> pqEmails = new PriorityQueue<Emails>(3, new Comparator<Emails>() {
-            @Override
-            public int compare(Emails o1, Emails o2) {
-                return o2.getPriority() - o1.getPriority();
-            }
-        });
-
-
-        String primaryAddress = null;
-        for (Email email : entry.getEmailAddresses()) {
-            if (email.getPrimary()) {
-                pqEmails.add(new Emails(email.getAddress(), 10));
-                //save primary email to test if there are duplicates
-                primaryAddress = email.getAddress();
-            }
-        }
+        PriorityQueue<Emails> pqEmails = new PreventDuplicatesPriorityQueue<Emails>();
 
         if (entry.hasEmailAddresses()) {
             for (final Email email : entry.getEmailAddresses()) {
-                if (email.getRel() != null) {
-                    //test duplicates
-                    if (email.getRel().endsWith("work") && false == isEqualsToPrimaryAddress(primaryAddress, email.getAddress())) {
-                        pqEmails.add(new Emails(email.getAddress(), 9));
-                    } else if (email.getRel().endsWith("home") && false == isEqualsToPrimaryAddress(primaryAddress, email.getAddress())) {
-                        pqEmails.add(new Emails(email.getAddress(), 8));
-                    } else if (email.getRel().endsWith("other") && false == isEqualsToPrimaryAddress(primaryAddress, email.getAddress())) {
-                        pqEmails.add(new Emails(email.getAddress(), 7));
+                if(isValidMailAddress(email.getAddress())) {
+                    if (email.getRel() != null) {
+                        if (email.getPrimary()) {
+                            pqEmails.add(new Emails(email.getAddress(), 10));
+                        } else if (email.getRel().endsWith("work")) {
+                            pqEmails.add(new Emails(email.getAddress(), 9));
+                        } else if (email.getRel().endsWith("home")) {
+                            pqEmails.add(new Emails(email.getAddress(), 8));
+                        } else if (email.getRel().endsWith("other")) {
+                            pqEmails.add(new Emails(email.getAddress(), 7));
+                        }
                     }
-                }
-                // if there are other user tagged mail addresses add them with low priority
-                else if (false == isEqualsToPrimaryAddress(primaryAddress, email.getAddress())) {
-                    pqEmails.add(new Emails(email.getAddress(), 1));
+                    // if there are other user tagged mail addresses add them with low priority
+                    else {
+                        pqEmails.add(new Emails(email.getAddress(), 6));
+                    }
                 }
             }
         }
@@ -270,15 +261,6 @@ public class ContactEntryParser {
         }
     }
 
-    private boolean isEqualsToPrimaryAddress(String primaryAddress, String email) {
-        if(primaryAddress != null) {
-            if(primaryAddress.equals(email)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     /**
      * Sets the birthday for the contact based on the google information
      *
@@ -307,11 +289,28 @@ public class ContactEntryParser {
         }
     }
 
-    private class Emails {
+    /**
+     * This method checks if an address contains invalid characters
+     *
+     * @param address The address string to check
+     */
+    private final boolean isValidMailAddress(final String address)  {
+        if (null != address) {
+            try {
+                new QuotedInternetAddress(address, true);
+                return true;
+            } catch (final AddressException e) {
+                return false;
+            }
+        }
+        return false;
+    }
+
+    private class Emails implements Comparable<Emails> {
         private String emailAddress;
         private int priority;
 
-        private Emails(String emailAddress, int priority) {
+        public Emails(String emailAddress, int priority) {
             if(emailAddress == null) {
                 throw new IllegalStateException("Parameter emailAddress can't be null");
             }
@@ -319,12 +318,46 @@ public class ContactEntryParser {
             this.priority = priority;
         }
 
-        private String getEmail() {
+        public String getEmail() {
             return emailAddress;
         }
 
-        private int getPriority() {
+        public int getPriority() {
             return priority;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            Emails o1 = (Emails) obj;
+            if(o1.getEmail().equals(this.getEmail())) {
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return emailAddress.hashCode();
+        }
+
+        @Override
+        public int compareTo(Emails o) {
+            return o.getPriority() - this.getPriority();
+        }
+    }
+
+    /**
+     * Prevent the adding of duplicates in an priority queue
+     **/
+    private class PreventDuplicatesPriorityQueue<T> extends PriorityQueue<T> {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public boolean add(T e){
+            if(!super.contains(e)) {
+                return super.add(e);
+            }
+            return false;
         }
     }
 }
