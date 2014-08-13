@@ -87,6 +87,14 @@ public class CreateTest extends ShareTest {
         testCreateSharedFolders(FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder());
     }
 
+    public void testCreateSharedTaskFolders() throws Exception {
+        testCreateSharedFolders(FolderObject.TASK, client.getValues().getPrivateTaskFolder());
+    }
+
+    public void testCreateSharedCalendarFolders() throws Exception {
+        testCreateSharedFolders(FolderObject.CALENDAR, client.getValues().getPrivateAppointmentFolder());
+    }
+
     private void testCreateSharedFolders(int module, int parent) throws Exception {
         for (EnumAPI api : new EnumAPI[] { EnumAPI.OX_OLD, EnumAPI.OX_NEW, EnumAPI.OUTLOOK }) {
             for (OCLGuestPermission guestPermission : TESTED_PERMISSIONS) {

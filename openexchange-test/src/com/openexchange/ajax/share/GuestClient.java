@@ -60,6 +60,7 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 import org.junit.Assert;
+import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.ajax.contact.action.InsertResponse;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
@@ -78,11 +79,18 @@ import com.openexchange.ajax.infostore.actions.NewInfostoreResponse;
 import com.openexchange.ajax.share.actions.ParsedShare;
 import com.openexchange.ajax.share.actions.ResolveShareRequest;
 import com.openexchange.ajax.share.actions.ResolveShareResponse;
+import com.openexchange.ajax.task.actions.AllRequest;
+import com.openexchange.ajax.task.actions.DeleteRequest;
+import com.openexchange.ajax.task.actions.GetRequest;
+import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.groupware.tasks.Task;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.share.AuthenticationMode;
@@ -180,14 +188,24 @@ public class GuestClient extends AJAXClient {
             Assert.assertFalse("Errors in response", deleteResponse.hasError());
             return;
         }
+        if ("io.ox/tasks".equals(getModule())) {
+            DeleteRequest deleteRequest = new DeleteRequest(getIntFolder(), Integer.parseInt(id), getFutureTimestamp());
+            CommonDeleteResponse deleteResponse = execute(deleteRequest);
+            Assert.assertFalse("Errors in response", deleteResponse.hasError());
+            return;
+        }
+        if ("io.ox/calendar".equals(getModule())) {
+            com.openexchange.ajax.appointment.action.DeleteRequest deleteRequest =
+                new com.openexchange.ajax.appointment.action.DeleteRequest(Integer.parseInt(id), getIntFolder(), getFutureTimestamp());
+            CommonDeleteResponse deleteResponse = execute(deleteRequest);
+            Assert.assertFalse("Errors in response", deleteResponse.hasError());
+            return;
+        }
         Assert.fail("no delete item request for " + getModule() + " implemented");
     }
 
     private Object getItem(String id) throws Exception {
         if ("io.ox/contacts".equals(getModule())) {
-            Contact contact = new Contact();
-            contact.setParentFolderID(getIntFolder());
-            contact.setDisplayName(UUIDs.getUnformattedString(UUID.randomUUID()));
             com.openexchange.ajax.contact.action.GetRequest getRequest = new com.openexchange.ajax.contact.action.GetRequest(
                 getIntFolder(), Integer.parseInt(id), TimeZones.UTC);
             GetResponse getResponse = execute(getRequest);
@@ -199,6 +217,19 @@ public class GuestClient extends AJAXClient {
             GetInfostoreResponse getResponse = execute(getRequest);
             Assert.assertFalse("Errors in response", getResponse.hasError());
             return getResponse.getDocumentMetadata();
+        }
+        if ("io.ox/tasks".equals(getModule())) {
+            GetRequest getRequest = new GetRequest(getIntFolder(), Integer.parseInt(id));
+            com.openexchange.ajax.task.actions.GetResponse getResponse = execute(getRequest);
+            Assert.assertFalse("Errors in response", getResponse.hasError());
+            return getResponse.getTask(TimeZones.UTC);
+        }
+        if ("io.ox/calendar".equals(getModule())) {
+            com.openexchange.ajax.appointment.action.GetRequest getRequest =
+                new com.openexchange.ajax.appointment.action.GetRequest(getIntFolder(), Integer.parseInt(id));
+            com.openexchange.ajax.appointment.action.GetResponse getResponse = execute(getRequest);
+            Assert.assertFalse("Errors in response", getResponse.hasError());
+            return getResponse.getAppointment(TimeZones.UTC);
         }
         Assert.fail("no get item request for " + getModule() + " implemented");
         return null;
@@ -225,6 +256,29 @@ public class GuestClient extends AJAXClient {
             Assert.assertFalse("Errors in response", newResponse.hasError());
             return String.valueOf(newResponse.getID());
         }
+        if ("io.ox/tasks".equals(getModule())) {
+            Task task = new Task();
+            task.setParentFolderID(getIntFolder());
+            task.setTitle(UUIDs.getUnformattedString(UUID.randomUUID()));
+            InsertRequest insertRequest = new InsertRequest(task, TimeZones.UTC);
+            com.openexchange.ajax.task.actions.InsertResponse insertResponse = execute(insertRequest);
+            Assert.assertFalse("Errors in response", insertResponse.hasError());
+            insertResponse.fillObject(task);
+            return String.valueOf(task.getObjectID());
+        }
+        if ("io.ox/calendar".equals(getModule())) {
+            Appointment appointment = new Appointment();
+            appointment.setParentFolderID(getIntFolder());
+            appointment.setTitle(UUIDs.getUnformattedString(UUID.randomUUID()));
+            appointment.setStartDate(new Date());
+            appointment.setEndDate(new Date(appointment.getStartDate().getTime() + 60 * 1000 * 60));
+            com.openexchange.ajax.appointment.action.InsertRequest insertRequest =
+                new com.openexchange.ajax.appointment.action.InsertRequest(appointment, TimeZones.UTC);
+            AppointmentInsertResponse insertResponse = execute(insertRequest);
+            Assert.assertFalse("Errors in response", insertResponse.hasError());
+            insertResponse.fillObject(appointment);
+            return String.valueOf(appointment.getObjectID());
+        }
         Assert.fail("no create item request for " + getModule() + " implemented");
         return null;
     }
@@ -238,6 +292,17 @@ public class GuestClient extends AJAXClient {
         if ("io.ox/files".equals(getModule())) {
             int[] columns = new int[] { Metadata.ID, Metadata.TITLE, Metadata.DESCRIPTION, Metadata.URL, Metadata.FOLDER_ID };
             AllInfostoreRequest allRequest = new AllInfostoreRequest(getFolder(), columns, Metadata.ID, Order.ASCENDING);
+            return execute(allRequest);
+        }
+        if ("io.ox/tasks".equals(getModule())) {
+            AllRequest allRequest = new AllRequest(getIntFolder(), Task.ALL_COLUMNS, Task.OBJECT_ID, Order.ASCENDING);
+            return execute(allRequest);
+        }
+        if ("io.ox/calendar".equals(getModule())) {
+            Date start = new Date(System.currentTimeMillis() - 100000000);
+            Date end = new Date(System.currentTimeMillis() + 100000000);
+            com.openexchange.ajax.appointment.action.AllRequest allRequest =
+                new com.openexchange.ajax.appointment.action.AllRequest(getIntFolder(), CalendarDataObject.ALL_COLUMNS, start, end, TimeZones.UTC);
             return execute(allRequest);
         }
         Assert.fail("no all request for " + getModule() + " implemented");
