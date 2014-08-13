@@ -49,13 +49,13 @@
 
 package com.openexchange.realtime.hazelcast.serialization.cleanup;
 
+import com.hazelcast.nio.serialization.ClassDefinition;
 import com.hazelcast.nio.serialization.Portable;
 import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
 
-
 /**
  * {@link PortableCleanupStatusFactory}
- *
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.1
  */
@@ -69,6 +69,11 @@ public class PortableCleanupStatusFactory extends AbstractCustomPortableFactory 
     @Override
     public int getClassId() {
         return PortableCleanupStatus.CLASS_ID;
+    }
+
+    @Override
+    public ClassDefinition getClassDefinition() {
+        return PortableCleanupStatus.CLASS_DEFINITION;
     }
 
 }

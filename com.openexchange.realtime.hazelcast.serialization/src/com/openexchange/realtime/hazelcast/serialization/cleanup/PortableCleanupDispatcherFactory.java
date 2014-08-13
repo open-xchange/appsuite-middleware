@@ -49,8 +49,10 @@
 
 package com.openexchange.realtime.hazelcast.serialization.cleanup;
 
+import com.hazelcast.nio.serialization.ClassDefinition;
 import com.hazelcast.nio.serialization.Portable;
 import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
+import com.openexchange.realtime.hazelcast.serialization.packet.PortableID;
 
 
 /**
@@ -69,6 +71,11 @@ public class PortableCleanupDispatcherFactory extends AbstractCustomPortableFact
     @Override
     public int getClassId() {
         return PortableCleanupDispatcher.CLASS_ID;
+    }
+
+    @Override
+    public ClassDefinition getClassDefinition() {
+        return PortableCleanupDispatcher.CLASS_DEFINITION;
     }
 
 }

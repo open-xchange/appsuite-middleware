@@ -54,6 +54,8 @@ import java.util.concurrent.Callable;
 import org.apache.commons.lang.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.hazelcast.nio.serialization.ClassDefinition;
+import com.hazelcast.nio.serialization.ClassDefinitionBuilder;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
@@ -76,6 +78,14 @@ public class PortableCleanupDispatcher extends AbstractCustomPortable implements
     public static final int CLASS_ID = 15;
 
     private static final String FIELD_ID = "id";
+
+    public static ClassDefinition CLASS_DEFINITION = null;
+
+    static {
+        CLASS_DEFINITION = new ClassDefinitionBuilder(FACTORY_ID, CLASS_ID)
+        .addPortableField(FIELD_ID, PortableID.CLASS_DEFINITION)
+        .build();
+    }
 
     private ID id;
 

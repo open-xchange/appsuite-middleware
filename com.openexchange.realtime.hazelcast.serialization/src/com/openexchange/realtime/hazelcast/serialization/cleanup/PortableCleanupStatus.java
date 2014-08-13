@@ -50,15 +50,17 @@
 package com.openexchange.realtime.hazelcast.serialization.cleanup;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import com.hazelcast.core.Member;
+import com.hazelcast.nio.serialization.ClassDefinition;
+import com.hazelcast.nio.serialization.ClassDefinitionBuilder;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
+import com.openexchange.realtime.hazelcast.serialization.directory.PortableRoutingInfo;
 
 /**
- * {@link PortableCleanupStatus} - Holds data about a cluster wide cleanup for c.o.realtime.hazelcast resources that can be used to decide if a
- * cleanup was already started. Additionally it holds data about who performed the cleanup at what time.
+ * {@link PortableCleanupStatus} - Holds data about a cluster wide cleanup for c.o.realtime.hazelcast resources that can be used to decide
+ * if a cleanup was already started. Additionally it holds data about who performed the cleanup at what time.
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.0
@@ -67,9 +69,26 @@ public class PortableCleanupStatus extends AbstractCustomPortable {
 
     public static int CLASS_ID = 16;
 
-    private String cleaningMemberId, memberToCleanId;
+    private static String FIELD_CLEANING_MEMBER = "cleaningMember";
 
-    private InetSocketAddress cleaningMemberAddress, memberToCleanAddress;
+    private static String FIELD_MEMBER_TO_CLEAN = "memberToClean";
+    
+    private static String FIELD_CLEANING_START_TIME = "cleaningStartTime";
+    
+    private static String FIELD_CLEANING_FINISH_TIME = "cleaningFinishTime";
+
+    public static ClassDefinition CLASS_DEFINITION = null;
+
+    static {
+        CLASS_DEFINITION = new ClassDefinitionBuilder(FACTORY_ID, CLASS_ID)
+        .addPortableField(FIELD_CLEANING_MEMBER, PortableRoutingInfo.CLASS_DEFINITION)
+        .addPortableField(FIELD_MEMBER_TO_CLEAN, PortableRoutingInfo.CLASS_DEFINITION)
+        .addLongField(FIELD_CLEANING_START_TIME)
+        .addLongField(FIELD_CLEANING_FINISH_TIME)
+        .build();
+    }
+
+    private PortableRoutingInfo cleaningMember, memberToClean;
 
     private long cleaningStartTime, cleaningFinishTime;
 
@@ -88,84 +107,46 @@ public class PortableCleanupStatus extends AbstractCustomPortable {
      */
     public PortableCleanupStatus(Member cleaningMember, Member memberToClean) {
         super();
-        this.cleaningMemberId = cleaningMember.getUuid();
-        this.cleaningMemberAddress = cleaningMember.getSocketAddress();
-        this.memberToCleanId = memberToClean.getUuid();
-        this.memberToCleanAddress = memberToClean.getSocketAddress();
+        this.cleaningMember = new PortableRoutingInfo(cleaningMember.getSocketAddress(), cleaningMember.getUuid());
+        this.memberToClean = new PortableRoutingInfo(memberToClean.getSocketAddress(), memberToClean.getUuid());
         this.cleaningStartTime = System.currentTimeMillis();
         this.cleaningFinishTime = -1;
     }
 
     /**
-     * Gets the cleaningMemberId
+     * Gets the cleaningMember
      * 
-     * @return The cleaningMemberId
+     * @return The cleaningMember
      */
-    public String getCleaningMemberId() {
-        return cleaningMemberId;
+    public PortableRoutingInfo getCleaningMember() {
+        return cleaningMember;
     }
 
     /**
-     * Sets the cleaningMemberId
+     * Sets the cleaningMember
      * 
-     * @param cleaningMemberId The cleaningMemberId to set
+     * @param cleaningMember The cleaningMember to set
      */
-    public void setCleaningMemberId(String cleaningMemberId) {
-        this.cleaningMemberId = cleaningMemberId;
+    public void setCleaningMember(PortableRoutingInfo cleaningMember) {
+        this.cleaningMember = cleaningMember;
     }
 
     /**
-     * Gets the memberToCleanId
+     * Gets the memberToClean
      * 
-     * @return The memberToCleanId
+     * @return The memberToClean
      */
-    public String getMemberToCleanId() {
-        return memberToCleanId;
+    public PortableRoutingInfo getMemberToClean() {
+        return memberToClean;
     }
 
     /**
-     * Sets the memberToCleanId
+     * Sets the memberToClean
      * 
-     * @param memberToCleanId The memberToCleanId to set
+     * @param memberToClean The memberToClean to set
      */
-    public void setMemberToCleanId(String memberToCleanId) {
-        this.memberToCleanId = memberToCleanId;
-    }
-
-    /**
-     * Gets the cleaningMemberAddress
-     * 
-     * @return The cleaningMemberAddress
-     */
-    public InetSocketAddress getCleaningMemberAddress() {
-        return cleaningMemberAddress;
-    }
-
-    /**
-     * Sets the cleaningMemberAddress
-     * 
-     * @param cleaningMemberAddress The cleaningMemberAddress to set
-     */
-    public void setCleaningMemberAddress(InetSocketAddress cleaningMemberAddress) {
-        this.cleaningMemberAddress = cleaningMemberAddress;
-    }
-
-    /**
-     * Gets the memberToCleanAddress
-     * 
-     * @return The memberToCleanAddress
-     */
-    public InetSocketAddress getMemberToCleanAddress() {
-        return memberToCleanAddress;
-    }
-
-    /**
-     * Sets the memberToCleanAddress
-     * 
-     * @param memberToCleanAddress The memberToCleanAddress to set
-     */
-    public void setMemberToCleanAddress(InetSocketAddress memberToCleanAddress) {
-        this.memberToCleanAddress = memberToCleanAddress;
+    public void setMemberToClean(PortableRoutingInfo memberToClean) {
+        this.memberToClean = memberToClean;
     }
 
     /**
@@ -209,11 +190,9 @@ public class PortableCleanupStatus extends AbstractCustomPortable {
         final int prime = 31;
         int result = 1;
         result = prime * result + (int) (cleaningFinishTime ^ (cleaningFinishTime >>> 32));
-        result = prime * result + ((cleaningMemberAddress == null) ? 0 : cleaningMemberAddress.hashCode());
-        result = prime * result + ((cleaningMemberId == null) ? 0 : cleaningMemberId.hashCode());
+        result = prime * result + ((cleaningMember == null) ? 0 : cleaningMember.hashCode());
         result = prime * result + (int) (cleaningStartTime ^ (cleaningStartTime >>> 32));
-        result = prime * result + ((memberToCleanAddress == null) ? 0 : memberToCleanAddress.hashCode());
-        result = prime * result + ((memberToCleanId == null) ? 0 : memberToCleanId.hashCode());
+        result = prime * result + ((memberToClean == null) ? 0 : memberToClean.hashCode());
         return result;
     }
 
@@ -223,41 +202,29 @@ public class PortableCleanupStatus extends AbstractCustomPortable {
             return true;
         if (obj == null)
             return false;
-        if (!(obj instanceof PortableCleanupStatus))
+        if (getClass() != obj.getClass())
             return false;
         PortableCleanupStatus other = (PortableCleanupStatus) obj;
         if (cleaningFinishTime != other.cleaningFinishTime)
             return false;
-        if (cleaningMemberAddress == null) {
-            if (other.cleaningMemberAddress != null)
+        if (cleaningMember == null) {
+            if (other.cleaningMember != null)
                 return false;
-        } else if (!cleaningMemberAddress.equals(other.cleaningMemberAddress))
-            return false;
-        if (cleaningMemberId == null) {
-            if (other.cleaningMemberId != null)
-                return false;
-        } else if (!cleaningMemberId.equals(other.cleaningMemberId))
+        } else if (!cleaningMember.equals(other.cleaningMember))
             return false;
         if (cleaningStartTime != other.cleaningStartTime)
             return false;
-        if (memberToCleanAddress == null) {
-            if (other.memberToCleanAddress != null)
+        if (memberToClean == null) {
+            if (other.memberToClean != null)
                 return false;
-        } else if (!memberToCleanAddress.equals(other.memberToCleanAddress))
-            return false;
-        if (memberToCleanId == null) {
-            if (other.memberToCleanId != null)
-                return false;
-        } else if (!memberToCleanId.equals(other.memberToCleanId))
+        } else if (!memberToClean.equals(other.memberToClean))
             return false;
         return true;
     }
 
     @Override
     public String toString() {
-        return "CleanupStatus [cleaningMemberId=" + cleaningMemberId + ", memberToCleanId=" + memberToCleanId
-             + ", cleaningMemberAddress=" + cleaningMemberAddress + ", memberToCleanAddress=" + memberToCleanAddress 
-             + ", cleaningStartTime=" + cleaningStartTime + ", cleaningFinishTime=" + cleaningFinishTime + "]";
+        return "PortableCleanupStatus [cleaningMember=" + cleaningMember + ", memberToClean=" + memberToClean + ", cleaningStartTime=" + cleaningStartTime + ", cleaningFinishTime=" + cleaningFinishTime + "]";
     }
 
     @Override
@@ -267,10 +234,18 @@ public class PortableCleanupStatus extends AbstractCustomPortable {
 
     @Override
     public void writePortable(PortableWriter writer) throws IOException {
+        writer.writePortable(FIELD_CLEANING_MEMBER, cleaningMember);
+        writer.writePortable(FIELD_MEMBER_TO_CLEAN, memberToClean);
+        writer.writeLong(FIELD_CLEANING_START_TIME, cleaningStartTime);
+        writer.writeLong(FIELD_CLEANING_FINISH_TIME, cleaningFinishTime);
     }
 
     @Override
     public void readPortable(PortableReader reader) throws IOException {
+        cleaningMember = reader.readPortable(FIELD_CLEANING_MEMBER);
+        memberToClean = reader.readPortable(FIELD_MEMBER_TO_CLEAN);
+        cleaningStartTime = reader.readLong(FIELD_CLEANING_START_TIME);
+        cleaningFinishTime = reader.readLong(FIELD_CLEANING_FINISH_TIME);
     }
 
 }
