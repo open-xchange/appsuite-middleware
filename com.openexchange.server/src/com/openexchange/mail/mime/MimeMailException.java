@@ -279,10 +279,7 @@ public class MimeMailException extends OXException {
                     final SMTPSendFailedException smtpExc = (SMTPSendFailedException) nextException;
                     final Address[] invalidAddresses = smtpExc.getInvalidAddresses();
                     if (null == invalidAddresses || invalidAddresses.length == 0) {
-                        return MimeMailExceptionCode.SEND_FAILED_MSG_EXT_ERROR.create(
-                            exc,
-                            exc.getMessage(),
-                            '(' + smtpExc.getMessage() + ')');
+                        return MimeMailExceptionCode.SEND_FAILED_MSG_EXT_ERROR.create(exc, exc.getMessage(), '(' + smtpExc.getMessage() + ')');
                     }
                 }
                 String serverInfo = null;
