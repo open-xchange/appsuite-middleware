@@ -214,8 +214,6 @@ public class CalendarEventParser {
         if (recurrence != null && recurrence.size() > 0) {
             // Recurrence string is the first element
             handleRecurrence(recurrence.get(0), calendarObject);
-        } else if (event.getRecurringEventId() != null) { // Series exception
-            // calendarObject.setE
         }
 
         // Participants and confirmations

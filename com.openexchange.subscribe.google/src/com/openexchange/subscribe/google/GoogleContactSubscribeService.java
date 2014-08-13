@@ -131,7 +131,9 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
                 bytes = out.toByteArray();
             } finally {
                 Streams.close(in);
-                gRequest.end();
+                if (gRequest != null) {
+                    gRequest.end();
+                }
             }
 
             if(null != bytes) {
