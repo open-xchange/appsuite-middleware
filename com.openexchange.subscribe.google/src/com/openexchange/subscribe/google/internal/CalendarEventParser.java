@@ -157,6 +157,7 @@ public class CalendarEventParser {
             final long startDate;
             if (eventDateTime.getDate() != null) {
                 startDate = eventDateTime.getDate().getValue();
+                calendarObject.setFullTime(true);
             } else if (eventDateTime.getDateTime() != null) {
                 startDate = eventDateTime.getDateTime().getValue();
             } else {
