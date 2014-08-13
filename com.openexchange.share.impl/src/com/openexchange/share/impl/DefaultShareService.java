@@ -64,6 +64,7 @@ import com.openexchange.groupware.userconfiguration.RdbUserPermissionBitsStorage
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.Guest;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
@@ -223,6 +224,13 @@ public class DefaultShareService implements ShareService {
         int guestID = services.getService(UserService.class).createUser(connection, context, guestUser);
         guestUser.setId(guestID);
         UserPermissionBitsStorage.getInstance().saveUserPermissionBits(connection, permissionBits, guestID, context); // FIXME: to service layer
+        if (AuthenticationMode.ANONYMOUS == guest.getAuthenticationMode()) {
+            LOG.info("Created anonymous guest user with permissions {} in context {}: {}",
+                permissionBits, context.getContextId(), guestID);
+        } else {
+            LOG.info("Created guest user {} with permissions {} in context {}: {}",
+                guestUser.getMail(), permissionBits, context.getContextId(), guestID);
+        }
         return guestUser;
     }
 
@@ -336,36 +344,36 @@ public class DefaultShareService implements ShareService {
 
     /**
      * Remove all shares identified by supplied tokens.
-     * 
+     *
      * @param tokens The tokens
      * @throws OXException If removal fails
      */
     public void removeShares(String[] tokens) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /**
      * Remove all shares in supplied context.
-     * 
+     *
      * @param contextId The contextId
      * @throws OXException If removal fails.
      */
     public void removeShares(int contextId) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /**
      * Remove all shares created by supplied user in supplied context.
-     * 
+     *
      * @param contextId The contextId
      * @param userId The userId
      * @throws OXException If removal fails
      */
     public void removeShares(int contextId, int userId) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
 }
