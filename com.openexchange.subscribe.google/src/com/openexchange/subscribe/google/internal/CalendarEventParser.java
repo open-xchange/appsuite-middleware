@@ -337,7 +337,7 @@ public class CalendarEventParser {
                     if (weekdays.size() == 1) {
                         final WeekdayNum weekdayNum = weekdays.get(0);
                         calendarObject.setDayInMonth(weekdayNum.num);
-                        calendarObject.setDays((int) Math.pow(2, weekdayNum.wday.javaDayNum));
+                        calendarObject.setDays((int) Math.pow(2, weekdayNum.wday.jsDayNum));
                     }
                 }
             } else if (calendarObject.getRecurrenceType() == CalendarDataObject.YEARLY) {
