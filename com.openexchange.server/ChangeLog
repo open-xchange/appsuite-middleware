@@ -1,3 +1,7 @@
+* 2014-08-13 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 34014: Adjusted example configuration to match corresponding comments 
+
 * 2014-08-12 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 34006: Corrected hashCode() calculation for contacts 
