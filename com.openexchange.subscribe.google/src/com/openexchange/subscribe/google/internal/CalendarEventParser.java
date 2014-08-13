@@ -151,7 +151,7 @@ public class CalendarEventParser {
             calendarObject.setNote(event.getDescription());
         }
         if (event.getColorId() != null) {
-            calendarObject.set(CalendarDataObject.COLOR_LABEL, event.getColorId());
+            calendarObject.set(CalendarDataObject.COLOR_LABEL, Integer.parseInt(event.getColorId()));
         }
 
         // Start, end and creation time
