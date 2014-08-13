@@ -65,7 +65,6 @@ import com.google.api.services.calendar.model.Events;
 import com.openexchange.exception.OXException;
 import com.openexchange.google.api.client.GoogleApiClients;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
@@ -192,10 +191,10 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
                             exceptionMap.put(co.getExtendedProperties().get("iCalUID").toString(), co);
                         }
                         if (!seriesExceptions.isEmpty()) {
-                            for (CalendarObject co : seriesExceptions) {
-                                CalendarObject cdo = exceptionMap.get(co.getExtendedProperties().get("iCalUID"));
-                                co.setChangeExceptions(Collections.singletonList(co.getStartDate()));
-                                co.setRecurrenceID(cdo.getRecurrenceID());
+                            for (CalendarObject exception : seriesExceptions) {
+                                CalendarObject master = exceptionMap.get(exception.getExtendedProperties().get("iCalUID"));
+                                exception.setChangeExceptions(Collections.singletonList(exception.getStartDate()));
+                                exception.setRecurrenceID(master.getRecurrenceID());
                             }
                             folderUpdater.save(new SearchIteratorDelegator<CalendarObject>(seriesExceptions), subscription);
                         }
@@ -231,10 +230,12 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
         for (CalendarObject exception : seriesExceptions) {
             CalendarDataObject master = exceptionMap.get(exception.getExtendedProperties().get("iCalUID"));
             int seq = master.getSequence();
-            master.setSequence(++seq);
+            exception.setSequence(seq++);
+            master.setSequence(seq);
             setBeginOfTheDay(exception.getStartDate(), gmtCalendar);
-            exception.setRecurrenceDatePosition(gmtCalendar.getTime());
             master.addChangeException(gmtCalendar.getTime());
+            exception.addChangeException(gmtCalendar.getTime());
+            exception.setRecurrenceDatePosition(gmtCalendar.getTime());
         }
     }
     
