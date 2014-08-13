@@ -116,15 +116,6 @@ public final class DropboxFile extends DefaultFile {
     public DropboxFile parseDropboxFile(final Entry entry, final List<Field> fields) throws OXException {
         if (null != entry && !entry.isDir) {
             try {
-                setId(entry.path);
-                {
-                    final String p = entry.parentPath();
-                    if ("/".equals(p)) {
-                        setFolderId(FileStorageFolder.ROOT_FULLNAME);
-                    } else {
-                        setFolderId(p);
-                    }
-                }
                 final String name = entry.fileName();
                 setTitle(name);
                 setFileName(name);
