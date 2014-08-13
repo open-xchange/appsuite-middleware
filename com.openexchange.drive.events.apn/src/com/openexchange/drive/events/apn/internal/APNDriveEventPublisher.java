@@ -57,6 +57,7 @@ import javapns.communication.exceptions.KeystoreException;
 import javapns.devices.Device;
 import javapns.devices.exceptions.InvalidDeviceTokenFormatException;
 import javapns.json.JSONException;
+import javapns.json.JSONObject;
 import javapns.notification.PayloadPerDevice;
 import javapns.notification.PushNotificationPayload;
 import javapns.notification.PushedNotification;
@@ -183,7 +184,12 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
                 payload.addCustomAlertActionLocKey("OK");
                 payload.addCustomDictionary("root", subscription.getRootFolderID());
                 payload.addCustomDictionary("action", "sync");
-//                payload.addCustomDictionary("folders", event.getFolderIDs().toString());
+                JSONObject apsObject = payload.getPayload().getJSONObject("aps");
+                if (null == apsObject) {
+                    apsObject = new JSONObject();
+                    payload.getPayload().put("aps", apsObject);
+                }
+                apsObject.put("content-available", 1);
                 payloads.add(new PayloadPerDevice(payload, subscription.getToken()));
             } catch (JSONException e) {
                 LOG.warn("error constructing payload", e);
