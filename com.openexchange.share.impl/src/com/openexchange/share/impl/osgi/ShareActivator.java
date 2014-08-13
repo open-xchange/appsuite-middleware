@@ -53,10 +53,10 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.contact.ContactService;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.html.HtmlService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.share.ShareCryptoService;
@@ -64,7 +64,10 @@ import com.openexchange.share.ShareService;
 import com.openexchange.share.impl.DefaultShareService;
 import com.openexchange.share.impl.ShareCryptoServiceImpl;
 import com.openexchange.share.impl.ShareServiceLookup;
+import com.openexchange.share.impl.notification.DefaultNotificationService;
+import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.storage.ShareStorage;
+import com.openexchange.templating.TemplateService;
 import com.openexchange.user.UserService;
 
 /**
@@ -85,7 +88,8 @@ public class ShareActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, ContextService.class, ContactService.class, ShareStorage.class, ConfigurationService.class, DatabaseService.class };
+        return new Class<?>[] { UserService.class, ContextService.class, TemplateService.class,
+            ShareStorage.class, ConfigurationService.class, DatabaseService.class, HtmlService.class };
     }
 
     @Override
@@ -138,10 +142,11 @@ public class ShareActivator extends HousekeepingActivator {
                 context.ungetService(serviceReference);
             }
         });
-        
+
         track(ManagementService.class, new ManagementServiceTracker(context, shareService));
-        
         openTrackers();
+
+        registerService(ShareNotificationService.class, new DefaultNotificationService());
     }
 
     @Override

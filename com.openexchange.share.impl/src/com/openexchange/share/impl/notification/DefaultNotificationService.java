@@ -47,51 +47,38 @@
  *
  */
 
-package com.openexchange.share.json;
+package com.openexchange.share.impl.notification;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.json.actions.AllAction;
-import com.openexchange.share.json.actions.GETAction;
-import com.openexchange.share.json.actions.NewAction;
-import com.openexchange.share.json.actions.NotifyAction;
+import com.openexchange.session.Session;
+import com.openexchange.share.impl.notification.mail.MailSender;
+import com.openexchange.share.notification.ShareNotification;
+import com.openexchange.share.notification.ShareNotificationService;
+import com.openexchange.share.notification.mail.MailNotification;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 /**
- * {@link ShareActionFactory}
+ * {@link DefaultNotificationService}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class ShareActionFactory implements AJAXActionServiceFactory {
+public class DefaultNotificationService implements ShareNotificationService {
 
-    private final Map<String, AJAXActionService> actions = new HashMap<String, AJAXActionService>();
-
-    /**
-     * Initializes a new {@link ShareActionFactory}.
-     * @param shareJsonActivator
-     */
-    public ShareActionFactory(ServiceLookup services) {
+    public DefaultNotificationService() {
         super();
-        actions.put("GET", new GETAction(services));
-        actions.put("new", new NewAction(services));
-        actions.put("all", new AllAction(services));
-        actions.put("notify", new NotifyAction(services));
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
-    }
-
-    @Override
-    public Collection<?> getSupportedServices() {
-        return null;
+    public <T extends ShareNotification<?>> void notify(T notification, Session session) throws OXException {
+        if (MailNotification.class.isAssignableFrom(notification.getClass())) {
+            new MailSender((MailNotification) notification, ServerSessionAdapter.valueOf(session)).send();
+        } else {
+            // TODO: implement extension mechanism based on concrete notification type (think of SMS, WhatsApp etc.)
+            throw new OXException(
+                new IllegalArgumentException("No provider exists to handle notifications of type " + notification.getClass().getName()));
+        }
     }
 
 }

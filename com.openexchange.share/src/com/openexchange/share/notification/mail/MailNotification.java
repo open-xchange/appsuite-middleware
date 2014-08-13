@@ -47,51 +47,57 @@
  *
  */
 
-package com.openexchange.share.json;
+package com.openexchange.share.notification.mail;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.json.actions.AllAction;
-import com.openexchange.share.json.actions.GETAction;
-import com.openexchange.share.json.actions.NewAction;
-import com.openexchange.share.json.actions.NotifyAction;
+import com.openexchange.java.Strings;
+import com.openexchange.share.Share;
+import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.ShareService;
+import com.openexchange.share.notification.AbstractNotification;
+import com.openexchange.share.notification.ShareNotification;
 
 
 /**
- * {@link ShareActionFactory}
+ * A {@link ShareNotification} that uses E-Mail as notification mechanism.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class ShareActionFactory implements AJAXActionServiceFactory {
+public class MailNotification extends AbstractNotification<InternetAddress> {
 
-    private final Map<String, AJAXActionService> actions = new HashMap<String, AJAXActionService>();
+    public static final String TYPE = MailNotification.class.getName();
+
+    private final InternetAddress mailAddress;
+
 
     /**
-     * Initializes a new {@link ShareActionFactory}.
-     * @param shareJsonActivator
+     * Initializes a new {@link MailNotification}.
+     * @param share The share
+     * @param url The url that points to the share. See {@link ShareService#generateServerUrl(java.util.List, String, String)}.
+     * @param title The shares title
+     * @param message The message (optional)
+     * @param recipientAddress The mail address of the recipient
+     * @throws OXException If the recipient address is not a valid mail address
      */
-    public ShareActionFactory(ServiceLookup services) {
-        super();
-        actions.put("GET", new GETAction(services));
-        actions.put("new", new NewAction(services));
-        actions.put("all", new AllAction(services));
-        actions.put("notify", new NotifyAction(services));
+    public MailNotification(Share share, String url, String title, String message, String recipientAddress) throws OXException {
+        super(share, url, title, message);
+        if (Strings.isEmpty(recipientAddress)) {
+            throw ShareExceptionCodes.INVALID_MAIL_ADDRESS.create("");
+        }
+
+        try {
+            this.mailAddress = new InternetAddress(recipientAddress);
+        } catch (AddressException e) {
+            throw ShareExceptionCodes.INVALID_MAIL_ADDRESS.create(recipientAddress);
+        }
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
-    }
-
-    @Override
-    public Collection<?> getSupportedServices() {
-        return null;
+    public InternetAddress getTransportInfo() {
+        return mailAddress;
     }
 
 }

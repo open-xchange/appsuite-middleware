@@ -103,4 +103,16 @@ public interface ShareService {
      */
     List<Share> addSharesToFolder(Session session, String folder, int module, List<Guest> guests) throws OXException;
 
+    /**
+     * Generates a URL for every share that is passed.
+     *
+     * @param shares A list of shares
+     * @param protocol The protocol to use (e.g. <code>http://</code>). If <code>null</code> <code>https://</code> is used.
+     *                 You probably want to pass com.openexchange.tools.servlet.http.Tools.getProtocol() here.
+     * @param fallbackHostname The hostname to use if no HostnameService is available.
+     *                 You probably want to pass HttpServletRequest.getServerName() here.
+     * @return A list of URLs, one for every share. The URLs are guaranteed to be in the same order as their according shares.
+     */
+    List<String> generateServerUrl(List<Share> shares, String protocol, String fallbackHostname) throws OXException;
+
 }

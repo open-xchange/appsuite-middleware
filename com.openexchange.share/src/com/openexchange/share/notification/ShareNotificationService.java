@@ -47,51 +47,27 @@
  *
  */
 
-package com.openexchange.share.json;
+package com.openexchange.share.notification;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.json.actions.AllAction;
-import com.openexchange.share.json.actions.GETAction;
-import com.openexchange.share.json.actions.NewAction;
-import com.openexchange.share.json.actions.NotifyAction;
+import com.openexchange.session.Session;
+
 
 
 /**
- * {@link ShareActionFactory}
+ * A service to notify arbitrary recipients about available shares.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class ShareActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AJAXActionService> actions = new HashMap<String, AJAXActionService>();
+public interface ShareNotificationService {
 
     /**
-     * Initializes a new {@link ShareActionFactory}.
-     * @param shareJsonActivator
+     * Notifies the recipient of {@link ShareNotification} about the according share.
+     *
+     * @param notification The notification
+     * @param session The session
      */
-    public ShareActionFactory(ServiceLookup services) {
-        super();
-        actions.put("GET", new GETAction(services));
-        actions.put("new", new NewAction(services));
-        actions.put("all", new AllAction(services));
-        actions.put("notify", new NotifyAction(services));
-    }
-
-    @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
-    }
-
-    @Override
-    public Collection<?> getSupportedServices() {
-        return null;
-    }
+    <T extends ShareNotification<?>> void notify(T notification, Session session) throws OXException;
 
 }

@@ -47,51 +47,35 @@
  *
  */
 
-package com.openexchange.share.json;
+package com.openexchange.share.impl.notification.mail;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.json.actions.AllAction;
-import com.openexchange.share.json.actions.GETAction;
-import com.openexchange.share.json.actions.NewAction;
-import com.openexchange.share.json.actions.NotifyAction;
+import com.openexchange.i18n.LocalizableStrings;
 
 
 /**
- * {@link ShareActionFactory}
+ * Translatable Strings to compose share notification mails.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class ShareActionFactory implements AJAXActionServiceFactory {
+public class MailStrings implements LocalizableStrings {
 
-    private final Map<String, AJAXActionService> actions = new HashMap<String, AJAXActionService>();
+    // [John Doe] shared "[holiday pictures]" with you
+    public static final String SUBJECT = "%1$s shared \"%2$s\" with you";
 
-    /**
-     * Initializes a new {@link ShareActionFactory}.
-     * @param shareJsonActivator
-     */
-    public ShareActionFactory(ServiceLookup services) {
-        super();
-        actions.put("GET", new GETAction(services));
-        actions.put("new", new NewAction(services));
-        actions.put("all", new AllAction(services));
-        actions.put("notify", new NotifyAction(services));
-    }
+    // Message from [John Doe]
+    public static final String MESSAGE_INTRO = "Message from %1$s";
 
-    @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
-    }
+    // Click here to view [holiday pictures]
+    public static final String LINK_INTRO = "Click here to view %1$s";
 
-    @Override
-    public Collection<?> getSupportedServices() {
-        return null;
-    }
+    // Please use the following credentials if asked for
+    public static final String CREDENTIALS_INTRO = "Please use the following credentials if asked for";
+
+    // Username
+    public static final String USERNAME_FIELD = "Username";
+
+    // Password
+    public static final String PASSWORD_FIELD = "Password";
 
 }

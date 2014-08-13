@@ -59,13 +59,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.modules.Module;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.osgi.util.ServiceCallWrapper;
+import com.openexchange.osgi.util.ServiceCallWrapper.ServiceException;
+import com.openexchange.osgi.util.ServiceCallWrapper.ServiceUser;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.DefaultShare;
@@ -81,6 +86,8 @@ import com.openexchange.share.ShareCryptoService;
  * @since v7.6.1
  */
 public class ShareTool {
+
+    public static final String SHARE_SERVLET = "share";
 
     private static final long LOW_BITS = 0x00000000FFFFFFFFL;
 
@@ -99,6 +106,42 @@ public class ShareTool {
         mostSignificantBits |= (((long)contextId) << 32);
         String token = UUIDs.getUnformattedString(new UUID(mostSignificantBits, randomUUID.getLeastSignificantBits()));
         return token;
+    }
+
+    public static String getShareUrl(Share share, String protocol, String fallbackHostname) {
+        String hostname = getHostname(share.getCreatedBy(), share.getContextID());
+        if (hostname == null) {
+            hostname = fallbackHostname;
+        }
+
+        String prefix = getServletPrefix();
+        return protocol + hostname + prefix + SHARE_SERVLET + '/' + share.getToken();
+    }
+
+    public static String getHostname(final int userID, final int contextID) {
+        try {
+            return ServiceCallWrapper.doServiceCall(ShareTool.class, HostnameService.class, new ServiceUser<HostnameService, String>() {
+                @Override
+                public String call(HostnameService service) throws Exception {
+                    return service.getHostname(userID, contextID);
+                }
+            });
+        } catch (ServiceException e) {
+            return null;
+        }
+    }
+
+    public static String getServletPrefix() {
+        try {
+            return ServiceCallWrapper.doServiceCall(ShareTool.class, DispatcherPrefixService.class, new ServiceUser<DispatcherPrefixService, String>() {
+                @Override
+                public String call(DispatcherPrefixService service) throws Exception {
+                    return service.getPrefix();
+                }
+            });
+        } catch (ServiceException e) {
+           return DispatcherPrefixService.DEFAULT_PREFIX;
+        }
     }
 
     /**

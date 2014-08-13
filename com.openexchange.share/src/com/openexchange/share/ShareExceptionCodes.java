@@ -51,6 +51,7 @@ package com.openexchange.share;
 
 import static com.openexchange.exception.OXExceptionStrings.SQL_ERROR_MSG;
 import static com.openexchange.share.ShareExceptionMessages.INVALID_LINK_MSG;
+import static com.openexchange.share.ShareExceptionMessages.INVALID_MAIL_ADDRESS_MSG;
 import static com.openexchange.share.ShareExceptionMessages.UNKNOWN_SHARE_MSG;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
@@ -73,6 +74,12 @@ public enum ShareExceptionCodes implements DisplayableOXExceptionCode {
 
     /** The link \"%1$s\" is invalid. */
     INVALID_LINK("A share with token \"%1$s\" does not exist.", INVALID_LINK_MSG, Category.CATEGORY_USER_INPUT, 3),
+
+    /** An unexpected error occurred: %1$s */
+    UNEXPECTED_ERROR("An unexpected error occurred: %1$s", null, Category.CATEGORY_ERROR, 4),
+
+    /** \"%1$s\" is not a valid email address. */
+    INVALID_MAIL_ADDRESS("\"%1$s\" is not a valid email address.", INVALID_MAIL_ADDRESS_MSG, Category.CATEGORY_USER_INPUT, 5),
 
     ;
 

@@ -157,6 +157,16 @@ public class DefaultShareService implements ShareService {
         return shares;
     }
 
+    @Override
+    public List<String> generateServerUrl(List<Share> shares, String protocol, String fallbackHostname) throws OXException {
+        List<String> urls = new ArrayList<String>(shares.size());
+        for (Share share : shares) {
+            urls.add(ShareTool.getShareUrl(share, protocol, fallbackHostname));
+        }
+
+        return urls;
+    }
+
     /**
      * Removes all expired shares from the supplied list.
      *

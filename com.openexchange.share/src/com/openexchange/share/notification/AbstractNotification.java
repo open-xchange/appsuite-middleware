@@ -47,51 +47,59 @@
  *
  */
 
-package com.openexchange.share.json;
+package com.openexchange.share.notification;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.json.actions.AllAction;
-import com.openexchange.share.json.actions.GETAction;
-import com.openexchange.share.json.actions.NewAction;
-import com.openexchange.share.json.actions.NotifyAction;
+import static com.google.common.base.Preconditions.checkNotNull;
+import com.openexchange.share.Share;
 
 
 /**
- * {@link ShareActionFactory}
+ * Abstract convenience implementation that provides all common fields for
+ * {@link ShareNotification}s.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class ShareActionFactory implements AJAXActionServiceFactory {
+public abstract class AbstractNotification<T> implements ShareNotification<T> {
 
-    private final Map<String, AJAXActionService> actions = new HashMap<String, AJAXActionService>();
+    protected final Share share;
 
-    /**
-     * Initializes a new {@link ShareActionFactory}.
-     * @param shareJsonActivator
-     */
-    public ShareActionFactory(ServiceLookup services) {
+    protected final String url;
+
+    protected final String title;
+
+    protected final String message;
+
+
+    public AbstractNotification(Share share, String url, String title, String message) {
         super();
-        actions.put("GET", new GETAction(services));
-        actions.put("new", new NewAction(services));
-        actions.put("all", new AllAction(services));
-        actions.put("notify", new NotifyAction(services));
+        checkNotNull(share);
+        checkNotNull(url);
+        checkNotNull(title);
+        this.share = share;
+        this.url = url;
+        this.title = title;
+        this.message = message;
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
+    public Share getShare() {
+        return share;
     }
 
     @Override
-    public Collection<?> getSupportedServices() {
-        return null;
+    public String getUrl() {
+        return url;
+    }
+
+    @Override
+    public String getTitle() {
+        return title;
+    }
+
+    @Override
+    public String getMessage() {
+        return message;
     }
 
 }

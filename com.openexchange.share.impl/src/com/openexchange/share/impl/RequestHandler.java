@@ -49,7 +49,6 @@
 
 package com.openexchange.share.impl;
 
-import com.openexchange.contact.ContactService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
@@ -88,10 +87,6 @@ public abstract class RequestHandler<R, T> {
 
     protected UserService getUserService() throws OXException {
         return getService(UserService.class, true);
-    }
-
-    protected ContactService getContactService() throws OXException {
-        return getService(ContactService.class, true);
     }
 
     protected DatabaseService getDatabaseService() throws OXException {

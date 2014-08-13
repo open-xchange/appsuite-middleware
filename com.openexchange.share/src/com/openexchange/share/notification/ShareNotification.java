@@ -47,51 +47,53 @@
  *
  */
 
-package com.openexchange.share.json;
+package com.openexchange.share.notification;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.json.actions.AllAction;
-import com.openexchange.share.json.actions.GETAction;
-import com.openexchange.share.json.actions.NewAction;
-import com.openexchange.share.json.actions.NotifyAction;
-
+import com.openexchange.share.Share;
 
 /**
- * {@link ShareActionFactory}
+ * A {@link ShareNotification} encapsulates all information necessary to notify
+ * the according recipient about a share and provide her a link to access that share.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class ShareActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AJAXActionService> actions = new HashMap<String, AJAXActionService>();
+public interface ShareNotification<T> {
 
     /**
-     * Initializes a new {@link ShareActionFactory}.
-     * @param shareJsonActivator
+     * Gets the share to notify the recipient about.
+     *
+     * @return The share, never <code>null</code>
      */
-    public ShareActionFactory(ServiceLookup services) {
-        super();
-        actions.put("GET", new GETAction(services));
-        actions.put("new", new NewAction(services));
-        actions.put("all", new AllAction(services));
-        actions.put("notify", new NotifyAction(services));
-    }
+    Share getShare();
 
-    @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
-    }
+    /**
+     * Gets the URL needed for accessing the share.
+     *
+     * @return The url, never <code>null</code>
+     */
+    String getUrl();
 
-    @Override
-    public Collection<?> getSupportedServices() {
-        return null;
-    }
+    /**
+     * Gets the title of the share that is shown to the recipient
+     * (e.g. "My Photos").
+     *
+     * @return The title, never <code>null</code>
+     */
+    String getTitle();
+
+    /**
+     * Gets the message that is shown to the recipient.
+     *
+     * @return The message or <code>null</code>, if nothing was provided
+     */
+    String getMessage();
+
+    /**
+     * Gets the transport information used to notify the recipient.
+     *
+     * @return The transport information, never <code>null</code>
+     */
+    T getTransportInfo();
 
 }
