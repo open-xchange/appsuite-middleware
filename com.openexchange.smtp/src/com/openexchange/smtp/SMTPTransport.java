@@ -958,12 +958,10 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
             transport.sendMessage(smtpMessage, recipients);
             logMessageTransport(smtpMessage, smtpConfig);
         } catch (SMTPSendFailedException sendFailed) {
-            if (null == smtpStatusInfo) {
-                throw MimeMailException.handleMessagingException(sendFailed, smtpConfig, session);
+            if (null != smtpStatusInfo) {
+                smtpStatusInfo.setReturnCode(sendFailed.getReturnCode());
             }
-            smtpStatusInfo.setReturnCode(sendFailed.getReturnCode());
-            OXException oxe = MimeMailException.handleMessagingException(sendFailed, smtpConfig, session);
-            throw oxe;
+            throw MimeMailException.handleMessagingException(sendFailed, smtpConfig, session);
         } catch (final MessagingException e) {
             if (e.getNextException() instanceof javax.activation.UnsupportedDataTypeException) {
                 // Check for "no object DCH for MIME type xxxxx/yyyy"
