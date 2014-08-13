@@ -129,7 +129,7 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
             final ThreadPoolService threadPool = services.getOptionalService(ThreadPoolService.class);
 
             if (null == threadPool) {
-                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("ThreadPoolService");
+                throw ServiceExceptionCode.absentService(ThreadPoolService.class);
             }
 
             final AppointmentSqlFactoryService factoryService = services.getOptionalService(AppointmentSqlFactoryService.class);
