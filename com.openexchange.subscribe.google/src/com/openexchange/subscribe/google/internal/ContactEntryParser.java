@@ -122,37 +122,37 @@ public class ContactEntryParser {
 
         if (entry.hasEmailAddresses()) {
             for (final Email email : entry.getEmailAddresses()) {
-                if(isValidMailAddress(email.getAddress())) {
+                String contactsMail = email.getAddress();
+                if(isValidMailAddress(contactsMail)) {
                     if (email.getRel() != null) {
+                        String relType = email.getRel();
                         if (email.getPrimary()) {
-                            pqEmails.add(new Emails(email.getAddress(), 10));
-                        } else if (email.getRel().endsWith("work")) {
-                            pqEmails.add(new Emails(email.getAddress(), 9));
-                        } else if (email.getRel().endsWith("home")) {
-                            pqEmails.add(new Emails(email.getAddress(), 8));
-                        } else if (email.getRel().endsWith("other")) {
-                            pqEmails.add(new Emails(email.getAddress(), 7));
+                            pqEmails.add(new Emails(contactsMail, 10));
+                        } else if (relType.endsWith("work")) {
+                            pqEmails.add(new Emails(contactsMail, 9));
+                        } else if (relType.endsWith("home")) {
+                            pqEmails.add(new Emails(contactsMail, 8));
+                        } else if (relType.endsWith("other")) {
+                            pqEmails.add(new Emails(contactsMail, 7));
                         }
                     }
                     // if there are other user tagged mail addresses add them with low priority
                     else {
-                        pqEmails.add(new Emails(email.getAddress(), 6));
+                        pqEmails.add(new Emails(contactsMail, 6));
                     }
                 }
             }
         }
 
-        while(pqEmails.size() > 0) {
+        //mapping of mails
+        if(pqEmails.peek() != null) {
             contact.setEmail1(pqEmails.poll().getEmail());
-            if(pqEmails.peek() == null) {
-                break;
-            }
+        }
+        if(pqEmails.peek() != null) {
             contact.setEmail2(pqEmails.poll().getEmail());
-            if(pqEmails.peek() == null) {
-                break;
-            }
+        }
+        if(pqEmails.peek() != null) {
             contact.setEmail3(pqEmails.poll().getEmail());
-            break;
         }
 
         if (entry.hasPhoneNumbers()) {
