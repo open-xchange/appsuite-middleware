@@ -384,6 +384,15 @@ public class Presence extends Stanza {
         }
     }
 
+    @Override
+    public void addPayload(PayloadTree tree) {
+        ElementPath newRootPath = tree.getElementPath();
+        if (defaultElements.contains(newRootPath)) {
+            payloads.remove(newRootPath);
+        }
+        addPayloadToMap(tree, payloads);
+    }
+
     /**
      * Initialize a Presence Builder
      * 
