@@ -723,7 +723,7 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * The message intended for being displayed to the user.
      */
-    private final String displayMessage;
+    private String displayMessage;
 
     /**
      * Category of the exception.
@@ -744,6 +744,9 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     private OXCalendarExceptionCodes(final String message, final int detailNumber, final Category category) {
         this(message, OXExceptionStrings.MESSAGE, detailNumber, category);
+        if (category == Category.CATEGORY_USER_INPUT) {
+            this.displayMessage = message;
+        }
     }
 
     /**
