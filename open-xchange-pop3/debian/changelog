@@ -94,6 +94,12 @@ open-xchange-pop3 (7.6.0-0) unstable; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 12 Feb 2014 09:36:20 +0100
 
+open-xchange-pop3 (7.4.2-32) stable; urgency=low
+
+  * Build for patch 2014-08-15
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 13 Aug 2014 15:58:49 +0200
+
 open-xchange-pop3 (7.4.2-31) stable; urgency=low
 
   * Build for patch 2014-08-11
