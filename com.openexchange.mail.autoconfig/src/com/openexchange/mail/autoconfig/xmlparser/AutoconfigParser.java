@@ -113,9 +113,23 @@ public class AutoconfigParser {
             Collection<EmailProvider> emailProvider = new ArrayList<EmailProvider>();
             clientConfig.setEmailProvider(emailProvider);
             while (parser.nextTag() == START_TAG) {
-                parser.require(START_TAG, null, EMAIL_PROVIDER);
-                EmailProvider ep = parseEmailProvider(parser);
-                emailProvider.add(ep);
+                String name = parser.getName();
+                if (name.equalsIgnoreCase(EMAIL_PROVIDER)) {
+                    parser.require(START_TAG, null, EMAIL_PROVIDER);
+                    EmailProvider ep = parseEmailProvider(parser);
+                    emailProvider.add(ep);
+                } else {
+                    int depth = 1;
+                    while (depth > 0) {
+                        int tag = parser.next();
+                        String name2 = parser.getName();
+                        if (tag == START_TAG && name2.equalsIgnoreCase(name)) {
+                            depth++;
+                        } else if (tag == END_TAG && name2.equalsIgnoreCase(name)) {
+                            depth--;
+                        }
+                    }
+                }
             }
             parser.require(END_TAG, null, CLIENT_CONFIG);
             parser.next();
