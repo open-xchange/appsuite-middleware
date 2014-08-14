@@ -116,12 +116,6 @@ public class SQL {
         "FROM share " +
         "WHERE cid=?;"
     ;
-    
-    public static final String SELECT_SHARES_BY_USER_STMT =
-        "SELECT token,module,folder,item,created,createdBy,lastModified,modifiedBy,expires,guest,auth " +
-        "FROM share " +
-        "WHERE cid=? AND createdBy=?;"
-    ;
 
     public static final String SELECT_SHARES_BY_ITEM_STMT =
         "SELECT token,module,created,createdBy,lastModified,modifiedBy,expires,guest,auth " +
