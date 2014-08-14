@@ -242,8 +242,8 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
         super(googleMetaData, services);
         source = initSS(FolderObject.CONTACT, "contact");
         parser = new ContactEntryParser();
-        final ConfigurationService configService = services.getOptionalService(ConfigurationService.class);
-        pageSize = configService.getIntProperty("com.openexchange.subscribe.google.calendar.pageSize", 25);
+        final ConfigurationService configService = services.getService(ConfigurationService.class);
+        pageSize = configService.getIntProperty("com.openexchange.subscribe.google.contact.pageSize", 25);
     }
 
     @Override

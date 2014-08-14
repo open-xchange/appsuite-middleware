@@ -93,7 +93,7 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
     public GoogleCalendarSubscribeService(final OAuthServiceMetaData googleMetaData, ServiceLookup services) {
         super(googleMetaData, services);
         source = initSS(FolderObject.CALENDAR, "calendar");
-        final ConfigurationService configService = services.getOptionalService(ConfigurationService.class);
+        final ConfigurationService configService = services.getService(ConfigurationService.class);
         pageSize = configService.getIntProperty("com.openexchange.subscribe.google.calendar.pageSize", 25);
     }
 
@@ -218,7 +218,7 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
 
     private void handleSeriesAndSeriesExceptions(final Subscription subscription, final List<CalendarDataObject> changeExceptions, final List<CalendarDataObject> deleteExceptions, final List<CalendarDataObject> series, final AppointmentSQLInterface appointmentsql) throws OXException {
         final Map<String, CalendarDataObject> masterMap = new HashMap<String, CalendarDataObject>(series.size());
-        
+
         handleSeries(subscription, series, appointmentsql, masterMap);
         handleExceptions(subscription, changeExceptions, appointmentsql, masterMap, false);
         handleExceptions(subscription, deleteExceptions, appointmentsql, masterMap, true);
