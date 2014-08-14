@@ -178,12 +178,7 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
                         parseAndAdd(e, parser, appointments, series, changeExceptions, deleteExceptions);
                         for (CalendarDataObject cdo : appointments) {
                             cdo.setParentFolderID(subscription.getFolderIdAsInt());
-                            try {
-                                appointmentsql.insertAppointmentObject(cdo);
-                            } catch (Exception e1) {
-                                System.err.println(cdo);
-                                e1.printStackTrace();
-                            }
+                            appointmentsql.insertAppointmentObject(cdo);
                         }
 
                     } while ((nextPageToken = e.getNextPageToken()) != null);
@@ -227,19 +222,14 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
             appointmentsql.insertAppointmentObject(cdo);
             masterMap.put(cdo.getUid(), cdo);
         }
-        final java.util.Calendar utcCalendar = java.util.Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        // Handle series exceptions
-        for (CalendarDataObject cdo : changeExceptions) {
-            final CalendarDataObject masterObj = masterMap.get(cdo.getUid());
-            cdo.setObjectID(masterObj.getObjectID());
-            setBeginOfTheDay(cdo.getStartDate(), utcCalendar);
-            cdo.setRecurrenceDatePosition(utcCalendar.getTime());
-            cdo.setParentFolderID(subscription.getFolderIdAsInt());
-            appointmentsql.updateAppointmentObject(cdo, subscription.getFolderIdAsInt(), masterObj.getLastModified());
-            masterObj.setLastModified(cdo.getLastModified());
-        }
 
-        for (CalendarDataObject cdo : deleteExceptions) {
+        handleExceptions(subscription, changeExceptions, appointmentsql, masterMap, false);
+        handleExceptions(subscription, deleteExceptions, appointmentsql, masterMap, true);
+    }
+
+    private void handleExceptions(final Subscription subscription, final List<CalendarDataObject> exceptions, final AppointmentSQLInterface appointmentsql, final Map<String, CalendarDataObject> masterMap, final boolean delete) throws OXException {
+        final java.util.Calendar utcCalendar = java.util.Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        for (CalendarDataObject cdo : exceptions) {
             String uid = cdo.getUid();
             final CalendarDataObject masterObj = masterMap.get(uid);
             if (masterObj != null) {
@@ -247,7 +237,11 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
                 setBeginOfTheDay(cdo.getStartDate(), utcCalendar);
                 cdo.setRecurrenceDatePosition(utcCalendar.getTime());
                 try {
-                    appointmentsql.deleteAppointmentObject(cdo, subscription.getFolderIdAsInt(), masterObj.getLastModified());
+                    if (delete) {
+                        appointmentsql.deleteAppointmentObject(cdo, subscription.getFolderIdAsInt(), masterObj.getLastModified());
+                    } else {
+                        appointmentsql.updateAppointmentObject(cdo, subscription.getFolderIdAsInt(), masterObj.getLastModified());
+                    }
                 } catch (SQLException e) {
                     throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e);
                 }
