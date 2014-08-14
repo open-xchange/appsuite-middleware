@@ -61,6 +61,7 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.google.api.client.services.Services;
+import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthAccount;
@@ -131,12 +132,15 @@ public class GoogleApiClients {
             int expiry = scribeOAuthService.getExpiry(defaultAccount.getToken());
             if (expiry < 300) {
                 // Less than 5 minutes to live -> refresh token!
+                String refreshToken = defaultAccount.getSecret();
                 Token accessToken = scribeOAuthService.getAccessToken(new Token(defaultAccount.getToken(), defaultAccount.getSecret()), null);
-
+                if (!Strings.isEmpty(accessToken.getSecret())) {
+                    refreshToken = accessToken.getSecret();
+                }
                 // Update account
                 int accountId = defaultAccount.getId();
                 Map<String, Object> arguments = new HashMap<String, Object>(3);
-                arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(accessToken.getToken(), accessToken.getSecret()));
+                arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(accessToken.getToken(), refreshToken));
                 arguments.put(OAuthConstants.ARGUMENT_SESSION, session);
                 oAuthService.updateAccount(accountId, arguments, session.getUserId(), session.getContextId());
 
