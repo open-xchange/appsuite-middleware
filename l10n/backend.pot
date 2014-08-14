@@ -2044,6 +2044,11 @@ msgstr ""
 msgid "An I/O error occurred: %1$s"
 msgstr ""
 
+#. The file %1$s doesn't have any content stored on Drive
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.google_drive/src/com/openexchange/file/storage/google_drive/GoogleDriveExceptionMessages.java:98
+msgid "The file %1$s doesn't have any content stored on Drive"
+msgstr ""
+
 #. Directory "%1$s" must not be deleted.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/WebDAVFileStorageExceptionMessages.java:64
 msgid "Directory \"%1$s\" must not be deleted."
