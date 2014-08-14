@@ -47,82 +47,42 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast.serialization;
+package com.openexchange.realtime.hazelcast.serialization.group;
 
 import java.io.IOException;
+import java.util.Map.Entry;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
+import com.hazelcast.query.Predicate;
 import com.openexchange.hazelcast.serialization.CustomPortable;
+import com.openexchange.realtime.hazelcast.serialization.directory.PortableResource;
+import com.openexchange.realtime.hazelcast.serialization.packet.PortableID;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.IDComponentsParser;
-import com.openexchange.realtime.packet.IDComponentsParser.IDComponents;
-
 
 /**
- * {@link PortableID} A {@link ID} implementation that can efficiently be serialized via Hazelcast's Portable
- *
+ * {@link PortableNotInternalPredicate} - Filter out internal {@link ID}s.
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
- * @since 7.6.0
+ * @since 7.6.1
  */
-public class PortableID extends ID implements CustomPortable {
+public class PortableNotInternalPredicate implements Predicate<PortableID, PortableResource>, CustomPortable {
 
-    private static final long serialVersionUID = -6140097121581373922L;
-    
-    public static final int CLASS_ID = 5;
+    private static final long serialVersionUID = -4738251095093967960L;
 
-    /**
-     * Initializes a new {@link PortableID}.
-     * @param id
-     */
-    public PortableID(String id) {
-        super(id);
+    public static final int CLASS_ID = 7;
+
+    @Override
+    public boolean apply(Entry<PortableID, PortableResource> event) {
+        PortableID id = event.getKey();
+        return !id.isInternal();
     }
 
-    /**
-     * Initializes a new {@link PortableID}.
-     * @param id
-     * @param defaultContext
-     */
-    public PortableID(String id, String defaultContext) {
-        super(id, defaultContext);
+    @Override
+    public void writePortable(PortableWriter writer) throws IOException {
     }
 
-    /**
-     * Initializes a new {@link PortableID}.
-     * @param protocol
-     * @param user
-     * @param context
-     * @param resource
-     */
-    public PortableID(String protocol, String user, String context, String resource) {
-        super(protocol, user, context, resource);
-    }
-
-    /**
-     * Initializes a new {@link PortableID}.
-     * @param protocol
-     * @param component
-     * @param user
-     * @param context
-     * @param resource
-     */
-    public PortableID(String protocol, String component, String user, String context, String resource) {
-        super(protocol, component, user, context, resource);
-    }
-
-    /**
-     * Initializes a new {@link PortableID} based on an existing non portable ID.
-     * @param id The non portable ID to use as base for this PortableID.
-     */
-    public PortableID(ID id) {
-        super(id.getProtocol(), id.getComponent(), id.getUser(), id.getContext(), id.getResource());
-    }
-
-    /**
-     * Initializes a new {@link PortableID}.
-     */
-    public PortableID() {
-        super();
+    @Override
+    public void readPortable(PortableReader reader) throws IOException {
     }
 
     @Override
@@ -133,24 +93,6 @@ public class PortableID extends ID implements CustomPortable {
     @Override
     public int getClassId() {
         return CLASS_ID;
-    }
-
-    @Override
-    public void writePortable(PortableWriter writer) throws IOException {
-        writer.writeUTF("idString", this.toString());
-    }
-
-    @Override
-    public void readPortable(PortableReader reader) throws IOException {
-        String idString = reader.readUTF("idString");
-        IDComponents idComponents = IDComponentsParser.parse(idString);
-        protocol = idComponents.protocol;
-        component = idComponents.component;
-        user = idComponents.user;
-        context = idComponents.context;
-        resource = idComponents.resource;
-        sanitize();
-        validate();
     }
 
 }

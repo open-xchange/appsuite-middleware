@@ -47,72 +47,83 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast.serialization;
+package com.openexchange.realtime.hazelcast.serialization.directory;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import com.hazelcast.nio.serialization.ClassDefinition;
+import com.hazelcast.nio.serialization.ClassDefinitionBuilder;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 import com.openexchange.hazelcast.serialization.CustomPortable;
-import com.openexchange.realtime.group.SelectorChoice;
-import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.directory.RoutingInfo;
 
 /**
- * {@link PortableSelectorChoice} - A {@link SelectorChoice} implementation that can efficiently be serialized via Hazelcast's Portable
+ * {@link PortableRoutingInfo} - A {@link RoutingInfo} implementation that can efficiently be serialized via Hazelcast's Portable mechanism.
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.1
  */
-public class PortableSelectorChoice extends SelectorChoice implements CustomPortable {
+public class PortableRoutingInfo extends RoutingInfo implements CustomPortable {
 
-    public static final int CLASS_ID = 6;
+    public static final int CLASS_ID = 12;
 
-    private static final String CLIENT_ID = "clientID";
+    private static final String FIELD_HOSTBYTES = "hostbytes";
 
-    private static final String GROUP_ID = "groupID";
+    private static final String FIELD_PORT = "port";
 
-    private static final String SELECTOR = "selector";
+    private static final String FIELD_ID = "id";
+
+    public static ClassDefinition CLASS_DEFINITION = null;
+
+    static {
+        CLASS_DEFINITION = new ClassDefinitionBuilder(FACTORY_ID, CLASS_ID)
+        .addByteArrayField(FIELD_HOSTBYTES)
+        .addIntField(FIELD_PORT)
+        .addUTFField(FIELD_ID)
+        .build();
+    }
 
     /**
-     * Initializes a new {@link PortableSelectorChoice}.
+     * Initializes a new {@link PortableRoutingInfo}.
      */
-    protected PortableSelectorChoice() {
+    public PortableRoutingInfo() {
         super();
     }
 
     /**
-     * Initializes a new {@link PortableSelectorChoice}.
+     * Initializes a new {@link PortableRoutingInfo} by copying the infos from another instance.
      * 
-     * @param clientId
-     * @param groupId
-     * @param selector
+     * @param routingInfo The other instance, must not be null
      */
-    public PortableSelectorChoice(ID clientId, ID groupId, String selector) {
-        super(clientId, groupId, selector);
+    public PortableRoutingInfo(RoutingInfo routingInfo) {
+        super(routingInfo);
     }
 
     /**
-     * Initializes a new {@link PortableSelectorChoice}.
+     * Initializes a new {@link PortableRoutingInfo}.
      * 
-     * @param selectorChoice
+     * @param address The address used to initialize this RoutingInfo, must not be null
+     * @param id The unique id of the RoutingInfo
      */
-    public PortableSelectorChoice(SelectorChoice selectorChoice) {
-        super(selectorChoice);
+    public PortableRoutingInfo(InetSocketAddress address, String id) {
+        super(address, id);
     }
 
     @Override
     public void writePortable(PortableWriter writer) throws IOException {
-        writer.writePortable(CLIENT_ID, new PortableID(client));
-        writer.writePortable(GROUP_ID, new PortableID(group));
-        writer.writeUTF(SELECTOR, selector);
+        final InetAddress inetAddress = socketAddress.getAddress();
+        writer.writeByteArray(FIELD_HOSTBYTES, inetAddress.getAddress());
+        writer.writeInt(FIELD_PORT, socketAddress.getPort());
+        writer.writeUTF(FIELD_ID, id);
     }
 
     @Override
     public void readPortable(PortableReader reader) throws IOException {
-        PortableID pCID = reader.readPortable(CLIENT_ID);
-        PortableID pGID = reader.readPortable(GROUP_ID);
-        client = pCID;
-        group = pGID;
-        selector = reader.readUTF(SELECTOR);
+        final InetAddress inetAddress = InetAddress.getByAddress(reader.readByteArray(FIELD_HOSTBYTES));
+        socketAddress = new InetSocketAddress(inetAddress, reader.readInt(FIELD_PORT));
+        id = reader.readUTF(FIELD_ID);
     }
 
     @Override

@@ -47,50 +47,35 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast.serialization;
+package com.openexchange.realtime.hazelcast.serialization.cleanup;
 
-import java.io.IOException;
-import java.util.Map;
-import java.util.Map.Entry;
-import com.hazelcast.nio.serialization.PortableReader;
-import com.hazelcast.nio.serialization.PortableWriter;
-import com.hazelcast.query.Predicate;
-import com.openexchange.hazelcast.serialization.CustomPortable;
-import com.openexchange.realtime.packet.ID;
+import com.hazelcast.nio.serialization.ClassDefinition;
+import com.hazelcast.nio.serialization.Portable;
+import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
+import com.openexchange.realtime.hazelcast.serialization.packet.PortableID;
 
 
 /**
- * {@link PortableNotInternalPredicate} - Filter out internal {@link ID}s.
+ * {@link PortableCleanupDispatcherFactory}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.1
  */
-public class PortableNotInternalPredicate implements Predicate<String, Map<String,Object>>, CustomPortable{
-
-    private static final long serialVersionUID = -4738251095093967960L;
-
-    public static final int CLASS_ID = 7;
+public class PortableCleanupDispatcherFactory extends AbstractCustomPortableFactory {
 
     @Override
-    public boolean apply(Entry<String, Map<String, Object>> event) {
-        ID id = new ID(event.getKey());
-        return !id.isInternal();
-    }
-
-    @Override
-    public void writePortable(PortableWriter writer) throws IOException {}
-
-    @Override
-    public void readPortable(PortableReader reader) throws IOException {}
-
-    @Override
-    public int getFactoryId() {
-        return FACTORY_ID;
+    public Portable create() {
+        return new PortableCleanupDispatcher();
     }
 
     @Override
     public int getClassId() {
-        return CLASS_ID;
+        return PortableCleanupDispatcher.CLASS_ID;
+    }
+
+    @Override
+    public ClassDefinition getClassDefinition() {
+        return PortableCleanupDispatcher.CLASS_DEFINITION;
     }
 
 }

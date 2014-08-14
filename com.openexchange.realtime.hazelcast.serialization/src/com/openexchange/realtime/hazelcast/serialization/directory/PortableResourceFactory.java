@@ -47,28 +47,33 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast.serialization;
+package com.openexchange.realtime.hazelcast.serialization.directory;
 
+import com.hazelcast.nio.serialization.ClassDefinition;
 import com.hazelcast.nio.serialization.Portable;
-import com.openexchange.hazelcast.serialization.CustomPortableFactory;
-
+import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
 
 /**
- * {@link PortableSelectorChoiceFactory}
- *
+ * {@link PortableResourceFactory}
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.1
  */
-public class PortableSelectorChoiceFactory implements CustomPortableFactory {
+public class PortableResourceFactory extends AbstractCustomPortableFactory {
 
     @Override
     public Portable create() {
-        return new PortableSelectorChoice();
+        return new PortableResource();
     }
 
     @Override
     public int getClassId() {
-        return PortableSelectorChoice.CLASS_ID;
+        return PortableResource.CLASS_ID;
+    }
+
+    @Override
+    public ClassDefinition getClassDefinition() {
+        return PortableResource.CLASS_DEFINITION;
     }
 
 }

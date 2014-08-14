@@ -47,54 +47,65 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast.cleanup;
+package com.openexchange.realtime.hazelcast.serialization.directory;
 
-import java.io.Serializable;
-import java.util.concurrent.Callable;
-import org.apache.commons.lang.Validate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.realtime.cleanup.LocalRealtimeCleanup;
-import com.openexchange.realtime.exception.RealtimeExceptionCodes;
-import com.openexchange.realtime.hazelcast.osgi.Services;
-import com.openexchange.realtime.packet.ID;
+import java.io.IOException;
+import java.util.Map.Entry;
+import com.hazelcast.core.Member;
+import com.hazelcast.nio.serialization.PortableReader;
+import com.hazelcast.nio.serialization.PortableWriter;
+import com.hazelcast.query.Predicate;
+import com.openexchange.hazelcast.serialization.CustomPortable;
+import com.openexchange.realtime.hazelcast.serialization.packet.PortableID;
+
 
 /**
- * {@link CleanupDispatcher} - Issues a cleanup on the LocalRealtimeCleanup service.
- * 
+ * {@link MemberPredicate} - Filters resources that are located on a member node via a distributed query.
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since 7.6.1
  */
-public class CleanupDispatcher implements Callable<Void>, Serializable {
+public class PortableMemberPredicate implements Predicate<PortableID, PortableResource>, CustomPortable {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CleanupDispatcher.class);
-    
-    private static final long serialVersionUID = 2669822501149210448L;
+    private static final long serialVersionUID = -3149448521057961502L;
 
-    private final ID id;
+    public static final int CLASS_ID = 8;
 
-    /**
-     * Initializes a new {@link CleanupDispatcher}.
-     * 
-     * @param id The ID to clean up for.
-     * @param cleanupScopes The scopes to clean up on the remote machines. 
-     */
-    public CleanupDispatcher(ID id) {
-        Validate.notNull(id, "Mandatory parameter id is missing.");
-        this.id = id;
+    private String uuid;
+    private final static String UUID="uuid";
+
+    public PortableMemberPredicate() {
+        super();
+    }
+
+    public PortableMemberPredicate(Member member) {
+        this.uuid = member.getUuid();
     }
 
     @Override
-    public Void call() throws Exception {
-        LocalRealtimeCleanup localRealtimeCleanup = Services.getService(LocalRealtimeCleanup.class);
-        if (localRealtimeCleanup != null) {
-            localRealtimeCleanup.cleanForId(id);
-        } else {
-            LOG.error(
-                "Error while trying to cleanup for ResponseChannel ID: {}",
-                id,
-                RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(LocalRealtimeCleanup.class.getName()));
-        }
-        return null;
+    public boolean apply(Entry<PortableID, PortableResource> mapEntry) {
+        PortableResource resource = mapEntry.getValue();
+        return uuid.equals(resource.getRoutingInfo().getId());
+    }
+
+    @Override
+    public void writePortable(PortableWriter writer) throws IOException {
+        writer.writeUTF(UUID, uuid);
+    }
+
+    @Override
+    public void readPortable(PortableReader reader) throws IOException {
+        uuid = reader.readUTF(UUID);
+    }
+
+    @Override
+    public int getFactoryId() {
+        return FACTORY_ID;
+    }
+
+    @Override
+    public int getClassId() {
+        return CLASS_ID;
     }
 
 }

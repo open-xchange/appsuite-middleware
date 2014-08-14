@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,26 +47,34 @@
  *
  */
 
-package com.openexchange.caching.events.ms.internal;
+package com.openexchange.realtime.hazelcast.serialization.packet;
 
+import com.hazelcast.nio.serialization.ClassDefinition;
 import com.hazelcast.nio.serialization.Portable;
 import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
 
+
 /**
- * {@link PortableCacheEventFactory}
+ * {@link PortablePresenceFactory}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since 7.6.1
  */
-public class PortableCacheEventFactory extends AbstractCustomPortableFactory {
+public class PortablePresenceFactory extends AbstractCustomPortableFactory {
 
     @Override
     public Portable create() {
-        return new PortableCacheEvent();
+        return new PortablePresence();
     }
 
     @Override
     public int getClassId() {
-        return PortableCacheEvent.CLASS_ID;
+        return PortablePresence.CLASS_ID;
+    }
+
+    @Override
+    public ClassDefinition getClassDefinition() {
+        return PortablePresence.CLASS_DEFINITION;
     }
 
 }

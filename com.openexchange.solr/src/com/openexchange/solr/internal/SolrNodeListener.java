@@ -53,6 +53,7 @@ import java.util.Set;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.Member;
+import com.hazelcast.core.MemberAttributeEvent;
 import com.hazelcast.core.MembershipEvent;
 import com.hazelcast.core.MembershipListener;
 import com.hazelcast.query.SqlPredicate;
@@ -83,11 +84,11 @@ public class SolrNodeListener implements MembershipListener {
     @Override
     public void memberRemoved(MembershipEvent membershipEvent) {
         Member member = membershipEvent.getMember();
-        String hostAddress = member.getInetSocketAddress().getAddress().getHostAddress();
+        String hostAddress = member.getSocketAddress().getAddress().getHostAddress();
         IMap<String, Integer> solrNodes = hazelcast.getMap(SolrCoreTools.SOLR_NODE_MAP);
         solrNodes.remove(hostAddress);
 
-        String host = SolrCoreTools.resolveSocketAddress(member.getInetSocketAddress());
+        String host = SolrCoreTools.resolveSocketAddress(member.getSocketAddress());
         SqlPredicate predicate = new SqlPredicate("this = " + host);
         IMap<String, String> solrCores = hazelcast.getMap(SolrCoreTools.SOLR_CORE_MAP);
         if (LOG.isDebugEnabled()) {
@@ -103,10 +104,9 @@ public class SolrNodeListener implements MembershipListener {
         }
     }
 
-    /*-
-     * @Override
+    @Override
     public void memberAttributeChanged(MemberAttributeEvent memberAttributeEvent) {
-        // Nothing to do
-    }*/
+        // nothing to do
+    }
 
 }

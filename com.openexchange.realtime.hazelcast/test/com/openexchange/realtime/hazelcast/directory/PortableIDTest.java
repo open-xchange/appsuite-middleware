@@ -47,33 +47,52 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast.management;
+package com.openexchange.realtime.hazelcast.directory;
 
-import java.util.Map;
-import java.util.Map.Entry;
-import com.hazelcast.query.Predicate;
+import static org.junit.Assert.*;
+import java.util.ArrayList;
+import java.util.List;
+import org.junit.Before;
+import org.junit.Test;
+import com.openexchange.realtime.hazelcast.serialization.packet.PortableID;
 import com.openexchange.realtime.packet.ID;
 
-
 /**
- * {@link ContextPredicate} - Predicate to lookup Resources based on the context identifier.
+ * {@link PortableIDTest}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
- * @since 7.6.0
+ * @since 7.6.1
  */
-public class ContextPredicate implements Predicate<String,Map<String,Object>> {
+public class PortableIDTest {
+    private ID marensID;
+    private PortableID portableMarensID;
 
-    private static final long serialVersionUID = -3347565349211147581L;
-    private String contextId;
-    
-    public ContextPredicate(String contextId) {
-        this.contextId=contextId.trim();
+    @Before
+    public void setUp() {
+        marensID = new ID("ox", "marens", "premium", "desktop");
+        portableMarensID = new PortableID(marensID);
     }
 
-    @Override
-    public boolean apply(Entry<String, Map<String, Object>> mapEntry) {
-        ID id = new ID(mapEntry.getKey());
-        return contextId.equals(id.getContext());
+    @Test
+    public void testEquals() {
+        assertEquals("IDs should be equal", marensID, portableMarensID);
+    }
+
+    @Test
+    public void testToGeneralEquals() {
+        ID generalMarensID = marensID.toGeneralForm();
+        PortableID generalPortableMarensID = portableMarensID.toGeneralForm();
+        assertTrue(generalPortableMarensID instanceof PortableID);
+        assertEquals(generalMarensID, generalPortableMarensID);
+    }
+
+    @Test
+    public void testListRemoval() {
+        List<ID> idList = new ArrayList<ID>() ;
+        PortableID portableMarensID = new PortableID(marensID);
+        idList.add(marensID);
+        idList.remove(portableMarensID);
+        assertTrue(idList.isEmpty());
     }
 
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,26 +47,83 @@
  *
  */
 
-package com.openexchange.caching.events.ms.internal;
+package com.openexchange.realtime.hazelcast.serialization.group;
 
-import com.hazelcast.nio.serialization.Portable;
-import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
+import java.io.IOException;
+import com.hazelcast.nio.serialization.PortableReader;
+import com.hazelcast.nio.serialization.PortableWriter;
+import com.openexchange.hazelcast.serialization.CustomPortable;
+import com.openexchange.realtime.group.SelectorChoice;
+import com.openexchange.realtime.hazelcast.serialization.packet.PortableID;
+import com.openexchange.realtime.packet.ID;
 
 /**
- * {@link PortableCacheEventFactory}
- *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * {@link PortableSelectorChoice} - A {@link SelectorChoice} implementation that can efficiently be serialized via Hazelcast's Portable
+ * 
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since 7.6.1
  */
-public class PortableCacheEventFactory extends AbstractCustomPortableFactory {
+public class PortableSelectorChoice extends SelectorChoice implements CustomPortable {
+
+    public static final int CLASS_ID = 6;
+
+    private static final String CLIENT_ID = "clientID";
+
+    private static final String GROUP_ID = "groupID";
+
+    private static final String SELECTOR = "selector";
+
+    /**
+     * Initializes a new {@link PortableSelectorChoice}.
+     */
+    protected PortableSelectorChoice() {
+        super();
+    }
+
+    /**
+     * Initializes a new {@link PortableSelectorChoice}.
+     * 
+     * @param clientId
+     * @param groupId
+     * @param selector
+     */
+    public PortableSelectorChoice(ID clientId, ID groupId, String selector) {
+        super(clientId, groupId, selector);
+    }
+
+    /**
+     * Initializes a new {@link PortableSelectorChoice}.
+     * 
+     * @param selectorChoice
+     */
+    public PortableSelectorChoice(SelectorChoice selectorChoice) {
+        super(selectorChoice);
+    }
 
     @Override
-    public Portable create() {
-        return new PortableCacheEvent();
+    public void writePortable(PortableWriter writer) throws IOException {
+        writer.writePortable(CLIENT_ID, new PortableID(client));
+        writer.writePortable(GROUP_ID, new PortableID(group));
+        writer.writeUTF(SELECTOR, selector);
+    }
+
+    @Override
+    public void readPortable(PortableReader reader) throws IOException {
+        PortableID pCID = reader.readPortable(CLIENT_ID);
+        PortableID pGID = reader.readPortable(GROUP_ID);
+        client = pCID;
+        group = pGID;
+        selector = reader.readUTF(SELECTOR);
+    }
+
+    @Override
+    public int getFactoryId() {
+        return FACTORY_ID;
     }
 
     @Override
     public int getClassId() {
-        return PortableCacheEvent.CLASS_ID;
+        return CLASS_ID;
     }
 
 }

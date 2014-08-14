@@ -47,33 +47,73 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast.directory;
+package com.openexchange.realtime.hazelcast.serialization;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import com.openexchange.realtime.packet.ID;
-
+import java.io.IOException;
+import java.util.Map.Entry;
+import com.hazelcast.nio.serialization.PortableReader;
+import com.hazelcast.nio.serialization.PortableWriter;
+import com.hazelcast.query.Predicate;
+import com.openexchange.hazelcast.serialization.CustomPortable;
+import com.openexchange.realtime.hazelcast.serialization.directory.PortableResource;
+import com.openexchange.realtime.hazelcast.serialization.packet.PortableID;
 
 /**
- * {@link IDWrapper} - Helper class to map/unmap IDs from and to String
- * hazelcast.
- *
+ * {@link PortableContextPredicate} - Predicate to lookup Resources based on the context identifier.
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since 7.6.0
  */
-public class IDWrapper {
+public class PortableContextPredicate implements Predicate<PortableID, PortableResource>, CustomPortable {
+
+    private static final long serialVersionUID = -8551722082184158155L;
+
+    public static final int CLASS_ID = 13;
+
+    private String contextId;
+
+    private static final String CONTEXT_ID = "contextid";
 
     /**
-     * Transform a Collection of IDs to a Set of Strings
-     * @param ids the collection of IDs
-     * @return the collection of Strings representing the IDs
+     * Initializes a new {@link PortableContextPredicate}.
+     * 
+     * @param contextId The contextid to use when filtering/applying the predicate
      */
-    public static Set<String> idsToStringSet(Collection<ID> ids) {
-        Set<String> stringList = new HashSet<String>(ids.size());
-        
-        for (ID id : ids) {
-            stringList.add(id.toString());
-        }
-        return stringList;
+    public PortableContextPredicate(String contextId) {
+        this.contextId = contextId.trim();
     }
+
+    /**
+     * Initializes a new {@link PortableContextPredicate}.
+     */
+    public PortableContextPredicate() {
+        super();
+    }
+
+    @Override
+    public boolean apply(Entry<PortableID, PortableResource> mapEntry) {
+        PortableID id = mapEntry.getKey();
+        return contextId.equals(id.getContext());
+    }
+
+    @Override
+    public void writePortable(PortableWriter writer) throws IOException {
+        writer.writeUTF(CONTEXT_ID, contextId);
+    }
+
+    @Override
+    public void readPortable(PortableReader reader) throws IOException {
+        contextId = reader.readUTF(CONTEXT_ID);
+    }
+
+    @Override
+    public int getFactoryId() {
+        return FACTORY_ID;
+    }
+
+    @Override
+    public int getClassId() {
+        return CLASS_ID;
+    }
+
 }

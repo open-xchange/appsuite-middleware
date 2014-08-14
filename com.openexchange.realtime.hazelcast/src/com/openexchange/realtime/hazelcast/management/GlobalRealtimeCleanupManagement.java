@@ -49,7 +49,6 @@
 
 package com.openexchange.realtime.hazelcast.management;
 
-import java.util.Map;
 import java.util.Set;
 import javax.management.MBeanInfo;
 import javax.management.MBeanOperationInfo;
@@ -61,6 +60,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementObject;
 import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
 import com.openexchange.realtime.hazelcast.directory.HazelcastResourceDirectory;
+import com.openexchange.realtime.hazelcast.serialization.PortableContextPredicate;
+import com.openexchange.realtime.hazelcast.serialization.directory.PortableResource;
+import com.openexchange.realtime.hazelcast.serialization.packet.PortableID;
 import com.openexchange.realtime.packet.ID;
 
 /**
@@ -138,10 +140,10 @@ public class GlobalRealtimeCleanupManagement extends ManagementObject<GlobalReal
     @Override
     public void cleanContext(String contextId) throws Exception {
         try {
-            IMap<String, Map<String, Object>> resourceMapping = hazelcastResourceDirectory.getResourceMapping();
-            Set<String> keySet = resourceMapping.keySet(new ContextPredicate(contextId));
-            for (String id : keySet) {
-                globalRealtimeCleanup.cleanForId(new ID(id));
+            IMap<PortableID,PortableResource> resourceMapping = hazelcastResourceDirectory.getResourceMapping();
+            Set<PortableID> keySet = resourceMapping.keySet(new PortableContextPredicate(contextId));
+            for (PortableID id : keySet) {
+                globalRealtimeCleanup.cleanForId(id);
             }
         } catch (OXException oxe) {
             throw new Exception(oxe.getLogMessage());
@@ -157,10 +159,10 @@ public class GlobalRealtimeCleanupManagement extends ManagementObject<GlobalReal
     @Override
     public void cleanAll() throws Exception {
         try {
-            IMap<String, Map<String, Object>> resourceMapping = hazelcastResourceDirectory.getResourceMapping();
-            Set<String> keySet = resourceMapping.keySet();
-            for (String id : keySet) {
-                globalRealtimeCleanup.cleanForId(new ID(id));
+            IMap<PortableID, PortableResource> resourceMapping = hazelcastResourceDirectory.getResourceMapping();
+            Set<PortableID> keySet = resourceMapping.keySet();
+            for (PortableID id : keySet) {
+                globalRealtimeCleanup.cleanForId(id);
             }
         } catch (OXException oxe) {
             throw new Exception(oxe.getLogMessage());

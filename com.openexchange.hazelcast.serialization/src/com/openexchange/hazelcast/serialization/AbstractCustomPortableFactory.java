@@ -47,72 +47,21 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast.serialization;
+package com.openexchange.hazelcast.serialization;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.util.Map;
-import java.util.Map.Entry;
-import com.hazelcast.core.Member;
-import com.hazelcast.nio.serialization.PortableReader;
-import com.hazelcast.nio.serialization.PortableWriter;
-import com.hazelcast.query.Predicate;
-import com.openexchange.hazelcast.serialization.CustomPortable;
-
+import com.hazelcast.nio.serialization.ClassDefinition;
 
 /**
- * {@link MemberPredicate} - Filters resources that are located on a member node via a distributed query.
- *
+ * {@link AbstractCustomPortableFactory}
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.1
  */
-public class PortableMemberPredicate implements Predicate<String, Map<String, Object>>, CustomPortable {
-
-    private static final long serialVersionUID = -3149448521057961502L;
-
-    public static final int CLASS_ID = 8;
-
-    private InetSocketAddress memberAddress;
-
-    public PortableMemberPredicate() {
-        super();
-    }
-
-    public PortableMemberPredicate(InetSocketAddress memberAddress) {
-        this.memberAddress = memberAddress;
-    }
+public abstract class AbstractCustomPortableFactory implements CustomPortableFactory {
 
     @Override
-    public boolean apply(Entry<String, Map<String, Object>> mapEntry) {
-        Map<String, Object> resourceMap = mapEntry.getValue();
-        if(resourceMap != null) {
-            Member resourceMember = (Member) resourceMap.get("routingInfo");
-            return memberAddress.equals(resourceMember.getInetSocketAddress());
-        }
-        return false;
-    }
-
-    @Override
-    public void writePortable(PortableWriter writer) throws IOException {
-        writer.writeUTF("memberAddressHostname", memberAddress.getHostName());
-        writer.writeInt("memberAddressPort", memberAddress.getPort());
-    }
-
-    @Override
-    public void readPortable(PortableReader reader) throws IOException {
-        String hostname = reader.readUTF("memberAddressHostname");
-        int port = reader.readInt("memberAddressPort");
-        memberAddress = new InetSocketAddress(hostname, port);
-    }
-
-    @Override
-    public int getFactoryId() {
-        return FACTORY_ID;
-    }
-
-    @Override
-    public int getClassId() {
-        return CLASS_ID;
+    public ClassDefinition getClassDefinition() {
+        return null;
     }
 
 }

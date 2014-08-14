@@ -49,61 +49,129 @@
 
 package com.openexchange.realtime.directory;
 
-import java.io.Serializable;
 import java.util.Date;
 import com.openexchange.realtime.packet.Presence;
 
 /**
  * {@link DefaultResource} {@link Resource} implementation that doesn't carry any routing information, yet. Routing information is
  * automatically added by a transport specific Resource implmentation e.g. when adding a DefaultResource to a HazelcastResourceDirectory.
- *
+ * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class DefaultResource extends AbstractResource implements Resource {
+public class DefaultResource implements Resource {
 
-    private static final long serialVersionUID = -1140736920132224444L;
+    protected Presence presence;
+
+    protected Date timestamp;
 
     /**
      * Initializes a new {@link DefaultResource} without associated {@link Presence}
      */
     public DefaultResource() {
-        super();
+        this(null);
     }
 
     /**
-     * Initializes a new {@link DefaultResource}.
-     *
+     * Initializes a new {@link AbstractResource}.
+     * 
      * @param state The presence state
      * @param timestamp The timestamp
      */
     public DefaultResource(Presence presence) {
-        super(presence);
-
+        this(presence, new Date());
     }
 
     /**
      * Initializes a new {@link DefaultResource}.
-     *
+     * 
      * @param presence The presence state
      * @param timestamp The timestamp
      */
     public DefaultResource(Presence presence, Date timestamp) {
-        super(presence, timestamp);
+        this.presence = presence;
+        this.timestamp = timestamp;
     }
 
-    /*
-     * DefaultResources don't carry routing infos
+    /**
+     * Gets the presence
+     * 
+     * @return The presence
      */
+    public Presence getPresence() {
+        return presence;
+    }
+
+    /**
+     * Sets the presence
+     * 
+     * @param presence The presence to set
+     */
+    public void setPresence(Presence presence) {
+        this.presence = presence;
+    }
+
+    /**
+     * Gets the timestamp
+     * 
+     * @return The timestamp
+     */
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
+    /**
+     * Sets the timestamp
+     * 
+     * @param timestamp The timestamp to set
+     */
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
+    }
 
     @Override
-    public Serializable getRoutingInfo() {
+    public RoutingInfo getRoutingInfo() {
         return null;
     }
 
     @Override
-    public void setRoutingInfo(Object routingInfo) {
-        // Nothing to do
+    public void setRoutingInfo(RoutingInfo routingInfo) {
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((presence == null) ? 0 : presence.hashCode());
+        result = prime * result + ((timestamp == null) ? 0 : timestamp.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (!(obj instanceof DefaultResource))
+            return false;
+        DefaultResource other = (DefaultResource) obj;
+        if (presence == null) {
+            if (other.presence != null)
+                return false;
+        } else if (!presence.equals(other.presence))
+            return false;
+        if (timestamp == null) {
+            if (other.timestamp != null)
+                return false;
+        } else if (!timestamp.equals(other.timestamp))
+            return false;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "DefaultResource [presence=" + presence + ", timestamp=" + timestamp + "]";
     }
 
 }

@@ -50,6 +50,8 @@
 
 package com.openexchange.hazelcast.serialization;
 
+import java.util.Collection;
+import com.hazelcast.nio.serialization.ClassDefinition;
 import com.hazelcast.nio.serialization.PortableFactory;
 
 /**
@@ -61,5 +63,12 @@ public interface DynamicPortableFactory extends PortableFactory {
 
     /** The static identifier of the dynamic portable factory */
     static final int FACTORY_ID = 873;
+
+    /**
+     * Gets the collected ClassDefinitions of registered PortableFactories
+     * 
+     * @return The collected ClassDefinitions of registered PortableFactories
+     */
+    Collection<ClassDefinition> getClassDefinitions();
 
 }

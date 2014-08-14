@@ -11,6 +11,7 @@ Import-Package: com.openexchange.exception,
  com.openexchange.realtime.packet,
  com.openexchange.realtime.util,
  com.openexchange.server,
+ org.apache.commons.lang;version="2.6.0",
  org.osgi.framework,
  org.osgi.util.tracker
 Export-Package: com.openexchange.realtime.directory

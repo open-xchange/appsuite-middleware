@@ -47,28 +47,47 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast.serialization;
+package com.openexchange.realtime.hazelcast.directory;
 
-import com.hazelcast.nio.serialization.Portable;
-import com.openexchange.hazelcast.serialization.CustomPortableFactory;
+import com.google.common.base.Optional;
+import com.hazelcast.core.EntryEvent;
+import com.hazelcast.query.Predicate;
+import com.openexchange.realtime.hazelcast.serialization.directory.PortableResource;
+import com.openexchange.realtime.hazelcast.serialization.packet.PortableID;
 
 
 /**
- * {@link PortableNotInternalPredicateFactory}
- *
+ * {@link ResourceMappingEntryAdapter} - An abstract adapter class for receiving ResourceMappingEntry events. The methods in this class are
+ * empty. This class exists as convenience for creating listener objects.
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.1
  */
-public class PortableNotInternalPredicateFactory implements CustomPortableFactory {
+public abstract class ResourceMappingEntryAdapter implements ResourceMappingEntryListener {
 
     @Override
-    public Portable create() {
-        return new PortableNotInternalPredicate();
+    public void entryAdded(EntryEvent<PortableID, PortableResource> event) {
+        // Do nothing
     }
 
     @Override
-    public int getClassId() {
-        return PortableNotInternalPredicate.CLASS_ID;
+    public void entryRemoved(EntryEvent<PortableID, PortableResource> event) {
+     // Do nothing
+    }
+
+    @Override
+    public void entryUpdated(EntryEvent<PortableID, PortableResource> event) {
+     // Do nothing
+    }
+
+    @Override
+    public void entryEvicted(EntryEvent<PortableID, PortableResource> event) {
+     // Do nothing
+    }
+
+    @Override
+    public Optional<Predicate<PortableID, PortableResource>> getPredicate() {
+        return Optional.absent();
     }
 
 }

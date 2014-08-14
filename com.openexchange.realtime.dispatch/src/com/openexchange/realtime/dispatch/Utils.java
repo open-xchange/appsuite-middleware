@@ -47,28 +47,49 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast.serialization;
+package com.openexchange.realtime.dispatch;
 
-import com.hazelcast.nio.serialization.Portable;
-import com.openexchange.hazelcast.serialization.CustomPortableFactory;
+import java.util.Map;
+import com.openexchange.exception.OXException;
+import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Stanza;
 
 
 /**
- * {@link PortableIDFactory}
+ * {@link Utils}
  *
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
- * @since 7.6.0
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class PortableIDFactory implements CustomPortableFactory {
+public class Utils {
 
-    @Override
-    public Portable create() {
-        return new PortableID();
-    }
-
-    @Override
-    public int getClassId() {
-        return PortableID.CLASS_ID;
+    /**
+     * Check if an {@link DispatchExceptionCode.RESOURCE_OFFLINE} occurred while trying to reach the exact recipient specified in the stanza
+     * iow. stanza.getTo().isGeneral() == false. This is the case when e.g. addressing synthetic resources like
+     * "synthetic.office://operations@1/28041.219886"
+     * 
+     * @param sendErrors The map of ID -> Exception that was the result when trying to send a {@link Stanza} 
+     * @param stanza The {@link Stanza} you tried to send
+     * @return true if the exact ID was offline, false otherwise
+     */
+    public static boolean shouldResend(Map<ID, OXException> sendErrors, Stanza stanza) {
+        if (sendErrors.isEmpty()) {
+            return false;
+        }
+        OXException exception = sendErrors.get(stanza.getTo());
+        if (exception == null) {
+            return false;
+        }
+        Throwable cause = exception.getCause();
+        if (cause == null) {
+            return false;
+        }
+        if (cause instanceof OXException) {
+            OXException oxexception = (OXException) cause;
+            if ( DispatchExceptionCode.RESOURCE_OFFLINE.equals(oxexception)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }
