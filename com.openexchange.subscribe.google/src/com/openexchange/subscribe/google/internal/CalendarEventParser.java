@@ -297,6 +297,9 @@ public class CalendarEventParser {
 
     private void handleRecurrence(final String recurrence, final CalendarDataObject calendarObject) throws OXException {
         try {
+            final String timezone = (calendarObject.getTimezone() != null) ?  calendarObject.getTimezone() : "UTC";
+            final Calendar tzCalendar = Calendar.getInstance(TimeZone.getTimeZone(timezone));
+            
             final RRule r = new RRule(recurrence);
 
             // Set recurrence type
@@ -328,9 +331,8 @@ public class CalendarEventParser {
                 final List<WeekdayNum> weekdays = r.getByDay();
                 // When it comes to monthly events, the rule should only contain one entry
                 if (weekdays.isEmpty()) {
-                    final Calendar c = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-                    c.setTime(calendarObject.getStartDate());
-                    calendarObject.setDayInMonth(c.get(Calendar.DAY_OF_MONTH));
+                    tzCalendar.setTime(calendarObject.getStartDate());
+                    calendarObject.setDayInMonth(tzCalendar.get(Calendar.DAY_OF_MONTH));
                 } else {
                     if (weekdays.size() == 1) {
                         final WeekdayNum weekdayNum = weekdays.get(0);
@@ -340,20 +342,17 @@ public class CalendarEventParser {
                 }
             } else if (calendarObject.getRecurrenceType() == CalendarDataObject.YEARLY) {
                 // YEARLY
-                final Calendar c = Calendar.getInstance(TimeZone.getTimeZone(calendarObject.getTimezone()));
-                c.setTime(calendarObject.getStartDate());
-                calendarObject.setDayInMonth(c.get(Calendar.DAY_OF_WEEK_IN_MONTH));
-                calendarObject.setDays(c.get(Calendar.DAY_OF_WEEK));
-                calendarObject.setMonth(c.get(Calendar.MONTH));
+                tzCalendar.setTime(calendarObject.getStartDate());
+                calendarObject.setDayInMonth(tzCalendar.get(Calendar.DAY_OF_WEEK));
+                calendarObject.setMonth(tzCalendar.get(Calendar.MONTH));
             }
 
             // Set occurrence or until
             if (r.getUntil() != null) {
-                final Calendar cal = Calendar.getInstance(TimeZone.getTimeZone(calendarObject.getTimezone()));
-                cal.set(Calendar.YEAR, r.getUntil().year());
-                cal.set(Calendar.MONTH, r.getUntil().month());
-                cal.set(Calendar.DAY_OF_MONTH, r.getUntil().day());
-                calendarObject.setUntil(cal.getTime());
+                tzCalendar.set(Calendar.YEAR, r.getUntil().year());
+                tzCalendar.set(Calendar.MONTH, r.getUntil().month());
+                tzCalendar.set(Calendar.DAY_OF_MONTH, r.getUntil().day());
+                calendarObject.setUntil(tzCalendar.getTime());
             } else if (r.getCount() > 0) {
                 calendarObject.setOccurrence(r.getCount());
             }
