@@ -70,7 +70,6 @@ import com.google.gdata.data.contacts.ContactFeed;
 import com.google.gdata.util.ServiceException;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.container.IFileHolder;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.google.api.client.GoogleApiClients;
 import com.openexchange.groupware.container.Contact;
@@ -261,7 +260,7 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
             final ContactsService contactsService;
             {
                 GoogleCredential googleCreds = GoogleApiClients.getCredentials(subscription.getSession());
-                String productName = services.getService(ConfigurationService.class).getProperty("com.openexchange.oauth.google.productName", "");
+                String productName = GoogleApiClients.getGoogleProductName();
                 contactsService = new ContactsService(productName);
                 contactsService.setOAuth2Credentials(googleCreds);
             }

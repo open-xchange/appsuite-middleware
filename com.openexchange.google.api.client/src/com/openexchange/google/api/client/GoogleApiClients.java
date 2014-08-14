@@ -59,6 +59,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.google.api.client.services.Services;
 import com.openexchange.java.Strings;
@@ -174,6 +175,16 @@ public class GoogleApiClients {
         } catch (GeneralSecurityException e) {
             throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    /**
+     * Gets the product name associated with registered Google application
+     *
+     * @return The product name
+     */
+    public static String getGoogleProductName() {
+        ConfigurationService configService = Services.getService(ConfigurationService.class);
+        return null == configService ? "" : configService.getProperty("com.openexchange.oauth.google.productName", "");
     }
 
 }
