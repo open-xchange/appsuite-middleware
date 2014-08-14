@@ -154,6 +154,8 @@ public final class LogProperties {
         SESSION_USER_ID("com.openexchange.session.userId"),
         /**
          * com.openexchange.session.userName
+         * <p>
+         * The session's full login information; e.g. <code>"user1@foobar.org"</code>
          */
         SESSION_USER_NAME("com.openexchange.session.userName"),
         /**
@@ -168,6 +170,12 @@ public final class LogProperties {
          * com.openexchange.session.session
          */
         SESSION_SESSION("com.openexchange.session.session"),
+        /**
+         * com.openexchange.session.loginName
+         * <p>
+         * The session's login name (<i>not</i> the full login string)
+         */
+        SESSION_LOGIN_NAME("com.openexchange.session.loginName"),
         /**
          * com.openexchange.grizzly.requestURI
          */
