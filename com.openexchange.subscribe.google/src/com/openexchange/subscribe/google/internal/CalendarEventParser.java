@@ -197,9 +197,6 @@ public class CalendarEventParser {
             }
         }
 
-        if (event.getOrganizer().isSelf()) {
-            calendarObject.setOrganizerId(session.getUserId());
-        }
         calendarObject.setOrganizer(event.getOrganizer().getEmail());
 
         // We only support one reminder per calendar Object, thus the first one of the event
@@ -251,6 +248,11 @@ public class CalendarEventParser {
                 }
                 participants.add(p);
             }
+            
+            //Add self
+            final UserParticipant up = new UserParticipant(session.getUserId());
+            participants.add(up);
+            
             calendarObject.setConfirmations(confParts);
             calendarObject.setParticipants(participants);
         }
