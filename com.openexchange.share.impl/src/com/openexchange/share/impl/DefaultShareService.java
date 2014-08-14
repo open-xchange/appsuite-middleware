@@ -54,7 +54,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -360,11 +362,20 @@ public class DefaultShareService implements ShareService {
      * @throws OXException If removal fails
      */
     public void removeShares(String[] tokens) throws OXException {
+        Map<Integer, List<Share>> shareMap = new HashMap<Integer, List<Share>>();
         for (String token : tokens) {
             int contextId = ShareTool.extractContextId(token);
-            ShareStorage shareStorage = services.getService(ShareStorage.class);
+            List<Share> shares = shareMap.get(contextId);
+            if (null == shares) {
+                shares = new ArrayList<Share>();
+                shareMap.put(contextId, shares);
+            }
+            shares.add(resolveToken(token));
+        }
+        for (int contextId : shareMap.keySet()) {
             ConnectionHelper helper = new ConnectionHelper(contextId, services, false);
-            shareStorage.deleteShare(contextId, token, helper.getParameters());
+            List<Share> shares = shareMap.get(contextId);
+            removeShares(helper, shares);
         }
     }
 
@@ -375,9 +386,9 @@ public class DefaultShareService implements ShareService {
      * @throws OXException If removal fails.
      */
     public void removeShares(int contextId) throws OXException {
-        ShareStorage shareStorage = services.getService(ShareStorage.class);
+        List<Share> shares = getAllShares(contextId);
         ConnectionHelper helper = new ConnectionHelper(contextId, services, false);
-        shareStorage.deleteSharesFromContext(contextId, helper.getParameters());
+        removeShares(helper, shares);
     }
 
     /**
@@ -388,9 +399,9 @@ public class DefaultShareService implements ShareService {
      * @throws OXException If removal fails
      */
     public void removeShares(int contextId, int userId) throws OXException {
-        ShareStorage shareStorage = services.getService(ShareStorage.class);
+        List<Share> shares = getAllShares(contextId, userId);
         ConnectionHelper helper = new ConnectionHelper(contextId, services, false);
-        shareStorage.deleteSharesFromUser(contextId, userId, helper.getParameters());
+        removeShares(helper, shares);
     }
 
 }

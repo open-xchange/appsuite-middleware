@@ -150,16 +150,6 @@ public class SQL {
         "DELETE FROM share " +
         "WHERE cid=? AND token=?;"
     ;
-    
-    public static final String DELETE_SHARE_CONTEXT_STMT =
-        "DELETE FROM share " +
-        "WHERE cid=?;"
-    ;
-    
-    public static final String DELETE_SHARE_USER_STMT =
-        "DELETE FROM share " +
-        "WHERE cid=? AND createdBy=?;"
-    ;
 
     /**
      * DELETE FROM share

@@ -144,30 +144,6 @@ public class RdbShareStorage implements ShareStorage {
             provider.close();
         }
     }
-    
-    @Override
-    public void deleteSharesFromContext(int contextId, StorageParameters parameters) throws OXException {
-        ConnectionProvider provider = getWriteProvider(contextId, parameters);
-        try {
-            deleteSharesFromContext(provider.get(), contextId);
-        } catch (SQLException e) {
-            throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
-        } finally {
-            provider.close();
-        }
-    }
-    
-    @Override
-    public void deleteSharesFromUser(int contextId, int userId, StorageParameters parameters) throws OXException {
-        ConnectionProvider provider = getWriteProvider(contextId, parameters);
-        try {
-            deleteSharesFromUser(provider.get(), contextId, userId);
-        } catch (SQLException e) {
-            throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
-        } finally {
-            provider.close();
-        }
-    }
 
     @Override
     public List<Share> loadSharesCreatedBy(int contextID, int createdBy, StorageParameters parameters) throws OXException {
@@ -347,31 +323,6 @@ public class RdbShareStorage implements ShareStorage {
                 stmt.setBytes(2 + i, UUIDs.toByteArray(UUIDs.fromUnformattedString(tokens.get(i))));
             }
             return logExecuteUpdate(stmt);
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
-        }
-    }
-    
-
-    private void deleteSharesFromContext(Connection connection, int contextId) throws SQLException {
-        PreparedStatement stmt = null;
-        try {
-            stmt = connection.prepareStatement(SQL.DELETE_SHARE_CONTEXT_STMT);
-            stmt.setInt(1, contextId);
-            logExecuteUpdate(stmt);
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
-        }
-    }
-    
-
-    private void deleteSharesFromUser(Connection connection, int contextId, int userId) throws SQLException {
-        PreparedStatement stmt = null;
-        try {
-            stmt = connection.prepareStatement(SQL.DELETE_SHARE_USER_STMT);
-            stmt.setInt(1, contextId);
-            stmt.setInt(2, userId);
-            logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
