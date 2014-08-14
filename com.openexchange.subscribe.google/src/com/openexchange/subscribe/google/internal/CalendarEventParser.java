@@ -197,7 +197,10 @@ public class CalendarEventParser {
             }
         }
 
-        calendarObject.setOrganizer(event.getOrganizer().getEmail());
+        // Events with no organizer are considered to be delete exceptions
+        if (event.getOrganizer() != null) {
+            calendarObject.setOrganizer(event.getOrganizer().getEmail());
+        }
 
         // We only support one reminder per calendar Object, thus the first one of the event
         final Reminders reminders = event.getReminders();
@@ -248,11 +251,11 @@ public class CalendarEventParser {
                 }
                 participants.add(p);
             }
-            
-            //Add self
+
+            // Add self
             final UserParticipant up = new UserParticipant(session.getUserId());
             participants.add(up);
-            
+
             calendarObject.setConfirmations(confParts);
             calendarObject.setParticipants(participants);
         }
@@ -260,6 +263,18 @@ public class CalendarEventParser {
         calendarObject.setIgnoreConflicts(true);
 
         convertExternalToInternal(calendarObject);
+    }
+
+    /**
+     * Parse a delete exception
+     * 
+     * @param event
+     * @param calendarObject
+     */
+    public void parseDeleteException(Event event, CalendarDataObject calendarObject) {
+        calendarObject.setContext(session.getContext());
+        calendarObject.setUid(event.getRecurringEventId() + "@google.com");
+        calendarObject.setStartDate(new Date(event.getOriginalStartTime().getDateTime().getValue()));
     }
 
     /**
@@ -299,9 +314,9 @@ public class CalendarEventParser {
 
     private void handleRecurrence(final String recurrence, final CalendarDataObject calendarObject) throws OXException {
         try {
-            final String timezone = (calendarObject.getTimezone() != null) ?  calendarObject.getTimezone() : "UTC";
+            final String timezone = (calendarObject.getTimezone() != null) ? calendarObject.getTimezone() : "UTC";
             final Calendar tzCalendar = Calendar.getInstance(TimeZone.getTimeZone(timezone));
-            
+
             final RRule r = new RRule(recurrence);
 
             // Set recurrence type
