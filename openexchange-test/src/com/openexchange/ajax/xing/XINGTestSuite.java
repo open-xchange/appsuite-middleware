@@ -54,7 +54,7 @@ import junit.framework.TestSuite;
 
 /**
  * {@link XINGTestSuite}
- * 
+ *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class XINGTestSuite extends TestSuite {
@@ -67,7 +67,7 @@ public class XINGTestSuite extends TestSuite {
         final TestSuite suite = new TestSuite("com.openexchange.ajax.xing.XINGTestSuite");
         suite.addTestSuite(FeedTest.class);
         suite.addTestSuite(ActivityTest.class);
-        suite.addTestSuite(ContactRequestTest.class);
+//        suite.addTestSuite(ContactRequestTest.class);
         suite.addTestSuite(FindByMailTest.class);
         return suite;
     }
