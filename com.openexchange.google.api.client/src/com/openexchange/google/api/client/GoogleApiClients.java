@@ -244,7 +244,7 @@ public class GoogleApiClients {
      *
      * @param googleAccount The Google OAuth account to check
      * @param session The associated session
-     * @return The non-expired candidate
+     * @return The non-expired candidate or <code>null</code> if given account appears to have enough time left
      * @throws OXException If a non-expired candidate cannot be returned
      */
     public static OAuthAccount ensureNonExpiredGoogleAccount(OAuthAccount googleAccount, Session session) throws OXException {
@@ -267,7 +267,7 @@ public class GoogleApiClients {
         int expiry = scribeOAuthService.getExpiry(googleAccount.getToken());
         if (expiry >= 300) {
             // More than 5 minutes to live
-            return googleAccount;
+            return null;
         }
 
         // Less than 5 minutes to live -> refresh token!
