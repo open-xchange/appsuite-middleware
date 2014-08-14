@@ -1,3 +1,7 @@
+* 2014-08-14 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 34041: Ignore additional elements in autoconfig xml.
+
 * 2014-08-13 - martin.herfurth@open-xchange.com
 
  - Fix for bug 34023: Default display message for category user input.
