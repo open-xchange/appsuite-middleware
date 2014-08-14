@@ -428,10 +428,11 @@ public final class LogProperties {
         if (null == session) {
             return;
         }
-        MDC.put(LogProperties.Name.SESSION_SESSION_ID.getName(), session.getSessionID());
-        MDC.put(LogProperties.Name.SESSION_AUTH_ID.getName(), session.getAuthId());
+        MDC.put(LogProperties.Name.SESSION_SESSION_ID.getName(), getLoggableString(session.getSessionID()));
+        MDC.put(LogProperties.Name.SESSION_AUTH_ID.getName(), getLoggableString(session.getAuthId()));
         MDC.put(LogProperties.Name.SESSION_USER_ID.getName(), Integer.toString(session.getUserId()));
-        MDC.put(LogProperties.Name.SESSION_USER_NAME.getName(), session.getLogin());
+        MDC.put(LogProperties.Name.SESSION_USER_NAME.getName(), getLoggableString(session.getLogin()));
+        MDC.put(LogProperties.Name.SESSION_LOGIN_NAME.getName(), getLoggableString(session.getLoginName()));
         MDC.put(LogProperties.Name.SESSION_CONTEXT_ID.getName(), Integer.toString(session.getContextId()));
         final String client  = session.getClient();
         MDC.put(LogProperties.Name.SESSION_CLIENT_ID.getName(), client == null ? "unknown" : client);
@@ -446,9 +447,14 @@ public final class LogProperties {
         MDC.remove(LogProperties.Name.SESSION_AUTH_ID.getName());
         MDC.remove(LogProperties.Name.SESSION_USER_ID.getName());
         MDC.remove(LogProperties.Name.SESSION_USER_NAME.getName());
+        MDC.remove(LogProperties.Name.SESSION_LOGIN_NAME.getName());
         MDC.remove(LogProperties.Name.SESSION_CONTEXT_ID.getName());
         MDC.remove(LogProperties.Name.SESSION_CLIENT_ID.getName());
         // MDC.remove(LogProperties.Name.SESSION_SESSION.getName());
+    }
+
+    private static String getLoggableString(String str) {
+        return null == str ? "" : str;
     }
 
     /**
