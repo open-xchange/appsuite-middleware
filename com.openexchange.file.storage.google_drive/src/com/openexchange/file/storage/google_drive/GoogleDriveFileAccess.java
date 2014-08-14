@@ -457,15 +457,16 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             }
         }
         try {
-            dropboxAPI.delete(id);
+            Drive drive = googleDriveAccess.getDrive();
+            drive.children().delete(folderId, id).execute();
             return new String[0];
-        } catch (final DropboxServerException e) {
-            if (404 == e.error) {
+        } catch (final HttpResponseException e) {
+            if (404 == e.getStatusCode()) {
                 return new String[0];
             }
-            throw handleServerError(null, e);
-        } catch (final DropboxException e) {
-            throw GoogleDriveExceptionCodes.GOOGLE_DRIVE_ERROR.create(e, e.getMessage());
+            throw handleHttpResponseError(null, e);
+        } catch (final IOException e) {
+            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
