@@ -60,6 +60,8 @@ import java.util.Date;
  */
 public class DefaultShare implements Share, Serializable {
 
+    private static final long serialVersionUID = -5225966203133129562L;
+
     private String token;
     private int contextID;
     private int module;
@@ -104,7 +106,6 @@ public class DefaultShare implements Share, Serializable {
     public boolean isFolder() {
         return item == null;
     }
-
 
     @Override
     public String getItem() {

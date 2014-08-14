@@ -160,23 +160,34 @@ public abstract class ShareTest extends AbstractAJAXSession {
         InsertResponse insertResponse = client.execute(new UpdateRequest(api, folder));
         insertResponse.fillObject(folder);
         remember(folder);
-        GetResponse getResponse = client.execute(new GetRequest(api, folder.getObjectID()));
-        FolderObject updatedFolder = getResponse.getFolder();
+        FolderObject updatedFolder = getFolder(api, folder.getObjectID());
         assertNotNull(updatedFolder);
         assertEquals("Folder name wrong", folder.getFolderName(), updatedFolder.getFolderName());
-        updatedFolder.setLastModified(getResponse.getTimestamp());
         return updatedFolder;
+    }
+
+    /**
+     * Gets a folder by ID.
+     *
+     * @param api The folder API to use
+     * @param objectID The ID of the folder to get
+     * @return The folder
+     * @throws Exception
+     */
+    protected FolderObject getFolder(EnumAPI api, int objectID) throws Exception {
+        GetResponse getResponse = client.execute(new GetRequest(api, objectID));
+        FolderObject folder = getResponse.getFolder();
+        folder.setLastModified(getResponse.getTimestamp());
+        return getResponse.getFolder();
     }
 
     private FolderObject insertFolder(EnumAPI api, FolderObject folder) throws Exception {
         InsertResponse insertResponse = client.execute(new InsertRequest(api, folder));
         insertResponse.fillObject(folder);
         remember(folder);
-        GetResponse getResponse = client.execute(new GetRequest(api, folder.getObjectID(), FolderObject.ALL_COLUMNS));
-        FolderObject createdFolder = getResponse.getFolder();
+        FolderObject createdFolder = getFolder(api, folder.getObjectID());
         assertNotNull(createdFolder);
         assertEquals("Folder name wrong", folder.getFolderName(), createdFolder.getFolderName());
-        createdFolder.setLastModified(getResponse.getTimestamp());
         return createdFolder;
     }
 

@@ -217,6 +217,9 @@ public final class FolderParser {
                     } catch (IllegalArgumentException e) {
                         throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, FolderField.GUEST_AUTH.getName(), authValue);
                     }
+                    if (jPerm.hasAndNotNull(FolderField.EXPIRES.getName())) {
+                        perm.setExpires(new Date(jPerm.getLong(FolderField.EXPIRES.getName())));
+                    }
                     if (AuthenticationMode.ANONYMOUS != perm.getAuthenticationMode()) {
                         if (false == jPerm.hasAndNotNull(FolderField.MAIL_ADDRESS.getName())) {
                             throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(FolderField.MAIL_ADDRESS.getName());
@@ -229,9 +232,6 @@ public final class FolderParser {
                         perm.setDisplayName(jPerm.optString(FolderField.DISPLAY_NAME.getName(), null));
                         perm.setContactID(jPerm.optString(FolderField.CONTACT_ID.getName(), null));
                         perm.setContactFolderID(jPerm.optString(FolderField.CONTACT_FOLDER_ID.getName(), null));
-                        if (jPerm.hasAndNotNull(FolderField.EXPIRES.getName())) {
-                            perm.setExpires(new Date(jPerm.getLong(FolderField.EXPIRES.getName())));
-                        }
                     }
                     oclPerm = perm;
                 } else {

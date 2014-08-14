@@ -100,6 +100,7 @@ public class DefaultShareService implements ShareService {
         int contextID = ShareTool.extractContextId(token);
         Share share = services.getService(ShareStorage.class).loadShare(contextID, token, StorageParameters.NO_PARAMETERS);
         if (null != share && share.isExpired()) {
+            LOG.info("Detected expired share ({}): {}", share.getExpires(), share);
             removeShares(new ConnectionHelper(contextID, services, true), Collections.singletonList(share));
             return null;
         }
@@ -178,6 +179,11 @@ public class DefaultShareService implements ShareService {
     private List<Share> removeExpired(Session session, List<Share> shares) throws OXException {
         List<Share> expiredShares = ShareTool.filterExpiredShares(shares);
         if (null != expiredShares && 0 < expiredShares.size()) {
+            if (LOG.isInfoEnabled()) {
+                for (Share share : expiredShares) {
+                    LOG.info("Detected expired share ({}): {}", share.getExpires(), share);
+                }
+            }
             removeShares(new ConnectionHelper(session, services, true), expiredShares);
         }
         return shares;

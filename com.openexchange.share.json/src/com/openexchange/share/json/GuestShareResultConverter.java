@@ -49,7 +49,9 @@
 
 package com.openexchange.share.json;
 
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -102,46 +104,70 @@ public class GuestShareResultConverter implements ResultConverter {
         if (null == timeZoneID) {
         	timeZoneID = session.getUser().getTimeZone();
         }
+        TimeZone timeZone = TimeZone.getTimeZone(timeZoneID);
         /*
          * convert result object
          */
         Object resultObject = result.getResultObject();
         if (GuestShare.class.isInstance(resultObject)) {
-            resultObject = convert((GuestShare)resultObject, timeZoneID, session);
+            resultObject = convert((GuestShare)resultObject, timeZone, session);
         } else {
-            resultObject = convert((List<GuestShare>) resultObject, timeZoneID, session);
+            resultObject = convert((List<GuestShare>) resultObject, timeZone, session);
         }
         result.setResultObject(resultObject, "json");
     }
 
-    private JSONArray convert(List<GuestShare> shares, String timeZoneID, Session session) throws OXException {
+    private JSONArray convert(List<GuestShare> shares, TimeZone timeZone, Session session) throws OXException {
         JSONArray jsonArray = new JSONArray(shares.size());
         for (GuestShare share : shares) {
-            jsonArray.put(convert(share, timeZoneID, session));
+            jsonArray.put(convert(share, timeZone, session));
         }
         return jsonArray;
     }
 
-    private JSONObject convert(GuestShare guestShare, String timeZoneID, Session session) throws OXException {
+    private static long addTimeZoneOffset(final long date, final TimeZone timeZone) {
+        return null == timeZone ? date : date + timeZone.getOffset(date);
+    }
+
+    private JSONObject convert(GuestShare guestShare, TimeZone timeZone, Session session) throws OXException {
         try {
             JSONObject json = new JSONObject();
             Share share = guestShare.getShare();
-            json.put("token", share.getToken());
-            json.put("module", share.getModule());
-            json.put("folder", share.getFolder());
-            json.put("item", share.getItem());
-            json.put("created", share.getCreated().getTime());
-            json.put("created_by", share.getCreatedBy());
-            json.put("last_modified", share.getLastModified().getTime());
-            json.put("modified_by", share.getModifiedBy());
-            json.put("expires", share.getExpires());
-            json.put("guest", share.getGuest());
+            json.putOpt("token", share.getToken());
+            if (0 != share.getModule()) {
+                json.put("module", share.getModule());
+            }
+            json.putOpt("folder", share.getFolder());
+            json.putOpt("item", share.getItem());
+            Date created = share.getCreated();
+            if (null != created) {
+                json.put("created", addTimeZoneOffset(created.getTime(), timeZone));
+            }
+            if (0 != share.getCreatedBy()) {
+                json.put("created_by", share.getCreatedBy());
+            }
+            Date lastModified = share.getLastModified();
+            if (null != lastModified) {
+                json.put("last_modified", addTimeZoneOffset(lastModified.getTime(), timeZone));
+            }
+            if (0 != share.getModifiedBy()) {
+                json.put("modified_by", share.getModifiedBy());
+            }
+            Date expires = share.getExpires();
+            if (null != expires) {
+                json.put("expires", share.getExpires().getTime());
+            }
+            if (0 != share.getGuest()) {
+                json.put("guest", share.getGuest());
+            }
             json.put("authentication", share.getAuthentication().getID());
             User guest = guestShare.getGuest();
-            json.put("guest_mail_address", guest.getMail());
-            json.put("guest_display_name", guest.getDisplayName());
-            json.put("guest_password", guestShare.getGuestPassword());
-            json.put("share_url", guestShare.getShareURL());
+            if (null != guest) {
+                json.putOpt("guest_mail_address", guest.getMail());
+                json.putOpt("guest_display_name", guest.getDisplayName());
+                json.putOpt("guest_password", guestShare.getGuestPassword());
+            }
+            json.putOpt("share_url", guestShare.getShareURL());
             return json;
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e);
