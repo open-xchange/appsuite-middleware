@@ -15,7 +15,7 @@ public class ChangeLogWriter {
     }
 
     public void writeChangeLog(String changeLog, String physicalFilePath) throws IOException {
-        InputStream stylesheet = StreamUtil.singleInputStream(physicalFilePath, resourceAccessor);
+        InputStream stylesheet = resourceAccessor.getResourceAsStream(physicalFilePath);
         if (stylesheet == null) {
             throw new IOException("Can not find "+changeLog);
         }

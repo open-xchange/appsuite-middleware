@@ -27,13 +27,6 @@ public class ChangeLogParserFactory {
         return instance;
     }
 
-    /**
-     * Set the instance used by this singleton. Used primarily for testing.
-     */
-    public static void setInstance(ChangeLogParserFactory instance) {
-        ChangeLogParserFactory.instance = instance;
-    }
-
     private ChangeLogParserFactory() {
         Class<? extends ChangeLogParser>[] classes;
         changelogParserComparator = new Comparator<ChangeLogParser>() {

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog xmlns="urn:liquibase"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="urn:liquibase ./schema/dbchangelog-3.0.xsd"
+	logicalFilePath="ox-release-changelog">
+
+	<include file="./release-7.6.1/release-7.6.1.ox.changelog.xml" relativeToChangelogFile="true"/>
+
+</databaseChangeLog>

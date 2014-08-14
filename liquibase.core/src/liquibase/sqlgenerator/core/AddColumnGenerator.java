@@ -35,7 +35,8 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         validationErrors.checkRequiredField("columnType", statement.getColumnType());
         validationErrors.checkRequiredField("tableName", statement.getTableName());
 
-        if (statement.isPrimaryKey() && (database instanceof H2Database
+        if (statement.isPrimaryKey() && (database instanceof CacheDatabase
+                || database instanceof H2Database
                 || database instanceof DB2Database
                 || database instanceof DerbyDatabase
                 || database instanceof SQLiteDatabase)) {
@@ -46,25 +47,13 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         if (database instanceof MySQLDatabase && statement.isAutoIncrement() && !statement.isPrimaryKey()) {
             validationErrors.addError("Cannot add a non-primary key identity column");
         }
-        
-        // TODO is this feature valid for other databases?
-        if ((statement.getAddAfterColumn() != null) && !(database instanceof MySQLDatabase)) {
-        	validationErrors.addError("Cannot add column on specific position");
-        }
-        if ((statement.getAddBeforeColumn() != null) && !((database instanceof H2Database) || (database instanceof HsqlDatabase))) {
-        	validationErrors.addError("Cannot add column on specific position");
-        }
-        if ((statement.getAddAtPosition() != null) && !(database instanceof FirebirdDatabase)) {
-        	validationErrors.addError("Cannot add column on specific position");
-        }
-        
         return validationErrors;
     }
 
     @Override
     public Sql[] generateSql(AddColumnStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 
-        String alterTable = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ADD " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnType() + (statement.isAutoIncrement() ? "{autoIncrement:true}" : ""), database).toDatabaseDataType(database);
+        String alterTable = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ADD " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnType() + (statement.isAutoIncrement() ? "{autoIncrement:true}" : "")).toDatabaseDataType(database);
 
         if (statement.isAutoIncrement() && database.supportsAutoIncrement()) {
             AutoIncrementConstraint autoIncrementConstraint = statement.getAutoIncrementConstraint();
@@ -84,10 +73,6 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         }
 
         alterTable += getDefaultClause(statement, database);
-
-        if( database instanceof MySQLDatabase && statement.getRemarks() != null ) {
-            alterTable += " COMMENT '" + statement.getRemarks() + "' ";
-        }
 
         List<Sql> returnSql = new ArrayList<Sql>();
         returnSql.add(new UnparsedSql(alterTable, getAffectedColumn(statement)));
@@ -115,28 +100,20 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         for (ColumnConstraint constraint : statement.getConstraints()) {
             if (constraint instanceof ForeignKeyConstraint) {
                 ForeignKeyConstraint fkConstraint = (ForeignKeyConstraint) constraint;
-                String refSchemaName = null;
-                String refTableName;
-                String refColName;
-                if (fkConstraint.getReferences() != null) {
-                    Matcher referencesMatcher = Pattern.compile("([\\w\\._]+)\\(([\\w_]+)\\)").matcher(fkConstraint.getReferences());
-                    if (!referencesMatcher.matches()) {
-                        throw new UnexpectedLiquibaseException("Don't know how to find table and column names from " + fkConstraint.getReferences());
-                    }
-                    refTableName = referencesMatcher.group(1);
-                    refColName = referencesMatcher.group(2);
-                } else {
-                    refTableName = ((ForeignKeyConstraint) constraint).getReferencedTableName();
-                    refColName = ((ForeignKeyConstraint) constraint).getReferencedColumnNames();
+                Matcher referencesMatcher = Pattern.compile("([\\w\\._]+)\\(([\\w_]+)\\)").matcher(fkConstraint.getReferences());
+                if (!referencesMatcher.matches()) {
+                    throw new UnexpectedLiquibaseException("Don't know how to find table and column names from " + fkConstraint.getReferences());
                 }
-
+                String refSchemaName = null;
+                String refTableName = referencesMatcher.group(1);
                 if (refTableName.indexOf(".") > 0) {
                     refSchemaName = refTableName.split("\\.")[0];
                     refTableName = refTableName.split("\\.")[1];
                 }
+                String refColName = referencesMatcher.group(2);
+                String refCatalogName = null;
 
-
-                AddForeignKeyConstraintStatement addForeignKeyConstraintStatement = new AddForeignKeyConstraintStatement(fkConstraint.getForeignKeyName(), statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName(), null, refSchemaName, refTableName, refColName);
+                AddForeignKeyConstraintStatement addForeignKeyConstraintStatement = new AddForeignKeyConstraintStatement(fkConstraint.getForeignKeyName(), statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName(), refCatalogName, refSchemaName, refTableName, refColName);
                 returnSql.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(addForeignKeyConstraintStatement, database)));
             }
         }

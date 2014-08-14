@@ -5,10 +5,8 @@ import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
-import liquibase.statement.DatabaseFunction;
-import liquibase.util.StringUtils;
 
-@DataTypeInfo(name="clob", aliases = {"longvarchar", "text", "longtext", "java.sql.Types.LONGVARCHAR", "java.sql.Types.CLOB"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
+@DataTypeInfo(name="clob", aliases = {"text", "longtext", "java.sql.Types.CLOB"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class ClobType extends LiquibaseDataType {
 
     @Override
@@ -16,11 +14,6 @@ public class ClobType extends LiquibaseDataType {
         if (value == null || value.toString().equalsIgnoreCase("null")) {
             return null;
         }
-
-        if (value instanceof DatabaseFunction) {
-            return value.toString();
-        }
-
         String val = String.valueOf(value);
         // postgres type character varying gets identified as a char type
         // simple sanity check to avoid double quoting a value
@@ -33,26 +26,16 @@ public class ClobType extends LiquibaseDataType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-        String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
-
-        if (database instanceof FirebirdDatabase) {
+        if (database instanceof CacheDatabase) {
+            return new DatabaseDataType("LONGVARCHAR");
+        }   else if (database instanceof FirebirdDatabase) {
             return new DatabaseDataType("BLOB SUB_TYPE TEXT");
-        } else if (database instanceof SybaseASADatabase) {
+        } else if (database instanceof MaxDBDatabase || database instanceof SybaseASADatabase) {
             return new DatabaseDataType("LONG VARCHAR");
         } else if (database instanceof MSSQLDatabase) {
             return new DatabaseDataType("NVARCHAR", "MAX");
         } else if (database instanceof MySQLDatabase) {
-            if (originalDefinition.toLowerCase().startsWith("text")) {
-                return new DatabaseDataType("TEXT");
-            } else {
-                return new DatabaseDataType("LONGTEXT");
-            }
-        } else if (database instanceof H2Database || database instanceof HsqlDatabase) {
-            if (originalDefinition.toLowerCase().startsWith("longvarchar") || originalDefinition.startsWith("java.sql.Types.LONGVARCHAR")) {
-                return new DatabaseDataType("LONGVARCHAR");
-            } else {
-                return new DatabaseDataType("CLOB");
-            }
+            return new DatabaseDataType("LONGTEXT");
         } else if (database instanceof PostgresDatabase || database instanceof SQLiteDatabase || database instanceof SybaseDatabase) {
             return new DatabaseDataType("TEXT");
         } else if (database instanceof OracleDatabase) {
@@ -60,6 +43,7 @@ public class ClobType extends LiquibaseDataType {
         }
         return super.toDatabaseDataType(database);
     }
+
 
     //sqlite
     //        } else if (columnTypeString.equals("TEXT") ||

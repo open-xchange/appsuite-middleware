@@ -5,16 +5,14 @@ import java.io.InputStream;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import javax.xml.transform.Source;
-import javax.xml.validation.SchemaFactory;
 
 import liquibase.changelog.ChangeLogParameters;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.logging.LogFactory;
-import liquibase.parser.core.ParsedNode;
-import liquibase.resource.UtfBomStripperInputStream;
+import liquibase.parser.ChangeLogParser;
 import liquibase.resource.ResourceAccessor;
-import liquibase.util.StreamUtil;
+import liquibase.resource.UtfBomAwareReader;
 import liquibase.util.file.FilenameUtils;
 
 import org.xml.sax.ErrorHandler;
@@ -25,14 +23,20 @@ import org.xml.sax.SAXNotSupportedException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 
-public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
+public class XMLChangeLogSAXParser implements ChangeLogParser {
 
     private SAXParserFactory saxParserFactory;
 
     public XMLChangeLogSAXParser() {
         saxParserFactory = SAXParserFactory.newInstance();
-        saxParserFactory.setValidating(true);
-        saxParserFactory.setNamespaceAware(true);
+
+        if (System.getProperty("java.vm.version").startsWith("1.4")) {
+            saxParserFactory.setValidating(false);
+            saxParserFactory.setNamespaceAware(false);
+        } else {
+            saxParserFactory.setValidating(true);
+            saxParserFactory.setNamespaceAware(true);
+        }
     }
 
     @Override
@@ -41,20 +45,21 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
     }
 
     public static String getSchemaVersion() {
-        return "3.3";
+        return "3.0";
+    }
+
+    public static String getDatabaseChangeLogNameSpace() {
+        return "http://www.liquibase.org/xml/ns/dbchangelog";
     }
 
     @Override
     public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
-        return changeLogFile.toLowerCase().endsWith("xml");
-    }
-
-    protected SAXParserFactory getSaxParserFactory() {
-        return saxParserFactory;
+        return changeLogFile.endsWith("xml");
     }
 
     @Override
-    protected ParsedNode parseToNode(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
+    public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
+
         InputStream inputStream = null;
         try {
             SAXParser parser = saxParserFactory.newSAXParser();
@@ -67,7 +72,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
             }
 
             XMLReader xmlReader = parser.getXMLReader();
-            LiquibaseEntityResolver resolver=new LiquibaseEntityResolver(this);
+            LiquibaseEntityResolver resolver=new LiquibaseEntityResolver();
             resolver.useResoureAccessor(resourceAccessor,FilenameUtils.getFullPath(physicalChangeLogLocation));
             xmlReader.setEntityResolver(resolver);
             xmlReader.setErrorHandler(new ErrorHandler() {
@@ -90,16 +95,16 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
                 }
             });
         	
-            inputStream = StreamUtil.singleInputStream(physicalChangeLogLocation, resourceAccessor);
+            inputStream = resourceAccessor.getResourceAsStream(physicalChangeLogLocation);
             if (inputStream == null) {
                 throw new ChangeLogParseException(physicalChangeLogLocation + " does not exist");
             }
 
             XMLChangeLogSAXHandler contentHandler = new XMLChangeLogSAXHandler(physicalChangeLogLocation, resourceAccessor, changeLogParameters);
             xmlReader.setContentHandler(contentHandler);
-            xmlReader.parse(new InputSource(new UtfBomStripperInputStream(inputStream)));
+            xmlReader.parse(new InputSource(new UtfBomAwareReader(inputStream)));
 
-            return contentHandler.getDatabaseChangeLogTree();
+            return contentHandler.getDatabaseChangeLog();
         } catch (ChangeLogParseException e) {
             throw e;
         } catch (IOException e) {

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog xmlns="urn:liquibase"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="urn:liquibase ../schema/dbchangelog-3.0.xsd">
+
+	<changeSet id="7.6.1:login2context:login_info" author="martin.schneider"
+		logicalFilePath="release-7.6.1/1.login_info.changelog.xml">
+		<comment>Bug 33418: enhances the login_info column to 255 characters</comment>
+		<modifyDataType columnName="login_info" newDataType="varchar(255)"
+			tableName="login2context" />
+		<dropDefaultValue columnDataType="varchar(255)"
+			columnName="login_info" tableName="login2context" />
+	</changeSet>
+</databaseChangeLog>
+
+

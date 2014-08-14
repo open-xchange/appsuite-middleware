@@ -23,10 +23,4 @@ public class PrependSqlVisitor extends AbstractSqlVisitor {
     public String modifySql(String sql, Database database) {
         return value + sql;
     }
-
-    @Override
-    public String getSerializedObjectNamespace() {
-        return STANDARD_CHANGELOG_NAMESPACE;
-    }
-
 }

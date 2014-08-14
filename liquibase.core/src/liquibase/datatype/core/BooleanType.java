@@ -1,6 +1,7 @@
 package liquibase.datatype.core;
 
 import liquibase.database.Database;
+import liquibase.database.core.CacheDatabase;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.FirebirdDatabase;
@@ -23,14 +24,13 @@ public class BooleanType extends LiquibaseDataType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-        if (database instanceof DB2Database || database instanceof FirebirdDatabase) {
+        if (database instanceof CacheDatabase) {
+            return new DatabaseDataType("INT");
+        } else if (database instanceof DB2Database || database instanceof FirebirdDatabase) {
             return new DatabaseDataType("SMALLINT");
         } else if (database instanceof MSSQLDatabase) {
             return new DatabaseDataType("BIT");
         } else if (database instanceof MySQLDatabase) {
-            if (getRawDefinition().toLowerCase().startsWith("bit")) {
-                return new DatabaseDataType("BIT", getParameters());
-            }
             return new DatabaseDataType("BIT", 1);
         } else if (database instanceof OracleDatabase) {
             return new DatabaseDataType("NUMBER", 1);
@@ -70,22 +70,12 @@ public class BooleanType extends LiquibaseDataType {
             } else {
                 returnValue = this.getFalseBooleanValue(database);
             }
-        } else if (value instanceof Number) {
-            if (value.equals(1)) {
-                returnValue = this.getTrueBooleanValue(database);
-            } else {
-                returnValue = this.getFalseBooleanValue(database);
-            }
         } else if (value instanceof DatabaseFunction) {
-            return value.toString();
-        } else if (value instanceof Boolean) {
-            if (((Boolean) value)) {
-                returnValue = this.getTrueBooleanValue(database);
-            } else {
-                returnValue = this.getFalseBooleanValue(database);
-            }
+            return ((DatabaseFunction) value).toString();
+        } else if (((Boolean) value)) {
+            returnValue = this.getTrueBooleanValue(database);
         } else {
-            throw new UnexpectedLiquibaseException("Cannot convert type "+value.getClass()+" to a boolean value");
+            returnValue = this.getFalseBooleanValue(database);
         }
 
         return returnValue;
@@ -95,7 +85,8 @@ public class BooleanType extends LiquibaseDataType {
         if (database instanceof DerbyDatabase) {
             return !((DerbyDatabase) database).supportsBooleanDataType();
         }
-        return database instanceof DB2Database
+        return database instanceof CacheDatabase
+                || database instanceof DB2Database
                 || database instanceof FirebirdDatabase
                 || database instanceof MSSQLDatabase
                 || database instanceof MySQLDatabase

@@ -7,11 +7,13 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawSqlStatement;
+import liquibase.structure.core.Schema;
 
 /**
  * Encapsulates MySQL database support.
@@ -95,11 +97,6 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    protected boolean mustQuoteObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
-        return super.mustQuoteObjectName(objectName, objectType) || (!objectName.contains("(") && !objectName.matches("\\w+"));
-    }
-
-    @Override
     public String getLineComment() {
         return "-- ";
     }
@@ -107,17 +104,6 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
     @Override
     protected String getAutoIncrementClause() {
         return "AUTO_INCREMENT";
-    }
-
-    @Override
-    protected boolean generateAutoIncrementStartWith(final BigInteger startWith) {
-    	// startWith not supported here. StartWith has to be set as table option.
-        return false;
-    }
-
-    public String getTableOptionAutoIncrementStartWithClause(BigInteger startWith){
-    	String startWithClause = String.format(getAutoIncrementStartWithClause(), (startWith == null) ? defaultAutoIncrementStartWith : startWith);
-    	return getAutoIncrementClause() + startWithClause;
     }
 
     @Override
@@ -191,7 +177,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public CatalogAndSchema getSchemaFromJdbcInfo(String rawCatalogName, String rawSchemaName) {
-        return new CatalogAndSchema(rawCatalogName, null).customize(this);
+        return this.correctSchema(new CatalogAndSchema(rawCatalogName, null));
     }
 
     @Override
@@ -214,16 +200,6 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             return true;
         }
         return super.isReservedWord(string);
-    }
-
-    public int getDatabasePatchVersion() throws DatabaseException {
-        String versionStrings[] = this.getDatabaseProductVersion().split("\\.");
-        try {
-            return Integer.parseInt(versionStrings[2].replaceFirst("\\D.*", ""));
-        } catch (NumberFormatException e) {
-            return 0;
-        }
-
     }
 
     {

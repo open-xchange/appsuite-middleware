@@ -15,7 +15,6 @@ public class CreateSequenceStatement extends AbstractSqlStatement {
     private BigInteger minValue;
     private Boolean ordered;
     private Boolean cycle;
-    private BigInteger cacheSize;
 
     public CreateSequenceStatement(String catalogName, String schemaName, String sequenceName) {
         this.catalogName = catalogName;
@@ -95,15 +94,6 @@ public class CreateSequenceStatement extends AbstractSqlStatement {
 
     public CreateSequenceStatement setCycle(Boolean cycle) {
         this.cycle = cycle;
-        return this;
-    }
-
-    public BigInteger getCacheSize() {
-        return cacheSize;
-    }
-
-    public CreateSequenceStatement setCacheSize(BigInteger cacheSize) {
-        this.cacheSize = cacheSize;
         return this;
     }
 }

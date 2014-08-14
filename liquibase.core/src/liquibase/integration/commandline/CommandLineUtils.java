@@ -1,23 +1,30 @@
 package liquibase.integration.commandline;
 
 import liquibase.CatalogAndSchema;
-import liquibase.command.CommandExecutionException;
-import liquibase.command.DiffCommand;
-import liquibase.command.DiffToChangeLogCommand;
-import liquibase.command.GenerateChangeLogCommand;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.diff.DiffGeneratorFactory;
+import liquibase.diff.DiffResult;
 import liquibase.diff.DiffStatusListener;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
+import liquibase.diff.output.changelog.DiffToChangeLog;
+import liquibase.diff.output.report.DiffToReport;
 import liquibase.exception.*;
 import liquibase.logging.LogFactory;
-import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
+import liquibase.snapshot.SnapshotControl;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.util.StringUtils;
 
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.*;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.sql.*;
+import java.util.*;
 
 /**
  * Common Utilitiy methods used in the CommandLine application and the Maven plugin.
@@ -40,8 +47,68 @@ public class CommandLineUtils {
                                                 String driverPropertiesFile,
                                                 String liquibaseCatalogName,
                                                 String liquibaseSchemaName) throws DatabaseException {
+        driver = StringUtils.trimToNull(driver);
+        if (driver == null) {
+            driver = DatabaseFactory.getInstance().findDefaultDriver(url);
+        }
+
         try {
-            Database database = DatabaseFactory.getInstance().openDatabase(url, username, password, driver, databaseClass, driverPropertiesFile, new ClassLoaderResourceAccessor(classLoader));
+            Driver driverObject;
+            DatabaseFactory databaseFactory = DatabaseFactory.getInstance();
+            if (databaseClass != null) {
+                databaseFactory.clearRegistry();
+                databaseFactory.register((Database) Class.forName(databaseClass, true, classLoader).newInstance());
+            }
+
+            try {
+                if (driver == null) {
+                    driver = databaseFactory.findDefaultDriver(url);
+                }
+
+                if (driver == null) {
+                    throw new RuntimeException("Driver class was not specified and could not be determined from the url (" + url + ")");
+                }
+
+                driverObject = (Driver) Class.forName(driver, true, classLoader).newInstance();
+            } catch (Exception e) {
+                throw new RuntimeException("Cannot find database driver: " + e.getMessage());
+            }
+
+
+            Properties driverProperties = new Properties();
+
+            if (username != null) {
+                driverProperties.put("user", username);
+            }
+            if (password != null) {
+                driverProperties.put("password", password);
+            }
+            if (null != driverPropertiesFile) {
+                File propertiesFile = new File(driverPropertiesFile);
+                if (propertiesFile.exists()) {
+//                    System.out.println("Loading properties from the file:'" + driverPropertiesFile + "'");
+                    driverProperties.load(new FileInputStream(propertiesFile));
+                } else {
+                  throw new RuntimeException("Can't open JDBC Driver specific properties from the file: '"
+                      + driverPropertiesFile + "'");
+                }
+            }
+
+
+//            System.out.println("Properties:");
+//            for (Map.Entry entry : driverProperties.entrySet()) {
+//                System.out.println("Key:'"+entry.getKey().toString()+"' Value:'"+entry.getValue().toString()+"'");
+//            }
+            
+
+//            System.out.println("Connecting to the URL:'"+url+"' using driver:'"+driverObject.getClass().getName()+"'");
+            Connection connection = driverObject.connect(url, driverProperties);
+//            System.out.println("Connection has been created");
+            if (connection == null) {
+                throw new DatabaseException("Connection could not be created to " + url + " with driver " + driverObject.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
+            }
+
+            Database database = databaseFactory.findCorrectDatabaseImplementation(new JdbcConnection(connection));
             database.setDefaultCatalogName(StringUtils.trimToNull(defaultCatalogName));
             database.setDefaultSchemaName(StringUtils.trimToNull(defaultSchemaName));
             database.setOutputDefaultCatalog(outputDefaultCatalog);
@@ -54,91 +121,60 @@ public class CommandLineUtils {
         }
     }
 
-    public static void doDiff(Database referenceDatabase, Database targetDatabase, String snapshotTypes) throws LiquibaseException {
-        doDiff(referenceDatabase, targetDatabase, snapshotTypes, null);
-    }
+    public static void doDiff(Database referenceDatabase, Database targetDatabase) throws LiquibaseException {
+//        compareControl.addStatusListener(new OutDiffStatusListener());
+        DatabaseSnapshot referenceSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(referenceDatabase.getDefaultSchema(), referenceDatabase, new SnapshotControl(referenceDatabase));
+        DatabaseSnapshot targetSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(targetDatabase.getDefaultSchema(), targetDatabase, new SnapshotControl(targetDatabase));
 
-    public static void doDiff(Database referenceDatabase, Database targetDatabase, String snapshotTypes, CompareControl.SchemaComparison[] schemaComparisons) throws LiquibaseException {
-        DiffCommand diffCommand = new DiffCommand()
-                .setReferenceDatabase(referenceDatabase)
-                .setTargetDatabase(targetDatabase)
-                .setCompareControl(new CompareControl(schemaComparisons, snapshotTypes))
-                .setSnapshotTypes(snapshotTypes)
-                .setOutputStream(System.out);
+        CompareControl compareControl = new CompareControl(referenceSnapshot.getSnapshotControl().getTypesToInclude());
+        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(referenceSnapshot, targetSnapshot, compareControl);
 
         System.out.println("");
         System.out.println("Diff Results:");
-        try {
-            diffCommand.execute();
-        } catch (CommandExecutionException e) {
-            throw new LiquibaseException(e);
-        }
+        new DiffToReport(diffResult, System.out).print();
     }
 
     public static void doDiffToChangeLog(String changeLogFile,
                                          Database referenceDatabase,
                                          Database targetDatabase,
-                                         DiffOutputControl diffOutputControl,
-                                         String snapshotTypes)
+                                         DiffOutputControl diffOutputControl)
             throws LiquibaseException, IOException, ParserConfigurationException {
-        doDiffToChangeLog(changeLogFile, referenceDatabase, targetDatabase, diffOutputControl, snapshotTypes, null);
-    }
+        DatabaseSnapshot referenceSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(referenceDatabase.getDefaultSchema(), referenceDatabase, new SnapshotControl(referenceDatabase));
+        DatabaseSnapshot targetSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(targetDatabase.getDefaultSchema(), targetDatabase, new SnapshotControl(targetDatabase));
 
-        public static void doDiffToChangeLog(String changeLogFile,
-                                         Database referenceDatabase,
-                                         Database targetDatabase,
-                                         DiffOutputControl diffOutputControl,
-                                         String snapshotTypes,
-                                         CompareControl.SchemaComparison[] schemaComparisons)
-            throws LiquibaseException, IOException, ParserConfigurationException {
+        CompareControl compareControl = new CompareControl(referenceSnapshot.getSnapshotControl().getTypesToInclude());
+//        compareControl.addStatusListener(new OutDiffStatusListener());
 
-        DiffToChangeLogCommand command = new DiffToChangeLogCommand();
-        command.setReferenceDatabase(referenceDatabase)
-                .setTargetDatabase(targetDatabase)
-                .setSnapshotTypes(snapshotTypes)
-                .setCompareControl(new CompareControl(schemaComparisons, snapshotTypes))
-                .setOutputStream(System.out);
-        command.setChangeLogFile(changeLogFile)
-                .setDiffOutputControl(diffOutputControl);
+        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(referenceSnapshot, targetSnapshot, compareControl);
 
-        try {
-            command.execute();
-        } catch (CommandExecutionException e) {
-            throw new LiquibaseException(e);
+        if (changeLogFile == null) {
+            new DiffToChangeLog(diffResult, diffOutputControl).print(System.out);
+        } else {
+            new DiffToChangeLog(diffResult, diffOutputControl).print(changeLogFile);
         }
-
     }
 
-    public static void doGenerateChangeLog(String changeLogFile, Database originalDatabase, String catalogName, String schemaName, String snapshotTypes, String author, String context, String dataDir, DiffOutputControl diffOutputControl) throws DatabaseException, IOException, ParserConfigurationException, InvalidExampleException, LiquibaseException {
-        doGenerateChangeLog(changeLogFile, originalDatabase, new CatalogAndSchema[] {new CatalogAndSchema(catalogName, schemaName)}, snapshotTypes, author, context, dataDir, diffOutputControl);
-    }
+    public static void doGenerateChangeLog(String changeLogFile, Database originalDatabase, String catalogName, String schemaName, String snapshotTypes, String author, String context, String dataDir, DiffOutputControl diffOutputControl) throws DatabaseException, IOException, ParserConfigurationException, InvalidExampleException {
+        SnapshotControl snapshotControl = new SnapshotControl(originalDatabase, snapshotTypes);
+        CompareControl compareControl = new CompareControl(new CompareControl.SchemaComparison[] {new CompareControl.SchemaComparison(new CatalogAndSchema(catalogName, schemaName), new CatalogAndSchema(catalogName, schemaName))}, snapshotTypes);
+//        compareControl.addStatusListener(new OutDiffStatusListener());
 
-    public static void doGenerateChangeLog(String changeLogFile, Database originalDatabase, CatalogAndSchema[] schemas, String snapshotTypes, String author, String context, String dataDir, DiffOutputControl diffOutputControl) throws DatabaseException, IOException, ParserConfigurationException, InvalidExampleException, LiquibaseException {
-        CompareControl.SchemaComparison[] comparisons = new CompareControl.SchemaComparison[schemas.length];
-        int i=0;
-        for (CatalogAndSchema schema : schemas) {
-            comparisons[i++] = new CompareControl.SchemaComparison(schema, schema);
-        }
-        CompareControl compareControl = new CompareControl(comparisons, snapshotTypes);
         diffOutputControl.setDataDir(dataDir);
 
-        GenerateChangeLogCommand command = new GenerateChangeLogCommand();
+        DatabaseSnapshot originalDatabaseSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(compareControl.getSchemas(CompareControl.DatabaseRole.REFERENCE), originalDatabase, snapshotControl);
+        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(originalDatabaseSnapshot, SnapshotGeneratorFactory.getInstance().createSnapshot(compareControl.getSchemas(CompareControl.DatabaseRole.REFERENCE), null, snapshotControl), compareControl);
 
-        command.setReferenceDatabase(originalDatabase)
-                .setSnapshotTypes(snapshotTypes)
-                .setOutputStream(System.out)
-                .setCompareControl(compareControl);
-        command.setChangeLogFile(changeLogFile)
-                .setDiffOutputControl(diffOutputControl);
-        command.setAuthor(author)
-                .setContext(context);
+        DiffToChangeLog changeLogWriter = new DiffToChangeLog(diffResult, diffOutputControl);
 
-        try {
-            command.execute();
-        } catch (CommandExecutionException e) {
-            throw new LiquibaseException(e);
+        changeLogWriter.setChangeSetAuthor(author);
+        changeLogWriter.setChangeSetContext(context);
+
+        if (StringUtils.trimToNull(changeLogFile) != null) {
+            changeLogWriter.print(changeLogFile);
+        } else {
+            PrintStream outputStream = System.out;
+            changeLogWriter.print(outputStream);
         }
-
     }
 
     private static class OutDiffStatusListener implements DiffStatusListener {

@@ -9,7 +9,6 @@ public class CreateViewStatement extends AbstractSqlStatement {
     private String viewName;
     private String selectQuery;
     private boolean replaceIfExists;
-    private boolean fullDefinition;
 
     public CreateViewStatement(String catalogName, String schemaName, String viewName, String selectQuery, boolean replaceIfExists) {
         this.catalogName = catalogName;
@@ -39,12 +38,4 @@ public class CreateViewStatement extends AbstractSqlStatement {
         return replaceIfExists;
     }
 
-    public boolean isFullDefinition() {
-        return fullDefinition;
-    }
-
-    public CreateViewStatement setFullDefinition(boolean fullDefinition) {
-        this.fullDefinition = fullDefinition;
-        return this;
-    }
 }

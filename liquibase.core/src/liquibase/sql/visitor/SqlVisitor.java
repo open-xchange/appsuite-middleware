@@ -1,12 +1,10 @@
 package liquibase.sql.visitor;
 
-import liquibase.ContextExpression;
-import liquibase.Contexts;
-import liquibase.Labels;
 import liquibase.change.CheckSum;
 import liquibase.database.Database;
 import liquibase.serializer.LiquibaseSerializable;
 
+import java.util.Collection;
 import java.util.Set;
 
 public interface SqlVisitor extends LiquibaseSerializable {
@@ -23,12 +21,9 @@ public interface SqlVisitor extends LiquibaseSerializable {
 
     boolean isApplyToRollback();
 
-    ContextExpression getContexts();
+    Set<String> getContexts();
 
-    void setContexts(ContextExpression contexts);
-
-    Labels getLabels();
-    void setLabels(Labels labels);
+    void setContexts(Set<String> contexts);
 
     CheckSum generateCheckSum();
 

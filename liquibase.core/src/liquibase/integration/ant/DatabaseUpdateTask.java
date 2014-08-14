@@ -1,7 +1,5 @@
 package liquibase.integration.ant;
 
-import liquibase.Contexts;
-import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.util.ui.UIFactory;
 import org.apache.tools.ant.BuildException;
@@ -44,12 +42,12 @@ public class DatabaseUpdateTask extends BaseLiquibaseTask {
                     liquibase.dropAll();
                 }
 
-                liquibase.update(new Contexts(getContexts()), new LabelExpression(getLabels()));
+                liquibase.update(getContexts());
             } else {
                 if (isDropFirst()) {
                     throw new BuildException("Cannot dropFirst when outputting update SQL");
                 }
-                liquibase.update(new Contexts(getContexts()), new LabelExpression(getLabels()), writer);
+                liquibase.update(getContexts(), writer);
                 writer.flush();
                 writer.close();
             }

@@ -2,33 +2,27 @@ package liquibase.statement;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.PreparedStatementFactory;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.DatabaseException;
-import liquibase.resource.ResourceAccessor;
-import liquibase.resource.UtfBomAwareReader;
-import liquibase.util.JdbcUtils;
-import liquibase.util.StreamUtil;
-import liquibase.util.StringUtils;
 import liquibase.util.file.FilenameUtils;
+import liquibase.util.StreamUtil;
 
 public abstract class ExecutablePreparedStatementBase implements ExecutablePreparedStatement {
 
@@ -39,20 +33,13 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 	private List<ColumnConfig> columns;
 	private ChangeSet changeSet;
 
-	private Set<Closeable> closeables;
-	
-	private ResourceAccessor resourceAccessor;
-
-	protected ExecutablePreparedStatementBase(Database database, String catalogName, String schemaName, String tableName, List<ColumnConfig> columns, ChangeSet changeSet, ResourceAccessor resourceAccessor) {
+	protected ExecutablePreparedStatementBase(Database database, String catalogName, String schemaName, String tableName, List<ColumnConfig> columns, ChangeSet changeSet) {
 		this.database = database;
-		this.changeSet = changeSet;
 		this.catalogName = catalogName;
 		this.schemaName = schemaName;
 		this.tableName = tableName;
 		this.columns = columns;
 		this.changeSet = changeSet;
-		this.closeables = new HashSet<Closeable>();
-		this.resourceAccessor = resourceAccessor;
 	}
 
 	@Override
@@ -77,11 +64,6 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 	        stmt.execute();
 	    } catch(SQLException e) {
 	        throw new DatabaseException(e);
-	    } finally {
-	        for (Closeable closeable : closeables) {
-                StreamUtil.closeQuietly(closeable);
-            }
-	        JdbcUtils.closeStatement(stmt);
 	    }
 	}
 
@@ -109,168 +91,38 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 		    }
 		} else if(col.getValueDate() != null) {
 		    stmt.setDate(i, new java.sql.Date(col.getValueDate().getTime()));
-		} else if (col.getValueBlobFile() != null) {
-			try {
-				LOBContent<InputStream> lob = toBinaryStream(col.getValueBlobFile());
-				if (lob.length <= Integer.MAX_VALUE) {
-					stmt.setBinaryStream(i, lob.content, (int) lob.length);
-				} else {
-					stmt.setBinaryStream(i, lob.content, lob.length);
-				}
-			} catch (IOException e) {
-				throw new DatabaseException(e.getMessage(), e); // wrap
-			}
+		} else if(col.getValueBlobFile() != null) {
+		    try {
+                // Add change log base path if file path is relative.
+		    	String filePath = getAbsolutePath(col.getValueBlobFile());
+		        File file = new File(filePath);
+		        stmt.setBinaryStream(i, new BufferedInputStream(new FileInputStream(file)), (int) file.length());
+		    } catch (FileNotFoundException e) {
+		        throw new DatabaseException(e.getMessage(), e); // wrap
+		    }
 		} else if(col.getValueClobFile() != null) {
-			try {
-				LOBContent<Reader> lob = toCharacterStream(col.getValueClobFile(), col.getEncoding());
-				if (lob.length <= Integer.MAX_VALUE) {
-					stmt.setCharacterStream(i, lob.content, (int) lob.length);
-				} else {
-					stmt.setCharacterStream(i, lob.content, lob.length);
-				}
-			} catch (IOException e) {
-				throw new DatabaseException(e.getMessage(), e); // wrap
-			}
+		    try {
+                // Add change log base path if file path is relative.
+		    	String filePath = getAbsolutePath(col.getValueClobFile());
+		        File file = new File(filePath);
+		        Reader bufReader = new BufferedReader(new FileReader(file));
+		        // PostgreSql does not support PreparedStatement.setCharacterStream() nor
+		        // PreparedStatement.setClob().
+		        if (database instanceof PostgresDatabase) {
+		            String text = StreamUtil.getReaderContents(bufReader);
+		            stmt.setString(i, text);
+		        } else {
+		            stmt.setCharacterStream(i, bufReader);
+		        }
+		    } catch(FileNotFoundException e) {
+		        throw new DatabaseException(e.getMessage(), e); // wrap
+		    } catch(IOException e) {
+		        throw new DatabaseException(e.getMessage(), e); // wrap
+		    }
 		} else {
 			// NULL values might intentionally be set into a change, we must also add them to the prepared statement  
 			stmt.setNull(i, java.sql.Types.NULL);
 		}
-	}
-
-	private class LOBContent<T> {
-		private final T content;
-		private final long length;
-		
-		LOBContent(T content, long length) {
-			this.content = content;
-			this.length = length;
-		}
-	}
-
-	@SuppressWarnings("resource")
-    private LOBContent<InputStream> toBinaryStream(String valueLobFile) throws DatabaseException, IOException
-	{
-		InputStream in = getResourceAsStream(valueLobFile);
-		
-		if (in == null) {
-			throw new DatabaseException("BLOB resource not found: " + valueLobFile);
-		}
-		
-		try {
-			if (in instanceof FileInputStream) {
-				in = createStream(in);
-				return new LOBContent<InputStream>(in, ((FileInputStream) in).getChannel().size());
-			}
-			
-			in = createStream(in);
-			
-			final int IN_MEMORY_THRESHOLD = 100000;
-			
-			if (in.markSupported()) {
-				in.mark(IN_MEMORY_THRESHOLD);
-			}
-			
-			long length = StreamUtil.getContentLength(in);
-			
-			if (in.markSupported() && length <= IN_MEMORY_THRESHOLD) {
-				in.reset();
-			} else {
-				StreamUtil.closeQuietly(in);
-				in = getResourceAsStream(valueLobFile);
-				in = createStream(in);
-			}
-			
-			return new LOBContent<InputStream>(in, length);
-		} finally {
-			if (in != null) {
-				closeables.add(in);
-			}
-		}
-	}
-
-	private InputStream createStream(InputStream in) {
-		return (in instanceof BufferedInputStream) ? in : new BufferedInputStream(in);
-	}
-	
-	private LOBContent<Reader> toCharacterStream(String valueLobFile, String encoding) throws IOException, DatabaseException
-	{
-		InputStream in = getResourceAsStream(valueLobFile);
-		
-		if (in == null) {
-			throw new DatabaseException("CLOB resource not found: " + valueLobFile);
-		}
-		
-		final int IN_MEMORY_THRESHOLD = 100000;
-		
-		Reader reader = null;
-		
-		try {
-			reader = createReader(in, encoding);
-			
-			if (reader.markSupported()) {
-				reader.mark(IN_MEMORY_THRESHOLD);
-			}
-			
-			long length = StreamUtil.getContentLength(reader);
-			
-			if (reader.markSupported() && length <= IN_MEMORY_THRESHOLD) {
-				reader.reset();
-			} else {
-				StreamUtil.closeQuietly(reader);
-				in = getResourceAsStream(valueLobFile);
-				reader = createReader(in, encoding);
-			}
-			
-			return new LOBContent<Reader>(reader, length);
-		}
-		finally {
-			if (reader != null) {
-				closeables.add(reader);
-			}
-			if (in != null) {
-				closeables.add(in);
-			}
-		}
-	}
-
-	@SuppressWarnings("resource")
-	private Reader createReader(InputStream in, String encoding) throws UnsupportedEncodingException {
-		return new BufferedReader(
-				StringUtils.trimToNull(encoding) == null
-					? new UtfBomAwareReader(in)
-					: new UtfBomAwareReader(in, encoding));
-	}
-	
-	private InputStream getResourceAsStream(String valueLobFile) throws IOException {
-		String fileName = getFileName(valueLobFile);
-        Set<InputStream> streams = this.resourceAccessor.getResourcesAsStream(fileName);
-        if (streams == null || streams.size() == 0) {
-            return null;
-        }
-        if (streams.size() > 1) {
-            for (InputStream stream : streams) {
-                stream.close();
-            }
-
-            throw new IOException(streams.size()+ " matched "+valueLobFile);
-        }
-        return streams.iterator().next();
-	}
-
-	private String getFileName(String fileName) {
-		//  Most of this method were copy-pasted from XMLChangeLogSAXHandler#handleIncludedChangeLog()
-		
-		String relativeBaseFileName = changeSet.getChangeLog().getPhysicalFilePath();
-		
-		// workaround for FilenameUtils.normalize() returning null for relative paths like ../conf/liquibase.xml
-		String tempFile = FilenameUtils.concat(FilenameUtils.getFullPath(relativeBaseFileName), fileName);
-		if (tempFile != null && new File(tempFile).exists() == true) {
-			fileName = tempFile;
-		} else {
-			fileName = FilenameUtils.getFullPath(relativeBaseFileName) + fileName;
-		}
-		
-		return fileName;
 	}
 
     /**

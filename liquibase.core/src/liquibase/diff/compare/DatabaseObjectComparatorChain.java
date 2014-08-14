@@ -6,7 +6,7 @@ import liquibase.structure.DatabaseObject;
 
 import java.util.*;
 
-public class DatabaseObjectComparatorChain {
+public class DatabaseObjectComparatorChain implements Cloneable {
     private List<DatabaseObjectComparator> comparators;
     private int nextIndex = 0; //this class is used often enough that the overhead of an iterator adds up to a significant percentage of the execution time
 

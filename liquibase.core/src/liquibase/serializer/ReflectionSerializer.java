@@ -29,7 +29,7 @@ public class ReflectionSerializer {
         }
 
         for (Field field : allFields) {
-            if (field.getName().equals("serialVersionUID") || field.getName().equals("serializableFields")) {
+            if (field.getName().equals("serialVersionUID")) {
                 continue;
             }
             if (field.isSynthetic() || field.getName().equals("$VRc")) { //from emma

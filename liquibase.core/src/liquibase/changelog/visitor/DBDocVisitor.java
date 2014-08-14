@@ -4,7 +4,6 @@ import liquibase.CatalogAndSchema;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
 import liquibase.dbdoc.*;
 import liquibase.diff.compare.CompareControl;
@@ -64,7 +63,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
     }
 
     @Override
-    public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
+    public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) throws LiquibaseException {
         ChangeSet.RunStatus runStatus = this.database.getRunStatus(changeSet);
         if (rootChangeLogName == null) {
             rootChangeLogName = changeSet.getFilePath();
@@ -93,7 +92,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
         }
 
 
-        ChangeLogInfo changeLogInfo = new ChangeLogInfo(changeSet.getChangeLog().getLogicalFilePath(), changeSet.getChangeLog().getPhysicalFilePath());
+        ChangeLogInfo changeLogInfo = new ChangeLogInfo(changeSet.getFilePath(), databaseChangeLog.getPhysicalFilePath());
         if (!changeLogs.contains(changeLogInfo)) {
             changeLogs.add(changeLogInfo);
         }
@@ -107,12 +106,12 @@ public class DBDocVisitor implements ChangeSetVisitor {
                             changesToRunByObject.put(dbObject, new ArrayList<Change>());
                         }
                         changesToRunByObject.get(dbObject).add(change);
-                    } else {
-                       if (!changesByObject.containsKey(dbObject)) {
-                           changesByObject.put(dbObject, new ArrayList<Change>());
-                       }
-                       changesByObject.get(dbObject).add(change);
                     }
+
+                    if (!changesByObject.containsKey(dbObject)) {
+                        changesByObject.put(dbObject, new ArrayList<Change>());
+                    }
+                    changesByObject.get(dbObject).add(change);
                 }
             }
         }

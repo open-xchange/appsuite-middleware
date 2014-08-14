@@ -5,23 +5,17 @@ import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
-import liquibase.util.StringUtils;
 
-@DataTypeInfo(name="blob", aliases = {"longblob", "longvarbinary", "java.sql.Types.BLOB", "java.sql.Types.LONGBLOB", "java.sql.Types.LONGVARBINARY", "java.sql.Types.VARBINARY", "java.sql.Types.BINARY", "varbinary"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
+@DataTypeInfo(name="blob", aliases = {"longblob", "longvarbinary", "java.sql.Types.BLOB", "java.sql.Types.LONGBLOB", "java.sql.Types.LONGVARBINARY", "java.sql.Types.VARBINARY", "varbinary"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class BlobType extends LiquibaseDataType {
-
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-        String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
-
-        if (database instanceof H2Database || database instanceof HsqlDatabase) {
-            if (originalDefinition.toLowerCase().startsWith("longvarbinary") || originalDefinition.startsWith("java.sql.Types.LONGVARBINARY")) {
-                return new DatabaseDataType("LONGVARBINARY");
-            } else {
-                return new DatabaseDataType("BLOB");
-            }
+        if (database instanceof CacheDatabase || database instanceof H2Database || database instanceof HsqlDatabase) {
+            return new DatabaseDataType("LONGVARBINARY");
         }
-
+        if (database instanceof MaxDBDatabase) {
+            return new DatabaseDataType("LONG BYTE");
+        }
         if (database instanceof MSSQLDatabase) {
             String param = "MAX";
             if (this.getParameters().length > 0) {
@@ -33,13 +27,7 @@ public class BlobType extends LiquibaseDataType {
             return new DatabaseDataType("VARBINARY", param);
         }
         if (database instanceof MySQLDatabase) {
-            if (originalDefinition.toLowerCase().startsWith("blob") || originalDefinition.equals("java.sql.Types.BLOB")) {
-                return new DatabaseDataType("BLOB");
-            } else if (originalDefinition.toLowerCase().startsWith("varbinary") || originalDefinition.equals("java.sql.Types.VARBINARY")) {
-                return new DatabaseDataType("VARBINARY", getParameters());
-            } else {
-                return new DatabaseDataType("LONGBLOB");
-            }
+            return new DatabaseDataType("LONGBLOB");
         }
         if (database instanceof PostgresDatabase) {
             return new DatabaseDataType("BYTEA");

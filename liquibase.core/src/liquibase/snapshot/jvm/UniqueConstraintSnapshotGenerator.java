@@ -20,7 +20,6 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         super(UniqueConstraint.class, new Class[]{Table.class});
     }
 
-
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (database instanceof SQLiteDatabase) {
@@ -29,14 +28,13 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         return super.getPriority(objectType, database);
     }
 
-
     @Override
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
         Database database = snapshot.getDatabase();
         UniqueConstraint exampleConstraint = (UniqueConstraint) example;
         Table table = exampleConstraint.getTable();
 
-        List<Map<String, ?>> metadata = listColumns(exampleConstraint, database);
+        List<Map> metadata = listColumns(exampleConstraint, database);
 
         if (metadata.size() == 0) {
             return null;
@@ -44,13 +42,12 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         UniqueConstraint constraint = new UniqueConstraint();
         constraint.setTable(table);
         constraint.setName(example.getName());
-        for (Map<String, ?> col : metadata) {
+        for (Map<String, Object> col : metadata) {
             constraint.getColumns().add((String) col.get("COLUMN_NAME"));
         }
 
         return constraint;
     }
-
 
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
@@ -88,7 +85,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         return ((JdbcDatabaseSnapshot) snapshot).getMetaData().getUniqueConstraints(schema.getCatalogName(), schema.getName(), table.getName());
     }
 
-    protected List<Map<String, ?>> listColumns(UniqueConstraint example, Database database) throws DatabaseException {
+    protected List<Map> listColumns(UniqueConstraint example, Database database) throws DatabaseException {
         Table table = example.getTable();
         Schema schema = table.getSchema();
         String name = example.getName();
@@ -96,8 +93,8 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         String sql = null;
         if (database instanceof MySQLDatabase || database instanceof HsqlDatabase) {
             sql = "select const.CONSTRAINT_NAME, COLUMN_NAME " +
-                    "from "+database.getSystemSchema()+".table_constraints const " +
-                    "join "+database.getSystemSchema()+".key_column_usage col " +
+                    "from information_schema.table_constraints const " +
+                    "join information_schema.key_column_usage col " +
                     "on const.constraint_schema=col.constraint_schema " +
                     "and const.table_name=col.table_name " +
                     "and const.constraint_name=col.constraint_name " +
@@ -107,8 +104,8 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                     "order by ordinal_position";
         } else if (database instanceof PostgresDatabase) {
                 sql = "select const.CONSTRAINT_NAME, COLUMN_NAME " +
-                        "from "+database.getSystemSchema()+".table_constraints const " +
-                        "join "+database.getSystemSchema()+".key_column_usage col " +
+                        "from information_schema.table_constraints const " +
+                        "join information_schema.key_column_usage col " +
                         "on const.constraint_schema=col.constraint_schema " +
                         "and const.table_name=col.table_name " +
                         "and const.constraint_name=col.constraint_name " +
@@ -120,7 +117,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         } else if (database instanceof MSSQLDatabase) {
             sql = "select TC.CONSTRAINT_NAME as CONSTRAINT_NAME, CC.COLUMN_NAME as COLUMN_NAME from INFORMATION_SCHEMA.TABLE_CONSTRAINTS TC " +
                     "inner join INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE CC on TC.CONSTRAINT_NAME = CC.CONSTRAINT_NAME " +
-                    "where TC.CONSTRAINT_SCHEMA='" + database.correctObjectName(schema.getName(), Schema.class) + "' " +
+                    "where TC.CONSTRAINT_SCHEMA='" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' " +
                     "and TC.TABLE_NAME='" + database.correctObjectName(example.getTable().getName(), Table.class) + "' " +
                     "and TC.CONSTRAINT_NAME='" + database.correctObjectName(name, UniqueConstraint.class) + "'" +
                     "order by TC.CONSTRAINT_NAME";
@@ -139,9 +136,9 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                     "JOIN sys.sysconstraints c ON c.constraintid = k.constraintid " +
                     "JOIN sys.systables t ON c.tableid = t.tableid "+
                     "WHERE c.constraintname='"+database.correctObjectName(name, UniqueConstraint.class)+"'";
-            List<Map<String, ?>> rows = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(sql));
+            List<Map> rows = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(sql));
 
-            List<Map<String, ?>> returnList = new ArrayList<Map<String, ?>>();
+            List<Map> returnList = new ArrayList<Map>();
             if (rows.size() == 0) {
                 return returnList;
             } else if (rows.size() > 1) {
@@ -177,7 +174,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
             String constraintName = database.correctObjectName(name, UniqueConstraint.class);
             String tableName = database.correctObjectName(table.getName(), Table.class);
             sql = "select CONSTRAINT_NAME, COLUMN_LIST as COLUMN_NAME " +
-                    "from "+database.getSystemSchema()+".constraints " +
+                    "from information_schema.constraints " +
                     "where constraint_type='UNIQUE' ";
             if (catalogName != null) {
                 sql += "and constraint_catalog='" + catalogName + "' ";

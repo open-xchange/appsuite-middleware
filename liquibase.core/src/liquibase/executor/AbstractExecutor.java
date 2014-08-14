@@ -30,10 +30,8 @@ public abstract class AbstractExecutor {
                 continue;
             }
             returnSql[i] = sql[i].toSql();
-            if (sqlVisitors != null) {
-                for (SqlVisitor visitor : sqlVisitors) {
-                    returnSql[i] = visitor.modifySql(returnSql[i], database);
-                }
+            for (SqlVisitor visitor : sqlVisitors) {
+                returnSql[i] = visitor.modifySql(returnSql[i], database);
             }
 
         }

@@ -69,9 +69,9 @@ class SingleColumnRowMapper implements RowMapper {
         ResultSetMetaData rsmd = rs.getMetaData();
         int nrOfColumns = rsmd.getColumnCount();
         if (nrOfColumns == 0) {
-            throw new SQLException("Returned no columns!");
+            throw new SQLException("Returned no rows!");
         } else if (nrOfColumns != 1) {
-            throw new SQLException("Returned too many columns: "+ nrOfColumns);
+            throw new SQLException("Returned too many rows: "+ nrOfColumns);
         }
 
         // Extract column value from JDBC ResultSet

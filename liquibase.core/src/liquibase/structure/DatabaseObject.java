@@ -1,15 +1,17 @@
 package liquibase.structure;
 
-import liquibase.serializer.LiquibaseSerializable;
+import liquibase.CatalogAndSchema;
+import liquibase.database.Database;
 import liquibase.structure.core.Schema;
 
 import java.util.Set;
+import java.util.UUID;
 
-public interface DatabaseObject extends Comparable, LiquibaseSerializable {
+public interface DatabaseObject extends Comparable{
 
-    public String getSnapshotId();
+    public UUID getSnapshotId();
 
-    public void setSnapshotId(String id);
+    public void setSnapshotId(UUID id);
 
     DatabaseObject[] getContainingObjects();
 
@@ -26,8 +28,6 @@ public interface DatabaseObject extends Comparable, LiquibaseSerializable {
     Set<String> getAttributes();
 
     <T> T getAttribute(String attribute, Class<T> type);
-
-    <T> T getAttribute(String attribute, T defaultValue);
 
     DatabaseObject setAttribute(String attribute, Object value);
 

@@ -119,7 +119,7 @@ public class MergeColumnChange extends AbstractChange {
         AddColumnChange addNewColumnChange = new AddColumnChange();
         addNewColumnChange.setSchemaName(schemaName);
         addNewColumnChange.setTableName(getTableName());
-        AddColumnConfig columnConfig = new AddColumnConfig();
+        ColumnConfig columnConfig = new ColumnConfig();
         columnConfig.setName(getFinalColumnName());
         columnConfig.setType(getFinalColumnType());
         addNewColumnChange.addColumn(columnConfig);
@@ -197,10 +197,5 @@ public class MergeColumnChange extends AbstractChange {
     @Override
     public String getConfirmationMessage() {
         return "Columns "+getTableName()+"."+getColumn1Name()+" and "+getTableName()+"."+getColumn2Name()+" merged";
-    }
-
-    @Override
-    public String getSerializedObjectNamespace() {
-        return STANDARD_CHANGELOG_NAMESPACE;
     }
 }

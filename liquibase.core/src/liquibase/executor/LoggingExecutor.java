@@ -1,6 +1,5 @@
 package liquibase.executor;
 
-import liquibase.change.Change;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.SybaseASADatabase;
@@ -29,26 +28,6 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
         this.output = output;
         this.delegatedReadExecutor = delegatedExecutor;
         setDatabase(database);
-    }
-
-    protected Writer getOutput() {
-        return output;
-    }
-
-    @Override
-    public void execute(Change change) throws DatabaseException {
-        execute(change, new ArrayList<SqlVisitor>());
-    }
-
-    @Override
-    public void execute(Change change, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        SqlStatement[] sqlStatements = change.generateStatements(database);
-        if (sqlStatements != null) {
-            for (SqlStatement statement : sqlStatements) {
-                execute(statement, sqlVisitors);
-            }
-        }
-
     }
 
     @Override
@@ -132,15 +111,15 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
     }
 
     @Override
-    public <T> T queryForObject(SqlStatement sql, Class<T> requiredType) throws DatabaseException {
+    public Object queryForObject(SqlStatement sql, Class requiredType) throws DatabaseException {
         if (sql instanceof SelectFromDatabaseChangeLogLockStatement) {
-            return (T) Boolean.FALSE;
+            return false;
         }
         return delegatedReadExecutor.queryForObject(sql, requiredType);
     }
 
     @Override
-    public <T> T queryForObject(SqlStatement sql, Class<T> requiredType, List<SqlVisitor> sqlVisitors) throws DatabaseException {
+    public Object queryForObject(SqlStatement sql, Class requiredType, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         return delegatedReadExecutor.queryForObject(sql, requiredType, sqlVisitors);
     }
 
@@ -182,12 +161,12 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
     }
 
     @Override
-    public List<Map<String, ?>> queryForList(SqlStatement sql) throws DatabaseException {
+    public List<Map> queryForList(SqlStatement sql) throws DatabaseException {
         return delegatedReadExecutor.queryForList(sql);
     }
 
     @Override
-    public List<Map<String, ?>> queryForList(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
+    public List<Map> queryForList(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         return delegatedReadExecutor.queryForList(sql, sqlVisitors);
     }
 

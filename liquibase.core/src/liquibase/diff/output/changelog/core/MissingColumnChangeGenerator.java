@@ -1,7 +1,7 @@
 package liquibase.diff.output.changelog.core;
 
-import liquibase.change.AddColumnConfig;
 import liquibase.change.Change;
+import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
 import liquibase.change.core.AddColumnChange;
 import liquibase.database.Database;
@@ -51,14 +51,14 @@ public class MissingColumnChangeGenerator implements MissingObjectChangeGenerato
 
         AddColumnChange change = new AddColumnChange();
         change.setTableName(column.getRelation().getName());
-        if (control.getIncludeCatalog()) {
+        if (control.isIncludeCatalog()) {
             change.setCatalogName(column.getRelation().getSchema().getCatalogName());
         }
-        if (control.getIncludeSchema()) {
+        if (control.isIncludeSchema()) {
             change.setSchemaName(column.getRelation().getSchema().getName());
         }
 
-        AddColumnConfig columnConfig = new AddColumnConfig();
+        ColumnConfig columnConfig = new ColumnConfig();
         columnConfig.setName(column.getName());
 
         String dataType = column.getType().toString();
@@ -69,7 +69,7 @@ public class MissingColumnChangeGenerator implements MissingObjectChangeGenerato
         if (defaultValue != null) {
             String defaultValueString = null;
             try {
-                defaultValueString = DataTypeFactory.getInstance().from(column.getType(), comparisonDatabase).objectToSql(defaultValue, referenceDatabase);
+                defaultValueString = DataTypeFactory.getInstance().from(column.getType()).objectToSql(defaultValue, referenceDatabase);
             } catch (NullPointerException e) {
                 throw e;
             }

@@ -1,7 +1,7 @@
 package liquibase.diff.output.changelog.core;
 
-import liquibase.change.AddColumnConfig;
 import liquibase.change.Change;
+import liquibase.change.ColumnConfig;
 import liquibase.change.core.CreateIndexChange;
 import liquibase.change.core.DropIndexChange;
 import liquibase.database.Database;
@@ -44,23 +44,22 @@ public class ChangedIndexChangeGenerator implements ChangedObjectChangeGenerator
 
         DropIndexChange dropIndexChange = new DropIndexChange();
         dropIndexChange.setTableName(index.getTable().getName());
-        dropIndexChange.setIndexName(index.getName());
-        
+
         CreateIndexChange addIndexChange = new CreateIndexChange();
         addIndexChange.setTableName(index.getTable().getName());
-        List<AddColumnConfig> columns = new ArrayList<AddColumnConfig>();
+        List<ColumnConfig> columns = new ArrayList<ColumnConfig>();
         for (String col : index.getColumns()) {
-            columns.add((AddColumnConfig) new AddColumnConfig().setName(col));
+            columns.add(new ColumnConfig().setName(col));
         }
         addIndexChange.setColumns(columns);
         addIndexChange.setIndexName(index.getName());
 
 
-        if (control.getIncludeCatalog()) {
+        if (control.isIncludeCatalog()) {
             dropIndexChange.setCatalogName(index.getSchema().getCatalogName());
             addIndexChange.setCatalogName(index.getSchema().getCatalogName());
         }
-        if (control.getIncludeSchema()) {
+        if (control.isIncludeSchema()) {
             dropIndexChange.setSchemaName(index.getSchema().getName());
             addIndexChange.setSchemaName(index.getSchema().getName());
         }

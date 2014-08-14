@@ -67,7 +67,7 @@ public class ServiceLocator {
         instance = newInstance;
     }
 
-    protected PackageScanClassResolver defaultClassLoader(){
+    private PackageScanClassResolver defaultClassLoader(){
         if (WebSpherePackageScanClassResolver.isWebSphereClassLoader(this.getClass().getClassLoader())) {
             logger.debug("Using WebSphere Specific Class Resolver");
             return new WebSpherePackageScanClassResolver("liquibase/parser/core/xml/dbchangelog-2.0.xsd");
@@ -90,10 +90,12 @@ public class ServiceLocator {
         		addPackageToScan(value);
         	}
         } else {
-	        Set<InputStream> manifests;
+	        Enumeration<URL> manifests = null;
 	        try {
-	            manifests = resourceAccessor.getResourcesAsStream("META-INF/MANIFEST.MF");
-	            for (InputStream is : manifests) {
+	            manifests = resourceAccessor.getResources("META-INF/MANIFEST.MF");
+	            while (manifests.hasMoreElements()) {
+	                URL url = manifests.nextElement();
+	                InputStream is = url.openStream();
 	                Manifest manifest = new Manifest(is);
 	                String attributes = StringUtils.trimToNull(manifest.getMainAttributes().getValue("Liquibase-Package"));
 	                if (attributes != null) {
@@ -109,7 +111,6 @@ public class ServiceLocator {
 
             if (packagesToScan.size() == 0) {
                 addPackageToScan("liquibase.change");
-                addPackageToScan("liquibase.changelog");
                 addPackageToScan("liquibase.database");
                 addPackageToScan("liquibase.parser");
                 addPackageToScan("liquibase.precondition");
@@ -123,7 +124,6 @@ public class ServiceLocator {
                 addPackageToScan("liquibase.structure");
                 addPackageToScan("liquibase.structurecompare");
                 addPackageToScan("liquibase.lockservice");
-                addPackageToScan("liquibase.sdk");
                 addPackageToScan("liquibase.ext");
             }
         }
@@ -131,10 +131,6 @@ public class ServiceLocator {
 
     public void addPackageToScan(String packageName) {
         packagesToScan.add(packageName);
-    }
-
-    public List<String> getPackages() {
-        return packagesToScan;
     }
 
     public Class findClass(Class requiredInterface) throws ServiceNotFoundException {

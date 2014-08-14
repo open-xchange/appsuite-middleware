@@ -5,9 +5,8 @@ import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
-import liquibase.statement.DatabaseFunction;
 
-@DataTypeInfo(name="smallint", aliases = {"java.sql.Types.SMALLINT", "int2"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
+@DataTypeInfo(name="smallint", aliases = "java.sql.Types.SMALLINT", minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class SmallIntType extends LiquibaseDataType {
 
     private boolean autoIncrement;
@@ -22,14 +21,9 @@ public class SmallIntType extends LiquibaseDataType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-        if (database instanceof DB2Database || database instanceof DerbyDatabase || database instanceof FirebirdDatabase || database instanceof MSSQLDatabase || database instanceof PostgresDatabase || database instanceof InformixDatabase || database instanceof MySQLDatabase) {
+        if (database instanceof DB2Database || database instanceof DerbyDatabase || database instanceof FirebirdDatabase || database instanceof MSSQLDatabase) {
             return new DatabaseDataType("SMALLINT"); //always smallint regardless of parameters passed
         }
-
-        if (database instanceof OracleDatabase) {
-            return new DatabaseDataType("NUMBER", 5);
-        }
-
         return super.toDatabaseDataType(database);
     }
 
@@ -38,15 +32,10 @@ public class SmallIntType extends LiquibaseDataType {
         if (value == null || value.toString().equalsIgnoreCase("null")) {
             return null;
         }
-        if (value instanceof DatabaseFunction) {
-            return value.toString();
-        }
-
         if (value instanceof Boolean)
             return Boolean.TRUE.equals(value) ? "1" : "0";
-        else {
-            return formatNumber(value.toString());
-        }
+        else
+            return value.toString();
     }
 
 }

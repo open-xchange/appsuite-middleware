@@ -1,7 +1,5 @@
 package liquibase.integration.ant;
 
-import liquibase.Contexts;
-import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import org.apache.tools.ant.BuildException;
 
@@ -24,7 +22,7 @@ public class DatabaseRollbackFutureTask extends BaseLiquibaseTask {
             liquibase = createLiquibase();
 
 
-            liquibase.futureRollbackSQL(null, new Contexts(getContexts()), new LabelExpression(getLabels()), writer);
+            liquibase.futureRollbackSQL(getContexts(), writer);
 
             writer.flush();
             writer.close();

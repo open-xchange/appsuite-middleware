@@ -17,8 +17,6 @@ import liquibase.util.JdbcUtils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class SchemaSnapshotGenerator extends JdbcSnapshotGenerator {
 
@@ -31,7 +29,10 @@ public class SchemaSnapshotGenerator extends JdbcSnapshotGenerator {
     @Override
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
         Database database = snapshot.getDatabase();
+        ResultSet schemas = null;
         Schema match = null;
+        boolean passedCatalog = ((Schema) example).getCatalogName() != null;
+        boolean passedSchema = ((Schema) example).getName() != null;
 
         String catalogName = ((Schema) example).getCatalogName();
         String schemaName = example.getName();
@@ -61,12 +62,14 @@ public class SchemaSnapshotGenerator extends JdbcSnapshotGenerator {
         database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
         try {
             if (database.supportsSchemas()) {
-                for (String tableSchema : getDatabaseSchemaNames(database)) {
-                    CatalogAndSchema schemaFromJdbcInfo = toCatalogAndSchema(tableSchema, database);
+                schemas = ((JdbcConnection) database.getConnection()).getMetaData().getSchemas();
+                while (schemas.next()) {
+                    String tableSchema = JdbcUtils.getValueForColumn(schemas, "TABLE_SCHEM", database);
+                    CatalogAndSchema schemaFromJdbcInfo = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(null, tableSchema);
 
                     Catalog catalog = new Catalog(schemaFromJdbcInfo.getCatalogName());
 
-                    Schema schema = new Schema(catalog, tableSchema);
+                    Schema schema = new Schema(catalog, schemaFromJdbcInfo.getSchemaName());
                     if (DatabaseObjectComparatorFactory.getInstance().isSameObject(schema, example, database)) {
                         if (match == null) {
                             match = schema;
@@ -77,46 +80,26 @@ public class SchemaSnapshotGenerator extends JdbcSnapshotGenerator {
                 }
             } else {
                 Catalog catalog = new Catalog(catalogName);
-                match = new Schema(catalog, null);
+                return new Schema(catalog, null);
             }
 
         } catch (SQLException e) {
             throw new DatabaseException(e);
         } finally {
             database.setObjectQuotingStrategy(currentStrategy);
-        }
+            if (schemas != null) {
+                try {
+                    schemas.close();
+                } catch (SQLException ignore) {
 
-        if (match != null && (match.getName() == null || match.getName().equalsIgnoreCase(database.getDefaultSchemaName()))) {
-            match.setDefault(true);
+                }
+            }
         }
         return match;
-    }
-
-    protected CatalogAndSchema toCatalogAndSchema(String tableSchema, Database database) {
-        return ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(null, tableSchema);
     }
 
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
         //no other types
     }
-
-    protected String[] getDatabaseSchemaNames(Database database) throws SQLException, DatabaseException {
-        List<String> returnList = new ArrayList<String>();
-
-        ResultSet schemas = null;
-        try {
-            schemas = ((JdbcConnection) database.getConnection()).getMetaData().getSchemas();
-            while (schemas.next()) {
-                returnList.add(JdbcUtils.getValueForColumn(schemas, "TABLE_SCHEM", database));
-            }
-        } finally {
-            if (schemas != null) {
-                schemas.close();
-            }
-        }
-
-        return returnList.toArray(new String[returnList.size()]);
-    }
-
 }

@@ -5,9 +5,6 @@ import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
-import liquibase.parser.core.ParsedNode;
-import liquibase.parser.core.ParsedNodeException;
-import liquibase.resource.ResourceAccessor;
 import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RuntimeStatement;
@@ -51,19 +48,6 @@ public class StopChange extends AbstractChange {
     public static class StopChangeException extends RuntimeException {
         public StopChangeException(String message) {
             super(message);
-        }
-    }
-
-    @Override
-    public String getSerializedObjectNamespace() {
-        return STANDARD_CHANGELOG_NAMESPACE;
-    }
-
-    @Override
-    protected void customLoadLogic(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
-        Object value = parsedNode.getValue();
-        if (value != null && value instanceof String) {
-            setMessage((String) value);
         }
     }
 }

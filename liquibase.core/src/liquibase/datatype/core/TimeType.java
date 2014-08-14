@@ -8,12 +8,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.database.Database;
 
-import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-
-@DataTypeInfo(name="time", aliases = {"java.sql.Types.TIME", "java.sql.Time", "timetz"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
+@DataTypeInfo(name="time", aliases = {"java.sql.Types.TIME", "java.sql.Time"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class TimeType  extends LiquibaseDataType {
 
     @Override
@@ -30,35 +25,9 @@ public class TimeType  extends LiquibaseDataType {
                 //assume greater than sql 2008 and TIME will work
             }
         }
-
-        if (database instanceof MySQLDatabase) {
-            boolean supportsParameters = true;
-            try {
-                supportsParameters = database.getDatabaseMajorVersion() >= 5
-                        && database.getDatabaseMinorVersion() >= 6
-                        && ((MySQLDatabase) database).getDatabasePatchVersion() >= 4;
-            } catch (Exception ignore) {
-                //assume supports parameters
-            }
-            if (supportsParameters) {
-                return new DatabaseDataType(getName(), getParameters());
-            } else {
-                return new DatabaseDataType(getName());
-            }
-        }
         if (database instanceof OracleDatabase) {
             return new DatabaseDataType("DATE");
         }
-
-        if (database instanceof PostgresDatabase) {
-            String rawDefinition = getRawDefinition().toLowerCase();
-            if (rawDefinition.contains("tz") || rawDefinition.contains("with time zone")) {
-                return new DatabaseDataType("TIME WITH TIME ZONE");
-            } else {
-                return new DatabaseDataType("TIME WITHOUT TIME ZONE");
-            }
-        }
-
         return new DatabaseDataType(getName());
     }
 
@@ -77,10 +46,6 @@ public class TimeType  extends LiquibaseDataType {
 
     @Override
     public Object sqlToObject(String value, Database database) {
-        if (zeroTime(value)) {
-            return value;
-        }
-
         if (database instanceof DB2Database) {
             return value.replaceFirst("^\"SYSIBM\".\"TIME\"\\('", "").replaceFirst("'\\)", "");
         }
@@ -88,30 +53,7 @@ public class TimeType  extends LiquibaseDataType {
             return value.replaceFirst("^TIME\\('", "").replaceFirst("'\\)", "");
         }
 
-        try {
-            DateFormat timeFormat = getTimeFormat(database);
-
-            if (database instanceof OracleDatabase && value.matches("to_date\\('\\d+:\\d+:\\d+', 'HH24:MI:SS'\\)")) {
-                timeFormat = new SimpleDateFormat("HH:mm:s");
-                value = value.replaceFirst(".*?'", "").replaceFirst("',.*","");
-            }
-
-            return new java.sql.Time(timeFormat.parse(value).getTime());
-        } catch (ParseException e) {
-            return new DatabaseFunction(value);
-        }
+        return super.sqlToObject(value, database);
     }
-
-    private boolean zeroTime(String stringVal) {
-        return stringVal.replace("-","").replace(":", "").replace(" ","").replace("0","").equals("");
-    }
-
-    protected DateFormat getTimeFormat(Database database) {
-        if (database instanceof DB2Database) {
-            return new SimpleDateFormat("HH.mm.ss");
-        }
-        return new SimpleDateFormat("HH:mm:ss");
-    }
-
 
 }

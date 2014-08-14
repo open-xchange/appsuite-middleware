@@ -88,10 +88,6 @@ public class ChangeGeneratorFactory {
     }
 
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisionDatabase) {
-        if (!control.shouldOutput(missingObject, comparisionDatabase)) {
-            return null;
-        }
-
         ChangeGeneratorChain chain = createGeneratorChain(MissingObjectChangeGenerator.class, missingObject.getClass(), referenceDatabase);
         if (chain == null) {
             return null;
@@ -100,9 +96,6 @@ public class ChangeGeneratorFactory {
     }
 
     public Change[] fixUnexpected(DatabaseObject unexpectedObject, DiffOutputControl control, Database referenceDatabase, Database comparisionDatabase) {
-        if (!control.shouldOutput(unexpectedObject, comparisionDatabase)) {
-            return null;
-        }
         ChangeGeneratorChain chain = createGeneratorChain(UnexpectedObjectChangeGenerator.class, unexpectedObject.getClass(), referenceDatabase);
         if (chain == null) {
             return null;
@@ -111,10 +104,6 @@ public class ChangeGeneratorFactory {
     }
 
     public Change[] fixChanged(DatabaseObject changedObject, ObjectDifferences differences, DiffOutputControl control, Database referenceDatabase, Database comparisionDatabase) {
-        if (!control.shouldOutput(changedObject, comparisionDatabase)) {
-            return null;
-        }
-
         ChangeGeneratorChain chain = createGeneratorChain(ChangedObjectChangeGenerator.class, changedObject.getClass(), referenceDatabase);
         if (chain == null) {
             return null;

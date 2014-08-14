@@ -1,64 +1,59 @@
 package liquibase.integration.commandline;
 
-import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 
 /**
- * Extension of {@link liquibase.resource.ClassLoaderResourceAccessor} that adds extra fuzzy searching logic based on
- * what users may enter that is different than what is exactly correct.
+ * Implementation of liquibase.FileOpener for the command line app.
+ *
+ * @see liquibase.resource.ResourceAccessor
  */
-public class CommandLineResourceAccessor extends ClassLoaderResourceAccessor {
+public class CommandLineResourceAccessor implements ResourceAccessor {
+    private ClassLoader loader;
 
     public CommandLineResourceAccessor(ClassLoader loader) {
-        super(loader);
+        this.loader = loader;
     }
 
     @Override
-    public Set<InputStream> getResourcesAsStream(String path) throws IOException {
-        Set<InputStream> resourcesAsStream = super.getResourcesAsStream(path);
-        if (resourcesAsStream == null) {
-            for (String altPath : getAlternatePaths(path)) {
-                resourcesAsStream = super.getResourcesAsStream(altPath);
-                if (resourcesAsStream != null) {
-                    return resourcesAsStream;
-                }
-            }
+    public InputStream getResourceAsStream(String file) throws IOException {
+        URL resource = loader.getResource(file);
+        if (resource == null) {
+            throw new IOException(file + " could not be found");
         }
-        return resourcesAsStream;
+        return resource.openStream();
     }
 
     @Override
-    public Set<String> list(String relativeTo, String path, boolean includeFiles, boolean includeDirectories, boolean recursive) throws IOException {
-        Set<String> contents = super.list(relativeTo, path, includeFiles, includeDirectories, recursive);
-        if (contents == null || contents.size() == 0) {
-            for (String altPath : getAlternatePaths(path)) {
-                contents = super.list(relativeTo, altPath, includeFiles, includeDirectories, recursive);
-                if (contents != null && contents.size() > 0) {
-                    return contents;
-                }
+    public Enumeration<URL> getResources(String packageName) throws IOException {
+        return loader.getResources(packageName);
+    }
+
+    @Override
+    public ClassLoader toClassLoader() {
+        return loader;
+    }
+
+    @Override
+    public String toString() {
+        String description;
+        if (loader instanceof URLClassLoader) {
+            List<String> urls = new ArrayList<String>();
+            for (URL url : ((URLClassLoader) loader).getURLs()) {
+                urls.add(url.toExternalForm());
             }
+            description = StringUtils.join(urls, ",");
+        } else {
+            description = loader.getClass().getName();
         }
-        return contents;
+        return getClass().getName()+"("+ description +")";
     }
-
-    /**
-     * Return alternate options for the given path that the user maybe meant. Return in order of likelihood.
-     */
-    protected List<String> getAlternatePaths(String path) {
-        List<String> alternatePaths = new ArrayList<String>();
-
-        if (path.startsWith("/")) { //People are often confused about leading slashes in resource paths...
-            alternatePaths.add(path.substring(1));
-        }
-
-        return alternatePaths;
-
-    }
-
 }

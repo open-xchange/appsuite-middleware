@@ -1,14 +1,16 @@
 package liquibase.change.core;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 
 import liquibase.change.*;
-import liquibase.changelog.ChangeLogParameters;
 import liquibase.database.Database;
 import liquibase.exception.SetupException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
+import liquibase.logging.LogFactory;
+import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 
@@ -18,10 +20,10 @@ import liquibase.util.StringUtils;
  * To create an instance call the constructor as normal and then call
  *
  * @author <a href="mailto:csuml@yahoo.co.uk">Paul Keeble</a>
- * @link{#setResourceAccesssor(ResourceAccessor)} before calling setPath otherwise the
+ * @link{#setFileOpener(FileOpener)} before calling setPath otherwise the
  * file will likely not be found.
  */
-@DatabaseChange(name = "sqlFile",
+@DatabaseChange(name="sqlFile",
         description = "The 'sqlFile' tag allows you to specify any sql statements and have it stored external in a file. It is useful for complex changes that are not supported through LiquiBase's automated refactoring tags such as stored procedures.\n" +
                 "\n" +
                 "The sqlFile refactoring finds the file by searching in the following order:\n" +
@@ -39,16 +41,6 @@ public class SQLFileChange extends AbstractSQLChange {
 
     private String path;
     private Boolean relativeToChangelogFile;
-
-    @Override
-    public boolean generateStatementsVolatile(Database database) {
-        return false;
-    }
-
-    @Override
-    public boolean generateRollbackStatementsVolatile(Database database) {
-        return false;
-    }
 
     @DatabaseChangeProperty(description = "The file path of the SQL file to load", requiredForDatabase = "all", exampleValue = "my/path/file.sql")
     public String getPath() {
@@ -95,23 +87,29 @@ public class SQLFileChange extends AbstractSQLChange {
         if (path == null) {
             throw new SetupException("<sqlfile> - No path specified");
         }
+        LogFactory.getLogger().debug("SQLFile file:" + path);
+        boolean loaded = false;
+        try {
+            loaded = initializeSqlStream();
+        } catch (IOException e) {
+            throw new SetupException(e);
+        }
+
+        if (!loaded) {
+            throw new SetupException("<sqlfile path=" + path + "> - Could not find file");
+        }
     }
 
-    public InputStream openSqlStream() throws IOException {
+    public boolean initializeSqlStream() throws IOException {
         if (path == null) {
-            return null;
+            return true;
         }
 
-        InputStream inputStream = null;
-        try {
-            inputStream = StreamUtil.openStream(path, isRelativeToChangelogFile(), getChangeSet(), getResourceAccessor());
-        } catch (IOException e) {
-            throw new IOException("Unable to read file '" + path + "'", e);
+        boolean loaded = loadFromClasspath(path);
+        if (!loaded) {
+            loaded = loadFromFileSystem(path);
         }
-        if (inputStream == null) {
-            throw new IOException("Unable to read file '" + path + "'");
-        }
-        return inputStream;
+        return loaded;
     }
 
     @Override
@@ -121,6 +119,80 @@ public class SQLFileChange extends AbstractSQLChange {
             validationErrors.addError("'path' is required");
         }
         return validationErrors;
+    }
+
+    /**
+     * Tries to load the file from the file system.
+     *
+     * @param file The name of the file to search for
+     * @return True if the file was found, false otherwise.
+     */
+    private boolean loadFromFileSystem(String file) throws IOException {
+        if (relativeToChangelogFile != null && relativeToChangelogFile) {
+            String base;
+            if (getChangeSet().getChangeLog() == null) {
+                base = getChangeSet().getFilePath();
+            } else {
+                base = getChangeSet().getChangeLog().getPhysicalFilePath().replaceAll("\\\\","/");
+            }
+            if (!base.contains("/")) {
+                base = ".";
+            }
+            file = base.replaceFirst("/[^/]*$", "") + "/" + file;
+        }
+
+        try {
+            sqlStream = getResourceAccessor().getResourceAsStream(file);
+            if (sqlStream == null) {
+                throw new IOException("<sqlfile path=" + file + "> -Unable to read file");
+            }
+            return true;
+        } catch (FileNotFoundException fnfe) {
+            return false;
+        } catch (IOException e) {
+            throw new IOException("<sqlfile path=" + file + "> -Unable to read file", e);
+        }
+
+    }
+
+    /**
+     * Tries to load a file using the FileOpener.
+     * <p/>
+     * If the fileOpener can not be found then the attempt to load from the
+     * classpath the return is false.
+     *
+     * @param file The file name to try and find.
+     * @return True if the file was found and loaded, false otherwise.
+     */
+    private boolean loadFromClasspath(String file) {
+        if (relativeToChangelogFile != null && relativeToChangelogFile) {
+            String base;
+            if (getChangeSet().getChangeLog() == null) {
+                base = getChangeSet().getFilePath();
+            } else {
+                base = getChangeSet().getChangeLog().getPhysicalFilePath().replaceAll("\\\\","/");
+            }
+            if (!base.contains("/")) {
+                base = ".";
+            }
+
+            file = base.replaceFirst("/[^/]*$", "") + "/" + file;
+        }
+
+        try {
+            ResourceAccessor fo = getResourceAccessor();
+            if (fo == null) {
+                return false;
+            }
+
+            sqlStream = fo.getResourceAsStream(file);
+            if (sqlStream == null) {
+                return false;
+            }
+            return true;
+        } catch (IOException ioe) {
+            return false;
+        }
     }
 
     @Override
@@ -133,22 +205,19 @@ public class SQLFileChange extends AbstractSQLChange {
     public String getSql() {
         String sql = super.getSql();
         if (sql == null) {
-            InputStream sqlStream;
+            if (sqlStream == null) {
+                return null;
+            }
             try {
-                sqlStream = openSqlStream();
-                if (sqlStream == null) {
-                    return null;
-                }
-                String content = StreamUtil.getStreamContents(sqlStream, encoding);
-                if (getChangeSet() != null) {
-                    ChangeLogParameters parameters = getChangeSet().getChangeLogParameters();
-                    if (parameters != null) {
-                        content = parameters.expandExpressions(content);
-                    }
-                }
-                return content;
+                return StreamUtil.getStreamContents(sqlStream, encoding);
             } catch (IOException e) {
                 throw new UnexpectedLiquibaseException(e);
+            } finally {
+                try {
+                    initializeSqlStream();
+                } catch (IOException e) {
+                    LogFactory.getLogger().severe("Error re-initializing sqlStream", e);
+                }
             }
         } else {
             return sql;
@@ -161,10 +230,5 @@ public class SQLFileChange extends AbstractSQLChange {
             sql = getChangeSet().getChangeLogParameters().expandExpressions(sql);
         }
         super.setSql(sql);
-    }
-
-    @Override
-    public String getSerializedObjectNamespace() {
-        return STANDARD_CHANGELOG_NAMESPACE;
     }
 }

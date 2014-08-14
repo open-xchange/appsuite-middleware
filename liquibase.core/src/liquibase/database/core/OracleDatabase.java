@@ -3,23 +3,21 @@ package liquibase.database.core;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.OfflineConnection;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
-import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.statement.DatabaseFunction;
-import liquibase.statement.core.RawCallStatement;
-import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Index;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -30,7 +28,6 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
 
     private Set<String> reservedWords = new HashSet<String>();
-    private Set<String> userDefinedTypes = null;
 
     public OracleDatabase() {
         super.unquotedObjectsAreUppercased=true;
@@ -59,7 +56,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             method.invoke(sqlConn, true);
 
             reservedWords.addAll(Arrays.asList(sqlConn.getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
-            reservedWords.addAll(Arrays.asList("GROUP", "USER", "SESSION","PASSWORD", "RESOURCE", "START", "SIZE", "UID")); //more reserved words not returned by driver
+            reservedWords.addAll(Arrays.asList("GROUP", "USER", "SESSION","PASSWORD", "RESOURCE", "START", "SIZE")); //more reserved words not returned by driver
         } catch (Exception e) {
             LogFactory.getLogger().info("Could not set remarks reporting on OracleDatabase: " + e.getMessage());
             ; //cannot set it. That is OK
@@ -89,7 +86,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getJdbcSchemaName(CatalogAndSchema schema) {
-        return correctObjectName(schema.getCatalogName() == null ? schema.getSchemaName() : schema.getCatalogName(), Schema.class);
+        return schema.getCatalogName() == null ? schema.getSchemaName() : schema.getCatalogName();
     }
 
     @Override
@@ -128,11 +125,10 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     @Override
     protected String getConnectionCatalogName() throws DatabaseException {
-        if (getConnection() instanceof OfflineConnection) {
-            return getConnection().getCatalog();
-        }
         try {
-            return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawCallStatement("select sys_context( 'userenv', 'current_schema' ) from dual"), String.class);
+            ResultSet resultSet = ((JdbcConnection) getConnection()).prepareCall("select sys_context( 'userenv', 'current_schema' ) from dual").executeQuery();
+            resultSet.next();
+            return resultSet.getString(1);
         } catch (Exception e) {
             LogFactory.getLogger().info("Error getting default schema", e);
         }
@@ -222,7 +218,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             if (("SYSTEM".equals(example.getName()) || "SYS".equals(example.getName()) || "CTXSYS".equals(example.getName()) || "XDB".equals(example.getName()))) {
                 return true;
             }
-        } else if (example.getName() != null) {
+        } else if (example instanceof Table) {
             if (example.getName().startsWith("BIN$")) { //oracle deleted table
                 return true;
             } else if (example.getName().startsWith("AQ$")) { //oracle AQ tables
@@ -287,20 +283,5 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     @Override
     public boolean jdbcCallsCatalogsSchemas() {
         return true;
-    }
-
-    public Set<String> getUserDefinedTypes() {
-        if (userDefinedTypes == null) {
-            userDefinedTypes = new HashSet<String>();
-            if (getConnection() != null && !(getConnection() instanceof OfflineConnection)) {
-                try {
-                    userDefinedTypes.addAll(ExecutorService.getInstance().getExecutor(this).queryForList(new RawSqlStatement("SELECT TYPE_NAME FROM USER_TYPES"), String.class));
-                } catch (DatabaseException e) {
-                    //ignore error
-                }
-            }
-        }
-
-        return userDefinedTypes;
     }
 }

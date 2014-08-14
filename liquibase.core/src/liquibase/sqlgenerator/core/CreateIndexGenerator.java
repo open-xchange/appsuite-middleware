@@ -22,9 +22,6 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", createIndexStatement.getTableName());
         validationErrors.checkRequiredField("columns", createIndexStatement.getColumns());
-        if (database instanceof HsqlDatabase) {
-            validationErrors.checkRequiredField("name", createIndexStatement.getIndexName());
-        }
         return validationErrors;
     }
 

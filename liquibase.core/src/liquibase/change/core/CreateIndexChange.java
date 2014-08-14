@@ -2,10 +2,8 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
-import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateIndexStatement;
-import liquibase.structure.core.Index;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +12,7 @@ import java.util.List;
  * Creates an index on an existing column.
  */
 @DatabaseChange(name="createIndex", description = "Creates an index on an existing column or set of columns.", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "index")
-public class CreateIndexChange extends AbstractChange implements ChangeWithColumns<AddColumnConfig> {
+public class CreateIndexChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
 
     private String catalogName;
     private String schemaName;
@@ -22,7 +20,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
     private String indexName;
     private Boolean unique;
     private String tablespace;
-    private List<AddColumnConfig> columns;
+    private List<ColumnConfig> columns;
 
 	// Contain associations of index
 	// for example: foreignKey, primaryKey or uniqueConstraint
@@ -30,7 +28,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
 
 
     public CreateIndexChange() {
-        columns = new ArrayList<AddColumnConfig>();
+        columns = new ArrayList<ColumnConfig>();
     }
 
     @DatabaseChangeProperty(mustEqualExisting = "index", description = "Name of the index to create")
@@ -62,20 +60,20 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
 
     @Override
     @DatabaseChangeProperty(mustEqualExisting = "index.column", description = "Column(s) to add to the index", requiredForDatabase = "all")
-    public List<AddColumnConfig> getColumns() {
+    public List<ColumnConfig> getColumns() {
         if (columns == null) {
-            return new ArrayList<AddColumnConfig>();
+            return new ArrayList<ColumnConfig>();
         }
         return columns;
     }
 
     @Override
-    public void setColumns(List<AddColumnConfig> columns) {
+    public void setColumns(List<ColumnConfig> columns) {
         this.columns = columns;
     }
 
     @Override
-    public void addColumn(AddColumnConfig column) {
+    public void addColumn(ColumnConfig column) {
         columns.add(column);
     }
 
@@ -122,33 +120,6 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
-        ChangeStatus result = new ChangeStatus();
-        try {
-            Index example = new Index(getIndexName(), getCatalogName(), getSchemaName(), getTableName());
-            if (getColumns() != null) {
-                for (ColumnConfig column : getColumns() ) {
-                    example.addColumn(column.getName());
-                }
-            }
-
-            Index snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
-            result.assertComplete(snapshot != null, "Index does not exist");
-
-            if (snapshot != null) {
-                if (isUnique() != null) {
-                    result.assertCorrect(isUnique().equals(snapshot.isUnique()), "Unique does not match");
-                }
-            }
-
-            return result;
-
-        } catch (Exception e) {
-            return result.unknown(e);
-        }
-    }
-
-    @Override
     public String getConfirmationMessage() {
         return "Index " + getIndexName() + " created";
     }
@@ -189,10 +160,5 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
 
     public void setCatalogName(String catalogName) {
         this.catalogName = catalogName;
-    }
-
-    @Override
-    public String getSerializedObjectNamespace() {
-        return STANDARD_CHANGELOG_NAMESPACE;
     }
 }

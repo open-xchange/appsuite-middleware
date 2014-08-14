@@ -22,22 +22,6 @@ public class Index extends AbstractDatabaseObject {
         setAttribute("associatedWith", new HashSet<String>());
     }
 
-    public Index(String indexName) {
-        this();
-        setName(indexName);
-    }
-
-    public Index(String indexName, String catalogName, String schemaName, String tableName, String... columns) {
-        this();
-        setName(indexName);
-        if (tableName != null) {
-            setTable(new Table(catalogName, schemaName, tableName));
-            if (columns != null && columns.length > 0) {
-                setColumns(StringUtils.join(columns, ","));
-            }
-        }
-    }
-
     @Override
     public DatabaseObject[] getContainingObjects() {
         return new DatabaseObject[] {
@@ -101,6 +85,15 @@ public class Index extends AbstractDatabaseObject {
         return StringUtils.join(getColumns(), ", ");
     }
 
+    public String getFilterCondition() {
+        return getAttribute("filterCondition", String.class);
+    }
+
+    public Index setFilterCondition(String filterCondition) {
+        this.setAttribute("filterCondition", filterCondition);
+        return this;
+    }
+
     public Index setUnique(Boolean value) {
         this.setAttribute("unique", value);
         return this;
@@ -162,23 +155,6 @@ public class Index extends AbstractDatabaseObject {
 
 
         return returnValue;
-    }
-
-    @Override
-    public int hashCode() {
-        return toString().hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if ((obj instanceof Index)) {
-            return false;
-        }
-        if (obj == null) {
-            return false;
-        }
-
-        return this.compareTo(obj) == 0;
     }
 
     @Override

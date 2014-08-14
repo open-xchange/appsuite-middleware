@@ -3,12 +3,9 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
-import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RenameTableStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +43,7 @@ public class RenameTableChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "table", description = "Name of the table to rename", exampleValue = "person")
+    @DatabaseChangeProperty(mustEqualExisting = "table", description = "Name of the table to rename")
     public String getOldTableName() {
         return oldTableName;
     }
@@ -55,7 +52,7 @@ public class RenameTableChange extends AbstractChange {
         this.oldTableName = oldTableName;
     }
 
-    @DatabaseChangeProperty(description = "New name for the table", exampleValue = "employee")
+    @DatabaseChangeProperty(description = "New name for the table")
     public String getNewTableName() {
         return newTableName;
     }
@@ -76,28 +73,6 @@ public class RenameTableChange extends AbstractChange {
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
-        try {
-            ChangeStatus changeStatus = new ChangeStatus();
-            Table newTable = SnapshotGeneratorFactory.getInstance().createSnapshot(new Table(getCatalogName(), getSchemaName(), getNewTableName()), database);
-            Table oldTable = SnapshotGeneratorFactory.getInstance().createSnapshot(new Table(getCatalogName(), getSchemaName(), getOldTableName()), database);
-
-            if (newTable == null && oldTable == null) {
-                return changeStatus.unknown("Neither table exists");
-            }
-            if (newTable != null && oldTable != null) {
-                return changeStatus.unknown("Both tables exist");
-            }
-            changeStatus.assertComplete(newTable != null, "New table does not exist");
-
-            return changeStatus;
-        } catch (Exception e) {
-            return new ChangeStatus().unknown(e);
-        }
-
-    }
-
-    @Override
     protected Change[] createInverses() {
         RenameTableChange inverse = new RenameTableChange();
         inverse.setSchemaName(getSchemaName());
@@ -112,10 +87,5 @@ public class RenameTableChange extends AbstractChange {
     @Override
     public String getConfirmationMessage() {
         return "Table " + oldTableName + " renamed to " + newTableName;
-    }
-
-    @Override
-    public String getSerializedObjectNamespace() {
-        return STANDARD_CHANGELOG_NAMESPACE;
     }
 }

@@ -27,31 +27,27 @@ public class SchemaComparator implements DatabaseObjectComparator {
 
     @Override
     public boolean isSameObject(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
+        if (chain.isSameObject(databaseObject1, databaseObject2, accordingTo)) {
+            return true;
+        }
+
         if (!(databaseObject1 instanceof Schema && databaseObject2 instanceof Schema)) {
             return false;
         }
 
-        CatalogAndSchema thisSchema = ((Schema) databaseObject1).toCatalogAndSchema().standardize(accordingTo);
-        CatalogAndSchema otherSchema = ((Schema) databaseObject2).toCatalogAndSchema().standardize(accordingTo);
+        CatalogAndSchema thisSchema = accordingTo.correctSchema(((Schema) databaseObject1).toCatalogAndSchema());
+        CatalogAndSchema otherSchema = accordingTo.correctSchema(((Schema) databaseObject2).toCatalogAndSchema());
 
         if (accordingTo.supportsCatalogs()) {
             if (thisSchema.getCatalogName() == null) {
-                if (!(otherSchema.getCatalogName() == null || accordingTo.getDefaultCatalogName() == null || accordingTo.getDefaultCatalogName().equalsIgnoreCase(otherSchema.getCatalogName()))) {
-                    return false;
+                return otherSchema.getCatalogName() == null || accordingTo.getDefaultCatalogName() == null || accordingTo.getDefaultCatalogName().equalsIgnoreCase(otherSchema.getCatalogName());
             }
-            } else {
             if (!thisSchema.getCatalogName().equalsIgnoreCase(otherSchema.getCatalogName())) {
                 return false;
-                }
             }
         }
-        if (accordingTo.supportsCatalogs() && accordingTo.supportsSchemas()) {
-            String thisSchemaName = thisSchema.getSchemaName();
-            String otherSchemaName = otherSchema.getSchemaName();
-            if (thisSchemaName == null) {
-                return otherSchemaName == null;
-            }
-            return thisSchemaName.equalsIgnoreCase(otherSchemaName);
+        if (accordingTo.supportsSchemas()) {
+            return thisSchema.getSchemaName().equalsIgnoreCase(otherSchema.getSchemaName());
         }
         return true;
     }

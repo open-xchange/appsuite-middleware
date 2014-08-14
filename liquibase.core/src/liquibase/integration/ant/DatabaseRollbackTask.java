@@ -1,7 +1,5 @@
 package liquibase.integration.ant;
 
-import liquibase.Contexts;
-import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import org.apache.tools.ant.BuildException;
 
@@ -63,21 +61,21 @@ public class DatabaseRollbackTask extends BaseLiquibaseTask {
             Writer writer = createOutputWriter();
             if (getRollbackCount() != null) {
                 if (writer == null) {
-                    liquibase.rollback(getRollbackCount(), new Contexts(getContexts()), new LabelExpression(getLabels()));
+                    liquibase.rollback(getRollbackCount(), getContexts());
                 } else {
-                    liquibase.rollback(getRollbackCount(), new Contexts(getContexts()), new LabelExpression(getLabels()), writer);
+                    liquibase.rollback(getRollbackCount(), getContexts(), writer);
                 }
             } else if (getRollbackDate() != null) {
                 if (writer == null) {
-                    liquibase.rollback(getRollbackDate(), new Contexts(getContexts()), new LabelExpression(getLabels()));
+                    liquibase.rollback(getRollbackDate(), getContexts());
                 } else {
-                    liquibase.rollback(getRollbackDate(), new Contexts(getContexts()), new LabelExpression(getLabels()), writer);
+                    liquibase.rollback(getRollbackDate(), getContexts(), writer);
                 }
             } else if (getRollbackTag() != null) {
                 if (writer == null) {
-                    liquibase.rollback(getRollbackTag(), new Contexts(getContexts()), new LabelExpression(getLabels()));
+                    liquibase.rollback(getRollbackTag(), getContexts());
                 } else {
-                    liquibase.rollback(getRollbackTag(), new Contexts(getContexts()), new LabelExpression(getLabels()), writer);
+                    liquibase.rollback(getRollbackTag(), getContexts(), writer);
                 }
             } else {
                 throw new BuildException("Must specify rollbackCount, rollbackDate, or rollbackTag");

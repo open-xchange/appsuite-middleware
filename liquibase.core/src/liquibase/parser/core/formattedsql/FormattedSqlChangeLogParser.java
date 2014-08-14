@@ -1,6 +1,5 @@
 package liquibase.parser.core.formattedsql;
 
-import liquibase.Labels;
 import liquibase.change.core.EmptyChange;
 import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.ChangeLogParameters;
@@ -13,7 +12,6 @@ import liquibase.precondition.core.PreconditionContainer;
 import liquibase.precondition.core.SqlPrecondition;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
-import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 
 import java.io.*;
@@ -33,8 +31,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                 }
                 reader = new BufferedReader(new UtfBomAwareReader(fileStream));
 
-                String line = reader.readLine();
-                return line != null && line.matches("\\-\\-\\s*liquibase formatted.*");
+                return reader.readLine().matches("\\-\\-\\s*liquibase formatted.*");
             } else {
                 return false;
             }
@@ -80,14 +77,12 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             Pattern stripCommentsPattern = Pattern.compile(".*stripComments:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern splitStatementsPattern = Pattern.compile(".*splitStatements:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern endDelimiterPattern = Pattern.compile(".*endDelimiter:(\\S*).*", Pattern.CASE_INSENSITIVE);
-            Pattern commentPattern = Pattern.compile("\\-\\-[\\s]*comment: (.*)", Pattern.CASE_INSENSITIVE);
 
             Pattern runOnChangePattern = Pattern.compile(".*runOnChange:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern runAlwaysPattern = Pattern.compile(".*runAlways:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern contextPattern = Pattern.compile(".*context:(\\S*).*", Pattern.CASE_INSENSITIVE);
-            Pattern labelsPattern = Pattern.compile(".*labels:(\\S*).*", Pattern.CASE_INSENSITIVE);
             Pattern runInTransactionPattern = Pattern.compile(".*runInTransaction:(\\w+).*", Pattern.CASE_INSENSITIVE);
-            Pattern dbmsPattern = Pattern.compile(".*dbms:([^,][\\w!,]+).*", Pattern.CASE_INSENSITIVE);
+            Pattern dbmsPattern = Pattern.compile(".*dbms:([\\w!]+).*", Pattern.CASE_INSENSITIVE);
             Pattern failOnErrorPattern = Pattern.compile(".*failOnError:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern onFailPattern = Pattern.compile(".*onFail:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern onErrorPattern = Pattern.compile(".*onError:(\\w+).*", Pattern.CASE_INSENSITIVE);
@@ -124,7 +119,6 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     Matcher runOnChangePatternMatcher = runOnChangePattern.matcher(line);
                     Matcher runAlwaysPatternMatcher = runAlwaysPattern.matcher(line);
                     Matcher contextPatternMatcher = contextPattern.matcher(line);
-                    Matcher labelsPatternMatcher = labelsPattern.matcher(line);
                     Matcher runInTransactionPatternMatcher = runInTransactionPattern.matcher(line);
                     Matcher dbmsPatternMatcher = dbmsPattern.matcher(line);
                     Matcher failOnErrorPatternMatcher = failOnErrorPattern.matcher(line);
@@ -138,11 +132,9 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
                     String endDelimiter = parseString(endDelimiterPatternMatcher);
                     String context = parseString(contextPatternMatcher);
-                    String labels = parseString(labelsPatternMatcher);
                     String dbms = parseString(dbmsPatternMatcher);
 
                     changeSet = new ChangeSet(changeSetPatternMatcher.group(2), changeSetPatternMatcher.group(1), runAlways, runOnChange, physicalChangeLogLocation, context, dbms, runInTransaction, changeLog.getObjectQuotingStrategy(), changeLog);
-                    changeSet.setLabels(new Labels(labels));
                     changeSet.setFailOnError(failOnError);
                     changeLog.addChangeSet(changeSet);
 
@@ -158,16 +150,10 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     currentRollbackSql = new StringBuffer();
                 } else {
                     if (changeSet != null) {
-                        Matcher commentMatcher = commentPattern.matcher(line);
                         Matcher rollbackMatcher = rollbackPattern.matcher(line);
                         Matcher preconditionsMatcher = preconditionsPattern.matcher(line);
                         Matcher preconditionMatcher = preconditionPattern.matcher(line);
-
-                        if (commentMatcher.matches()) {
-                            if (commentMatcher.groupCount() == 1) {
-                                changeSet.setComments(commentMatcher.group(1));
-                            }
-                        } else if (rollbackMatcher.matches()) {
+                        if (rollbackMatcher.matches()) {
                             if (rollbackMatcher.groupCount() == 1) {
                                 currentRollbackSql.append(rollbackMatcher.group(1)).append("\n");
                             }
@@ -277,10 +263,6 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
     }
 
     protected InputStream openChangeLogFile(String physicalChangeLogLocation, ResourceAccessor resourceAccessor) throws IOException {
-        InputStream resourceAsStream = StreamUtil.singleInputStream(physicalChangeLogLocation, resourceAccessor);
-        if (resourceAsStream == null) {
-            throw new IOException("File does not exist: "+physicalChangeLogLocation);
-        }
-        return resourceAsStream;
+        return resourceAccessor.getResourceAsStream(physicalChangeLogLocation);
     }
 }

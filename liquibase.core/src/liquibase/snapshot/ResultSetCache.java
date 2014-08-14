@@ -5,7 +5,6 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.jvm.ColumnMapRowMapper;
 import liquibase.executor.jvm.RowMapperResultSetExtractor;
-import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
 
 import java.sql.ResultSet;
@@ -14,8 +13,8 @@ import java.sql.Statement;
 import java.util.*;
 
 class ResultSetCache {
-    private Map<String, Integer> timesSingleQueried = new HashMap<String, Integer>();
-    private Map<String, Boolean> didBulkQuery = new HashMap<String, Boolean>();
+    private int timesSingleQueried = 0;
+    private boolean didBulkQuery = false;
 
     private Map<String, Map<String, List<CachedRow>>> cacheBySchema = new HashMap<String, Map<String, List<CachedRow>>>();
 
@@ -37,21 +36,17 @@ class ResultSetCache {
                 return cache.get(wantedKey);
             }
 
-            if (didBulkQuery.containsKey(schemaKey) && didBulkQuery.get(schemaKey)) {
+            if (didBulkQuery) {
                 return new ArrayList<CachedRow>();
             }
 
             List<CachedRow> results;
-            if (resultSetExtractor.shouldBulkSelect(schemaKey, this)) {
+            if (resultSetExtractor.shouldBulkSelect(this)) {
                 cache.clear(); //remove any existing single fetches that may be duplicated
                 results = resultSetExtractor.bulkFetch();
-                didBulkQuery.put(schemaKey, true);
+                didBulkQuery = true;
             } else {
-                Integer previousCount = timesSingleQueried.get(schemaKey);
-                if (previousCount == null) {
-                    previousCount = 0;
-                }
-                timesSingleQueried.put(schemaKey, previousCount+1);
+                timesSingleQueried++;
                 results = resultSetExtractor.fastFetch();
             }
 
@@ -170,23 +165,13 @@ class ResultSetCache {
             this.database = database;
         }
 
-        boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
-            return resultSetCache.getTimesSingleQueried(schemaKey) >= 3;
+        boolean shouldBulkSelect(ResultSetCache resultSetCache) {
+            return resultSetCache.timesSingleQueried >= 3;
         }
 
-        List<CachedRow> executeAndExtract(String sql, Database database) throws DatabaseException, SQLException {
-            if (sql == null) {
-                return new ArrayList<CachedRow>();
-            }
-            Statement statement = null;
-            ResultSet resultSet = null;
-            try {
-                statement = ((JdbcConnection) database.getConnection()).createStatement();
-                resultSet = statement.executeQuery(sql);
-                return extract(resultSet);
-            } finally {
-                JdbcUtils.close(resultSet, statement);
-            }
+        ResultSet executeQuery(String sql, Database database) throws DatabaseException, SQLException {
+            Statement statement = ((JdbcConnection) database.getConnection()).createStatement();
+            return statement.executeQuery(sql);
 
         }
 
@@ -232,20 +217,12 @@ class ResultSetCache {
                     returnList.add(new CachedRow(row));
                 }
             } finally {
-                JdbcUtils.closeResultSet(resultSet);
+                resultSet.close();
             }
             return returnList;
         }
 
 
-    }
-
-    private int getTimesSingleQueried(String schemaKey) {
-        Integer integer = timesSingleQueried.get(schemaKey);
-        if (integer == null) {
-            return 0;
-        }
-        return integer;
     }
 
     public abstract static class SingleResultSetExtractor extends ResultSetExtractor {
@@ -254,18 +231,18 @@ class ResultSetCache {
             super(database);
         }
 
-        public abstract List<CachedRow> fastFetchQuery() throws SQLException, DatabaseException;
-        public abstract List<CachedRow> bulkFetchQuery() throws SQLException, DatabaseException;
+        public abstract ResultSet fastFetchQuery() throws SQLException, DatabaseException;
+        public abstract ResultSet bulkFetchQuery() throws SQLException, DatabaseException;
 
         @Override
         public List<CachedRow> fastFetch() throws SQLException, DatabaseException {
-            return fastFetchQuery();
+            return extract(fastFetchQuery());
         }
 
 
         @Override
         public List<CachedRow> bulkFetch() throws SQLException, DatabaseException {
-            return bulkFetchQuery();
+            return extract(bulkFetchQuery());
         }
     }
 

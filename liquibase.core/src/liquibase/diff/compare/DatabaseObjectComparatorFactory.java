@@ -6,8 +6,6 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Catalog;
-import liquibase.structure.core.Schema;
 import liquibase.util.StringUtils;
 
 import java.util.*;
@@ -100,28 +98,12 @@ public class DatabaseObjectComparatorFactory {
         if (object1 == null && object2 == null) {
             return true;
         }
-
-        if (object1 instanceof Schema || object2 instanceof Schema) {
-            if (object1 == null) {
-                object1 = new Schema();
-            }
-            if (object2 == null) {
-                object2 = new Schema();
-            }
-        } else if (object1 instanceof Catalog || object2 instanceof Catalog) {
-                if (object1 == null) {
-                    object1 = new Catalog();
-                }
-                if (object2 == null) {
-                    object2 = new Catalog();
-                }
-        }
         if (object1 == null || object2 == null) {
             return false;
         }
 
-        String snapshotId1 = object1.getSnapshotId();
-        String snapshotId2 = object2.getSnapshotId();
+        UUID snapshotId1 = object1.getSnapshotId();
+        UUID snapshotId2 = object2.getSnapshotId();
         if (snapshotId1 != null && snapshotId2 != null) {
             if (snapshotId1.equals(snapshotId2)) {
                 return true;

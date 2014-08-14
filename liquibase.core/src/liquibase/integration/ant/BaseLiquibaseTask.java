@@ -1,8 +1,6 @@
 package liquibase.integration.ant;
 
 import liquibase.Liquibase;
-import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.configuration.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
@@ -45,16 +43,12 @@ public abstract class BaseLiquibaseTask extends Task {
     private boolean promptOnNonLocalDatabase = false;
     private String currentDateTimeFunction;
     private String contexts;
-    private String labels;
     private String outputFile;
     private String defaultCatalogName;
     private String defaultSchemaName;
     private String databaseClass;
     private String databaseChangeLogTableName;
     private String databaseChangeLogLockTableName;
-    private String databaseChangeLogObjectsTablespace;
-    private boolean outputDefaultSchema = true; // Default based on setting in AbstractJdbcDatabase
-    private boolean outputDefaultCatalog = true;
 
 
     private Map<String, Object> changeLogProperties = new HashMap<String, Object>();
@@ -268,17 +262,12 @@ public abstract class BaseLiquibaseTask extends Task {
         database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
         database.setDefaultCatalogName(defaultCatalogName);
         database.setDefaultSchemaName(defaultSchemaName);
-        database.setOutputDefaultSchema(isOutputDefaultSchema());
-        database.setOutputDefaultCatalog(isOutputDefaultCatalog());
 
         if (getDatabaseChangeLogTableName() != null)
             database.setDatabaseChangeLogTableName(getDatabaseChangeLogTableName());
 
         if (getDatabaseChangeLogLockTableName() != null)
             database.setDatabaseChangeLogLockTableName(getDatabaseChangeLogLockTableName());
-
-        if (getDatabaseChangeLogObjectsTablespace() != null)
-            database.setLiquibaseTablespaceName(getDatabaseChangeLogObjectsTablespace());
 
         return database;
     }
@@ -291,13 +280,6 @@ public abstract class BaseLiquibaseTask extends Task {
         this.contexts = cntx.trim();
     }
 
-    public String getLabels() {
-        return labels;
-    }
-
-    public void setLabels(String labels) {
-        this.labels = labels;
-    }
 
     /**
      * Redirector of logs from java.util.logging to ANT's loggging
@@ -359,9 +341,9 @@ public abstract class BaseLiquibaseTask extends Task {
     }
 
     protected boolean shouldRun() {
-        GlobalConfiguration globalConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class);
-        if (!globalConfiguration.getShouldRun()) {
-            log("Liquibase did not run because " + LiquibaseConfiguration.getInstance().describeValueLookupLogic(globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN)) + " was set to false");
+        String shouldRunProperty = System.getProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY);
+        if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
+            log("Liquibase did not run because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
             return false;
         }
         return true;
@@ -402,41 +384,6 @@ public abstract class BaseLiquibaseTask extends Task {
 
     public void setDatabaseChangeLogLockTableName(String tableName) {
         this.databaseChangeLogLockTableName = tableName;
-    }
-
-    public String getDatabaseChangeLogObjectsTablespace() {
-        return databaseChangeLogObjectsTablespace;
-    }
-
-
-    public void setDatabaseChangeLogObjectsTablespace(String tablespaceName) {
-        this.databaseChangeLogObjectsTablespace = tablespaceName;
-    }
-
-    public boolean isOutputDefaultSchema() {
-        return outputDefaultSchema;
-    }
-
-    /**
-     * If not set, defaults to true.
-     *
-     * @param outputDefaultSchema True to output the default schema.
-     */
-    public void setOutputDefaultSchema(boolean outputDefaultSchema) {
-        this.outputDefaultSchema = outputDefaultSchema;
-    }
-
-    public boolean isOutputDefaultCatalog() {
-        return outputDefaultCatalog;
-    }
-
-    /**
-     * If not set, defaults to true
-     *
-     * @param outputDefaultCatalog True to output the default catalog.
-     */
-    public void setOutputDefaultCatalog(boolean outputDefaultCatalog) {
-        this.outputDefaultCatalog = outputDefaultCatalog;
     }
 
     public String getLogLevel() {

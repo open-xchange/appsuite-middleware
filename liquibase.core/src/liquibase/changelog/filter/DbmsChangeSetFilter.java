@@ -4,7 +4,6 @@ import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.sql.visitor.SqlVisitor;
-import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,9 +17,9 @@ public class DbmsChangeSetFilter implements ChangeSetFilter {
     }
 
     @Override
-    public ChangeSetFilterResult accepts(ChangeSet changeSet) {
+    public boolean accepts(ChangeSet changeSet) {
         if (database == null) {
-            return new ChangeSetFilterResult(true, "No database connection, cannot evaluate dbms attribute", this.getClass());
+            return true;
         }
          List<SqlVisitor> visitorsToRemove = new ArrayList<SqlVisitor>();
         for (SqlVisitor visitor : changeSet.getSqlVisitors()) {
@@ -30,17 +29,6 @@ public class DbmsChangeSetFilter implements ChangeSetFilter {
         }
         changeSet.getSqlVisitors().removeAll(visitorsToRemove);
 
-        String dbmsList;
-        if (changeSet.getDbmsSet() == null || changeSet.getDbmsSet().size() == 0) {
-            dbmsList = "all databases";
-        } else {
-            dbmsList = "'"+StringUtils.join(changeSet.getDbmsSet(), ", ") + "'";
-        }
-
-        if (DatabaseList.definitionMatches(changeSet.getDbmsSet(), database, true)) {
-            return new ChangeSetFilterResult(true, "Database '" + database.getShortName() + "' matches " + dbmsList, this.getClass());
-        } else {
-            return new ChangeSetFilterResult(false, "Database '"+database.getShortName()+"' does not match "+dbmsList, this.getClass());
-        }
+        return DatabaseList.definitionMatches(changeSet.getDbmsSet(), database, true);
     }
 }

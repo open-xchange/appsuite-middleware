@@ -3,8 +3,6 @@ package liquibase.database.core;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.OfflineConnection;
-import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.Executor;
@@ -223,16 +221,11 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    protected String getConnectionSchemaName() {
-        if (getConnection() == null || getConnection() instanceof OfflineConnection) {
-            return null;
+    public String getDefaultSchemaName() {
+        if (defaultSchemaName == null) {
+            defaultSchemaName = getConnectionSchemaName();
         }
-        try {
-            return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("select user_name()"), String.class);
-        } catch (Exception e) {
-            LogFactory.getLogger().info("Error getting default schema", e);
-        }
-        return null;
+        return defaultSchemaName;
     }
 
 
@@ -243,7 +236,7 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
 
 	@Override
 	public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
-        schema = schema.customize(this);
+        schema = correctSchema(schema);
         GetViewDefinitionStatement statement = new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName);
         Executor executor = ExecutorService.getInstance().getExecutor(this);
         @SuppressWarnings("unchecked")
@@ -287,7 +280,7 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String escapeIndexName(String catalogName,String schemaName, String indexName) {
-        return indexName;
+        return super.escapeIndexName(null, null, indexName);
     }
 
     @Override

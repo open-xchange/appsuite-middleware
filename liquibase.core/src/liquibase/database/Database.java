@@ -5,7 +5,9 @@ import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
+import liquibase.snapshot.SnapshotControl;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Schema;
 import liquibase.exception.*;
 import liquibase.servicelocator.PrioritizedService;
 import liquibase.sql.visitor.SqlVisitor;
@@ -15,7 +17,6 @@ import liquibase.statement.DatabaseFunction;
 import java.io.IOException;
 import java.io.Writer;
 import java.math.BigInteger;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -137,7 +138,15 @@ public interface Database extends PrioritizedService {
      */
     String getConcatSql(String... values);
 
+    boolean hasDatabaseChangeLogTable() throws DatabaseException;
+
     public void setCanCacheLiquibaseTableInfo(boolean canCacheLiquibaseTableInfo);
+
+    boolean hasDatabaseChangeLogLockTable() throws DatabaseException;
+
+    void checkDatabaseChangeLogTable(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, String[] contexts) throws DatabaseException;
+
+    void checkDatabaseChangeLogLockTable() throws DatabaseException;
 
     void dropDatabaseObjects(CatalogAndSchema schema) throws LiquibaseException;
 
@@ -249,6 +258,8 @@ public interface Database extends PrioritizedService {
 
     void saveRollbackStatement(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException, LiquibaseException;
 
+    int getNextChangeSetSequenceValue() throws LiquibaseException;
+
     public Date parseDate(String dateAsString) throws DateParseException;
 
     /**
@@ -273,7 +284,8 @@ public interface Database extends PrioritizedService {
      * fixes for case issues,
      * replacing null schema or catalog names with the default values
      * removing set schema or catalog names if they are not supported
-     * @deprecated use {@link liquibase.CatalogAndSchema#standardize(Database)}
+     * @param schema
+     * @return
      */
     CatalogAndSchema correctSchema(CatalogAndSchema schema);
 
@@ -327,9 +339,5 @@ public interface Database extends PrioritizedService {
     void setOutputDefaultCatalog(boolean outputDefaultCatalog);
 
     boolean supportsPrimaryKeyNames();
-
-    public String getSystemSchema();
-
-    public void addReservedWords(Collection<String> words);
 }
 

@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange core db statement migration bundle
+Bundle-SymbolicName: com.openexchange.database.migration.ox
+Bundle-Version: 7.6.1
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-Activator: com.openexchange.database.migration.ox.osgi.OXMigrationActivator
+Bundle-ClassPath: .
+Import-Package: com.openexchange.database.migration,
+ com.openexchange.exception,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ liquibase.changelog,
+ org.osgi.framework,
+ org.slf4j
+Bundle-Vendor: Open-Xchange Inc.

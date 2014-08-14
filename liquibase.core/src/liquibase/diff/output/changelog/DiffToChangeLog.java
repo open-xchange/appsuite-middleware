@@ -3,8 +3,6 @@ package liquibase.diff.output.changelog;
 import liquibase.CatalogAndSchema;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.diff.DiffResult;
@@ -15,7 +13,6 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.ChangeLogSerializerFactory;
-import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.core.xml.XMLChangeLogSerializer;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectComparator;
@@ -25,8 +22,6 @@ import liquibase.util.StringUtils;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class DiffToChangeLog {
 
@@ -35,7 +30,6 @@ public class DiffToChangeLog {
 
     private String changeSetContext;
     private String changeSetAuthor;
-    private String changeSetPath;
     private DiffResult diffResult;
     private DiffOutputControl diffOutputControl;
 
@@ -45,14 +39,6 @@ public class DiffToChangeLog {
     public DiffToChangeLog(DiffResult diffResult, DiffOutputControl diffOutputControl) {
         this.diffResult = diffResult;
         this.diffOutputControl = diffOutputControl;
-    }
-
-    public DiffToChangeLog(DiffOutputControl diffOutputControl) {
-        this.diffOutputControl = diffOutputControl;
-    }
-
-    public void setDiffResult(DiffResult diffResult) {
-        this.diffResult = diffResult;
     }
 
     public void setChangeSetContext(String changeSetContext) {
@@ -89,7 +75,7 @@ public class DiffToChangeLog {
                 return;
             }
 
-            String lineSeparator = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputLineSeparator();
+            String lineSeparator = System.getProperty("line.separator");
             BufferedReader fileReader = new BufferedReader(new FileReader(file));
             String line;
             long offset = 0;
@@ -102,6 +88,11 @@ public class DiffToChangeLog {
                     offset += lineSeparator.getBytes().length;
                 }
             }
+            fileReader.close();
+
+            fileReader = new BufferedReader(new FileReader(file));
+            fileReader.skip(offset);
+
             fileReader.close();
 
             // System.out.println("resulting XML: " + xml.trim());
@@ -146,8 +137,8 @@ public class DiffToChangeLog {
                 if (object == null) {
                     continue;
                 }
+                Change[] changes = changeGeneratorFactory.fixMissing(object, diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
                 if (!diffResult.getReferenceSnapshot().getDatabase().isLiquibaseObject(object) && !diffResult.getReferenceSnapshot().getDatabase().isSystemObject(object)) {
-                    Change[] changes = changeGeneratorFactory.fixMissing(object, diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
                     addToChangeSets(changes, changeSets, quotingStrategy);
                 }
             }
@@ -157,8 +148,8 @@ public class DiffToChangeLog {
         for (Class<? extends DatabaseObject> type : types) {
             ObjectQuotingStrategy quotingStrategy = ObjectQuotingStrategy.QUOTE_ALL_OBJECTS;
             for (DatabaseObject object : diffResult.getUnexpectedObjects(type, comparator)) {
+                Change[] changes = changeGeneratorFactory.fixUnexpected(object, diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
                 if (!diffResult.getComparisonSnapshot().getDatabase().isLiquibaseObject(object) && !diffResult.getComparisonSnapshot().getDatabase().isSystemObject(object)) {
-                    Change[] changes = changeGeneratorFactory.fixUnexpected(object, diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
                     addToChangeSets(changes, changeSets, quotingStrategy);
                 }
             }
@@ -168,8 +159,8 @@ public class DiffToChangeLog {
         for (Class<? extends DatabaseObject> type : types) {
             ObjectQuotingStrategy quotingStrategy = ObjectQuotingStrategy.QUOTE_ALL_OBJECTS;
             for (Map.Entry<? extends DatabaseObject, ObjectDifferences> entry : diffResult.getChangedObjects(type, comparator).entrySet()) {
+                Change[] changes = changeGeneratorFactory.fixChanged(entry.getKey(), entry.getValue(), diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
                 if (!diffResult.getReferenceSnapshot().getDatabase().isLiquibaseObject(entry.getKey()) && !diffResult.getReferenceSnapshot().getDatabase().isSystemObject(entry.getKey())) {
-                    Change[] changes = changeGeneratorFactory.fixChanged(entry.getKey(), entry.getValue(), diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
                     addToChangeSets(changes, changeSets, quotingStrategy);
                 }
             }
@@ -200,13 +191,18 @@ public class DiffToChangeLog {
 
     private void addToChangeSets(Change[] changes, List<ChangeSet> changeSets, ObjectQuotingStrategy quotingStrategy) {
         if (changes != null) {
-            ChangeSet changeSet = new ChangeSet(generateId(), getChangeSetAuthor(), false, false, null, changeSetContext,
-                    null, quotingStrategy, null);
             for (Change change : changes) {
-                changeSet.addChange(change);
+                changeSets.add(generateChangeSet(change, quotingStrategy));
             }
-            changeSets.add(changeSet);
         }
+    }
+
+    protected ChangeSet generateChangeSet(Change change, ObjectQuotingStrategy quotingStrategy) {
+        ChangeSet changeSet = new ChangeSet(generateId(), getChangeSetAuthor(), false, false,
+                null, changeSetContext, null, quotingStrategy, null);
+        changeSet.addChange(change);
+
+        return changeSet;
     }
 
     protected String getChangeSetAuthor() {
@@ -223,14 +219,6 @@ public class DiffToChangeLog {
 
     public void setChangeSetAuthor(String changeSetAuthor) {
         this.changeSetAuthor = changeSetAuthor;
-    }
-
-    public String getChangeSetPath() {
-        return changeSetPath;
-    }
-
-    public void setChangeSetPath(String changeSetPath) {
-        this.changeSetPath = changeSetPath;
     }
 
     public void setIdRoot(String idRoot) {
@@ -368,19 +356,8 @@ public class DiffToChangeLog {
 
             @Override
             public boolean equals(Object obj) {
-                if (!(obj instanceof Edge)) {
-                    return false;
-                }
-                if (obj == null) {
-                    return false;
-                }
                 Edge e = (Edge) obj;
                 return e.from == from && e.to == to;
-            }
-
-            @Override
-            public int hashCode() {
-                return (this.from.toString()+"."+this.to.toString()).hashCode();
             }
         }
     }

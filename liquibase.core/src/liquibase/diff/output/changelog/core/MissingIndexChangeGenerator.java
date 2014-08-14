@@ -1,7 +1,7 @@
 package liquibase.diff.output.changelog.core;
 
-import liquibase.change.AddColumnConfig;
 import liquibase.change.Change;
+import liquibase.change.ColumnConfig;
 import liquibase.change.core.CreateIndexChange;
 import liquibase.database.Database;
 import liquibase.diff.output.DiffOutputControl;
@@ -38,15 +38,15 @@ public class MissingIndexChangeGenerator implements MissingObjectChangeGenerator
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         Index index = (Index) missingObject;
 
-        CreateIndexChange change = createCreateIndexChange();
+        CreateIndexChange change = new CreateIndexChange();
         change.setTableName(index.getTable().getName());
-        if (control.getIncludeTablespace()) {
+        if (control.isIncludeTablespace()) {
             change.setTablespace(index.getTablespace());
         }
-        if (control.getIncludeCatalog()) {
+        if (control.isIncludeCatalog()) {
             change.setCatalogName(index.getTable().getSchema().getCatalogName());
         }
-        if (control.getIncludeSchema()) {
+        if (control.isIncludeSchema()) {
             change.setSchemaName(index.getTable().getSchema().getName());
         }
         change.setIndexName(index.getName());
@@ -58,15 +58,11 @@ public class MissingIndexChangeGenerator implements MissingObjectChangeGenerator
 //        }
 
         for (String columnName : index.getColumns()) {
-            AddColumnConfig column = new AddColumnConfig();
+            ColumnConfig column = new ColumnConfig();
             column.setName(columnName);
             change.addColumn(column);
         }
 
         return new Change[] { change };
-    }
-
-    protected CreateIndexChange createCreateIndexChange() {
-        return new CreateIndexChange();
     }
 }

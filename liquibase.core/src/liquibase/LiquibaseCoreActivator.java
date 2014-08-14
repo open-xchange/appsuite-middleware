@@ -61,34 +61,13 @@ import org.osgi.framework.BundleContext;
  */
 public class LiquibaseCoreActivator implements BundleActivator {
 
-    // private ServiceRegistration<FlywayTest> registration;
-    // private Set<ServiceTracker<?,?>> trackers = new HashSet<ServiceTracker<?,?>>();
-
     @Override
     public void start(BundleContext context) throws Exception {
-        System.out.println("liquibase core started");
-
-        //      context.registerService(CommandProvider.class, new Bl(context, tracker), null);
-        // OXResolver tracker = new OXResolver(context);
-        // StartupTracker startupTracker = new StartupTracker(context, tracker);
-        // trackers.add(new ServiceTracker<JdbcMigration, JdbcMigration>(context, JdbcMigration.class, tracker));
-        // trackers.add(new ServiceTracker<SignalStartedService, SignalStartedService>(context, SignalStartedService.class,
-        // startupTracker));
-        // for (ServiceTracker<?,?> t : trackers) {
-        // t.open();
-        // }
-        // JdbcMigration migration = new V1_1__CreateBlablubberTable();
-        // context.registerService(JdbcMigration.class, migration, null);
+        System.out.println("bundle liquibase.core started");
     }
 
     @Override
     public void stop(BundleContext context) throws Exception {
-        // if (null != registration) {
-        // context.ungetService(registration.getReference());
-        // }
-        // for (ServiceTracker<?,?> tracker : trackers) {
-        // tracker.close();
-        // }
+        System.out.println("bundle liquibase.core stopped");
     }
-
 }

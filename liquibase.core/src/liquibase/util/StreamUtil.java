@@ -2,13 +2,7 @@ package liquibase.util;
 
 import java.io.*;
 import java.nio.charset.Charset;
-import java.util.Set;
 
-import liquibase.changelog.ChangeSet;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
 
 /**
@@ -16,8 +10,10 @@ import liquibase.resource.UtfBomAwareReader;
  */
 public class StreamUtil {
 	
+	final public static String lineSeparator = System.getProperty("line.separator");
+	
     public static String getLineSeparator() {
-        return LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputLineSeparator();
+        return lineSeparator;
     }
 
     /**
@@ -44,10 +40,6 @@ public class StreamUtil {
 	public static String getStreamContents(InputStream ins, String charsetName)
 			throws IOException {
 		UtfBomAwareReader reader;
-
-        if (ins  == null) {
-            throw new IOException("No stream to open");
-        }
 
 		if (charsetName == null) {
 			reader = new UtfBomAwareReader(ins);
@@ -87,7 +79,11 @@ public class StreamUtil {
             }
             return result.toString();
         } finally {
-            closeQuietly(reader);
+            try {
+                reader.close();
+            } catch (IOException ioe) {//NOPMD
+                // can safely ignore
+            }
         }
     }
 
@@ -98,128 +94,5 @@ public class StreamUtil {
             outputStream.write(bytes, 0, r);
             r = inputStream.read(bytes);
         }
-    }
-
-    public static long getContentLength(InputStream in) throws IOException
-    {
-        long length = 0;
-        byte[] buf = new byte[4096];
-        int bytesRead = in.read(buf);
-        while (bytesRead > 0) {
-            length += bytesRead;
-            bytesRead = in.read(buf);
-        }
-        return length;
-    }
-
-    public static long getContentLength(Reader reader) throws IOException
-    {
-        long length = 0;
-        char[] buf = new char[2048];
-        int charsRead = reader.read(buf);
-        while (charsRead > 0) {
-            length += charsRead;
-            charsRead = reader.read(buf);
-        }
-        return length;
-    }
-    
-    public static void closeQuietly(Reader input) {
-        closeQuietly((Closeable) input);
-    }
-    
-    public static void closeQuietly(InputStream input) {
-        closeQuietly((Closeable) input);
-    }
-    
-    public static void closeQuietly(Closeable input) {
-        try {
-            if (input != null) {
-                input.close();
-            }
-        } catch (IOException ioe) {
-            // ignore
-        }
-    }
-
-    public static InputStream openStream(String path, Boolean relativeToChangelogFile, ChangeSet changeSet, ResourceAccessor resourceAccessor) throws IOException {
-        InputStream stream = openFromClasspath(path, relativeToChangelogFile, changeSet, resourceAccessor);
-        if (stream == null) {
-            stream = openFromFileSystem(path, relativeToChangelogFile, changeSet, resourceAccessor);
-        }
-
-        return stream;
-    }
-
-    /**
-     * Tries to load the file from the file system.
-     *
-     * @param file The name of the file to search for
-     * @return True if the file was found, false otherwise.
-     */
-    private static InputStream openFromFileSystem(String file, Boolean relativeToChangelogFile, ChangeSet changeSet, ResourceAccessor resourceAccessor) throws IOException {
-        if (resourceAccessor == null) {
-            return null;
-        }
-        if (relativeToChangelogFile != null && relativeToChangelogFile) {
-            String base;
-            if (changeSet.getChangeLog() == null) {
-                base = changeSet.getFilePath();
-            } else {
-                base = changeSet.getChangeLog().getPhysicalFilePath().replaceAll("\\\\","/");
-            }
-            if (!base.contains("/")) {
-                base = ".";
-            }
-            file = base.replaceFirst("/[^/]*$", "") + "/" + file;
-        }
-
-        return singleInputStream(file, resourceAccessor);
-    }
-
-    public static InputStream singleInputStream(String path, ResourceAccessor resourceAccessor) throws IOException {
-        Set<InputStream> streams = resourceAccessor.getResourcesAsStream(path);
-        if (streams == null || streams.size() == 0) {
-            return null;
-        }
-        if (streams.size() != 1) {
-            for (InputStream stream : streams) {
-                stream.close();
-            }
-            throw new IOException("Found "+streams.size()+" files that match "+path);
-        }
-
-        return streams.iterator().next();
-    }
-
-    /**
-     * Tries to load a file using the FileOpener.
-     * <p/>
-     * If the fileOpener can not be found then the attempt to load from the
-     * classpath the return is false.
-     *
-     * @param file The file name to try and find.
-     * @return True if the file was found and loaded, false otherwise.
-     */
-    private static InputStream openFromClasspath(String file, Boolean relativeToChangelogFile, ChangeSet changeSet, ResourceAccessor resourceAccessor) throws IOException {
-        if (resourceAccessor == null) {
-            return null;
-        }
-
-        if (relativeToChangelogFile != null && relativeToChangelogFile) {
-            String base;
-            if (changeSet.getChangeLog() == null) {
-                base = changeSet.getFilePath();
-            } else {
-                base = changeSet.getChangeLog().getPhysicalFilePath().replaceAll("\\\\","/");
-            }
-            if (base == null || !base.contains("/")) {
-                base = ".";
-            }
-
-            file = base.replaceFirst("/[^/]*$", "") + "/" + file;
-        }
-
-        return singleInputStream(file, resourceAccessor);
     }
 }

@@ -4,7 +4,6 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.logging.LogFactory;
-import liquibase.precondition.AbstractPrecondition;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.core.Column;
@@ -15,17 +14,12 @@ import liquibase.precondition.Precondition;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
-public class IndexExistsPrecondition extends AbstractPrecondition {
+public class IndexExistsPrecondition implements Precondition {
     private String catalogName;
     private String schemaName;
     private String tableName;
     private String columnNames;
     private String indexName;
-
-    @Override
-    public String getSerializedObjectNamespace() {
-        return STANDARD_CHANGELOG_NAMESPACE;
-    }
 
     public String getCatalogName() {
         return catalogName;

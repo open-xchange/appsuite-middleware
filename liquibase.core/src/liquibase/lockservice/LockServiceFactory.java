@@ -23,26 +23,14 @@ public class LockServiceFactory {
 
 	private Map<Database, LockService> openLockServices = new ConcurrentHashMap<Database, LockService>();
 
-	public static synchronized LockServiceFactory getInstance() {
+	public static LockServiceFactory getInstance() {
 		if (instance == null) {
 			instance = new LockServiceFactory();
 		}
 		return instance;
 	}
 
-    /**
-     * Set the instance used by this singleton. Used primarily for testing.
-     */
-    public static void setInstance(LockServiceFactory lockServiceFactory) {
-        LockServiceFactory.instance = lockServiceFactory;
-    }
-
-
-    public static void reset() {
-        instance = null;
-    }
-
-    private LockServiceFactory() {
+	private LockServiceFactory() {
 		Class<? extends LockService>[] classes;
 		try {
 			classes = ServiceLocator.getInstance().findClasses(LockService.class);

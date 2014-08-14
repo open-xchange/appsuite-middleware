@@ -8,6 +8,7 @@ import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.UnexpectedObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.Sequence;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
 
@@ -39,10 +40,10 @@ public class UnexpectedViewChangeGenerator implements UnexpectedObjectChangeGene
 
         DropViewChange change = new DropViewChange();
         change.setViewName(view.getName());
-        if (control.getIncludeCatalog()) {
+        if (control.isIncludeCatalog()) {
             change.setCatalogName(view.getSchema().getCatalogName());
         }
-        if (control.getIncludeSchema()) {
+        if (control.isIncludeSchema()) {
             change.setSchemaName(view.getSchema().getName());
         }
 

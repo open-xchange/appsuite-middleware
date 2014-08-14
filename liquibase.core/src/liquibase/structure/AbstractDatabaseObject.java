@@ -1,22 +1,20 @@
 package liquibase.structure;
 
+import liquibase.CatalogAndSchema;
+import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.parser.core.ParsedNode;
-import liquibase.parser.core.ParsedNodeException;
-import liquibase.resource.ResourceAccessor;
-import liquibase.serializer.LiquibaseSerializable;
 import liquibase.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
+import java.util.UUID;
 
 public abstract class AbstractDatabaseObject implements DatabaseObject {
 
     private Map<String, Object> attributes = new HashMap<String, Object>();
 
-    private String snapshotId;
+    private UUID snapshotId;
 
     @Override
     public String getObjectTypeName() {
@@ -24,14 +22,14 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
     }
 
     @Override
-    public String getSnapshotId() {
+    public UUID getSnapshotId() {
         return snapshotId;
     }
 
     @Override
-    public void setSnapshotId(String snapshotId) {
+    public void setSnapshotId(UUID snapshotId) {
         if (snapshotId == null) {
-            throw new UnexpectedLiquibaseException("Must be a non null snapshot id");
+            throw new UnexpectedLiquibaseException("Must be a non null uuid");
         }
         if (this.snapshotId != null) {
             throw new UnexpectedLiquibaseException("snapshotId already set");
@@ -60,15 +58,6 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
     }
 
     @Override
-    public <T> T getAttribute(String attribute, T defaultValue) {
-        T value = (T) attributes.get(attribute);
-        if (value == null) {
-            return defaultValue;
-        }
-        return value;
-    }
-
-    @Override
     public DatabaseObject setAttribute(String attribute, Object value) {
         if (value == null) {
             attributes.remove(attribute);
@@ -76,68 +65,5 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
             attributes.put(attribute, value);
         }
         return this;
-    }
-
-    @Override
-    public String getSerializedObjectName() {
-        return getObjectTypeName();
-    }
-
-    @Override
-    public String getSerializedObjectNamespace() {
-        return STANDARD_SNAPSHOT_NAMESPACE;
-    }
-
-    @Override
-    public Set<String> getSerializableFields() {
-        TreeSet<String> fields = new TreeSet<String>(attributes.keySet());
-        fields.add("snapshotId");
-        return fields;
-    }
-
-    @Override
-    public Object getSerializableFieldValue(String field) {
-        if (field.equals("snapshotId")) {
-            return snapshotId;
-        }
-        if (!attributes.containsKey(field)) {
-            throw new UnexpectedLiquibaseException("Unknown field "+field);
-        }
-        Object value = attributes.get(field);
-        if (value instanceof DatabaseObject) {
-            try {
-                DatabaseObject clone = (DatabaseObject) value.getClass().newInstance();
-                clone.setName(((DatabaseObject) value).getName());
-                clone.setSnapshotId(((DatabaseObject) value).getSnapshotId());
-                return clone;
-            } catch (Exception e) {
-                throw new UnexpectedLiquibaseException(e);
-            }
-        }
-        return value;
-    }
-
-    @Override
-    public LiquibaseSerializable.SerializationType getSerializableFieldType(String field) {
-        if (getSerializableFieldValue(field) instanceof DatabaseObject) {
-            return LiquibaseSerializable.SerializationType.NAMED_FIELD;
-        } else {
-            return LiquibaseSerializable.SerializationType.NAMED_FIELD;
-        }
-    }
-
-    @Override
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
-        throw new RuntimeException("TODO");
-    }
-
-    @Override
-    public ParsedNode serialize() {
-        throw new RuntimeException("TODO");
-    }
-
-    @Override
-    public String toString() {
-        return getName();
     }
 }

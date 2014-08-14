@@ -3,10 +3,8 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.SybaseASADatabase;
-import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropUniqueConstraintStatement;
-import liquibase.structure.core.UniqueConstraint;
 
 /**
  * Removes an existing unique constraint.
@@ -58,7 +56,6 @@ public class DropUniqueConstraintChange extends AbstractChange {
         this.constraintName = constraintName;
     }
 
-    @DatabaseChangeProperty(exampleValue = "name")
     public String getUniqueColumns() {
 		return uniqueColumns;
 	}
@@ -82,21 +79,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
 			statement
         };
     }
-
-    @Override
-    public ChangeStatus checkStatus(Database database) {
-        try {
-            UniqueConstraint example = new UniqueConstraint(getConstraintName(), getCatalogName(), getSchemaName(), getTableName());
-            if (getUniqueColumns() != null) {
-                for (String column : getUniqueColumns().split("\\s*,\\s*")) {
-                    example.addColumn(example.getColumns().size(), column);
-                }
-            }
-            return new ChangeStatus().assertComplete(!SnapshotGeneratorFactory.getInstance().has(example, database), "Unique constraint exists");
-        } catch (Exception e) {
-            return new ChangeStatus().unknown(e);
-        }
-    }
+    
 //    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
 //
 //    	// SQLite does not support this ALTER TABLE operation until now.
@@ -142,10 +125,5 @@ public class DropUniqueConstraintChange extends AbstractChange {
     @Override
     public String getConfirmationMessage() {
         return "Unique constraint "+getConstraintName()+" dropped from "+getTableName();
-    }
-
-    @Override
-    public String getSerializedObjectNamespace() {
-        return STANDARD_CHANGELOG_NAMESPACE;
     }
 }

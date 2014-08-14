@@ -7,13 +7,12 @@ import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
-import liquibase.precondition.AbstractPrecondition;
 import liquibase.precondition.Precondition;
 
 /**
  * Precondition that checks the name of the user executing the change log.
  */
-public class RunningAsPrecondition extends AbstractPrecondition {
+public class RunningAsPrecondition implements Precondition {
 
     private String username;
 
@@ -48,11 +47,6 @@ public class RunningAsPrecondition extends AbstractPrecondition {
         if (!username.equalsIgnoreCase(loggedusername)) {
             throw new PreconditionFailedException("RunningAs Precondition failed: expected "+username+", was "+loggedusername, changeLog, this);
         }
-    }
-
-    @Override
-    public String getSerializedObjectNamespace() {
-        return STANDARD_CHANGELOG_NAMESPACE;
     }
 
     @Override

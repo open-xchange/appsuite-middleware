@@ -1,7 +1,5 @@
 package liquibase.integration.ant;
 
-import liquibase.Contexts;
-import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import org.apache.tools.ant.AntClassLoader;
 import org.apache.tools.ant.BuildException;
@@ -22,9 +20,9 @@ public class ChangeLogSyncTask extends BaseLiquibaseTask {
 
             Writer writer = createOutputWriter();
             if (writer == null) {
-                liquibase.changeLogSync(new Contexts(getContexts()), new LabelExpression(getLabels()));
+                liquibase.changeLogSync(getContexts());
             } else {
-                liquibase.changeLogSync(new Contexts(getContexts()), new LabelExpression(getLabels()), writer);
+                liquibase.changeLogSync(getContexts(), writer);
                 writer.flush();
                 writer.close();
             }

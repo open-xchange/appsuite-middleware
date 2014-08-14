@@ -72,12 +72,7 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
                 view.setSchema(new Schema(schemaFromJdbcInfo.getCatalogName(), schemaFromJdbcInfo.getSchemaName()));
 
                 try {
-                    String definition = database.getViewDefinition(schemaFromJdbcInfo, view.getName());
-                    if (definition.startsWith("FULL_DEFINITION: ")) {
-                        definition = definition.replaceFirst("^FULL_DEFINITION: ", "");
-                        view.setContainsFullDefinition(true);
-                    }
-                    view.setDefinition(definition);
+                    view.setDefinition(database.getViewDefinition(schemaFromJdbcInfo, view.getName()));
                 } catch (DatabaseException e) {
                     throw new DatabaseException("Error getting " + database.getConnection().getURL() + " view with " + new GetViewDefinitionStatement(view.getSchema().getCatalogName(), view.getSchema().getName(), rawViewName), e);
                 }

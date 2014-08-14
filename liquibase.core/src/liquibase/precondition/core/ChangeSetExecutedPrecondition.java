@@ -9,19 +9,13 @@ import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
-import liquibase.precondition.AbstractPrecondition;
 import liquibase.precondition.Precondition;
 
-public class ChangeSetExecutedPrecondition extends AbstractPrecondition {
+public class ChangeSetExecutedPrecondition implements Precondition {
 
     private String changeLogFile;
     private String id;
     private String author;
-
-    @Override
-    public String getSerializedObjectNamespace() {
-        return STANDARD_CHANGELOG_NAMESPACE;
-    }
 
     public String getChangeLogFile() {
         return changeLogFile;

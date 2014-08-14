@@ -3,6 +3,7 @@ package liquibase.sqlgenerator.core;
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
+import liquibase.structure.core.Schema;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -29,7 +30,7 @@ public class FindForeignKeyConstraintsGeneratorOracle extends AbstractSqlGenerat
 
     @Override
     public Sql[] generateSql(FindForeignKeyConstraintsStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        CatalogAndSchema baseTableSchema = new CatalogAndSchema(statement.getBaseTableCatalogName(), statement.getBaseTableSchemaName()).customize(database);
+        CatalogAndSchema baseTableSchema = database.correctSchema(new CatalogAndSchema(statement.getBaseTableCatalogName(), statement.getBaseTableSchemaName()));
 
         StringBuilder sb = new StringBuilder();
 

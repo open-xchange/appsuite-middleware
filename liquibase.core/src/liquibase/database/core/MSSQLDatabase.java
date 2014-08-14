@@ -1,14 +1,14 @@
 package liquibase.database.core;
 
 import java.math.BigInteger;
+import java.sql.ResultSet;
 
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.OfflineConnection;
-import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Index;
+import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
 import liquibase.exception.DatabaseException;
@@ -19,9 +19,8 @@ import liquibase.statement.core.GetViewDefinitionStatement;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.logging.LogFactory;
 
 /**
@@ -31,7 +30,8 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     public static final String PRODUCT_NAME = "Microsoft SQL Server";
     protected Set<String> systemTablesAndViews = new HashSet<String>();
 
-    private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("(?im)^\\s*(CREATE|ALTER)\\s+VIEW\\s+(\\S+)\\s+?AS\\s*", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static Pattern INITIAL_COMMENT_PATTERN = Pattern.compile("^/\\*.*?\\*/");
+    private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("(?im)^\\s*(CREATE|ALTER)\\s+?VIEW\\s+?((\\S+?)|(\\[.*\\])|(\\\".*\\\"))\\s+?AS\\s*?", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     @Override
     public String getShortName() {
@@ -40,8 +40,6 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     public MSSQLDatabase() {
         super.setCurrentDateTimeFunction("GETDATE()");
-
-        super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
 
         systemTablesAndViews.add("syscolumns");
         systemTablesAndViews.add("syscomments");
@@ -104,13 +102,6 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean supportsSequences() {
-        try {
-            if (this.getDatabaseMajorVersion() >= 11) {
-                return true;
-            }
-        } catch (DatabaseException e) {
-            return false;
-        }
         return false;
     }
 
@@ -170,11 +161,13 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     protected String getConnectionSchemaName() {
-        if (getConnection() == null || getConnection() instanceof OfflineConnection) {
+        if (getConnection() == null) {
             return null;
         }
         try {
-            return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("select schema_name()"), String.class);
+            ResultSet resultSet = ((JdbcConnection) getConnection()).prepareStatement("select schema_name()").executeQuery();
+            resultSet.next();
+            return resultSet.getString(1);
         } catch (Exception e) {
             LogFactory.getLogger().info("Error getting default schema", e);
         }
@@ -297,7 +290,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
-          schema = schema.customize(this);
+          schema = correctSchema(schema);
         List<String> defLines = (List<String>) ExecutorService.getInstance().getExecutor(this).queryForList(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);
         StringBuffer sb = new StringBuffer();
         for (String defLine : defLines) {
@@ -305,23 +298,19 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         }
         String definition = sb.toString();
 
-        String finalDef =definition.replaceAll("\\r\\n", "\n").trim();
+        String finalDef =definition.replaceAll("\r\n", "\n");
+        finalDef = INITIAL_COMMENT_PATTERN.matcher(finalDef).replaceFirst("").trim(); //handle views that start with '/****** Script for XYZ command from SSMS  ******/'
+        finalDef = CREATE_VIEW_AS_PATTERN.matcher(finalDef).replaceFirst("").trim();
 
-        String selectOnly = CREATE_VIEW_AS_PATTERN.matcher(finalDef).replaceFirst("");
-        if (selectOnly.equals(finalDef)) {
-            return "FULL_DEFINITION: " + finalDef;
-        }
-
-        selectOnly = selectOnly.trim();
-
+        finalDef = finalDef.replaceAll("--.*", "").trim();
 
         /**handle views that end up as '(select XYZ FROM ABC);' */
-        if (selectOnly.startsWith("(") && (selectOnly.endsWith(")") || selectOnly.endsWith(");"))) {
-            selectOnly = selectOnly.replaceFirst("^\\(", "");
-            selectOnly = selectOnly.replaceFirst("\\);?$", "");
+        if (finalDef.startsWith("(") && (finalDef.endsWith(")") || finalDef.endsWith(");"))) {
+            finalDef = finalDef.replaceFirst("^\\(", "");
+            finalDef = finalDef.replaceFirst("\\);?$", "");
         }
 
-        return selectOnly;
+        return finalDef;
     }
 
     /**
@@ -334,33 +323,5 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     }
 
-    @Override
-    public String getJdbcSchemaName(CatalogAndSchema schema) {
-        String schemaName = super.getJdbcSchemaName(schema);
-        if (schemaName != null) {
-            schemaName = schemaName.toLowerCase();
-        }
-        return schemaName;
-    }
 
-    @Override
-    public boolean isCaseSensitive() {
-
-        if (caseSensitive == null) {
-            try {
-                if (getConnection() != null) {
-                    String collation = ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("SELECT CONVERT(varchar(100), SERVERPROPERTY('COLLATION'))"), String.class);
-                    caseSensitive = ! collation.contains("_CI_");
-                }
-            } catch (Exception e) {
-                LogFactory.getLogger().warning("Cannot determine case sensitivity from MSSQL", e);
-            }
-        }
-
-        if (caseSensitive == null) {
-            return false;
-        } else {
-            return caseSensitive.booleanValue();
-        }
-    }
 }

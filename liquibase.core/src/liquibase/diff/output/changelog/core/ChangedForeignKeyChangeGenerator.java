@@ -47,13 +47,13 @@ public class ChangedForeignKeyChangeGenerator implements ChangedObjectChangeGene
         addFkChange.setReferencedTableName(fk.getPrimaryKeyTable().getName());
         addFkChange.setReferencedColumnNames(fk.getPrimaryKeyColumns());
 
-        if (control.getIncludeCatalog()) {
+        if (control.isIncludeCatalog()) {
             dropFkChange.setBaseTableCatalogName(fk.getForeignKeyTable().getSchema().getCatalogName());
 
             addFkChange.setBaseTableCatalogName(fk.getForeignKeyTable().getSchema().getCatalogName());
             addFkChange.setReferencedTableCatalogName(fk.getPrimaryKeyTable().getSchema().getCatalogName());
         }
-        if (control.getIncludeSchema()) {
+        if (control.isIncludeSchema()) {
             dropFkChange.setBaseTableSchemaName(fk.getForeignKeyTable().getSchema().getName());
 
             addFkChange.setBaseTableSchemaName(fk.getForeignKeyTable().getSchema().getName());

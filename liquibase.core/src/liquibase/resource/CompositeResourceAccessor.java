@@ -4,51 +4,78 @@ import liquibase.util.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.*;
 
 /**
- * A {@link liquibase.resource.ResourceAccessor} that will search in a list of other ResourceAccessors until it finds
+ * A FileOpener that will search in a List of other FileOpeners until it finds
  * one that has a resource of the appropriate name and path.
+ *
+ * @author <a href="mailto:csuml@yahoo.co.uk>Paul Keeble</a>
  */
 public class CompositeResourceAccessor implements ResourceAccessor {
+    List<ResourceAccessor> openers;
 
-    private List<ResourceAccessor> resourceAccessors;
-
-    public CompositeResourceAccessor(List<ResourceAccessor> resourceAccessors) {
-        this.resourceAccessors = resourceAccessors;
+    /**
+     * Creates a Composite Opener with the list specified. The List will
+     * be searched in order from beginning to end.
+     *
+     * @param openers The list of Openers to use
+     */
+    public CompositeResourceAccessor(List<ResourceAccessor> openers) {
+        this.openers = openers;
     }
 
-    public CompositeResourceAccessor(ResourceAccessor... resourceAccessors) {
-        this.resourceAccessors = Arrays.asList(resourceAccessors);
+    /**
+     * Creates a CompositeFileOpener with 2 entries.
+     *
+     * @param openers The list of Openers to use
+     */
+    public CompositeResourceAccessor(ResourceAccessor... openers) {
+        this.openers = Arrays.asList(openers);
     }
 
+    /**
+     * Searches through all of the FileOpeners in order for the file.
+     * <p/>
+     * If none of the FileOpeners was able to produce a stream to the file
+     * then null is returned.
+     */
     @Override
-    public Set<InputStream> getResourcesAsStream(String path) throws IOException {
-        for (ResourceAccessor accessor : resourceAccessors) {
-            Set<InputStream> returnSet = accessor.getResourcesAsStream(path);
-            if (returnSet != null && returnSet.size() > 0) {
-                return returnSet;
-            }
+    public InputStream getResourceAsStream(String file) throws IOException {
+        for (ResourceAccessor o : openers) {
+            InputStream is = o.getResourceAsStream(file);
+            if (is != null)
+                return is;
         }
         return null;
     }
 
+    /**
+     * Searches all of the FileOpeners for a directory named packageName. If no
+     * results are found within any of the directories then an empty
+     * Enumeration is returned.
+     */
     @Override
-    public Set<String> list(String relativeTo, String path, boolean includeFiles, boolean includeDirectories, boolean recursive) throws IOException {
-        for (ResourceAccessor accessor : resourceAccessors) {
-            Set<String> returnSet = accessor.list(relativeTo, path, includeFiles, includeDirectories, recursive);
-            if (returnSet != null && returnSet.size() > 0) {
-                return returnSet;
+    public Enumeration<URL> getResources(String packageName) throws IOException {
+        Vector<URL> urls = new Vector<URL>();
+        for (ResourceAccessor o : openers) {
+            Enumeration<URL> e = o.getResources(packageName);
+            while (e.hasMoreElements()) {
+           		urls.add(e.nextElement());
             }
+            if (!urls.isEmpty())
+            	break;
         }
-        return null;
+        return urls.elements();
     }
 
     @Override
     public ClassLoader toClassLoader() {
-        ClassLoader[] loaders=new ClassLoader[resourceAccessors.size()];
+        ClassLoader[] loaders=new ClassLoader[openers.size()];
         int i=0;
-        for (ResourceAccessor fo: resourceAccessors) {
+        for (ResourceAccessor fo: openers) {
            loaders[i++]=fo.toClassLoader();
         }
 
@@ -101,7 +128,7 @@ public class CompositeResourceAccessor implements ResourceAccessor {
     @Override
     public String toString() {
         List<String> openerStrings = new ArrayList<String>();
-        for (ResourceAccessor opener : resourceAccessors) {
+        for (ResourceAccessor opener : openers ) {
             openerStrings.add(opener.toString());
         }
         return getClass().getName()+"("+StringUtils.join(openerStrings,",")+")";

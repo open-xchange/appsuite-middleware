@@ -12,8 +12,11 @@ public class CurrencyType  extends LiquibaseDataType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-        if (database instanceof InformixDatabase || database instanceof MSSQLDatabase || database instanceof SybaseASADatabase || database instanceof SybaseDatabase) {
+        if (database instanceof CacheDatabase || database instanceof InformixDatabase || database instanceof MSSQLDatabase || database instanceof SybaseASADatabase || database instanceof SybaseDatabase) {
             return new DatabaseDataType("MONEY");
+        }
+        if (database instanceof MaxDBDatabase) {
+            return new DatabaseDataType("NUMERIC", 15, 2);
         }
         if (database instanceof OracleDatabase) {
             return new DatabaseDataType("NUMBER", 15, 2);

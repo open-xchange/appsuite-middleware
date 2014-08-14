@@ -3,14 +3,9 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
-import liquibase.parser.core.ParsedNode;
-import liquibase.parser.core.ParsedNodeException;
-import liquibase.resource.ResourceAccessor;
-import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateViewStatement;
 import liquibase.statement.core.DropViewStatement;
-import liquibase.structure.core.View;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +21,6 @@ public class CreateViewChange extends AbstractChange {
 	private String viewName;
 	private String selectQuery;
 	private Boolean replaceIfExists;
-    private Boolean fullDefinition;
 
 
     @DatabaseChangeProperty(since = "3.0")
@@ -73,16 +67,7 @@ public class CreateViewChange extends AbstractChange {
 		this.replaceIfExists = replaceIfExists;
 	}
 
-    @DatabaseChangeProperty(description = "Set to true if selectQuery is the entire view definition. False if the CREATE VIEW header should be added", since = "3.3")
-    public Boolean getFullDefinition() {
-        return fullDefinition;
-    }
-
-    public void setFullDefinition(Boolean fullDefinition) {
-        this.fullDefinition = fullDefinition;
-    }
-
-    @Override
+	@Override
     public SqlStatement[] generateStatements(Database database) {
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
@@ -91,18 +76,13 @@ public class CreateViewChange extends AbstractChange {
 			replaceIfExists = true;
 		}
 
-        boolean fullDefinition = false;
-        if (this.fullDefinition != null) {
-            fullDefinition = this.fullDefinition;
-        }
-
 		if (!supportsReplaceIfExistsOption(database) && replaceIfExists) {
 			statements.add(new DropViewStatement(getCatalogName(), getSchemaName(), getViewName()));
-			statements.add(new CreateViewStatement(getCatalogName(), getSchemaName(), getViewName(), getSelectQuery(), false)
-                    .setFullDefinition(fullDefinition));
+			statements.add(new CreateViewStatement(getCatalogName(), getSchemaName(), getViewName(), getSelectQuery(),
+					false));
 		} else {
-			statements.add(new CreateViewStatement(getCatalogName(), getSchemaName(), getViewName(), getSelectQuery(), replaceIfExists)
-                    .setFullDefinition(fullDefinition));
+			statements.add(new CreateViewStatement(
+					getCatalogName(), getSchemaName(), getViewName(), getSelectQuery(), replaceIfExists));
 		}
 
 		return statements.toArray(new SqlStatement[statements.size()]);
@@ -122,36 +102,8 @@ public class CreateViewChange extends AbstractChange {
 		return new Change[] { inverse };
 	}
 
-    @Override
-    public ChangeStatus checkStatus(Database database) {
-        ChangeStatus result = new ChangeStatus();
-        try {
-            View example = new View(getCatalogName(), getSchemaName(), getViewName());
-
-            View snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
-            result.assertComplete(snapshot != null, "View does not exist");
-
-            return result;
-
-        } catch (Exception e) {
-            return result.unknown(e);
-        }
-    }
-
 	private boolean supportsReplaceIfExistsOption(Database database) {
 		return !(database instanceof SQLiteDatabase);
 	}
 
-    @Override
-    public String getSerializedObjectNamespace() {
-        return STANDARD_CHANGELOG_NAMESPACE;
-    }
-
-    @Override
-    protected void customLoadLogic(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
-        Object value = parsedNode.getValue();
-        if (value instanceof String) {
-            this.setSelectQuery((String) value);
-        }
-    }
 }

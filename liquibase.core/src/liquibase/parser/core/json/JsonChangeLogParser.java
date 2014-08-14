@@ -6,7 +6,7 @@ import liquibase.resource.ResourceAccessor;
 public class JsonChangeLogParser extends YamlChangeLogParser {
 
     @Override
-    protected String[] getSupportedFileExtensions() {
-        return new String[] {"json"};
+    protected String getSupportedFileExtension() {
+        return "json";
     }
 }

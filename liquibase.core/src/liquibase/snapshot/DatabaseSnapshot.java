@@ -1,31 +1,20 @@
 package liquibase.snapshot;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
-import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.parser.core.ParsedNode;
-import liquibase.parser.core.ParsedNodeException;
-import liquibase.resource.ResourceAccessor;
-import liquibase.serializer.LiquibaseSerializable;
+import liquibase.servicelocator.ServiceLocator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectCollection;
-import liquibase.structure.core.Catalog;
-import liquibase.structure.core.Schema;
+import liquibase.structure.core.*;
+import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 
-public abstract class DatabaseSnapshot implements LiquibaseSerializable{
+import java.lang.reflect.Field;
+import java.util.*;
 
-    private HashSet<String> serializableFields;
+public abstract class DatabaseSnapshot {
+
     private SnapshotControl snapshotControl;
     private Database database;
     private DatabaseObjectCollection allFound;
@@ -38,26 +27,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
         allFound = new DatabaseObjectCollection(database);
         this.snapshotControl = snapshotControl;
 
-        init(examples);
-
-        this.serializableFields =  new HashSet<String>();
-        this.serializableFields.add("snapshotControl");
-        this.serializableFields.add("objects");
-    }
-
-    protected void init(DatabaseObject[] examples) throws DatabaseException, InvalidExampleException {
         if (examples != null) {
-            Set<Catalog> catalogs = new HashSet<Catalog>();
-            for (DatabaseObject object : examples) {
-                if (object instanceof Schema) {
-                    catalogs.add(((Schema) object).getCatalog());
-                }
-            }
-
-            for (Catalog catalog : catalogs) {
-                this.snapshotControl.addType(catalog.getClass(), database);
-                include(catalog);
-            }
             for (DatabaseObject obj : examples) {
                 this.snapshotControl.addType(obj.getClass(), database);
 
@@ -74,42 +44,6 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
         return snapshotControl;
     }
 
-    @Override
-    public String getSerializedObjectName() {
-        return "databaseSnapshot";
-    }
-
-    @Override
-    public String getSerializedObjectNamespace() {
-        return STANDARD_SNAPSHOT_NAMESPACE;
-    }
-
-    @Override
-    public Set<String> getSerializableFields() {
-        return serializableFields;
-    }
-
-    @Override
-    public Object getSerializableFieldValue(String field) {
-        if (field.equals("snapshotControl")) {
-            return snapshotControl;
-        } else if (field.equals("objects")) {
-            return allFound;
-        } else {
-            throw new UnexpectedLiquibaseException("Unknown field: "+field);
-        }
-    }
-
-    @Override
-    public SerializationType getSerializableFieldType(String field) {
-        if (field.equals("snapshotControl")) {
-            return SerializationType.NESTED_OBJECT;
-        } else if (field.equals("objects")) {
-            return SerializationType.NESTED_OBJECT;
-        } else {
-            throw new UnexpectedLiquibaseException("Unknown field: "+field);
-        }
-    }
     public Database getDatabase() {
         return database;
     }
@@ -135,7 +69,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
         }
 
         if (example instanceof Schema && example.getName() == null && (((Schema) example).getCatalog() == null || ((Schema) example).getCatalogName() == null)) {
-            CatalogAndSchema catalogAndSchema = ((Schema) example).toCatalogAndSchema().customize(database);
+            CatalogAndSchema catalogAndSchema = database.correctSchema(((Schema) example).toCatalogAndSchema());
             example = (T) new Schema(catalogAndSchema.getCatalogName(), catalogAndSchema.getSchemaName());
         }
 
@@ -143,7 +77,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
             return example;
         }
 
-        T existing = get(example);
+       T existing = get(example);
         if (existing != null) {
             return existing;
         }
@@ -151,16 +85,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
             return null;
         }
 
-        SnapshotListener snapshotListener = snapshotControl.getSnapshotListener();
-
-        if (snapshotListener != null) {
-            snapshotListener.willSnapshot(example, database);
-        }
         SnapshotGeneratorChain chain = createGeneratorChain(example.getClass(), database);
-        if (chain == null) {
-            return null;
-        }
-
         T object = chain.snapshot(example, this);
 
         if (object == null) {
@@ -182,23 +107,18 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
                 throw new UnexpectedLiquibaseException(e);
             }
         }
-
-        if (snapshotListener != null) {
-            snapshotListener.finishedSnapshot(example, object, database);
-        }
-
         return object;
     }
 
     private void includeNestedObjects(DatabaseObject object) throws DatabaseException, InvalidExampleException, InstantiationException, IllegalAccessException {
-        for (String field : new HashSet<String>(object.getAttributes())) {
-            Object fieldValue = object.getAttribute(field, Object.class);
-            Object newFieldValue = replaceObject(fieldValue);
-            if (fieldValue != newFieldValue) {
-                object.setAttribute(field, newFieldValue);
-            }
+            for (String field : new HashSet<String>(object.getAttributes())) {
+                Object fieldValue = object.getAttribute(field, Object.class);
+                Object newFieldValue = replaceObject(fieldValue);
+                if (fieldValue != newFieldValue) {
+                    object.setAttribute(field, newFieldValue);
+                }
 
-        }
+            }
     }
 
     private Object replaceObject(Object fieldValue) throws DatabaseException, InvalidExampleException, IllegalAccessException, InstantiationException {
@@ -240,16 +160,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
                     newValues.add(obj);
                 }
             }
-            Collection newCollection = null;
-            try {
-                Class<?> collectionClass = fieldValue.getClass();
-                if (List.class.isAssignableFrom(collectionClass)) {
-                    collectionClass = ArrayList.class;
-                }
-                newCollection = (Collection) collectionClass.newInstance();
-            } catch (InstantiationException e) {
-                throw e;
-            }
+            Collection newCollection = (Collection) fieldValue.getClass().newInstance();
             newCollection.addAll(newValues);
             return newCollection;
         } else if (fieldValue instanceof Map) {
@@ -285,7 +196,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
     }
 
 
-    protected SnapshotGeneratorChain createGeneratorChain(Class<? extends DatabaseObject> databaseObjectType, Database database) {
+    private SnapshotGeneratorChain createGeneratorChain(Class<? extends DatabaseObject> databaseObjectType, Database database) {
         SortedSet<SnapshotGenerator> generators = SnapshotGeneratorFactory.getInstance().getGenerators(databaseObjectType, database);
         if (generators == null || generators.size() == 0) {
             return null;
@@ -305,15 +216,5 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
             }
         }
         return false;
-    }
-
-    @Override
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
-        throw new RuntimeException("TODO");
-    }
-
-    @Override
-    public ParsedNode serialize() {
-        throw new RuntimeException("TODO");
     }
 }

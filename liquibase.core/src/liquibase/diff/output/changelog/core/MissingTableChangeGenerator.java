@@ -47,12 +47,12 @@ public class MissingTableChangeGenerator implements MissingObjectChangeGenerator
 //            continue;
 //        }
 
-        CreateTableChange change = createCreateTableChange();
+        CreateTableChange change = new CreateTableChange();
         change.setTableName(missingTable.getName());
-        if (control.getIncludeCatalog()) {
+        if (control.isIncludeCatalog()) {
             change.setCatalogName(missingTable.getSchema().getCatalogName());
         }
-        if (control.getIncludeSchema()) {
+        if (control.isIncludeSchema()) {
             change.setSchemaName(missingTable.getSchema().getName());
         }
         if (missingTable.getRemarks() != null) {
@@ -62,7 +62,7 @@ public class MissingTableChangeGenerator implements MissingObjectChangeGenerator
         for (Column column : missingTable.getColumns()) {
             ColumnConfig columnConfig = new ColumnConfig();
             columnConfig.setName(column.getName());
-            columnConfig.setType(DataTypeFactory.getInstance().from(column.getType(), comparisonDatabase).toDatabaseDataType(referenceDatabase).toString());
+            columnConfig.setType(DataTypeFactory.getInstance().from(column.getType()).toDatabaseDataType(referenceDatabase).toString());
 
             if (column.isAutoIncrement()) {
                 columnConfig.setAutoIncrement(true);
@@ -120,9 +120,5 @@ public class MissingTableChangeGenerator implements MissingObjectChangeGenerator
         return new Change[] {
                 change
         };
-    }
-
-    protected CreateTableChange createCreateTableChange() {
-        return new CreateTableChange();
     }
 }

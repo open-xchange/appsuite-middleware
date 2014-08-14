@@ -58,11 +58,6 @@ public abstract class JdbcUtils {
         }
     }
 
-    public static void close(ResultSet rs, Statement stmt) {
-        closeResultSet(rs);
-        closeStatement(stmt);
-    }
-
     /**
      * Retrieve a JDBC column value from a ResultSet, using the most appropriate
      * value type. The returned value should be a detached value object, not having
@@ -164,7 +159,7 @@ public abstract class JdbcUtils {
         for (int i = 1; i < numberOfColumns + 1; i++) {
             String columnName = metadata.getColumnLabel(i);
             // Get the name of the column's table name
-            if (correctedColumnName.equalsIgnoreCase(columnName)) {
+            if (correctedColumnName.equals(columnName)) {
                 return rs.getString(columnName);
             }
         }

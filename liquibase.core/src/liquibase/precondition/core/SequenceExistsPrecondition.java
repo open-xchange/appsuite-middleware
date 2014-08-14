@@ -3,7 +3,6 @@ package liquibase.precondition.core;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
-import liquibase.precondition.AbstractPrecondition;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.core.Schema;
@@ -12,7 +11,7 @@ import liquibase.exception.*;
 import liquibase.precondition.Precondition;
 import liquibase.snapshot.DatabaseSnapshot;
 
-public class SequenceExistsPrecondition extends AbstractPrecondition {
+public class SequenceExistsPrecondition implements Precondition {
     private String catalogName;
     private String schemaName;
     private String sequenceName;
@@ -62,11 +61,6 @@ public class SequenceExistsPrecondition extends AbstractPrecondition {
         } catch (LiquibaseException e) {
             throw new PreconditionErrorException(e, changeLog, this);
         }
-    }
-
-    @Override
-    public String getSerializedObjectNamespace() {
-        return STANDARD_CHANGELOG_NAMESPACE;
     }
 
     @Override

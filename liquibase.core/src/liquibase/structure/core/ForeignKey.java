@@ -9,25 +9,6 @@ import java.util.List;
 
 public class ForeignKey extends AbstractDatabaseObject{
 
-    public ForeignKey() {
-    }
-
-    public ForeignKey(String name) {
-        setName(name);
-
-    }
-
-    public ForeignKey(String name, String foreignKeyCatalog, String foreignKeySchema, String foreignKeyTable, String... baseTableColumns) {
-        setName(name);
-        if (foreignKeyTable != null) {
-            setForeignKeyTable(new Table(foreignKeyCatalog, foreignKeySchema, foreignKeyTable));
-        }
-        if (baseTableColumns != null && baseTableColumns.length > 0 && baseTableColumns[0] != null) {
-            setForeignKeyColumns(StringUtils.join(baseTableColumns, ","));
-        }
-
-    }
-
     @Override
     public DatabaseObject[] getContainingObjects() {
 
@@ -70,14 +51,13 @@ public class ForeignKey extends AbstractDatabaseObject{
         return getAttribute("primaryKeyColumns", String.class);
     }
 
-    public ForeignKey addPrimaryKeyColumn(String primaryKeyColumn) {
+    public void addPrimaryKeyColumn(String primaryKeyColumn) {
         if ((this.getPrimaryKeyColumns() == null)
                 || (this.getPrimaryKeyColumns().length() == 0)) {
             this.setPrimaryKeyColumns(primaryKeyColumn);
         } else {
             this.setPrimaryKeyColumns(this.getPrimaryKeyColumns() + ", " + primaryKeyColumn);
         }
-        return this;
     }
 
     public ForeignKey setPrimaryKeyColumns(String primaryKeyColumns) {
@@ -132,7 +112,7 @@ public class ForeignKey extends AbstractDatabaseObject{
 
 
     public boolean isDeferrable() {
-        return getAttribute("deferrable", false);
+        return getAttribute("deferrable", Boolean.class);
     }
 
     public ForeignKey setDeferrable(boolean deferrable) {
@@ -142,7 +122,7 @@ public class ForeignKey extends AbstractDatabaseObject{
 
 
     public boolean isInitiallyDeferred() {
-        return getAttribute("initiallyDeferred", false);
+        return getAttribute("initiallyDeferred", Boolean.class);
     }
 
     public ForeignKey setInitiallyDeferred(boolean initiallyDeferred) {
@@ -179,10 +159,10 @@ public class ForeignKey extends AbstractDatabaseObject{
             return this.getName().equalsIgnoreCase(that.getName());
         }
 
-        return (getForeignKeyColumns() != null && that.getForeignKeyColumns() != null && getForeignKeyColumns().equalsIgnoreCase(that.getForeignKeyColumns()))
-                && (getForeignKeyTable() != null && that.getForeignKeyTable() != null && getForeignKeyTable().equals(that.getForeignKeyTable()))
-                && (getPrimaryKeyColumns() != null && that.getPrimaryKeyColumns() != null && getPrimaryKeyColumns().equalsIgnoreCase(that.getPrimaryKeyColumns()))
-                && (getPrimaryKeyTable() != null && that.getPrimaryKeyTable() != null && getPrimaryKeyTable().equals(that.getPrimaryKeyTable()));
+        return getForeignKeyColumns().equalsIgnoreCase(that.getForeignKeyColumns())
+                && getForeignKeyTable().equals(that.getForeignKeyTable())
+                && getPrimaryKeyColumns().equalsIgnoreCase(that.getPrimaryKeyColumns())
+                && getPrimaryKeyTable().equals(that.getPrimaryKeyTable());
     }
 
     @Override

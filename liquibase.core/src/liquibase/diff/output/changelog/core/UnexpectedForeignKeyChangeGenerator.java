@@ -39,10 +39,10 @@ public class UnexpectedForeignKeyChangeGenerator implements UnexpectedObjectChan
         DropForeignKeyConstraintChange change = new DropForeignKeyConstraintChange();
         change.setConstraintName(fk.getName());
         change.setBaseTableName(fk.getForeignKeyTable().getName());
-        if (control.getIncludeCatalog()) {
+        if (control.isIncludeCatalog()) {
             change.setBaseTableCatalogName(fk.getForeignKeyTable().getSchema().getCatalogName());
         }
-        if (control.getIncludeSchema()) {
+        if (control.isIncludeSchema()) {
             change.setBaseTableSchemaName(fk.getForeignKeyTable().getSchema().getName());
         }
 

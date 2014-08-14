@@ -79,14 +79,6 @@ public class ChangeFactory {
         }
     }
 
-    public ChangeMetaData getChangeMetaData(String change) {
-        Change changeObj = create(change);
-        if (changeObj == null) {
-            return null;
-        }
-        return getChangeMetaData(changeObj);
-    }
-
     public ChangeMetaData getChangeMetaData(Change change) {
         if (!metaDataByClass.containsKey(change.getClass())) {
             metaDataByClass.put(change.getClass(), change.createChangeMetaData());
@@ -143,26 +135,4 @@ public class ChangeFactory {
         }
     }
 
-    public String[] getAllChangeNamespaces() {
-        Set<String> namespaces = new HashSet<String>();
-        for (String changeName : getDefinedChanges()) {
-            Change change = create(changeName);
-            namespaces.add(change.getSerializedObjectNamespace());
-        }
-
-        return namespaces.toArray(new String[namespaces.size()]);
-    }
-
-    public Map<String, Object> getParameters(Change change) {
-        Map<String, Object> returnMap = new HashMap<String, Object>();
-        ChangeMetaData changeMetaData = getChangeMetaData(change);
-        for (ChangeParameterMetaData param : changeMetaData.getParameters().values()) {
-            Object currentValue = param.getCurrentValue(change);
-            if (currentValue != null) {
-                returnMap.put(param.getParameterName(), currentValue);
-            }
-        }
-
-        return returnMap;
-    }
 }

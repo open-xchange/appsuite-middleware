@@ -44,13 +44,13 @@ public class MissingUniqueConstraintChangeGenerator implements MissingObjectChan
 
         AddUniqueConstraintChange change = new AddUniqueConstraintChange();
         change.setTableName(uc.getTable().getName());
-        if (uc.getBackingIndex() != null && control.getIncludeTablespace()) {
+        if (uc.getBackingIndex() != null && control.isIncludeTablespace()) {
             change.setTablespace(uc.getBackingIndex().getTablespace());
         }
-        if (control.getIncludeCatalog()) {
+        if (control.isIncludeCatalog()) {
             change.setCatalogName(uc.getTable().getSchema().getCatalogName());
         }
-        if (control.getIncludeSchema()) {
+        if (control.isIncludeSchema()) {
             change.setSchemaName(uc.getTable().getSchema().getName());
         }
         change.setConstraintName(uc.getName());

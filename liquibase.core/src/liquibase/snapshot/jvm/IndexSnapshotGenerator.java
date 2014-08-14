@@ -11,7 +11,6 @@ import liquibase.exception.DatabaseException;
 import liquibase.snapshot.*;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
-import liquibase.util.StringUtils;
 
 import java.sql.DatabaseMetaData;
 import java.util.*;
@@ -260,10 +259,9 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                         && position == 0) {
                     System.out.println(this.getClass().getName() + ": corrected position to " + ++position);
                 }
-                String filterCondition = StringUtils.trimToNull(row.getString("FILTER_CONDITION"));
+                String filterCondition = row.getString("FILTER_CONDITION");
                 if (filterCondition != null) {
                     filterCondition = filterCondition.replaceAll("\"", "");
-                    columnName = filterCondition;
                 }
 
                 if (type == DatabaseMetaData.tableIndexStatistic) {
@@ -283,6 +281,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     returnIndex.setTable((Table) new Table().setName(row.getString("TABLE_NAME")).setSchema(schema));
                     returnIndex.setName(indexName);
                     returnIndex.setUnique(!nonUnique);
+                    returnIndex.setFilterCondition(filterCondition);
                     foundIndexes.put(indexName, returnIndex);
                 }
 

@@ -25,6 +25,8 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     private String sql;
     private String dbms;
 
+    protected InputStream sqlStream;
+
     protected String encoding = null;
 
 
@@ -33,8 +35,8 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         setSplitStatements(null);
     }
 
-    public InputStream openSqlStream() throws IOException {
-        return null;
+    public boolean initializeSqlStream() throws IOException {
+        return true;
     }
 
     @Override
@@ -159,29 +161,26 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
      */
     @Override
     public CheckSum generateCheckSum() {
-        InputStream stream = null;
+        InputStream stream = this.sqlStream;
+
+        String sql = this.sql;
+        if (sqlStream == null && sql == null) {
+            sql = "";
+        }
+
+        if (sql != null) {
+            stream = new ByteArrayInputStream(sql.getBytes());
+        }
+
         try {
-            stream = openSqlStream();
+            CheckSum checkSum = CheckSum.compute(new NormalizingStream(this.getEndDelimiter(), this.isSplitStatements(), this.isStripComments(), stream), false);
 
-            String sql = this.sql;
-            if (stream == null && sql == null) {
-                sql = "";
-            }
-
-            if (sql != null) {
-                stream = new ByteArrayInputStream(sql.getBytes("UTF-8"));
-            }
-
-            return CheckSum.compute(new NormalizingStream(this.getEndDelimiter(), this.isSplitStatements(), this.isStripComments(), stream), false);
-        } catch (IOException e) {
-            throw new UnexpectedLiquibaseException(e);
+            return checkSum;
         } finally {
-            if (stream != null) {
-                try {
-                    stream.close();
-                } catch (IOException e) {
-                    LogFactory.getLogger().debug("Error closing stream", e);
-                }
+            try {
+                initializeSqlStream();
+            } catch (IOException e) {
+                LogFactory.getLogger().severe("Exception re-initializing sql", e);
             }
         }
     }
@@ -207,7 +206,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         String processedSQL = normalizeLineEndings(sql);
         for (String statement : StringUtils.processMutliLineSQL(processedSQL, isStripComments(), isSplitStatements(), getEndDelimiter())) {
             if (database instanceof MSSQLDatabase) {
-                 statement = statement.replaceAll("\\n", "\r\n");
+                 statement = statement.replaceAll("\n", "\r\n");
              }
 
             String escapedStatement = statement;
@@ -235,10 +234,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         return false;
     }
 
-    @Override
-    public ChangeStatus checkStatus(Database database) {
-        return new ChangeStatus().unknown("Cannot check raw sql status");
-    }
+
 
     protected String normalizeLineEndings(String string) {
         return string.replace("\r", "");

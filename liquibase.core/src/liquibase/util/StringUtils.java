@@ -2,7 +2,10 @@ package liquibase.util;
 
 import liquibase.database.Database;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.regex.Pattern;
 
 /**
@@ -62,10 +65,10 @@ public class StringUtils {
      */
     public static String[] splitSQL(String multiLineSQL, String endDelimiter) {
         if (endDelimiter == null) {
-            endDelimiter = ";\\s*\\n|;$|\\n[gG][oO]\\s*\\n|\\n[Gg][oO]\\s*$";
+            endDelimiter = ";\\s*\n|;$|\n[gG][oO]\\s*\n|\n[Gg][oO]\\s*$";
         } else {
             if (endDelimiter.equalsIgnoreCase("go")) {
-                endDelimiter = "\\n[gG][oO]\\s*\\n|\\n[Gg][oO]\\s*$";
+                endDelimiter = "\n[gG][oO]\\s*\n|\n[Gg][oO]\\s*$";
             }
         }
         String[] initialSplit = multiLineSQL.split(endDelimiter);
@@ -89,13 +92,9 @@ public class StringUtils {
      * @return The String without the comments in
      */
     public static String stripComments(String multiLineSQL) {
-        String strippedSingleLines = Pattern.compile("\\s*\\-\\-.*\\n").matcher(multiLineSQL).replaceAll("\n");
+        String strippedSingleLines = Pattern.compile("\\s*\\-\\-.*\n").matcher(multiLineSQL).replaceAll("\n");
         strippedSingleLines = Pattern.compile("\\s*\\-\\-.*$").matcher(strippedSingleLines).replaceAll("\n");
         return Pattern.compile("/\\*.*?\\*/", Pattern.DOTALL).matcher(strippedSingleLines).replaceAll("").trim();
-    }
-
-    public static String join(Object[] array, String delimiter, StringUtilsFormatter formatter) {
-        return join(Arrays.asList(array), delimiter, formatter);
     }
 
     public static String join(String[] array, String delimiter) {
@@ -103,11 +102,6 @@ public class StringUtils {
     }
 
     public static String join(Collection<String> collection, String delimiter) {
-        return join(collection, delimiter, new ToStringFormatter());
-
-    }
-
-    public static String join(Collection collection, String delimiter, StringUtilsFormatter formatter) {
         if (collection == null) {
             return null;
         }
@@ -117,43 +111,12 @@ public class StringUtils {
         }
         
         StringBuffer buffer = new StringBuffer();
-        for (Object val : collection) {
-            buffer.append(formatter.toString(val)).append(delimiter);
+        for (String val : collection) {
+            buffer.append(val).append(delimiter);
         }
 
         String returnString = buffer.toString();
         return returnString.substring(0, returnString.length()-delimiter.length());
-    }
-
-    public static String join(Collection collection, String delimiter, StringUtilsFormatter formatter, boolean sorted) {
-        if (sorted) {
-            TreeSet<String> sortedSet = new TreeSet<String>();
-            for (Object obj : collection) {
-                sortedSet.add(formatter.toString(obj));
-            }
-            return join(sortedSet, delimiter);
-        }
-        return join(collection, delimiter, formatter);
-    }
-
-    public static String join(Collection<String> collection, String delimiter, boolean sorted) {
-        if (sorted) {
-            return join(new TreeSet<String>(collection), delimiter);
-        } else {
-            return join(collection, delimiter);
-        }
-    }
-
-    public static String join(Map map, String delimiter) {
-        return join(map, delimiter, new ToStringFormatter());
-    }
-
-    public static String join(Map map, String delimiter, StringUtilsFormatter formatter) {
-        List<String> list = new ArrayList<String>();
-        for (Map.Entry entry : (Set<Map.Entry>) map.entrySet()) {
-            list.add(entry.getKey().toString()+"="+formatter.toString(entry.getValue()));
-        }
-        return join(list, delimiter);
     }
 
     public static List<String> splitAndTrim(String s, String regex) {
@@ -210,15 +173,6 @@ public class StringUtils {
         return returnString.substring(0, returnString.length()-delimiter.length());
     }
 
-    public static String indent(String string) {
-        return indent(string, 4);
-    }
-
-    public static String indent(String string, int padding) {
-        String pad = StringUtils.repeat(" ", padding);
-        return pad+(string.replaceAll("\n", "\n" + pad));
-    }
-
     public static String lowerCaseFirst(String string) {
         return string.substring(0, 1).toLowerCase()+string.substring(1);
     }
@@ -256,44 +210,5 @@ public class StringUtils {
 
     public static boolean isAscii(char ch) {
         return ch < 128;
-    }
-
-    public static String escapeHtml(String str) {
-        StringBuilder out = new StringBuilder();
-        int len = str.length();
-        for (int i = 0; i < len; i++) {
-            char c = str.charAt(i);
-                if (c > 0x7F) {
-                    out.append("&#");
-                    out.append(Integer.toString(c, 10));
-                    out.append(';');
-                } else {
-                    out.append(c);
-                }
-        }
-        return out.toString();
-    }
-
-    public static String pad(String value, int length) {
-        value = StringUtils.trimToEmpty(value);
-        if (value.length() >= length) {
-            return value;
-        }
-
-        return value + StringUtils.repeat(" ", length - value.length());
-    }
-
-    public static interface StringUtilsFormatter<Type> {
-        public String toString(Type obj);
-    }
-
-    public static class ToStringFormatter implements StringUtilsFormatter {
-        @Override
-        public String toString(Object obj) {
-            if (obj == null) {
-                return null;
-            }
-            return obj.toString();
-        }
     }
 }

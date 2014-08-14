@@ -2,14 +2,15 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
-import liquibase.database.core.*;
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.database.core.DB2Database;
+import liquibase.database.core.InformixDatabase;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.SybaseASADatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.ForeignKey;
-import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -134,14 +135,6 @@ public class AddLookupTableChange extends AbstractChange {
     }
 
     @Override
-    public boolean supports(Database database) {
-        if (database instanceof HsqlDatabase) {
-            return false;
-        }
-        return super.supports(database);
-    }
-
-    @Override
     protected Change[] createInverses() {
         DropForeignKeyConstraintChange dropFK = new DropForeignKeyConstraintChange();
         dropFK.setBaseTableSchemaName(getExistingTableSchemaName());
@@ -225,35 +218,7 @@ public class AddLookupTableChange extends AbstractChange {
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
-        ChangeStatus result = new ChangeStatus();
-        try {
-            Table newTableExample = new Table(getNewTableCatalogName(), getNewTableSchemaName(), getNewTableName());
-            Column newColumnExample = new Column(Table.class, getNewTableCatalogName(), getNewTableSchemaName(), getNewTableName(), getNewColumnName());
-
-            ForeignKey foreignKeyExample = new ForeignKey(getConstraintName(), getExistingTableCatalogName(), getExistingTableSchemaName(), getExistingTableName());
-            foreignKeyExample.setPrimaryKeyTable(newTableExample);
-            foreignKeyExample.setForeignKeyColumns(getExistingColumnName());
-            foreignKeyExample.setPrimaryKeyColumns(getNewColumnName());
-
-            result.assertComplete(SnapshotGeneratorFactory.getInstance().has(newTableExample, database), "New table does not exist");
-            result.assertComplete(SnapshotGeneratorFactory.getInstance().has(newColumnExample, database), "New column does not exist");
-            result.assertComplete(SnapshotGeneratorFactory.getInstance().has(foreignKeyExample, database), "Foreign key does not exist");
-
-            return result;
-
-        } catch (Exception e) {
-            return result.unknown(e);
-        }
-    }
-
-    @Override
     public String getConfirmationMessage() {
         return "Lookup table added for "+getExistingTableName()+"."+getExistingColumnName();
-    }
-
-    @Override
-    public String getSerializedObjectNamespace() {
-        return STANDARD_CHANGELOG_NAMESPACE;
     }
 }

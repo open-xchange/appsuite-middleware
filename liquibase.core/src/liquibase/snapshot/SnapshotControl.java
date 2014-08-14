@@ -2,19 +2,22 @@ package liquibase.snapshot;
 
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.parser.core.ParsedNode;
-import liquibase.parser.core.ParsedNodeException;
-import liquibase.resource.ResourceAccessor;
-import liquibase.serializer.LiquibaseSerializable;
+import liquibase.logging.LogFactory;
+import liquibase.servicelocator.ServiceLocator;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Catalog;
 import liquibase.structure.core.DatabaseObjectFactory;
+import liquibase.structure.core.Schema;
+import liquibase.util.StringUtils;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.SortedSet;
 
-public class SnapshotControl implements LiquibaseSerializable {
+public class SnapshotControl {
 
     private Set<Class<? extends DatabaseObject>> types;
-    private SnapshotListener snapshotListener;
 
     public SnapshotControl(Database database) {
         setTypes(DatabaseObjectFactory.getInstance().getStandardTypes(), database);
@@ -30,51 +33,6 @@ public class SnapshotControl implements LiquibaseSerializable {
 
     public SnapshotControl(Database database, String types) {
         setTypes(DatabaseObjectFactory.getInstance().parseTypes(types), database);
-    }
-
-    public SnapshotListener getSnapshotListener() {
-        return snapshotListener;
-    }
-
-    public void setSnapshotListener(SnapshotListener snapshotListener) {
-        this.snapshotListener = snapshotListener;
-    }
-
-    @Override
-    public String getSerializedObjectName() {
-        return "snapshotControl";
-    }
-
-    @Override
-    public Set<String> getSerializableFields() {
-        return new HashSet<String>(Arrays.asList("includedType"));
-    }
-
-    @Override
-    public Object getSerializableFieldValue(String field) {
-        if (field.equals("includedType")) {
-            SortedSet<String> types = new TreeSet<String>();
-            for (Class type : this.getTypesToInclude()) {
-                types.add(type.getName());
-            }
-            return types;
-        } else {
-            throw new UnexpectedLiquibaseException("Unknown field "+field);
-        }
-    }
-
-    @Override
-    public SerializationType getSerializableFieldType(String field) {
-        if (field.equals("includedType")) {
-            return SerializationType.NESTED_OBJECT;
-        } else {
-            throw new UnexpectedLiquibaseException("Unknown field "+field);
-        }
-    }
-
-    @Override
-    public String getSerializedObjectNamespace() {
-        return STANDARD_SNAPSHOT_NAMESPACE;
     }
 
     private void setTypes(Set<Class<? extends DatabaseObject>> types, Database database) {
@@ -103,15 +61,4 @@ public class SnapshotControl implements LiquibaseSerializable {
     public boolean shouldInclude(Class<? extends DatabaseObject> type) {
         return types.contains(type);
     }
-
-    @Override
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
-        throw new RuntimeException("TODO");
-    }
-
-    @Override
-    public ParsedNode serialize() {
-        throw new RuntimeException("TODO");
-    }
-
 }

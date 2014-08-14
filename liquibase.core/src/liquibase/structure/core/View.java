@@ -2,14 +2,7 @@ package liquibase.structure.core;
 
 public class View extends Relation {
 
-    private boolean containsFullDefinition;
-
     public View() {
-    }
-
-    public View(String catalogName, String schemaName, String tableName) {
-        this.setSchema(new Schema(catalogName, schemaName));
-        setName(tableName);
     }
 
     @Override
@@ -61,12 +54,4 @@ public class View extends Relation {
     }
 
 
-    public boolean getContainsFullDefinition() {
-        return this.containsFullDefinition;
-    }
-
-    public View setContainsFullDefinition(boolean fullDefinition) {
-        this.containsFullDefinition = fullDefinition;
-        return this;
-    }
 }

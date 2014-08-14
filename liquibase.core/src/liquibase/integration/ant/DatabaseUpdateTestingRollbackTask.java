@@ -1,7 +1,5 @@
 package liquibase.integration.ant;
 
-import liquibase.Contexts;
-import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.util.ui.UIFactory;
 import org.apache.tools.ant.BuildException;
@@ -40,7 +38,7 @@ public class DatabaseUpdateTestingRollbackTask extends BaseLiquibaseTask {
                 liquibase.dropAll();
             }
 
-            liquibase.updateTestingRollback(new Contexts(getContexts()), new LabelExpression(getLabels()));
+            liquibase.updateTestingRollback(getContexts());
 
         } catch (Exception e) {
             throw new BuildException(e);

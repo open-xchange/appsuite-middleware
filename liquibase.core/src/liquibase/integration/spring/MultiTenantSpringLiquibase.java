@@ -48,22 +48,16 @@ import org.springframework.core.io.ResourceLoader;
  */
 public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoaderAware {
 	private Logger log = LogFactory.getLogger(MultiTenantSpringLiquibase.class.getName());
-	
+
 	/** Defines the location of data sources suitable for multi-tenant environment. */
 	private String jndiBase;
 	private final List<DataSource> dataSources = new ArrayList<DataSource>();
-	
-		/** Defines a single data source and several schemas for a multi-tenant environment. */
-	private DataSource dataSource;
-	private List<String> schemas;
-	
-	private ResourceLoader resourceLoader;
 
+	private ResourceLoader resourceLoader;
+	
     private String changeLog;
 
     private String contexts;
-
-    private String labels;
 
     private Map<String, String> parameters;
 
@@ -78,23 +72,8 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		if(dataSource!=null || schemas!=null) {
-			if(dataSource==null && schemas!=null) {
-				throw new LiquibaseException("When schemas are defined you should also define a base dataSource");				
-			}else if(dataSource!=null){
-				log.info("Schema based multitenancy enabled");
-				if(schemas==null || schemas.isEmpty()) {
-					log.warning("Schemas not defined, using defaultSchema only");
-					schemas = new ArrayList<String>();
-					schemas.add(defaultSchema);
-				}
-				runOnAllSchemas();
-			}
-		}else {
-			log.info("DataSources based multitenancy enabled");
-			resolveDataSources();
-			runOnAllDataSources();
-		}
+		resolveDataSources();
+		runOnAllDataSources();
 	}
 
 	private void resolveDataSources() throws NamingException {
@@ -125,40 +104,24 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 	}
 
 	private void runOnAllDataSources() throws LiquibaseException {
-		for(DataSource aDataSource : dataSources) {
-			log.info("Initializing Liquibase for data source " + aDataSource);
-			SpringLiquibase liquibase = getSpringLiquibase(aDataSource);
-			liquibase.afterPropertiesSet();
-			log.info("Liquibase ran for data source " + aDataSource);
-		}
-	}
-	
-	private void runOnAllSchemas() throws LiquibaseException {
-		for(String schema : schemas) {
-			if(schema.equals("default")) {
-				schema = null;
-			}
-			log.info("Initializing Liquibase for schema " + schema);
-			SpringLiquibase liquibase = getSpringLiquibase(dataSource);
-			liquibase.setDefaultSchema(schema);
-			liquibase.afterPropertiesSet();
-			log.info("Liquibase ran for schema " + schema);
-		}
-	}
+		for(DataSource dataSource : dataSources) {
+			log.info("Initializing Liquibase for data source " + dataSource);
+			SpringLiquibase liquibase = new SpringLiquibase();
+			liquibase.setChangeLog(changeLog);
+			liquibase.setChangeLogParameters(parameters);
+			liquibase.setContexts(contexts);
+			liquibase.setDefaultSchema(defaultSchema);
+			liquibase.setDropFirst(dropFirst);
+			liquibase.setShouldRun(shouldRun);
+			liquibase.setRollbackFile(rollbackFile);
+			
+			liquibase.setResourceLoader(resourceLoader);
+			
+			liquibase.setDataSource(dataSource);
 
-	private SpringLiquibase getSpringLiquibase(DataSource dataSource) {
-		SpringLiquibase liquibase = new SpringLiquibase();
-		liquibase.setChangeLog(changeLog);
-		liquibase.setChangeLogParameters(parameters);
-		liquibase.setContexts(contexts);
-        liquibase.setLabels(labels);
-		liquibase.setDropFirst(dropFirst);
-		liquibase.setShouldRun(shouldRun);
-		liquibase.setRollbackFile(rollbackFile);
-		liquibase.setResourceLoader(resourceLoader);
-		liquibase.setDataSource(dataSource);
-		liquibase.setDefaultSchema(defaultSchema);
-		return liquibase;
+			liquibase.afterPropertiesSet();
+			log.info("Liquibase ran for data source " + dataSource);
+		}
 	}
 
 	
@@ -186,15 +149,7 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 		this.contexts = contexts;
 	}
 
-    public String getLabels() {
-        return labels;
-    }
-
-    public void setLabels(String labels) {
-        this.labels = labels;
-    }
-
-    public Map<String, String> getParameters() {
+	public Map<String, String> getParameters() {
 		return parameters;
 	}
 
@@ -237,21 +192,6 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 	@Override
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.resourceLoader = resourceLoader;
-	}
-
-	public List<String> getSchemas() {
-		return schemas;
-	}
-
-	public void setSchemas(List<String> schemas) {
-		this.schemas = schemas;
-	}
-
-	public DataSource getDataSource() {
-		return dataSource;
-	}
-	public void setDataSource(DataSource dataSource) {
-		this.dataSource = dataSource;
 	}
 
 	

@@ -23,8 +23,7 @@ public class MissingForeignKeyChangeGenerator implements MissingObjectChangeGene
         return new Class[] {
                 Table.class,
                 Column.class,
-                PrimaryKey.class,
-                UniqueConstraint.class
+                PrimaryKey.class
         };
     }
 
@@ -41,19 +40,19 @@ public class MissingForeignKeyChangeGenerator implements MissingObjectChangeGene
         change.setConstraintName(fk.getName());
 
         change.setReferencedTableName(fk.getPrimaryKeyTable().getName());
-        if (!((ForeignKey) missingObject).getPrimaryKeyTable().getSchema().equals(((ForeignKey) missingObject).getForeignKeyTable().getSchema()) || control.getIncludeCatalog()) {
+        if (control.isIncludeCatalog()) {
             change.setReferencedTableCatalogName(fk.getPrimaryKeyTable().getSchema().getCatalogName());
         }
-        if (!((ForeignKey) missingObject).getPrimaryKeyTable().getSchema().equals(((ForeignKey) missingObject).getForeignKeyTable().getSchema()) || control.getIncludeSchema()) {
+        if (control.isIncludeSchema()) {
             change.setReferencedTableSchemaName(fk.getPrimaryKeyTable().getSchema().getName());
         }
         change.setReferencedColumnNames(fk.getPrimaryKeyColumns());
 
         change.setBaseTableName(fk.getForeignKeyTable().getName());
-        if (control.getIncludeCatalog()) {
+        if (control.isIncludeCatalog()) {
             change.setBaseTableCatalogName(fk.getForeignKeyTable().getSchema().getCatalogName());
         }
-        if (control.getIncludeSchema()) {
+        if (control.isIncludeSchema()) {
             change.setBaseTableSchemaName(fk.getForeignKeyTable().getSchema().getName());
         }
         change.setBaseColumnNames(fk.getForeignKeyColumns());

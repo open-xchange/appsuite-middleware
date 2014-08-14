@@ -19,16 +19,6 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
 
     private static final int INDENT_LENGTH = 4;
 
-    private FieldFilter fieldFilter;
-
-    public StringChangeLogSerializer() {
-        this(new FieldFilter());
-    }
-
-    public StringChangeLogSerializer(FieldFilter fieldFilter) {
-        this.fieldFilter = fieldFilter;
-    }
-
     @Override
     public String[] getValidFileExtensions() {
         return new String[]{"txt"};
@@ -47,12 +37,7 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
             SortedSet<String> values = new TreeSet<String>();
             for (String field : objectToSerialize.getSerializableFields()) {
                 Object value = objectToSerialize.getSerializableFieldValue(field);
-                if (value == null) {
-                    continue;
-                }
-                if (!fieldFilter.include(objectToSerialize, field, value)) {
-                    continue;
-                }
+
                 if (value instanceof LiquibaseSerializable) {
                     values.add(indent(indent) + serializeObject((LiquibaseSerializable) value, indent + 1));
                 } else {
@@ -67,8 +52,7 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
                             String valueString = value.toString();
                             if (value instanceof Double || value instanceof Float) { //java 6 adds additional zeros to the end of doubles and floats
                                 if (valueString.contains(".")) {
-                                    valueString = valueString.replaceFirst("(\\.[0-9]+)0+$","$1");
-                                    valueString = valueString.replaceFirst("\\.0+$", "");
+                                    valueString = valueString.replaceFirst("0*$","");
                                 }
                             }
                             values.add(indent(indent) + field + "=\"" + valueString + "\"");
@@ -159,11 +143,5 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
     @Override
     public void append(ChangeSet changeSet, File changeLogFile) throws IOException {
 
-    }
-
-    public static class FieldFilter {
-        public boolean include(Object obj, String field, Object value) {
-            return true;
-        }
     }
 }

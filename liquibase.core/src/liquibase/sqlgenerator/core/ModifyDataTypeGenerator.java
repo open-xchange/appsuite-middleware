@@ -56,7 +56,7 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
         alterTable += getPreDataTypeString(database); // adds a space if nothing else
 
         // add column type
-        alterTable += DataTypeFactory.getInstance().fromDescription(statement.getNewDataType(), database).toDatabaseDataType(database);
+        alterTable += DataTypeFactory.getInstance().fromDescription(statement.getNewDataType()).toDatabaseDataType(database);
 
         return new Sql[]{new UnparsedSql(alterTable, getAffectedTable(statement))};
     }
@@ -68,11 +68,12 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
     /**
      * @return either "MODIFY" or "ALTER COLUMN" depending on the current db
      */
-    protected String getModifyString(Database database) {
+    private String getModifyString(Database database) {
         if (database instanceof SybaseASADatabase
                 || database instanceof SybaseDatabase
                 || database instanceof MySQLDatabase
                 || database instanceof OracleDatabase
+                || database instanceof MaxDBDatabase
                 || database instanceof InformixDatabase
                 ) {
             return "MODIFY";
@@ -85,7 +86,7 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
      * @return the string that comes before the column type
      *         definition (like 'set data type' for derby or an open parentheses for Oracle)
      */
-    protected String getPreDataTypeString(Database database) {
+    private String getPreDataTypeString(Database database) {
         if (database instanceof DerbyDatabase
                 || database instanceof DB2Database) {
             return " SET DATA TYPE ";
@@ -95,7 +96,9 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
                 || database instanceof MySQLDatabase
                 || database instanceof HsqlDatabase
                 || database instanceof H2Database
+                || database instanceof CacheDatabase
                 || database instanceof OracleDatabase
+                || database instanceof MaxDBDatabase
                 || database instanceof InformixDatabase) {
             return " ";
         } else {

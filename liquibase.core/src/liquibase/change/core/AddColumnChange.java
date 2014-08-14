@@ -7,34 +7,31 @@ import java.util.Set;
 
 import liquibase.change.*;
 import liquibase.database.Database;
-import liquibase.database.core.*;
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.database.core.DB2Database;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
 import liquibase.statement.core.AddColumnStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.statement.core.SetColumnRemarksStatement;
 import liquibase.statement.core.UpdateStatement;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.PrimaryKey;
-import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
 /**
  * Adds a column to an existing table.
  */
 @DatabaseChange(name="addColumn", description = "Adds a new column to an existing table", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
-public class AddColumnChange extends AbstractChange implements ChangeWithColumns<AddColumnConfig> {
+public class AddColumnChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
 
     private String catalogName;
     private String schemaName;
     private String tableName;
-    private List<AddColumnConfig> columns;
+    private List<ColumnConfig> columns;
+
 
     public AddColumnChange() {
-        columns = new ArrayList<AddColumnConfig>();
+        columns = new ArrayList<ColumnConfig>();
     }
-    
+
     @DatabaseChangeProperty(mustEqualExisting ="relation.catalog", since = "3.0")
     public String getCatalogName() {
         return catalogName;
@@ -64,17 +61,17 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
 
     @Override
     @DatabaseChangeProperty(description = "Column constraint and foreign key information. Setting the \"defaultValue\" attribute will specify a default value for the column. Setting the \"value\" attribute will set all rows existing to the specified value without modifying the column default.", requiredForDatabase = "all")
-    public List<AddColumnConfig> getColumns() {
+    public List<ColumnConfig> getColumns() {
         return columns;
     }
 
     @Override
-    public void setColumns(List<AddColumnConfig> columns) {
+    public void setColumns(List<ColumnConfig> columns) {
         this.columns = columns;
     }
 
     @Override
-    public void addColumn(AddColumnConfig column) {
+    public void addColumn(ColumnConfig column) {
         this.columns.add(column);
     }
 
@@ -93,7 +90,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
             };
         }
 
-        for (AddColumnConfig column : getColumns()) {
+        for (ColumnConfig column : getColumns()) {
             Set<ColumnConstraint> constraints = new HashSet<ColumnConstraint>();
             ConstraintsConfig constraintsConfig =column.getConstraints();
             if (constraintsConfig != null) {
@@ -123,17 +120,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
                     column.getName(),
                     column.getType(),
                     column.getDefaultValueObject(),
-                    column.getRemarks(),
                     constraints.toArray(new ColumnConstraint[constraints.size()]));
-
-            if ((database instanceof MySQLDatabase) && (column.getAfterColumn() != null)) {
-                addColumnStatement.setAddAfterColumn(column.getAfterColumn());
-            } else if (((database instanceof HsqlDatabase) || (database instanceof H2Database))
-                       && (column.getBeforeColumn() != null)) {
-                addColumnStatement.setAddBeforeColumn(column.getBeforeColumn());
-            } else if ((database instanceof FirebirdDatabase) && (column.getPosition() != null)) {
-                addColumnStatement.setAddAtPosition(column.getPosition());
-            }
 
             sql.add(addColumnStatement);
 
@@ -187,30 +174,6 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
-        ChangeStatus result = new ChangeStatus();
-        try {
-            for (AddColumnConfig column : getColumns()) {
-                Column snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), column.getName()), database);
-                result.assertComplete(snapshot != null, "Column "+column.getName()+" does not exist");
-
-                if (snapshot != null) {
-                    PrimaryKey snapshotPK = ((Table) snapshot.getRelation()).getPrimaryKey();
-
-                    ConstraintsConfig constraints = column.getConstraints();
-                    if (constraints != null) {
-                        result.assertComplete(constraints.isPrimaryKey() == (snapshotPK != null && snapshotPK.getColumnNamesAsList().contains(column.getName())), "Column " + column.getName() + " not set as primary key");
-                    }
-                }
-            }
-        } catch (Exception e) {
-            return result.unknown(e);
-        }
-
-        return result;
-    }
-
-    @Override
     public String getConfirmationMessage() {
         List<String> names = new ArrayList<String>(columns.size());
         for (ColumnConfig col : columns) {
@@ -220,9 +183,5 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         return "Columns " + StringUtils.join(names, ",") + " added to " + tableName;
     }
 
-    @Override
-    public String getSerializedObjectNamespace() {
-        return STANDARD_CHANGELOG_NAMESPACE;
-    }
 
 }

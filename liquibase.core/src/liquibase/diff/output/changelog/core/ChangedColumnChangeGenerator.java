@@ -66,27 +66,27 @@ public class ChangedColumnChangeGenerator implements ChangedObjectChangeGenerato
             boolean nullable = (Boolean) nullableDifference.getReferenceValue();
             if (nullable) {
                 DropNotNullConstraintChange change = new DropNotNullConstraintChange();
-                if (control.getIncludeCatalog()) {
+                if (control.isIncludeCatalog()) {
                     change.setCatalogName(column.getRelation().getSchema().getCatalog().getName());
                 }
-                if (control.getIncludeSchema()) {
+                if (control.isIncludeSchema()) {
                     change.setSchemaName(column.getRelation().getSchema().getName());
                 }
                 change.setTableName(column.getRelation().getName());
                 change.setColumnName(column.getName());
-                change.setColumnDataType(DataTypeFactory.getInstance().from(column.getType(), comparisonDatabase).toString());
+                change.setColumnDataType(DataTypeFactory.getInstance().from(column.getType()).toString());
                 changes.add(change);
             } else {
                 AddNotNullConstraintChange change = new AddNotNullConstraintChange();
-                if (control.getIncludeCatalog()) {
+                if (control.isIncludeCatalog()) {
                     change.setCatalogName(column.getRelation().getSchema().getCatalog().getName());
                 }
-                if (control.getIncludeSchema()) {
+                if (control.isIncludeSchema()) {
                     change.setSchemaName(column.getRelation().getSchema().getName());
                 }
                 change.setTableName(column.getRelation().getName());
                 change.setColumnName(column.getName());
-                change.setColumnDataType(DataTypeFactory.getInstance().from(column.getType(), comparisonDatabase).toString());
+                change.setColumnDataType(DataTypeFactory.getInstance().from(column.getType()).toString());
                 changes.add(change);
             }
         }
@@ -100,15 +100,15 @@ public class ChangedColumnChangeGenerator implements ChangedObjectChangeGenerato
                 //todo: Support dropping auto increments
             } else {
                 AddAutoIncrementChange change = new AddAutoIncrementChange();
-                if (control.getIncludeCatalog()) {
+                if (control.isIncludeCatalog()) {
                     change.setCatalogName(column.getRelation().getSchema().getCatalog().getName());
                 }
-                if (control.getIncludeSchema()) {
+                if (control.isIncludeSchema()) {
                     change.setSchemaName(column.getRelation().getSchema().getName());
                 }
                 change.setTableName(column.getRelation().getName());
                 change.setColumnName(column.getName());
-                change.setColumnDataType(DataTypeFactory.getInstance().from(column.getType(), comparisonDatabase).toString());
+                change.setColumnDataType(DataTypeFactory.getInstance().from(column.getType()).toString());
                 changes.add(change);
             }
         }
@@ -118,16 +118,16 @@ public class ChangedColumnChangeGenerator implements ChangedObjectChangeGenerato
         Difference typeDifference = differences.getDifference("type");
         if (typeDifference != null) {
             ModifyDataTypeChange change = new ModifyDataTypeChange();
-            if (control.getIncludeCatalog()) {
+            if (control.isIncludeCatalog()) {
                 change.setCatalogName(column.getRelation().getSchema().getCatalog().getName());
             }
-            if (control.getIncludeSchema()) {
+            if (control.isIncludeSchema()) {
                 change.setSchemaName(column.getRelation().getSchema().getName());
             }
             change.setTableName(column.getRelation().getName());
             change.setColumnName(column.getName());
             DataType referenceType = (DataType) typeDifference.getReferenceValue();
-            change.setNewDataType(DataTypeFactory.getInstance().from(referenceType, comparisonDatabase).toString());
+            change.setNewDataType(DataTypeFactory.getInstance().from(referenceType).toString());
 
             changes.add(change);
         }
@@ -139,13 +139,13 @@ public class ChangedColumnChangeGenerator implements ChangedObjectChangeGenerato
         if (difference != null) {
             Object value = difference.getReferenceValue();
 
-            LiquibaseDataType columnDataType = DataTypeFactory.getInstance().from(column.getType(), comparisonDatabase);
+            LiquibaseDataType columnDataType = DataTypeFactory.getInstance().from(column.getType());
             if (value == null) {
                 DropDefaultValueChange change = new DropDefaultValueChange();
-                if (control.getIncludeCatalog()) {
+                if (control.isIncludeCatalog()) {
                     change.setCatalogName(column.getRelation().getSchema().getCatalog().getName());
                 }
-                if (control.getIncludeSchema()) {
+                if (control.isIncludeSchema()) {
                     change.setSchemaName(column.getRelation().getSchema().getName());
                 }
                 change.setTableName(column.getRelation().getName());
@@ -156,10 +156,10 @@ public class ChangedColumnChangeGenerator implements ChangedObjectChangeGenerato
 
             } else {
                 AddDefaultValueChange change = new AddDefaultValueChange();
-                if (control.getIncludeCatalog()) {
+                if (control.isIncludeCatalog()) {
                     change.setCatalogName(column.getRelation().getSchema().getCatalog().getName());
                 }
-                if (control.getIncludeSchema()) {
+                if (control.isIncludeSchema()) {
                     change.setSchemaName(column.getRelation().getSchema().getName());
                 }
                 change.setTableName(column.getRelation().getName());

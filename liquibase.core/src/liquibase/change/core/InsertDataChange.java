@@ -2,7 +2,6 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
-import liquibase.exception.ValidationErrors;
 import liquibase.statement.InsertExecutablePreparedStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
@@ -24,13 +23,6 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
 
     public InsertDataChange() {
         columns = new ArrayList<ColumnConfig>();
-    }
-
-    @Override
-    public ValidationErrors validate(Database database) {
-        ValidationErrors validate = super.validate(database);
-        validate.checkRequiredField("columns", columns);
-        return validate;
     }
 
     @DatabaseChangeProperty(mustEqualExisting ="table.catalog", since = "3.0")
@@ -98,7 +90,7 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
 
         if (needsPreparedStatement) {
             return new SqlStatement[] {
-                    new InsertExecutablePreparedStatement(database, catalogName, schemaName, tableName, columns, getChangeSet(), this.getResourceAccessor())
+                    new InsertExecutablePreparedStatement(database, catalogName, schemaName, tableName, columns, getChangeSet())
             };
         }
 
@@ -120,11 +112,6 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
         };
     }
 
-    @Override
-    public ChangeStatus checkStatus(Database database) {
-        return new ChangeStatus().unknown("Cannot check insertData status");
-    }
-
     /**
      * @see liquibase.change.Change#getConfirmationMessage()
      */
@@ -144,8 +131,4 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
         this.dbms = dbms;
     }
 
-    @Override
-    public String getSerializedObjectNamespace() {
-        return STANDARD_CHANGELOG_NAMESPACE;
-    }
 }

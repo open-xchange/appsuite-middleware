@@ -1,6 +1,5 @@
 package liquibase.executor;
 
-import liquibase.change.Change;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.sql.visitor.SqlVisitor;
@@ -15,9 +14,9 @@ public interface Executor {
     void setDatabase(Database database);
 
     /** Read methods */
-    <T>  T queryForObject(SqlStatement sql, Class<T> requiredType) throws DatabaseException;
+    Object queryForObject(SqlStatement sql, Class requiredType) throws DatabaseException;
 
-    <T> T queryForObject(SqlStatement sql, Class<T> requiredType, List<SqlVisitor> sqlVisitors) throws DatabaseException;
+    Object queryForObject(SqlStatement sql, Class requiredType, List<SqlVisitor> sqlVisitors) throws DatabaseException;
 
     long queryForLong(SqlStatement sql) throws DatabaseException;
 
@@ -31,16 +30,12 @@ public interface Executor {
 
     List queryForList(SqlStatement sql, Class elementType, List<SqlVisitor> sqlVisitors) throws DatabaseException;
 
-    List<Map<String, ?>> queryForList(SqlStatement sql) throws DatabaseException;
+    List<Map> queryForList(SqlStatement sql) throws DatabaseException;
 
-    List<Map<String, ?>> queryForList(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException;
+    List<Map> queryForList(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException;
 
 
     /** Write methods */
-    void execute(Change change) throws DatabaseException;
-
-    void execute(Change change, List<SqlVisitor> sqlVisitors) throws DatabaseException;
-
     void execute(SqlStatement sql) throws DatabaseException;
 
     void execute(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException;

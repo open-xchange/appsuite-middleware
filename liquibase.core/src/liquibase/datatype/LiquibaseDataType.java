@@ -22,7 +22,6 @@ public abstract class LiquibaseDataType implements PrioritizedService {
 
     private List<Object> parameters = new ArrayList<Object>();
     private String additionalInformation;
-    private String rawDefinition;
 
     protected LiquibaseDataType(LiquibaseDataType originalType) {
     	name = originalType.name;
@@ -90,10 +89,6 @@ public abstract class LiquibaseDataType implements PrioritizedService {
         this.additionalInformation = additionalInformation;
     }
 
-    public String getRawDefinition() {
-        return rawDefinition;
-    }
-
     public boolean validate(Database database) {
         int maxParameters = this.getMaxParameters(database);
         int minParameters = this.getMinParameters(database);
@@ -123,8 +118,6 @@ public abstract class LiquibaseDataType implements PrioritizedService {
             return null;
         } else if (value instanceof DatabaseFunction) {
             return database.generateDatabaseFunctionValue((DatabaseFunction) value);
-        } else if (value instanceof Number) {
-            return formatNumber(value.toString());
         }
         return value.toString();
     }
@@ -175,17 +168,4 @@ public abstract class LiquibaseDataType implements PrioritizedService {
                 || string.toLowerCase().startsWith(DatabaseFunction.CURRENT_DATE_TIME_PLACE_HOLDER)
                 || database.getCurrentDateTimeFunction().equalsIgnoreCase(string);
     }
-
-    public void finishInitialization(String originalDefinition) {
-        this.rawDefinition = originalDefinition;
-    }
-
-    protected String formatNumber(String value) {
-        if (value == null) {
-            return null;
-        }
-        return value.replaceFirst("\\.0+$", "");
-    }
-
-
 }

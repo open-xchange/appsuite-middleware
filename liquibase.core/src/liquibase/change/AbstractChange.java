@@ -5,9 +5,6 @@ import java.util.*;
 
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
-import liquibase.parser.core.ParsedNode;
-import liquibase.parser.core.ParsedNodeException;
-import liquibase.serializer.LiquibaseSerializable;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.*;
 import liquibase.resource.ResourceAccessor;
@@ -47,7 +44,6 @@ public abstract class AbstractChange implements Change {
     /**
      * Generate the ChangeMetaData for this class. Default implementation reads from the @{@link DatabaseChange } annotation
      * and calls out to {@link #createChangeParameterMetadata(String)} for each property.
-     *
      * @throws UnexpectedLiquibaseException if no @DatabaseChange annotation on this Change class
      */
     @Override
@@ -61,14 +57,11 @@ public abstract class AbstractChange implements Change {
 
             Set<ChangeParameterMetaData> params = new HashSet<ChangeParameterMetaData>();
             for (PropertyDescriptor property : Introspector.getBeanInfo(this.getClass()).getPropertyDescriptors()) {
-                if (isInvalidProperty(property)) {
-                    continue;
-                }
                 Method readMethod = property.getReadMethod();
                 Method writeMethod = property.getWriteMethod();
                 if (readMethod == null) {
                     try {
-                        readMethod = this.getClass().getMethod("is" + StringUtils.upperCaseFirst(property.getName()));
+                        readMethod = this.getClass().getMethod("is"+ StringUtils.upperCaseFirst(property.getName()));
                     } catch (Exception ignore) {
                         //it was worth a try
                     }
@@ -93,10 +86,6 @@ public abstract class AbstractChange implements Change {
         }
     }
 
-    protected boolean isInvalidProperty(PropertyDescriptor property) {
-        return property.getDisplayName().equals("metaClass");
-    }
-
     /**
      * Called by {@link #createChangeMetaData()} to create metadata for a given parameter. It finds the method that corresponds to the parameter
      * and calls the corresponding create*MetaData methods such as {@link #createRequiredDatabasesMetaData(String, DatabaseChangeProperty)} to determine the
@@ -104,7 +93,7 @@ public abstract class AbstractChange implements Change {
      *
      * @throws UnexpectedLiquibaseException if the passed parameter does not exist
      */
-    protected ChangeParameterMetaData createChangeParameterMetadata(String parameterName) {
+    protected ChangeParameterMetaData createChangeParameterMetadata(String parameterName)  {
 
         try {
             String displayName = parameterName.replaceAll("([A-Z])", " $1");
@@ -123,7 +112,7 @@ public abstract class AbstractChange implements Change {
 
             Method readMethod = property.getReadMethod();
             if (readMethod == null) {
-                readMethod = getClass().getMethod("is" + StringUtils.upperCaseFirst(property.getName()));
+                readMethod = getClass().getMethod("is"+StringUtils.upperCaseFirst(property.getName()));
             }
             Type type = readMethod.getGenericReturnType();
 
@@ -131,14 +120,14 @@ public abstract class AbstractChange implements Change {
 
             String mustEqualExisting = createMustEqualExistingMetaData(parameterName, changePropertyAnnotation);
             String description = createDescriptionMetaData(parameterName, changePropertyAnnotation);
-            Map<String, Object> examples = createExampleValueMetaData(parameterName, changePropertyAnnotation);
+            String example = createExampleValueMetaData(parameterName, changePropertyAnnotation);
             String since = createSinceMetaData(parameterName, changePropertyAnnotation);
             SerializationType serializationType = createSerializationTypeMetaData(parameterName, changePropertyAnnotation);
             String[] requiredForDatabase = createRequiredDatabasesMetaData(parameterName, changePropertyAnnotation);
             String[] supportsDatabase = createSupportedDatabasesMetaData(parameterName, changePropertyAnnotation);
 
 
-            return new ChangeParameterMetaData(this, parameterName, displayName, description, examples, since, type, requiredForDatabase, supportsDatabase, mustEqualExisting, serializationType);
+            return new ChangeParameterMetaData(this, parameterName, displayName, description, example, since, type, requiredForDatabase, supportsDatabase, mustEqualExisting, serializationType);
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
@@ -191,18 +180,14 @@ public abstract class AbstractChange implements Change {
 
     /**
      * Create the {@link ChangeParameterMetaData} "example" value. Uses the value on the DatabaseChangeProperty annotation or returns null as a default.
-     * Returns map with key=database short name, value=example. Use short-name "all" as the fallback.
      */
     @SuppressWarnings("UnusedParameters")
-    protected Map<String, Object> createExampleValueMetaData(String parameterName, DatabaseChangeProperty changePropertyAnnotation) {
+    protected String createExampleValueMetaData(String parameterName, DatabaseChangeProperty changePropertyAnnotation) {
         if (changePropertyAnnotation == null) {
             return null;
         }
 
-        Map<String, Object> examples = new HashMap<String, Object>();
-        examples.put("all", StringUtils.trimToNull(changePropertyAnnotation.exampleValue()));
-
-        return examples;
+        return StringUtils.trimToNull(changePropertyAnnotation.exampleValue());
     }
 
     /**
@@ -275,12 +260,9 @@ public abstract class AbstractChange implements Change {
      */
     @Override
     public boolean generateRollbackStatementsVolatile(Database database) {
-        if (generateStatementsVolatile(database)) {
-            return true;
-        }
         SqlStatement[] statements = generateStatements(database);
         if (statements == null) {
-            return false;
+             return false;
         }
         for (SqlStatement statement : statements) {
             if (SqlGeneratorFactory.getInstance().generateRollbackStatementsVolatile(statement, database)) {
@@ -332,7 +314,7 @@ public abstract class AbstractChange implements Change {
             if (SqlGeneratorFactory.getInstance().supports(statement, database)) {
                 warnings.addAll(SqlGeneratorFactory.getInstance().warn(statement, database));
             } else if (statement.skipOnUnsupported()) {
-                warnings.addWarning(statement.getClass().getName() + " is not supported on " + database.getShortName() + ", but " + ChangeFactory.getInstance().getChangeMetaData(this).getName() + " will still execute");
+                warnings.addWarning(statement.getClass().getName()+" is not supported on " + database.getShortName() + ", but "+ChangeFactory.getInstance().getChangeMetaData(this).getName() + " will still execute");
             }
         }
 
@@ -361,7 +343,7 @@ public abstract class AbstractChange implements Change {
         String unsupportedWarning = ChangeFactory.getInstance().getChangeMetaData(this).getName() + " is not supported on " + database.getShortName();
         if (!this.supports(database)) {
             changeValidationErrors.addError(unsupportedWarning);
-        } else if (!generateStatementsVolatile(database)) {
+        } else {
             boolean sawUnsupportedError = false;
             SqlStatement[] statements;
             statements = generateStatements(database);
@@ -381,11 +363,6 @@ public abstract class AbstractChange implements Change {
         }
 
         return changeValidationErrors;
-    }
-
-    @Override
-    public ChangeStatus checkStatus(Database database) {
-        return new ChangeStatus().unknown("Not implemented");
     }
 
     /**
@@ -428,7 +405,7 @@ public abstract class AbstractChange implements Change {
         try {
             for (Change inverse : inverses) {
                 if (!inverse.supports(database)) {
-                    throw new RollbackImpossibleException(ChangeFactory.getInstance().getChangeMetaData(inverse).getName() + " is not supported on " + database.getShortName());
+                    throw new RollbackImpossibleException(ChangeFactory.getInstance().getChangeMetaData(inverse).getName()+" is not supported on "+database.getShortName());
                 }
                 statements.addAll(Arrays.asList(inverse.generateStatements(database)));
             }
@@ -510,141 +487,5 @@ public abstract class AbstractChange implements Change {
     @Override
     public SerializationType getSerializableFieldType(String field) {
         return ChangeFactory.getInstance().getChangeMetaData(this).getParameters().get(field).getSerializationType();
-    }
-
-    @Override
-    public String getSerializedObjectNamespace() {
-        return GENERIC_CHANGELOG_EXTENSION_NAMESPACE;
-    }
-
-    @Override
-    public String toString() {
-        return ChangeFactory.getInstance().getChangeMetaData(this).getName();
-    }
-
-    @Override
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
-        ChangeMetaData metaData = ChangeFactory.getInstance().getChangeMetaData(this);
-        this.setResourceAccessor(resourceAccessor);
-        try {
-            for (ChangeParameterMetaData param : metaData.getParameters().values()) {
-                if (Collection.class.isAssignableFrom(param.getDataTypeClass())) {
-                    Class collectionType = (Class) param.getDataTypeClassParameters()[0];
-                    if (param.getDataTypeClassParameters().length == 1) {
-                        if (ColumnConfig.class.isAssignableFrom(collectionType)) {
-                            List<ParsedNode> columnNodes = new ArrayList<ParsedNode>(parsedNode.getChildren(null, param.getParameterName()));
-                            columnNodes.addAll(parsedNode.getChildren(null, "column"));
-
-                            Object nodeValue = parsedNode.getValue();
-                            if (nodeValue instanceof ParsedNode) {
-                                columnNodes.add((ParsedNode) nodeValue);
-                            } else if (nodeValue instanceof Collection) {
-                                for (Object nodeValueChild : ((Collection) nodeValue)) {
-                                    if (nodeValueChild instanceof ParsedNode) {
-                                        columnNodes.add((ParsedNode) nodeValueChild);
-                                    }
-                                }
-                            }
-
-
-                            for (ParsedNode child : columnNodes) {
-                                if (child.getName().equals("column") || child.getName().equals("columns")) {
-                                    List<ParsedNode> columnChildren = child.getChildren(null, "column");
-                                    if (columnChildren != null && columnChildren.size() > 0) {
-                                        for (ParsedNode columnChild : columnChildren) {
-                                            ColumnConfig columnConfig = (ColumnConfig) collectionType.newInstance();
-                                            columnConfig.load(columnChild, resourceAccessor);
-                                            ((ChangeWithColumns) this).addColumn(columnConfig);
-                                        }
-                                    } else {
-                                        ColumnConfig columnConfig = (ColumnConfig) collectionType.newInstance();
-                                        columnConfig.load(child, resourceAccessor);
-                                        ((ChangeWithColumns) this).addColumn(columnConfig);
-                                    }
-                                }
-                            }
-                        } else if (LiquibaseSerializable.class.isAssignableFrom(collectionType)) {
-                            List<ParsedNode> childNodes = new ArrayList<ParsedNode>(parsedNode.getChildren(null, param.getParameterName()));
-                            for (ParsedNode childNode : childNodes) {
-                                LiquibaseSerializable childObject = (LiquibaseSerializable) collectionType.newInstance();
-                                childObject.load(childNode, resourceAccessor);
-
-                                ((Collection) param.getCurrentValue(this)).add(childObject);
-
-                            }
-                        }
-                    }
-                } else if (LiquibaseSerializable.class.isAssignableFrom(param.getDataTypeClass())) {
-                    try {
-                        ParsedNode child = parsedNode.getChild(null, param.getParameterName());
-                        if (child != null) {
-                            LiquibaseSerializable serializableChild = (LiquibaseSerializable) param.getDataTypeClass().newInstance();
-                            serializableChild.load(child, resourceAccessor);
-                            param.setValue(this, serializableChild);
-                        }
-                    } catch (InstantiationException e) {
-                        throw new UnexpectedLiquibaseException(e);
-                    } catch (IllegalAccessException e) {
-                        throw new UnexpectedLiquibaseException(e);
-                    }
-                } else {
-                    Object childValue = parsedNode.getChildValue(null, param.getParameterName(), param.getDataTypeClass());
-                    if (childValue == null && param.getSerializationType() == SerializationType.DIRECT_VALUE) {
-                        childValue = parsedNode.getValue();
-                    }
-                    param.setValue(this, childValue);
-                }
-            }
-        } catch (InstantiationException e) {
-            throw new UnexpectedLiquibaseException(e);
-        } catch (IllegalAccessException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
-        customLoadLogic(parsedNode, resourceAccessor);
-        try {
-            this.finishInitialization();
-        } catch (SetupException e) {
-            throw new ParsedNodeException(e);
-        }
-    }
-
-    protected void customLoadLogic(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
-
-    }
-
-    @Override
-    public ParsedNode serialize() throws ParsedNodeException {
-        ParsedNode node = new ParsedNode(null, getSerializedObjectName());
-        ChangeMetaData metaData = ChangeFactory.getInstance().getChangeMetaData(this);
-        for (ChangeParameterMetaData param : metaData.getSetParameters(this).values()) {
-            Object currentValue = param.getCurrentValue(this);
-            currentValue = serializeValue(currentValue);
-            if (currentValue != null) {
-                node.addChild(null, param.getParameterName(), currentValue);
-            }
-        }
-
-        return node;
-    }
-
-    protected Object serializeValue(Object value) throws ParsedNodeException {
-        if (value instanceof Collection) {
-            List returnList = new ArrayList();
-            for (Object obj : (Collection) value) {
-                Object objValue = serializeValue(obj);
-                if (objValue != null) {
-                    returnList.add(objValue);
-                }
-            }
-            if (((Collection) value).size() == 0) {
-                return null;
-            } else {
-                return returnList;
-            }
-        } else if (value instanceof LiquibaseSerializable) {
-            return ((LiquibaseSerializable) value).serialize();
-        } else {
-            return value;
-        }
     }
 }

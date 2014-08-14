@@ -60,7 +60,7 @@ public class PreconditionFactory {
     public Precondition create(String tagName) {
         Class<?> aClass = preconditions.get(tagName);
         if (aClass == null) {
-            return null;
+            throw new UnexpectedLiquibaseException("Unknown tag: " + tagName);
         }
         try {
             return (Precondition) aClass.newInstance();

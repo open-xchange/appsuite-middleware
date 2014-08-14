@@ -1,8 +1,5 @@
 package liquibase.executor.jvm;
 
-import liquibase.exception.DatabaseException;
-import liquibase.statement.SqlStatement;
-
 import java.sql.CallableStatement;
 import java.sql.SQLException;
 
@@ -27,7 +24,6 @@ interface CallableStatementCallback {
      *                             into a DataAccessException by a SQLExceptionTranslator
      * @throws liquibase.exception.DatabaseException in case of custom exceptions
      */
-    Object doInCallableStatement(CallableStatement cs) throws SQLException, DatabaseException;
+    Object doInCallableStatement(CallableStatement cs) throws SQLException;
 
-    SqlStatement getStatement();
 }

@@ -2,11 +2,12 @@ package liquibase.database;
 
 import liquibase.CatalogAndSchema;
 import liquibase.change.Change;
-import liquibase.change.core.DropTableChange;
-import liquibase.changelog.*;
-import liquibase.configuration.ConfigurationProperty;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.change.CheckSum;
+import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.RanChangeSet;
+import liquibase.changelog.filter.ContextChangeSetFilter;
+import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.DiffGeneratorFactory;
@@ -16,23 +17,18 @@ import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.exception.*;
+import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogFactory;
-import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.EmptyDatabaseSnapshot;
-import liquibase.snapshot.SnapshotControl;
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.*;
 import liquibase.sql.Sql;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.DatabaseFunction;
-import liquibase.statement.SequenceCurrentValueFunction;
-import liquibase.statement.SequenceNextValueFunction;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.*;
 import liquibase.statement.core.*;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
+import liquibase.structure.core.UniqueConstraint;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
@@ -40,7 +36,9 @@ import liquibase.util.StringUtils;
 import java.io.IOException;
 import java.io.Writer;
 import java.math.BigInteger;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -75,17 +73,27 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     protected List<String> unmodifiableDataTypes = new ArrayList<String>();
 
+    private List<RanChangeSet> ranChangeSetList;
+
+    protected void resetRanChangeSetList() {
+        ranChangeSetList = null;
+    }
+
     private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-    private String databaseChangeLogTableName;
-    private String databaseChangeLogLockTableName;
-    private String liquibaseTablespaceName;
-    private String liquibaseSchemaName;
-    private String liquibaseCatalogName;
+    private String databaseChangeLogTableName = System.getProperty("liquibase.databaseChangeLogTableName") == null ? "DatabaseChangeLog".toUpperCase() : System.getProperty("liquibase.databaseChangeLogTableName");
+    private String databaseChangeLogLockTableName = System.getProperty("liquibase.databaseChangeLogLockTableName") == null ? "DatabaseChangeLogLock".toUpperCase() : System.getProperty("liquibase.databaseChangeLogLockTableName");
+    private String liquibaseTablespaceName = System.getProperty("liquibase.tablespaceName");
+    private String liquibaseSchemaName = System.getProperty("liquibase.schemaName");
+    private String liquibaseCatalogName = System.getProperty("liquibase.catalogName");
 
+    private Integer lastChangeSetSequenceValue;
     private Boolean previousAutoCommit;
 
     private boolean canCacheLiquibaseTableInfo = false;
+    private boolean hasDatabaseChangeLogTable = false;
+    private boolean hasDatabaseChangeLogLockTable = false;
+    private boolean isDatabaseChangeLogLockTableInitialized = false;
 
     protected BigInteger defaultAutoIncrementStartWith = BigInteger.ONE;
     protected BigInteger defaultAutoIncrementBy = BigInteger.ONE;
@@ -94,14 +102,9 @@ public abstract class AbstractJdbcDatabase implements Database {
     // whether object names should be quoted
     protected ObjectQuotingStrategy quotingStrategy = ObjectQuotingStrategy.LEGACY;
 
-    private final Set<String> reservedWords = new HashSet<String>();
-
-    protected Boolean caseSensitive;
+    private Boolean caseSensitive;
     private boolean outputDefaultSchema = true;
     private boolean outputDefaultCatalog = true;
-
-    private boolean defaultCatalogSet = false;
-    private boolean defaultSchemaSet = false;
 
     public String getName() {
         return toString();
@@ -129,7 +132,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public void setConnection(final DatabaseConnection conn) {
+    public void setConnection(DatabaseConnection conn) {
         LogFactory.getLogger().debug("Connected to " + conn.getConnectionUserName() + "@" + conn.getURL());
         this.connection = conn;
         try {
@@ -144,13 +147,10 @@ public abstract class AbstractJdbcDatabase implements Database {
 
                 LogFactory.getLogger().debug("Setting auto commit to " + getAutoCommitMode() + " from " + autoCommit);
                 connection.setAutoCommit(getAutoCommitMode());
-
             }
         } catch (DatabaseException e) {
             LogFactory.getLogger().warning("Cannot set auto commit to " + getAutoCommitMode() + " on connection");
         }
-
-        this.connection.attached(this);
     }
 
     /**
@@ -159,11 +159,6 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public boolean getAutoCommitMode() {
         return !supportsDDLInTransaction();
-    }
-
-    @Override
-    public void addReservedWords(Collection<String> words) {
-        reservedWords.addAll(words);
     }
 
     /**
@@ -209,7 +204,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public int getDatabaseMajorVersion() throws DatabaseException {
         if (connection == null) {
-            return 999;
+            return -1;
         }
         try {
             return connection.getDatabaseMajorVersion();
@@ -252,32 +247,62 @@ public abstract class AbstractJdbcDatabase implements Database {
         return connection.getCatalog();
     }
 
-    /**
-     * @deprecated use {@link liquibase.CatalogAndSchema#standardize(Database)}
-     */
-    public CatalogAndSchema correctSchema(final String catalog, final String schema) {
-        return new CatalogAndSchema(catalog, schema).standardize(this);
+    public CatalogAndSchema correctSchema(String catalog, String schema) {
+        return correctSchema(new CatalogAndSchema(catalog, schema));
     }
 
     @Override
-    /**
-     * @deprecated Use {@link liquibase.CatalogAndSchema#standardize(Database)}) or {@link liquibase.CatalogAndSchema#customize(Database)}
-     */
-    public CatalogAndSchema correctSchema(final CatalogAndSchema schema) {
+    public CatalogAndSchema correctSchema(CatalogAndSchema schema) {
         if (schema == null) {
             return new CatalogAndSchema(getDefaultCatalogName(), getDefaultSchemaName());
         }
+        String catalogName = StringUtils.trimToNull(schema.getCatalogName());
+        String schemaName = StringUtils.trimToNull(schema.getSchemaName());
 
-        return schema.standardize(this);
+        if (supportsCatalogs() && supportsSchemas()) {
+            if (catalogName == null) {
+                catalogName = getDefaultCatalogName();
+            } else {
+                catalogName = correctObjectName(catalogName, Catalog.class);
+            }
+
+            if (schemaName == null) {
+                schemaName = getDefaultSchemaName();
+            } else {
+                schemaName = correctObjectName(schemaName, Schema.class);
+            }
+        } else if (!supportsCatalogs() && !supportsSchemas()) {
+            return new CatalogAndSchema(null, null);
+        } else if (supportsCatalogs()) { //schema is null
+            if (catalogName == null) {
+                if (schemaName == null) {
+                    catalogName = getDefaultCatalogName();
+                } else {
+                    catalogName = schemaName;
+                }
+            }
+            schemaName = catalogName;
+        } else if (supportsSchemas()) {
+            if (schemaName == null) {
+                if (catalogName == null) {
+                    schemaName = getDefaultSchemaName();
+                } else {
+                    schemaName = catalogName;
+                }
+            }
+            catalogName = schemaName;
+        }
+        return new CatalogAndSchema(catalogName, schemaName);
+
     }
 
     @Override
-    public String correctObjectName(final String objectName, final Class<? extends DatabaseObject> objectType) {
+    public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS || unquotedObjectsAreUppercased == null
                 || objectName == null || (objectName.startsWith(quotingStartCharacter) && objectName.endsWith(
                 quotingEndCharacter))) {
             return objectName;
-        } else if (Boolean.TRUE.equals(unquotedObjectsAreUppercased)) {
+        } else if (unquotedObjectsAreUppercased == Boolean.TRUE) {
             return objectName.toUpperCase();
         } else {
             return objectName.toLowerCase();
@@ -311,12 +336,13 @@ public abstract class AbstractJdbcDatabase implements Database {
      * @return
      */
     protected String getConnectionSchemaName() {
-        if (connection == null || connection instanceof OfflineConnection) {
+        if (connection == null) {
             return null;
         }
         try {
-            return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawCallStatement("call current_schema"), String.class);
-
+            ResultSet resultSet = ((JdbcConnection) connection).prepareCall("call current_schema").executeQuery();
+            resultSet.next();
+            return resultSet.getString(1);
         } catch (Exception e) {
             LogFactory.getLogger().info("Error getting default schema", e);
         }
@@ -324,19 +350,13 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public void setDefaultCatalogName(final String defaultCatalogName) {
+    public void setDefaultCatalogName(String defaultCatalogName) {
         this.defaultCatalogName = correctObjectName(defaultCatalogName, Catalog.class);
-        defaultCatalogSet = defaultCatalogName != null;
-
     }
 
     @Override
-    public void setDefaultSchemaName(final String schemaName) {
+    public void setDefaultSchemaName(String schemaName) {
         this.defaultSchemaName = correctObjectName(schemaName, Schema.class);
-        defaultSchemaSet = schemaName != null;
-        if (!supportsSchemas()) {
-            defaultCatalogSet = schemaName != null;
-        }
     }
 
     /**
@@ -372,7 +392,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     // ------- DATABASE-SPECIFIC SQL METHODS ---- //
 
     @Override
-    public void setCurrentDateTimeFunction(final String function) {
+    public void setCurrentDateTimeFunction(String function) {
         if (function != null) {
             this.currentDateTimeFunction = function;
             this.dateFunctions.add(new DatabaseFunction(function));
@@ -393,7 +413,7 @@ public abstract class AbstractJdbcDatabase implements Database {
      * yyyy-MM-ddThh:mm:ss
      */
     @Override
-    public String getDateLiteral(final String isoDate) {
+    public String getDateLiteral(String isoDate) {
         if (isDateOnly(isoDate) || isTimeOnly(isoDate)) {
             return "'" + isoDate + "'";
         } else if (isDateTime(isoDate)) {
@@ -413,22 +433,22 @@ public abstract class AbstractJdbcDatabase implements Database {
 
 
     @Override
-    public String getDateTimeLiteral(final java.sql.Timestamp date) {
+    public String getDateTimeLiteral(java.sql.Timestamp date) {
         return getDateLiteral(new ISODateFormat().format(date).replaceFirst("^'", "").replaceFirst("'$", ""));
     }
 
     @Override
-    public String getDateLiteral(final java.sql.Date date) {
+    public String getDateLiteral(java.sql.Date date) {
         return getDateLiteral(new ISODateFormat().format(date).replaceFirst("^'", "").replaceFirst("'$", ""));
     }
 
     @Override
-    public String getTimeLiteral(final java.sql.Time date) {
+    public String getTimeLiteral(java.sql.Time date) {
         return getDateLiteral(new ISODateFormat().format(date).replaceFirst("^'", "").replaceFirst("'$", ""));
     }
 
     @Override
-    public String getDateLiteral(final Date date) {
+    public String getDateLiteral(Date date) {
         if (date instanceof java.sql.Date) {
             return getDateLiteral(((java.sql.Date) date));
         } else if (date instanceof java.sql.Time) {
@@ -441,7 +461,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public Date parseDate(final String dateAsString) throws DateParseException {
+    public Date parseDate(String dateAsString) throws DateParseException {
         try {
             if (dateAsString.indexOf(" ") > 0) {
                 return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateAsString);
@@ -459,15 +479,15 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
     }
 
-    protected boolean isDateOnly(final String isoDate) {
+    protected boolean isDateOnly(String isoDate) {
         return isoDate.length() == "yyyy-MM-dd".length();
     }
 
-    protected boolean isDateTime(final String isoDate) {
+    protected boolean isDateTime(String isoDate) {
         return isoDate.length() >= "yyyy-MM-ddThh:mm:ss".length();
     }
 
-    protected boolean isTimeOnly(final String isoDate) {
+    protected boolean isTimeOnly(String isoDate) {
         return isoDate.length() == "hh:mm:ss".length();
     }
 
@@ -484,7 +504,7 @@ public abstract class AbstractJdbcDatabase implements Database {
      * Returns database-specific auto-increment DDL clause.
      */
     @Override
-    public String getAutoIncrementClause(final BigInteger startWith, final BigInteger incrementBy) {
+    public String getAutoIncrementClause(BigInteger startWith, BigInteger incrementBy) {
         if (!supportsAutoIncrement()) {
             return "";
         }
@@ -521,12 +541,12 @@ public abstract class AbstractJdbcDatabase implements Database {
         return "GENERATED BY DEFAULT AS IDENTITY";
     }
 
-    protected boolean generateAutoIncrementStartWith(final BigInteger startWith) {
+    protected boolean generateAutoIncrementStartWith(BigInteger startWith) {
         return startWith != null
                 && !startWith.equals(defaultAutoIncrementStartWith);
     }
 
-    protected boolean generateAutoIncrementBy(final BigInteger incrementBy) {
+    protected boolean generateAutoIncrementBy(BigInteger incrementBy) {
         return incrementBy != null
                 && !incrementBy.equals(defaultAutoIncrementBy);
     }
@@ -548,7 +568,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public String getConcatSql(final String... values) {
+    public String getConcatSql(String... values) {
         StringBuffer returnString = new StringBuffer();
         for (String value : values) {
             returnString.append(value).append(" || ");
@@ -557,16 +577,14 @@ public abstract class AbstractJdbcDatabase implements Database {
         return returnString.toString().replaceFirst(" \\|\\| $", "");
     }
 
+// ------- DATABASECHANGELOG / DATABASECHANGELOGLOCK METHODS ---- //
+
     /**
      * @see liquibase.database.Database#getDatabaseChangeLogTableName()
      */
     @Override
     public String getDatabaseChangeLogTableName() {
-        if (databaseChangeLogTableName != null) {
-            return databaseChangeLogTableName;
-        }
-
-        return LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getDatabaseChangeLogTableName();
+        return databaseChangeLogTableName;
     }
 
     /**
@@ -574,11 +592,7 @@ public abstract class AbstractJdbcDatabase implements Database {
      */
     @Override
     public String getDatabaseChangeLogLockTableName() {
-        if (databaseChangeLogLockTableName != null) {
-            return databaseChangeLogLockTableName;
-        }
-
-        return LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getDatabaseChangeLogLockTableName();
+        return databaseChangeLogLockTableName;
     }
 
     /**
@@ -586,18 +600,14 @@ public abstract class AbstractJdbcDatabase implements Database {
      */
     @Override
     public String getLiquibaseTablespaceName() {
-        if (liquibaseTablespaceName != null) {
-            return liquibaseTablespaceName;
-        }
-
-        return LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getLiquibaseTablespaceName();
+        return liquibaseTablespaceName;
     }
 
     /**
      * @see liquibase.database.Database#setDatabaseChangeLogTableName(java.lang.String)
      */
     @Override
-    public void setDatabaseChangeLogTableName(final String tableName) {
+    public void setDatabaseChangeLogTableName(String tableName) {
         this.databaseChangeLogTableName = tableName;
     }
 
@@ -605,7 +615,7 @@ public abstract class AbstractJdbcDatabase implements Database {
      * @see liquibase.database.Database#setDatabaseChangeLogLockTableName(java.lang.String)
      */
     @Override
-    public void setDatabaseChangeLogLockTableName(final String tableName) {
+    public void setDatabaseChangeLogLockTableName(String tableName) {
         this.databaseChangeLogLockTableName = tableName;
     }
 
@@ -613,69 +623,265 @@ public abstract class AbstractJdbcDatabase implements Database {
      * @see liquibase.database.Database#setLiquibaseTablespaceName(java.lang.String)
      */
     @Override
-    public void setLiquibaseTablespaceName(final String tablespace) {
+    public void setLiquibaseTablespaceName(String tablespace) {
         this.liquibaseTablespaceName = tablespace;
     }
 
+    /**
+     * This method will check the database ChangeLog table used to keep track of
+     * the changes in the file. If the table does not exist it will create one
+     * otherwise it will not do anything besides outputting a log message.
+     *
+     * @param updateExistingNullChecksums
+     * @param contexts
+     */
+    @Override
+    public void checkDatabaseChangeLogTable(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, String... contexts) throws DatabaseException {
+        Executor executor = ExecutorService.getInstance().getExecutor(this);
+
+        Table changeLogTable = null;
+        try {
+            changeLogTable = SnapshotGeneratorFactory.getInstance().getDatabaseChangeLogTable(new SnapshotControl(this, Table.class, Column.class), this);
+        } catch (LiquibaseException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+
+        List<SqlStatement> statementsToExecute = new ArrayList<SqlStatement>();
+
+        boolean changeLogCreateAttempted = false;
+        if (changeLogTable != null) {
+            boolean hasDescription = changeLogTable.getColumn("DESCRIPTION") != null;
+            boolean hasComments = changeLogTable.getColumn("COMMENTS") != null;
+            boolean hasTag = changeLogTable.getColumn("TAG") != null;
+            boolean hasLiquibase = changeLogTable.getColumn("LIQUIBASE") != null;
+            boolean liquibaseColumnNotRightSize = false;
+            if (!connection.getDatabaseProductName().equals("SQLite")) {
+                Integer columnSize = changeLogTable.getColumn("LIQUIBASE").getType().getColumnSize();
+                liquibaseColumnNotRightSize = columnSize != null && columnSize != 20;
+            }
+            boolean hasOrderExecuted = changeLogTable.getColumn("ORDEREXECUTED") != null;
+            boolean checksumNotRightSize = false;
+            if (!connection.getDatabaseProductName().equals("SQLite")) {
+                Integer columnSize = changeLogTable.getColumn("MD5SUM").getType().getColumnSize();
+                checksumNotRightSize = columnSize != null && columnSize != 35;
+            }
+            boolean hasExecTypeColumn = changeLogTable.getColumn("EXECTYPE") != null;
+
+            if (!hasDescription) {
+                executor.comment("Adding missing databasechangelog.description column");
+                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "DESCRIPTION", "VARCHAR(255)", null));
+            }
+            if (!hasTag) {
+                executor.comment("Adding missing databasechangelog.tag column");
+                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "TAG", "VARCHAR(255)", null));
+            }
+            if (!hasComments) {
+                executor.comment("Adding missing databasechangelog.comments column");
+                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "COMMENTS", "VARCHAR(255)", null));
+            }
+            if (!hasLiquibase) {
+                executor.comment("Adding missing databasechangelog.liquibase column");
+                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "LIQUIBASE", "VARCHAR(255)", null));
+            }
+            if (!hasOrderExecuted) {
+                executor.comment("Adding missing databasechangelog.orderexecuted column");
+                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "ORDEREXECUTED", "INT", null));
+                statementsToExecute.add(new UpdateStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()).addNewColumnValue("ORDEREXECUTED", -1));
+                statementsToExecute.add(new SetNullableStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "ORDEREXECUTED", "INT", false));
+            }
+            if (checksumNotRightSize) {
+                executor.comment("Modifying size of databasechangelog.md5sum column");
+
+                statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "MD5SUM", "VARCHAR(35)"));
+            }
+            if (liquibaseColumnNotRightSize) {
+                executor.comment("Modifying size of databasechangelog.liquibase column");
+
+                statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "LIQUIBASE", "VARCHAR(20)"));
+            }
+            if (!hasExecTypeColumn) {
+                executor.comment("Adding missing databasechangelog.exectype column");
+                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "EXECTYPE", "VARCHAR(10)", null));
+                statementsToExecute.add(new UpdateStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()).addNewColumnValue("EXECTYPE", "EXECUTED"));
+                statementsToExecute.add(new SetNullableStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "EXECTYPE", "VARCHAR(10)", false));
+            }
+
+            List<Map> md5sumRS = ExecutorService.getInstance().getExecutor(this).queryForList(new SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum(), "MD5SUM"));
+            if (md5sumRS.size() > 0) {
+                String md5sum = md5sumRS.get(0).get("MD5SUM").toString();
+                if (!md5sum.startsWith(CheckSum.getCurrentVersion() + ":")) {
+                    executor.comment("DatabaseChangeLog checksums are an incompatible version.  Setting them to null so they will be updated on next database update");
+                    statementsToExecute.add(new RawSqlStatement("UPDATE " + escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()) + " SET MD5SUM=null"));
+                }
+            }
+
+
+        } else if (!changeLogCreateAttempted) {
+            executor.comment("Create Database Change Log Table");
+            SqlStatement createTableStatement = new CreateDatabaseChangeLogTableStatement();
+            if (!canCreateChangeLogTable()) {
+                throw new DatabaseException("Cannot create " + escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()) + " table for your database.\n\n" +
+                        "Please construct it manually using the following SQL as a base and re-run Liquibase:\n\n" +
+                        createTableStatement);
+            }
+            // If there is no table in the database for recording change history create one.
+            statementsToExecute.add(createTableStatement);
+            LogFactory.getLogger().info("Creating database history table with name: " + escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()));
+//                }
+        }
+
+        for (SqlStatement sql : statementsToExecute) {
+            if (SqlGeneratorFactory.getInstance().supports(sql, this)) {
+                executor.execute(sql);
+                this.commit();
+            } else {
+                LogFactory.getLogger().info("Cannot run "+sql.getClass().getSimpleName()+" on "+this.getShortName()+" when checking databasechangelog table");
+            }
+        }
+
+        if (updateExistingNullChecksums) {
+            for (RanChangeSet ranChangeSet : this.getRanChangeSetList()) {
+                if (ranChangeSet.getLastCheckSum() == null) {
+                    ChangeSet changeSet = databaseChangeLog.getChangeSet(ranChangeSet);
+                    if (changeSet != null && new ContextChangeSetFilter(contexts).accepts(changeSet) && new DbmsChangeSetFilter(this).accepts(changeSet)) {
+                        LogFactory.getLogger().debug("Updating null or out of date checksum on changeSet " + changeSet + " to correct value");
+                        executor.execute(new UpdateChangeSetChecksumStatement(changeSet));
+                    }
+                }
+            }
+            commit();
+            this.ranChangeSetList = null;
+        }
+    }
+
+
     protected boolean canCreateChangeLogTable() throws DatabaseException {
-        return ((StandardChangeLogHistoryService) ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this)).canCreateChangeLogTable();
+        return true;
     }
 
     @Override
-    public void setCanCacheLiquibaseTableInfo(final boolean canCacheLiquibaseTableInfo) {
+    public void setCanCacheLiquibaseTableInfo(boolean canCacheLiquibaseTableInfo) {
         this.canCacheLiquibaseTableInfo = canCacheLiquibaseTableInfo;
+        hasDatabaseChangeLogTable = false;
+        hasDatabaseChangeLogLockTable = false;
+    }
+
+    @Override
+    public boolean hasDatabaseChangeLogTable() throws DatabaseException {
+        if (hasDatabaseChangeLogTable) {
+            return true;
+        }
+        boolean hasTable = false;
+        try {
+            hasTable = SnapshotGeneratorFactory.getInstance().hasDatabaseChangeLogTable(this);
+        } catch (LiquibaseException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+        if (canCacheLiquibaseTableInfo) {
+            hasDatabaseChangeLogTable = hasTable;
+        }
+        return hasTable;
+    }
+
+    @Override
+    public boolean hasDatabaseChangeLogLockTable() throws DatabaseException {
+        if (canCacheLiquibaseTableInfo && hasDatabaseChangeLogLockTable) {
+            return true;
+        }
+        boolean hasTable = false;
+        try {
+            hasTable = SnapshotGeneratorFactory.getInstance().hasDatabaseChangeLogLockTable(this);
+        } catch (LiquibaseException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+        if (canCacheLiquibaseTableInfo) {
+            hasDatabaseChangeLogLockTable = hasTable;
+        }
+        return hasTable;
+    }
+
+    public boolean isDatabaseChangeLogLockTableInitialized(boolean tableJustCreated) throws DatabaseException {
+        if (canCacheLiquibaseTableInfo && isDatabaseChangeLogLockTableInitialized) {
+            return true;
+        }
+        boolean initialized;
+        Executor executor = ExecutorService.getInstance().getExecutor(this);
+        try {
+            initialized = executor.queryForInt(new RawSqlStatement("select count(*) from " + this.escapeTableName(this.getLiquibaseCatalogName(), this.getLiquibaseSchemaName(), this.getDatabaseChangeLogLockTableName()))) > 0;
+        } catch (LiquibaseException e) {
+            if (executor.updatesDatabase()) {
+                throw new UnexpectedLiquibaseException(e);
+            } else {
+                //probably didn't actually create the table yet.
+
+                initialized = !tableJustCreated;
+            }
+        }
+        if (canCacheLiquibaseTableInfo) {
+            isDatabaseChangeLogLockTableInitialized = initialized;
+        }
+        return initialized;
     }
 
     @Override
     public String getLiquibaseCatalogName() {
-        if (liquibaseCatalogName != null) {
-            return liquibaseCatalogName;
-        }
-
-        ConfigurationProperty configuration = LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.LIQUIBASE_CATALOG_NAME);
-        if (configuration.getWasOverridden()) {
-            return configuration.getValue(String.class);
-        }
-
-        return getDefaultCatalogName();
+        return liquibaseCatalogName == null ? getDefaultCatalogName() : liquibaseCatalogName;
     }
 
     @Override
-    public void setLiquibaseCatalogName(final String catalogName) {
+    public void setLiquibaseCatalogName(String catalogName) {
         this.liquibaseCatalogName = catalogName;
     }
 
     @Override
     public String getLiquibaseSchemaName() {
-        if (liquibaseSchemaName != null) {
-            return liquibaseSchemaName;
-        }
-
-        ConfigurationProperty configuration = LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.LIQUIBASE_SCHEMA_NAME);
-        if (configuration.getWasOverridden()) {
-            return configuration.getValue(String.class);
-        }
-
-        return getDefaultSchemaName();
+        return liquibaseSchemaName == null ? getDefaultSchemaName() : liquibaseSchemaName;
     }
 
     @Override
-    public void setLiquibaseSchemaName(final String schemaName) {
+    public void setLiquibaseSchemaName(String schemaName) {
         this.liquibaseSchemaName = schemaName;
+    }
+
+    /**
+     * This method will check the database ChangeLogLock table used to keep track of
+     * if a machine is updating the database. If the table does not exist it will create one
+     * otherwise it will not do anything besides outputting a log message.
+     */
+    @Override
+    public void checkDatabaseChangeLogLockTable() throws DatabaseException {
+
+        boolean createdTable = false;
+        Executor executor = ExecutorService.getInstance().getExecutor(this);
+        if (!hasDatabaseChangeLogLockTable()) {
+
+            executor.comment("Create Database Lock Table");
+            executor.execute(new CreateDatabaseChangeLogLockTableStatement());
+            this.commit();
+            LogFactory.getLogger().debug("Created database lock table with name: " + escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogLockTableName()));
+            this.hasDatabaseChangeLogLockTable = true;
+            createdTable = true;
+        }
+
+        if (!isDatabaseChangeLogLockTableInitialized(createdTable)) {
+            executor.comment("Initialize Database Lock Table");
+            executor.execute(new InitializeDatabaseChangeLogLockTableStatement());
+            this.commit();
+        }
     }
 
     @Override
     public boolean isCaseSensitive() {
     	if (caseSensitive == null) {
-            if (connection != null && connection instanceof JdbcConnection) {
+            if (connection != null) {
                 try {
-                	caseSensitive = ((JdbcConnection) connection).getUnderlyingConnection().getMetaData().supportsMixedCaseIdentifiers();
+                	caseSensitive = Boolean.valueOf(((JdbcConnection) connection).getUnderlyingConnection().getMetaData().supportsMixedCaseIdentifiers());
                 } catch (SQLException e) {
                     LogFactory.getLogger().warning("Cannot determine case sensitivity from JDBC driver", e);
                 }
             }
         }
-
+    	
     	if (caseSensitive == null) {
             return false;
     	} else {
@@ -683,19 +889,15 @@ public abstract class AbstractJdbcDatabase implements Database {
     	}
     }
 
-    public void setCaseSensitive(Boolean caseSensitive) {
-        this.caseSensitive = caseSensitive;
-    }
-
     @Override
-    public boolean isReservedWord(final String string) {
-        return reservedWords.contains(string.toUpperCase());
+    public boolean isReservedWord(String string) {
+        return false;
     }
 
     /*
     * Check if given string starts with numeric values that may cause problems and should be escaped.
     */
-    protected boolean startsWithNumeric(final String objectName) {
+    protected boolean startsWithNumeric(String objectName) {
         return startsWithNumberPattern.matcher(objectName).matches();
     }
 
@@ -705,7 +907,7 @@ public abstract class AbstractJdbcDatabase implements Database {
      * Drops all objects owned by the connected user.
      */
     @Override
-    public void dropDatabaseObjects(final CatalogAndSchema schemaToDrop) throws LiquibaseException {
+    public void dropDatabaseObjects(CatalogAndSchema schemaToDrop) throws LiquibaseException {
         ObjectQuotingStrategy currentStrategy = this.getObjectQuotingStrategy();
         this.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
         try {
@@ -734,16 +936,13 @@ public abstract class AbstractJdbcDatabase implements Database {
 
 	        final long changeSetStarted = System.currentTimeMillis();
 	        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(new EmptyDatabaseSnapshot(this), snapshot, new CompareControl(snapshot.getSnapshotControl().getTypesToInclude()));
-            List<ChangeSet> changeSets = new DiffToChangeLog(diffResult, new DiffOutputControl(true, true, false).addIncludedSchema(schemaToDrop)).generateChangeSets();
+            List<ChangeSet> changeSets = new DiffToChangeLog(diffResult, new DiffOutputControl(true, true, false)).generateChangeSets();
 	        LogFactory.getLogger().debug(String.format("ChangeSet to Remove Database Objects generated in %d ms.", System.currentTimeMillis() - changeSetStarted));
 
             final boolean reEnableFK = supportsForeignKeyDisable() && disableForeignKeyChecks();
             try {
                 for (ChangeSet changeSet : changeSets) {
                     for (Change change : changeSet.getChanges()) {
-                        if (change instanceof DropTableChange) {
-                            ((DropTableChange) change).setCascadeConstraints(true);
-                        }
                         SqlStatement[] sqlStatements = change.generateStatements(this);
                         for (SqlStatement statement : sqlStatements) {
                             ExecutorService.getInstance().getExecutor(this).execute(statement);
@@ -757,8 +956,12 @@ public abstract class AbstractJdbcDatabase implements Database {
                 }
             }
 
-            ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).destroy();
-            LockServiceFactory.getInstance().getLockService(this).destroy();
+            if (SnapshotGeneratorFactory.getInstance().has(new Table().setName(this.getDatabaseChangeLogTableName()).setSchema(this.getLiquibaseCatalogName(), this.getLiquibaseSchemaName()), this)) {
+                ExecutorService.getInstance().getExecutor(this).execute(new DropTableStatement(this.getLiquibaseCatalogName(), this.getLiquibaseSchemaName(), this.getDatabaseChangeLogTableName(), false));
+            }
+            if (SnapshotGeneratorFactory.getInstance().has(new Table().setName(this.getDatabaseChangeLogLockTableName()).setSchema(this.getLiquibaseCatalogName(), this.getLiquibaseSchemaName()), this)) {
+                ExecutorService.getInstance().getExecutor(this).execute(new DropTableStatement(this.getLiquibaseCatalogName(), this.getLiquibaseSchemaName(), this.getDatabaseChangeLogLockTableName(), false));
+            }
 
         } finally {
             this.setObjectQuotingStrategy(currentStrategy);
@@ -777,7 +980,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public boolean isSystemObject(final DatabaseObject example) {
+    public boolean isSystemObject(DatabaseObject example) {
         if (example == null) {
             return false;
         }
@@ -795,8 +998,8 @@ public abstract class AbstractJdbcDatabase implements Database {
         return false;
     }
 
-    public boolean isSystemView(CatalogAndSchema schema, final String viewName) {
-        schema = schema.customize(this);
+    public boolean isSystemView(CatalogAndSchema schema, String viewName) {
+        schema = correctSchema(schema);
         if ("information_schema".equalsIgnoreCase(schema.getSchemaName())) {
             return true;
         } else if (getSystemViews().contains(viewName)) {
@@ -806,7 +1009,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public boolean isLiquibaseObject(final DatabaseObject object) {
+    public boolean isLiquibaseObject(DatabaseObject object) {
         if (object instanceof Table) {
             Schema liquibaseSchema = new Schema(getLiquibaseCatalogName(), getLiquibaseSchemaName());
             if (DatabaseObjectComparatorFactory.getInstance().isSameObject(object, new Table().setName(getDatabaseChangeLogTableName()).setSchema(liquibaseSchema), this)) {
@@ -826,17 +1029,35 @@ public abstract class AbstractJdbcDatabase implements Database {
         return false;
     }
 
+    // ------- DATABASE TAGGING METHODS ---- //
+
     /**
      * Tags the database changelog with the given string.
      */
     @Override
-    public void tag(final String tagString) throws DatabaseException {
-        ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).tag(tagString);
+    public void tag(String tagString) throws DatabaseException {
+        Executor executor = ExecutorService.getInstance().getExecutor(this);
+        try {
+            int totalRows = ExecutorService.getInstance().getExecutor(this).queryForInt(new SelectFromDatabaseChangeLogStatement("COUNT(*)"));
+            if (totalRows == 0) {
+                ChangeSet emptyChangeSet = new ChangeSet(String.valueOf(new Date().getTime()), "liquibase", false, false, "liquibase-internal", null, null, quotingStrategy, null);
+                this.markChangeSetExecStatus(emptyChangeSet, ChangeSet.ExecType.EXECUTED);
+            }
+
+//            Timestamp lastExecutedDate = (Timestamp) this.getExecutor().queryForObject(createChangeToTagSQL(), Timestamp.class);
+            executor.execute(new TagDatabaseStatement(tagString));
+            this.commit();
+
+            getRanChangeSetList().get(getRanChangeSetList().size() - 1).setTag(tagString);
+        } catch (Exception e) {
+            throw new DatabaseException(e);
+        }
     }
 
     @Override
-    public boolean doesTagExist(final String tag) throws DatabaseException {
-        return ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).tagExists(tag);
+    public boolean doesTagExist(String tag) throws DatabaseException {
+        int count = ExecutorService.getInstance().getExecutor(this).queryForInt(new SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByTag(tag), "COUNT(*)"));
+        return count > 0;
     }
 
     @Override
@@ -850,8 +1071,8 @@ public abstract class AbstractJdbcDatabase implements Database {
 
 
     @Override
-    public String getViewDefinition(CatalogAndSchema schema, final String viewName) throws DatabaseException {
-        schema = schema.customize(this);
+    public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
+        schema = correctSchema(schema);
         String definition = (String) ExecutorService.getInstance().getExecutor(this).queryForObject(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);
         if (definition == null) {
             return null;
@@ -860,12 +1081,12 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public String escapeTableName(final String catalogName, final String schemaName, final String tableName) {
+    public String escapeTableName(String catalogName, String schemaName, String tableName) {
         return escapeObjectName(catalogName, schemaName, tableName, Table.class);
     }
 
     @Override
-    public String escapeObjectName(String catalogName, String schemaName, final String objectName, final Class<? extends DatabaseObject> objectType) {
+    public String escapeObjectName(String catalogName, String schemaName, String objectName, Class<? extends DatabaseObject> objectType) {
 //        CatalogAndSchema catalogAndSchema = this.correctSchema(catalogName, schemaName);
 //        catalogName = catalogAndSchema.getCatalogName();
 //        schemaName = catalogAndSchema.getSchemaName();
@@ -887,15 +1108,15 @@ public abstract class AbstractJdbcDatabase implements Database {
             if (catalogName == null && schemaName == null) {
                 return escapeObjectName(objectName, objectType);
             } else if (catalogName == null || !this.supportsCatalogInObjectName(objectType)) {
-                if (!defaultSchemaSet && isDefaultSchema(catalogName, schemaName) && !getOutputDefaultSchema()) {
+                if (isDefaultSchema(catalogName, schemaName) && !getOutputDefaultSchema()) {
                     return escapeObjectName(objectName, objectType);
                 } else {
                     return escapeObjectName(schemaName, Schema.class) + "." + escapeObjectName(objectName, objectType);
                 }
             } else {
-                if (!defaultSchemaSet && isDefaultSchema(catalogName, schemaName) && !getOutputDefaultSchema() && !getOutputDefaultCatalog()) {
+                if (isDefaultSchema(catalogName, schemaName) && !getOutputDefaultSchema() && !getOutputDefaultCatalog()) {
                     return escapeObjectName(objectName, objectType);
-                } else if (!defaultSchemaSet && isDefaultSchema(catalogName, schemaName) && !getOutputDefaultCatalog()) {
+                } else if (isDefaultSchema(catalogName, schemaName) && !getOutputDefaultCatalog()) {
                     return escapeObjectName(schemaName, Schema.class) + "." + escapeObjectName(objectName, objectType);
                 } else {
                     return escapeObjectName(catalogName, Catalog.class) + "." + escapeObjectName(schemaName, Schema.class) + "." + escapeObjectName(objectName, objectType);
@@ -909,7 +1130,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                 if (getOutputDefaultCatalog()) {
                     return escapeObjectName(catalogName, Catalog.class) + "." + escapeObjectName(objectName, objectType);
                 } else {
-                    if (!defaultCatalogSet && isDefaultCatalog(catalogName)) {
+                    if (isDefaultCatalog(catalogName)) {
                         return escapeObjectName(objectName, objectType);
                     } else {
                         return escapeObjectName(catalogName, Catalog.class) + "." + escapeObjectName(objectName, objectType);
@@ -920,7 +1141,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                     if (getOutputDefaultCatalog()) {
                         return escapeObjectName(schemaName, Catalog.class) + "." + escapeObjectName(objectName, objectType);
                     } else {
-                        if (!defaultCatalogSet && isDefaultCatalog(schemaName)) {
+                        if (isDefaultCatalog(schemaName)) {
                             return escapeObjectName(objectName, objectType);
                         } else {
                             return escapeObjectName(schemaName, Catalog.class) + "." + escapeObjectName(objectName, objectType);
@@ -932,7 +1153,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                     if (catalogName == null) {
                         return escapeObjectName(objectName, objectType);
                     } else {
-                        if (defaultCatalogSet || (isDefaultCatalog(catalogName) && getOutputDefaultCatalog())) {
+                        if (isDefaultCatalog(catalogName) && getOutputDefaultCatalog()) {
                             return escapeObjectName(catalogName, Catalog.class) + "." + escapeObjectName(objectName, objectType);
                         } else {
                             return escapeObjectName(objectName, objectType);
@@ -947,10 +1168,9 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public String escapeObjectName(String objectName, final Class<? extends DatabaseObject> objectType) {
+    public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         if (objectName != null) {
-            objectName = objectName.trim();
-            if (mustQuoteObjectName(objectName, objectType)) {
+            if (objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName)) {
                 return quoteObject(objectName, objectType);
             } else if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) {
                 return quoteObject(objectName, objectType);
@@ -960,39 +1180,32 @@ public abstract class AbstractJdbcDatabase implements Database {
         return objectName;
     }
 
-    protected boolean mustQuoteObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
-        if (objectName.contains("(")) {
-            return false;
-        }
-        return objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName) || objectName.contains(" ");
-    }
-
-    public String quoteObject(final String objectName, final Class<? extends DatabaseObject> objectType) {
+    public String quoteObject(String objectName, Class<? extends DatabaseObject> objectType) {
         return quotingStartCharacter + objectName + quotingEndCharacter;
     }
 
     @Override
-    public String escapeIndexName(final String catalogName, final String schemaName, final String indexName) {
+    public String escapeIndexName(String catalogName, String schemaName, String indexName) {
         return escapeObjectName(catalogName, schemaName, indexName, Index.class);
     }
 
     @Override
-    public String escapeSequenceName(final String catalogName, final String schemaName, final String sequenceName) {
+    public String escapeSequenceName(String catalogName, String schemaName, String sequenceName) {
         return escapeObjectName(catalogName, schemaName, sequenceName, Sequence.class);
     }
 
     @Override
-    public String escapeConstraintName(final String constraintName) {
+    public String escapeConstraintName(String constraintName) {
         return escapeObjectName(constraintName, Index.class);
     }
 
     @Override
-    public String escapeColumnName(final String catalogName, final String schemaName, final String tableName, final String columnName) {
+    public String escapeColumnName(String catalogName, String schemaName, String tableName, String columnName) {
         return escapeObjectName(columnName, Column.class);
     }
 
     @Override
-    public String escapeColumnNameList(final String columnNames) {
+    public String escapeColumnNameList(String columnNames) {
         StringBuffer sb = new StringBuffer();
         for (String columnName : columnNames.split(",")) {
             if (sb.length() > 0) {
@@ -1019,17 +1232,17 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public boolean supportsCatalogInObjectName(final Class<? extends DatabaseObject> type) {
+    public boolean supportsCatalogInObjectName(Class<? extends DatabaseObject> type) {
         return false;
     }
 
     @Override
-    public String generatePrimaryKeyName(final String tableName) {
+    public String generatePrimaryKeyName(String tableName) {
         return "PK_" + tableName.toUpperCase();
     }
 
     @Override
-    public String escapeViewName(final String catalogName, final String schemaName, final String viewName) {
+    public String escapeViewName(String catalogName, String schemaName, String viewName) {
         return escapeObjectName(catalogName, schemaName, viewName, View.class);
     }
 
@@ -1037,13 +1250,56 @@ public abstract class AbstractJdbcDatabase implements Database {
      * Returns the run status for the given ChangeSet
      */
     @Override
-    public ChangeSet.RunStatus getRunStatus(final ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException {
-        return ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).getRunStatus(changeSet);
+    public ChangeSet.RunStatus getRunStatus(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException {
+        if (!hasDatabaseChangeLogTable()) {
+            return ChangeSet.RunStatus.NOT_RAN;
+        }
+
+        RanChangeSet foundRan = getRanChangeSet(changeSet);
+
+        if (foundRan == null) {
+            return ChangeSet.RunStatus.NOT_RAN;
+        } else {
+            if (foundRan.getLastCheckSum() == null) {
+                try {
+                    LogFactory.getLogger().info("Updating NULL md5sum for " + changeSet.toString());
+                    ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement("UPDATE " + escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()) + " SET MD5SUM='" + changeSet.generateCheckSum().toString() + "' WHERE ID='" + changeSet.getId() + "' AND AUTHOR='" + changeSet.getAuthor() + "' AND FILENAME='" + changeSet.getFilePath() + "'"));
+
+                    this.commit();
+                } catch (DatabaseException e) {
+                    throw new DatabaseException(e);
+                }
+
+                return ChangeSet.RunStatus.ALREADY_RAN;
+            } else {
+                if (foundRan.getLastCheckSum().equals(changeSet.generateCheckSum())) {
+                    return ChangeSet.RunStatus.ALREADY_RAN;
+                } else {
+                    if (changeSet.shouldRunOnChange()) {
+                        return ChangeSet.RunStatus.RUN_AGAIN;
+                    } else {
+                        return ChangeSet.RunStatus.INVALID_MD5SUM;
+//                        throw new DatabaseHistoryException("MD5 Check for " + changeSet.toString() + " failed");
+                    }
+                }
+            }
+        }
     }
 
     @Override
-    public RanChangeSet getRanChangeSet(final ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException {
-        return ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).getRanChangeSet(changeSet);
+    public RanChangeSet getRanChangeSet(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException {
+        if (!hasDatabaseChangeLogTable()) {
+            return null;
+        }
+
+        RanChangeSet foundRan = null;
+        for (RanChangeSet ranChange : getRanChangeSetList()) {
+            if (ranChange.isSameAs(changeSet)) {
+                foundRan = ranChange;
+                break;
+            }
+        }
+        return foundRan;
     }
 
     /**
@@ -1051,12 +1307,56 @@ public abstract class AbstractJdbcDatabase implements Database {
      */
     @Override
     public List<RanChangeSet> getRanChangeSetList() throws DatabaseException {
-        return ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).getRanChangeSets();
+        if (this.ranChangeSetList != null) {
+            return this.ranChangeSetList;
+        }
+
+        String databaseChangeLogTableName = escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName());
+        ranChangeSetList = new ArrayList<RanChangeSet>();
+        if (hasDatabaseChangeLogTable()) {
+            LogFactory.getLogger().info("Reading from " + databaseChangeLogTableName);
+            SqlStatement select = new SelectFromDatabaseChangeLogStatement("FILENAME", "AUTHOR", "ID", "MD5SUM", "DATEEXECUTED", "ORDEREXECUTED", "TAG", "EXECTYPE", "DESCRIPTION", "COMMENTS").setOrderBy("DATEEXECUTED ASC", "ORDEREXECUTED ASC");
+            List<Map> results = ExecutorService.getInstance().getExecutor(this).queryForList(select);
+            for (Map rs : results) {
+                String fileName = rs.get("FILENAME").toString();
+                String author = rs.get("AUTHOR").toString();
+                String id = rs.get("ID").toString();
+                String md5sum = rs.get("MD5SUM") == null ? null : rs.get("MD5SUM").toString();
+                String description = rs.get("DESCRIPTION") == null ? null : rs.get("DESCRIPTION").toString();
+                String comments = rs.get("COMMENTS") == null ? null : rs.get("COMMENTS").toString();
+                Object tmpDateExecuted = rs.get("DATEEXECUTED");
+                Date dateExecuted = null;
+                if (tmpDateExecuted instanceof Date) {
+                    dateExecuted = (Date) tmpDateExecuted;
+                } else {
+                    DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    try {
+                        dateExecuted = df.parse((String) tmpDateExecuted);
+                    } catch (ParseException e) {
+                    }
+                }
+                String tag = rs.get("TAG") == null ? null : rs.get("TAG").toString();
+                String execType = rs.get("EXECTYPE") == null ? null : rs.get("EXECTYPE").toString();
+                try {
+                    RanChangeSet ranChangeSet = new RanChangeSet(fileName, id, author, CheckSum.parse(md5sum), dateExecuted, tag, ChangeSet.ExecType.valueOf(execType), description, comments);
+                    ranChangeSetList.add(ranChangeSet);
+                } catch (IllegalArgumentException e) {
+                    LogFactory.getLogger().severe("Unknown EXECTYPE from database: " + execType);
+                    throw e;
+                }
+            }
+        }
+        return ranChangeSetList;
     }
 
     @Override
-    public Date getRanDate(final ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException {
-        return ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).getRanDate(changeSet);
+    public Date getRanDate(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException {
+        RanChangeSet ranChange = getRanChangeSet(changeSet);
+        if (ranChange == null) {
+            return null;
+        } else {
+            return ranChange.getDateExecuted();
+        }
     }
 
     /**
@@ -1064,17 +1364,25 @@ public abstract class AbstractJdbcDatabase implements Database {
      * with the information.
      */
     @Override
-    public void markChangeSetExecStatus(final ChangeSet changeSet, final ChangeSet.ExecType execType) throws DatabaseException {
-        ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).setExecType(changeSet, execType);
+    public void markChangeSetExecStatus(ChangeSet changeSet, ChangeSet.ExecType execType) throws DatabaseException {
+
+
+        ExecutorService.getInstance().getExecutor(this).execute(new MarkChangeSetRanStatement(changeSet, execType));
+        commit();
+        getRanChangeSetList().add(new RanChangeSet(changeSet, execType));
     }
 
     @Override
-    public void removeRanStatus(final ChangeSet changeSet) throws DatabaseException {
-        ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).removeFromHistory(changeSet);
+    public void removeRanStatus(ChangeSet changeSet) throws DatabaseException {
+
+        ExecutorService.getInstance().getExecutor(this).execute(new RemoveChangeSetRanStatusStatement(changeSet));
+        commit();
+
+        getRanChangeSetList().remove(new RanChangeSet(changeSet));
     }
 
     @Override
-    public String escapeStringForDatabase(final String string) {
+    public String escapeStringForDatabase(String string) {
         if (string == null) {
             return null;
         }
@@ -1100,7 +1408,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
@@ -1137,7 +1445,6 @@ public abstract class AbstractJdbcDatabase implements Database {
             }
             connection.close();
         }
-        ExecutorService.getInstance().clearExecutor(this);
     }
 
     @Override
@@ -1155,7 +1462,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public void setAutoCommit(final boolean b) throws DatabaseException {
+    public void setAutoCommit(boolean b) throws DatabaseException {
         try {
             getConnection().setAutoCommit(b);
         } catch (DatabaseException e) {
@@ -1183,7 +1490,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public void executeStatements(final Change change, final DatabaseChangeLog changeLog, final List<SqlVisitor> sqlVisitors) throws LiquibaseException {
+    public void executeStatements(Change change, DatabaseChangeLog changeLog, List<SqlVisitor> sqlVisitors) throws LiquibaseException {
         SqlStatement[] statements = change.generateStatements(this);
 
         execute(statements, sqlVisitors);
@@ -1197,7 +1504,7 @@ public abstract class AbstractJdbcDatabase implements Database {
      * @throws DatabaseException if there were problems issuing the statements
      */
     @Override
-    public void execute(final SqlStatement[] statements, final List<SqlVisitor> sqlVisitors) throws LiquibaseException {
+    public void execute(SqlStatement[] statements, List<SqlVisitor> sqlVisitors) throws LiquibaseException {
         for (SqlStatement statement : statements) {
             if (statement.skipOnUnsupported() && !SqlGeneratorFactory.getInstance().supports(statement, this)) {
                 continue;
@@ -1209,7 +1516,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
 
     @Override
-    public void saveStatements(final Change change, final List<SqlVisitor> sqlVisitors, final Writer writer) throws IOException, StatementNotSupportedOnDatabaseException, LiquibaseException {
+    public void saveStatements(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, StatementNotSupportedOnDatabaseException, LiquibaseException {
         SqlStatement[] statements = change.generateStatements(this);
         for (SqlStatement statement : statements) {
             for (Sql sql : SqlGeneratorFactory.getInstance().generateSql(statement, this)) {
@@ -1219,7 +1526,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public void executeRollbackStatements(final Change change, final List<SqlVisitor> sqlVisitors) throws LiquibaseException, RollbackImpossibleException {
+    public void executeRollbackStatements(Change change, List<SqlVisitor> sqlVisitors) throws LiquibaseException, RollbackImpossibleException {
         SqlStatement[] statements = change.generateRollbackStatements(this);
         List<SqlVisitor> rollbackVisitors = new ArrayList<SqlVisitor>();
         if (sqlVisitors != null) {
@@ -1233,7 +1540,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public void saveRollbackStatement(final Change change, final List<SqlVisitor> sqlVisitors, final Writer writer) throws IOException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException, LiquibaseException {
+    public void saveRollbackStatement(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException, LiquibaseException {
         SqlStatement[] statements = change.generateRollbackStatements(this);
         for (SqlStatement statement : statements) {
             for (Sql sql : SqlGeneratorFactory.getInstance().generateSql(statement, this)) {
@@ -1243,12 +1550,25 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
+    public int getNextChangeSetSequenceValue() throws LiquibaseException {
+        if (lastChangeSetSequenceValue == null) {
+            if (getConnection() == null) {
+                lastChangeSetSequenceValue = 0;
+            } else {
+                lastChangeSetSequenceValue = ExecutorService.getInstance().getExecutor(this).queryForInt(new GetNextChangeSetSequenceValueStatement());
+            }
+        }
+
+        return ++lastChangeSetSequenceValue;
+    }
+
+    @Override
     public List<DatabaseFunction> getDateFunctions() {
         return dateFunctions;
     }
 
     @Override
-    public boolean isFunction(final String string) {
+    public boolean isFunction(String string) {
         if (string.endsWith("()")) {
             return true;
         }
@@ -1262,8 +1582,8 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public void resetInternalState() {
-        ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).reset();
-        LockServiceFactory.getInstance().getLockService(this).reset();
+        this.ranChangeSetList = null;
+        this.hasDatabaseChangeLogLockTable = false;
     }
 
     @Override
@@ -1287,23 +1607,23 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public int getDataTypeMaxParameters(final String dataTypeName) {
+    public int getDataTypeMaxParameters(String dataTypeName) {
         return 2;
     }
 
-    public CatalogAndSchema getSchemaFromJdbcInfo(final String rawCatalogName, final String rawSchemaName) {
-        return new CatalogAndSchema(rawCatalogName, rawSchemaName).customize(this);
+    public CatalogAndSchema getSchemaFromJdbcInfo(String rawCatalogName, String rawSchemaName) {
+        return this.correctSchema(new CatalogAndSchema(rawCatalogName, rawSchemaName));
     }
 
-    public String getJdbcCatalogName(final CatalogAndSchema schema) {
-        return correctObjectName(schema.getCatalogName(), Catalog.class);
+    public String getJdbcCatalogName(CatalogAndSchema schema) {
+        return schema.getCatalogName();
     }
 
-    public String getJdbcSchemaName(final CatalogAndSchema schema) {
-        return correctObjectName(schema.getSchemaName(), Schema.class);
+    public String getJdbcSchemaName(CatalogAndSchema schema) {
+        return schema.getSchemaName();
     }
 
-    public final String getJdbcCatalogName(final Schema schema) {
+    public final String getJdbcCatalogName(Schema schema) {
         if (schema == null) {
             return getJdbcCatalogName(getDefaultSchema());
         } else {
@@ -1311,7 +1631,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
     }
 
-    public final String getJdbcSchemaName(final Schema schema) {
+    public final String getJdbcSchemaName(Schema schema) {
         if (schema == null) {
             return getJdbcSchemaName(getDefaultSchema());
         } else {
@@ -1325,7 +1645,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public void setObjectQuotingStrategy(final ObjectQuotingStrategy quotingStrategy) {
+    public void setObjectQuotingStrategy(ObjectQuotingStrategy quotingStrategy) {
         this.quotingStrategy = quotingStrategy;
     }
 
@@ -1358,29 +1678,25 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
     }
 
-    private boolean isCurrentTimeFunction(final String functionValue) {
-        if (functionValue == null) {
-            return false;
-        }
-
+    private boolean isCurrentTimeFunction(String functionValue) {
         return functionValue.startsWith("current_timestamp")
                 || functionValue.startsWith("current_datetime")
-                || functionValue.equalsIgnoreCase(getCurrentDateTimeFunction());
+                || getCurrentDateTimeFunction().equalsIgnoreCase(functionValue);
     }
 
     @Override
     public String getCurrentDateTimeFunction() {
         return currentDateTimeFunction;
     }
-
+    
  	@Override
-    public void setOutputDefaultSchema(final boolean outputDefaultSchema) {
+    public void setOutputDefaultSchema(boolean outputDefaultSchema) {
 		this.outputDefaultSchema = outputDefaultSchema;
-
+ 		
  	}
 
     @Override
-    public boolean isDefaultSchema(final String catalog, final String schema) {
+    public boolean isDefaultSchema(String catalog, String schema) {
         if (!supportsSchemas()) {
             return true;
         }
@@ -1392,7 +1708,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public boolean isDefaultCatalog(final String catalog) {
+    public boolean isDefaultCatalog(String catalog) {
         if (!supportsCatalogs()) {
             return true;
         }
@@ -1412,17 +1728,12 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public void setOutputDefaultCatalog(final boolean outputDefaultCatalog) {
+    public void setOutputDefaultCatalog(boolean outputDefaultCatalog) {
         this.outputDefaultCatalog = outputDefaultCatalog;
     }
 
     @Override
     public boolean supportsPrimaryKeyNames() {
         return true;
-    }
-
-    @Override
-	public String getSystemSchema(){
-    	return "information_schema";
     }
 }

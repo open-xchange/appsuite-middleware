@@ -2,16 +2,18 @@ package liquibase.snapshot;
 
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
-import liquibase.database.OfflineConnection;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Relation;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.*;
 
 public class SnapshotGeneratorFactory {
@@ -20,7 +22,7 @@ public class SnapshotGeneratorFactory {
 
     private List<SnapshotGenerator> generators = new ArrayList<SnapshotGenerator>();
 
-    protected SnapshotGeneratorFactory() {
+    private SnapshotGeneratorFactory() {
         Class[] classes;
         try {
             classes = ServiceLocator.getInstance().findClasses(SnapshotGenerator.class);
@@ -113,16 +115,13 @@ public class SnapshotGeneratorFactory {
         }
         Schema[] schemas = new Schema[examples.length];
         for (int i = 0; i< schemas.length; i++) {
-            examples[i] = examples[i].customize(database);
+            examples[i] = database.correctSchema(examples[i]);
             schemas[i] = new Schema(examples[i].getCatalogName(), examples[i].getSchemaName());
         }
         return createSnapshot(schemas, database, snapshotControl);
     }
 
     public DatabaseSnapshot createSnapshot(DatabaseObject[] examples, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
-        if (database.getConnection() instanceof OfflineConnection) {
-            throw new DatabaseException("Cannot snapshot offline database");
-        }
         return new JdbcDatabaseSnapshot(examples, database, snapshotControl);
     }
 

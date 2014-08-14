@@ -15,10 +15,6 @@ public class DatabaseList {
      * The string "all" will match all databases. The string "none" will match no databases, even if others are listed.
      * If an empty or null definition or null is passed, it will return the passed returnValueIfEmpty value.
      */
-    public static boolean definitionMatches(String definition, String databaseShortName, boolean returnValueIfEmpty) {
-        return definitionMatches(StringUtils.splitAndTrim(StringUtils.trimToNull(definition), ","), databaseShortName, returnValueIfEmpty);
-    }
-
     public static boolean definitionMatches(String definition, Database database, boolean returnValueIfEmpty) {
         return definitionMatches(StringUtils.splitAndTrim(StringUtils.trimToNull(definition), ","), database, returnValueIfEmpty);
     }
@@ -26,7 +22,7 @@ public class DatabaseList {
     /**
      * Same logic as {@link #definitionMatches(String, liquibase.database.Database, boolean)} but with a collection of definitions rather than a comma separated list.
      */
-    public static boolean definitionMatches(Collection<String> definition, String databaseShortName, boolean returnValueIfEmptyList) {
+    public static boolean definitionMatches(Collection<String> definition, Database database, boolean returnValueIfEmptyList) {
         if (definition == null || definition.isEmpty()) {
             return returnValueIfEmptyList;
         }
@@ -40,7 +36,7 @@ public class DatabaseList {
         }
 
         // !h2 would mean that the h2 database should be excluded
-        if (definition.contains("!" + databaseShortName)) {
+        if (definition.contains("!" + database.getShortName())) {
             return false;
         }
 
@@ -53,21 +49,11 @@ public class DatabaseList {
         }
 
 
-        if (dbmsSupported.isEmpty() || dbmsSupported.contains(databaseShortName)) {
+        if (dbmsSupported.isEmpty() || dbmsSupported.contains(database.getShortName())) {
             return true;
         }
 
         return false;
 
-    }
-
-    public static boolean definitionMatches(Collection<String> definition, Database database, boolean returnValueIfEmptyList) {
-        String shortName;
-        if (database == null) {
-            shortName = "null";
-        } else {
-            shortName = database.getShortName();
-        }
-        return definitionMatches(definition, shortName, returnValueIfEmptyList);
     }
 }

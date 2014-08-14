@@ -1,15 +1,20 @@
 package liquibase.servicelocator;
 
+import liquibase.logging.LogFactory;
+import liquibase.logging.LogLevel;
 import liquibase.logging.Logger;
 import liquibase.logging.core.DefaultLogger;
-import liquibase.util.StringUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Modifier;
-import java.net.*;
+import java.lang.annotation.Annotation;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLDecoder;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
@@ -19,11 +24,11 @@ import java.util.jar.JarInputStream;
  */
 public class DefaultPackageScanClassResolver implements PackageScanClassResolver {
 
+    private static Map<String, Set<String>> classesByJarUrl = new HashMap<String, Set<String>>();
+
     protected final transient Logger log = new DefaultLogger();
     private Set<ClassLoader> classLoaders;
     private Set<PackageScanFilter> scanFilters;
-    private Map<String, Set<Class>> allClassesByPackage = new HashMap<String, Set<Class>>();
-    private Set<String> loadedPackages = new HashSet<String>();
 
     @Override
     public void addClassLoader(ClassLoader classLoader) {
@@ -111,18 +116,14 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
 
         Set<ClassLoader> set = getClassLoaders();
 
-        if (!loadedPackages.contains(packageName)) {
-            for (ClassLoader classLoader : set) {
-                this.findAllClasses(packageName, classLoader);
-            }
-            loadedPackages.add(packageName);
+        for (ClassLoader classLoader : set) {
+            find(test, packageName, classLoader, classes);
         }
-
-        findInAllClasses(test, packageName, classes);
     }
 
-    protected void findAllClasses(String packageName, ClassLoader loader) {
-        log.debug("Searching for all classes in package: " + packageName + " using classloader: " + loader.getClass().getName());
+    protected void find(PackageScanFilter test, String packageName, ClassLoader loader, Set<Class<?>> classes) {
+        log.debug("Searching for: " + test + " in package: " + packageName + " using classloader: "
+                + loader.getClass().getName());
 
         Enumeration<URL> urls;
         try {
@@ -144,7 +145,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                 url = customResourceLocator(url);
 
                 String urlPath = url.getFile();
-                String host = null;
+				String host = null;
                 urlPath = URLDecoder.decode(urlPath, "UTF-8");
 
                 if (url.getProtocol().equals("vfs") && !urlPath.startsWith("vfs")) {
@@ -163,8 +164,8 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                     // to remedy this then create new path without using the URLDecoder
                     try {
                         URI uri = new URI(url.getFile());
-                        host = uri.getHost();
-                        urlPath = uri.getPath();
+						host = uri.getHost();
+						urlPath = uri.getPath();
                     } catch (URISyntaxException e) {
                         // fallback to use as it was given from the URLDecoder
                         // this allows us to work on Windows if users have spaces in paths
@@ -189,22 +190,24 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                 if (urlPath.indexOf('!') > 0) {
                     urlPath = urlPath.substring(0, urlPath.indexOf('!'));
                 }
+				
+				// If a host component was given prepend it to the decoded path.
+				// This still has its problems as we silently skip user and password
+				// information etc. but it fixes UNC urls on windows.
+				if (host != null) {
+					if (urlPath.startsWith("/")) {
+						urlPath = "//" + host + urlPath;
+					} else {
+						urlPath = "//" + host + "/" + urlPath;
+					}
+				}
 
-                // If a host component was given prepend it to the decoded path.
-                // This still has its problems as we silently skip user and password
-                // information etc. but it fixes UNC urls on windows.
-                if (host != null) {
-                    if (urlPath.startsWith("/")) {
-                        urlPath = "//" + host + urlPath;
-                    } else {
-                        urlPath = "//" + host + "/" + urlPath;
-                    }
-                }
+                log.debug("Scanning for classes in [" + urlPath + "] matching criteria: " + test);
 
                 File file = new File(urlPath);
                 if (file.isDirectory()) {
                     log.debug("Loading from directory using file: " + file);
-                    loadImplementationsInDirectory(packageName, file, loader);
+                    loadImplementationsInDirectory(test, packageName, file, classes);
                 } else {
                     InputStream stream;
                     if (urlPath.startsWith("http:") || urlPath.startsWith("https:")
@@ -222,63 +225,13 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                         stream = new FileInputStream(file);
                     }
 
-                    try {
-                        loadImplementationsInJar(packageName, stream, loader);
-                    } catch (IOException ioe) {
-                        log.warning("Cannot search jar file '" + urlPath + "' for classes due to an IOException: " + ioe.getMessage(), ioe);
-                    } finally {
-                        stream.close();
-                    }
+                    loadImplementationsInJar(test, packageName, stream, urlPath, classes);
                 }
             } catch (IOException e) {
                 // use debug logging to avoid being to noisy in logs
                 log.debug("Cannot read entries in url: " + url, e);
             }
         }
-    }
-
-    protected void findInAllClasses(PackageScanFilter test, String packageName, Set<Class<?>> classes) {
-        log.debug("Searching for: " + test + " in package: " + packageName );
-
-        Set<Class> packageClasses = getFoundClasses(packageName);
-        if (packageClasses == null) {
-            log.debug("No classes found in package: " + packageName );
-            return;
-        }
-        for (Class type : packageClasses) {
-            if (test.matches(type)) {
-                classes.add(type);
-            }
-        }
-
-    }
-
-    protected void addFoundClass(Class<?> type) {
-        if (type.getPackage() != null) {
-            String packageName = type.getPackage().getName();
-            List<String> packageNameParts = Arrays.asList(packageName.split("\\."));
-            for (int i = 0; i < packageNameParts.size(); i++) {
-                String thisPackage = StringUtils.join(packageNameParts.subList(0, i + 1), "/");
-                addFoundClass(thisPackage, type);
-            }
-        }
-    }
-
-
-    protected void addFoundClass(String packageName, Class<?> type) {
-        packageName = packageName.replace("/", ".");
-
-        if (!this.allClassesByPackage.containsKey(packageName)) {
-            this.allClassesByPackage.put(packageName, new HashSet<Class>());
-        }
-
-        this.allClassesByPackage.get(packageName).add(type);
-    }
-
-
-    protected Set<Class> getFoundClasses(String packageName) {
-        packageName = packageName.replace("/", ".");
-        return this.allClassesByPackage.get(packageName);
     }
 
     // We can override this method to support the custom ResourceLocator
@@ -322,16 +275,18 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
     /**
      * Finds matches in a physical directory on a filesystem. Examines all files
      * within a directory - if the File object is not a directory, and ends with
-     * <i>.class</i> the file is loaded. Operates recursively to find classes within a
+     * <i>.class</i> the file is loaded and tested to see if it is acceptable
+     * according to the Test. Operates recursively to find classes within a
      * folder structure matching the package structure.
      *
+     * @param test     a Test used to filter the classes that are discovered
      * @param parent   the package name up to this directory in the package
      *                 hierarchy. E.g. if /classes is in the classpath and we wish to
      *                 examine files in /classes/org/apache then the values of
      *                 <i>parent</i> would be <i>org/apache</i>
      * @param location a File object representing a directory
      */
-    private void loadImplementationsInDirectory(String parent, File location, ClassLoader classLoader) {
+    private void loadImplementationsInDirectory(PackageScanFilter test, String parent, File location, Set<Class<?>> classes) {
         File[] files = location.listFiles();
         StringBuilder builder = null;
 
@@ -344,39 +299,12 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                 String packageOrClass = parent == null ? name : builder.toString();
 
                 if (file.isDirectory()) {
-                    loadImplementationsInDirectory(packageOrClass, file, classLoader);
+                    loadImplementationsInDirectory(test, packageOrClass, file, classes);
                 } else if (name.endsWith(".class")) {
-                    this.loadClass(packageOrClass, classLoader);
+                    addIfMatching(test, packageOrClass, classes);
                 }
             }
         }
-    }
-
-    private void loadClass(String className, ClassLoader classLoader) {
-        try {
-            String externalName = className.substring(0, className.indexOf('.')).replace('/', '.');
-            Class<?> type = classLoader.loadClass(externalName);
-            log.debug("Loaded the class: " + type + " in classloader: " + classLoader);
-
-            if (Modifier.isAbstract(type.getModifiers()) || Modifier.isInterface(type.getModifiers())) {
-                return;
-            }
-
-            addFoundClass(type);
-
-        } catch (ClassNotFoundException e) {
-            log.debug("Cannot find class '" + className + "' in classloader: " + classLoader
-                    + ". Reason: " + e, e);
-        } catch (NoClassDefFoundError e) {
-            log.debug("Cannot find the class definition '" + className + "' in classloader: " + classLoader
-                    + ". Reason: " + e, e);
-        } catch (LinkageError e) {
-            log.debug("Cannot find the class definition '" + className + "' in classloader: " + classLoader
-                    + ". Reason: " + e, e);
-        } catch (Throwable e) {
-            log.severe("Cannot load class '"+className+"' in classloader: "+classLoader+".  Reason: "+e, e);
-        }
-
     }
 
     /**
@@ -384,28 +312,55 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
      * structure matching the package structure. If the File is not a JarFile or
      * does not exist a warning will be logged, but no error will be raised.
      *
+     * @param test    a Test used to filter the classes that are discovered
      * @param parent  the parent package under which classes must be in order to
      *                be considered
      * @param stream  the inputstream of the jar file to be examined for classes
+     * @param urlPath the url of the jar file to be examined for classes
      */
-    protected void loadImplementationsInJar(String parent, InputStream stream, ClassLoader loader) throws IOException {
+    protected void loadImplementationsInJar(PackageScanFilter test, String parent, InputStream stream, String urlPath, Set<Class<?>> classes) {
         JarInputStream jarStream = null;
-            if (stream instanceof JarInputStream) {
-                jarStream = (JarInputStream) stream;
-            } else {
-                jarStream = new JarInputStream(stream);
-            }
+        try {
 
-            JarEntry entry;
-            while ((entry = jarStream.getNextJarEntry()) != null) {
-                String name = entry.getName();
-                if (name != null && name.contains(parent)) {
-                    name = name.trim();
-                    if (!entry.isDirectory() && name.endsWith(".class")) {
-                        loadClass(name, loader);
+            if (!classesByJarUrl.containsKey(urlPath)) {
+                Set<String> names = new HashSet<String>();
+
+                if (stream instanceof JarInputStream) {
+                    jarStream = (JarInputStream) stream;
+                } else {
+                    jarStream = new JarInputStream(stream);
+                }
+
+                JarEntry entry;
+                while ((entry = jarStream.getNextJarEntry()) != null) {
+                    String name = entry.getName();
+                    if (name != null) {
+                        name = name.trim();
+                        if (!entry.isDirectory() && name.endsWith(".class")) {
+                            names.add(name);
+                        }
                     }
                 }
+
+                classesByJarUrl.put(urlPath, names);
             }
+
+            for (String name : classesByJarUrl.get(urlPath)) {
+                if (name.startsWith(parent)) {
+                    addIfMatching(test, name, classes);
+                }
+            }
+        } catch (IOException ioe) {
+            log.warning("Cannot search jar file '" + urlPath + "' for classes matching criteria: " + test
+                    + " due to an IOException: " + ioe.getMessage(), ioe);
+        } finally {
+            try {
+                if (jarStream != null) {
+                    jarStream.close();
+                }
+            } catch (IOException ignore) {
+            }
+        }
     }
 
     /**
@@ -436,9 +391,6 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                     log.debug("Cannot find class '" + fqn + "' in classloader: " + classLoader
                             + ". Reason: " + e, e);
                 } catch (NoClassDefFoundError e) {
-                    log.debug("Cannot find the class definition '" + fqn + "' in classloader: " + classLoader
-                            + ". Reason: " + e, e);
-                } catch (LinkageError e) {
                     log.debug("Cannot find the class definition '" + fqn + "' in classloader: " + classLoader
                             + ". Reason: " + e, e);
                 } catch (Throwable e) {

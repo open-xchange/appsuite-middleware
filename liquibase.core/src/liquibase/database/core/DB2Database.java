@@ -3,14 +3,12 @@ package liquibase.database.core;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
-import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Schema;
 import liquibase.util.JdbcUtils;
-import liquibase.util.StringUtils;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -72,7 +70,7 @@ public class DB2Database extends AbstractJdbcDatabase {
     public String getDefaultCatalogName() {
 
         if (defaultCatalogName != null) {
-            return defaultCatalogName;
+            return defaultSchemaName;
         }
 
         if (defaultSchemaName != null) {
@@ -80,7 +78,7 @@ public class DB2Database extends AbstractJdbcDatabase {
         }
 
 
-        if (getConnection() == null || getConnection() instanceof OfflineConnection) {
+        if (getConnection() == null) {
             return null;
         }
         Statement stmt = null;
@@ -91,9 +89,9 @@ public class DB2Database extends AbstractJdbcDatabase {
             if (rs.next()) {
                 String result = rs.getString(1);
                 if (result != null) {
-                    this.defaultSchemaName = StringUtils.trimToNull(result);
+                    this.defaultSchemaName = result;
                 } else {
-                    this.defaultSchemaName = StringUtils.trimToNull(super.getDefaultSchemaName());
+                    this.defaultSchemaName = super.getDefaultSchemaName();
                 }
             }
         } catch (Exception e) {
@@ -218,7 +216,7 @@ public class DB2Database extends AbstractJdbcDatabase {
 
     @Override
     public CatalogAndSchema getSchemaFromJdbcInfo(String rawCatalogName, String rawSchemaName) {
-        return new CatalogAndSchema(rawSchemaName, null).customize(this);
+        return this.correctSchema(new CatalogAndSchema(rawSchemaName, null));
     }
 
     @Override
@@ -228,7 +226,7 @@ public class DB2Database extends AbstractJdbcDatabase {
 
     @Override
     public String getJdbcSchemaName(CatalogAndSchema schema) {
-        return correctObjectName(schema.getCatalogName(), Catalog.class);
+        return schema.getCatalogName();
     }
 
     @Override

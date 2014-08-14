@@ -18,6 +18,7 @@ public class RenameViewGenerator extends AbstractSqlGenerator<RenameViewStatemen
                 || database instanceof HsqlDatabase
                 || database instanceof H2Database
                 || database instanceof DB2Database
+                || database instanceof CacheDatabase
                 || database instanceof FirebirdDatabase
                 || database instanceof InformixDatabase
                 || database instanceof SybaseASADatabase);
@@ -44,6 +45,8 @@ public class RenameViewGenerator extends AbstractSqlGenerator<RenameViewStatemen
             sql = "RENAME TABLE " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getOldViewName()) + " TO " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getNewViewName());
         } else if (database instanceof PostgresDatabase) {
             sql = "ALTER TABLE " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getOldViewName()) + " RENAME TO " + database.escapeObjectName(statement.getNewViewName(), View.class);
+        } else if (database instanceof MaxDBDatabase) {
+            sql = "RENAME VIEW " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getOldViewName()) + " TO " + database.escapeObjectName(statement.getNewViewName(), View.class);
         } else if (database instanceof OracleDatabase) {
             sql = "RENAME " + database.escapeObjectName(statement.getOldViewName(), View.class) + " TO " + database.escapeObjectName(statement.getNewViewName(), View.class);
         } else {

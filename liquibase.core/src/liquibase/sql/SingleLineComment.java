@@ -30,8 +30,4 @@ public class SingleLineComment implements Sql {
 		return lineCommentToken + ' ' + sql;
 	}
 
-    @Override
-    public String toString() {
-        return toSql();
-    }
 }

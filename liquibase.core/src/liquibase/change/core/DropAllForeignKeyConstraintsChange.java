@@ -84,7 +84,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
         FindForeignKeyConstraintsStatement sql = new FindForeignKeyConstraintsStatement(getBaseTableCatalogName(), getBaseTableSchemaName(), getBaseTableName());
 
         try {
-            List<Map<String, ?>> results = executor.queryForList(sql);
+            List<Map> results = executor.queryForList(sql);
             Set<String> handledConstraints = new HashSet<String>();
 
             if (results != null && results.size() > 0) {
@@ -122,10 +122,5 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
     @Override
     public boolean generateStatementsVolatile(Database database) {
         return true;
-    }
-
-    @Override
-    public String getSerializedObjectNamespace() {
-        return STANDARD_CHANGELOG_NAMESPACE;
     }
 }

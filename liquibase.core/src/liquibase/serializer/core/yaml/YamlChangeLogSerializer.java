@@ -2,13 +2,11 @@ package liquibase.serializer.core.yaml;
 
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
-import liquibase.util.StringUtils;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.introspector.FieldProperty;
@@ -22,7 +20,9 @@ import org.yaml.snakeyaml.representer.Represent;
 import org.yaml.snakeyaml.representer.Representer;
 
 import java.beans.IntrospectionException;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.sql.Timestamp;
 import java.util.*;
@@ -97,13 +97,7 @@ public class YamlChangeLogSerializer implements ChangeLogSerializer {
 
     @Override
     public void write(List<ChangeSet> changeSets, OutputStream out) throws IOException {
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
-        writer.write("databaseChangeLog:\n");
-        for (ChangeSet changeSet : changeSets) {
-            writer.write(StringUtils.indent(serialize(changeSet, true), 2));
-            writer.write("\n");
-        }
-        writer.flush();
+        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
@@ -153,9 +147,9 @@ public class YamlChangeLogSerializer implements ChangeLogSerializer {
                     return super.getProperties(type);
                 }
             } catch (InstantiationException e) {
-                throw new UnexpectedLiquibaseException(e);
+                throw new RuntimeException(e);
             } catch (IllegalAccessException e) {
-                throw new UnexpectedLiquibaseException(e);
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }
             for (String property : serialzableType.getSerializableFields()) {
                 LiquibaseSerializable.SerializationType fieldType = serialzableType.getSerializableFieldType(property);

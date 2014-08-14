@@ -1,7 +1,5 @@
 package liquibase.structure.core;
 
-import liquibase.util.StringUtils;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -14,11 +12,6 @@ public class Table extends Relation {
         setAttribute("outgoingForeignKeys", new ArrayList<ForeignKey>());
         setAttribute("indexes", new ArrayList<Index>());
         setAttribute("uniqueConstraints", new ArrayList<UniqueConstraint>());
-    }
-
-    public Table(String catalogName, String schemaName, String tableName) {
-        this.setSchema(new Schema(catalogName, schemaName));
-        setName(tableName);
     }
 
     public PrimaryKey getPrimaryKey() {
@@ -54,7 +47,7 @@ public class Table extends Relation {
 
     @Override
     public int hashCode() {
-        return StringUtils.trimToEmpty(getName()).toUpperCase().hashCode();
+        return getName().toUpperCase().hashCode();
     }
 
     @Override

@@ -23,10 +23,4 @@ public class AppendSqlVisitor extends AbstractSqlVisitor{
     public String modifySql(String sql, Database database) {
         return sql + value;
     }
-
-    @Override
-    public String getSerializedObjectNamespace() {
-        return STANDARD_CHANGELOG_NAMESPACE;
-    }
-
 }

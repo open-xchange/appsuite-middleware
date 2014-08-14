@@ -24,12 +24,7 @@ public class NotPrecondition extends PreconditionLogic {
     public ValidationErrors validate(Database database) {
         return new ValidationErrors();
     }
-
-    @Override
-    public String getSerializedObjectNamespace() {
-        return STANDARD_CHANGELOG_NAMESPACE;
-    }
-
+    
     @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         for (Precondition precondition : getNestedPreconditions()) {

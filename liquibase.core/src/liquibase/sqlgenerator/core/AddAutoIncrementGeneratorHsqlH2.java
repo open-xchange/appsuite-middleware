@@ -40,7 +40,7 @@ public class AddAutoIncrementGeneratorHsqlH2 extends AddAutoIncrementGenerator {
             			statement.getTableName(),
             			statement.getColumnName())
             		+ " "
-            		+ DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType(), database)
+            		+ DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType())
             		+ " "
             		+ database.getAutoIncrementClause(
             			statement.getStartWith(), statement.getIncrementBy()),

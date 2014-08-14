@@ -6,7 +6,6 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
@@ -196,11 +195,10 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
 
     @Override
     protected String getConnectionCatalogName() throws DatabaseException {
-        if (getConnection() == null || getConnection() instanceof OfflineConnection) {
-            return null;
-        }
         try {
-            return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("select current schema from sysibm.sysdummy1"), String.class);
+            ResultSet resultSet = ((JdbcConnection) getConnection()).prepareStatement("select current schema from sysibm.sysdummy1").executeQuery();
+            resultSet.next();
+            return resultSet.getString(1);
         } catch (Exception e) {
             LogFactory.getLogger().info("Error getting default schema", e);
         }
@@ -211,6 +209,22 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
     @Override
     public boolean supportsCatalogInObjectName(Class<? extends DatabaseObject> type) {
         return true;
+    }
+
+    @Override
+    public void checkDatabaseChangeLogLockTable() throws DatabaseException {
+        super.checkDatabaseChangeLogLockTable();
+
+        if (this.supportsBooleanDataType()) { //check if the changelog table is of an old smallint vs. boolean format
+            Executor executor = ExecutorService.getInstance().getExecutor(this);
+            String lockTable = this.escapeTableName(this.getLiquibaseCatalogName(), this.getLiquibaseSchemaName(), this.getDatabaseChangeLogLockTableName());
+            Object obj = executor.queryForObject(new RawSqlStatement("select min(locked) as test from " + lockTable + " fetch first row only"), Object.class);
+            if (!(obj instanceof Boolean)) { //wrong type, need to recreate table
+                executor.execute(new DropTableStatement(this.getLiquibaseCatalogName(), this.getLiquibaseSchemaName(), this.getDatabaseChangeLogLockTableName(), false));
+                executor.execute(new CreateDatabaseChangeLogLockTableStatement());
+                executor.execute(new InitializeDatabaseChangeLogLockTableStatement());
+            }
+        }
     }
 
     public boolean supportsBooleanDataType() {

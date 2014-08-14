@@ -7,6 +7,7 @@ import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Sequence;
 
 public class MissingSequenceChangeGenerator implements MissingObjectChangeGenerator {
@@ -35,19 +36,14 @@ public class MissingSequenceChangeGenerator implements MissingObjectChangeGenera
 
         CreateSequenceChange change = new CreateSequenceChange();
         change.setSequenceName(sequence.getName());
-        if (control.getIncludeCatalog()) {
+        if (control.isIncludeCatalog()) {
             change.setCatalogName(sequence.getSchema().getCatalogName());
         }
-        if (control.getIncludeSchema()) {
+        if (control.isIncludeSchema()) {
             change.setSchemaName(sequence.getSchema().getName());
         }
         change.setStartValue(sequence.getStartValue());
         change.setIncrementBy(sequence.getIncrementBy());
-        change.setMinValue(sequence.getMinValue());
-        change.setMaxValue(sequence.getMaxValue());
-        change.setCacheSize(sequence.getCacheSize());
-        change.setCycle(sequence.getWillCycle());
-        change.setOrdered(sequence.getOrdered());
 
         return new Change[] { change };
 

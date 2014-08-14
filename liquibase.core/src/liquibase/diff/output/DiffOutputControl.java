@@ -1,26 +1,23 @@
 package liquibase.diff.output;
 
-import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
-import liquibase.database.InternalDatabase;
 import liquibase.database.core.H2Database;
-import liquibase.diff.output.changelog.ChangeGeneratorFactory;
-import liquibase.diff.output.changelog.core.MissingDataExternalFileChangeGenerator;
+import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectCollection;
-import liquibase.structure.core.Schema;
+import liquibase.structure.core.Column;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class DiffOutputControl {
-
-    private Set<CatalogAndSchema> includeSchemas = new HashSet<CatalogAndSchema>();
-
     private boolean includeSchema;
     private boolean includeCatalog;
     private boolean includeTablespace;
 
+    private String dataDir = null;
     private DatabaseObjectCollection alreadyHandledMissing= new DatabaseObjectCollection(new DatabaseForHash());
     private DatabaseObjectCollection alreadyHandledUnexpected = new DatabaseObjectCollection(new DatabaseForHash());
     private DatabaseObjectCollection alreadyHandledChanged = new DatabaseObjectCollection(new DatabaseForHash());
@@ -37,7 +34,7 @@ public class DiffOutputControl {
         this.includeTablespace = includeTablespace;
     }
 
-    public boolean getIncludeSchema() {
+    public boolean isIncludeSchema() {
         return includeSchema;
     }
 
@@ -46,7 +43,7 @@ public class DiffOutputControl {
         return this;
     }
 
-    public boolean getIncludeCatalog() {
+    public boolean isIncludeCatalog() {
         return includeCatalog;
     }
 
@@ -55,7 +52,7 @@ public class DiffOutputControl {
         return this;
     }
 
-    public boolean getIncludeTablespace() {
+    public boolean isIncludeTablespace() {
         return includeTablespace;
     }
 
@@ -64,11 +61,12 @@ public class DiffOutputControl {
         return this;
     }
 
-    public DiffOutputControl setDataDir(String dataDir) {
+    public String getDataDir() {
+        return dataDir;
+    }
 
-        if (dataDir != null) {
-            ChangeGeneratorFactory.getInstance().register(new MissingDataExternalFileChangeGenerator(dataDir));
-        }
+    public DiffOutputControl setDataDir(String dataDir) {
+        this.dataDir = dataDir;
         return this;
     }
 
@@ -92,39 +90,9 @@ public class DiffOutputControl {
     }
 
     public boolean alreadyHandledChanged(DatabaseObject changedObject, Database accordingTo) {
-        return alreadyHandledChanged.contains(changedObject);
-    }
+        return alreadyHandledChanged.contains(changedObject);    }
 
-    public DiffOutputControl addIncludedSchema(Schema schema) {
-        this.includeSchemas.add(schema.toCatalogAndSchema());
-        return this;
-    }
-
-    public DiffOutputControl addIncludedSchema(CatalogAndSchema schema) {
-        this.includeSchemas.add(schema);
-        return this;
-    }
-
-    public boolean shouldOutput(DatabaseObject object, Database accordingTo) {
-        if (includeSchemas.size() > 0) {
-            Schema schema = object.getSchema();
-            if (schema == null) {
-                return true;
-            }
-            CatalogAndSchema objectCatalogAndSchema = schema.toCatalogAndSchema().standardize(accordingTo);
-            for (CatalogAndSchema catalogAndSchema : includeSchemas) {
-                catalogAndSchema = schema.toCatalogAndSchema().standardize(accordingTo);
-                if (objectCatalogAndSchema.equals(catalogAndSchema, accordingTo)) {
-                    return true;
-                }
-            }
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    private static class DatabaseForHash extends H2Database implements InternalDatabase {
+    private static class DatabaseForHash extends H2Database {
         @Override
         public boolean isCaseSensitive() {
             return true;

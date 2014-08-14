@@ -10,7 +10,6 @@ public class RenameColumnStatement extends AbstractSqlStatement {
     private String oldColumnName;
     private String newColumnName;
     private String columnDataType;
-    private String remarks;
 
     public RenameColumnStatement(String catalogName, String schemaName, String tableName, String oldColumnName, String newColumnName, String columnDataType) {
         this.catalogName = catalogName;
@@ -19,12 +18,6 @@ public class RenameColumnStatement extends AbstractSqlStatement {
         this.oldColumnName = oldColumnName;
         this.newColumnName = newColumnName;
         this.columnDataType = columnDataType;
-    }
-
-
-    public RenameColumnStatement(String catalogName, String schemaName, String tableName, String oldColumnName, String newColumnName, String columnDataType,String remarks) {
-        this(catalogName, schemaName, tableName, oldColumnName, newColumnName, columnDataType);
-        this.remarks = remarks;
     }
 
     public String getCatalogName() {
@@ -69,14 +62,6 @@ public class RenameColumnStatement extends AbstractSqlStatement {
 
     public void setColumnDataType(String columnDataType) {
         this.columnDataType = columnDataType;
-    }
-
-    public String getRemarks() {
-        return remarks;
-    }
-
-    public void setRemarks(String remarks) {
-        this.remarks = remarks;
     }
 }
 

@@ -4,7 +4,6 @@ import liquibase.change.*;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
@@ -13,14 +12,12 @@ import liquibase.resource.UtfBomAwareReader;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
 import liquibase.structure.core.Column;
-import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.csv.CSVReader;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 
 @DatabaseChange(name="loadData",
@@ -48,13 +45,6 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
     @Override
     public boolean supports(Database database) {
-        return true;
-    }
-
-
-
-    @Override
-    public boolean generateRollbackStatementsVolatile(Database database) {
         return true;
     }
 
@@ -103,19 +93,17 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         this.encoding = encoding;
     }
 
-    @DatabaseChangeProperty(exampleValue = ",")
     public String getSeparator() {
 		return separator;
 	}
 
 	public void setSeparator(String separator) {
-        if (separator != null && separator.equals("\\t")) {
+        if (separator.equals("\\t")) {
             separator = "\t";
         }
 		this.separator = separator;
 	}
 
-    @DatabaseChangeProperty(exampleValue = "'")
 	public String getQuotchar() {
 		return quotchar;
 	}
@@ -146,10 +134,6 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         try {
             reader = getCSVReader();
 
-            if (reader == null) {
-                throw new UnexpectedLiquibaseException("Unable to read file "+this.getFile());
-            }
-
             String[] headers = reader.readNext();
             if (headers == null) {
                 throw new UnexpectedLiquibaseException("Data file "+getFile()+" was empty");
@@ -174,7 +158,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
                     Object value = line[i];
 
-                    ColumnConfig columnConfig = getColumnConfig(i, headers[i].trim());
+                    ColumnConfig columnConfig = getColumnConfig(i, headers[i]);
                     if (columnConfig != null) {
                         columnName = columnConfig.getName();
 
@@ -242,18 +226,19 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
     @Override
     public boolean generateStatementsVolatile(Database database) {
-        return true;
+        return false;
     }
 
-    public CSVReader getCSVReader() throws IOException {
-        ResourceAccessor resourceAccessor = getResourceAccessor();
-        if (resourceAccessor == null) {
-            throw new UnexpectedLiquibaseException("No file resourceAccessor specified for "+getFile());
+    protected CSVReader getCSVReader() throws IOException {
+        ResourceAccessor opener = getResourceAccessor();
+        if (opener == null) {
+            throw new UnexpectedLiquibaseException("No file opener specified for "+getFile());
         }
-        InputStream stream = StreamUtil.singleInputStream(getFile(), resourceAccessor);
+        InputStream stream = opener.getResourceAsStream(getFile());
         if (stream == null) {
-            return null;
+            throw new UnexpectedLiquibaseException("Data file "+getFile()+" was not found");
         }
+
         Reader streamReader;
         if (getEncoding() == null) {
             streamReader = new UtfBomAwareReader(stream);
@@ -262,15 +247,11 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         }
 
         char quotchar;
-        if (StringUtils.trimToEmpty(this.quotchar).length() == 0) {
-            // hope this is impossible to have a field surrounded with non ascii char 0x01
-            quotchar = '\1';
+        if (0 == this.quotchar.length() ) {
+        	// hope this is impossible to have a field surrounded with non ascii char 0x01
+        	quotchar = '\1';
         } else {
-            quotchar = this.quotchar.charAt(0);
-        }
-
-        if (separator == null) {
-            separator = liquibase.util.csv.opencsv.CSVReader.DEFAULT_SEPARATOR + "";
+        	quotchar = this.quotchar.charAt(0);
         }
 
         return new CSVReader(streamReader, separator.charAt(0), quotchar );
@@ -297,11 +278,6 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
-        return new ChangeStatus().unknown("Cannot check loadData status");
-    }
-
-    @Override
     public String getConfirmationMessage() {
         return "Data loaded from "+getFile()+" into "+getTableName();
     }
@@ -310,19 +286,21 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     public CheckSum generateCheckSum() {
         InputStream stream = null;
         try {
-            stream = StreamUtil.singleInputStream(getFile(), getResourceAccessor());
+            stream = getResourceAccessor().getResourceAsStream(getFile());
             if (stream == null) {
-                throw new UnexpectedLiquibaseException(getFile() + " could not be found");
+                throw new RuntimeException(getFile() + " could not be found");
             }
             stream = new BufferedInputStream(stream);
-            return CheckSum.compute(getTableName()+":"+CheckSum.compute(stream, true));
+            return CheckSum.compute(stream, true);
         } catch (IOException e) {
-            throw new UnexpectedLiquibaseException(e);
+            throw new RuntimeException(e);
         } finally {
             if (stream != null) {
                 try {
                     stream.close();
-                } catch (IOException ignore) { }
+                } catch (IOException e) {
+                    ;
+                }
             }
         }
     }
@@ -330,10 +308,5 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     @Override
     public Warnings warn(Database database) {
         return null;
-    }
-
-    @Override
-    public String getSerializedObjectNamespace() {
-        return STANDARD_CHANGELOG_NAMESPACE;
     }
 }

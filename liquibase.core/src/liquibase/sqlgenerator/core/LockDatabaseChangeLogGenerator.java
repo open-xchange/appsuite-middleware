@@ -11,6 +11,7 @@ import liquibase.statement.core.LockDatabaseChangeLogStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.util.NetUtil;
 
+import java.net.InetAddress;
 import java.sql.Timestamp;
 
 public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDatabaseChangeLogStatement> {
@@ -20,13 +21,15 @@ public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDat
         return new ValidationErrors();
     }
 
-    protected static final String hostname;
-    protected static final String hostaddress;
+    protected static String hostname;
+    protected static String hostaddress;
 
     static {
+        InetAddress localHost;
         try {
-            hostname = NetUtil.getLocalHostName();
-            hostaddress = NetUtil.getLocalHostAddress();
+            localHost = NetUtil.getLocalHost();
+            hostname = localHost.getHostName();
+            hostaddress = localHost.getHostAddress();
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
@@ -43,7 +46,7 @@ public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDat
         updateStatement.addNewColumnValue("LOCKED", true);
         updateStatement.addNewColumnValue("LOCKGRANTED", new Timestamp(new java.util.Date().getTime()));
         updateStatement.addNewColumnValue("LOCKEDBY", hostname + " (" + hostaddress + ")");
-        updateStatement.setWhereClause(database.escapeColumnName(liquibaseCatalog, liquibaseSchema, database.getDatabaseChangeLogTableName(), "ID") + " = 1 AND " + database.escapeColumnName(liquibaseCatalog, liquibaseSchema, database.getDatabaseChangeLogTableName(), "LOCKED") + " = "+ DataTypeFactory.getInstance().fromDescription("boolean", database).objectToSql(false, database));
+        updateStatement.setWhereClause(database.escapeColumnName(liquibaseCatalog, liquibaseSchema, database.getDatabaseChangeLogTableName(), "ID") + " = 1 AND " + database.escapeColumnName(liquibaseCatalog, liquibaseSchema, database.getDatabaseChangeLogTableName(), "LOCKED") + " = "+ DataTypeFactory.getInstance().fromDescription("boolean").objectToSql(false, database));
 
         return SqlGeneratorFactory.getInstance().generateSql(updateStatement, database);
 

@@ -10,8 +10,6 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateSequenceStatement;
 import liquibase.structure.core.Sequence;
 
-import java.math.BigInteger;
-
 public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequenceStatement> {
 
     @Override
@@ -31,7 +29,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         validationErrors.checkDisallowedField("minValue", statement.getMinValue(), database, FirebirdDatabase.class, H2Database.class, HsqlDatabase.class);
         validationErrors.checkDisallowedField("maxValue", statement.getMaxValue(), database, FirebirdDatabase.class, H2Database.class, HsqlDatabase.class);
 
-        validationErrors.checkDisallowedField("ordered", statement.getOrdered(), database, DB2Database.class, HsqlDatabase.class);
+        validationErrors.checkDisallowedField("ordered", statement.getOrdered(), database, DB2Database.class, MaxDBDatabase.class);
 
 
         return validationErrors;
@@ -58,21 +56,9 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
             buffer.append(" MAXVALUE ").append(statement.getMaxValue());
         }
 
-        if (statement.getCacheSize() != null && database instanceof OracleDatabase) {
-            if (statement.getCacheSize().equals(BigInteger.ZERO)) {
-                buffer.append(" NOCACHE ");
-            } else {
-                buffer.append(" CACHE ").append(statement.getCacheSize());
-            }
-        }
-
         if (statement.getOrdered() != null) {
             if (statement.getOrdered()) {
                 buffer.append(" ORDER");
-            } else {
-               if (database instanceof OracleDatabase) {
-                   buffer.append(" NOORDER");
-               }
             }
         }
         if (statement.getCycle() != null) {
