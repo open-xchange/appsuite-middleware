@@ -194,4 +194,6 @@ Export-Package: com.google.api.client.auth.oauth,
  com.google.api.client.xml,
  com.google.api.client.xml.atom,
  com.google.api.services.calendar,
- com.google.api.services.calendar.model
+ com.google.api.services.calendar.model,
+ com.google.api.services.drive,
+ com.google.api.services.drive.model
