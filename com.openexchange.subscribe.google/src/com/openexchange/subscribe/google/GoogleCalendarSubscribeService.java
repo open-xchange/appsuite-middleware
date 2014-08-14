@@ -216,18 +216,24 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
 
     private void handleSeriesAndSeriesExceptions(final Subscription subscription, final List<CalendarDataObject> changeExceptions, final List<CalendarDataObject> deleteExceptions, final List<CalendarDataObject> series, final AppointmentSQLInterface appointmentsql) throws OXException {
         final Map<String, CalendarDataObject> masterMap = new HashMap<String, CalendarDataObject>(series.size());
+        
+        handleSeries(subscription, series, appointmentsql, masterMap);
+        handleExceptions(subscription, changeExceptions, appointmentsql, masterMap, false);
+        handleExceptions(subscription, deleteExceptions, appointmentsql, masterMap, true);
+    }
+
+    private Map<String, CalendarDataObject> handleSeries(final Subscription subscription, final List<CalendarDataObject> series, final AppointmentSQLInterface appointmentsql, final Map<String, CalendarDataObject> masterMap) throws OXException {
         // Handle series
         for (CalendarDataObject cdo : series) {
             cdo.setParentFolderID(subscription.getFolderIdAsInt());
             appointmentsql.insertAppointmentObject(cdo);
             masterMap.put(cdo.getUid(), cdo);
         }
-
-        handleExceptions(subscription, changeExceptions, appointmentsql, masterMap, false);
-        handleExceptions(subscription, deleteExceptions, appointmentsql, masterMap, true);
+        return masterMap;
     }
 
     private void handleExceptions(final Subscription subscription, final List<CalendarDataObject> exceptions, final AppointmentSQLInterface appointmentsql, final Map<String, CalendarDataObject> masterMap, final boolean delete) throws OXException {
+        // Handle exceptions
         final java.util.Calendar utcCalendar = java.util.Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         for (CalendarDataObject cdo : exceptions) {
             String uid = cdo.getUid();
