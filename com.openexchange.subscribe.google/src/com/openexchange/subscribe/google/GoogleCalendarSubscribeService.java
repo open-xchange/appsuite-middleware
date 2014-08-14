@@ -193,14 +193,17 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
 
     protected void parseAndAdd(final Events events, final CalendarEventParser parser, final List<CalendarDataObject> singleAppointments, final List<CalendarDataObject> series, final List<CalendarDataObject> seriesExceptions) throws OXException {
         for (Event event : events.getItems()) {
-            final CalendarDataObject calendarObject = new CalendarDataObject();
-            parser.parseCalendarEvent(event, calendarObject);
-            if (event.getRecurrence() != null) {
-                series.add(calendarObject);
-            } else if (event.getRecurringEventId() != null) {
-                seriesExceptions.add(calendarObject);
-            } else {
-                singleAppointments.add(calendarObject);
+            // Consider only events with an organizer; the rest are only updates on status and thus redundant
+            if (event.getOrganizer() != null) {
+                final CalendarDataObject calendarObject = new CalendarDataObject();
+                parser.parseCalendarEvent(event, calendarObject);
+                if (event.getRecurrence() != null) {
+                    series.add(calendarObject);
+                } else if (event.getRecurringEventId() != null) {
+                    seriesExceptions.add(calendarObject);
+                } else {
+                    singleAppointments.add(calendarObject);
+                }
             }
         }
     }
