@@ -80,6 +80,7 @@ public class ReplicationMonitorTest {
 
     @After
     public void tearDown() {
+        assignment = null;
         monitor = null;
     }
 

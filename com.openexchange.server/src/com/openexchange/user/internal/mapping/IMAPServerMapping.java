@@ -77,7 +77,6 @@ public final class IMAPServerMapping extends VarCharMapping<User> {
         } else {
             throw new UnsupportedOperationException("com.openexchange.groupware.ldap.User.setImapServer(String)");
         }
-        throw new UnsupportedOperationException();
     }
 
     @Override
