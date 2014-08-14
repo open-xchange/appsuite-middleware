@@ -57,7 +57,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.json.JSONArray;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
@@ -77,25 +76,25 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.6.1
  */
-public class AllAction implements AJAXActionService {
-
-    private final ServiceLookup services;
+public class AllAction extends AbstractShareAction {
 
     /**
      * Initializes a new {@link AllAction}.
-     * @param services
+     *
+     * @param services The service lookup
      */
     public AllAction(ServiceLookup services) {
-        super();
-        this.services = services;
+        super(services);
     }
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        List<Share> shares = services.getService(ShareService.class).getAllShares(session);
+        ShareService shareService = getShareService();
+        List<Share> shares = shareService.getAllShares(session);
         if (null == shares || 0 == shares.size()) {
             return new AJAXRequestResult(new JSONArray());
         }
+        List<String> shareURLs = generateShareURLs(shares, requestData);
         Date lastModified = null;
         Set<Integer> guestIDs = new HashSet<Integer>();
         for (Share share : shares) {
@@ -106,9 +105,9 @@ public class AllAction implements AJAXActionService {
             guestIDs.add(Integer.valueOf(share.getGuest()));
         }
         int[] ids = new int[guestIDs.size()];
-        int i = 0;
+        int idx = 0;
         for (Integer guestID : guestIDs) {
-            ids[i++] = guestID.intValue();
+            ids[idx++] = guestID.intValue();
         }
         User[] guestUsers = services.getService(UserService.class).getUser(session.getContext(), ids);
         Map<Integer, User> guestUsersByID = new HashMap<Integer, User>();
@@ -117,13 +116,13 @@ public class AllAction implements AJAXActionService {
         }
         ShareCryptoService cryptoService = services.getService(ShareCryptoService.class);
         List<GuestShare> guestShares = new ArrayList<GuestShare>(shares.size());
-        for (Share share : shares) {
+        for (int i = 0; i < shares.size(); i++) {
+            Share share = shares.get(i);
+            String shareURL = shareURLs.get(i);
             User guestUser = guestUsersByID.get(Integer.valueOf(share.getGuest()));
-            if (AuthenticationMode.ANONYMOUS != share.getAuthentication()) {
-                guestShares.add(new GuestShare(share, guestUser, cryptoService.decrypt(guestUser.getUserPassword())));
-            } else {
-                guestShares.add(new GuestShare(share, guestUser, null));
-            }
+            String guestPassword = AuthenticationMode.ANONYMOUS != share.getAuthentication() ?
+                cryptoService.decrypt(guestUser.getUserPassword()) : null;
+            guestShares.add(new GuestShare(share, guestUser, guestPassword, shareURL));
         }
         return new AJAXRequestResult(guestShares, lastModified, "guestshare");
     }

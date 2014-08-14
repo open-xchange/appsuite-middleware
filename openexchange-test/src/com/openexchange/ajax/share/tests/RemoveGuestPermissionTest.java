@@ -75,28 +75,22 @@ public class RemoveGuestPermissionTest extends ShareTest {
         super(name);
     }
 
-    public void testUpdateSharedContactFolders() throws Exception {
-        testUpdateSharedFolders(FolderObject.CONTACT, client.getValues().getPrivateContactFolder());
+    public void testUpdateSharedFolderRandomly() throws Exception {
+        testUpdateSharedFolder(randomFolderAPI(), randomModule(), randomGuestPermission());
     }
 
-    public void testUpdateSharedInfostoreFolders() throws Exception {
-        testUpdateSharedFolders(FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder());
-    }
-
-    public void testUpdateSharedTaskFolders() throws Exception {
-        testUpdateSharedFolders(FolderObject.TASK, client.getValues().getPrivateTaskFolder());
-    }
-
-    public void testUpdateSharedCalendarFolders() throws Exception {
-        testUpdateSharedFolders(FolderObject.CALENDAR, client.getValues().getPrivateAppointmentFolder());
-    }
-
-    private void testUpdateSharedFolders(int module, int parent) throws Exception {
-        for (EnumAPI api : new EnumAPI[] { EnumAPI.OX_OLD, EnumAPI.OX_NEW, EnumAPI.OUTLOOK }) {
+    public void noTestUpdateSharedFolderExtensively() throws Exception {
+        for (EnumAPI api : TESTED_FOLDER_APIS) {
             for (OCLGuestPermission guestPermission : TESTED_PERMISSIONS) {
-                testUpdateSharedFolder(api, module, parent, guestPermission);
+                for (int module : TESTED_MODULES) {
+                    testUpdateSharedFolder(api, module, guestPermission);
+                }
             }
         }
+    }
+
+    private void testUpdateSharedFolder(EnumAPI api, int module, OCLGuestPermission guestPermission) throws Exception {
+        testUpdateSharedFolder(api, module, getDefaultFolder(module), guestPermission);
     }
 
     private void testUpdateSharedFolder(EnumAPI api, int module, int parent, OCLGuestPermission guestPermission) throws Exception {
@@ -125,6 +119,7 @@ public class RemoveGuestPermissionTest extends ShareTest {
          * check access to share
          */
         GuestClient guestClient = resolveShare(share);
+        guestClient.checkShareModuleAvailableExclusively();
         guestClient.checkShareAccessible(guestPermission);
         /*
          * update folder, revoke permissions

@@ -113,6 +113,6 @@ public interface ShareService {
      *                 You probably want to pass HttpServletRequest.getServerName() here.
      * @return A list of URLs, one for every share. The URLs are guaranteed to be in the same order as their according shares.
      */
-    List<String> generateServerUrl(List<Share> shares, String protocol, String fallbackHostname) throws OXException;
+    List<String> generateShareURLs(List<Share> shares, String protocol, String fallbackHostname) throws OXException;
 
 }

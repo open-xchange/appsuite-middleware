@@ -75,6 +75,7 @@ public class ParsedShare {
     private String guestMailAddress;
     private String guestDisplayName;
     private String guestPassword;
+    private String shareURL;
 
     /**
      * Initializes a new {@link ParsedShare}.
@@ -112,6 +113,7 @@ public class ParsedShare {
         guestMailAddress = json.optString("guest_mail_address");
         guestDisplayName = json.optString("guest_display_name");
         guestPassword = json.optString("guest_password");
+        shareURL = json.optString("share_url");
     }
 
     public String getToken() {
@@ -220,6 +222,14 @@ public class ParsedShare {
 
     public Date getExpires() {
         return expires;
+    }
+
+    public String getShareURL() {
+        return shareURL;
+    }
+
+    public void setShareURL(String shareURL) {
+        this.shareURL = shareURL;
     }
 
 }

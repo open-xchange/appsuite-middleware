@@ -158,7 +158,7 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
-    public List<String> generateServerUrl(List<Share> shares, String protocol, String fallbackHostname) throws OXException {
+    public List<String> generateShareURLs(List<Share> shares, String protocol, String fallbackHostname) throws OXException {
         List<String> urls = new ArrayList<String>(shares.size());
         for (Share share : shares) {
             urls.add(ShareTool.getShareUrl(share, protocol, fallbackHostname));

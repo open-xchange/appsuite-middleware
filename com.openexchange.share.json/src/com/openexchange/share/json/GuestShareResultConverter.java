@@ -141,6 +141,7 @@ public class GuestShareResultConverter implements ResultConverter {
             json.put("guest_mail_address", guest.getMail());
             json.put("guest_display_name", guest.getDisplayName());
             json.put("guest_password", guestShare.getGuestPassword());
+            json.put("share_url", guestShare.getShareURL());
             return json;
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e);

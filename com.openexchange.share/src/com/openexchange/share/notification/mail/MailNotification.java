@@ -76,7 +76,7 @@ public class MailNotification extends AbstractNotification<InternetAddress> {
     /**
      * Initializes a new {@link MailNotification}.
      * @param share The share
-     * @param url The url that points to the share. See {@link ShareService#generateServerUrl(java.util.List, String, String)}.
+     * @param url The url that points to the share. See {@link ShareService#generateShareURLs(java.util.List, String, String)}.
      * @param title The shares title
      * @param message The message (optional)
      * @param recipientAddress The mail address of the recipient

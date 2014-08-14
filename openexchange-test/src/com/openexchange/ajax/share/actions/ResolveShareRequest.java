@@ -50,9 +50,12 @@
 package com.openexchange.ajax.share.actions;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import org.json.JSONException;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.Header;
+import com.openexchange.java.Strings;
 
 /**
  * {@link ResolveShareRequest}
@@ -88,6 +91,14 @@ public class ResolveShareRequest implements AJAXRequest<ResolveShareResponse> {
 
     @Override
     public String getServletPath() {
+        String shareURL = share.getShareURL();
+        if (false == Strings.isEmpty(shareURL)) {
+            try {
+                return new URL(shareURL).getPath();
+            } catch (MalformedURLException e) {
+                System.out.println("Malformed share URL: " + shareURL);
+            }
+        }
         return "/ajax/share/" + share.getToken();
     }
 

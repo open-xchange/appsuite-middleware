@@ -51,10 +51,8 @@ package com.openexchange.share.json.actions;
 
 import java.util.Collections;
 import java.util.List;
-import javax.servlet.http.HttpServletRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
@@ -65,7 +63,6 @@ import com.openexchange.share.ShareService;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.mail.MailNotification;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -75,17 +72,15 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class NotifyAction implements AJAXActionService {
-
-    private final ServiceLookup services;
+public class NotifyAction extends AbstractShareAction {
 
     /**
      * Initializes a new {@link NotifyAction}.
-     * @param services
+     *
+     * @param services The service lookup
      */
     public NotifyAction(ServiceLookup services) {
-        super();
-        this.services = services;
+        super(services);
     }
 
     @Override
@@ -105,21 +100,13 @@ public class NotifyAction implements AJAXActionService {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
 
-        ShareService shareService = services.getService(ShareService.class);
+        ShareService shareService = getShareService();
         Share share = shareService.resolveToken(token);
         if (share == null) {
             throw ShareExceptionCodes.UNKNWON_SHARE.create(token);
         }
 
-        HttpServletRequest servletRequest = requestData.optHttpServletRequest();
-        if (servletRequest == null) {
-            throw AjaxExceptionCodes.BAD_REQUEST_CUSTOM.create("Missing HttpServletRequest in request data.");
-        }
-
-        List<String> urls = shareService.generateServerUrl(
-            Collections.singletonList(share),
-            Tools.getProtocol(servletRequest),
-            servletRequest.getServerName());
+        List<String> urls = generateShareURLs(Collections.singletonList(share), requestData);
         ShareNotificationService notificationService = services.getService(ShareNotificationService.class);
         notificationService.notify(new MailNotification(share, urls.get(0), title, message, recipient), session);
         return AJAXRequestResult.EMPTY_REQUEST_RESULT;

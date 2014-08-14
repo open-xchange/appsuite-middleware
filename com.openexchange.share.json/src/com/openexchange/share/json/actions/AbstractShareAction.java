@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,47 +47,74 @@
  *
  */
 
-package com.openexchange.share.json.osgi;
+package com.openexchange.share.json.actions;
 
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.context.ContextService;
-import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.share.ShareCryptoService;
+import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.Share;
 import com.openexchange.share.ShareService;
-import com.openexchange.share.json.GuestShareResultConverter;
-import com.openexchange.share.json.ShareActionFactory;
-import com.openexchange.share.notification.ShareNotificationService;
-import com.openexchange.user.UserService;
 
 /**
- * {@link ShareJsonActivator}
+ * {@link AbstractShareAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.6.1
  */
-public class ShareJsonActivator extends AJAXModuleActivator {
+public abstract class AbstractShareAction implements AJAXActionService {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ShareJsonActivator.class);
+    protected final ServiceLookup services;
 
     /**
-     * Initializes a new {@link ShareJsonActivator}.
+     * Initializes a new {@link AbstractShareAction}.
+     *
+     * @param services The service lookup reference
      */
-    public ShareJsonActivator() {
+    public AbstractShareAction(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ShareService.class, UserService.class, ContextService.class, DispatcherPrefixService.class,
-            SessiondService.class, ShareCryptoService.class, ShareNotificationService.class };
+    /**
+     * Gets the share service.
+     *
+     * @return The share service
+     */
+    protected ShareService getShareService() {
+        return services.getService(ShareService.class);
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("starting bundle: \"com.openexchange.share.json\"");
-        registerModule(new ShareActionFactory(this), "share/management");
-        registerService(ResultConverter.class, new GuestShareResultConverter());
+    /**
+     * Generates share URLs appropriate for the supplied request data.
+     *
+     * @param shares The shares
+     * @param requestData The request data
+     * @return The share URLs
+     * @throws OXException
+     */
+    protected List<String> generateShareURLs(List<Share> shares, AJAXRequestData requestData) throws OXException {
+        return getShareService().generateShareURLs(shares, determineProtocol(requestData), determineHostname(requestData));
+    }
+
+    protected static String determineProtocol(AJAXRequestData requestData) {
+        HttpServletRequest servletRequest = requestData.optHttpServletRequest();
+        if (null != servletRequest) {
+            return com.openexchange.tools.servlet.http.Tools.getProtocol(servletRequest);
+        } else {
+            return requestData.isSecure() ? "https://" : "http://";
+        }
+    }
+
+    protected static String determineHostname(AJAXRequestData requestData) {
+        HttpServletRequest servletRequest = requestData.optHttpServletRequest();
+        if (null != servletRequest) {
+            return servletRequest.getServerName();
+        } else {
+            return requestData.getHostname();
+        }
     }
 
 }

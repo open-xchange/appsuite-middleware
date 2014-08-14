@@ -58,6 +58,7 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.junit.Assert;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
+import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.ajax.contact.action.InsertResponse;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -153,6 +154,22 @@ public class GuestClient extends AJAXClient {
         return shareResponse.getModule();
     }
 
+    public int getModuleID() {
+        String module = getModule();
+        if ("io.ox/contacts".equals(module)) {
+            return FolderObject.CONTACT;
+        } else if ("io.ox/files".equals(module)) {
+            return FolderObject.INFOSTORE;
+        } else if ("io.ox/tasks".equals(module)) {
+            return FolderObject.TASK;
+        } else if ("io.ox/calendar".equals(module)) {
+            return FolderObject.CALENDAR;
+        } else {
+            Assert.fail("Unknown module: " + module);
+            return 0;
+        }
+    }
+
     public String getFolder() {
         return shareResponse.getFolder();
     }
@@ -192,22 +209,50 @@ public class GuestClient extends AJAXClient {
         getAll(false == permissions.canReadOwnObjects());
     }
 
-    public void checkSessionAlive(boolean expectToFail) throws Exception {
-        String contentType;
-        if ("io.ox/contacts".equals(getModule())) {
-            contentType = "contacts";
-        } else if ("io.ox/files".equals(getModule())) {
-            contentType = "infostore";
-        } else if ("io.ox/tasks".equals(getModule())) {
-            contentType = "tasks";
-        } else if ("io.ox/calendar".equals(getModule())) {
-            contentType = "calendar";
-        } else {
-            Assert.fail("no alive check for " + getModule() + " implemented");
-            return;
+    /**
+     * Checks that the share's module is available, as well as all others modules are not.
+     */
+    public void checkShareModuleAvailableExclusively() throws Exception {
+        com.openexchange.ajax.config.actions.GetResponse getResponse =
+            execute(new com.openexchange.ajax.config.actions.GetRequest(Tree.AvailableModules));
+        Object[] array = getResponse.getArray();
+        for (int moduleID : new int[] { FolderObject.CALENDAR, FolderObject.CONTACT, FolderObject.INFOSTORE, FolderObject.TASK }) {
+            String module = getContentType(moduleID);
+            boolean found = false;
+            for (Object object : array) {
+                if (module.equals(object)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (getModuleID() == moduleID) {
+                Assert.assertTrue("Module " + module + " not found", found);
+            } else {
+                Assert.assertFalse("Module " + module + " was found", found);
+            }
         }
-        VisibleFoldersRequest request = new VisibleFoldersRequest(EnumAPI.OX_NEW, contentType, FolderObject.ALL_COLUMNS, false == expectToFail);
-        VisibleFoldersResponse response = execute(request);
+    }
+
+    private String getContentType(int module) {
+        switch (module) {
+        case FolderObject.CONTACT:
+            return "contacts";
+        case FolderObject.INFOSTORE:
+            return "infostore";
+        case FolderObject.TASK:
+            return "tasks";
+        case FolderObject.CALENDAR:
+            return "calendar";
+        default:
+            Assert.fail("no content type for " + getModule() + "");
+            return null;
+        }
+    }
+
+    public void checkSessionAlive(boolean expectToFail) throws Exception {
+        String contentType = getContentType(getModuleID());
+        VisibleFoldersResponse response = execute(new VisibleFoldersRequest(
+            EnumAPI.OX_NEW, contentType, FolderObject.ALL_COLUMNS, false == expectToFail));
         checkResponse(response, expectToFail);
     }
 

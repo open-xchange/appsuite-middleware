@@ -73,28 +73,22 @@ public class CreateWithGuestPermissionTest extends ShareTest {
         super(name);
     }
 
-    public void testCreateSharedContactFolders() throws Exception {
-        testCreateSharedFolders(FolderObject.CONTACT, client.getValues().getPrivateContactFolder());
+    public void testCreateSharedFolderRandomly() throws Exception {
+        testCreateSharedFolder(randomFolderAPI(), randomModule(), randomGuestPermission());
     }
 
-    public void testCreateSharedInfostoreFolders() throws Exception {
-        testCreateSharedFolders(FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder());
-    }
-
-    public void testCreateSharedTaskFolders() throws Exception {
-        testCreateSharedFolders(FolderObject.TASK, client.getValues().getPrivateTaskFolder());
-    }
-
-    public void testCreateSharedCalendarFolders() throws Exception {
-        testCreateSharedFolders(FolderObject.CALENDAR, client.getValues().getPrivateAppointmentFolder());
-    }
-
-    private void testCreateSharedFolders(int module, int parent) throws Exception {
-        for (EnumAPI api : new EnumAPI[] { EnumAPI.OX_OLD, EnumAPI.OX_NEW, EnumAPI.OUTLOOK }) {
+    public void noTestCreateSharedFolderExtensively() throws Exception {
+        for (EnumAPI api : TESTED_FOLDER_APIS) {
             for (OCLGuestPermission guestPermission : TESTED_PERMISSIONS) {
-                testCreateSharedFolder(api, module, parent, guestPermission);
+                for (int module : TESTED_MODULES) {
+                    testCreateSharedFolder(api, module, guestPermission);
+                }
             }
         }
+    }
+
+    private void testCreateSharedFolder(EnumAPI api, int module, OCLGuestPermission guestPermission) throws Exception {
+        testCreateSharedFolder(api, module, getDefaultFolder(module), guestPermission);
     }
 
     private void testCreateSharedFolder(EnumAPI api, int module, int parent, OCLGuestPermission guestPermission) throws Exception {
@@ -123,6 +117,7 @@ public class CreateWithGuestPermissionTest extends ShareTest {
          * check access to share
          */
         GuestClient guestClient = resolveShare(share);
+        guestClient.checkShareModuleAvailableExclusively();
         guestClient.checkShareAccessible(guestPermission);
     }
 

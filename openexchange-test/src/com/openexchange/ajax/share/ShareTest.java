@@ -53,8 +53,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 import org.json.JSONException;
+import org.junit.Assert;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -87,6 +89,14 @@ public abstract class ShareTest extends AbstractAJAXSession {
         createAnonymousAuthorPermission(),
         createAnonymousGuestPermission()
     };
+
+    protected static final EnumAPI[] TESTED_FOLDER_APIS = new EnumAPI[] { EnumAPI.OX_OLD, EnumAPI.OX_NEW, EnumAPI.OUTLOOK };
+
+    protected static final int[] TESTED_MODULES = new int[] {
+        FolderObject.CONTACT, FolderObject.INFOSTORE, FolderObject.TASK, FolderObject.CALENDAR
+    };
+
+    private static final Random random = new Random();
 
     private Map<Integer, FolderObject> foldersToDelete;
 
@@ -293,6 +303,35 @@ public abstract class ShareTest extends AbstractAJAXSession {
         guestPermission.setGroupPermission(false);
         guestPermission.setFolderAdmin(false);
         return guestPermission;
+    }
+
+    protected int getDefaultFolder(int module) throws Exception {
+        switch (module) {
+        case FolderObject.CONTACT:
+            return client.getValues().getPrivateContactFolder();
+        case FolderObject.CALENDAR:
+            return client.getValues().getPrivateAppointmentFolder();
+        case FolderObject.INFOSTORE:
+            return client.getValues().getPrivateInfostoreFolder();
+        case FolderObject.TASK:
+            return client.getValues().getPrivateTaskFolder();
+        default:
+            Assert.fail("No default folder for moduel: " + module);
+            return 0;
+        }
+
+    }
+
+    protected static int randomModule() {
+        return TESTED_MODULES[random.nextInt(TESTED_MODULES.length)];
+    }
+
+    protected static EnumAPI randomFolderAPI() {
+        return TESTED_FOLDER_APIS[random.nextInt(TESTED_FOLDER_APIS.length)];
+    }
+
+    protected static OCLGuestPermission randomGuestPermission() {
+        return TESTED_PERMISSIONS[random.nextInt(TESTED_PERMISSIONS.length)];
     }
 
 }

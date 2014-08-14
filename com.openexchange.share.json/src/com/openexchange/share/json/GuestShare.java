@@ -62,18 +62,22 @@ public class GuestShare {
     private final Share share;
     private final User guest;
     private final String guestPassword;
+    private final String shareURL;
 
     /**
      * Initializes a new {@link GuestShare}.
      *
      * @param share The share
      * @param guest The guest user
+     * @param guestPassword The guest password
+     * @param shareURL The share URL
      */
-    public GuestShare(Share share, User guest, String guestPassword) {
+    public GuestShare(Share share, User guest, String guestPassword, String shareURL) {
         super();
         this.share = share;
         this.guest = guest;
         this.guestPassword = guestPassword;
+        this.shareURL = shareURL;
     }
 
     /**
@@ -101,6 +105,15 @@ public class GuestShare {
      */
     public String getGuestPassword() {
         return guestPassword;
+    }
+
+    /**
+     * Gets the shareURL
+     *
+     * @return The shareURL
+     */
+    public String getShareURL() {
+        return shareURL;
     }
 
 }
