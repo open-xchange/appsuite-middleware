@@ -159,6 +159,10 @@ public enum MimeMailExceptionCode implements DisplayableOXExceptionCode {
      */
     MESSAGE_TOO_LARGE(MimeMailExceptionCode.MESSAGE_TOO_LARGE_MSG, CATEGORY_USER_INPUT, 1012, MimeMailExceptionMessage.MESSAGE_TOO_LARGE_MSG_DISPLAY),
     /**
+     * Message could not be sent because it is too large (%1$s) (<i>arbitrary server information</i>)
+     */
+    MESSAGE_TOO_LARGE_EXT(MimeMailExceptionCode.MESSAGE_TOO_LARGE_EXT_MSG, CATEGORY_USER_INPUT, 1012, MimeMailExceptionMessage.MESSAGE_TOO_LARGE_EXT_MSG_DISPLAY),
+    /**
      * Message could not be sent to following recipients: %1$s
      * <p>
      * The exception includes those addresses to which the message could not be sent as well as the valid addresses to which the message was
@@ -167,7 +171,7 @@ public enum MimeMailExceptionCode implements DisplayableOXExceptionCode {
      */
     SEND_FAILED(MimeMailExceptionCode.SEND_FAILED_MSG, CATEGORY_USER_INPUT, 1013, MimeMailExceptionMessage.SEND_FAILED_MSG_DISPLAY),
     /**
-     * Message could not be sent to following recipients: %1$s %2$s (arbitrary server information)
+     * Message could not be sent to following recipients: %1$s (%2$s) (<i>arbitrary server information</i>)
      */
     SEND_FAILED_EXT(MimeMailExceptionCode.SEND_FAILED_EXT_MSG, CATEGORY_USER_INPUT, 1013, MimeMailExceptionMessage.SEND_FAILED_EXT_MSG_DISPLAY),
     /**
@@ -424,6 +428,11 @@ public enum MimeMailExceptionCode implements DisplayableOXExceptionCode {
     private final static String MESSAGE_TOO_LARGE_MSG = "Message could not be sent because it is too large";
 
     /**
+     * Message could not be sent because it is too large (%1$s) (<i>arbitrary server information</i>)
+     */
+    private final static String MESSAGE_TOO_LARGE_EXT_MSG = "Message could not be sent because it is too large (%1$s)";
+
+    /**
      * Message could not be sent to following recipients: %1$s
      * <p>
      * The exception includes those addresses to which the message could not be sent as well as the valid addresses to which the message was
@@ -433,9 +442,9 @@ public enum MimeMailExceptionCode implements DisplayableOXExceptionCode {
     private final static String SEND_FAILED_MSG = "Message could not be sent to the following recipients: %1$s";
 
     /**
-     * Message could not be sent to following recipients: %1$s %2$s (arbitrary server information)
+     * Message could not be sent to following recipients: %1$s (%2$s) (<i>arbitrary server information</i>)
      */
-    private final static String SEND_FAILED_EXT_MSG = "Message could not be sent to the following recipients: %1$s %2$s";
+    private final static String SEND_FAILED_EXT_MSG = "Message could not be sent to the following recipients: %1$s (%2$s)";
 
     /**
      * Lost connection to mail server.
