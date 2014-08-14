@@ -70,6 +70,7 @@ import com.google.gdata.data.contacts.ContactFeed;
 import com.google.gdata.util.ServiceException;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.container.IFileHolder;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.google.api.client.GoogleApiClients;
 import com.openexchange.groupware.container.Contact;
@@ -213,7 +214,7 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
 
     // -------------------------------------------------------------------------------------------------------------------------- //
 
-    private static final int PAGE_SIZE = 25;
+    private final int pageSize;
     private static final URL CONTACT_URL;
     private static final URL GROUP_URL;
 
@@ -241,6 +242,8 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
         super(googleMetaData, services);
         source = initSS(FolderObject.CONTACT, "contact");
         parser = new ContactEntryParser();
+        final ConfigurationService configService = services.getOptionalService(ConfigurationService.class);
+        pageSize = configService.getIntProperty("com.openexchange.subscribe.google.calendar.pageSize", 25);
     }
 
     @Override
@@ -271,7 +274,6 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
             contactQuery.setStringCustomParameter("sortorder", "descending");
 
             // First page with this thread
-            final int pageSize = PAGE_SIZE;
             int page = 1;
             adjustQuery(contactQuery, page, pageSize);
 

@@ -63,6 +63,7 @@ import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
 import com.openexchange.api2.AppointmentSQLInterface;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.google.api.client.GoogleApiClients;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
@@ -85,13 +86,15 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeService {
 
-    private static final int PAGE_SIZE = 25;
+    private final int pageSize;
 
     private final SubscriptionSource source;
 
     public GoogleCalendarSubscribeService(final OAuthServiceMetaData googleMetaData, ServiceLookup services) {
         super(googleMetaData, services);
         source = initSS(FolderObject.CALENDAR, "calendar");
+        final ConfigurationService configService = services.getOptionalService(ConfigurationService.class);
+        pageSize = configService.getIntProperty("com.openexchange.subscribe.google.calendar.pageSize", 25);
     }
 
     @Override
@@ -142,7 +145,6 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
 
             // Fetch the events
             final String accessToken = googleCreds.getAccessToken();
-            final Integer pageSize = Integer.valueOf(PAGE_SIZE);
             Events events = googleCalendarService.events().list(calendarId).setOauthToken(accessToken).setMaxResults(pageSize).execute();
             parseAndAdd(events, parser, single, series, changeExceptions, deleteExceptions);
 
