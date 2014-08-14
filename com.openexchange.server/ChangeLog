@@ -1,3 +1,7 @@
+* 2014-08-14 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 34041: Ignore additional elements in autoconfig xml.
+
 * 2014-08-08 - martin.herfurth@open-xchange.com
 
  - Fix for bug 30599: Ical export stumbles over bad reccurring appointment.
