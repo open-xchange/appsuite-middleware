@@ -345,7 +345,7 @@ public class CalendarEventParser {
             } else if (calendarObject.getRecurrenceType() == CalendarDataObject.YEARLY) {
                 // YEARLY
                 tzCalendar.setTime(calendarObject.getStartDate());
-                calendarObject.setDayInMonth(tzCalendar.get(Calendar.DAY_OF_WEEK));
+                calendarObject.setDayInMonth(tzCalendar.get(Calendar.DAY_OF_MONTH));
                 calendarObject.setMonth(tzCalendar.get(Calendar.MONTH));
             }
 
