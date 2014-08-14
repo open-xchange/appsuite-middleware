@@ -100,7 +100,7 @@ public class HazelcastSerializationActivator extends HousekeepingActivator {
 
             @Override
             public void removed(ServiceReference<LocalMessageDispatcher> ref, LocalMessageDispatcher service) {
-                removed(ref, service);
+                removeService(LocalMessageDispatcher.class);
             }
         });
 
@@ -113,7 +113,7 @@ public class HazelcastSerializationActivator extends HousekeepingActivator {
 
             @Override
             public void removed(ServiceReference<GlobalRealtimeCleanup> ref, GlobalRealtimeCleanup service) {
-                removed(ref, service);
+                removeService(GlobalRealtimeCleanup.class);
             }
         });
 
@@ -130,7 +130,7 @@ public class HazelcastSerializationActivator extends HousekeepingActivator {
 
             @Override
             public void removed(ServiceReference<LocalRealtimeCleanup> ref, LocalRealtimeCleanup service) {
-                removed(ref, service);
+                removeService(LocalRealtimeCleanup.class);
             }
         });
 
