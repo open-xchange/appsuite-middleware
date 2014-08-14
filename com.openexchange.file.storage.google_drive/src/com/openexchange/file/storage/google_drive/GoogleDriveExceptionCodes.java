@@ -73,7 +73,7 @@ public enum GoogleDriveExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR("An I/O error occurred: %1$s", GoogleDriveExceptionMessages.IO_ERROR_MSG, Category.CATEGORY_ERROR, 2),
+    IO_ERROR("An I/O error occurred: %1$s", GoogleDriveExceptionMessages.IO_ERROR_MSG, Category.CATEGORY_ERROR, 3),
     /**
      * Google Drive URL does not denote a directory: %1$s
      */
@@ -94,6 +94,10 @@ public enum GoogleDriveExceptionCodes implements DisplayableOXExceptionCode {
      * Google Drive URL does not denote a file: %1$s
      */
     NOT_A_FILE("Google Drive URL does not denote a file: %1$s", GoogleDriveExceptionMessages.NOT_A_FILE_MSG, Category.CATEGORY_ERROR, 8),
+    /**
+     * The file %1$s doesn't have any content stored on Drive
+     */
+    NO_CONTENT("The file %1$s doesn't have any content stored on Drive", GoogleDriveExceptionMessages.NO_CONTENT_MSG, Category.CATEGORY_ERROR, 8),
     /**
      * Missing file name.
      */

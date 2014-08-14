@@ -94,6 +94,9 @@ public final class GoogleDriveExceptionMessages implements LocalizableStrings {
     // An I/O error occurred: %1$s
     public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
 
+    // The file %1$s doesn't have any content stored on Drive
+    public static final String NO_CONTENT_MSG = "The file %1$s doesn't have any content stored on Drive";
+
     /**
      * Initializes a new {@link GoogleDriveExceptionMessages}.
      */

@@ -57,8 +57,14 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import com.google.api.client.googleapis.media.MediaHttpUploader;
+import com.google.api.client.http.GenericUrl;
+import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpResponseException;
+import com.google.api.client.http.InputStreamContent;
 import com.google.api.services.drive.Drive;
+import com.google.api.services.drive.model.FileList;
+import com.google.api.services.drive.model.ParentReference;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -95,6 +101,20 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
         super(googleDriveAccess, account, session);
         this.accountAccess = accountAccess;
         userId = session.getUserId();
+    }
+
+    private void checkFileValidity(com.google.api.services.drive.model.File file) throws OXException {
+        if (isDir(file)) {
+            throw GoogleDriveExceptionCodes.NOT_A_FILE.create(file.getId());
+        }
+        checkIfTrashed(file);
+    }
+
+    private void checkIfTrashed(com.google.api.services.drive.model.File file) throws OXException {
+        Boolean explicitlyTrashed = file.getExplicitlyTrashed();
+        if (null != explicitlyTrashed && explicitlyTrashed.booleanValue()) {
+            throw GoogleDriveExceptionCodes.NOT_FOUND.create(file.getId());
+        }
     }
 
     @Override
@@ -156,16 +176,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
         try {
             Drive drive = googleDriveAccess.getDrive();
             com.google.api.services.drive.model.File file = drive.files().get(id).execute();
-
-            if (isDir(file)) {
-                throw GoogleDriveExceptionCodes.NOT_A_FILE.create(id);
-            }
-
-            Boolean explicitlyTrashed = file.getExplicitlyTrashed();
-            if (null != explicitlyTrashed && explicitlyTrashed.booleanValue()) {
-                throw GoogleDriveExceptionCodes.NOT_FOUND.create(id);
-            }
-
+            checkFileValidity(file);
             return new GoogleDriveFile(folderId, id, userId).parseGoogleDriveFile(file);
         } catch (final HttpResponseException e) {
             throw handleHttpResponseError(id, e);
@@ -192,39 +203,57 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             // can only copy the current revision
             throw GoogleDriveExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
         }
-        final String id = source.getId();
+        String id = source.getId();
         try {
-            String name = id.substring(id.lastIndexOf('/') + 1);
-            String destPath = toPath(destFolder);
+            Drive drive = googleDriveAccess.getDrive();
 
-            int pos = destPath.lastIndexOf('/');
-            String toPath = pos > 0 ? new StringBuilder(destPath).append('/').append(name).toString() : new StringBuilder(name.length() + 1).append('/').append(name).toString();
+            // Get source file
+            com.google.api.services.drive.model.File srcFile = drive.files().get(id).execute();
+            checkFileValidity(srcFile);
 
-            String baseName;
-            String ext;
+            // Check destination folder
+            String title = srcFile.getTitle();
             {
-                int dotPos = name.lastIndexOf('.');
-                if (dotPos > 0) {
-                    baseName = name.substring(0, dotPos);
-                    ext = name.substring(dotPos);
-                } else {
-                    baseName = name;
-                    ext = "";
+                String baseName;
+                String ext;
+                {
+                    int dotPos = title.lastIndexOf('.');
+                    if (dotPos > 0) {
+                        baseName = title.substring(0, dotPos);
+                        ext = title.substring(dotPos);
+                    } else {
+                        baseName = title;
+                        ext = "";
+                    }
+                }
+                int count = 1;
+                boolean keepOn = true;
+                while (keepOn) {
+                    com.google.api.services.drive.Drive.Files.List list = drive.files().list();
+                    list.setQ(new StringBuilder().append("title = '").append(title).append("' and mimeType != 'application/vnd.google-apps.folder'").toString());
+
+                    FileList fileList = list.execute();
+                    if (!fileList.getItems().isEmpty()) {
+                        title = new StringBuilder(baseName).append(" (").append(count++).append(')').append(ext).toString();
+                    } else {
+                        keepOn = false;
+                    }
                 }
             }
-            int count = 1;
-            while (exists(destFolder, toPath, version)) {
-                name = new StringBuilder(baseName).append(" (").append(count++).append(')').append(ext).toString();
-                pos = toPath.lastIndexOf('/');
-                toPath = pos > 0 ? new StringBuilder(toPath.substring(0, pos)).append('/').append(name).toString() : new StringBuilder(name.length() + 1).append('/').append(name).toString();
-            }
 
-            Entry entry = dropboxAPI.copy(id, toPath);
-            return new IDTuple(entry.parentPath(), entry.path);
-        } catch (final DropboxServerException e) {
-            throw handleServerError(id, e);
-        } catch (final DropboxException e) {
-            throw GoogleDriveExceptionCodes.GOOGLE_DRIVE_ERROR.create(e, e.getMessage());
+            // Create a file at destination directory
+            com.google.api.services.drive.model.File copy = new com.google.api.services.drive.model.File();
+            copy.setTitle(title);
+            copy.setParents(Collections.<ParentReference> singletonList(new ParentReference().setId(destFolder)));
+
+            // Copy file
+            com.google.api.services.drive.model.File copiedFile = drive.files().copy(id, copy).execute();
+
+            return new IDTuple(destFolder, copiedFile.getId());
+        } catch (final HttpResponseException e) {
+            throw handleHttpResponseError(id, e);
+        } catch (final IOException e) {
+            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -232,22 +261,35 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     @Override
     public IDTuple move(IDTuple source, String destFolder, long sequenceNumber, File update, List<File.Field> modifiedFields) throws OXException {
-        final String id = source.getId();
+        String id = source.getId();
         try {
-            String name = null != update && null != modifiedFields && modifiedFields.contains(Field.FILENAME) ? update.getFileName() : id.substring(id.lastIndexOf('/') + 1);
-            String destPath = toPath(destFolder);
-            if (!destPath.endsWith("/")) {
-                destPath = new StringBuilder(destPath.length() + 1).append(destPath).append('/').toString();
+            Drive drive = googleDriveAccess.getDrive();
+
+            // Get source file
+            com.google.api.services.drive.model.File srcFile = drive.files().get(id).execute();
+            checkFileValidity(srcFile);
+
+            // Check destination folder
+            {
+                for (ParentReference parentReference : srcFile.getParents()) {
+                    if (parentReference.getId().equals(destFolder)) {
+                        return source;
+                    }
+                }
             }
 
-            int pos = destPath.lastIndexOf('/');
-            Entry entry = dropboxAPI.move(id, pos > 0 ? new StringBuilder(destPath).append('/').append(name).toString() : new StringBuilder(name.length() + 1).append('/').append(name).toString());
+            // Create patch file
+            com.google.api.services.drive.model.File patch = new com.google.api.services.drive.model.File();
+            patch.setParents(Collections.<ParentReference> singletonList(new ParentReference().setId(destFolder)));
 
-            return new IDTuple(entry.parentPath(), entry.path);
-        } catch (final DropboxServerException e) {
-            throw handleServerError(id, e);
-        } catch (final DropboxException e) {
-            throw GoogleDriveExceptionCodes.GOOGLE_DRIVE_ERROR.create(e, e.getMessage());
+            // Patch the file
+            com.google.api.services.drive.model.File patchedFile = drive.files().patch(id, patch).execute();
+
+            return new IDTuple(destFolder, patchedFile.getId());
+        } catch (final HttpResponseException e) {
+            throw handleHttpResponseError(id, e);
+        } catch (final IOException e) {
+            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -256,11 +298,24 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     @Override
     public InputStream getDocument(final String folderId, final String id, final String version) throws OXException {
         try {
-            return dropboxAPI.getFileStream(id, version);
-        } catch (final DropboxServerException e) {
-            throw handleServerError(id, e);
-        } catch (final DropboxException e) {
-            throw GoogleDriveExceptionCodes.GOOGLE_DRIVE_ERROR.create(e, e.getMessage());
+            Drive drive = googleDriveAccess.getDrive();
+
+            // Get file
+            com.google.api.services.drive.model.File file = drive.files().get(id).execute();
+            checkFileValidity(file);
+
+            String downloadUrl = file.getDownloadUrl();
+            if (downloadUrl == null || downloadUrl.length() <= 0) {
+                // The file doesn't have any content stored on Drive.
+                throw GoogleDriveExceptionCodes.NO_CONTENT.create(id);
+            }
+
+            HttpResponse resp = drive.getRequestFactory().buildGetRequest(new GenericUrl(downloadUrl)).execute();
+            return resp.getContent();
+        } catch (final HttpResponseException e) {
+            throw handleHttpResponseError(id, e);
+        } catch (final IOException e) {
+            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -269,52 +324,67 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     @Override
     public InputStream getThumbnailStream(String folderId, String id, String version) throws OXException {
         try {
-            final Entry entry = dropboxAPI.metadata(id, 1, null, false, version);
-            if (entry.isDir) {
-                throw GoogleDriveExceptionCodes.NOT_A_FILE.create(id);
+            Drive drive = googleDriveAccess.getDrive();
+
+            // Get file
+            com.google.api.services.drive.model.File file = drive.files().get(id).execute();
+            checkFileValidity(file);
+
+            String thumbnailLink = file.getThumbnailLink();
+            if (thumbnailLink == null || thumbnailLink.length() <= 0) {
+                // The file doesn't have a thumbnail
+                return null;
             }
-            if (entry.isDeleted) {
-                throw GoogleDriveExceptionCodes.NOT_FOUND.create(id);
-            }
-            return entry.thumbExists ? dropboxAPI.getThumbnailStream(id, ThumbSize.ICON_128x128, ThumbFormat.JPEG) : null;
-        } catch (final DropboxServerException e) {
-            throw handleServerError(id, e);
-        } catch (final DropboxException e) {
-            throw GoogleDriveExceptionCodes.GOOGLE_DRIVE_ERROR.create(e, e.getMessage());
+
+            HttpResponse resp = drive.getRequestFactory().buildGetRequest(new GenericUrl(thumbnailLink)).execute();
+            return resp.getContent();
+        } catch (final HttpResponseException e) {
+            throw handleHttpResponseError(id, e);
+        } catch (final IOException e) {
+            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
     @Override
-    public void saveDocument(final File file, final InputStream data, final long sequenceNumber) throws OXException {
+    public void saveDocument(File file, InputStream data, long sequenceNumber) throws OXException {
         saveDocument(file, data, sequenceNumber, null);
     }
 
     @Override
-    public void saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
-        final String id = file.getId();
+    public void saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws OXException {
+        String id = file.getId();
         try {
-            final long fileSize = file.getFileSize();
-            final long length = fileSize > 0 ? fileSize : -1L;
-            final Entry entry;
+            Drive drive = googleDriveAccess.getDrive();
+
             if (isEmpty(id) || !exists(null, id, CURRENT_VERSION)) {
-                // Create
-                entry = dropboxAPI.putFile(
-                    new StringBuilder(file.getFolderId()).append('/').append(file.getFileName()).toString(),
-                    data,
-                    length,
-                    null,
-                    null);
+                // Insert
+                com.google.api.services.drive.model.File fileMetadata = new com.google.api.services.drive.model.File();
+                fileMetadata.setTitle(file.getFileName());
+                fileMetadata.setParents(Collections.<ParentReference> singletonList(new ParentReference().setId(file.getFolderId())));
+
+                Drive.Files.Insert insert = drive.files().insert(fileMetadata, new InputStreamContent(file.getFileMIMEType(), data));
+                MediaHttpUploader uploader = insert.getMediaHttpUploader();
+                uploader.setDirectUploadEnabled(true);
+                String newId = insert.execute().getId();
+                file.setId(newId);
             } else {
                 // Update
-                entry = dropboxAPI.putFileOverwrite(id, data, length, null);
+                com.google.api.services.drive.model.File fileMetadata = new com.google.api.services.drive.model.File();
+                fileMetadata.setId(id);
+                fileMetadata.setTitle(file.getFileName());
+                fileMetadata.setParents(Collections.<ParentReference> singletonList(new ParentReference().setId(file.getFolderId())));
+
+                Drive.Files.Update update = drive.files().update(id, fileMetadata, new InputStreamContent(file.getFileMIMEType(), data));
+                MediaHttpUploader uploader = update.getMediaHttpUploader();
+                uploader.setDirectUploadEnabled(true);
+                update.execute();
             }
-            file.setId(entry.path);
-        } catch (final DropboxServerException e) {
-            throw handleServerError(id, e);
-        } catch (final DropboxException e) {
-            throw GoogleDriveExceptionCodes.GOOGLE_DRIVE_ERROR.create(e, e.getMessage());
+        } catch (final HttpResponseException e) {
+            throw handleHttpResponseError(id, e);
+        } catch (final IOException e) {
+            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -323,19 +393,22 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     @Override
     public void removeDocument(final String folderId, final long sequenceNumber) throws OXException {
         try {
-            final Entry directoryEntry = dropboxAPI.metadata(toPath(folderId), 0, null, true, null);
-            if (!directoryEntry.isDir) {
-                throw GoogleDriveExceptionCodes.NOT_A_FOLDER.create(folderId);
-            }
-            for (final Entry childEntry : directoryEntry.contents) {
-                if (!childEntry.isDir && !childEntry.isDeleted) {
-                    dropboxAPI.delete(childEntry.path);
+            Drive drive = googleDriveAccess.getDrive();
+
+            // Query all files
+            com.google.api.services.drive.Drive.Files.List list = drive.files().list();
+            list.setQ("mimeType != 'application/vnd.google-apps.folder'");
+
+            FileList fileList = list.execute();
+            if (!fileList.isEmpty()) {
+                for (com.google.api.services.drive.model.File child : fileList.getItems()) {
+                    drive.children().delete(folderId, child.getId()).execute();
                 }
             }
-        } catch (final DropboxServerException e) {
-            throw handleServerError(folderId, e);
-        } catch (final DropboxException e) {
-            throw GoogleDriveExceptionCodes.GOOGLE_DRIVE_ERROR.create(e, e.getMessage());
+        } catch (final HttpResponseException e) {
+            throw handleHttpResponseError(folderId, e);
+        } catch (final IOException e) {
+            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -349,21 +422,25 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     @Override
     public List<IDTuple> removeDocument(final List<IDTuple> ids, final long sequenceNumber, boolean hardDelete) throws OXException {
         try {
-            final List<IDTuple> ret = new ArrayList<IDTuple>(ids.size());
-            for (final IDTuple id : ids) {
+            Drive drive = googleDriveAccess.getDrive();
+
+            List<IDTuple> ret = new ArrayList<IDTuple>(ids.size());
+            for (IDTuple id : ids) {
                 try {
-                    dropboxAPI.delete(id.getId());
-                } catch (final DropboxServerException e) {
-                    if (404 != e.error) {
+                    drive.children().delete(id.getFolder(), id.getId()).execute();
+                } catch (final HttpResponseException e) {
+                    if (404 != e.getStatusCode()) {
                         ret.add(id);
+                    } else {
+                        throw e;
                     }
                 }
             }
             return ret;
-        } catch (final DropboxServerException e) {
-            throw handleServerError(null, e);
-        } catch (final DropboxException e) {
-            throw GoogleDriveExceptionCodes.GOOGLE_DRIVE_ERROR.create(e, e.getMessage());
+        } catch (final HttpResponseException e) {
+            throw handleHttpResponseError(null, e);
+        } catch (final IOException e) {
+            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -424,10 +501,10 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 }
             }
             return new FileTimedResult(files);
-        } catch (final DropboxServerException e) {
-            throw handleServerError(folderId, e);
-        } catch (final DropboxException e) {
-            throw GoogleDriveExceptionCodes.GOOGLE_DRIVE_ERROR.create(e, e.getMessage());
+        } catch (final HttpResponseException e) {
+            throw handleHttpResponseError(folderId, e);
+        } catch (final IOException e) {
+            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -455,10 +532,10 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             // Sort collection if needed
             sort(files, sort, order);
             return new FileTimedResult(files);
-        } catch (final DropboxServerException e) {
-            throw handleServerError(folderId, e);
-        } catch (final DropboxException e) {
-            throw GoogleDriveExceptionCodes.GOOGLE_DRIVE_ERROR.create(e, e.getMessage());
+        } catch (final HttpResponseException e) {
+            throw handleHttpResponseError(folderId, e);
+        } catch (final IOException e) {
+            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -473,10 +550,10 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 files.add(new GoogleDriveFile(folderId, id, userId).parseGoogleDriveFile(revisionEntry));
             }
             return new FileTimedResult(files);
-        } catch (final DropboxServerException e) {
-            throw handleServerError(id, e);
-        } catch (final DropboxException e) {
-            throw GoogleDriveExceptionCodes.GOOGLE_DRIVE_ERROR.create(e, e.getMessage());
+        } catch (final HttpResponseException e) {
+            throw handleHttpResponseError(id, e);
+        } catch (final IOException e) {
+            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -498,10 +575,10 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             // Sort collection
             sort(files, sort, order);
             return new FileTimedResult(files);
-        } catch (final DropboxServerException e) {
-            throw handleServerError(id, e);
-        } catch (final DropboxException e) {
-            throw GoogleDriveExceptionCodes.GOOGLE_DRIVE_ERROR.create(e, e.getMessage());
+        } catch (final HttpResponseException e) {
+            throw handleHttpResponseError(id, e);
+        } catch (final IOException e) {
+            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -623,10 +700,10 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 files = files.subList(start, toIndex);
             }
             return new SearchIteratorAdapter<File>(files.iterator(), files.size());
-        } catch (final DropboxServerException e) {
-            throw handleServerError(null, e);
-        } catch (final DropboxException e) {
-            throw GoogleDriveExceptionCodes.GOOGLE_DRIVE_ERROR.create(e, e.getMessage());
+        } catch (final HttpResponseException e) {
+            throw handleHttpResponseError(null, e);
+        } catch (final IOException e) {
+            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
