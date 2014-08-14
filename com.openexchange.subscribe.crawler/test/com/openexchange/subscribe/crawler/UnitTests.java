@@ -15,7 +15,6 @@ import com.openexchange.subscribe.xing.ContactSanitationTest;
 @RunWith(Suite.class)
 @SuiteClasses({
     ContactSanitationTest.class,
-    GoogleAPIStepTest.class
 })
 public class UnitTests {
 

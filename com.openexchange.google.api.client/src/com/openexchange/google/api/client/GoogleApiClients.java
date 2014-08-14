@@ -130,10 +130,8 @@ public class GoogleApiClients {
             // Check expiry
             int expiry = scribeOAuthService.getExpiry(defaultAccount.getToken());
             if (expiry < 300) {
-                // Less than 5 minutes to live
-                Token accessToken = scribeOAuthService.getAccessToken(
-                    new Token(defaultAccount.getToken(), defaultAccount.getSecret()),
-                    null);
+                // Less than 5 minutes to live -> refresh token!
+                Token accessToken = scribeOAuthService.getAccessToken(new Token(defaultAccount.getToken(), defaultAccount.getSecret()), null);
 
                 // Update account
                 int accountId = defaultAccount.getId();

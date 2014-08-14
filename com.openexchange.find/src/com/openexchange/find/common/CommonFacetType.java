@@ -53,7 +53,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.FacetType;
+import com.openexchange.find.facet.Filter;
 import com.openexchange.java.Strings;
 
 /**
@@ -64,10 +66,8 @@ import com.openexchange.java.Strings;
 public enum CommonFacetType implements FacetType {
 
     /**
-     * The global facet is a field facet,
-     * that applies to all modules and is meant
-     * to be used as a filter that searches in an
-     * implementation-defined set of fields.
+     * The global facet is a field facet, that applies to all modules and is meant
+     * to be used as a filter that searches in an implementation-defined set of fields.
      */
     GLOBAL,
     /**
@@ -80,6 +80,27 @@ public enum CommonFacetType implements FacetType {
      * with {@link CommonFacetType#FOLDER}.
      */
     FOLDER_TYPE(CommonStrings.FACET_TYPE_FOLDER_TYPE),
+    /**
+     * The facet type for time frames. A module that supports this facet may provide some
+     * default values to indicate that the facet exists (e.g. "last week"). It also has to
+     * support client-defined time ranges with a special syntax denoting a frame between two
+     * timestamps:
+     *
+     * <ul>
+     *   <li><code>[&lt;from&gt; TO &lt;to&gt;]</code></li>
+     *   <li><code>{&lt;from&gt; TO &lt;to&gt;}</code></li>
+     * </ul>
+     *
+     * For <code>[]</code> &lt;from&gt; and &lt;to&gt; are inclusive. For <code>{}</code>
+     * &lt;from&gt; and &lt;to&gt; are exclusive. Both, &lt;from&gt; and &lt;to&gt; are
+     * timestamps in milliseconds since midnight, January 1, 1970 UTC. It is also possible to
+     * use the asterisk as a wildcard, e.g. <code>[* TO 1407142786432]</code>.
+     *
+     * If the filter for an {@link ActiveFacet} of type {@link CommonFacetType#TIME} is {@link Filter#NO_FILTER},
+     * its value is expected to be such a custom time range. Modules are advised to use {@link TimeFrame#valueOf(String)}
+     * to parse the input string.
+     */
+    TIME(CommonStrings.TIME)
     ;
 
     private static final Map<String, CommonFacetType> typesById = new HashMap<String, CommonFacetType>();

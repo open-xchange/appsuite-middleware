@@ -58,6 +58,8 @@ import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.dropbox.DropboxConstants;
 import com.openexchange.file.storage.dropbox.DropboxFileStorageService;
+import com.openexchange.oauth.OAuthAccountDeleteListener;
+import com.openexchange.oauth.OAuthUtilizerCreator;
 
 /**
  * {@link DropboxServiceRegisterer}
@@ -69,7 +71,9 @@ public final class DropboxServiceRegisterer implements ServiceTrackerCustomizer<
     private final BundleContext context;
     private volatile FileStorageAccountManagerProvider provider;
     private volatile DropboxFileStorageService service;
-    private volatile ServiceRegistration<FileStorageService> registration;
+    private volatile ServiceRegistration<FileStorageService> serviceRegistration;
+    private volatile ServiceRegistration<OAuthUtilizerCreator> creatorRegistration;
+    private volatile ServiceRegistration<OAuthAccountDeleteListener> listenerRegistration;
 
     /**
      * Initializes a new {@link DropboxServiceRegisterer}.
@@ -98,7 +102,9 @@ public final class DropboxServiceRegisterer implements ServiceTrackerCustomizer<
                  * Try to create Dropbox service
                  */
                 service = DropboxFileStorageService.newInstance();
-                this.registration = context.registerService(FileStorageService.class, service, null);
+                this.serviceRegistration = context.registerService(FileStorageService.class, service, null);
+                this.creatorRegistration = context.registerService(OAuthUtilizerCreator.class, service, null);
+                this.listenerRegistration = context.registerService(OAuthAccountDeleteListener.class, service, null);
                 this.service = service;
                 this.provider = provider;
             } else {
@@ -109,9 +115,11 @@ public final class DropboxServiceRegisterer implements ServiceTrackerCustomizer<
                 if (null == compositeProvider) {
                     compositeProvider = new CompositeFileStorageAccountManagerProvider();
                     compositeProvider.addProvider(this.provider);
-                    unregisterService(reference);
+                    unregisterService(null);
                     service = DropboxFileStorageService.newInstance(compositeProvider);
-                    this.registration = context.registerService(FileStorageService.class, service, null);
+                    this.serviceRegistration = context.registerService(FileStorageService.class, service, null);
+                    this.creatorRegistration = context.registerService(OAuthUtilizerCreator.class, service, null);
+                    this.listenerRegistration = context.registerService(OAuthAccountDeleteListener.class, service, null);
                     this.service = service;
                     this.provider = compositeProvider;
                 }
@@ -144,15 +152,29 @@ public final class DropboxServiceRegisterer implements ServiceTrackerCustomizer<
     }
 
     private void unregisterService(final ServiceReference<FileStorageAccountManagerProvider> ref) {
-        final ServiceRegistration<FileStorageService> registration = this.registration;
-        if (null != registration) {
-            registration.unregister();
-            this.registration = null;
+        ServiceRegistration<FileStorageService> serviceRegistration = this.serviceRegistration;
+        if (null != serviceRegistration) {
+            serviceRegistration.unregister();
+            this.serviceRegistration = null;
         }
-        final ServiceReference<FileStorageAccountManagerProvider> reference = ref;
+
+        ServiceRegistration<OAuthUtilizerCreator> creatorRegistration = this.creatorRegistration;
+        if (null != creatorRegistration) {
+            creatorRegistration.unregister();
+            this.creatorRegistration = null;
+        }
+
+        ServiceRegistration<OAuthAccountDeleteListener> listenerRegistration = this.listenerRegistration;
+        if (null != listenerRegistration) {
+            listenerRegistration.unregister();
+            this.listenerRegistration = null;
+        }
+
+        ServiceReference<FileStorageAccountManagerProvider> reference = ref;
         if (null != reference) {
             context.ungetService(reference);
         }
+
         this.service = null;
     }
 

@@ -103,10 +103,6 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class BasicDriveDriver extends AbstractModuleSearchDriver {
 
-    static enum Comparison {
-        GREATER_THAN, GREATER_EQUALS, EQUALS, LOWER_THAN, LOWER_EQUALS;
-    }
-
     private static final List<Field> DEFAULT_FIELDS = new ArrayList<Field>(10);
     static {
         Collections.addAll(DEFAULT_FIELDS,

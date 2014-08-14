@@ -1,3 +1,7 @@
+* 2014-08-06 - steffen.templin@open-xchange.com
+
+ - Fix for bug 33929: Fixed CLT output when a user is copied by its name
+
 * 2012-06-15 - jan.bauerdick@open-xchange.com
 
  - Moved packages c.o.admin.user.copy.rmi & c.o.admin.user.copy.console to dedicated bundles

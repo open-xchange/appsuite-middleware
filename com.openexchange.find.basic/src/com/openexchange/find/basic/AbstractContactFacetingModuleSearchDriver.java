@@ -59,6 +59,7 @@ import com.openexchange.contact.SortOrder;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.spi.AbstractModuleSearchDriver;
+import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactSimilarity;
 import com.openexchange.groupware.contact.helpers.UseCountComparator;
@@ -256,6 +257,12 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
                 } else {
                     contacts = SearchIteratorAdapter.toList(searchIterator);
                 }
+            } catch (OXException e) {
+                if (ContactExceptionCodes.TOO_FEW_SEARCH_CHARS.equals(e)) {
+                    return Collections.emptyList();
+                }
+
+                throw e;
             } finally {
                 SearchIterators.close(searchIterator);
             }

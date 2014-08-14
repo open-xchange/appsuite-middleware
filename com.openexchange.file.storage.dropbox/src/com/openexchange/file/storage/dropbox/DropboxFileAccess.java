@@ -57,6 +57,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import com.dropbox.client2.DropboxAPI.Entry;
+import com.dropbox.client2.DropboxAPI.ThumbFormat;
+import com.dropbox.client2.DropboxAPI.ThumbSize;
 import com.dropbox.client2.exception.DropboxException;
 import com.dropbox.client2.exception.DropboxServerException;
 import com.openexchange.exception.OXException;
@@ -65,8 +67,8 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
-import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileTimedResult;
+import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.dropbox.session.DropboxOAuthAccess;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
@@ -81,7 +83,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DropboxFileAccess extends AbstractDropboxAccess implements FileStorageFileAccess {
+public class DropboxFileAccess extends AbstractDropboxAccess implements ThumbnailAware {
 
     private final DropboxAccountAccess accountAccess;
     private final int userId;
@@ -231,6 +233,22 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
     public InputStream getDocument(final String folderId, final String id, final String version) throws OXException {
         try {
             return dropboxAPI.getFileStream(id, version);
+        } catch (final DropboxServerException e) {
+            if (404 == e.error) {
+                throw DropboxExceptionCodes.NOT_FOUND.create(e, id);
+            }
+            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+        } catch (final DropboxException e) {
+            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
+    public InputStream getThumbnailStream(String folderId, String id, String version) throws OXException {
+        try {
+            return dropboxAPI.getThumbnailStream(id, ThumbSize.ICON_64x64, ThumbFormat.JPEG);
         } catch (final DropboxServerException e) {
             if (404 == e.error) {
                 throw DropboxExceptionCodes.NOT_FOUND.create(e, id);
