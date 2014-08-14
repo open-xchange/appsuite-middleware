@@ -57,6 +57,7 @@ import javapns.communication.exceptions.KeystoreException;
 import javapns.devices.Device;
 import javapns.devices.exceptions.InvalidDeviceTokenFormatException;
 import javapns.json.JSONException;
+import javapns.json.JSONObject;
 import javapns.notification.PayloadPerDevice;
 import javapns.notification.PushNotificationPayload;
 import javapns.notification.PushedNotification;
@@ -169,6 +170,52 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
         LOG.info("Finished processing APN feedback for ''{}'' after {} ms.", getServiceID(), (System.currentTimeMillis() - start));
     }
 
+    public void notifySilently() {
+        LOG.info("Sending silent push notifications for '{}'...", getServiceID());
+        long start = System.currentTimeMillis();
+        try {
+            List<Subscription> subscriptions = Services.getService(DriveSubscriptionStore.class, true).getSubscriptions(getServiceID());
+            if (null != subscriptions && 0 < subscriptions.size()) {
+                List<PayloadPerDevice> payloads = getSilentNotificationPayloads(subscriptions);
+                if (0 < payloads.size()) {
+                    APNAccess access = getAccess();
+                    PushedNotifications notifications = Push.payloads(access.getKeystore(), access.getPassword(), access.isProduction(), payloads);
+                    processNotificationResults(notifications);
+                }
+            }
+        } catch (CommunicationException e) {
+            LOG.warn("error sending silent push notifications", e);
+        } catch (KeystoreException e) {
+            LOG.warn("error sending silent push notifications", e);
+        } catch (OXException e) {
+            LOG.warn("error sending silent push notifications", e);
+        }
+        LOG.info("Finished sending silent push notifications for ''{}'' after {} ms.", getServiceID(), (System.currentTimeMillis() - start));
+    }
+
+    private List<PayloadPerDevice> getSilentNotificationPayloads(List<Subscription> subscriptions) {
+        List<PayloadPerDevice> payloads = new ArrayList<PayloadPerDevice>(subscriptions.size());
+        for (Subscription subscription : subscriptions) {
+            try {
+                PushNotificationPayload payload = new PushNotificationPayload();
+                payload.addCustomDictionary("root", subscription.getRootFolderID());
+                JSONObject apsObject = payload.getPayload().getJSONObject("aps");
+                if (null == apsObject) {
+                    apsObject = new JSONObject();
+                    payload.getPayload().put("aps", apsObject);
+                }
+                apsObject.put("content-available", 1);
+                payloads.add(new PayloadPerDevice(payload, subscription.getToken()));
+            } catch (JSONException e) {
+                LOG.warn("error constructing payload", e);
+            } catch (InvalidDeviceTokenFormatException e) {
+                LOG.warn("Invalid device token: '{}', removing from subscription store.", subscription.getToken(), e);
+                removeSubscription(subscription);
+            }
+        }
+        return payloads;
+    }
+
     private List<PayloadPerDevice> getPayloads(DriveEvent event, List<Subscription> subscriptions) {
         String pushTokenReference = event.getPushTokenReference();
         List<PayloadPerDevice> payloads = new ArrayList<PayloadPerDevice>(subscriptions.size());
@@ -183,7 +230,12 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
                 payload.addCustomAlertActionLocKey("OK");
                 payload.addCustomDictionary("root", subscription.getRootFolderID());
                 payload.addCustomDictionary("action", "sync");
-//                payload.addCustomDictionary("folders", event.getFolderIDs().toString());
+                JSONObject apsObject = payload.getPayload().getJSONObject("aps");
+                if (null == apsObject) {
+                    apsObject = new JSONObject();
+                    payload.getPayload().put("aps", apsObject);
+                }
+                apsObject.put("content-available", 1);
                 payloads.add(new PayloadPerDevice(payload, subscription.getToken()));
             } catch (JSONException e) {
                 LOG.warn("error constructing payload", e);

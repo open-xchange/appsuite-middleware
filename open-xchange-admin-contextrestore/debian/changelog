@@ -94,6 +94,12 @@ open-xchange-admin-contextrestore (7.6.0-0) unstable; urgency=low
 
  -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Wed, 12 Feb 2014 09:35:13 +0100
 
+open-xchange-admin-contextrestore (7.4.2-32) stable; urgency=low
+
+  * Build for patch 2014-08-15
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Wed, 13 Aug 2014 15:57:11 +0200
+
 open-xchange-admin-contextrestore (7.4.2-31) stable; urgency=low
 
   * Build for patch 2014-08-11

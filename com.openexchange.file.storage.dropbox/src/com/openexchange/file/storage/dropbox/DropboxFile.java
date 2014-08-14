@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.dropbox;
 
+import static com.openexchange.file.storage.dropbox.Utils.normalizeFolderId;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
@@ -78,7 +79,7 @@ public final class DropboxFile extends DefaultFile {
      */
     public DropboxFile(final String folderId, final String id, final int userId) {
         super();
-        setFolderId("/".equals(folderId) ? FileStorageFolder.ROOT_FULLNAME : folderId);
+        setFolderId("/".equals(folderId) ? FileStorageFolder.ROOT_FULLNAME : normalizeFolderId(folderId));
         setCreatedBy(userId);
         setModifiedBy(userId);
         setId(id);
@@ -115,15 +116,6 @@ public final class DropboxFile extends DefaultFile {
     public DropboxFile parseDropboxFile(final Entry entry, final List<Field> fields) throws OXException {
         if (null != entry && !entry.isDir) {
             try {
-                setId(entry.path);
-                {
-                    final String p = entry.parentPath();
-                    if ("/".equals(p)) {
-                        setFolderId(FileStorageFolder.ROOT_FULLNAME);
-                    } else {
-                        setFolderId(p);
-                    }
-                }
                 final String name = entry.fileName();
                 setTitle(name);
                 setFileName(name);

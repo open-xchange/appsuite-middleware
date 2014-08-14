@@ -76,6 +76,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.log.LogProperties;
 import com.openexchange.login.Blocking;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginRequest;
@@ -232,6 +233,7 @@ public final class LoginPerformer {
                 // Session could not be created
                 throw LoginExceptionCodes.UNKNOWN.create("Session could not be created.");
             }
+            LogProperties.putSessionProperties(session);
             retval.setServerToken((String) session.getParameter(LoginFields.SERVER_TOKEN));
             if (SessionEnhancement.class.isInstance(authed)) {
                 ((SessionEnhancement) authed).enhanceSession(session);

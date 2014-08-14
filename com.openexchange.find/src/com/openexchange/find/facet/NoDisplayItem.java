@@ -57,16 +57,11 @@ package com.openexchange.find.facet;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public class NoDisplayItem extends DefaultDisplayItem {
+public class NoDisplayItem implements DisplayItem {
 
     @Override
-    public String getDefaultValue() {
+    public String getDisplayName() {
         return "";
-    }
-
-    @Override
-    public Object getItem() {
-        return null;
     }
 
     @Override

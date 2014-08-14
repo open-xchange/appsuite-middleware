@@ -108,6 +108,18 @@ public class SQL {
         return stringBuilder.append(';').toString();
     }
 
+    /**
+     * SELECT service,token,user,REVERSE(folder),timestamp FROM driveEventSubscriptions
+     * WHERE service IN (?,?,...);"
+     */
+    public static final String SELECT_SUBSCRIPTIONS_STMT(int serviceCount) throws OXException {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("SELECT cid,service,token,user,REVERSE(folder),timestamp FROM driveEventSubscriptions ");
+        stringBuilder.append("WHERE service");
+        appendPlaceholders(stringBuilder, serviceCount);
+        return stringBuilder.append(';').toString();
+    }
+
     public static final String DELETE_SUBSCRIPTIONS_FOR_TOKEN_STMT =
         "DELETE FROM driveEventSubscriptions " +
         "WHERE service=? AND token=? AND timestamp<?;";

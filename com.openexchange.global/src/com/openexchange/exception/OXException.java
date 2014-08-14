@@ -1084,7 +1084,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @param value The argument value
      * @return The value previously associated with argument value or <code>null</code> if not present before
      */
-    public Object setArgument(final String name, final String value) {
+    public Object setArgument(final String name, final Object value) {
         if (null == value) {
             return arguments.remove(name);
         }

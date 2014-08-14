@@ -96,7 +96,7 @@ public class MSNSubscribeService  extends AbstractSubscribeService {
 
     @Override
     public Collection<?> getContent(final Subscription subscription) throws OXException {
-        return activator.getMsnService().getContacts(subscription.getSession(), subscription.getUserId(), subscription.getContext().getContextId(), (Integer)subscription.getConfiguration().get("account"));
+        return activator.getMsnService().getContacts(subscription.getSession(), subscription.getUserId(), subscription.getContext().getContextId(), ((Integer)subscription.getConfiguration().get("account")).intValue());
     }
 
     @Override

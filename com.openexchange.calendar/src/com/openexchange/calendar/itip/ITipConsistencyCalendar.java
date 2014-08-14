@@ -469,9 +469,9 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
     }
 
     @Override
-    public void deleteAppointmentsInFolder(final int inFolder, final Connection writeCon)
+    public boolean deleteAppointmentsInFolder(final int inFolder, final Connection writeCon)
         throws OXException, SQLException {
-        delegate.deleteAppointmentsInFolder(inFolder, writeCon);
+        return delegate.deleteAppointmentsInFolder(inFolder, writeCon);
     }
 
     @Override

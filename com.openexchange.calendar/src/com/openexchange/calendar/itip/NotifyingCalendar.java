@@ -229,8 +229,8 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
     }
 
     @Override
-    public void deleteAppointmentsInFolder(final int inFolder, final Connection writeCon) throws OXException, SQLException {
-        delegate.deleteAppointmentsInFolder(inFolder, writeCon);
+    public boolean deleteAppointmentsInFolder(final int inFolder, final Connection writeCon) throws OXException, SQLException {
+        return delegate.deleteAppointmentsInFolder(inFolder, writeCon);
     }
 
     @Override

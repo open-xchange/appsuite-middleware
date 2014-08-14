@@ -62,13 +62,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.io.FileUtils;
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
 import com.openexchange.ajax.find.actions.AutocompleteResponse;
+import com.openexchange.ajax.find.actions.TestDisplayItem;
 import com.openexchange.ajax.mail.actions.ImportMailRequest;
 import com.openexchange.ajax.mail.actions.ImportMailResponse;
 import com.openexchange.ajax.user.actions.GetRequest;
@@ -78,7 +77,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.find.Module;
 import com.openexchange.find.common.CommonConstants;
 import com.openexchange.find.common.CommonFacetType;
-import com.openexchange.find.common.ContactDisplayItem;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.DefaultFacet;
 import com.openexchange.find.facet.Facet;
@@ -86,6 +84,7 @@ import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.find.mail.MailFacetType;
+import com.openexchange.find.util.DisplayItems;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.util.TimeZones;
@@ -162,29 +161,16 @@ public class BasicMailTest extends AbstractFindTest {
         assertNotNull("own contact was missing in response", found);
 
         /*
+         * Mail address included in detail info?
+         */
+        String mailAddress = ((TestDisplayItem) found.getDisplayItem()).getDetail();
+        assertEquals(defaultAddress, mailAddress);
+
+        /*
          * Contact image url included?
          */
-        JSONObject json = (JSONObject) autocompleteResponse.getResponse().getData();
-        JSONArray jFacets = json.getJSONArray("facets");
-        JSONObject jContactFacet = null;
-        for (int i = 0; i < jFacets.length(); i++) {
-            JSONObject jFacet = jFacets.getJSONObject(i);
-            if ("contacts".equals(jFacet.optString("id"))) {
-                jContactFacet = jFacet;
-                break;
-            }
-        }
-        JSONArray jValues = jContactFacet.getJSONArray("values");
-        JSONObject jContactValue = null;
-        for (int i = 0; i < jValues.length(); i++) {
-            JSONObject jValue = jValues.getJSONObject(i);
-            if (found.getId().equals(jValue.getString("id"))) {
-                jContactValue = jValue;
-                break;
-            }
-        }
-        assertNotNull("image_url missing in contact", jContactValue.optString("image_url", null));
-
+        String imageUrl = ((TestDisplayItem) found.getDisplayItem()).getImageUrl();
+        assertNotNull("image_url missing in contact", imageUrl);
 
         /*
          * Set own contact as activeFacet
@@ -537,44 +523,12 @@ public class BasicMailTest extends AbstractFindTest {
         assertTrue("document found", 0 == documents.size());
     }
 
-    public void testMailAddressNotDuplicatedInDisplayName() throws Exception {
-        FolderObject contactFolder = folderManager.generatePrivateFolder(
-            "findApiMailTestFolder_" + System.currentTimeMillis(),
-            FolderObject.CONTACT,
-            client.getValues().getPrivateContactFolder(),
-            client.getValues().getUserId());
-
-        contactFolder = folderManager.insertFolderOnServer(contactFolder);
-        Contact contact = contactManager.newAction(specificContact(null, "steffen.templin@open-xchange.com", "steffen.templin@open-xchange.com", contactFolder.getObjectID()));
-        String prefix = "ste";
-        List<Facet> facets = autocomplete(prefix);
-        Facet facet = findByType(MailFacetType.CONTACTS, facets);
-        assertNotNull("Contacts facet not found", facet);
-        List<FacetValue> values = ((DefaultFacet) facet).getValues();
-        assertTrue("Missing contacts in facets", values.size() > 0);
-
-        boolean found = false;
-        for (FacetValue value : values) {
-            if (contact.getSurName().equals(value.getDisplayItem().getDefaultValue())) {
-                found = true;
-            }
-
-            int i1 = value.getDisplayItem().getDefaultValue().indexOf(contact.getEmail1());
-            int i2 = value.getDisplayItem().getDefaultValue().lastIndexOf(contact.getEmail1());
-            if (i1 >= 0 && i2 >= 0 && i1 != i2) {
-                fail("Display name contains the mail address twice!");
-            }
-        }
-
-        assertTrue("Contact not found", found);
-    }
-
     private void findContactsInValues(List<Contact> contacts, List<FacetValue> values) {
         for (Contact contact : contacts) {
             boolean found = false;
-            String contactDN = ContactDisplayItem.extractDefaultValue(contact);
+            String contactDN = DisplayItems.convert(contact).getDisplayName();
             for (FacetValue value : values) {
-                String valueDN = value.getDisplayItem().getDefaultValue();
+                String valueDN = value.getDisplayItem().getDisplayName();
                 if (contactDN.equals(valueDN)) {
                     found = true;
                     break;
@@ -649,7 +603,7 @@ public class BasicMailTest extends AbstractFindTest {
         GetRequest getRequest = new GetRequest(client.getValues().getUserId(), client.getValues().getTimeZone());
         GetResponse getResponse = client.execute(getRequest);
         Contact contact = getResponse.getContact();
-        FacetValue found = findByDisplayName(facets, ContactDisplayItem.extractDefaultValue(contact));
+        FacetValue found = findByDisplayName(facets, DisplayItems.convert(contact).getDisplayName());
         return found;
     }
 

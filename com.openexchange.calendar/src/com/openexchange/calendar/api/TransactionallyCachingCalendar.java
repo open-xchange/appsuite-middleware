@@ -235,10 +235,10 @@ public class TransactionallyCachingCalendar implements AppointmentSQLInterface {
     }
 
     @Override
-    public void deleteAppointmentsInFolder(int inFolder, Connection writeCon)
+    public boolean deleteAppointmentsInFolder(int inFolder, Connection writeCon)
         throws com.openexchange.exception.OXException, SQLException {
         cached.clear();
-        delegate.deleteAppointmentsInFolder(inFolder, writeCon);
+        return delegate.deleteAppointmentsInFolder(inFolder, writeCon);
     }
 
     @Override

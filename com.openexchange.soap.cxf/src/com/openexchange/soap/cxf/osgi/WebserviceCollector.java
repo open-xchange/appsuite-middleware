@@ -79,9 +79,8 @@ public class WebserviceCollector implements ServiceListener {
     private static final String WEBSERVICE_NAME = "WebserviceName";
 
     private final ConcurrentMap<String, Endpoint> endpoints;
-
     private final BundleContext context;
-
+    private final String baseUri;
     private volatile boolean open;
 
     /**
@@ -89,8 +88,9 @@ public class WebserviceCollector implements ServiceListener {
      *
      * @param context The bundle context
      */
-    public WebserviceCollector(final BundleContext context) {
+    public WebserviceCollector(String baseUri, BundleContext context) {
         super();
+        this.baseUri = baseUri;
         endpoints = new ConcurrentHashMap<String, Endpoint>();
         this.context = context;
     }
@@ -190,10 +190,13 @@ public class WebserviceCollector implements ServiceListener {
     }
 
     private void replace(final String name, final Object service) {
-        final String address = '/' + name; // MessageFormat.format("/{0}", name);
+        String address = '/' + name; // MessageFormat.format("/{0}", name);
         Endpoint oldEndpoint;
         try {
             // Publish new server endpoint
+            if (null != baseUri) {
+                address = baseUri + address;
+            }
             final Endpoint endpoint = Endpoint.publish(address, service);
             {
                 // Alter server's in-stream interceptors

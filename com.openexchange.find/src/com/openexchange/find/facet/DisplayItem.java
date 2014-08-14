@@ -49,39 +49,23 @@
 
 package com.openexchange.find.facet;
 
-import com.openexchange.i18n.I18nService;
 
 /**
  * Interface for several kinds objects that can be displayed by a client. Inheritors must implement hashCode() and equals().
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Added method {@link #getItem()}
  * @since v7.6.0
  */
 public interface DisplayItem {
 
     /**
-     * A display item must contain a default value.
+     * A display item must contain a default display name.
      * <p>
      * Clients may use it for displaying the item if they have no implementation to handle the concrete item type.
      *
-     * @return The default value. Never <code>null</code>.
+     * @return The default display name. Never <code>null</code>.
      */
-    String getDefaultValue();
-
-    /**
-     * Whether the default value is a localizable String.
-     * If true, the default value is translated using {@link I18nService},
-     * before it is written out to the client.
-     */
-    boolean isLocalizable();
-
-    /**
-     * Gets the item associated with this instance.
-     *
-     * @return The item; possibly <code>null</code>
-     */
-    Object getItem();
+    String getDisplayName();
 
     /**
      * Delegate to given visitor.

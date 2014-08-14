@@ -57,10 +57,10 @@ import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
 import com.openexchange.ajax.find.actions.AutocompleteResponse;
 import com.openexchange.find.Module;
-import com.openexchange.find.common.ContactDisplayItem;
 import com.openexchange.find.contacts.ContactsFacetType;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.FacetValue;
+import com.openexchange.find.util.DisplayItems;
 import com.openexchange.groupware.container.Contact;
 
 /**
@@ -88,7 +88,8 @@ public class Bug33447Test extends ContactsFindTest {
         String prefix = contact.getEmail1().substring(0, 8);
         AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, Module.CONTACTS.getIdentifier(), options);
         AutocompleteResponse autocompleteResponse = client.execute(autocompleteRequest);
-        FacetValue foundFacetValue = findByDisplayName(autocompleteResponse.getFacets(), ContactDisplayItem.extractDefaultValue(contact));
+
+        FacetValue foundFacetValue = findByDisplayName(autocompleteResponse.getFacets(), DisplayItems.convert(contact).getDisplayName());
         assertNotNull("no facet value found for: " + contact.getEmail1(), foundFacetValue);
         ActiveFacet activeFacet = createActiveFacet(ContactsFacetType.CONTACT, foundFacetValue.getId(), foundFacetValue.getFilter());
         List<PropDocument> documents = query(Module.CONTACTS, Collections.singletonList(activeFacet), options);

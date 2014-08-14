@@ -67,9 +67,11 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.dropbox.session.DropboxOAuthAccess;
+import com.openexchange.file.storage.search.FileNameTerm;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
@@ -445,8 +447,8 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                     files.add(new DropboxFile(folderId, childEntry.path, userId).parseDropboxFile(childEntry));
                 }
             }
-            // Sort collection
-            Collections.sort(files, order.comparatorBy(sort));
+            // Sort collection if needed
+            sort(files, sort, order);
             return new FileTimedResult(files);
         } catch (final DropboxServerException e) {
             throw handleServerError(folderId, e);
@@ -489,7 +491,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                 files.add(new DropboxFile(folderId, id, userId).parseDropboxFile(revisionEntry));
             }
             // Sort collection
-            Collections.sort(files, order.comparatorBy(sort));
+            sort(files, sort, order);
             return new FileTimedResult(files);
         } catch (final DropboxServerException e) {
             throw handleServerError(id, e);
@@ -537,8 +539,11 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     @Override
     public SearchIterator<File> search(final List<String> folderIds, final SearchTerm<?> searchTerm, List<Field> fields, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        if (FileNameTerm.class.isInstance(searchTerm) && null == folderIds || 1 == folderIds.size()) {
+            String pattern = ((FileNameTerm) searchTerm).getPattern();
+            return search(pattern, fields, null != folderIds && 1 == folderIds.size() ? folderIds.get(0) : null, sort, order, start, end);
+        }
+        throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create("Search term not supported: " + searchTerm);
     }
 
     @Override
@@ -548,7 +553,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                 List<File> files = new LinkedList<File>();
                 gatherAllFiles("/", files);
                 // Sort collection
-                Collections.sort(files, order.comparatorBy(sort));
+                sort(files, sort, order);
                 if ((start != NOT_SET) && (end != NOT_SET)) {
                     final int size = files.size();
                     if ((start) > size) {
@@ -594,7 +599,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                 }
             }
             // Sort collection
-            Collections.sort(files, order.comparatorBy(sort));
+            sort(files, sort, order);
             if ((start != NOT_SET) && (end != NOT_SET)) {
                 final int size = files.size();
                 if ((start) > size) {
@@ -661,6 +666,19 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     @Override
     public FileStorageAccountAccess getAccountAccess() {
         return accountAccess;
+    }
+
+    /**
+     * Sorts the supplied list of files if needed.
+     *
+     * @param files The files to sort
+     * @param sort The sort order, or <code>null</code> if not specified
+     * @param order The sort direction
+     */
+    private static void sort(List<File> files, Field sort, SortDirection order) {
+        if (null != sort && 1 < files.size()) {
+            Collections.sort(files, order.comparatorBy(sort));
+        }
     }
 
     private static boolean isEmpty(final String string) {

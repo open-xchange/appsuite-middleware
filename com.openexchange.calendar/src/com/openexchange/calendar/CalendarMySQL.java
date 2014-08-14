@@ -3514,7 +3514,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                                             /*
                                              *  A move into another private folder:
                                              *    - Set to target folder ID for the folder owner
-                                             *    - Set to default folder ID for non-folder-owners 
+                                             *    - Set to default folder ID for non-folder-owners
                                              */
                                             if(new_userparticipant.getIdentifier() == access.getFolderOwner(cdao.getParentFolderID())) {
                                                 pfid = cdao.getParentFolderID();
@@ -4848,7 +4848,9 @@ public class CalendarMySQL implements CalendarSqlImp {
     }
 
     @Override
-    public void deleteAppointmentsInFolder(final Session so, final Context ctx, final ResultSet rs, final Connection readcon, final Connection writecon, final int foldertype, final int fid) throws SQLException, OXException {
+    public boolean deleteAppointmentsInFolder(final Session so, final Context ctx, final ResultSet rs, final Connection readcon, final Connection writecon, final int foldertype, final int fid) throws SQLException, OXException {
+        boolean modified = false;
+
         while (rs.next()) {
             final int oid = rs.getInt(1);
             final int owner = rs.getInt(2);
@@ -4868,7 +4870,9 @@ public class CalendarMySQL implements CalendarSqlImp {
                 null,
                 null,
                 false);
+            modified = true;
         }
+        return modified;
     }
 
     /**

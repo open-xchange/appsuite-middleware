@@ -176,8 +176,8 @@ public final class AJAXUtility {
      * <li>Replace double slashes with single one
      * </ul>
      *
-     * @param sInput The input to sanitize
-     * @return The sanitized input
+     * @param sInput The input to sanitize, can be <code>null</code> or empty
+     * @return The sanitized input or the original value if <code>null</code> or empty
      */
     public static String sanitizeParam(String sInput) {
         if (isEmpty(sInput)) {

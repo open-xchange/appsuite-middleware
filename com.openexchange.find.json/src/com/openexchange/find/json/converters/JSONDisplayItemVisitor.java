@@ -51,21 +51,18 @@ package com.openexchange.find.json.converters;
 
 import static com.openexchange.ajax.AJAXUtility.sanitizeParam;
 import java.util.Locale;
-import java.util.TimeZone;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.contacts.json.mapping.ContactMapper;
-import com.openexchange.find.common.ContactDisplayItem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.find.facet.ComplexDisplayItem;
 import com.openexchange.find.facet.DisplayItemVisitor;
 import com.openexchange.find.facet.FormattableDisplayItem;
 import com.openexchange.find.facet.NoDisplayItem;
 import com.openexchange.find.facet.SimpleDisplayItem;
-import com.openexchange.groupware.contact.helpers.ContactField;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.tools.mappings.json.JsonMapping;
-import com.openexchange.tools.TimeZoneUtils;
+import com.openexchange.java.util.Pair;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -74,17 +71,15 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class JSONDisplayItemVisitor implements DisplayItemVisitor {
 
+    private static final Logger LOG = LoggerFactory.getLogger(JSONDisplayItemVisitor.class);
+
     private final StringTranslator translator;
 
     private final ServerSession session;
 
     private final Locale locale;
 
-    private final TimeZone timeZone;
-
-    private Object result;
-
-    private String imageUrl = null;
+    private Pair<String, Object> result;
 
     private JSONException exception = null;
 
@@ -94,17 +89,34 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
         this.session = session;
         User user = session.getUser();
         locale = user.getLocale();
-        timeZone = TimeZoneUtils.getTimeZone(user.getTimeZone());
     }
 
     @Override
-    public void visit(ContactDisplayItem item) {
-        result = sanitizeParam(item.getDefaultValue());
-        JsonMapping<? extends Object, Contact> jsonMapping = ContactMapper.getInstance().getMappings().get(ContactField.IMAGE1_URL);
+    public void visit(SimpleDisplayItem item) {
+        String displayName;
+        if (item.isLocalizable()) {
+            displayName = sanitizeParam(translator.translate(locale, item.getDisplayName()));
+        } else {
+            displayName = sanitizeParam(item.getDisplayName());
+        }
+
+        result = new Pair<String, Object>("name", displayName);
+    }
+
+    @Override
+    public void visit(ComplexDisplayItem item) {
+        JSONObject jItem = new JSONObject();
+        result = new Pair<String, Object>("item", jItem);
         try {
-            Object url = jsonMapping.serialize(item.getItem(), timeZone, session);
-            if (url != null && url instanceof String) {
-                imageUrl = (String) url;
+            jItem.put("name", sanitizeParam(item.getDisplayName()));
+            jItem.put("detail", sanitizeParam(item.getDetail()));
+            if (item.hasImageData()) {
+                try {
+                    String imageUrl = item.getImageDataSource().generateUrl(item.getImageLocation(), session);
+                    jItem.put("image_url", imageUrl);
+                } catch (OXException e) {
+                    LOG.warn("Could not generate image url for ComplexDisplayItem.", e);
+                }
             }
         } catch (JSONException e) {
             exception = e;
@@ -112,19 +124,15 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
     }
 
     @Override
-    public void visit(SimpleDisplayItem item) {
-        if (item.isLocalizable()) {
-            result = sanitizeParam(translator.translate(locale, item.getDefaultValue()));
-        } else {
-            result = sanitizeParam(item.getDefaultValue());
-        }
-    }
-
-    @Override
     public void visit(FormattableDisplayItem item) {
-        String suffix = sanitizeParam(translator.translate(locale, item.getDefaultValue()));
-        String arg = sanitizeParam(item.getItem());
-        result = new String[] { arg, suffix };
+        JSONObject jItem = new JSONObject();
+        result = new Pair<String, Object>("item", jItem);
+        try {
+            jItem.put("name", sanitizeParam(item.getArgument()));
+            jItem.put("detail", sanitizeParam(translator.translate(locale, item.getSuffix())));
+        } catch (JSONException e) {
+            exception = e;
+        }
     }
 
     @Override
@@ -141,15 +149,8 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
             throw exception;
         }
 
-        if (result instanceof String) {
-            json.put("display_name", result);
-        } else if (result instanceof String[]) {
-            JSONArray parts = new JSONArray();
-            parts.put(((String[])result)[0]);
-            parts.put(((String[])result)[1]);
-            json.put("display_item", parts);
+        if (result != null) {
+            json.put(result.getFirst(), result.getSecond());
         }
-
-        json.put("image_url", imageUrl);
     }
 }

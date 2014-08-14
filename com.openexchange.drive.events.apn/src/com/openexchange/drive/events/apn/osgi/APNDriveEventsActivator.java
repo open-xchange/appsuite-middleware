@@ -126,6 +126,9 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
             String feedbackQueryInterval = configService.getProperty(
                 "com.openexchange.drive.events.apn.ios.feedbackQueryInterval", (String)null);
             setupFeedbackQueries(publisher, feedbackQueryInterval);
+            String silentNotificationInterval = configService.getProperty(
+                "com.openexchange.drive.events.apn.ios.silentNotificationInterval", (String)null);
+            setupSilentNotifications(publisher, silentNotificationInterval);
         } else {
             LOG.info("Drive events for iOS clients via APN are disabled, skipping publisher registration.");
         }
@@ -177,6 +180,23 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
                 }, interval, interval);
             } else {
                 LOG.warn("Ignoring too small value '{} for APN feedback query interval.", feedbackQueryInterval);
+            }
+        }
+    }
+
+    private static void setupSilentNotifications(final APNDriveEventPublisher publisher, String silentNotificationInterval) throws OXException {
+        if (false == Strings.isEmpty(silentNotificationInterval)) {
+            long interval = TimeSpanParser.parseTimespan(silentNotificationInterval);
+            if (60 * 1000 <= interval) {
+                Services.getService(TimerService.class).scheduleWithFixedDelay(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        publisher.notifySilently();
+                    }
+                }, interval, interval);
+            } else {
+                LOG.warn("Ignoring too small value '{} for APN silent notification interval.", silentNotificationInterval);
             }
         }
     }

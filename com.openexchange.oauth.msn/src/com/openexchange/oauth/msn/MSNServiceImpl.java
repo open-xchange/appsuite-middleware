@@ -53,7 +53,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -89,22 +89,18 @@ public class MSNServiceImpl implements MSNService {
 
     @Override
     public List<Contact> getContacts(final Session session, final int user, final int contextId, final int accountId) {
-        List<Contact> contacts = new ArrayList<Contact>();
-
-        OAuthAccount account = null;
         try {
             final com.openexchange.oauth.OAuthService oAuthService = activator.getOauthService();
-            account = oAuthService.getAccount(accountId, session, user, contextId);
+            OAuthAccount account = oAuthService.getAccount(accountId, session, user, contextId);
             // the account contains the refresh-token in this case
             final String wrap_access_token = useRefreshTokenToGetAccessToken(account, session);
             final JSONObject response = useAccessTokenToAccessData(wrap_access_token);
-            contacts = parseIntoContacts(wrap_access_token, response);
-
+            return parseIntoContacts(wrap_access_token, response);
         } catch (final OXException e) {
             LOG.error("", e);
         }
 
-        return contacts;
+        return new LinkedList<Contact>();
     }
 
     /**
@@ -137,7 +133,7 @@ public class MSNServiceImpl implements MSNService {
     }
 
     private List<Contact> parseIntoContacts(final String wrap_access_token, final JSONObject wholeResponse) {
-        final List<Contact> contacts = new ArrayList<Contact>();
+        final List<Contact> contacts = new LinkedList<Contact>();
         try {
             JSONArray arr = wholeResponse.getJSONArray("data");
             for(int i = 0, size = arr.length(); i < size; i++) {
@@ -159,7 +155,7 @@ public class MSNServiceImpl implements MSNService {
             	}
 
             	if (cObj.has("emails")) {
-            		List<String> mailAddresses = new ArrayList<String>();
+            		List<String> mailAddresses = new LinkedList<String>();
             		JSONObject emails = cObj.getJSONObject("emails");
             		for(String key: new String[]{"preferred", "account", "other", "personal","business"}) {
             			if (emails.hasAndNotNull(key)) {
@@ -277,15 +273,14 @@ public class MSNServiceImpl implements MSNService {
 
     @Override
     public String getAccountDisplayName(final Session session, final int user, final int contextId, final int accountId) {
-        String displayName = "";
         try {
             final com.openexchange.oauth.OAuthService oAuthService = activator.getOauthService();
             final OAuthAccount account = oAuthService.getAccount(accountId, session, user, contextId);
-            displayName = account.getDisplayName();
+            return account.getDisplayName();
         } catch (final OXException e) {
             LOG.error("", e);
         }
-        return displayName;
+        return "";
     }
 
 }

@@ -49,6 +49,8 @@
 
 package com.openexchange.soap.cxf.osgi;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import javax.servlet.ServletException;
@@ -56,13 +58,16 @@ import org.apache.cxf.Bus;
 import org.apache.cxf.BusFactory;
 import org.apache.cxf.common.logging.LogUtils;
 import org.apache.cxf.staxutils.StaxUtils;
+import org.apache.cxf.transport.http.HttpDestinationFactory;
 import org.apache.cxf.transport.servlet.CXFNonSpringServlet;
+import org.apache.cxf.transport.servlet.ServletDestinationFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.soap.cxf.interceptor.TransformGenericElementsInterceptor;
 
@@ -100,10 +105,10 @@ public class CXFActivator extends HousekeepingActivator {
             /*
              * Initialize ServiceTrackerCustomizer
              */
-            final ServiceTrackerCustomizer<HttpService, HttpService> trackerCustomizer =
-                new ServiceTrackerCustomizer<HttpService, HttpService>() {
+            final ServiceTrackerCustomizer<HttpService, HttpService> trackerCustomizer = new ServiceTrackerCustomizer<HttpService, HttpService>() {
 
                     private volatile WebserviceCollector collector;
+                    private volatile String alias3;
 
                     @Override
                     public void removedService(final ServiceReference<HttpService> reference, final HttpService service) {
@@ -112,6 +117,11 @@ public class CXFActivator extends HousekeepingActivator {
                             try {
                                 httpService.unregister(alias);
                                 httpService.unregister(alias2);
+                                String servletAlias = alias3;
+                                if (null != servletAlias) {
+                                    httpService.unregister(servletAlias);
+                                    alias3 = null;
+                                }
                             } catch (final Exception e) {
                                 // Ignore
                             }
@@ -145,27 +155,29 @@ public class CXFActivator extends HousekeepingActivator {
                             /*
                              * Register CXF Servlet
                              */
+                            String baseAddress = null;
                             {
                                 // Servlet config; see org.apache.cxf.transport.servlet.ServletController.init()
                                 final ConfigurationService configService = getService(ConfigurationService.class);
                                 Dictionary<String, Object> config = null;
                                 if (null != configService) {
-                                    final String baseAddress = configService.getProperty("com.openexchange.soap.cxf.baseAddress");
+                                    baseAddress = configService.getProperty("com.openexchange.soap.cxf.baseAddress");
+                                    baseAddress = Strings.isEmpty(baseAddress) ? null : baseAddress.trim();
                                     if (null != baseAddress) {
-                                        config = new Hashtable<String, Object>(2);
+                                        config = new Hashtable<String, Object>(4);
                                         config.put("base-address", baseAddress);
                                     }
                                     final String hideServiceListPage = configService.getProperty("com.openexchange.soap.cxf.hideServiceListPage");
                                     if (null != hideServiceListPage) {
                                         if (null == config) {
-                                            config = new Hashtable<String, Object>(2);
+                                            config = new Hashtable<String, Object>(4);
                                         }
                                         config.put("hide-service-list-page", hideServiceListPage.trim());
                                     }
                                     final String disableAddressUpdates = configService.getProperty("com.openexchange.soap.cxf.disableAddressUpdates");
                                     if (disableAddressUpdates != null) {
                                         if (config == null) {
-                                            config = new Hashtable<String, Object>(2);
+                                            config = new Hashtable<String, Object>(4);
                                         }
                                         config.put("disable-address-updates", disableAddressUpdates);
                                     }
@@ -175,6 +187,17 @@ public class CXFActivator extends HousekeepingActivator {
                                 log.info("Registered CXF Servlet under: {}", alias);
                                 httpService.registerServlet(alias2, cxfServlet, config, null);
                                 log.info("Registered CXF Servlet under: {}", alias2);
+                                if (null != baseAddress) {
+                                    try {
+                                        URL url = new URL(baseAddress);
+                                        String servletAlias = url.getPath();
+                                        alias3 = servletAlias;
+                                        httpService.registerServlet(servletAlias, cxfServlet, config, null);
+                                        log.info("Registered CXF Servlet under: {}", alias2);
+                                    } catch (MalformedURLException e) {
+                                        throw new IllegalStateException("Invalid URL specified in property \"com.openexchange.soap.cxf.baseAddress\": \"" + baseAddress + "\"", e);
+                                    }
+                                }
                                 servletRegistered = true;
                             }
                             /*
@@ -189,6 +212,7 @@ public class CXFActivator extends HousekeepingActivator {
                              * Add interceptors here
                              */
                             bus.getInInterceptors().add(new TransformGenericElementsInterceptor());
+                            bus.setExtension(new ServletDestinationFactory(), HttpDestinationFactory.class);
                             /*
                              * Apply as default bus
                              */
@@ -196,7 +220,8 @@ public class CXFActivator extends HousekeepingActivator {
                             /*
                              * Initialize Webservice collector
                              */
-                            final WebserviceCollector collector = new WebserviceCollector(context);
+                            baseAddress = null;
+                            final WebserviceCollector collector = new WebserviceCollector(baseAddress, context);
                             context.addServiceListener(collector);
                             collector.open();
                             this.collector = collector;
@@ -215,6 +240,11 @@ public class CXFActivator extends HousekeepingActivator {
                                 try {
                                     httpService.unregister(alias);
                                     httpService.unregister(alias2);
+                                    String servletAlias = alias3;
+                                    if (null != servletAlias) {
+                                        httpService.unregister(servletAlias);
+                                        alias3 = null;
+                                    }
                                 } catch (final Exception e1) {
                                     // Ignore
                                 }

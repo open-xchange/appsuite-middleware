@@ -216,6 +216,7 @@ public final class GoogleOAuthServiceMetaData extends AbstractOAuthServiceMetaDa
 
         // Request a refresh token, too
         authUrlBuilder.append("&access_type=offline");
+        authUrlBuilder.append("&approval_prompt=force");
 
         // Append state parameter used for later look-up in "CallbackRegistry" class
         return authUrlBuilder.append("&state=").append("__ox").append(UUIDs.getUnformattedString(UUID.randomUUID())).toString();

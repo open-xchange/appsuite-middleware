@@ -55,7 +55,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-import java.util.UUID;
 import org.slf4j.Logger;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
@@ -151,6 +150,9 @@ public class CalendarEventParser {
         if (event.getDescription() != null) {
             calendarObject.setNote(event.getDescription());
         }
+        if (event.getColorId() != null) {
+            calendarObject.set(CalendarDataObject.COLOR_LABEL, Integer.parseInt(event.getColorId()));
+        }
 
         // Start, end and creation time
         if (event.getStart() != null) {
@@ -158,6 +160,7 @@ public class CalendarEventParser {
             final long startDate;
             if (eventDateTime.getDate() != null) {
                 startDate = eventDateTime.getDate().getValue();
+                calendarObject.setFullTime(true);
             } else if (eventDateTime.getDateTime() != null) {
                 startDate = eventDateTime.getDateTime().getValue();
             } else {
@@ -185,15 +188,19 @@ public class CalendarEventParser {
             calendarObject.setCreationDate(new Date(dateTime.getValue()));
         }
 
+        // Set creator and organizer
         if (event.getCreator() != null) {
             Creator creator = event.getCreator();
             Boolean isSelf = creator.getSelf();
             if (isSelf != null && isSelf.booleanValue()) {
                 calendarObject.setCreatedBy(session.getUserId());
-            } else {
-                // add external creator?
             }
         }
+
+        if (event.getOrganizer().isSelf()) {
+            calendarObject.setOrganizerId(session.getUserId());
+        }
+        calendarObject.setOrganizer(event.getOrganizer().getEmail());
 
         // We only support one reminder per calendar Object, thus the first one of the event
         final Reminders reminders = event.getReminders();
@@ -207,8 +214,6 @@ public class CalendarEventParser {
         if (recurrence != null && recurrence.size() > 0) {
             // Recurrence string is the first element
             handleRecurrence(recurrence.get(0), calendarObject);
-        } else if (event.getRecurringEventId() != null) { // Series exception
-            //calendarObject.setE
         }
 
         // Participants and confirmations
@@ -249,6 +254,8 @@ public class CalendarEventParser {
             calendarObject.setConfirmations(confParts);
             calendarObject.setParticipants(participants);
         }
+
+        calendarObject.setIgnoreConflicts(true);
 
         convertExternalToInternal(calendarObject);
     }
@@ -313,17 +320,23 @@ public class CalendarEventParser {
                 final List<WeekdayNum> weekdays = r.getByDay();
                 int days = 0;
                 for (WeekdayNum w : weekdays) {
-                    days |= w.wday.javaDayNum;
+                    days |= (int) Math.pow(2, w.wday.jsDayNum);
                 }
                 calendarObject.setDays(days);
             } else if (calendarObject.getRecurrenceType() == CalendarDataObject.MONTHLY) {
                 // MONTHLY
                 final List<WeekdayNum> weekdays = r.getByDay();
                 // When it comes to monthly events, the rule should only contain one entry
-                if (weekdays.size() == 1) {
-                    final WeekdayNum weekdayNum = weekdays.get(0);
-                    calendarObject.setDayInMonth(weekdayNum.num);
-                    calendarObject.setDays(weekdayNum.wday.javaDayNum);
+                if (weekdays.isEmpty()) {
+                    final Calendar c = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                    c.setTime(calendarObject.getStartDate());
+                    calendarObject.setDayInMonth(c.get(Calendar.DAY_OF_MONTH));
+                } else {
+                    if (weekdays.size() == 1) {
+                        final WeekdayNum weekdayNum = weekdays.get(0);
+                        calendarObject.setDayInMonth(weekdayNum.num);
+                        calendarObject.setDays((int) Math.pow(2, weekdayNum.wday.jsDayNum));
+                    }
                 }
             } else if (calendarObject.getRecurrenceType() == CalendarDataObject.YEARLY) {
                 // YEARLY
