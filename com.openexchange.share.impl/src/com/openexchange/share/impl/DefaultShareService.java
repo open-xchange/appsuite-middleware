@@ -343,7 +343,7 @@ public class DefaultShareService implements ShareService {
         List<Share> result = new ArrayList<Share>();
         ShareStorage shareStorage = services.getService(ShareStorage.class);
         ConnectionHelper helper = new ConnectionHelper(contextId, services, false);
-        result.addAll(shareStorage.loadSharesForUser(contextId, userId, helper.getParameters()));
+        result.addAll(shareStorage.loadSharesCreatedBy(contextId, userId, helper.getParameters()));
         return result;
     }
 

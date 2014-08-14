@@ -163,8 +163,6 @@ public interface ShareStorage {
 
     List<Share> loadSharesForContext(int contextID, StorageParameters parameters) throws OXException;
 
-    List<Share> loadSharesForUser(int contextId, int userId, StorageParameters parameters) throws OXException;
-
     void deleteSharesFromContext(int contextId, StorageParameters parameters) throws OXException;
 
     void deleteSharesFromUser(int contextId, int userId, StorageParameters parameters) throws OXException;
