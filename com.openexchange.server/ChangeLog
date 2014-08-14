@@ -6,6 +6,10 @@
 
  - Fix for bug 33918: Translate display names of subscription sources only if necessary
 
+* 2014-08-04 - marcus.klein@open-xchange.com
+
+ - Fix for bug 33891: Removed superfluous line throwing always an exception.
+
 * 2014-08-04 - marc.arens@open-xchange.com
 
  - Fix for bug 33697: Respect destination folder for folder owners
