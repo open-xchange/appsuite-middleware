@@ -575,6 +575,7 @@ final class ListLsubCollection {
                                 lle.setParent(parent);
                                 parent.addChild(lle);
                             } else {
+                                LOG.warn("Found no parent for {} using IMAP account {}", parentFullName, imapStore.toString());
                                 lle.setParent(rootEntry);
                                 rootEntry.addChild(lle);
                             }
