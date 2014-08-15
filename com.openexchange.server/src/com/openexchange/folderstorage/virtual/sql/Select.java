@@ -71,7 +71,7 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.virtual.VirtualFolder;
 import com.openexchange.folderstorage.virtual.VirtualPermission;
-import com.openexchange.folderstorage.virtual.VirtualServiceRegistry;
+import com.openexchange.folderstorage.virtual.osgi.Services;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Collators;
 import com.openexchange.tools.sql.DBUtils;
@@ -138,7 +138,7 @@ public final class Select {
      * @throws OXException If checking folder's presence fails
      */
     public static boolean containsFolder(final int cid, final int tree, final int user, final String folderId, final StorageType storageType) throws OXException {
-        final DatabaseService databaseService = VirtualServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
+        final DatabaseService databaseService = Services.getService(DatabaseService.class);
         // Get a connection
         final Connection con = databaseService.getReadOnly(cid);
         try {
@@ -175,7 +175,7 @@ public final class Select {
      * @throws OXException If filling the folder fails
      */
     public static void fillFolder(final int cid, final int tree, final int user, final Locale locale, final VirtualFolder virtualFolder, final StorageType storageType) throws OXException {
-        final DatabaseService databaseService = VirtualServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
+        final DatabaseService databaseService = Services.getService(DatabaseService.class);
         // Get a connection
         final Connection con = databaseService.getReadOnly(cid);
         final String folderId = virtualFolder.getID();
@@ -321,7 +321,7 @@ public final class Select {
      * @throws OXException If subfolders cannot be detected
      */
     public static String[] getSubfolderIds(final int cid, final int tree, final int user, final Locale locale, final String parentId, final StorageType storageType) throws OXException {
-        final DatabaseService databaseService = VirtualServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
+        final DatabaseService databaseService = Services.getService(DatabaseService.class);
         // Get a connection
         final Connection con = databaseService.getReadOnly(cid);
         try {
