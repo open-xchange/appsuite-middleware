@@ -480,9 +480,9 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 try {
                     boolean delete = hardDelete || isTrashed(toGoogleDriveFolderId(id.getFolder()), drive);
                     if (delete) {
-                        drive.files().delete(id.getId());
+                        drive.files().delete(id.getId()).execute();
                     } else {
-                        drive.files().trash(id.getId());
+                        drive.files().trash(id.getId()).execute();
                     }
                 } catch (final HttpResponseException e) {
                     if (404 != e.getStatusCode()) {
