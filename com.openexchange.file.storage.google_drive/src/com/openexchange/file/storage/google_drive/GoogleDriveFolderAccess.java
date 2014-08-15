@@ -318,7 +318,7 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
             Drive drive = googleDriveAccess.getDrive();
 
             String fid = toGoogleDriveFolderId(folderId);
-            if (hardDelete || trashFolderId.equals(fid)) {
+            if (hardDelete || isTrashed(fid, drive)) {
                 drive.files().delete(fid).execute();
             } else {
                 drive.files().trash(fid).execute();
@@ -348,7 +348,7 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
             Drive drive = googleDriveAccess.getDrive();
 
             String fid = toGoogleDriveFolderId(folderId);
-            if (hardDelete || trashFolderId.equals(fid)) {
+            if (hardDelete || isTrashed(fid, drive)) {
                 // Delete permanently
                 Drive.Children.List list = drive.children().list(fid);
                 ChildList childList = list.execute();

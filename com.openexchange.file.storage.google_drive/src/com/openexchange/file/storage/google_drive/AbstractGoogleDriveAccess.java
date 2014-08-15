@@ -53,6 +53,7 @@ import java.io.IOException;
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
+import com.google.api.services.drive.model.File.Labels;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageFolder;
@@ -67,12 +68,12 @@ import com.openexchange.session.Session;
 public abstract class AbstractGoogleDriveAccess {
 
     private static final String MIME_TYPE_DIRECTORY = GoogleDriveConstants.MIME_TYPE_DIRECTORY;
+    // private static final String QUERY_STRING_DIRECTORIES_ONLY = GoogleDriveConstants.QUERY_STRING_DIRECTORIES_ONLY;
 
     protected final GoogleDriveAccess googleDriveAccess;
     protected final Session session;
     protected final FileStorageAccount account;
     protected final String rootFolderId;
-    protected final String trashFolderId;
 
     /**
      * Initializes a new {@link AbstractGoogleDriveAccess}.
@@ -85,12 +86,7 @@ public abstract class AbstractGoogleDriveAccess {
 
         try {
             Drive drive = googleDriveAccess.getDrive();
-
             rootFolderId = drive.files().get("root").execute().getId();
-
-            Drive.Children.List list = drive.children().list("root");
-            list.setQ("trashed = true");
-            trashFolderId = list.execute().getItems().get(0).getId();
         } catch (HttpResponseException e) {
             throw handleHttpResponseError(null, e);
         } catch (IOException e) {
@@ -111,6 +107,23 @@ public abstract class AbstractGoogleDriveAccess {
         }
 
         return GoogleDriveExceptionCodes.HTTP_ERROR.create(e, Integer.valueOf(e.getStatusCode()), e.getStatusMessage());
+    }
+
+    /**
+     * Checks if given Google Drive resource is trashed.
+     *
+     * @param id The Google Drive identifier
+     * @param drive The drive reference
+     * @return <code>true</code> if trashed; otherwise <code>false</code>
+     * @throws IOException If check fails
+     */
+    protected static boolean isTrashed(String id, Drive drive) throws IOException {
+        Labels labels = drive.files().get(id).execute().getLabels();
+        if (null == labels) {
+            return false;
+        }
+        Boolean trashed = labels.getTrashed();
+        return null != trashed && trashed.booleanValue();
     }
 
     /**

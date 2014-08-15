@@ -427,7 +427,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             Drive.Children.List list = drive.children().list(fid);
             list.setQ(QUERY_STRING_FILES_ONLY_EXCLUDING_TRASH);
 
-            boolean hardDelete = trashFolderId.equals(fid);
+            boolean hardDelete = isTrashed(fid, drive);
 
             ChildList childList = list.execute();
             if (!childList.isEmpty()) {
@@ -478,7 +478,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             List<IDTuple> ret = new ArrayList<IDTuple>(ids.size());
             for (IDTuple id : ids) {
                 try {
-                    boolean delete = hardDelete || trashFolderId.equals(toGoogleDriveFolderId(id.getFolder()));
+                    boolean delete = hardDelete || isTrashed(toGoogleDriveFolderId(id.getFolder()), drive);
                     if (delete) {
                         drive.files().delete(id.getId());
                     } else {
