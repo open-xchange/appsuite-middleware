@@ -71,11 +71,14 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.dropbox.session.DropboxOAuthAccess;
+import com.openexchange.file.storage.search.AndTerm;
 import com.openexchange.file.storage.search.FileNameTerm;
+import com.openexchange.file.storage.search.OrTerm;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -293,7 +296,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             final long fileSize = file.getFileSize();
             final long length = fileSize > 0 ? fileSize : -1L;
             final Entry entry;
-            if (isEmpty(id) || !exists(null, id, CURRENT_VERSION)) {
+            if (Strings.isEmpty(id) || !exists(null, id, CURRENT_VERSION)) {
                 // Create
                 entry = dropboxAPI.putFile(
                     new StringBuilder(file.getFolderId()).append('/').append(file.getFileName()).toString(),
@@ -539,97 +542,65 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     @Override
     public SearchIterator<File> search(final List<String> folderIds, final SearchTerm<?> searchTerm, List<Field> fields, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
-        if (FileNameTerm.class.isInstance(searchTerm) && null == folderIds || 1 == folderIds.size()) {
-            String pattern = ((FileNameTerm) searchTerm).getPattern();
-            return search(pattern, fields, null != folderIds && 1 == folderIds.size() ? folderIds.get(0) : null, sort, order, start, end);
+        /*
+         * search in one or all folders only
+         */
+        if (null != folderIds && 1 != folderIds.size()) {
+            throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create("Can only search in one or all folders");
+        }
+        String folderID = null == folderIds ? null : folderIds.get(0);
+        /*
+         * search by one or more filename patterns
+         */
+        List<String> patterns = extractPatterns(searchTerm);
+        List<File> files = new ArrayList<File>();
+        for (String pattern : patterns) {
+            files.addAll(searchInFolder(folderID, pattern));
+        }
+        return getSearchIterator(files, sort, order, start, end);
+    }
+
+    private static List<String> extractPatterns(SearchTerm<?> searchTerm) throws OXException {
+        if (FileNameTerm.class.isInstance(searchTerm)) {
+            /*
+             * single filename pattern
+             */
+            return Collections.singletonList(((FileNameTerm) searchTerm).getPattern());
+        } else if (OrTerm.class.isInstance(searchTerm)) {
+            /*
+             * try multiple filename patterns
+             */
+            List<SearchTerm<?>> nestedTerms = ((OrTerm) searchTerm).getPattern();
+            List<String> patterns = new ArrayList<String>(nestedTerms.size());
+            for (SearchTerm<?> nestedTerm : nestedTerms) {
+                if (FileNameTerm.class.isInstance(nestedTerm)) {
+                    patterns.add(((FileNameTerm) nestedTerm).getPattern());
+                } else {
+                    throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create("Search term not supported: " + searchTerm);
+                }
+            }
+            return patterns;
+        } else if (AndTerm.class.isInstance(searchTerm)) {
+            /*
+             * construct single filename pattern
+             */
+            List<SearchTerm<?>> nestedTerms = ((AndTerm) searchTerm).getPattern();
+            StringBuilder patternBuilder = new StringBuilder();
+            for (SearchTerm<?> nestedTerm : nestedTerms) {
+                if (FileNameTerm.class.isInstance(nestedTerm)) {
+                    patternBuilder.append(((FileNameTerm) nestedTerm).getPattern()).append(' ');
+                } else {
+                    throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create("Search term not supported: " + searchTerm);
+                }
+            }
+            return Collections.singletonList(patternBuilder.toString().trim());
         }
         throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create("Search term not supported: " + searchTerm);
     }
 
     @Override
     public SearchIterator<File> search(final String pattern, final List<Field> fields, final String folderId, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
-        try {
-            if (isEmpty(pattern)) {
-                List<File> files = new LinkedList<File>();
-                gatherAllFiles("/", files);
-                // Sort collection
-                sort(files, sort, order);
-                if ((start != NOT_SET) && (end != NOT_SET)) {
-                    final int size = files.size();
-                    if ((start) > size) {
-                        /*
-                         * Return empty iterator if start is out of range
-                         */
-                        return SearchIteratorAdapter.emptyIterator();
-                    }
-                    /*
-                     * Reset end index if out of range
-                     */
-                    int toIndex = end;
-                    if (toIndex >= size) {
-                        toIndex = size;
-                    }
-                    files = files.subList(start, toIndex);
-                }
-                return new SearchIteratorAdapter<File>(files.iterator(), files.size());
-            }
-            // Search by pattern
-            final List<Entry> results;
-            if (null == folderId) {
-                // All folders...
-                final Set<String> folderPaths = new LinkedHashSet<String>(16);
-                folderPaths.add("/");
-                gatherAllFolders("/", folderPaths);
-                // Search in them
-                results = new LinkedList<Entry>();
-                for (final String folderPath : folderPaths) {
-                    results.addAll(searchBy(pattern, folderPath));
-                }
-            } else {
-                results = searchBy(pattern, toPath(folderId));
-                if (results.isEmpty()) {
-                    return SearchIteratorAdapter.emptyIterator();
-                }
-            }
-            // Convert entries to Files
-            List<File> files = new ArrayList<File>(results.size());
-            for (final Entry resultsEntry : results) {
-                if (!resultsEntry.isDir) {
-                    files.add(new DropboxFile(folderId, resultsEntry.path, userId).parseDropboxFile(resultsEntry));
-                }
-            }
-            // Sort collection
-            sort(files, sort, order);
-            if ((start != NOT_SET) && (end != NOT_SET)) {
-                final int size = files.size();
-                if ((start) > size) {
-                    /*
-                     * Return empty iterator if start is out of range
-                     */
-                    return SearchIteratorAdapter.emptyIterator();
-                }
-                /*
-                 * Reset end index if out of range
-                 */
-                int toIndex = end;
-                if (toIndex >= size) {
-                    toIndex = size;
-                }
-                files = files.subList(start, toIndex);
-            }
-            return new SearchIteratorAdapter<File>(files.iterator(), files.size());
-        } catch (final DropboxServerException e) {
-            throw handleServerError(null, e);
-        } catch (final DropboxException e) {
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    private List<Entry> searchBy(final String pattern, final String folderPath) throws DropboxException {
-        // Dropbox API only supports searching by file name
-        return dropboxAPI.search(folderPath, pattern, 0, false);
+        return getSearchIterator(searchInFolder(folderId, pattern), sort, order, start, end);
     }
 
     private void gatherAllFolders(final String path, final Set<String> folderPaths) throws DropboxException {
@@ -669,6 +640,102 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     }
 
     /**
+     * Searches files matching the supplied pattern in a folder.
+     *
+     * @param folderId The ID of the folder to search in, or <code>null</code> to search in all folders
+     * @param pattern The pattern
+     * @return The found files
+     * @throws OXException
+     * @throws DropboxException
+     */
+    private List<File> searchInFolder(String folderId, String pattern) throws OXException {
+        try {
+            if (null == folderId) {
+                // All folders...
+                final Set<String> folderPaths = new LinkedHashSet<String>(16);
+                folderPaths.add("/");
+                gatherAllFolders("/", folderPaths);
+                // Search in them
+                List<File> results = new LinkedList<File>();
+                for (final String folderPath : folderPaths) {
+                    results.addAll(searchInPath(folderPath, pattern));
+                }
+                return results;
+            } else {
+                return searchInPath(toPath(folderId), pattern);
+            }
+        } catch (final DropboxServerException e) {
+            throw handleServerError(null, e);
+        } catch (final DropboxException e) {
+            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Searches files matching the supplied pattern in a dropbox folder path.
+     *
+     * @param folderPath The dropbox folder path
+     * @param pattern The pattern
+     * @return The found files
+     * @throws OXException
+     * @throws DropboxException
+     */
+    private List<File> searchInPath(String folderPath, String pattern) throws OXException, DropboxException {
+        if (Strings.isEmpty(pattern)) {
+            List<File> files = new LinkedList<File>();
+            gatherAllFiles(folderPath, files);
+            return files;
+        }
+        // Dropbox API only supports searching by file name
+        List<Entry> results = dropboxAPI.search(folderPath, pattern, 0, false);
+        List<File> files = new ArrayList<File>(results.size());
+        for (final Entry resultsEntry : results) {
+            if (!resultsEntry.isDir) {
+                files.add(new DropboxFile(toId(folderPath), resultsEntry.path, userId).parseDropboxFile(resultsEntry));
+            }
+        }
+        return files;
+    }
+
+    /**
+     * Wraps the supplied files into a search iterator, respecting the given sort order and ranges.
+     *
+     * @param files The files
+     * @param sort The sort field
+     * @param order The sort direction
+     * @param start The start index
+     * @param end The end index
+     * @return The search iterator
+     */
+    private static SearchIterator<File> getSearchIterator(List<File> files, Field sort, final SortDirection order, int start, int end) {
+        if (files.isEmpty()) {
+            return SearchIteratorAdapter.emptyIterator();
+        }
+        // Sort collection
+        sort(files, sort, order);
+        if ((start != NOT_SET) && (end != NOT_SET)) {
+            final int size = files.size();
+            if ((start) > size) {
+                /*
+                 * Return empty iterator if start is out of range
+                 */
+                return SearchIteratorAdapter.emptyIterator();
+            }
+            /*
+             * Reset end index if out of range
+             */
+            int toIndex = end;
+            if (toIndex >= size) {
+                toIndex = size;
+            }
+            files = files.subList(start, toIndex);
+        }
+        return new SearchIteratorAdapter<File>(files.iterator(), files.size());
+    }
+
+    /**
      * Sorts the supplied list of files if needed.
      *
      * @param files The files to sort
@@ -679,18 +746,6 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         if (null != sort && 1 < files.size()) {
             Collections.sort(files, order.comparatorBy(sort));
         }
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
 }
