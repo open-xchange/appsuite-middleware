@@ -571,9 +571,12 @@ final class ListLsubCollection {
                              */
                             final String parentFullName = fullName.substring(0, pos);
                             final ListLsubEntryImpl parent = listMap.get(parentFullName);
-                            {
+                            if (null != parent) {
                                 lle.setParent(parent);
                                 parent.addChild(lle);
+                            } else {
+                                lle.setParent(rootEntry);
+                                rootEntry.addChild(lle);
                             }
                         } else {
                             /*
