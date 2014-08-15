@@ -7585,6 +7585,20 @@ msgstr ""
 msgid "\"%1$s\" is not a valid email address."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:69
+msgid ""
+"The share has been modified in the meantime. Please refresh or synchronize "
+"and try again."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:71
+msgid "You don't have sufficient permissions to delete the share."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:73
+msgid "You don't have sufficient permissions to edit the share."
+msgstr ""
+
 #. *
 #. * No recipient(s) has been defined for new message
 #.
