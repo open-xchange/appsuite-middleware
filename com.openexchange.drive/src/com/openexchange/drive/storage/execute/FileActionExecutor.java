@@ -157,7 +157,7 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
             try {
                 edit(action);
             } catch (OXException e) {
-                LOG.warn("Got exception during server-side execution of download action: {}\nSession: {}, path: {}, action: {}",
+                LOG.warn("Got exception during server-side execution of edit action: {}\nSession: {}, path: {}, action: {}",
                     e.getMessage(), session, path, action);
                 if ("IFO-0100".equals(e.getErrorCode())) {
                     /*

@@ -77,7 +77,6 @@ import com.openexchange.file.storage.search.OrTerm;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -181,7 +180,23 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     @Override
     public void saveFileMetadata(final File file, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
-        saveDocument(file, Streams.newByteArrayInputStream(new byte[0]), sequenceNumber, modifiedFields);
+        /*
+         * only rename possible
+         */
+        if (null == modifiedFields || modifiedFields.contains(Field.FILENAME)) {
+            try {
+                String fromPath = file.getId();
+                String toPath = toPath(file.getFolderId()) + '/' + file.getFileName();
+                Entry entry = dropboxAPI.move(fromPath, toPath);
+                file.setId(entry.path);
+            } catch (final DropboxServerException e) {
+                throw handleServerError(file.getId(), e);
+            } catch (final DropboxException e) {
+                throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+            } catch (final RuntimeException e) {
+                throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
+        }
     }
 
     @Override
