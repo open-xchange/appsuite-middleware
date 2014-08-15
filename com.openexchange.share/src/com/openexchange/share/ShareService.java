@@ -49,6 +49,7 @@
 
 package com.openexchange.share;
 
+import java.util.Date;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
@@ -90,6 +91,17 @@ public interface ShareService {
      * @throws OXException
      */
     int[] deleteSharesForFolder(Session session, String folder, int module, int[] guests) throws OXException;
+
+    /**
+     * Deletes multiple shares of a user identified by their tokens.
+     *
+     * @param session The session
+     * @param tokens The tokens of the shares to delete
+     * @param clientTimestamp The time the tokens were fetched to catch concurrent modifications
+     * @return The identifiers of the guest users that have been removed through the removal of the shares
+     * @throws OXException
+     */
+    int[] deleteShares(Session session, List<String> tokens, Date clientTimestamp) throws OXException;
 
     /**
      * Creates shares for a specific folder for the supplied guest users.

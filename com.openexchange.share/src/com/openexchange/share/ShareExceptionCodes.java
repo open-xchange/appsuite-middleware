@@ -81,6 +81,18 @@ public enum ShareExceptionCodes implements DisplayableOXExceptionCode {
     /** \"%1$s\" is not a valid email address. */
     INVALID_MAIL_ADDRESS("\"%1$s\" is not a valid email address.", INVALID_MAIL_ADDRESS_MSG, Category.CATEGORY_USER_INPUT, 5),
 
+    /** The share has been modified in the meantime. Please refresh or synchronize and try again. || The share \"%1$s\" has been modified in the meantime. */
+    CONCURRENT_MODIFICATION("The share \"%1$s\" has been modified in the meantime.",
+        ShareExceptionMessages.CONCURRENT_MODIFICATION_MSG, Category.CATEGORY_CONFLICT, 6),
+
+    /** You don't have sufficient permissions to delete the share. || User %1$d has no delete permissions for share \"%2$s\" in context %3$d. */
+    NO_DELETE_PERMISSIONS("User %1$d has no delete permissions for share \"%2$s\" in context %3$d.",
+        ShareExceptionMessages.NO_DELETE_PERMISSIONS_MSG, Category.CATEGORY_PERMISSION_DENIED, 7),
+
+    /** You don't have sufficient permissions to edit the share. || User %1$d has no edit permissions for share \"%2$s\" in context %3$d. */
+    NO_EDIT_PERMISSIONS("User %1$d has no delete permissions for share \"%2$s\" in context %3$d.",
+        ShareExceptionMessages.NO_EDIT_PERMISSIONS_MSG, Category.CATEGORY_PERMISSION_DENIED, 8),
+
     ;
 
     private static final String PREFIX = "SHR";

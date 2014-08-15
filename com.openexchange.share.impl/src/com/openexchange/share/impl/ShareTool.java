@@ -249,4 +249,22 @@ public class ShareTool {
         return expiredShares;
     }
 
+    /**
+     * Finds a share by its token in the supplied list of shares.
+     *
+     * @param shares The shares to search
+     * @param token The token
+     * @return The share, or <code>null</code> if not found
+     */
+    public static Share findShare(List<Share> shares, String token) {
+        if (null != shares && 0 < shares.size()) {
+            for (Share share : shares) {
+                if (token.equals(share.getToken())) {
+                    return share;
+                }
+            }
+        }
+        return null;
+    }
+
 }

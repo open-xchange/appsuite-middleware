@@ -54,6 +54,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,7 +78,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link DefaultShareService}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.6.1
  */
@@ -89,7 +90,7 @@ public class DefaultShareService implements ShareService {
 
     /**
      * Initializes a new {@link DefaultShareService}.
-     * 
+     *
      * @param storage The underlying share storage
      */
     public DefaultShareService(ServiceLookup services) {
@@ -150,6 +151,47 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
+    public int[] deleteShares(Session session, List<String> tokens, Date clientTimestamp) throws OXException {
+        if (null == tokens || 0 == tokens.size()) {
+            return new int[0];
+        }
+        ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
+        try {
+            connectionHelper.start();
+            /*
+             * load & check shares, gather associated guest user IDs
+             */
+            List<Share> shares = services.getService(ShareStorage.class).loadShares(
+                session.getContextId(), tokens, connectionHelper.getParameters());
+            List<Integer> guestIDList = new ArrayList<Integer>(shares.size());
+            for (String token : tokens) {
+                Share share = ShareTool.findShare(shares, token);
+                if (null == share || ShareTool.extractContextId(token) != session.getContextId()) {
+                    throw ShareExceptionCodes.UNKNWON_SHARE.create(token);
+                }
+                if (session.getUserId() != share.getCreatedBy()) {
+                    throw ShareExceptionCodes.NO_DELETE_PERMISSIONS.create(
+                        Integer.valueOf(session.getUserId()), token, Integer.valueOf(session.getContextId()));
+                }
+                if (share.getLastModified().after(clientTimestamp)) {
+                    throw ShareExceptionCodes.CONCURRENT_MODIFICATION.create(token);
+                }
+                guestIDList.add(Integer.valueOf(share.getGuest()));
+            }
+            /*
+             * proceed with deletion
+             */
+            services.getService(ShareStorage.class).deleteShares(session.getContextId(), tokens, connectionHelper.getParameters());
+            int[] guestIDs = getPrimitiveArray(guestIDList);
+            deleteGuestUsers(connectionHelper.getConnection(), session.getContextId(), guestIDs);
+            connectionHelper.commit();
+            return guestIDs;
+        } finally {
+            connectionHelper.finish();
+        }
+    }
+
+    @Override
     public List<Share> addSharesToFolder(Session session, String folder, int module, List<Guest> guests) throws OXException {
         LOG.info("Adding shares to guest user(s) {} for folder {} in context {}...", guests, folder, session.getContextId());
         List<Share> shares = new ArrayList<Share>(guests.size());
@@ -194,7 +236,7 @@ public class DefaultShareService implements ShareService {
 
     /**
      * Removes all expired shares from the supplied list.
-     * 
+     *
      * @param session The session
      * @param shares The shares
      * @return The shares, without the expired ones
@@ -215,7 +257,7 @@ public class DefaultShareService implements ShareService {
 
     /**
      * Removes the supplied shares, i.e. deletes the share entries from the underlying storage along with the associated guest users.
-     * 
+     *
      * @param connectionHelper A connection helper
      * @param shares The shares to delete
      * @throws OXException
@@ -250,7 +292,7 @@ public class DefaultShareService implements ShareService {
 
     /**
      * Creates a guest user.
-     * 
+     *
      * @param connection A (writable) connection to the database
      * @param context The context
      * @param sharingUser The sharing user
@@ -280,7 +322,7 @@ public class DefaultShareService implements ShareService {
 
     /**
      * Deletes guest users.
-     * 
+     *
      * @param connection A (writable) database connection
      * @param contextID The context ID
      * @param guestIDs The identifiers of the guest users to delete
@@ -307,7 +349,7 @@ public class DefaultShareService implements ShareService {
 
     /**
      * Deletes shares for a specific folder that were bound to one of the supplied guest user IDs.
-     * 
+     *
      * @param storageParameters The storage parameters
      * @param contextID The context ID
      * @param folder The folder ID
@@ -343,16 +385,12 @@ public class DefaultShareService implements ShareService {
             shareStorage.deleteShares(contextID, tokens, storageParameters);
             LOG.info("Deleted {} share(s) for folder {} in context {}: {}", tokens.size(), folder, contextID, tokens);
         }
-        int[] guestUserIDs = new int[guestIDs.size()];
-        for (int i = 0; i < guestIDs.size(); i++) {
-            guestUserIDs[i] = guestIDs.get(i).intValue();
-        }
-        return guestUserIDs;
+        return getPrimitiveArray(guestIDs);
     }
 
     /**
      * Gets all shares created in the supplied context.
-     * 
+     *
      * @param contextId The contextId
      * @return The shares
      * @throws OXException
@@ -367,7 +405,7 @@ public class DefaultShareService implements ShareService {
 
     /**
      * Gets all shares created in the supplied context by supplied user.
-     * 
+     *
      * @param contextId The contextId
      * @param userId The userId
      * @return The shares
@@ -383,7 +421,7 @@ public class DefaultShareService implements ShareService {
 
     /**
      * Remove all shares identified by supplied tokens.
-     * 
+     *
      * @param tokens The tokens
      * @throws OXException If removal fails
      */
@@ -408,7 +446,7 @@ public class DefaultShareService implements ShareService {
 
     /**
      * Remove all shares in context identified by supplied tokens.
-     * 
+     *
      * @param contextId The contextId
      * @param tokens The tokens
      * @throws OXException If removal fails
@@ -430,7 +468,7 @@ public class DefaultShareService implements ShareService {
 
     /**
      * Remove all shares in supplied context.
-     * 
+     *
      * @param contextId The contextId
      * @throws OXException If removal fails.
      */
@@ -443,7 +481,7 @@ public class DefaultShareService implements ShareService {
 
     /**
      * Remove all shares created by supplied user in supplied context.
-     * 
+     *
      * @param contextId The contextId
      * @param userId The userId
      * @throws OXException If removal fails
@@ -453,6 +491,14 @@ public class DefaultShareService implements ShareService {
         ShareStorage shareStorage = services.getService(ShareStorage.class);
         List<Share> shares = shareStorage.loadSharesCreatedBy(contextId, userId, helper.getParameters());
         removeShares(helper, shares);
+    }
+
+    private static int[] getPrimitiveArray(List<Integer> list) {
+        int[] array = new int[list.size()];
+        for (int i = 0; i < list.size(); i++) {
+            array[i] = list.get(i).intValue();
+        }
+        return array;
     }
 
 }

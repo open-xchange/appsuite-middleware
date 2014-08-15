@@ -74,7 +74,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link RdbShareStorage}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.6.1
  */
@@ -84,7 +84,7 @@ public class RdbShareStorage implements ShareStorage {
 
     /**
      * Initializes a new {@link RdbShareStorage}.
-     * 
+     *
      * @param databaseService The database service
      */
     public RdbShareStorage(DatabaseService databaseService) {
@@ -165,6 +165,18 @@ public class RdbShareStorage implements ShareStorage {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
             return selectSharesCreatedBy(provider.get(), contextID, createdBy);
+        } catch (SQLException e) {
+            throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            provider.close();
+        }
+    }
+
+    @Override
+    public List<Share> loadShares(int contextID, List<String> tokens, StorageParameters parameters) throws OXException {
+        ConnectionProvider provider = getReadProvider(contextID, parameters);
+        try {
+            return selectSharesByTokens(provider.get(), contextID, tokens.toArray(new String[tokens.size()]));
         } catch (SQLException e) {
             throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
