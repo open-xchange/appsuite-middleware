@@ -605,7 +605,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
                         folder.getID(),
                         newParent,
                         storageParameters.getUserId(),
-                        p.getCapabilities().contains(FileStorageFolder.CAPABILITY_PERMISSIONS));
+                        supportsPermissions(p));
                     // Delete source
                     folderAccess.deleteFolder(folder.getID(), true);
                     // Perform other updates
@@ -632,6 +632,11 @@ public final class FileStorageFolderStorage implements FolderStorage {
         if ((null != fsPermissions) && StorageParametersUtility.isHandDownPermissions(storageParameters)) {
             handDown(fsFolder.getId(), fsPermissions, folderAccess);
         }
+    }
+
+    private boolean supportsPermissions(final FileStorageFolder p) {
+        Set<String> capabilities = p.getCapabilities();
+        return null != capabilities && capabilities.contains(FileStorageFolder.CAPABILITY_PERMISSIONS);
     }
 
     private static void handDown(final String parentId, final FileStoragePermission[] fsPermissions, final IDBasedFolderAccess folderAccess) throws OXException {
