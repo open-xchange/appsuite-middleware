@@ -59,11 +59,11 @@ import java.util.TimeZone;
 import org.mockito.Matchers;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.subscribe.google.mocks.MockAppointmentSqlFactoryService;
 import com.openexchange.subscribe.google.mocks.MockServiceLookup;
 import com.openexchange.user.SimUserService;
 import com.openexchange.user.UserService;
@@ -75,7 +75,7 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  * @since v7.6.1
  */
-@PrepareForTest({com.openexchange.subscribe.google.osgi.Services.class, AppointmentSqlFactoryService.class, AppointmentSQLInterface.class})
+@PrepareForTest({com.openexchange.subscribe.google.osgi.Services.class, AppointmentSqlFactoryService.class, com.openexchange.api2.AppointmentSQLInterface.class})
 public class GoogleCalendarTest extends AbstractGoogleTest {
     public void testCalendar() throws Exception {
         try {
@@ -294,7 +294,7 @@ public class GoogleCalendarTest extends AbstractGoogleTest {
         SimUserService simUser = new SimUserService();
         PowerMockito.mockStatic(com.openexchange.subscribe.google.osgi.Services.class);
         PowerMockito.doReturn(simUser).when(com.openexchange.subscribe.google.osgi.Services.class, "getService", Matchers.any(UserService.class));
-        AppointmentSqlFactoryService asfs = PowerMockito.mock(AppointmentSqlFactoryService.class);
+        AppointmentSqlFactoryService asfs = new MockAppointmentSqlFactoryService();
         sl.setAppointmentSQLServiceMock(asfs);
     }
 }

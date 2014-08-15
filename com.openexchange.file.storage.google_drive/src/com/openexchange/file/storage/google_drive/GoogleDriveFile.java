@@ -49,7 +49,6 @@
 
 package com.openexchange.file.storage.google_drive;
 
-import static com.openexchange.file.storage.google_drive.Utils.normalizeFolderId;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
@@ -76,15 +75,19 @@ public final class GoogleDriveFile extends DefaultFile {
      * @param id The file identifier
      * @param userId The user identifier
      */
-    public GoogleDriveFile(final String folderId, final String id, final int userId) {
+    public GoogleDriveFile(String folderId, String id, int userId, String rootFolderId) {
         super();
-        setFolderId("/".equals(folderId) ? FileStorageFolder.ROOT_FULLNAME : normalizeFolderId(folderId));
+        setFolderId(isRootFolder(folderId, rootFolderId) ? FileStorageFolder.ROOT_FULLNAME : folderId);
         setCreatedBy(userId);
         setModifiedBy(userId);
         setId(id);
         setFileName(id);
         setVersion(FileStorageFileAccess.CURRENT_VERSION);
         setIsCurrentVersion(true);
+    }
+
+    private static boolean isRootFolder(String id, String rootFolderId) {
+        return "root".equals(id) || rootFolderId.equals(id);
     }
 
     @Override
@@ -96,7 +99,7 @@ public final class GoogleDriveFile extends DefaultFile {
     /**
      * Parses specified Google Drive file.
      *
-     * @param entry The Google Drive file
+     * @param file The Google Drive file
      * @throws OXException If parsing Google Drive file fails
      * @return This Google Drive file
      */
@@ -107,7 +110,7 @@ public final class GoogleDriveFile extends DefaultFile {
     /**
      * Parses specified Google Drive file.
      *
-     * @param entry The Google Drive file
+     * @param file The Google Drive file
      * @param fields The fields to consider
      * @throws OXException If parsing Google Drive file fails
      * @return This Google Drive file with property set applied

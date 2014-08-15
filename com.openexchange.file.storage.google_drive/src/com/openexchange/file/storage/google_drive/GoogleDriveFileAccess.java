@@ -49,20 +49,21 @@
 
 package com.openexchange.file.storage.google_drive;
 
+import static com.openexchange.java.Strings.isEmpty;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import com.google.api.client.googleapis.media.MediaHttpUploader;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.http.InputStreamContent;
 import com.google.api.services.drive.Drive;
+import com.google.api.services.drive.model.ChildList;
+import com.google.api.services.drive.model.ChildReference;
 import com.google.api.services.drive.model.FileList;
 import com.google.api.services.drive.model.ParentReference;
 import com.openexchange.exception.OXException;
@@ -72,6 +73,7 @@ import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.google_drive.access.GoogleDriveAccess;
@@ -79,7 +81,6 @@ import com.openexchange.file.storage.search.FileNameTerm;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.java.Streams;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -91,13 +92,18 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  */
 public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements ThumbnailAware {
 
+    private static final String QUERY_STRING_FILES_ONLY = GoogleDriveConstants.QUERY_STRING_FILES_ONLY;
+    private static final String QUERY_STRING_FILES_ONLY_EXCLUDING_TRASH = GoogleDriveConstants.QUERY_STRING_FILES_ONLY_EXCLUDING_TRASH;
+
+    // ----------------------------------------------------------------------------------------------------------------------- //
+
     private final GoogleDriveAccountAccess accountAccess;
     private final int userId;
 
     /**
      * Initializes a new {@link GoogleDriveFileAccess}.
      */
-    public GoogleDriveFileAccess(GoogleDriveAccess googleDriveAccess, FileStorageAccount account, Session session, GoogleDriveAccountAccess accountAccess) {
+    public GoogleDriveFileAccess(GoogleDriveAccess googleDriveAccess, FileStorageAccount account, Session session, GoogleDriveAccountAccess accountAccess) throws OXException {
         super(googleDriveAccess, account, session);
         this.accountAccess = accountAccess;
         userId = session.getUserId();
@@ -108,13 +114,6 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             throw GoogleDriveExceptionCodes.NOT_A_FILE.create(file.getId());
         }
         checkIfTrashed(file);
-    }
-
-    private void checkIfTrashed(com.google.api.services.drive.model.File file) throws OXException {
-        Boolean explicitlyTrashed = file.getExplicitlyTrashed();
-        if (null != explicitlyTrashed && explicitlyTrashed.booleanValue()) {
-            throw GoogleDriveExceptionCodes.NOT_FOUND.create(file.getId());
-        }
     }
 
     @Override
@@ -177,7 +176,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             Drive drive = googleDriveAccess.getDrive();
             com.google.api.services.drive.model.File file = drive.files().get(id).execute();
             checkFileValidity(file);
-            return new GoogleDriveFile(folderId, id, userId).parseGoogleDriveFile(file);
+            return new GoogleDriveFile(folderId, id, userId, rootFolderId).parseGoogleDriveFile(file);
         } catch (final HttpResponseException e) {
             throw handleHttpResponseError(id, e);
         } catch (final IOException e) {
@@ -193,12 +192,28 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     }
 
     @Override
-    public void saveFileMetadata(final File file, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
-        saveDocument(file, Streams.newByteArrayInputStream(new byte[0]), sequenceNumber, modifiedFields);
+    public void saveFileMetadata(File file, long sequenceNumber, List<Field> modifiedFields) throws OXException {
+        if (null == modifiedFields || modifiedFields.contains(Field.FILENAME)) {
+            try {
+                Drive drive = googleDriveAccess.getDrive();
+
+                com.google.api.services.drive.model.File modFile = new com.google.api.services.drive.model.File();
+                modFile.setId(file.getId());
+                modFile.setTitle(file.getFileName());
+
+                drive.files().patch(file.getId(), modFile).execute();
+            } catch (final HttpResponseException e) {
+                throw handleHttpResponseError(file.getId(), e);
+            } catch (final IOException e) {
+                throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            } catch (final RuntimeException e) {
+                throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
+        }
     }
 
     @Override
-    public IDTuple copy(final IDTuple source, String version, final String destFolder, final File update, final InputStream newFil, final List<Field> modifiedFields) throws OXException {
+    public IDTuple copy(IDTuple source, String version, String destFolder, File update, InputStream newFil, List<Field> modifiedFields) throws OXException {
         if (version != CURRENT_VERSION) {
             // can only copy the current revision
             throw GoogleDriveExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
@@ -210,6 +225,9 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             // Get source file
             com.google.api.services.drive.model.File srcFile = drive.files().get(id).execute();
             checkFileValidity(srcFile);
+
+            // Determine destination identifier
+            String destId = toGoogleDriveFolderId(destFolder);
 
             // Check destination folder
             String title = srcFile.getTitle();
@@ -229,11 +247,11 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 int count = 1;
                 boolean keepOn = true;
                 while (keepOn) {
-                    com.google.api.services.drive.Drive.Files.List list = drive.files().list();
-                    list.setQ(new StringBuilder().append("title = '").append(title).append("' and mimeType != 'application/vnd.google-apps.folder'").toString());
+                    Drive.Children.List list = drive.children().list(destId);
+                    list.setQ(new StringBuilder().append("title = '").append(title).append("' and ").append(QUERY_STRING_FILES_ONLY_EXCLUDING_TRASH).toString());
 
-                    FileList fileList = list.execute();
-                    if (!fileList.getItems().isEmpty()) {
+                    ChildList childList = list.execute();
+                    if (!childList.getItems().isEmpty()) {
                         title = new StringBuilder(baseName).append(" (").append(count++).append(')').append(ext).toString();
                     } else {
                         keepOn = false;
@@ -244,7 +262,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             // Create a file at destination directory
             com.google.api.services.drive.model.File copy = new com.google.api.services.drive.model.File();
             copy.setTitle(title);
-            copy.setParents(Collections.<ParentReference> singletonList(new ParentReference().setId(destFolder)));
+            copy.setParents(Collections.<ParentReference> singletonList(new ParentReference().setId(destId)));
 
             // Copy file
             com.google.api.services.drive.model.File copiedFile = drive.files().copy(id, copy).execute();
@@ -269,10 +287,13 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             com.google.api.services.drive.model.File srcFile = drive.files().get(id).execute();
             checkFileValidity(srcFile);
 
+            // Determine destination identifier
+            String destId = toGoogleDriveFolderId(destFolder);
+
             // Check destination folder
             {
                 for (ParentReference parentReference : srcFile.getParents()) {
-                    if (parentReference.getId().equals(destFolder)) {
+                    if (parentReference.getId().equals(destId)) {
                         return source;
                     }
                 }
@@ -362,7 +383,9 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 // Insert
                 com.google.api.services.drive.model.File fileMetadata = new com.google.api.services.drive.model.File();
                 fileMetadata.setTitle(file.getFileName());
-                fileMetadata.setParents(Collections.<ParentReference> singletonList(new ParentReference().setId(file.getFolderId())));
+                // Determine folder identifier
+                String folderId = FileStorageFolder.ROOT_FULLNAME.equals(file.getFolderId()) ? rootFolderId : file.getFolderId();
+                fileMetadata.setParents(Collections.<ParentReference> singletonList(new ParentReference().setId(folderId)));
 
                 Drive.Files.Insert insert = drive.files().insert(fileMetadata, new InputStreamContent(file.getFileMIMEType(), data));
                 MediaHttpUploader uploader = insert.getMediaHttpUploader();
@@ -374,7 +397,9 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 com.google.api.services.drive.model.File fileMetadata = new com.google.api.services.drive.model.File();
                 fileMetadata.setId(id);
                 fileMetadata.setTitle(file.getFileName());
-                fileMetadata.setParents(Collections.<ParentReference> singletonList(new ParentReference().setId(file.getFolderId())));
+                // Determine folder identifier
+                String folderId = FileStorageFolder.ROOT_FULLNAME.equals(file.getFolderId()) ? rootFolderId : file.getFolderId();
+                fileMetadata.setParents(Collections.<ParentReference> singletonList(new ParentReference().setId(folderId)));
 
                 Drive.Files.Update update = drive.files().update(id, fileMetadata, new InputStreamContent(file.getFileMIMEType(), data));
                 MediaHttpUploader uploader = update.getMediaHttpUploader();
@@ -391,18 +416,44 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     }
 
     @Override
-    public void removeDocument(final String folderId, final long sequenceNumber) throws OXException {
+    public void removeDocument(String folderId, long sequenceNumber) throws OXException {
         try {
             Drive drive = googleDriveAccess.getDrive();
 
-            // Query all files
-            com.google.api.services.drive.Drive.Files.List list = drive.files().list();
-            list.setQ("mimeType != 'application/vnd.google-apps.folder'");
+            // Determine folder identifier
+            String fid = toGoogleDriveFolderId(folderId);
 
-            FileList fileList = list.execute();
-            if (!fileList.isEmpty()) {
-                for (com.google.api.services.drive.model.File child : fileList.getItems()) {
-                    drive.children().delete(folderId, child.getId()).execute();
+            // Query all files
+            Drive.Children.List list = drive.children().list(fid);
+            list.setQ(QUERY_STRING_FILES_ONLY_EXCLUDING_TRASH);
+
+            boolean hardDelete = isTrashed(fid, drive);
+
+            ChildList childList = list.execute();
+            if (!childList.getItems().isEmpty()) {
+                for (ChildReference child : childList.getItems()) {
+                    if (hardDelete) {
+                        drive.files().delete(child.getId()).execute();
+                    } else {
+                        drive.files().trash(child.getId()).execute();
+                    }
+                }
+
+                String nextPageToken = list.getPageToken();
+                while (!isEmpty(nextPageToken)) {
+                    list.setPageToken(nextPageToken);
+                    childList = list.execute();
+                    if (!childList.getItems().isEmpty()) {
+                        for (ChildReference child : childList.getItems()) {
+                            if (hardDelete) {
+                                drive.files().delete(child.getId()).execute();
+                            } else {
+                                drive.files().trash(child.getId()).execute();
+                            }
+                        }
+                    }
+
+                    nextPageToken = list.getPageToken();
                 }
             }
         } catch (final HttpResponseException e) {
@@ -415,19 +466,24 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     }
 
     @Override
-    public List<IDTuple> removeDocument(final List<IDTuple> ids, final long sequenceNumber) throws OXException {
+    public List<IDTuple> removeDocument(List<IDTuple> ids, long sequenceNumber) throws OXException {
         return removeDocument(ids, sequenceNumber, false);
     }
 
     @Override
-    public List<IDTuple> removeDocument(final List<IDTuple> ids, final long sequenceNumber, boolean hardDelete) throws OXException {
+    public List<IDTuple> removeDocument(List<IDTuple> ids, long sequenceNumber, boolean hardDelete) throws OXException {
         try {
             Drive drive = googleDriveAccess.getDrive();
 
             List<IDTuple> ret = new ArrayList<IDTuple>(ids.size());
             for (IDTuple id : ids) {
                 try {
-                    drive.children().delete(id.getFolder(), id.getId()).execute();
+                    boolean delete = hardDelete || isTrashed(toGoogleDriveFolderId(id.getFolder()), drive);
+                    if (delete) {
+                        drive.files().delete(id.getId()).execute();
+                    } else {
+                        drive.files().trash(id.getId()).execute();
+                    }
                 } catch (final HttpResponseException e) {
                     if (404 != e.getStatusCode()) {
                         ret.add(id);
@@ -447,9 +503,9 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     }
 
     @Override
-    public String[] removeVersion(final String folderId, final String id, final String[] versions) throws OXException {
+    public String[] removeVersion(String folderId, String id, String[] versions) throws OXException {
         /*
-         * Dropbox API does not support removing revisions of a file
+         * No versioning support
          */
         for (final String version : versions) {
             if (version != CURRENT_VERSION) {
@@ -458,7 +514,9 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
         }
         try {
             Drive drive = googleDriveAccess.getDrive();
-            drive.children().delete(folderId, id).execute();
+            // Determine folder identifier
+            String fid = toGoogleDriveFolderId(folderId);
+            drive.children().delete(fid, id).execute();
             return new String[0];
         } catch (final HttpResponseException e) {
             if (404 == e.getStatusCode()) {
@@ -473,34 +531,54 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     }
 
     @Override
-    public void unlock(final String folderId, final String id) throws OXException {
+    public void unlock(String folderId, String id) throws OXException {
         // Nope
     }
 
     @Override
-    public void lock(final String folderId, final String id, final long diff) throws OXException {
+    public void lock(String folderId, String id, long diff) throws OXException {
         // Nope
     }
 
     @Override
-    public void touch(final String folderId, final String id) throws OXException {
+    public void touch(String folderId, String id) throws OXException {
         exists(folderId, id, CURRENT_VERSION);
     }
 
     @Override
-    public TimedResult<File> getDocuments(final String folderId) throws OXException {
+    public TimedResult<File> getDocuments(String folderId) throws OXException {
         try {
-            final Entry directoryEntry = dropboxAPI.metadata(toPath(folderId), 0, null, true, null);
-            if (!directoryEntry.isDir) {
-                throw GoogleDriveExceptionCodes.NOT_A_FOLDER.create(folderId);
-            }
-            final List<Entry> contents = directoryEntry.contents;
-            final List<File> files = new ArrayList<File>(contents.size());
-            for (final Entry childEntry : contents) {
-                if (!childEntry.isDir && !childEntry.isDeleted) {
-                    files.add(new GoogleDriveFile(folderId, childEntry.path, userId).parseGoogleDriveFile(childEntry));
+            Drive drive = googleDriveAccess.getDrive();
+
+            // Determine folder identifier
+            String fid = toGoogleDriveFolderId(folderId);
+
+            Drive.Children.List list = drive.children().list(fid);
+            list.setQ(QUERY_STRING_FILES_ONLY_EXCLUDING_TRASH);
+            ChildList childList = list.execute();
+
+            List<File> files = new LinkedList<File>();
+            if (!childList.getItems().isEmpty()) {
+                for (ChildReference child : childList.getItems()) {
+                    String fileId = child.getId();
+                    files.add(new GoogleDriveFile(folderId, fileId, userId, rootFolderId).parseGoogleDriveFile(drive.files().get(fileId).execute()));
+                }
+
+                String nextPageToken = list.getPageToken();
+                while (!isEmpty(nextPageToken)) {
+                    list.setPageToken(nextPageToken);
+                    childList = list.execute();
+                    if (!childList.getItems().isEmpty()) {
+                        for (ChildReference child : childList.getItems()) {
+                            String fileId = child.getId();
+                            files.add(new GoogleDriveFile(folderId, fileId, userId, rootFolderId).parseGoogleDriveFile(drive.files().get(fileId).execute()));
+                        }
+                    }
+
+                    nextPageToken = list.getPageToken();
                 }
             }
+
             return new FileTimedResult(files);
         } catch (final HttpResponseException e) {
             throw handleHttpResponseError(folderId, e);
@@ -517,19 +595,39 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     }
 
     @Override
-    public TimedResult<File> getDocuments(final String folderId, final List<Field> fields, final Field sort, final SortDirection order) throws OXException {
+    public TimedResult<File> getDocuments(String folderId, List<Field> fields, Field sort, SortDirection order) throws OXException {
         try {
-            final Entry directoryEntry = dropboxAPI.metadata(toPath(folderId), 0, null, true, null);
-            if (!directoryEntry.isDir) {
-                throw GoogleDriveExceptionCodes.NOT_A_FOLDER.create(folderId);
-            }
-            final List<Entry> contents = directoryEntry.contents;
-            final List<File> files = new ArrayList<File>(contents.size());
-            for (final Entry childEntry : contents) {
-                if (!childEntry.isDir && !childEntry.isDeleted) {
-                    files.add(new GoogleDriveFile(folderId, childEntry.path, userId).parseGoogleDriveFile(childEntry));
+            Drive drive = googleDriveAccess.getDrive();
+
+            // Determine folder identifier
+            String fid = toGoogleDriveFolderId(folderId);
+
+            Drive.Children.List list = drive.children().list(fid);
+            list.setQ(QUERY_STRING_FILES_ONLY_EXCLUDING_TRASH);
+            ChildList childList = list.execute();
+
+            List<File> files = new LinkedList<File>();
+            if (!childList.getItems().isEmpty()) {
+                for (ChildReference child : childList.getItems()) {
+                    String fileId = child.getId();
+                    files.add(new GoogleDriveFile(folderId, fileId, userId, rootFolderId).parseGoogleDriveFile(drive.files().get(fileId).execute()));
+                }
+
+                String nextPageToken = list.getPageToken();
+                while (!isEmpty(nextPageToken)) {
+                    list.setPageToken(nextPageToken);
+                    childList = list.execute();
+                    if (!childList.getItems().isEmpty()) {
+                        for (ChildReference child : childList.getItems()) {
+                            String fileId = child.getId();
+                            files.add(new GoogleDriveFile(folderId, fileId, userId, rootFolderId).parseGoogleDriveFile(drive.files().get(fileId).execute()));
+                        }
+                    }
+
+                    nextPageToken = list.getPageToken();
                 }
             }
+
             // Sort collection if needed
             sort(files, sort, order);
             return new FileTimedResult(files);
@@ -543,13 +641,10 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     }
 
     @Override
-    public TimedResult<File> getVersions(final String folderId, final String id) throws OXException {
+    public TimedResult<File> getVersions(String folderId, String id) throws OXException {
         try {
-            final List<Entry> revisions = dropboxAPI.revisions(id, 0);
-            final List<File> files = new ArrayList<File>(revisions.size());
-            for (final Entry revisionEntry : revisions) {
-                files.add(new GoogleDriveFile(folderId, id, userId).parseGoogleDriveFile(revisionEntry));
-            }
+            Drive drive = googleDriveAccess.getDrive();
+            List<File> files = Collections.<File> singletonList(new GoogleDriveFile(folderId, id, userId, rootFolderId).parseGoogleDriveFile(drive.files().get(id).execute()));
             return new FileTimedResult(files);
         } catch (final HttpResponseException e) {
             throw handleHttpResponseError(id, e);
@@ -561,20 +656,15 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     }
 
     @Override
-    public TimedResult<File> getVersions(final String folderId, final String id, final List<Field> fields) throws OXException {
+    public TimedResult<File> getVersions(String folderId, String id, List<Field> fields) throws OXException {
         return getVersions(folderId, id);
     }
 
     @Override
-    public TimedResult<File> getVersions(final String folderId, final String id, final List<Field> fields, final Field sort, final SortDirection order) throws OXException {
+    public TimedResult<File> getVersions(String folderId, String id, List<Field> fields, Field sort, SortDirection order) throws OXException {
         try {
-            final List<Entry> revisions = dropboxAPI.revisions(id, 0);
-            final List<File> files = new ArrayList<File>(revisions.size());
-            for (final Entry revisionEntry : revisions) {
-                files.add(new GoogleDriveFile(folderId, id, userId).parseGoogleDriveFile(revisionEntry));
-            }
-            // Sort collection
-            sort(files, sort, order);
+            Drive drive = googleDriveAccess.getDrive();
+            List<File> files = Collections.<File> singletonList(new GoogleDriveFile(folderId, id, userId, rootFolderId).parseGoogleDriveFile(drive.files().get(id).execute()));
             return new FileTimedResult(files);
         } catch (final HttpResponseException e) {
             throw handleHttpResponseError(id, e);
@@ -586,23 +676,28 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     }
 
     @Override
-    public TimedResult<File> getDocuments(final List<IDTuple> ids, final List<Field> fields) throws OXException {
+    public TimedResult<File> getDocuments(List<IDTuple> ids, List<Field> fields) throws OXException {
         try {
-            final List<File> files = new ArrayList<File>(ids.size());
-            for (final IDTuple id : ids) {
-                final Entry entry = dropboxAPI.metadata(id.getId(), 1, null, false, null);
-                if (!entry.isDeleted && !entry.isDir) {
-                    files.add(new GoogleDriveFile(id.getFolder(), id.getId(), userId).parseGoogleDriveFile(entry));
+            Drive drive = googleDriveAccess.getDrive();
+
+            List<File> files = new LinkedList<File>();
+            for (IDTuple idTuple : ids) {
+                String fileId = idTuple.getId();
+                try {
+                    files.add(new GoogleDriveFile(idTuple.getFolder(), fileId, userId, rootFolderId).parseGoogleDriveFile(drive.files().get(fileId).execute()));
+                } catch (HttpResponseException e) {
+                    if (404 == e.getStatusCode()) {
+                        throw GoogleDriveExceptionCodes.NOT_FOUND.create(e, fileId);
+                    }
+                    throw e;
                 }
             }
+
             return new FileTimedResult(files);
-        } catch (final DropboxServerException e) {
-            if (404 == e.error) {
-                throw GoogleDriveExceptionCodes.NOT_FOUND.create(e, e.reason);
-            }
-            throw handleServerError(null, e);
-        } catch (final DropboxException e) {
-            throw GoogleDriveExceptionCodes.GOOGLE_DRIVE_ERROR.create(e, e.getMessage());
+        } catch (HttpResponseException e) {
+            throw handleHttpResponseError(null, e);
+        } catch (IOException e) {
+            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -611,17 +706,17 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     private static final SearchIterator<File> EMPTY_ITER = SearchIteratorAdapter.emptyIterator();
 
     @Override
-    public Delta<File> getDelta(final String folderId, final long updateSince, final List<Field> fields, final boolean ignoreDeleted) throws OXException {
+    public Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, boolean ignoreDeleted) throws OXException {
         return new FileDelta(EMPTY_ITER, EMPTY_ITER, EMPTY_ITER, 0L);
     }
 
     @Override
-    public Delta<File> getDelta(final String folderId, final long updateSince, final List<Field> fields, final Field sort, final SortDirection order, final boolean ignoreDeleted) throws OXException {
+    public Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, Field sort, SortDirection order, boolean ignoreDeleted) throws OXException {
         return new FileDelta(EMPTY_ITER, EMPTY_ITER, EMPTY_ITER, 0L);
     }
 
     @Override
-    public SearchIterator<File> search(final List<String> folderIds, final SearchTerm<?> searchTerm, List<Field> fields, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
+    public SearchIterator<File> search(List<String> folderIds, SearchTerm<?> searchTerm, List<Field> fields, Field sort, final SortDirection order, int start, int end) throws OXException {
         if (FileNameTerm.class.isInstance(searchTerm) && null == folderIds || 1 == folderIds.size()) {
             String pattern = ((FileNameTerm) searchTerm).getPattern();
             return search(pattern, fields, null != folderIds && 1 == folderIds.size() ? folderIds.get(0) : null, sort, order, start, end);
@@ -630,11 +725,38 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     }
 
     @Override
-    public SearchIterator<File> search(final String pattern, final List<Field> fields, final String folderId, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
+    public SearchIterator<File> search(String pattern, List<Field> fields, String folderId, Field sort, SortDirection order, int start, int end) throws OXException {
         try {
+            Drive drive = googleDriveAccess.getDrive();
+
             if (isEmpty(pattern)) {
+                // Get all files
                 List<File> files = new LinkedList<File>();
-                gatherAllFiles("/", files);
+                {
+                    Drive.Files.List list = drive.files().list();
+                    list.setQ(QUERY_STRING_FILES_ONLY_EXCLUDING_TRASH);
+
+                    FileList fileList = list.execute();
+                    if (!fileList.getItems().isEmpty()) {
+                        for (com.google.api.services.drive.model.File file : fileList.getItems()) {
+                            files.add(new GoogleDriveFile(folderId, file.getId(), userId, rootFolderId).parseGoogleDriveFile(file));
+                        }
+
+                        String nextPageToken = list.getPageToken();
+                        while (!isEmpty(nextPageToken)) {
+                            list.setPageToken(nextPageToken);
+                            fileList = list.execute();
+                            if (!fileList.getItems().isEmpty()) {
+                                for (com.google.api.services.drive.model.File file : fileList.getItems()) {
+                                    files.add(new GoogleDriveFile(folderId, file.getId(), userId, rootFolderId).parseGoogleDriveFile(file));
+                                }
+                            }
+
+                            nextPageToken = list.getPageToken();
+                        }
+                    }
+                }
+
                 // Sort collection
                 sort(files, sort, order);
                 if ((start != NOT_SET) && (end != NOT_SET)) {
@@ -654,33 +776,39 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                     }
                     files = files.subList(start, toIndex);
                 }
+
                 return new SearchIteratorAdapter<File>(files.iterator(), files.size());
             }
+
             // Search by pattern
-            final List<Entry> results;
-            if (null == folderId) {
-                // All folders...
-                final Set<String> folderPaths = new LinkedHashSet<String>(16);
-                folderPaths.add("/");
-                gatherAllFolders("/", folderPaths);
-                // Search in them
-                results = new LinkedList<Entry>();
-                for (final String folderPath : folderPaths) {
-                    results.addAll(searchBy(pattern, folderPath));
-                }
-            } else {
-                results = searchBy(pattern, toPath(folderId));
-                if (results.isEmpty()) {
-                    return SearchIteratorAdapter.emptyIterator();
+            List<File> files = new LinkedList<File>();
+            {
+                Drive.Children.List list = drive.children().list(toGoogleDriveFolderId(folderId));
+                list.setQ(new StringBuilder().append("title contains '").append(pattern).append("' and ").append(QUERY_STRING_FILES_ONLY).toString());
+
+                ChildList fileList = list.execute();
+                if (!fileList.getItems().isEmpty()) {
+                    for (ChildReference childRef : fileList.getItems()) {
+                        String fileId = childRef.getId();
+                        files.add(new GoogleDriveFile(folderId, fileId, userId, rootFolderId).parseGoogleDriveFile(drive.files().get(fileId).execute()));
+                    }
+
+                    String nextPageToken = list.getPageToken();
+                    while (!isEmpty(nextPageToken)) {
+                        list.setPageToken(nextPageToken);
+                        fileList = list.execute();
+                        if (!fileList.getItems().isEmpty()) {
+                            for (ChildReference childRef : fileList.getItems()) {
+                                String fileId = childRef.getId();
+                                files.add(new GoogleDriveFile(folderId, fileId, userId, rootFolderId).parseGoogleDriveFile(drive.files().get(fileId).execute()));
+                            }
+                        }
+
+                        nextPageToken = list.getPageToken();
+                    }
                 }
             }
-            // Convert entries to Files
-            List<File> files = new ArrayList<File>(results.size());
-            for (final Entry resultsEntry : results) {
-                if (!resultsEntry.isDir) {
-                    files.add(new GoogleDriveFile(folderId, resultsEntry.path, userId).parseGoogleDriveFile(resultsEntry));
-                }
-            }
+
             // Sort collection
             sort(files, sort, order);
             if ((start != NOT_SET) && (end != NOT_SET)) {
@@ -710,42 +838,6 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
         }
     }
 
-    private List<Entry> searchBy(final String pattern, final String folderPath) throws DropboxException {
-        // Dropbox API only supports searching by file name
-        return dropboxAPI.search(folderPath, pattern, 0, false);
-    }
-
-    private void gatherAllFolders(final String path, final Set<String> folderPaths) throws DropboxException {
-        final Entry metadata = dropboxAPI.metadata(path, 0, null, true, null);
-        final List<Entry> contents = metadata.contents;
-        final List<String> collectedPaths = new ArrayList<String>(contents.size());
-        for (final Entry childEntry : contents) {
-            final String childPath = childEntry.path;
-            if (childEntry.isDir && !childEntry.isDeleted && folderPaths.add(childPath)) {
-                // No direct recursive invocation to maintain hierarchical order in linked set
-                collectedPaths.add(childPath);
-            }
-        }
-        for (final String childPath : collectedPaths) {
-            gatherAllFolders(childPath, folderPaths);
-        }
-    }
-
-    private void gatherAllFiles(final String path, final List<File> files) throws DropboxException, OXException {
-        final Entry metadata = dropboxAPI.metadata(path, 0, null, true, null);
-        final List<Entry> contents = metadata.contents;
-        for (final Entry childEntry : contents) {
-            final String childPath = childEntry.path;
-            if (!childEntry.isDeleted) {
-                if (childEntry.isDir) {
-                    gatherAllFiles(childPath, files);
-                } else {
-                    files.add(new GoogleDriveFile(toId(path), childPath, userId).parseGoogleDriveFile(childEntry));
-                }
-            }
-        }
-    }
-
     @Override
     public FileStorageAccountAccess getAccountAccess() {
         return accountAccess;
@@ -762,18 +854,6 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
         if (null != sort && 1 < files.size()) {
             Collections.sort(files, order.comparatorBy(sort));
         }
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
 }

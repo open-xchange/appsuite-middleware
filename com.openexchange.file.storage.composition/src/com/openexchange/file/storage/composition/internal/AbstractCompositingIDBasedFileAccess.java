@@ -903,9 +903,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
                 @Override
                 protected Void callInTransaction(FileStorageFileAccess access) throws OXException {
-                    access.removeDocument(
-                        Arrays.asList(new FileStorageFileAccess.IDTuple(id.getFolderId(), id.getFileId())),
-                        sequenceNumber);
+                    access.removeDocument(Arrays.asList(new FileStorageFileAccess.IDTuple(id.getFolderId(), id.getFileId())), sequenceNumber, true);
                     return null;
                 }
             };

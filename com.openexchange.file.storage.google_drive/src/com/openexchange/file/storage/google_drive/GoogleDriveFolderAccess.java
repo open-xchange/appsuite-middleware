@@ -49,9 +49,17 @@
 
 package com.openexchange.file.storage.google_drive;
 
-import java.util.ArrayList;
+import static com.openexchange.java.Strings.isEmpty;
+import java.io.IOException;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import com.google.api.client.http.HttpResponseException;
+import com.google.api.services.drive.Drive;
+import com.google.api.services.drive.model.ChildList;
+import com.google.api.services.drive.model.ChildReference;
+import com.google.api.services.drive.model.File;
+import com.google.api.services.drive.model.ParentReference;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -69,47 +77,65 @@ import com.openexchange.session.Session;
  */
 public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess implements FileStorageFolderAccess {
 
+    private static final String QUERY_STRING_DIRECTORIES_ONLY = GoogleDriveConstants.QUERY_STRING_DIRECTORIES_ONLY;
+
+    // ---------------------------------------------------------------------------------------------------------------------- //
+
     private final GoogleDriveAccountAccess accountAccess;
     private final int userId;
+    private final String accountDisplayName;
 
     /**
      * Initializes a new {@link GoogleDriveFolderAccess}.
      */
-    public GoogleDriveFolderAccess(final GoogleDriveAccess googleDriveAccess, final FileStorageAccount account, final Session session, final GoogleDriveAccountAccess accountAccess) {
+    public GoogleDriveFolderAccess(final GoogleDriveAccess googleDriveAccess, final FileStorageAccount account, final Session session, final GoogleDriveAccountAccess accountAccess) throws OXException {
         super(googleDriveAccess, account, session);
         this.accountAccess = accountAccess;
         userId = session.getUserId();
+        accountDisplayName = account.getDisplayName();
+    }
+
+    private void checkDirValidity(com.google.api.services.drive.model.File file) throws OXException {
+        if (!isDir(file)) {
+            throw GoogleDriveExceptionCodes.NOT_A_FOLDER.create(file.getId());
+        }
+        checkIfTrashed(file);
+    }
+
+    private GoogleDriveFolder parseGoogleDriveFolder(com.google.api.services.drive.model.File dir, Drive drive) throws OXException, IOException {
+        return new GoogleDriveFolder(userId).parseDirEntry(dir, rootFolderId, accountDisplayName, drive);
     }
 
     @Override
-    public boolean exists(final String folderId) throws OXException {
+    public boolean exists(String folderId) throws OXException {
         try {
-            final Entry entry = dropboxAPI.metadata(toPath(folderId), 1, null, false, null);
-            return entry.isDir && !entry.isDeleted;
-        } catch (final DropboxServerException e) {
-            if (404 == e.error) {
+            Drive drive = googleDriveAccess.getDrive();
+            com.google.api.services.drive.model.File file = drive.files().get(toGoogleDriveFolderId(folderId)).execute();
+            Boolean explicitlyTrashed = file.getExplicitlyTrashed();
+            return isDir(file) && (null == explicitlyTrashed || !explicitlyTrashed.booleanValue());
+        } catch (final HttpResponseException e) {
+            if (404 == e.getStatusCode()) {
                 return false;
             }
-            throw GoogleDriveExceptionCodes.GOOGLE_DRIVE_ERROR.create(e, e.getMessage());
-        } catch (final DropboxException e) {
-            throw GoogleDriveExceptionCodes.GOOGLE_DRIVE_ERROR.create(e, e.getMessage());
+            throw handleHttpResponseError(null, e);
+        } catch (final IOException e) {
+            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
     @Override
-    public FileStorageFolder getFolder(final String folderId) throws OXException {
+    public FileStorageFolder getFolder(String folderId) throws OXException {
         try {
-            final Entry entry = dropboxAPI.metadata(toPath(folderId), 0, null, true, null);
-            if (!entry.isDir || entry.isDeleted) {
-                throw GoogleDriveExceptionCodes.NOT_FOUND.create(folderId);
-            }
-            return new GoogleDriveFolder(userId).parseDirEntry(entry, accountAccess.getAccount().getDisplayName());
-        } catch (final DropboxServerException e) {
-            throw handleServerError(folderId, e);
-        } catch (final DropboxException e) {
-            throw GoogleDriveExceptionCodes.GOOGLE_DRIVE_ERROR.create(e, e.getMessage());
+            Drive drive = googleDriveAccess.getDrive();
+            com.google.api.services.drive.model.File dir = drive.files().get(toGoogleDriveFolderId(folderId)).execute();
+            checkDirValidity(dir);
+            return parseGoogleDriveFolder(dir, drive);
+        } catch (final HttpResponseException e) {
+            throw handleHttpResponseError(folderId, e);
+        } catch (final IOException e) {
+            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -133,22 +159,39 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
     @Override
     public FileStorageFolder[] getSubfolders(final String parentIdentifier, final boolean all) throws OXException {
         try {
-            final Entry entry = dropboxAPI.metadata(toPath(parentIdentifier), 0, null, true, null);
-            if (!entry.isDir || entry.isDeleted) {
-                throw GoogleDriveExceptionCodes.NOT_FOUND.create(parentIdentifier);
+            Drive drive = googleDriveAccess.getDrive();
+
+            Drive.Children.List list = drive.children().list(toGoogleDriveFolderId(parentIdentifier));
+            list.setQ(QUERY_STRING_DIRECTORIES_ONLY);
+            ChildList childList = list.execute();
+
+            if (childList.getItems().isEmpty()) {
+                return new FileStorageFolder[0];
             }
-            final List<FileStorageFolder> list = new LinkedList<FileStorageFolder>();
-            String accDisplayName = accountAccess.getAccount().getDisplayName();
-            for (final Entry childEntry : entry.contents) {
-                if (childEntry.isDir && !childEntry.isDeleted) {
-                    list.add(new GoogleDriveFolder(userId).parseDirEntry(childEntry, accDisplayName));
+
+            List<FileStorageFolder> folders = new LinkedList<FileStorageFolder>();
+            for (ChildReference childReference : childList.getItems()) {
+                folders.add(parseGoogleDriveFolder(drive.files().get(childReference.getId()).execute(), drive));
+            }
+
+            String nextPageToken = list.getPageToken();
+            while (!isEmpty(nextPageToken)) {
+                list.setPageToken(nextPageToken);
+                childList = list.execute();
+                if (!childList.getItems().isEmpty()) {
+                    for (ChildReference childReference : childList.getItems()) {
+                        folders.add(parseGoogleDriveFolder(drive.files().get(childReference.getId()).execute(), drive));
+                    }
                 }
+
+                nextPageToken = list.getPageToken();
             }
-            return list.toArray(new FileStorageFolder[0]);
-        } catch (final DropboxServerException e) {
-            throw handleServerError(parentIdentifier, e);
-        } catch (final DropboxException e) {
-            throw GoogleDriveExceptionCodes.GOOGLE_DRIVE_ERROR.create(e, e.getMessage());
+
+            return folders.toArray(new FileStorageFolder[0]);
+        } catch (final HttpResponseException e) {
+            throw handleHttpResponseError(parentIdentifier, e);
+        } catch (final IOException e) {
+            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -161,145 +204,229 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
 
     @Override
     public String createFolder(final FileStorageFolder toCreate) throws OXException {
+        String parentId = toGoogleDriveFolderId(toCreate.getParentId());
         try {
-            final String parentPath = toPath(toCreate.getParentId());
-            final Entry entry =
-                dropboxAPI.createFolder(new StringBuilder("/".equals(parentPath) ? "" : parentPath).append('/').append(toCreate.getName()).toString());
-            return toId(entry.path);
-        } catch (final DropboxServerException e) {
-            throw handleServerError(null, e);
-        } catch (final DropboxException e) {
-            throw GoogleDriveExceptionCodes.GOOGLE_DRIVE_ERROR.create(e, e.getMessage());
+            Drive drive = googleDriveAccess.getDrive();
+
+            Drive.Children.List list = drive.children().list(parentId);
+            list.setQ("title='"+toCreate.getName()+"' and " + GoogleDriveConstants.QUERY_STRING_DIRECTORIES_ONLY_EXCLUDING_TRASH);
+            if (!list.execute().getItems().isEmpty()) {
+                // Already such a folder
+                throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(toCreate.getName(), drive.files().get(parentId).execute().getTitle());
+            }
+
+            File driveDir = new File();
+            driveDir.setParents(Collections.singletonList(new ParentReference().setId(parentId)));
+            driveDir.setTitle(toCreate.getName());
+            driveDir.setMimeType(GoogleDriveConstants.MIME_TYPE_DIRECTORY);
+
+            File newDir = drive.files().insert(driveDir).execute();
+
+            return toFileStorageFolderId(newDir.getId());
+        } catch (final HttpResponseException e) {
+            throw handleHttpResponseError(toCreate.getParentId(), e);
+        } catch (final IOException e) {
+            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
     @Override
-    public String updateFolder(final String identifier, final FileStorageFolder toUpdate) throws OXException {
-        // Dropbox neither supports subscription not permissions
+    public String updateFolder(String identifier, FileStorageFolder toUpdate) throws OXException {
+        // Neither support for subscription nor permissions
         return identifier;
     }
 
     @Override
-    public String moveFolder(final String folderId, final String newParentId) throws OXException {
+    public String moveFolder(String folderId, String newParentId) throws OXException {
         return moveFolder(folderId, newParentId, null);
     }
 
     @Override
-    public String moveFolder(final String folderId, final String newParentId, String newName) throws OXException {
+    public String moveFolder(String folderId, String newParentId, String newName) throws OXException {
+        String fid = toGoogleDriveFolderId(folderId);
+        String nfid = toGoogleDriveFolderId(newParentId);
         try {
-            final String path = toPath(folderId);
-            final int pos = path.lastIndexOf('/');
-            final String newParentPath = toPath(newParentId);
-            final Entry moved =
-                dropboxAPI.move(
-                    path,
-                    new StringBuilder("/".equals(newParentPath) ? "" : newParentPath).append('/').append(
-                        null != newName ? newName : (pos < 0 ? path : path.substring(pos + 1))).toString());
-            return toId(moved.path);
-        } catch (final DropboxServerException e) {
-            throw handleServerError(folderId, e);
-        } catch (final DropboxException e) {
-            throw GoogleDriveExceptionCodes.GOOGLE_DRIVE_ERROR.create(e, e.getMessage());
+            Drive drive = googleDriveAccess.getDrive();
+
+            String title = null == newName ? drive.files().get(fid).execute().getTitle() : newName;
+
+            Drive.Children.List list = drive.children().list(nfid);
+            list.setQ("title='"+title+"' and " + GoogleDriveConstants.QUERY_STRING_DIRECTORIES_ONLY_EXCLUDING_TRASH);
+            if (!list.execute().getItems().isEmpty()) {
+                // Already such a folder
+                throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(title, drive.files().get(nfid).execute().getTitle());
+            }
+
+            File driveDir = new File();
+            driveDir.setId(fid);
+            driveDir.setParents(Collections.singletonList(new ParentReference().setId(nfid)));
+            if (null != newName) {
+                driveDir.setTitle(newName);
+            }
+            driveDir.setMimeType(GoogleDriveConstants.MIME_TYPE_DIRECTORY);
+
+            File movedDir = drive.files().patch(fid, driveDir).execute();
+            return toFileStorageFolderId(movedDir.getId());
+        } catch (final HttpResponseException e) {
+            throw handleHttpResponseError(folderId, e);
+        } catch (final IOException e) {
+            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
     @Override
-    public String renameFolder(final String folderId, final String newName) throws OXException {
+    public String renameFolder(String folderId, String newName) throws OXException {
+        String fid = toGoogleDriveFolderId(folderId);
         try {
-            final String path = toPath(folderId);
-            final int pos = path.lastIndexOf('/');
-            final Entry moved =
-                dropboxAPI.move(
-                    path,
-                    pos <= 0 ? newName : new StringBuilder(path.substring(0, pos)).append('/').append(newName).toString());
-            return toId(moved.path);
-        } catch (final DropboxServerException e) {
-            throw handleServerError(folderId, e);
-        } catch (final DropboxException e) {
-            throw GoogleDriveExceptionCodes.GOOGLE_DRIVE_ERROR.create(e, e.getMessage());
+            Drive drive = googleDriveAccess.getDrive();
+
+            Drive.Children.List list = drive.children().list(fid);
+            list.setQ("title='"+newName+"' and " + GoogleDriveConstants.QUERY_STRING_DIRECTORIES_ONLY_EXCLUDING_TRASH);
+            if (!list.execute().getItems().isEmpty()) {
+                // Already such a folder
+                throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(newName, drive.files().get(fid).execute().getTitle());
+            }
+
+            File driveDir = new File();
+            driveDir.setId(fid);
+            driveDir.setTitle(newName);
+            driveDir.setMimeType(GoogleDriveConstants.MIME_TYPE_DIRECTORY);
+
+            File renamedDir = drive.files().patch(fid, driveDir).execute();
+            return toFileStorageFolderId(renamedDir.getId());
+        } catch (final HttpResponseException e) {
+            throw handleHttpResponseError(folderId, e);
+        } catch (final IOException e) {
+            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
     @Override
-    public String deleteFolder(final String folderId) throws OXException {
+    public String deleteFolder(String folderId) throws OXException {
+        return deleteFolder(folderId, false);
+    }
+
+    @Override
+    public String deleteFolder(String folderId, boolean hardDelete) throws OXException {
         try {
-            final String path = toPath(folderId);
-            dropboxAPI.delete(path);
+            Drive drive = googleDriveAccess.getDrive();
+
+            String fid = toGoogleDriveFolderId(folderId);
+            if (hardDelete || isTrashed(fid, drive)) {
+                drive.files().delete(fid).execute();
+            } else {
+                drive.files().trash(fid).execute();
+            }
+
             return folderId;
-        } catch (final DropboxServerException e) {
-            if (404 == e.error) {
+        } catch (final HttpResponseException e) {
+            if (404 == e.getStatusCode()) {
                 return folderId;
             }
-            throw handleServerError(null, e);
-        } catch (final DropboxException e) {
-            throw GoogleDriveExceptionCodes.GOOGLE_DRIVE_ERROR.create(e, e.getMessage());
+            throw handleHttpResponseError(folderId, e);
+        } catch (final IOException e) {
+            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
     @Override
-    public String deleteFolder(final String folderId, final boolean hardDelete) throws OXException {
-        return deleteFolder(folderId);
+    public void clearFolder(String folderId) throws OXException {
+        clearFolder(folderId, false);
     }
 
     @Override
-    public void clearFolder(final String folderId) throws OXException {
+    public void clearFolder(String folderId, boolean hardDelete) throws OXException {
         try {
-            final Entry directoryEntry = dropboxAPI.metadata(toPath(folderId), 0, null, true, null);
-            if (!directoryEntry.isDir) {
-                throw GoogleDriveExceptionCodes.NOT_A_FOLDER.create(folderId);
-            }
-            final List<Entry> contents = directoryEntry.contents;
-            for (final Entry childEntry : contents) {
-                if (!childEntry.isDir && !childEntry.isDeleted) {
-                    dropboxAPI.delete(childEntry.path);
+            Drive drive = googleDriveAccess.getDrive();
+
+            String fid = toGoogleDriveFolderId(folderId);
+            if (hardDelete || isTrashed(fid, drive)) {
+                // Delete permanently
+                Drive.Children.List list = drive.children().list(fid);
+                ChildList childList = list.execute();
+                if (!childList.getItems().isEmpty()) {
+                    for (ChildReference child : childList.getItems()) {
+                        drive.files().delete(child.getId()).execute();
+                    }
+
+                    String nextPageToken = list.getPageToken();
+                    while (!isEmpty(nextPageToken)) {
+                        list.setPageToken(nextPageToken);
+                        childList = list.execute();
+                        if (!childList.getItems().isEmpty()) {
+                            for (ChildReference child : childList.getItems()) {
+                                drive.files().delete(child.getId()).execute();
+                            }
+                        }
+                        nextPageToken = list.getPageToken();
+                    }
+                }
+            } else {
+                // Move to trash
+                Drive.Children.List list = drive.children().list(fid);
+                ChildList childList = list.execute();
+                if (!childList.getItems().isEmpty()) {
+                    for (ChildReference child : childList.getItems()) {
+                        drive.files().trash(child.getId()).execute();
+                    }
+
+                    String nextPageToken = list.getPageToken();
+                    while (!isEmpty(nextPageToken)) {
+                        list.setPageToken(nextPageToken);
+                        childList = list.execute();
+                        if (!childList.getItems().isEmpty()) {
+                            for (ChildReference child : childList.getItems()) {
+                                drive.files().trash(child.getId()).execute();
+                            }
+                        }
+                        nextPageToken = list.getPageToken();
+                    }
                 }
             }
-        } catch (final DropboxServerException e) {
-            throw handleServerError(folderId, e);
-        } catch (final DropboxException e) {
-            throw GoogleDriveExceptionCodes.GOOGLE_DRIVE_ERROR.create(e, e.getMessage());
+        } catch (final HttpResponseException e) {
+            throw handleHttpResponseError(folderId, e);
+        } catch (final IOException e) {
+            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
     @Override
-    public void clearFolder(final String folderId, final boolean hardDelete) throws OXException {
-        clearFolder(folderId);
-    }
-
-    @Override
-    public FileStorageFolder[] getPath2DefaultFolder(final String folderId) throws OXException {
+    public FileStorageFolder[] getPath2DefaultFolder(String folderId) throws OXException {
         try {
-            final Entry directoryEntry = dropboxAPI.metadata(toPath(folderId), 0, null, true, null);
-            if (!directoryEntry.isDir) {
-                throw GoogleDriveExceptionCodes.NOT_A_FOLDER.create(folderId);
-            }
-            final List<FileStorageFolder> list = new ArrayList<FileStorageFolder>();
-            FileStorageFolder f = new GoogleDriveFolder(userId).parseDirEntry(directoryEntry, accountAccess.getAccount().getDisplayName());
+            Drive drive = googleDriveAccess.getDrive();
+
+            List<FileStorageFolder> list = new LinkedList<FileStorageFolder>();
+
+            String fid = toGoogleDriveFolderId(folderId);
+            File dir = drive.files().get(fid).execute();
+            FileStorageFolder f = parseGoogleDriveFolder(dir, drive);
             list.add(f);
-            String parentId;
-            while (null != (parentId = f.getParentId())) {
-                f = getFolder(parentId);
+
+            while (!rootFolderId.equals(fid)) {
+                fid = dir.getParents().get(0).getId();
+                dir = drive.files().get(fid).execute();
+                f = parseGoogleDriveFolder(dir, drive);
                 list.add(f);
             }
+
             return list.toArray(new FileStorageFolder[list.size()]);
-        } catch (final DropboxServerException e) {
-            throw handleServerError(folderId, e);
-        } catch (final DropboxException e) {
-            throw GoogleDriveExceptionCodes.GOOGLE_DRIVE_ERROR.create(e, e.getMessage());
+        } catch (final HttpResponseException e) {
+            throw handleHttpResponseError(folderId, e);
+        } catch (final IOException e) {
+            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-
     }
 
     @Override

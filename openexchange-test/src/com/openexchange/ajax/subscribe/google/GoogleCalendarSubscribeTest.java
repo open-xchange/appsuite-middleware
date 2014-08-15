@@ -47,56 +47,58 @@
  *
  */
 
-package com.openexchange.file.storage.google_drive;
+package com.openexchange.ajax.subscribe.google;
 
-import com.openexchange.file.storage.FileStorageConstants;
+import java.io.IOException;
+import org.apache.commons.httpclient.HttpClient;
+import org.xml.sax.SAXException;
+import com.meterware.httpunit.ClientProperties;
+import com.meterware.httpunit.GetMethodWebRequest;
+import com.meterware.httpunit.HttpUnitOptions;
+import com.meterware.httpunit.WebConversation;
+import com.meterware.httpunit.WebForm;
+import com.meterware.httpunit.WebRequest;
+import com.meterware.httpunit.WebResponse;
+import com.openexchange.ajax.subscribe.test.AbstractSubscriptionTest;
+
 
 /**
- * {@link GoogleDriveConstants} - Provides useful constants for Google Drive file storage.
+ * {@link GoogleCalendarSubscribeTest}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
+ * @since v7.6.1
  */
-public final class GoogleDriveConstants implements FileStorageConstants {
+public class GoogleCalendarSubscribeTest extends AbstractSubscriptionTest {
 
     /**
-     * Initializes a new {@link GoogleDriveConstants}.
+     * Initializes a new {@link GoogleCalendarSubscribeTest}.
+     * @param name
      */
-    private GoogleDriveConstants() {
-        super();
+    public GoogleCalendarSubscribeTest(String name) {
+        super(name);
     }
 
-    /**
-     * The identifier for Google Drive file storage service.
-     */
-    public static final String ID = "com.openexchange.file.storage.google_drive";
+    public void testGoogleCalendar() throws IOException, SAXException, InterruptedException {
+        HttpUnitOptions.setScriptingEnabled(true);
+        WebConversation wc = new WebConversation();
+        ClientProperties cp = wc.getClientProperties();
+        HttpUnitOptions.setJavaScriptOptimizationLevel(-2);
+        cp.setUserAgent("Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0");
+        WebRequest     req = new GetMethodWebRequest("");
+        WebResponse   resp = wc.getResponse( req );
+        WebForm form1 = resp.getForms()[0];
+        form1.setParameter("Email", "");
+        form1.setParameter("Passwd", "");
+        WebResponse resp2 = form1.submit();
+        WebForm form2 = resp2.getForms()[0];
+        form2.getButtonWithID("submit_approve_access").removeAttribute("disabled");;
+        form2.getButtonWithID("submit_approve_access").click();
+        WebResponse resp3 = form2.submit();
+    }
 
-    /**
-     * The special MIME type marking a file as a directory.
-     * <p>
-     * A folder is a file with the MIME type <code>application/vnd.google-apps.folder</code> and with no extension.
-     */
-    public static final String MIME_TYPE_DIRECTORY = "application/vnd.google-apps.folder";
-
-    // -------------------------------------------------------------------------------------------------------------------
-
-    /**
-     * The query string for selecting only files: <code>"mimeType != 'application/vnd.google-apps.folder'"</code>
-     */
-    public static final String QUERY_STRING_FILES_ONLY = "mimeType != '" + MIME_TYPE_DIRECTORY + "'";
-
-    /**
-     * The query string for selecting only files: <code>"mimeType != 'application/vnd.google-apps.folder' and trashed=false"</code>
-     */
-    public static final String QUERY_STRING_FILES_ONLY_EXCLUDING_TRASH = "mimeType != '" + MIME_TYPE_DIRECTORY + "' and trashed=false";
-
-    /**
-     * The query string for selecting only directories: <code>"mimeType = 'application/vnd.google-apps.folder'"</code>
-     */
-    public static final String QUERY_STRING_DIRECTORIES_ONLY = "mimeType = '" + MIME_TYPE_DIRECTORY + "'";
-
-    /**
-     * The query string for selecting only directories: <code>"mimeType = 'application/vnd.google-apps.folder' and trashed=false"</code>
-     */
-    public static final String QUERY_STRING_DIRECTORIES_ONLY_EXCLUDING_TRASH = "mimeType = '" + MIME_TYPE_DIRECTORY + "' and trashed=false";
+    private String authUrl() {
+        StringBuilder sb = new StringBuilder();
+        return sb.toString();
+    }
 
 }

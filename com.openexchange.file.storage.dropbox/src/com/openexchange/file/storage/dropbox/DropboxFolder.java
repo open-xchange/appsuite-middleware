@@ -139,7 +139,10 @@ public final class DropboxFolder extends DefaultFileStorageFolder implements Typ
                 {
                     final String modified = entry.modified;
                     if (null != modified) {
-                        final Date date = RESTUtility.parseDate(modified);
+                        final Date date;
+                        synchronized (RESTUtility.class) {
+                            date = RESTUtility.parseDate(modified);
+                        }
                         creationDate = new Date(date.getTime());
                         lastModifiedDate = new Date(date.getTime());
                     }

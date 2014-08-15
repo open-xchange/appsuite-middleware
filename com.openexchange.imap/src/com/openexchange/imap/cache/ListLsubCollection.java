@@ -571,9 +571,13 @@ final class ListLsubCollection {
                              */
                             final String parentFullName = fullName.substring(0, pos);
                             final ListLsubEntryImpl parent = listMap.get(parentFullName);
-                            {
+                            if (null != parent) {
                                 lle.setParent(parent);
                                 parent.addChild(lle);
+                            } else {
+                                LOG.warn("Found no parent for {} using IMAP account {}", parentFullName, imapStore.toString());
+                                lle.setParent(rootEntry);
+                                rootEntry.addChild(lle);
                             }
                         } else {
                             /*
