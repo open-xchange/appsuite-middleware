@@ -551,11 +551,15 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 throw InfostoreExceptionCodes.NO_CREATE_PERMISSION.create();
             }
 
-            com.openexchange.file.storage.Quota storageQuota = getFileQuota(session);
-            long limit = storageQuota.getLimit();
-            long usage = storageQuota.getUsage();
-            if (limit > 0 && usage >= limit) {
-                throw QuotaExceptionCodes.QUOTA_EXCEEDED_FILES.create(usage, limit);
+            {
+                com.openexchange.file.storage.Quota storageQuota = getFileQuota(session);
+                long limit = storageQuota.getLimit();
+                if (limit > 0) {
+                    long usage = storageQuota.getUsage();
+                    if (usage >= limit) {
+                        throw QuotaExceptionCodes.QUOTA_EXCEEDED_FILES.create(Long.valueOf(usage), Long.valueOf(limit));
+                    }
+                }
             }
 
             setDefaults(document);

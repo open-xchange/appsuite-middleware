@@ -49,13 +49,14 @@
 
 package com.openexchange.realtime.packet;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.junit.Test;
+import com.google.common.base.Optional;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.exception.RealtimeExceptionFactory;
@@ -93,7 +94,7 @@ public class PresenceTest {
         assertEquals(0, initialPresence.getPriority());
         assertEquals(Type.NONE, initialPresence.getType());
         assertEquals(realtimeException, initialPresence.getError());
-        assertEquals(1, initialPresence.getPayloadTrees().size());
+        assertEquals(4, initialPresence.getPayloadTrees().size());
     }
 
     @Test
@@ -163,6 +164,32 @@ public class PresenceTest {
     private Object getFirstTreeRootData(Collection<PayloadTree> trees) {
         List<PayloadTree> payloads = new ArrayList<PayloadTree>(trees);
         return payloads.get(0).getRoot().getData();
+    }
+
+    @Test
+    public void testInitialPresencePayloads() {
+        Presence presence = new Presence();
+        Optional<Byte> priorityOpt = presence.getSinglePayload(Presence.PRIORITY_PATH, Byte.class);
+        assertEquals(0, priorityOpt.get().byteValue());
+
+        Optional<String> messageOpt = presence.getSinglePayload(Presence.MESSAGE_PATH, String.class);
+        assertTrue(Strings.isEmpty(messageOpt.get()));
+
+        Optional<PresenceState> statusOpt = presence.getSinglePayload(Presence.STATUS_PATH, PresenceState.class);
+        assertEquals(PresenceState.ONLINE, statusOpt.get());
+
+        assertEquals(Optional.absent(), presence.getSinglePayload(Presence.ERROR_PATH, RealtimeException.class));
+    }
+
+    @Test
+    public void testMessageRemoval() {
+        Presence presence = new Presence();
+
+        Optional<String> messageOpt = presence.getSinglePayload(Presence.MESSAGE_PATH, String.class);
+        assertTrue(Strings.isEmpty(messageOpt.get()));
+
+        presence.setMessage(null);
+        assertEquals(Optional.absent(), presence.getSinglePayload(Presence.MESSAGE_PATH, String.class));
     }
 
 }

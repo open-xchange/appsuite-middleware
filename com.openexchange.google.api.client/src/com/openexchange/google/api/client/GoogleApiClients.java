@@ -59,6 +59,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.google.api.client.services.Services;
 import com.openexchange.java.Strings;
@@ -153,27 +154,182 @@ public class GoogleApiClients {
     }
 
     /**
+     * Gets the denoted Google OAuth account.
+     * <p>
+     * Validates expiry of current access token and requests a new one if less than 5 minutes to live
+     *
+     * @param accountId The account identifier
+     * @param session The session
+     * @return The Google OAuth account
+     * @throws OXException If default Google OAuth account cannot be returned
+     */
+    public static OAuthAccount getGoogleAccount(int accountId, Session session) throws OXException {
+        return getGoogleAccount(accountId, session, true);
+    }
+
+    /**
+     * Gets the denoted Google OAuth account.
+     * <p>
+     * Optionally validates expiry of current access token and requests a new one if less than 5 minutes to live
+     *
+     * @param accountId The account identifier
+     * @param session The session
+     * @param reacquireIfExpired <code>true</code> to re-acquire a new access token, if existing one is about to expire; otherwise <code>false</code>
+     * @return The Google OAuth account
+     * @throws OXException If default Google OAuth account cannot be returned
+     */
+    public static OAuthAccount getGoogleAccount(int accountId, Session session, final boolean reacquireIfExpired) throws OXException {
+        final OAuthService oAuthService = Services.optService(OAuthService.class);
+        if (null == oAuthService) {
+            throw ServiceExceptionCode.absentService(OAuthService.class);
+        }
+
+        // Get default Google account
+        OAuthAccount googleAccount = oAuthService.getAccount(accountId, session, session.getUserId(), session.getContextId());
+
+        if (reacquireIfExpired) {
+            // Create Scribe Google OAuth service
+            final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(Google2v2Api.class);
+            serviceBuilder.apiKey(googleAccount.getMetaData().getAPIKey(session)).apiSecret(googleAccount.getMetaData().getAPISecret(session));
+            Google2v2Api.GoogleOAuth2Service scribeOAuthService = (Google2v2Api.GoogleOAuth2Service) serviceBuilder.build();
+
+            // Check expiry
+            int expiry = scribeOAuthService.getExpiry(googleAccount.getToken());
+            if (expiry < 300) {
+                // Less than 5 minutes to live -> refresh token!
+                String refreshToken = googleAccount.getSecret();
+                Token accessToken = scribeOAuthService.getAccessToken(new Token(googleAccount.getToken(), googleAccount.getSecret()), null);
+                if (!Strings.isEmpty(accessToken.getSecret())) {
+                    refreshToken = accessToken.getSecret();
+                }
+                // Update account
+                Map<String, Object> arguments = new HashMap<String, Object>(3);
+                arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(accessToken.getToken(), refreshToken));
+                arguments.put(OAuthConstants.ARGUMENT_SESSION, session);
+                oAuthService.updateAccount(accountId, arguments, session.getUserId(), session.getContextId());
+
+                // Reload
+                googleAccount = oAuthService.getAccount(accountId, session, session.getUserId(), session.getContextId());
+            }
+        }
+
+        return googleAccount;
+    }
+
+    /**
+     * Gets the expiry (in seconds) for given Google OAuth account
+     *
+     * @param googleAccount The Google OAuth account
+     * @param session The associated session
+     * @return The expiry in seconds
+     * @throws OXException If expiry cannot be returned
+     */
+    public static long getGoogleAccountExpiry(OAuthAccount googleAccount, Session session) throws OXException {
+        if (null == googleAccount) {
+            return -1L;
+        }
+
+        // Create Scribe Google OAuth service
+        final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(Google2v2Api.class);
+        serviceBuilder.apiKey(googleAccount.getMetaData().getAPIKey(session)).apiSecret(googleAccount.getMetaData().getAPISecret(session));
+        Google2v2Api.GoogleOAuth2Service scribeOAuthService = (Google2v2Api.GoogleOAuth2Service) serviceBuilder.build();
+
+        // Check expiry
+        int expiry = scribeOAuthService.getExpiry(googleAccount.getToken());
+        return expiry;
+    }
+
+    /**
+     * Gets a non-expired candidate for given Google OAuth account
+     *
+     * @param googleAccount The Google OAuth account to check
+     * @param session The associated session
+     * @return The non-expired candidate or <code>null</code> if given account appears to have enough time left
+     * @throws OXException If a non-expired candidate cannot be returned
+     */
+    public static OAuthAccount ensureNonExpiredGoogleAccount(OAuthAccount googleAccount, Session session) throws OXException {
+        if (null == googleAccount) {
+            return googleAccount;
+        }
+
+        // Get OAuth service
+        final OAuthService oAuthService = Services.optService(OAuthService.class);
+        if (null == oAuthService) {
+            throw ServiceExceptionCode.absentService(OAuthService.class);
+        }
+
+        // Create Scribe Google OAuth service
+        final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(Google2v2Api.class);
+        serviceBuilder.apiKey(googleAccount.getMetaData().getAPIKey(session)).apiSecret(googleAccount.getMetaData().getAPISecret(session));
+        Google2v2Api.GoogleOAuth2Service scribeOAuthService = (Google2v2Api.GoogleOAuth2Service) serviceBuilder.build();
+
+        // Check expiry
+        int expiry = scribeOAuthService.getExpiry(googleAccount.getToken());
+        if (expiry >= 300) {
+            // More than 5 minutes to live
+            return null;
+        }
+
+        // Less than 5 minutes to live -> refresh token!
+        String refreshToken = googleAccount.getSecret();
+        Token accessToken = scribeOAuthService.getAccessToken(new Token(googleAccount.getToken(), googleAccount.getSecret()), null);
+        if (!Strings.isEmpty(accessToken.getSecret())) {
+            refreshToken = accessToken.getSecret();
+        }
+        // Update account
+        int accountId = googleAccount.getId();
+        Map<String, Object> arguments = new HashMap<String, Object>(3);
+        arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(accessToken.getToken(), refreshToken));
+        arguments.put(OAuthConstants.ARGUMENT_SESSION, session);
+        oAuthService.updateAccount(accountId, arguments, session.getUserId(), session.getContextId());
+
+        // Reload
+        return oAuthService.getAccount(accountId, session, session.getUserId(), session.getContextId());
+    }
+
+    /**
      * Gets the Google credentials from default OAuth account.
      *
      * @param session The associated session
      * @return The Google credentials from default OAuth account
      * @throws OXException If Google credentials cannot be returned
      */
-    public static GoogleCredential getCredentials(final Session session) throws OXException {
-        try {
-            final OAuthAccount defaultAccount = getDefaultGoogleAccount(session);
+    public static GoogleCredential getCredentials(Session session) throws OXException {
+        OAuthAccount defaultAccount = getDefaultGoogleAccount(session);
+        return getCredentials(defaultAccount, session);
+    }
 
+    /**
+     * Gets the Google credentials from default OAuth account.
+     *
+     * @param googleOAuthAccount The Google OAuth account
+     * @param session The associated session
+     * @return The Google credentials from given OAuth account
+     * @throws OXException If Google credentials cannot be returned
+     */
+    public static GoogleCredential getCredentials(OAuthAccount googleOAuthAccount, Session session) throws OXException {
+        try {
             // Initialize transport
             NetHttpTransport transport = new NetHttpTransport.Builder().doNotValidateCertificate().build();
 
             // Build credentials
             return new GoogleCredential.Builder()
-            .setClientSecrets(defaultAccount.getMetaData().getAPIKey(session), defaultAccount.getMetaData().getAPISecret(session))
+            .setClientSecrets(googleOAuthAccount.getMetaData().getAPIKey(session), googleOAuthAccount.getMetaData().getAPISecret(session))
             .setJsonFactory(JSON_FACTORY).setTransport(transport).build()
-            .setRefreshToken(defaultAccount.getSecret()).setAccessToken(defaultAccount.getToken());
+            .setRefreshToken(googleOAuthAccount.getSecret()).setAccessToken(googleOAuthAccount.getToken());
         } catch (GeneralSecurityException e) {
             throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    /**
+     * Gets the product name associated with registered Google application
+     *
+     * @return The product name
+     */
+    public static String getGoogleProductName() {
+        ConfigurationService configService = Services.getService(ConfigurationService.class);
+        return null == configService ? "" : configService.getProperty("com.openexchange.oauth.google.productName", "");
     }
 
 }

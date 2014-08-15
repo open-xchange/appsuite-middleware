@@ -58,15 +58,14 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
-import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.google.api.client.GoogleApiClients;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
@@ -100,18 +99,20 @@ public abstract class AbstractGoogleTest extends TestCase {
     private static final String GOOGLE_API_KEY = "";
     private static final String GOOGLE_API_SECRET = "";
     private static final String ACCESS_TOKEN = "";
-    
+    private static final String REFRESH_TOKEN = "";
+
     private Subscription subscription;
     private SubscribeService subscribeService;
     private OAuthServiceMetaData oasdm;
     private MockServiceLookup sl;
+
 
     @Override
     protected void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
         //Mocks
-        ConfigurationService cs = new MockConfigurationService(GOOGLE_API_KEY, GOOGLE_API_SECRET, REDIRECT_URL);
+        ConfigurationService cs = new MockConfigurationService(GOOGLE_API_KEY, GOOGLE_API_SECRET, REDIRECT_URL, 10000, 10000);
         ThreadPoolService tps = new SimThreadPoolService();
 
         FolderUpdaterRegistry fur = new MockFolderUpdaterRegistry<Object>(new MockFolderUpdateService());
@@ -121,6 +122,7 @@ public abstract class AbstractGoogleTest extends TestCase {
         SimServerSession simServer = new SimServerSession(1, 1);
         subscription = new Subscription();
         subscription.setSession(simServer);
+        subscription.setFolderId(2);
 
         prepareMockitoMocks();
 
@@ -143,10 +145,12 @@ public abstract class AbstractGoogleTest extends TestCase {
         NetHttpTransport transport = new NetHttpTransport.Builder().doNotValidateCertificate().build();
         JsonFactory jsonFactory = new JacksonFactory();
 
+        GoogleClientSecrets gcs = new GoogleClientSecrets();
         GoogleCredential credential = new GoogleCredential.Builder()
         .setTransport(transport)
-        .setJsonFactory(jsonFactory).build();
-        credential.setAccessToken(ACCESS_TOKEN).setRefreshToken(null);
+        .setJsonFactory(jsonFactory).setClientSecrets(GOOGLE_API_KEY, GOOGLE_API_SECRET).build();
+        credential.setRefreshToken(REFRESH_TOKEN);
+        credential.setAccessToken(ACCESS_TOKEN);
 
         PowerMockito.mockStatic(GoogleApiClients.class);
         PowerMockito.doReturn(credential).when(GoogleApiClients.class, "getCredentials", Matchers.any(Session.class));

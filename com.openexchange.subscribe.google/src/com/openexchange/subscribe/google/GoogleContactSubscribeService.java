@@ -214,7 +214,7 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
 
     // -------------------------------------------------------------------------------------------------------------------------- //
 
-    private static final int PAGE_SIZE = 25;
+    private final int pageSize;
     private static final URL CONTACT_URL;
     private static final URL GROUP_URL;
 
@@ -242,6 +242,8 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
         super(googleMetaData, services);
         source = initSS(FolderObject.CONTACT, "contact");
         parser = new ContactEntryParser();
+        final ConfigurationService configService = services.getService(ConfigurationService.class);
+        pageSize = configService.getIntProperty("com.openexchange.subscribe.google.contact.pageSize", 25);
     }
 
     @Override
@@ -261,7 +263,7 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
             final ContactsService contactsService;
             {
                 GoogleCredential googleCreds = GoogleApiClients.getCredentials(subscription.getSession());
-                String productName = services.getService(ConfigurationService.class).getProperty("com.openexchange.oauth.google.productName", "");
+                String productName = GoogleApiClients.getGoogleProductName();
                 contactsService = new ContactsService(productName);
                 contactsService.setOAuth2Credentials(googleCreds);
             }
@@ -272,7 +274,6 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
             contactQuery.setStringCustomParameter("sortorder", "descending");
 
             // First page with this thread
-            final int pageSize = PAGE_SIZE;
             int page = 1;
             adjustQuery(contactQuery, page, pageSize);
 

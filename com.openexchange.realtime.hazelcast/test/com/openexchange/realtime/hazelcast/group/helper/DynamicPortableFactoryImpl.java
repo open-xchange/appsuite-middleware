@@ -50,8 +50,11 @@
 
 package com.openexchange.realtime.hazelcast.group.helper;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import com.hazelcast.nio.serialization.ClassDefinition;
 import com.hazelcast.nio.serialization.Portable;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.hazelcast.serialization.DynamicPortableFactory;
@@ -118,6 +121,19 @@ public class DynamicPortableFactoryImpl implements DynamicPortableFactory {
                  factory.getClassId(), factory.getClass().getName());
          }
          return removedRegistration;
+    }
+
+    @Override
+    public Collection<ClassDefinition> getClassDefinitions() {
+        Collection<CustomPortableFactory> registeredFactories = factories.values();
+        ArrayList<ClassDefinition> classDefinitions = new ArrayList<ClassDefinition>(registeredFactories.size());
+        for (CustomPortableFactory factory : registeredFactories) {
+            ClassDefinition classDefinition = factory.getClassDefinition();
+            if(classDefinition != null) {
+                classDefinitions.add(classDefinition);
+            }
+        }
+        return classDefinitions;
     }
 
 }

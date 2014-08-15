@@ -871,6 +871,8 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
             fieldsToSkip.add(Field.ID);
             fieldsToSkip.add(Field.LAST_MODIFIED);
             fieldsToSkip.add(Field.CREATED);
+            fieldsToSkip.add(Field.VERSION);
+            fieldsToSkip.add(Field.VERSION_COMMENT);
 
             final Set<Field> toCopy = EnumSet.complementOf(EnumSet.copyOf(fieldsToSkip));
 

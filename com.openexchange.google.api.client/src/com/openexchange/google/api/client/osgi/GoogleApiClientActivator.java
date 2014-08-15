@@ -49,6 +49,7 @@
 
 package com.openexchange.google.api.client.osgi;
 
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.google.api.client.services.Services;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -79,6 +80,7 @@ public final class GoogleApiClientActivator extends HousekeepingActivator {
         Services.setServiceLookup(this);
 
         trackService(OAuthService.class);
+        trackService(ConfigurationService.class);
         openTrackers();
     }
 

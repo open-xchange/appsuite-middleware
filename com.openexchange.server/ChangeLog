@@ -1,3 +1,7 @@
+* 2014-08-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 34035: Properly acquire message's source
+
 * 2014-08-14 - martin.herfurth@open-xchange.com
 
  - Fix for bug 34041: Ignore additional elements in autoconfig xml.
@@ -8,11 +12,11 @@
 
 * 2014-08-13 - tobias.friedrich@open-xchange.com
 
- - Fix for bug 34014: Adjusted example configuration to match corresponding comments 
+ - Fix for bug 34014: Adjusted example configuration to match corresponding comments
 
 * 2014-08-12 - tobias.friedrich@open-xchange.com
 
- - Fix for bug 34006: Corrected hashCode() calculation for contacts 
+ - Fix for bug 34006: Corrected hashCode() calculation for contacts
 
 * 2014-08-08 - jan.bauerdick@open-xchange.com
 
@@ -55,7 +59,7 @@
 * 2014-08-04 - marc.arens@open-xchange.com
 
  - Fix for bug 33697: Respect destination folder for folder owners
- 
+
 * 2014-08-01 - thorben.betten@open-xchange.com
 
  - Fix for bug 33857: Do not log a warning in case Content-Type misses any charset information; just detect it and continue

@@ -70,6 +70,7 @@ import com.openexchange.realtime.hazelcast.directory.HazelcastResourceDirectory;
 import com.openexchange.realtime.hazelcast.management.GlobalRealtimeCleanupMBean;
 import com.openexchange.realtime.hazelcast.management.GlobalRealtimeCleanupManagement;
 import com.openexchange.realtime.hazelcast.osgi.Services;
+import com.openexchange.realtime.hazelcast.serialization.cleanup.PortableCleanupDispatcher;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.util.IDMap;
 
@@ -126,7 +127,7 @@ public class GlobalRealtimeCleanupImpl implements GlobalRealtimeCleanup, Managem
                 LOG.warn("Couldn't remove local member from cluster members.");
             }
             if(!clusterMembers.isEmpty()) {
-                hazelcastInstance.getExecutorService("default").submitToMembers(new CleanupDispatcher(id), clusterMembers);
+                hazelcastInstance.getExecutorService("default").submitToMembers(new PortableCleanupDispatcher(id), clusterMembers);
             } else {
                 LOG.debug("No other cluster members besides the local member. No further clean up necessary.");
             }
@@ -187,7 +188,7 @@ public class GlobalRealtimeCleanupImpl implements GlobalRealtimeCleanup, Managem
                 LOG.warn("Couldn't remove local member from cluster members.");
             }
             if (!clusterMembers.isEmpty()) {
-                hazelcastInstance.getExecutorService("default").submitToMembers(new CleanupDispatcher(id), clusterMembers);
+                hazelcastInstance.getExecutorService("default").submitToMembers(new PortableCleanupDispatcher(id), clusterMembers);
             } else {
                 LOG.debug("No other cluster members besides the local member. No further clean up necessary.");
             }

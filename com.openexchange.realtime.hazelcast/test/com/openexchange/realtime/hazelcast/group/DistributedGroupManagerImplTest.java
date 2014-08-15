@@ -82,8 +82,8 @@ import com.openexchange.realtime.hazelcast.group.helper.DynamicPortableFactoryIm
 import com.openexchange.realtime.hazelcast.group.helper.MessageDispatcherMock;
 import com.openexchange.realtime.hazelcast.group.helper.SimServiceLookup;
 import com.openexchange.realtime.hazelcast.osgi.Services;
-import com.openexchange.realtime.hazelcast.serialization.PortableIDFactory;
-import com.openexchange.realtime.hazelcast.serialization.PortableSelectorChoiceFactory;
+import com.openexchange.realtime.hazelcast.serialization.group.PortableSelectorChoiceFactory;
+import com.openexchange.realtime.hazelcast.serialization.packet.PortableIDFactory;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.Duration;

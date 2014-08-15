@@ -144,9 +144,11 @@ public final class DropboxFile extends DefaultFile {
                 if (set.contains(Field.FILE_SIZE)) {
                     setFileSize(entry.bytes);
                 }
+                /*
                 if (set.contains(Field.URL)) {
                     setURL(entry.path);
                 }
+                */
                 if (set.contains(Field.COLOR_LABEL)) {
                     setColorLabel(0);
                 }

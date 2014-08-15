@@ -70,14 +70,16 @@ import com.openexchange.exception.OXException;
  * @since v7.6.1
  */
 public class MockConfigurationService implements ConfigurationService{
-    private final Map<String,String> props;
+    private final Map<String, Object> props;
 
-    public MockConfigurationService(String apiKey, String apiSecret, String redirectUrl){
-        props = new HashMap<String,String>();
+    public MockConfigurationService(String apiKey, String apiSecret, String redirectUrl, int pageSizeCal, int pageSizeContact){
+        props = new HashMap<String,Object>();
         props.put("com.openexchange.oauth.google.apiKey", apiSecret);
         props.put("com.openexchange.oauth.google.apiSecret", apiKey);
         props.put("com.openexchange.oauth.google.productName", apiKey);
         props.put("com.openexchange.oauth.google.redirectUrl", redirectUrl);
+        props.put("com.openexchange.subscribe.google.calendar.pageSize", pageSizeCal);
+        props.put("com.openexchange.subscribe.google.contact.pageSize", pageSizeContact);
     }
 
     @Override
@@ -87,13 +89,13 @@ public class MockConfigurationService implements ConfigurationService{
 
     @Override
     public String getProperty(String name) {
-        return props.get(name);
+        return (String) props.get(name);
     }
 
     @Override
     public String getProperty(String name, String defaultValue) {
         if(props.containsKey(name)) {
-            return props.get(name);
+            return (String) props.get(name);
         }
         return defaultValue;
     }
@@ -159,7 +161,10 @@ public class MockConfigurationService implements ConfigurationService{
 
     @Override
     public int getIntProperty(String name, int defaultValue) {
-        return 0;
+        if(props.containsKey(name)) {
+            return (Integer) props.get(name);
+        }
+        return defaultValue;
     }
 
     @Override
