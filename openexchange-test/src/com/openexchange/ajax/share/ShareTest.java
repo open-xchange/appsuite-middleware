@@ -96,7 +96,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
         FolderObject.CONTACT, FolderObject.INFOSTORE, FolderObject.TASK, FolderObject.CALENDAR
     };
 
-    private static final Random random = new Random();
+    protected static final Random random = new Random();
 
     private Map<Integer, FolderObject> foldersToDelete;
 
@@ -126,8 +126,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @throws Exception
      */
     protected FolderObject insertSharedFolder(EnumAPI api, int module, int parent, OCLGuestPermission guestPermission) throws Exception {
-        FolderObject sharedFolder = Create.createPrivateFolder(
-            UUIDs.getUnformattedString(UUID.randomUUID()), module, client.getValues().getUserId(), guestPermission);
+        FolderObject sharedFolder = Create.createPrivateFolder(randomUID(), module, client.getValues().getUserId(), guestPermission);
         sharedFolder.setParentFolderID(parent);
         return insertFolder(api, sharedFolder);
     }
@@ -142,8 +141,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @throws Exception
      */
     protected FolderObject insertPrivateFolder(EnumAPI api, int module, int parent) throws Exception {
-        FolderObject privateFolder = Create.createPrivateFolder(
-            UUIDs.getUnformattedString(UUID.randomUUID()), module, client.getValues().getUserId());
+        FolderObject privateFolder = Create.createPrivateFolder(randomUID(), module, client.getValues().getUserId());
         privateFolder.setParentFolderID(parent);
         return insertFolder(api, privateFolder);
     }
@@ -181,7 +179,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
         return getResponse.getFolder();
     }
 
-    private FolderObject insertFolder(EnumAPI api, FolderObject folder) throws Exception {
+    protected FolderObject insertFolder(EnumAPI api, FolderObject folder) throws Exception {
         InsertResponse insertResponse = client.execute(new InsertRequest(api, folder));
         insertResponse.fillObject(folder);
         remember(folder);
@@ -262,6 +260,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
     protected static void checkShare(OCLGuestPermission expected, ParsedShare actual) {
         assertNotNull("No share", actual);
         assertEquals("Authentication mode wrong", expected.getAuthenticationMode(), actual.getAuthentication());
+        assertEquals("Expiry date wrong", expected.getExpires(), actual.getExpires());
         if (AuthenticationMode.ANONYMOUS != expected.getAuthenticationMode()) {
             assertEquals("E-Mail address wrong", expected.getEmailAddress(), actual.getGuestMailAddress());
 //TODO            assertEquals("Display name wrong", guestPermission.getDisplayName(), share.getGuestDisplayName());
@@ -330,7 +329,10 @@ public abstract class ShareTest extends AbstractAJAXSession {
             Assert.fail("No default folder for moduel: " + module);
             return 0;
         }
+    }
 
+    protected static String randomUID() {
+        return UUIDs.getUnformattedString(UUID.randomUUID());
     }
 
     protected static int randomModule() {
