@@ -61,19 +61,60 @@ import com.openexchange.share.Share;
  * @since v7.6.1
  */
 public interface ShareMBean {
-    
+
     public final static String DOMAIN = "com.openexchange.share";
-    
+
+    /**
+     * Lists all shares in supplied context.
+     *
+     * @param contextId The contextId
+     * @return The shares
+     * @throws OXException On error
+     */
     List<Share> listShares(int contextId) throws OXException;
-    
+
+    /**
+     * Lists all shares in supplied context created by supplied user.
+     *
+     * @param contextId The contextId
+     * @param userId The userId
+     * @return The shares
+     * @throws OXException On error
+     */
     List<Share> listShares(int contextId, int userId) throws OXException;
-    
+
+    /**
+     * Removes all shares identified by supplied tokens.
+     *
+     * @param tokens The tokens
+     * @throws OXException On error
+     */
     void removeShares(String[] tokens) throws OXException;
-    
+
+    /**
+     * Removes all shares in supplied context identified by supplied tokens
+     *
+     * @param tokens The tokens
+     * @param contextId The contextId
+     * @throws OXException On error
+     */
     void removeShares(String[] tokens, int contextId) throws OXException;
-    
+
+    /**
+     * Remove all shares from supplied context.
+     *
+     * @param contextId The contextId
+     * @throws OXException On error
+     */
     void removeShares(int contextId) throws OXException;
-    
+
+    /**
+     * Removes all shares in supplied context created by supplied user.
+     *
+     * @param contextId The contextId
+     * @param userId The userId
+     * @throws OXException On error
+     */
     void removeShares(int contextId, int userId) throws OXException;
 
 }
