@@ -162,7 +162,7 @@ public final class GoogleDriveFolder extends DefaultFileStorageFolder implements
     private boolean hasSubfolder(String folderId, Drive drive) throws IOException {
         Drive.Children.List list = drive.children().list(folderId);
         list.setQ(QUERY_STRING_DIRECTORIES_ONLY);
-        return !list.execute().isEmpty();
+        return !list.execute().getItems().isEmpty();
     }
 
 }

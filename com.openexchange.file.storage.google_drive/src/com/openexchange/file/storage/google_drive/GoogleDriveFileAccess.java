@@ -430,7 +430,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             boolean hardDelete = isTrashed(fid, drive);
 
             ChildList childList = list.execute();
-            if (!childList.isEmpty()) {
+            if (!childList.getItems().isEmpty()) {
                 for (ChildReference child : childList.getItems()) {
                     if (hardDelete) {
                         drive.files().delete(child.getId()).execute();
@@ -443,7 +443,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 while (!isEmpty(nextPageToken)) {
                     list.setPageToken(nextPageToken);
                     childList = list.execute();
-                    if (!childList.isEmpty()) {
+                    if (!childList.getItems().isEmpty()) {
                         for (ChildReference child : childList.getItems()) {
                             if (hardDelete) {
                                 drive.files().delete(child.getId()).execute();
@@ -558,7 +558,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             ChildList childList = list.execute();
 
             List<File> files = new LinkedList<File>();
-            if (!childList.isEmpty()) {
+            if (!childList.getItems().isEmpty()) {
                 for (ChildReference child : childList.getItems()) {
                     String fileId = child.getId();
                     files.add(new GoogleDriveFile(folderId, fileId, userId, rootFolderId).parseGoogleDriveFile(drive.files().get(fileId).execute()));
@@ -568,7 +568,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 while (!isEmpty(nextPageToken)) {
                     list.setPageToken(nextPageToken);
                     childList = list.execute();
-                    if (!childList.isEmpty()) {
+                    if (!childList.getItems().isEmpty()) {
                         for (ChildReference child : childList.getItems()) {
                             String fileId = child.getId();
                             files.add(new GoogleDriveFile(folderId, fileId, userId, rootFolderId).parseGoogleDriveFile(drive.files().get(fileId).execute()));
@@ -607,7 +607,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             ChildList childList = list.execute();
 
             List<File> files = new LinkedList<File>();
-            if (!childList.isEmpty()) {
+            if (!childList.getItems().isEmpty()) {
                 for (ChildReference child : childList.getItems()) {
                     String fileId = child.getId();
                     files.add(new GoogleDriveFile(folderId, fileId, userId, rootFolderId).parseGoogleDriveFile(drive.files().get(fileId).execute()));
@@ -617,7 +617,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 while (!isEmpty(nextPageToken)) {
                     list.setPageToken(nextPageToken);
                     childList = list.execute();
-                    if (!childList.isEmpty()) {
+                    if (!childList.getItems().isEmpty()) {
                         for (ChildReference child : childList.getItems()) {
                             String fileId = child.getId();
                             files.add(new GoogleDriveFile(folderId, fileId, userId, rootFolderId).parseGoogleDriveFile(drive.files().get(fileId).execute()));
@@ -737,7 +737,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                     list.setQ(QUERY_STRING_FILES_ONLY_EXCLUDING_TRASH);
 
                     FileList fileList = list.execute();
-                    if (!fileList.isEmpty()) {
+                    if (!fileList.getItems().isEmpty()) {
                         for (com.google.api.services.drive.model.File file : fileList.getItems()) {
                             files.add(new GoogleDriveFile(folderId, file.getId(), userId, rootFolderId).parseGoogleDriveFile(file));
                         }
@@ -746,7 +746,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                         while (!isEmpty(nextPageToken)) {
                             list.setPageToken(nextPageToken);
                             fileList = list.execute();
-                            if (!fileList.isEmpty()) {
+                            if (!fileList.getItems().isEmpty()) {
                                 for (com.google.api.services.drive.model.File file : fileList.getItems()) {
                                     files.add(new GoogleDriveFile(folderId, file.getId(), userId, rootFolderId).parseGoogleDriveFile(file));
                                 }
@@ -787,7 +787,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 list.setQ(new StringBuilder().append("title contains '").append(pattern).append("' and ").append(QUERY_STRING_FILES_ONLY).toString());
 
                 ChildList fileList = list.execute();
-                if (!fileList.isEmpty()) {
+                if (!fileList.getItems().isEmpty()) {
                     for (ChildReference childRef : fileList.getItems()) {
                         String fileId = childRef.getId();
                         files.add(new GoogleDriveFile(folderId, fileId, userId, rootFolderId).parseGoogleDriveFile(drive.files().get(fileId).execute()));
@@ -797,7 +797,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                     while (!isEmpty(nextPageToken)) {
                         list.setPageToken(nextPageToken);
                         fileList = list.execute();
-                        if (!fileList.isEmpty()) {
+                        if (!fileList.getItems().isEmpty()) {
                             for (ChildReference childRef : fileList.getItems()) {
                                 String fileId = childRef.getId();
                                 files.add(new GoogleDriveFile(folderId, fileId, userId, rootFolderId).parseGoogleDriveFile(drive.files().get(fileId).execute()));

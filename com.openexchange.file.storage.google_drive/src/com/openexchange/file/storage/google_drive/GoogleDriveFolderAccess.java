@@ -165,7 +165,7 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
             list.setQ(QUERY_STRING_DIRECTORIES_ONLY);
             ChildList childList = list.execute();
 
-            if (childList.isEmpty()) {
+            if (childList.getItems().isEmpty()) {
                 return new FileStorageFolder[0];
             }
 
@@ -178,7 +178,7 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
             while (!isEmpty(nextPageToken)) {
                 list.setPageToken(nextPageToken);
                 childList = list.execute();
-                if (!childList.isEmpty()) {
+                if (!childList.getItems().isEmpty()) {
                     for (ChildReference childReference : childList.getItems()) {
                         folders.add(parseGoogleDriveFolder(drive.files().get(childReference.getId()).execute(), drive));
                     }
@@ -210,7 +210,7 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
 
             Drive.Children.List list = drive.children().list(parentId);
             list.setQ("title='"+toCreate.getName()+"' and " + GoogleDriveConstants.QUERY_STRING_DIRECTORIES_ONLY_EXCLUDING_TRASH);
-            if (!list.execute().isEmpty()) {
+            if (!list.execute().getItems().isEmpty()) {
                 // Already such a folder
                 throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(toCreate.getName(), drive.files().get(parentId).execute().getTitle());
             }
@@ -254,7 +254,7 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
 
             Drive.Children.List list = drive.children().list(nfid);
             list.setQ("title='"+title+"' and " + GoogleDriveConstants.QUERY_STRING_DIRECTORIES_ONLY_EXCLUDING_TRASH);
-            if (!list.execute().isEmpty()) {
+            if (!list.execute().getItems().isEmpty()) {
                 // Already such a folder
                 throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(title, drive.files().get(nfid).execute().getTitle());
             }
@@ -286,7 +286,7 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
 
             Drive.Children.List list = drive.children().list(fid);
             list.setQ("title='"+newName+"' and " + GoogleDriveConstants.QUERY_STRING_DIRECTORIES_ONLY_EXCLUDING_TRASH);
-            if (!list.execute().isEmpty()) {
+            if (!list.execute().getItems().isEmpty()) {
                 // Already such a folder
                 throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(newName, drive.files().get(fid).execute().getTitle());
             }
@@ -352,7 +352,7 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
                 // Delete permanently
                 Drive.Children.List list = drive.children().list(fid);
                 ChildList childList = list.execute();
-                if (!childList.isEmpty()) {
+                if (!childList.getItems().isEmpty()) {
                     for (ChildReference child : childList.getItems()) {
                         drive.files().delete(child.getId()).execute();
                     }
@@ -361,7 +361,7 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
                     while (!isEmpty(nextPageToken)) {
                         list.setPageToken(nextPageToken);
                         childList = list.execute();
-                        if (!childList.isEmpty()) {
+                        if (!childList.getItems().isEmpty()) {
                             for (ChildReference child : childList.getItems()) {
                                 drive.files().delete(child.getId()).execute();
                             }
@@ -373,7 +373,7 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
                 // Move to trash
                 Drive.Children.List list = drive.children().list(fid);
                 ChildList childList = list.execute();
-                if (!childList.isEmpty()) {
+                if (!childList.getItems().isEmpty()) {
                     for (ChildReference child : childList.getItems()) {
                         drive.files().trash(child.getId()).execute();
                     }
@@ -382,7 +382,7 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
                     while (!isEmpty(nextPageToken)) {
                         list.setPageToken(nextPageToken);
                         childList = list.execute();
-                        if (!childList.isEmpty()) {
+                        if (!childList.getItems().isEmpty()) {
                             for (ChildReference child : childList.getItems()) {
                                 drive.files().trash(child.getId()).execute();
                             }
