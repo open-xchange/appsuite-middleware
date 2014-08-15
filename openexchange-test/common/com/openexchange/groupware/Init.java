@@ -120,7 +120,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folder.FolderService;
 import com.openexchange.folder.internal.FolderInitialization;
 import com.openexchange.folder.internal.FolderServiceImpl;
-import com.openexchange.folderstorage.mail.MailServiceRegistry;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.internal.GroupInit;
 import com.openexchange.group.internal.GroupServiceImpl;
@@ -159,6 +158,7 @@ import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.SimpleServiceLookup;
 import com.openexchange.server.services.I18nServices;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.SessiondInit;
@@ -762,7 +762,12 @@ public final class Init {
             final MailAccountStorageService storageService = MailAccountStorageInit.newMailAccountStorageService();
             services.put(MailAccountStorageService.class, storageService);
             TestServiceRegistry.getInstance().addService(MailAccountStorageService.class, storageService);
-            MailServiceRegistry.getServiceRegistry().addService(MailAccountStorageService.class, storageService);
+
+            {
+                SimpleServiceLookup services = new SimpleServiceLookup();
+                services.add(MailAccountStorageService.class, storageService);
+                com.openexchange.folderstorage.mail.osgi.Services.setServiceLookup(services);
+            }
 
             final UnifiedInboxManagement unifiedINBOXManagement = MailAccountStorageInit.newUnifiedINBOXManagement();
             services.put(UnifiedInboxManagement.class, unifiedINBOXManagement);

@@ -49,54 +49,70 @@
 
 package com.openexchange.folderstorage.mail.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.framework.BundleActivator;
-import org.osgi.service.event.EventAdmin;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.folderstorage.FolderStorage;
-import com.openexchange.folderstorage.mail.MailFolderStorage;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.mailaccount.UnifiedInboxManagement;
-import com.openexchange.osgi.HousekeepingActivator;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link MailFolderStorageActivator} - {@link BundleActivator Activator} for mail folder storage.
+ * {@link Services} - The static service lookup.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailFolderStorageActivator extends HousekeepingActivator {
+public final class Services {
 
     /**
-     * Initializes a new {@link MailFolderStorageActivator}.
+     * Initializes a new {@link Services}.
      */
-    public MailFolderStorageActivator() {
+    private Services() {
         super();
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MailAccountStorageService.class, UnifiedInboxManagement.class, EventAdmin.class, ConfigurationService.class };
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Sets the service lookup.
+     *
+     * @param serviceLookup The service lookup or <code>null</code>
+     */
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        try {
-            Services.setServiceLookup(this);
-            // Register folder storage
-            final Dictionary<String, String> dictionary = new Hashtable<String, String>(2);
-            dictionary.put("tree", FolderStorage.REAL_TREE_ID);
-            registerService(FolderStorage.class, new MailFolderStorage(), dictionary);
-        } catch (final Exception e) {
-            org.slf4j.LoggerFactory.getLogger(MailFolderStorageActivator.class).error("", e);
-            throw e;
+    /**
+     * Gets the service lookup.
+     *
+     * @return The service lookup or <code>null</code>
+     */
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
+    }
+
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.folderstorage.mail\" not started?");
         }
+        return serviceLookup.getService(clazz);
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
-        super.stopBundle();
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
+        }
     }
 
 }

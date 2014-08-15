@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,56 +47,64 @@
  *
  */
 
-package com.openexchange.folderstorage.mail.osgi;
+package com.openexchange.server;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.framework.BundleActivator;
-import org.osgi.service.event.EventAdmin;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.folderstorage.FolderStorage;
-import com.openexchange.folderstorage.mail.MailFolderStorage;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.mailaccount.UnifiedInboxManagement;
-import com.openexchange.osgi.HousekeepingActivator;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 
 /**
- * {@link MailFolderStorageActivator} - {@link BundleActivator Activator} for mail folder storage.
+ * {@link SimpleServiceLookup} - A simple service look-up.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.6.1
  */
-public final class MailFolderStorageActivator extends HousekeepingActivator {
+public class SimpleServiceLookup implements ServiceLookup {
+
+    private final ConcurrentMap<Class<?>, Object> services;
 
     /**
-     * Initializes a new {@link MailFolderStorageActivator}.
+     * Initializes a new {@link SimpleServiceLookup}.
      */
-    public MailFolderStorageActivator() {
+    public SimpleServiceLookup() {
         super();
+        services = new ConcurrentHashMap<Class<?>, Object>();
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MailAccountStorageService.class, UnifiedInboxManagement.class, EventAdmin.class, ConfigurationService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        try {
-            Services.setServiceLookup(this);
-            // Register folder storage
-            final Dictionary<String, String> dictionary = new Hashtable<String, String>(2);
-            dictionary.put("tree", FolderStorage.REAL_TREE_ID);
-            registerService(FolderStorage.class, new MailFolderStorage(), dictionary);
-        } catch (final Exception e) {
-            org.slf4j.LoggerFactory.getLogger(MailFolderStorageActivator.class).error("", e);
-            throw e;
+    public <S> S getService(Class<? extends S> clazz) {
+        S service = (S) services.get(clazz);
+        if (null == service) {
+            throw new IllegalStateException("Missing service " + clazz.getName());
         }
+        return service;
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
-        super.stopBundle();
+    public <S> S getOptionalService(Class<? extends S> clazz) {
+        return (S) services.get(clazz);
     }
+
+    /**
+     * Adds specified service to this service look-up (replacing any possibly existing association).
+     *
+     * @param clazz The service's class
+     * @param service The service implementation
+     */
+    public <S> void add(Class<? extends S> clazz, S service) {
+        services.put(clazz, service);
+    }
+
+    /**
+     * Removes specified service
+     *
+     * @param clazz The service's class
+     * @return The removed service implementation or <code>null</code> if there was no such service
+     */
+    public <S> S remove(Class<? extends S> clazz) {
+        return (S) services.remove(clazz);
+    }
+
+
 
 }
