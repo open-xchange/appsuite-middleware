@@ -122,7 +122,10 @@ public final class DropboxFile extends DefaultFile {
                 setVersion(entry.rev);
                 final Set<Field> set = null == fields || fields.isEmpty() ? EnumSet.allOf(Field.class) : EnumSet.copyOf(fields);
                 try {
-                    final Date date = RESTUtility.parseDate(entry.modified);
+                    final Date date;
+                    synchronized (RESTUtility.class) {
+                        date = RESTUtility.parseDate(entry.modified);
+                    }
                     if (set.contains(Field.CREATED)) {
                         setCreated(new Date(date.getTime()));
                     }
