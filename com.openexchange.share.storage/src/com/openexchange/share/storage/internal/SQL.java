@@ -160,6 +160,14 @@ public class SQL {
         stringBuilder.append("DELETE FROM share WHERE cid=? AND token");
         return appendPlaceholders(stringBuilder, length).append(';').toString();
     }
+    
+    public static final String SELECT_SHARES_BY_TOKENS_STMT(int length) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT token,module,folder,item,created,createdBy,lastModified,modifiedBy,expires,guest,auth " +
+                  "FROM share " +
+                  "WHERE cid = ? AND token");
+        return appendPlaceholders(sb, length).append(";").toString();
+    }
 
     public static final String SELECT_EXPIRED_SHARES_STMT =
         "SELECT token,cid,module,folder,item,created,createdBy,lastModified,modifiedBy,expires,guest,auth " +

@@ -68,7 +68,7 @@ import com.openexchange.share.impl.mbean.ShareMBean;
  */
 public class RemoveSharesCLT extends AbstractMBeanCLI<Void> {
 
-    private String contextId;
+    private String contextId = "-1";
 
     private String userId;
 
@@ -84,7 +84,9 @@ public class RemoveSharesCLT extends AbstractMBeanCLI<Void> {
 
     @Override
     protected void checkOptions(CommandLine cmd) {
-        contextId = cmd.getOptionValue("c");
+        if (cmd.hasOption("c")) {
+            contextId = cmd.getOptionValue("c");
+        }
         userId = cmd.getOptionValue("i");
         token = cmd.getOptionValue("t");
     }
@@ -96,12 +98,18 @@ public class RemoveSharesCLT extends AbstractMBeanCLI<Void> {
 
     @Override
     protected void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) throws MBeanException {
-        int cid;
-        try {
-            cid = Integer.parseInt(contextId);
-            authenticator.doAuthentication(login, password, cid);
-        } catch (NumberFormatException e) {
-            throw new MBeanException(e);
+        if (null == contextId || contextId.isEmpty() || "-1".equals(contextId)) {
+            //oxadminmaster required
+            authenticator.doAuthentication(login, password);
+        } else {
+            //context admin required
+            int cid;
+            try {
+                cid = Integer.parseInt(contextId);
+                authenticator.doAuthentication(login, password, cid);
+            } catch (NumberFormatException e) {
+                throw new MBeanException(e);
+            }
         }
     }
 
@@ -125,7 +133,7 @@ public class RemoveSharesCLT extends AbstractMBeanCLI<Void> {
 
     @Override
     protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        if ((null == contextId || contextId.isEmpty()) && (null == token || token.isEmpty())) {
+        if ((null == contextId || contextId.isEmpty() || "-1".equals(contextId)) && (null == token || token.isEmpty())) {
             throw new MissingOptionException("ContextId and/or token is missing.");
         }
         ObjectName objectName = getObjectName(ShareMBean.class.getName(), ShareMBean.DOMAIN);
@@ -133,7 +141,11 @@ public class RemoveSharesCLT extends AbstractMBeanCLI<Void> {
         try {
             if (null != token && !token.isEmpty()) {
                 String[] tokens = token.trim().split(",");
-                mbean.removeShares(tokens);
+                if (null == contextId || contextId.isEmpty() || "-1".equals(contextId)) {
+                    mbean.removeShares(tokens);
+                } else {
+                    mbean.removeShares(tokens, Integer.parseInt(contextId));
+                }
             } else if (null != contextId && !contextId.isEmpty()) {
                 if (null != userId && !userId.isEmpty()) {
                     mbean.removeShares(Integer.parseInt(contextId), Integer.parseInt(userId));

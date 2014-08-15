@@ -162,5 +162,7 @@ public interface ShareStorage {
     List<Share> loadSharesForGuest(int contextID, int guestID, StorageParameters parameters) throws OXException;
 
     List<Share> loadSharesForContext(int contextID, StorageParameters parameters) throws OXException;
+    
+    List<Share> loadShares(String[] tokens, StorageParameters parameters) throws OXException;
 
 }

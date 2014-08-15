@@ -88,6 +88,11 @@ public class ShareMBeanImpl extends StandardMBean implements ShareMBean {
     }
 
     @Override
+    public void removeShares(String[] tokens, int contextId) throws OXException {
+        shareService.removeShares(tokens, contextId);
+    }
+
+    @Override
     public void removeShares(int contextId) throws OXException {
         shareService.removeShares(contextId);
     }

@@ -70,6 +70,8 @@ public interface ShareMBean {
     
     void removeShares(String[] tokens) throws OXException;
     
+    void removeShares(String[] tokens, int contextId) throws OXException;
+    
     void removeShares(int contextId) throws OXException;
     
     void removeShares(int contextId, int userId) throws OXException;

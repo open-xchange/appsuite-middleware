@@ -60,6 +60,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
@@ -71,10 +72,9 @@ import com.openexchange.share.storage.StorageParameters;
 import com.openexchange.share.storage.internal.ConnectionProvider.ConnectionMode;
 import com.openexchange.tools.sql.DBUtils;
 
-
 /**
  * {@link RdbShareStorage}
- *
+ * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.6.1
  */
@@ -84,7 +84,7 @@ public class RdbShareStorage implements ShareStorage {
 
     /**
      * Initializes a new {@link RdbShareStorage}.
-     *
+     * 
      * @param databaseService The database service
      */
     public RdbShareStorage(DatabaseService databaseService) {
@@ -102,6 +102,21 @@ public class RdbShareStorage implements ShareStorage {
         } finally {
             provider.close();
         }
+    }
+
+    @Override
+    public List<Share> loadShares(String[] tokens, StorageParameters parameters) throws OXException {
+        List<Share> result = new ArrayList<Share>(tokens.length);
+        try {
+            if (0 < tokens.length) {
+                int contextID = extractContextId(tokens[0]);
+                ConnectionProvider provider = getReadProvider(contextID, parameters);
+                result.addAll(selectSharesByTokens(provider.get(), contextID, tokens));
+            }
+        } catch (SQLException e) {
+            throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        }
+        return result;
     }
 
     @Override
@@ -180,7 +195,7 @@ public class RdbShareStorage implements ShareStorage {
             provider.close();
         }
     }
-    
+
     @Override
     public List<Share> loadSharesForContext(int contextID, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
@@ -360,7 +375,7 @@ public class RdbShareStorage implements ShareStorage {
         }
         return shares;
     }
-    
+
     private List<Share> selectSharesForContext(Connection connection, int contextID) throws SQLException {
         List<Share> shares = new ArrayList<Share>();
         PreparedStatement stmt = null;
@@ -460,6 +475,39 @@ public class RdbShareStorage implements ShareStorage {
         return shares;
     }
 
+    private static List<Share> selectSharesByTokens(Connection connection, int cid, String[] tokens) throws SQLException {
+        List<Share> result = new ArrayList<Share>(tokens.length);
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = connection.prepareStatement(SQL.SELECT_SHARES_BY_TOKENS_STMT(tokens.length));
+            stmt.setInt(1, cid);
+            for (int i = 0; i < tokens.length; i++) {
+                stmt.setBytes(2 + i, UUIDs.toByteArray(UUIDs.fromUnformattedString(tokens[i])));
+            }
+            rs = logExecuteQuery(stmt);
+            while (rs.next()) {
+                DefaultShare share = new DefaultShare();
+                share.setToken(UUIDs.getUnformattedString(UUIDs.toUUID(rs.getBytes(1))));
+                share.setContextID(cid);
+                share.setModule(rs.getInt(2));
+                share.setFolder(rs.getString(3));
+                share.setItem(rs.getString(4));
+                share.setCreated(new Date(rs.getLong(5)));
+                share.setCreatedBy(rs.getInt(6));
+                share.setLastModified(new Date(rs.getLong(7)));
+                share.setModifiedBy(rs.getInt(8));
+                share.setExpires(new Date(rs.getLong(9)));
+                share.setGuest(rs.getInt(10));
+                share.setAuthentication(rs.getInt(11));
+                result.add(share);
+            }
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+        }
+        return result;
+    }
+
     private static List<Share> selectSharesExpiredAfter(Connection connection, int cid, long expired) throws SQLException {
         List<Share> shares = new ArrayList<Share>();
         PreparedStatement stmt = null;
@@ -529,6 +577,14 @@ public class RdbShareStorage implements ShareStorage {
 
     private ConnectionProvider getWriteProvider(int contextId, StorageParameters parameters) throws OXException {
         return new ConnectionProvider(databaseService, parameters, ConnectionMode.WRITE, contextId);
+    }
+
+    private static final long HIGH_BITS = 0xFFFFFFFF00000000L;
+
+    private static int extractContextId(String token) {
+        UUID uuid = UUIDs.fromUnformattedString(token);
+        long mostSignificantBits = uuid.getMostSignificantBits();
+        return (int) ((mostSignificantBits &= HIGH_BITS) >>> 32);
     }
 
 }
