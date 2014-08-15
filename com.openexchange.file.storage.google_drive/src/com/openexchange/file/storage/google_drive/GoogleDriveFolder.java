@@ -145,7 +145,7 @@ public final class GoogleDriveFolder extends DefaultFileStorageFolder implements
                 lastModifiedDate = new Date(dir.getModifiedDate().getValue());
 
                 {
-                    final boolean hasSubfolders = hasSubfolder(id, drive);
+                    final boolean hasSubfolders = hasSubfolder(dir.getId(), drive);
                     setSubfolders(hasSubfolders);
                     setSubscribedSubfolders(hasSubfolders);
                 }
