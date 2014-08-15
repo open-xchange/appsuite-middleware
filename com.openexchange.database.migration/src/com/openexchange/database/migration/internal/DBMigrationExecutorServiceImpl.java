@@ -106,6 +106,8 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
         File xmlConfigFile = configurationService.getFileByName(fileName);
         if (null != xmlConfigFile) {
             execute(new DatabaseChangeLog(xmlConfigFile.getAbsolutePath()));
+        } else {
+            LOG.info("No database migration file with name " + fileName + " found! Execution for that file will be skipped.");
         }
     }
 }
