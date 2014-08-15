@@ -5,12 +5,22 @@ Bundle-SymbolicName: liquibase.core
 Bundle-Version: 3.0.7
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: javax.servlet;version="2.5.0",
- javax.servlet.http;version="2.5.0",
+Bundle-ClassPath: lib/ant-1.6.5.jar,
+ lib/jetty-server-8.1.15.v20140411.jar,
+ lib/jetty-util-8.1.15.v20140411.jar,
+ lib/junit-4.12-SNAPSHOT.jar,
+ lib/snakeyaml-1.11.jar,
+ lib/velocity-1.7.jar,
+ lib/spring-core-4.0.5.RELEASE.jar,
+ lib/spring-context-4.0.5.RELEASE.jar,
+ lib/spring-beans-4.0.5.RELEASE.jar,
+ .
+Import-Package: javax.servlet,
+ javax.servlet.http,
  javax.xml.parsers,
- org.apache.commons.cli;version="1.2.0",
- org.osgi.framework;version="1.7.0",
- org.osgi.util.tracker;version="1.5.1",
+ org.apache.commons.cli,
+ org.osgi.framework,
+ org.osgi.util.tracker,
  org.xml.sax,
  org.xml.sax.ext,
  org.xml.sax.helpers
