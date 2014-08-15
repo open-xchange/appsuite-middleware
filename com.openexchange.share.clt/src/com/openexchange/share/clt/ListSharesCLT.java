@@ -57,6 +57,7 @@ import javax.management.ObjectName;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.MissingOptionException;
 import org.apache.commons.cli.Options;
+import org.apache.http.ParseException;
 import com.openexchange.auth.mbean.AuthenticatorMBean;
 import com.openexchange.cli.AbstractMBeanCLI;
 import com.openexchange.share.Share;
@@ -136,7 +137,7 @@ public class ListSharesCLT extends AbstractMBeanCLI<Void> {
                 result = mbean.listShares(Integer.parseInt(contextId));
             }
         } catch (NumberFormatException e) {
-            // TODO: do something
+            throw new ParseException("Cannot parse value: " + e.getMessage());
         }
         return null;
     }

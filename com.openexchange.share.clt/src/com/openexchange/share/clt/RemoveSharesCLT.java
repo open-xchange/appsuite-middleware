@@ -56,6 +56,7 @@ import javax.management.ObjectName;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.MissingOptionException;
 import org.apache.commons.cli.Options;
+import org.apache.http.ParseException;
 import com.openexchange.auth.mbean.AuthenticatorMBean;
 import com.openexchange.cli.AbstractMBeanCLI;
 import com.openexchange.share.impl.mbean.ShareMBean;
@@ -154,7 +155,7 @@ public class RemoveSharesCLT extends AbstractMBeanCLI<Void> {
                 }
             }
         } catch (NumberFormatException e) {
-            // TODO: do something
+            throw new ParseException("Cannot parse value: " + e.getMessage());
         }
         return null;
     }
