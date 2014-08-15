@@ -81,7 +81,6 @@ import com.openexchange.file.storage.search.FileNameTerm;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.java.Streams;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -194,7 +193,23 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     @Override
     public void saveFileMetadata(File file, long sequenceNumber, List<Field> modifiedFields) throws OXException {
-        saveDocument(file, Streams.newByteArrayInputStream(new byte[0]), sequenceNumber, modifiedFields);
+        if (null == modifiedFields || modifiedFields.contains(Field.FILENAME)) {
+            try {
+                Drive drive = googleDriveAccess.getDrive();
+
+                com.google.api.services.drive.model.File modFile = new com.google.api.services.drive.model.File();
+                modFile.setId(file.getId());
+                modFile.setTitle(file.getFileName());
+
+                drive.files().patch(file.getId(), modFile).execute();
+            } catch (final HttpResponseException e) {
+                throw handleHttpResponseError(file.getId(), e);
+            } catch (final IOException e) {
+                throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            } catch (final RuntimeException e) {
+                throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
+        }
     }
 
     @Override
