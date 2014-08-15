@@ -51,6 +51,7 @@ package com.openexchange.share.servlet.osgi;
 
 import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.osgi.AbstractServletActivator;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.sessiond.SessiondService;
@@ -72,7 +73,7 @@ public class ShareServletActivator extends AbstractServletActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ShareService.class, UserService.class, ContextService.class, DispatcherPrefixService.class,
-            HttpService.class, SessiondService.class, ShareCryptoService.class };
+            HttpService.class, SessiondService.class, ShareCryptoService.class, ConfigurationService.class };
     }
 
     @Override

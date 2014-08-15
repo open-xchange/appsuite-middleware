@@ -63,6 +63,7 @@ import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginRequestImpl;
 import com.openexchange.ajax.login.LoginTools;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -189,9 +190,6 @@ public class ShareServlet extends HttpServlet {
         return loginResult;
     }
 
-    // http://192.168.32.191/ajax/share/19496DEDE78141A6AB77B316ADDA3660 kontakte steffen
-    // http://192.168.32.191/ajax/share/19496DED2C6542B5A1D6EF4AEEEA4D24 infostore tobias
-
     /**
      * Extracts the token from a HTTP request's path info and looks up the referenced share.
      *
@@ -220,13 +218,27 @@ public class ShareServlet extends HttpServlet {
      * @param share The share
      * @return The redirect URL
      */
-    private static String getDriveRedirectURL(Session session, User user, Share share) {
-        StringBuilder stringBuilder = new StringBuilder()
-            .append("/ajax/drive?action=syncfolders")
-            .append("&root=").append(share.getFolder())
-            .append("&session=").append(session.getSessionID())
+    private static String getRedirectURL(Session session, User user, Share share) {
+        ConfigurationService configService = ShareServiceLookup.getService(ConfigurationService.class);
+        String redirectLink;
+        if (share.isFolder()) {
+            redirectLink = configService.getProperty("com.openexchange.share.redirectLinkFolder",
+                "/[uiwebpath]#session=[session]&user=[user]&user_id=[user_id]&language=[language]&m=[module]&f=[folder]");
+        } else {
+            redirectLink = configService.getProperty("com.openexchange.share.redirectLinkItem",
+                "/[uiwebpath]#session=[session]&user=[user]&user_id=[user_id]&language=[language]&m=[module]&f=[folder]&i=[item]");
+        }
+        String uiWebPath = configService.getProperty("com.openexchange.UIWebPath", "/ox6/index.html");
+        return redirectLink
+            .replaceAll("\\[uiwebpath\\]", trimSlashes(uiWebPath))
+            .replaceAll("\\[session\\]", session.getSessionID())
+            .replaceAll("\\[user\\]", user.getMail())
+            .replaceAll("\\[user_id\\]", String.valueOf(user.getId()))
+            .replaceAll("\\[language\\]", String.valueOf(user.getLocale()))
+            .replaceAll("\\[module\\]", Module.getForFolderConstant(share.getModule()).getName())
+            .replaceAll("\\[folder\\]", share.getFolder())
+            .replaceAll("\\[item\\]", share.getItem())
         ;
-        return stringBuilder.toString();
     }
 
     /**
@@ -237,64 +249,25 @@ public class ShareServlet extends HttpServlet {
      * @param share The share
      * @return The redirect URL
      */
-    private static String getRedirectURL(Session session, User user, Share share) {
-        boolean ox6 = true;
-
-        StringBuilder stringBuilder = new StringBuilder();
-        if (ox6) {
-            stringBuilder.append("/ox6/")
-        //        .append(ShareServiceLookup.getService(DispatcherPrefixService.class).getPrefix())
-                .append("#session=").append(session.getSessionID())
-                .append("&user=").append(user.getMail())
-                .append("&user_id=").append(session.getUserId())
-                .append("&language=").append(user.getLocale())
-                .append("&store=true")
-                .append("&m=").append(getApp(Module.getForFolderConstant(share.getModule())))
-                .append("&f=").append(share.getFolder())
-                ;
-            if (false == share.isFolder()) {
-                stringBuilder.append("&id=").append(share.getItem());
-            }
-        } else {
-            stringBuilder
-                .append("/appsuite/")
-    //            .append(ShareServiceLookup.getService(DispatcherPrefixService.class).getPrefix())
-                .append("#session=").append(session.getSessionID())
-                .append("&user=").append(session.getLogin())
-                .append("&user_id=").append(session.getUserId())
-                .append("&language=").append(user.getLocale())
-                .append("&store=true")
-                .append("&app=").append(getApp(Module.getForFolderConstant(share.getModule())))
-                .append("&folder=").append(share.getFolder())
-            ;
-            if (false == share.isFolder()) {
-                stringBuilder.append("&id=").append(share.getItem());
-            }
-        }
+    private static String getDriveRedirectURL(Session session, User user, Share share) {
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("/ajax/drive?action=syncfolders")
+            .append("&root=").append(share.getFolder())
+            .append("&session=").append(session.getSessionID())
+        ;
         return stringBuilder.toString();
     }
 
-    /**
-     * Gets the application identifier as used by the app suite client.
-     *
-     * @param module The module
-     * @return The application identifier, or <code>null</code> if not known
-     */
-    private static String getApp(Module module) {
-        switch (module) {
-        case CALENDAR:
-            return "io.ox/calendar";
-        case CONTACTS:
-            return "io.ox/contacts";
-        case INFOSTORE:
-            return "io.ox/files";
-        case MAIL:
-            return "io.ox/mail";
-        case TASK:
-            return "io.ox/tasks";
-        default:
-            return null;
+    private static String trimSlashes(String path) {
+        if (null != path && 0 < path.length()) {
+            if ('/' == path.charAt(0)) {
+                path = path.substring(1);
+            }
+            if (0 < path.length() && '/' == path.charAt(path.length() - 1)) {
+                path = path.substring(0, path.length() - 1);
+            }
         }
+        return path;
     }
 
 }
