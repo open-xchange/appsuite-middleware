@@ -132,6 +132,7 @@ public final class GoogleDriveFolder extends DefaultFileStorageFolder implements
                 b_rootFolder = true;
 
                 if (rootFolder) {
+                    id = FileStorageFolder.ROOT_FULLNAME;
                     setParentId(null);
                     setName(null == accountDisplayName ? dir.getTitle() : accountDisplayName);
                 } else {
