@@ -54,7 +54,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import com.openexchange.realtime.hazelcast.directory.HazelcastResourceDirectoryTest;
-import com.openexchange.realtime.hazelcast.directory.HazelcastResourceTest;
+import com.openexchange.realtime.hazelcast.directory.PortableIDTest;
+import com.openexchange.realtime.hazelcast.directory.PortablePresenceTest;
+import com.openexchange.realtime.hazelcast.directory.PortableResourceTest;
+import com.openexchange.realtime.hazelcast.directory.PortableRoutingInfoTest;
 import com.openexchange.realtime.hazelcast.group.DistributedGroupManagerImplTest;
 
 /**
@@ -64,8 +67,11 @@ import com.openexchange.realtime.hazelcast.group.DistributedGroupManagerImplTest
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-    HazelcastResourceTest.class,
     HazelcastResourceDirectoryTest.class,
+    PortableIDTest.class,
+    PortablePresenceTest.class,
+    PortableResourceTest.class,
+    PortableRoutingInfoTest.class,
     DistributedGroupManagerImplTest.class
 })
 public class UnitTests {}

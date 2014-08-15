@@ -50,21 +50,27 @@
 package com.openexchange.subscribe.google;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
+import com.openexchange.api2.AppointmentSQLInterface;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.google.api.client.GoogleApiClients;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.generic.FolderUpdaterRegistry;
-import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
@@ -72,7 +78,6 @@ import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.google.internal.CalendarEventParser;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.tools.iterator.SearchIteratorDelegator;
 
 /**
  * {@link GoogleCalendarSubscribeService}
@@ -81,13 +86,15 @@ import com.openexchange.tools.iterator.SearchIteratorDelegator;
  */
 public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeService {
 
-    private static final int PAGE_SIZE = 25;
+    private final int pageSize;
 
     private final SubscriptionSource source;
 
     public GoogleCalendarSubscribeService(final OAuthServiceMetaData googleMetaData, ServiceLookup services) {
         super(googleMetaData, services);
         source = initSS(FolderObject.CALENDAR, "calendar");
+        final ConfigurationService configService = services.getService(ConfigurationService.class);
+        pageSize = configService.getIntProperty("com.openexchange.subscribe.google.calendar.pageSize", 25);
     }
 
     @Override
@@ -104,7 +111,10 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
     public Collection<?> getContent(final Subscription subscription) throws OXException {
         try {
             GoogleCredential googleCreds = GoogleApiClients.getCredentials(subscription.getSession());
-            final Calendar googleCalendarService = new Calendar(googleCreds.getTransport(), googleCreds.getJsonFactory(), googleCreds.getRequestInitializer());
+            final Calendar googleCalendarService = new Calendar(
+                googleCreds.getTransport(),
+                googleCreds.getJsonFactory(),
+                googleCreds.getRequestInitializer());
 
             final String calendarId;
             {
@@ -112,33 +122,47 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
                 calendarId = (tmp == null) ? "primary" : tmp;
             }
 
-            // Fetch calendar metadata
-            // com.google.api.services.calendar.model.Calendar calendar = googleCalendarService.calendars().get(calendarId).setOauthToken(googleCreds.getAccessToken()).execute();
             final CalendarEventParser parser = new CalendarEventParser(subscription.getSession());
 
+            // Initialize lists
+            final List<CalendarDataObject> single = new LinkedList<CalendarDataObject>();
+            final List<CalendarDataObject> changeExceptions = new LinkedList<CalendarDataObject>();
+            final List<CalendarDataObject> deleteExceptions = new LinkedList<CalendarDataObject>();
+            final List<CalendarDataObject> series = new LinkedList<CalendarDataObject>();
+
+            // Initialize folderUpdater and thread pool services
+            final ThreadPoolService threadPool = services.getOptionalService(ThreadPoolService.class);
+
+            if (null == threadPool) {
+                throw ServiceExceptionCode.absentService(ThreadPoolService.class);
+            }
+
+            final AppointmentSqlFactoryService factoryService = services.getOptionalService(AppointmentSqlFactoryService.class);
+            if (null == factoryService) {
+                throw ServiceExceptionCode.absentService(AppointmentSqlFactoryService.class);
+            }
+            final AppointmentSQLInterface appointmentsql = factoryService.createAppointmentSql(subscription.getSession());
+
+            // Fetch the events
             final String accessToken = googleCreds.getAccessToken();
-            final Integer pageSize = Integer.valueOf(PAGE_SIZE);
             Events events = googleCalendarService.events().list(calendarId).setOauthToken(accessToken).setMaxResults(pageSize).execute();
-            List<CalendarObject> calObjList = new LinkedList<CalendarObject>();
-            parseAndAdd(events, parser, calObjList);
+            parseAndAdd(events, parser, single, series, changeExceptions, deleteExceptions);
+
+            if (!series.isEmpty()) {
+                // handle series and series exceptions in background thread
+                threadPool.submit(new AbstractTask<Void>() {
+
+                    @Override
+                    public Void call() throws Exception {
+                        handleSeriesAndSeriesExceptions(subscription, changeExceptions, deleteExceptions, series, appointmentsql);
+                        return null;
+                    }
+                });
+            }
 
             String nextToken = events.getNextPageToken();
             if (nextToken == null) {
-                return calObjList;
-            }
-
-            // More pages available
-            final ThreadPoolService threadPool = services.getOptionalService(ThreadPoolService.class);
-            final FolderUpdaterRegistry folderUpdaterRegistry = services.getOptionalService(FolderUpdaterRegistry.class);
-            final FolderUpdaterService<CalendarObject> folderUpdater = null == folderUpdaterRegistry ? null : folderUpdaterRegistry.<CalendarObject> getFolderUpdater(subscription);
-
-            if (null == threadPool || null == folderUpdater) {
-                // Fetch all in one thread
-                do {
-                    events = googleCalendarService.events().list(calendarId).setOauthToken(accessToken).setMaxResults(pageSize).setPageToken(nextToken).execute();
-                    parseAndAdd(events, parser, calObjList);
-                } while ((nextToken = events.getNextPageToken()) != null);
-                return calObjList;
+                return single;
             }
 
             // Or spawn background thread
@@ -150,26 +174,95 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
                     String nextPageToken = tmp;
                     Events e;
                     do {
-                        e = googleCalendarService.events().list(calendarId).setOauthToken(accessToken).setMaxResults(pageSize).setPageToken(nextPageToken).execute();
-                        List<CalendarObject> appointments = new LinkedList<CalendarObject>();
-                        parseAndAdd(e, parser, appointments);
-                        folderUpdater.save(new SearchIteratorDelegator<CalendarObject>(appointments), subscription);
+                        List<CalendarDataObject> appointments = new LinkedList<CalendarDataObject>();
+                        e = googleCalendarService.events().list(calendarId).setOauthToken(accessToken).setMaxResults(pageSize).setPageToken(
+                            nextPageToken).execute();
+                        parseAndAdd(e, parser, appointments, series, changeExceptions, deleteExceptions);
+                        for (CalendarDataObject cdo : appointments) {
+                            cdo.setParentFolderID(subscription.getFolderIdAsInt());
+                            appointmentsql.insertAppointmentObject(cdo);
+                        }
+
                     } while ((nextPageToken = e.getNextPageToken()) != null);
+
+                    handleSeriesAndSeriesExceptions(subscription, changeExceptions, deleteExceptions, series, appointmentsql);
+
                     return null;
                 }
             });
-            return calObjList;
+            return single;
         } catch (IOException e) {
             throw SubscriptionErrorMessage.IO_ERROR.create(e, e.getMessage());
         }
     }
 
-    protected void parseAndAdd(final Events events, final CalendarEventParser parser, final List<CalendarObject> calendarObjectsList) throws OXException {
+    protected void parseAndAdd(final Events events, final CalendarEventParser parser, final List<CalendarDataObject> singleAppointments, final List<CalendarDataObject> series, final List<CalendarDataObject> changeExceptions, final List<CalendarDataObject> deleteExceptions) throws OXException {
         for (Event event : events.getItems()) {
-            final CalendarDataObject calenderObject = new CalendarDataObject();
-            parser.parseCalendarEvent(event, calenderObject);
-            calendarObjectsList.add(calenderObject);
+            // Consider only events with an organizer; the rest are only updates on status, e.g. delete exceptions (handle below)
+            final CalendarDataObject calendarObject = new CalendarDataObject();
+            if (event.getOrganizer() != null) {
+                parser.parseCalendarEvent(event, calendarObject);
+                if (event.getRecurrence() != null) {
+                    series.add(calendarObject);
+                } else if (event.getRecurringEventId() != null) {
+                    changeExceptions.add(calendarObject);
+                } else {
+                    singleAppointments.add(calendarObject);
+                }
+            } else {
+                parser.parseDeleteException(event, calendarObject);
+                deleteExceptions.add(calendarObject);
+            }
         }
     }
 
+    private void handleSeriesAndSeriesExceptions(final Subscription subscription, final List<CalendarDataObject> changeExceptions, final List<CalendarDataObject> deleteExceptions, final List<CalendarDataObject> series, final AppointmentSQLInterface appointmentsql) throws OXException {
+        final Map<String, CalendarDataObject> masterMap = new HashMap<String, CalendarDataObject>(series.size());
+
+        handleSeries(subscription, series, appointmentsql, masterMap);
+        handleExceptions(subscription, changeExceptions, appointmentsql, masterMap, false);
+        handleExceptions(subscription, deleteExceptions, appointmentsql, masterMap, true);
+    }
+
+    private Map<String, CalendarDataObject> handleSeries(final Subscription subscription, final List<CalendarDataObject> series, final AppointmentSQLInterface appointmentsql, final Map<String, CalendarDataObject> masterMap) throws OXException {
+        // Handle series
+        for (CalendarDataObject cdo : series) {
+            cdo.setParentFolderID(subscription.getFolderIdAsInt());
+            appointmentsql.insertAppointmentObject(cdo);
+            masterMap.put(cdo.getUid(), cdo);
+        }
+        return masterMap;
+    }
+
+    private void handleExceptions(final Subscription subscription, final List<CalendarDataObject> exceptions, final AppointmentSQLInterface appointmentsql, final Map<String, CalendarDataObject> masterMap, final boolean delete) throws OXException {
+        // Handle exceptions
+        final java.util.Calendar utcCalendar = java.util.Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        for (CalendarDataObject cdo : exceptions) {
+            String uid = cdo.getUid();
+            final CalendarDataObject masterObj = masterMap.get(uid);
+            if (masterObj != null) {
+                cdo.setObjectID(masterObj.getObjectID());
+                setBeginOfTheDay(cdo.getStartDate(), utcCalendar);
+                cdo.setRecurrenceDatePosition(utcCalendar.getTime());
+                try {
+                    if (delete) {
+                        appointmentsql.deleteAppointmentObject(cdo, subscription.getFolderIdAsInt(), masterObj.getLastModified());
+                    } else {
+                        appointmentsql.updateAppointmentObject(cdo, subscription.getFolderIdAsInt(), masterObj.getLastModified());
+                    }
+                } catch (SQLException e) {
+                    throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e);
+                }
+                masterObj.setLastModified(cdo.getLastModified());
+            }
+        }
+    }
+
+    private void setBeginOfTheDay(final Date startDate, final java.util.Calendar calendar) {
+        calendar.setTime(startDate);
+        calendar.set(java.util.Calendar.HOUR_OF_DAY, 0);
+        calendar.set(java.util.Calendar.MINUTE, 0);
+        calendar.set(java.util.Calendar.SECOND, 0);
+        calendar.set(java.util.Calendar.MILLISECOND, 0);
+    }
 }

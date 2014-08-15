@@ -60,7 +60,7 @@ import com.openexchange.i18n.I18nService;
  */
 public class SimpleDisplayItem implements DisplayItem {
 
-    private final String defaultValue;
+    private final String displayName;
 
     private final boolean isLocalizable;
 
@@ -68,32 +68,31 @@ public class SimpleDisplayItem implements DisplayItem {
      * Initializes a new {@link SimpleDisplayItem} that
      * is not localizable.
      *
-     * @param defaultValue The default value
+     * @param displayName The default value
      */
-    public SimpleDisplayItem(final String defaultValue) {
-        this(defaultValue, false);
+    public SimpleDisplayItem(final String displayName) {
+        this(displayName, false);
     }
 
     /**
      * Initializes a new {@link SimpleDisplayItem}.
      *
-     * @param defaultValue The default value
+     * @param displayName The default value
      * @param isLocalizable If the default value can be localized via {@link I18nService}.
      */
-    public SimpleDisplayItem(final String defaultValue, final boolean isLocalizable) {
+    public SimpleDisplayItem(final String displayName, final boolean isLocalizable) {
         super();
-        this.defaultValue = defaultValue;
+        this.displayName = displayName;
         this.isLocalizable = isLocalizable;
     }
 
-    @Override
-    public String getDefaultValue() {
-        return defaultValue;
+    public boolean isLocalizable() {
+        return isLocalizable;
     }
 
     @Override
-    public boolean isLocalizable() {
-        return isLocalizable;
+    public String getDisplayName() {
+        return displayName;
     }
 
     @Override
@@ -102,15 +101,10 @@ public class SimpleDisplayItem implements DisplayItem {
     }
 
     @Override
-    public String getItem() {
-        return defaultValue;
-    }
-
-    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((defaultValue == null) ? 0 : defaultValue.hashCode());
+        result = prime * result + ((displayName == null) ? 0 : displayName.hashCode());
         result = prime * result + ((isLocalizable) ? 1 : 0);
         return result;
     }
@@ -124,10 +118,10 @@ public class SimpleDisplayItem implements DisplayItem {
         if (getClass() != obj.getClass())
             return false;
         SimpleDisplayItem other = (SimpleDisplayItem) obj;
-        if (defaultValue == null) {
-            if (other.defaultValue != null)
+        if (displayName == null) {
+            if (other.displayName != null)
                 return false;
-        } else if (!defaultValue.equals(other.defaultValue))
+        } else if (!displayName.equals(other.displayName))
             return false;
         if (isLocalizable != other.isLocalizable)
             return false;
@@ -136,6 +130,7 @@ public class SimpleDisplayItem implements DisplayItem {
 
     @Override
     public String toString() {
-        return "SimpleDisplayItem [defaultValue=" + defaultValue + ", isLocalizable=" + isLocalizable + "]";
+        return "SimpleDisplayItem [defaultValue=" + displayName + ", isLocalizable=" + isLocalizable + "]";
     }
+
 }

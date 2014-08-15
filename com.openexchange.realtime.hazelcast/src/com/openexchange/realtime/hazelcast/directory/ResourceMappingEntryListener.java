@@ -49,10 +49,11 @@
 
 package com.openexchange.realtime.hazelcast.directory;
 
-import java.util.Map;
 import com.google.common.base.Optional;
 import com.hazelcast.core.EntryListener;
 import com.hazelcast.query.Predicate;
+import com.openexchange.realtime.hazelcast.serialization.directory.PortableResource;
+import com.openexchange.realtime.hazelcast.serialization.packet.PortableID;
 
 
 /**
@@ -61,11 +62,11 @@ import com.hazelcast.query.Predicate;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.0
  */
-public interface ResourceMappingEntryListener extends EntryListener<String, Map<String, Object>> {
+public interface ResourceMappingEntryListener extends EntryListener<PortableID, PortableResource> {
 
     /**
      * Get the optional Predicate
      * @return the optional Predicate
      */
-    Optional<Predicate<String, Map<String, Object>>> getPredicate();
+    Optional<Predicate<PortableID, PortableResource>> getPredicate();
 }

@@ -375,6 +375,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     /**
+     * Gets the current IMAP folder in use.
+     *
+     * @return The IMAP folder or <code>null</code>
+     */
+    public IMAPFolder getImapFolder() {
+        return imapFolder;
+    }
+
+    /**
      * Gets the IMAP configuration
      *
      * @return The IMAP configuration

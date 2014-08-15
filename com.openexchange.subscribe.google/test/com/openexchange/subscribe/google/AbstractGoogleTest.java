@@ -58,6 +58,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
@@ -67,14 +68,19 @@ import com.openexchange.exception.OXException;
 import com.openexchange.google.api.client.GoogleApiClients;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.google.GoogleOAuthServiceMetaData;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
+import com.openexchange.subscribe.google.mocks.MockConfigurationService;
+import com.openexchange.subscribe.google.mocks.MockFolderUpdateService;
+import com.openexchange.subscribe.google.mocks.MockFolderUpdaterRegistry;
+import com.openexchange.subscribe.google.mocks.MockServiceLookup;
+import com.openexchange.threadpool.SimThreadPoolService;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.session.SimServerSession;
-import com.openexchange.user.SimUserService;
-import com.openexchange.user.UserService;
 
 
 /**
@@ -88,70 +94,69 @@ import com.openexchange.user.UserService;
 @PrepareForTest({GoogleApiClients.class})
 @PowerMockIgnore({"javax.net.ssl.*"})
 public abstract class AbstractGoogleTest extends TestCase {
-    protected static final String REDIRECT_URL = "";
-    protected static final String GOOGLE_API_KEY = "";
-    protected static final String GOOGLE_API_SECRET = "";
-    protected static final String ACCESS_TOKEN = "";
+
+    private static final String REDIRECT_URL = "";
+    private static final String GOOGLE_API_KEY = "";
+    private static final String GOOGLE_API_SECRET = "";
+    private static final String ACCESS_TOKEN = "";
+    private static final String REFRESH_TOKEN = "";
 
     private Subscription subscription;
-    private GoogleCalendarSubscribeService gcass;
-    private GoogleContactSubscribeService gcoss;
-    private SimServerSession simServer;
+    private SubscribeService subscribeService;
+    private OAuthServiceMetaData oasdm;
+    private MockServiceLookup sl;
+
 
     @Override
     protected void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        ConfigurationService cs = new MockConfigurationService(GOOGLE_API_KEY, GOOGLE_API_SECRET, REDIRECT_URL);
-        ServiceLookup sl = new MockServiceLookup(cs);
-        OAuthServiceMetaData oasdm = new GoogleOAuthServiceMetaData(sl);
-        gcass = new GoogleCalendarSubscribeService(oasdm, sl);
-        gcoss = new GoogleContactSubscribeService(oasdm, sl);
-        simServer = new SimServerSession(1, 1);
+
+        //Mocks
+        ConfigurationService cs = new MockConfigurationService(GOOGLE_API_KEY, GOOGLE_API_SECRET, REDIRECT_URL, 10000, 10000);
+        ThreadPoolService tps = new SimThreadPoolService();
+
+        FolderUpdaterRegistry fur = new MockFolderUpdaterRegistry<Object>(new MockFolderUpdateService());
+        sl = new MockServiceLookup(cs, tps, fur);
+
+
+        SimServerSession simServer = new SimServerSession(1, 1);
         subscription = new Subscription();
         subscription.setSession(simServer);
+        subscription.setFolderId(2);
 
-        prepareMocks();
+        prepareMockitoMocks();
+
+        prepareAdditionalMocks(sl);
+
+        oasdm = new GoogleOAuthServiceMetaData(sl);
     }
 
-    protected LinkedList<CalendarDataObject> getGoogleCalendarObjects() throws OXException {
-        return (LinkedList<CalendarDataObject>) gcass.getContent(subscription);
+    protected LinkedList<CalendarDataObject> getGoogleCalendar() throws OXException {
+        subscribeService = new GoogleCalendarSubscribeService(oasdm, sl);
+        return (LinkedList<CalendarDataObject>) subscribeService.getContent(subscription);
     }
 
     protected LinkedList<Contact> getGoogleContacts() throws OXException {
-        return (LinkedList<Contact>) gcoss.getContent(subscription);
+        subscribeService = new GoogleContactSubscribeService(oasdm, sl);
+        return (LinkedList<Contact>) subscribeService.getContent(subscription);
     }
 
-    protected void assertFieldIsNull(String fieldDesc, Object valueToCheck) {
-        assertNull("The field " + fieldDesc + " should be empty, but is not", valueToCheck);
-    }
-
-    protected void assertNotNullAndEquals(String fieldDesc, Object expected, Object actual) {
-        assertNotNull("Could not find expected mapping for " + fieldDesc, actual);
-        assertEquals("Mapping for field '" + fieldDesc + "' differs -->", expected, actual);
-    }
-
-    protected void assertNotNull(String fieldDesc, Object expected, Object actual) {
-        super.assertNotNull("Could not find expected mapping for " + fieldDesc, actual);
-    }
-
-    private void prepareMocks() throws Exception {
-        final UserService simUser = new SimUserService();
-
+    private void prepareMockitoMocks() throws Exception {
         NetHttpTransport transport = new NetHttpTransport.Builder().doNotValidateCertificate().build();
         JsonFactory jsonFactory = new JacksonFactory();
 
+        GoogleClientSecrets gcs = new GoogleClientSecrets();
         GoogleCredential credential = new GoogleCredential.Builder()
         .setTransport(transport)
-        .setJsonFactory(jsonFactory).build();
-        credential.setAccessToken(ACCESS_TOKEN).setRefreshToken(null);
+        .setJsonFactory(jsonFactory).setClientSecrets(GOOGLE_API_KEY, GOOGLE_API_SECRET).build();
+        credential.setRefreshToken(REFRESH_TOKEN);
+        credential.setAccessToken(ACCESS_TOKEN);
 
         PowerMockito.mockStatic(GoogleApiClients.class);
         PowerMockito.doReturn(credential).when(GoogleApiClients.class, "getCredentials", Matchers.any(Session.class));
-
-        prepareAdditionalMocks();
     }
 
-    protected void prepareAdditionalMocks() throws Exception {
+    protected void prepareAdditionalMocks(MockServiceLookup sl) throws Exception {
 
     }
 }

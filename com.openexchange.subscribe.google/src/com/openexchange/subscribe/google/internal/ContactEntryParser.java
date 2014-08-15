@@ -50,8 +50,10 @@
 package com.openexchange.subscribe.google.internal;
 
 import java.util.Calendar;
+import java.util.PriorityQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.mail.internet.AddressException;
 import org.slf4j.Logger;
 import com.google.gdata.data.contacts.ContactEntry;
 import com.google.gdata.data.extensions.Email;
@@ -62,11 +64,13 @@ import com.google.gdata.data.extensions.PhoneNumber;
 import com.google.gdata.data.extensions.StructuredPostalAddress;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.util.TimeZones;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 
 /**
  * {@link ContactParser}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class ContactEntryParser {
 
@@ -80,19 +84,6 @@ public class ContactEntryParser {
     }
 
     public void parseContact(final ContactEntry entry, final Contact contact) {
-        {
-            String emailId = null;
-            for (Email email : entry.getEmailAddresses()) {
-                if (email.getPrimary()) {
-                    emailId = email.getAddress();
-                    break;
-                }
-            }
-            if (null != emailId) {
-                contact.setEmail1(emailId);
-            }
-        }
-
         if (entry.hasName()) {
             Name name = entry.getName();
             if (name.hasFullName()) {
@@ -123,25 +114,44 @@ public class ContactEntryParser {
                 if(o.hasOrgTitle()) {
                     contact.setPosition(o.getOrgTitle().getValue());
                 }
-
-                // if(o.hasOrgJobDescription()) {
-                //    contact.setTitle(o.getOrgJobDescription().getValue());
-                // }
             }
         }
 
+        PriorityQueue<Emails> pqEmails = new PreventDuplicatesPriorityQueue<Emails>();
+
         if (entry.hasEmailAddresses()) {
             for (final Email email : entry.getEmailAddresses()) {
-                if (email.getRel() != null) {
-                    if (email.getRel().endsWith("work")) {
-                        contact.setEmail1(email.getAddress());
-                    } else if (email.getRel().endsWith("home")) {
-                        contact.setEmail2(email.getAddress());
-                    } else if (email.getRel().endsWith("other")) {
-                        contact.setEmail3(email.getAddress());
+                String contactsMail = email.getAddress();
+                if(isValidMailAddress(contactsMail)) {
+                    if (email.getRel() != null) {
+                        String relType = email.getRel();
+                        if (email.getPrimary()) {
+                            pqEmails.add(new Emails(contactsMail, 10));
+                        } else if (relType.endsWith("work")) {
+                            pqEmails.add(new Emails(contactsMail, 9));
+                        } else if (relType.endsWith("home")) {
+                            pqEmails.add(new Emails(contactsMail, 8));
+                        } else if (relType.endsWith("other")) {
+                            pqEmails.add(new Emails(contactsMail, 7));
+                        }
+                    }
+                    // if there are other user tagged mail addresses add them with low priority
+                    else {
+                        pqEmails.add(new Emails(contactsMail, 6));
                     }
                 }
             }
+        }
+
+        //mapping of mails
+        if(pqEmails.peek() != null) {
+            contact.setEmail1(pqEmails.poll().getEmail());
+        }
+        if(pqEmails.peek() != null) {
+            contact.setEmail2(pqEmails.poll().getEmail());
+        }
+        if(pqEmails.peek() != null) {
+            contact.setEmail3(pqEmails.poll().getEmail());
         }
 
         if (entry.hasPhoneNumbers()) {
@@ -275,6 +285,78 @@ public class ContactEntryParser {
                     contact.setBirthday(cal.getTime());
                 }
             }
+        }
+    }
+
+    /**
+     * This method checks if an address contains invalid characters
+     *
+     * @param address The address string to check
+     */
+    private final boolean isValidMailAddress(final String address)  {
+        if (null != address) {
+            try {
+                new QuotedInternetAddress(address, true);
+                return true;
+            } catch (final AddressException e) {
+                return false;
+            }
+        }
+        return false;
+    }
+
+    private class Emails implements Comparable<Emails> {
+        private String emailAddress;
+        private int priority;
+
+        public Emails(String emailAddress, int priority) {
+            if(emailAddress == null) {
+                throw new IllegalStateException("Parameter emailAddress can't be null");
+            }
+            this.emailAddress = emailAddress;
+            this.priority = priority;
+        }
+
+        public String getEmail() {
+            return emailAddress;
+        }
+
+        public int getPriority() {
+            return priority;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            Emails o1 = (Emails) obj;
+            if(o1.getEmail().equals(this.getEmail())) {
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return emailAddress.hashCode();
+        }
+
+        @Override
+        public int compareTo(Emails o) {
+            return o.getPriority() - this.getPriority();
+        }
+    }
+
+    /**
+     * Prevent the adding of duplicates in an priority queue
+     **/
+    private class PreventDuplicatesPriorityQueue<T> extends PriorityQueue<T> {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public boolean add(T e){
+            if(!super.contains(e)) {
+                return super.add(e);
+            }
+            return false;
         }
     }
 }

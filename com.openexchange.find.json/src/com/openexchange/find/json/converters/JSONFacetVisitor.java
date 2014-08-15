@@ -112,7 +112,7 @@ public class JSONFacetVisitor implements FacetVisitor {
             FacetType type = facet.getType();
             result.put("id", type.getId());
             result.put("style", facet.getStyle());
-            result.put("display_name", sanitizeParam(translator.translate(locale, type.getDisplayName())));
+            result.put("name", sanitizeParam(translator.translate(locale, type.getDisplayName())));
 
             List<FacetValue> values = facet.getValues();
             JSONArray jValues = new JSONArray(values.size());
@@ -135,7 +135,7 @@ public class JSONFacetVisitor implements FacetVisitor {
             FacetType type = facet.getType();
             result.put("id", type.getId());
             result.put("style", facet.getStyle());
-            result.put("display_name", sanitizeParam(translator.translate(locale, type.getDisplayName())));
+            result.put("name", sanitizeParam(translator.translate(locale, type.getDisplayName())));
 
             List<FacetValue> values = facet.getValues();
             JSONArray jValues = new JSONArray(values.size());
@@ -182,7 +182,7 @@ public class JSONFacetVisitor implements FacetVisitor {
             for (Option option : value.getOptions()) {
                 JSONObject jOption = new JSONObject();
                 jOption.put("id", option.getId());
-                addDisplayItem(jOption, option.getDisplayItem());
+                jOption.put("name", translator.translate(locale, option.getName()));
                 jOption.put("filter", convertFilter(option.getFilter()));
                 jOptions.put(jOption);
             }

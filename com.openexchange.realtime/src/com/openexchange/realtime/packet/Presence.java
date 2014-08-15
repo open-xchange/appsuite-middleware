@@ -148,6 +148,9 @@ public class Presence extends Stanza {
         defaultElements.add(STATUS_PATH);
         defaultElements.add(PRIORITY_PATH);
         defaultElements.add(ERROR_PATH);
+        setMessage(message);
+        setState(state);
+        setPriority(priority);
     }
 
     /**
@@ -379,6 +382,15 @@ public class Presence extends Stanza {
             }
             return candidate;
         }
+    }
+
+    @Override
+    public void addPayload(PayloadTree tree) {
+        ElementPath newRootPath = tree.getElementPath();
+        if (defaultElements.contains(newRootPath)) {
+            payloads.remove(newRootPath);
+        }
+        addPayloadToMap(tree, payloads);
     }
 
     /**

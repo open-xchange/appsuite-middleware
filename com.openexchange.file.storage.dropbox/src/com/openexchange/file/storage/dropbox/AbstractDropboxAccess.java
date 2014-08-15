@@ -88,6 +88,11 @@ public abstract class AbstractDropboxAccess {
         this.dropboxAPI = dropboxOAuthAccess.getDropboxAPI();
     }
 
+    /**
+     * Gets the user name
+     *
+     * @return The user name
+     */
     public String getDropboxUserName() {
         return dropboxUserName;
     }

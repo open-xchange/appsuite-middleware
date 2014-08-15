@@ -301,9 +301,10 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
         }
         availability = 0;
         allAvailable = -1;
+        ConcurrentMap<Class<?>, ServiceProvider<?>> services = this.services;
         if (null != services) {
             services.clear();
-            services = null;
+            this.services = null;
         }
         context = null;
     }

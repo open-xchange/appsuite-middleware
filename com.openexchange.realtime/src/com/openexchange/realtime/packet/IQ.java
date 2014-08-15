@@ -50,6 +50,7 @@
 package com.openexchange.realtime.packet;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.payload.PayloadTree;
 
 /**
  * {@link IQ} - Used for command exchanges.
@@ -127,6 +128,11 @@ public class IQ extends Stanza {
     @Override
     public Stanza newInstance() {
         return new IQ();
+    }
+
+    @Override
+    public void addPayload(PayloadTree tree) {
+        addPayloadToMap(tree, payloads);
     }
 
 }

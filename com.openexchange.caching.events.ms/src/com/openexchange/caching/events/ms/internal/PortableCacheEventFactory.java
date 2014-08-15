@@ -50,14 +50,14 @@
 package com.openexchange.caching.events.ms.internal;
 
 import com.hazelcast.nio.serialization.Portable;
-import com.openexchange.hazelcast.serialization.CustomPortableFactory;
+import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
 
 /**
  * {@link PortableCacheEventFactory}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class PortableCacheEventFactory implements CustomPortableFactory {
+public class PortableCacheEventFactory extends AbstractCustomPortableFactory {
 
     @Override
     public Portable create() {

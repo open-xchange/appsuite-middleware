@@ -448,9 +448,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         try {
             OXFolderSQL.insertFolderSQL(fuid, user.getId(), folderObj, createTime, ctx, writeCon);
             folderObj.setObjectID(fuid);
-            if (null != writeCon && !writeCon.getAutoCommit()) {
-                writeCon.commit();
-            }
         } catch (final DataTruncation e) {
             throw parseTruncated(e, folderObj, TABLE_OXFOLDER_TREE);
         } catch (final SQLException e) {
@@ -820,9 +817,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
          */
         try {
             OXFolderSQL.updateFolderSQL(user.getId(), fo, lastModified, ctx, writeCon);
-            if (null != writeCon && !writeCon.getAutoCommit()) {
-                writeCon.commit();
-            }
         } catch (final DataTruncation e) {
             throw parseTruncated(e, fo, TABLE_OXFOLDER_TREE);
         } catch (final SQLException e) {
@@ -1045,9 +1039,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
          */
         try {
             OXFolderSQL.renameFolderSQL(user.getId(), folderObj, lastModified, ctx, writeCon);
-            if (null != writeCon && !writeCon.getAutoCommit()) {
-                writeCon.commit();
-            }
         } catch (final DataTruncation e) {
             throw parseTruncated(e, folderObj, TABLE_OXFOLDER_TREE);
         } catch (final SQLException e) {
@@ -1210,9 +1201,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         try {
             storageSrc.setFolderName(newName);
             OXFolderSQL.moveFolderSQL(user.getId(), storageSrc, storageDest, lastModified, ctx, readCon, writeCon);
-            if (null != writeCon && !writeCon.getAutoCommit()) {
-                writeCon.commit();
-            }
         } catch (final DataTruncation e) {
             throw parseTruncated(e, storageSrc, TABLE_OXFOLDER_TREE);
         } catch (final SQLException e) {
@@ -1244,9 +1232,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     folderIDs.addAll(OXFolderSQL.getSubfolderIDs(folderId, readCon, ctx, true));
                 }
                 OXFolderSQL.updateFolderType(writeCon, ctx, storageDest.getType(), folderIDs);
-                if (null != writeCon && !writeCon.getAutoCommit()) {
-                    writeCon.commit();
-                }
             } catch (SQLException e) {
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
             }
@@ -1258,9 +1243,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             OXFolderSQL.updateLastModified(storageSrc.getParentFolderID(), lastModified, user.getId(), writeCon, ctx);
             OXFolderSQL.updateLastModified(storageSrc.getObjectID(), lastModified, user.getId(), writeCon, ctx);
             OXFolderSQL.updateLastModified(storageDest.getObjectID(), lastModified, user.getId(), writeCon, ctx);
-            if (null != writeCon && !writeCon.getAutoCommit()) {
-                writeCon.commit();
-            }
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
@@ -1815,9 +1797,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
              */
             try {
                 OXFolderSQL.delOXFolder(folderID, session.getUserId(), lastModified, true, false, ctx, writeCon);
-                if (null != writeCon && !writeCon.getAutoCommit()) {
-                    writeCon.commit();
-                }
             } catch (final SQLException e) {
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
             }
@@ -1849,9 +1828,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
              */
             try {
                 OXFolderSQL.delWorkingOXFolder(folderID, session.getUserId(), lastModified, ctx, writeCon);
-                if (null != writeCon && !writeCon.getAutoCommit()) {
-                    writeCon.commit();
-                }
             } catch (final SQLException e) {
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
             }

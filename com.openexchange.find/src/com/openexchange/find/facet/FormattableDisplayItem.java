@@ -60,7 +60,7 @@ package com.openexchange.find.facet;
  * new FormattableDisplayItem("in E-Mails", "term") can be constructed to a result
  * string of "term in E-Mails" by clients.
  *
- * {@link FormattableDisplayItem#getDefaultValue()} returns the suffix.
+ * {@link FormattableDisplayItem#getSuffix()} returns the suffix.
  * {@link FormattableDisplayItem#getItem} returns the argument.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
@@ -84,17 +84,15 @@ public class FormattableDisplayItem implements DisplayItem {
     }
 
     @Override
-    public String getDefaultValue() {
+    public String getDisplayName() {
+        return arg + ' ' + suffix;
+    }
+
+    public String getSuffix() {
         return suffix;
     }
 
-    @Override
-    public boolean isLocalizable() {
-        return true;
-    }
-
-    @Override
-    public String getItem() {
+    public String getArgument() {
         return arg;
     }
 

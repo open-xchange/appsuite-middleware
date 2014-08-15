@@ -1,3 +1,23 @@
+* 2014-08-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 34035: Properly acquire message's source
+
+* 2014-08-14 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 34041: Ignore additional elements in autoconfig xml.
+
+* 2014-08-13 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 34023: Default display message for category user input.
+
+* 2014-08-13 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 34014: Adjusted example configuration to match corresponding comments
+
+* 2014-08-12 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 34006: Corrected hashCode() calculation for contacts
+
 * 2014-08-08 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 33818: Added update task to check foreign keys and drop them if necessary
@@ -36,11 +56,16 @@
 
  - Fix for bug 33891: Removed superfluous line throwing always an exception.
 
+* 2014-08-04 - marc.arens@open-xchange.com
+
+ - Fix for bug 33697: Respect destination folder for folder owners
+
 * 2014-08-01 - thorben.betten@open-xchange.com
 
  - Fix for bug 33857: Do not log a warning in case Content-Type misses any charset information; just detect it and continue
  - Fix for bug 33715: Accept new parameter "attach_src" for action=get request to let the client signal RFC822 source is supposed to be
                       attached to generated JSON mail representation
+ - Fix for bug 33850: Keep "Message-Id" header on message transport
 
 * 2014-07-31 - thorben.betten@open-xchange.com
 

@@ -49,7 +49,6 @@
 
 package com.openexchange.realtime.directory;
 
-import java.io.Serializable;
 import java.util.Date;
 import com.openexchange.realtime.packet.Presence;
 
@@ -58,7 +57,7 @@ import com.openexchange.realtime.packet.Presence;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface Resource extends Serializable {
+public interface Resource {
 
     /**
      * Gets the presence information.
@@ -80,14 +79,14 @@ public interface Resource extends Serializable {
      *
      * @return The routing information
      */
-    Object getRoutingInfo();
+    RoutingInfo getRoutingInfo();
 
     /**
      * Sets the routing information
      *
      * @param routingInfo The routing information to set
      */
-    void setRoutingInfo(Object routingInfo);
+    void setRoutingInfo(RoutingInfo routingInfo);
 
     /**
      * Gets the time the resource was last updated or created

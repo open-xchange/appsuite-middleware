@@ -54,6 +54,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
+import org.slf4j.Logger;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -84,6 +85,8 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "content_type", optional = true, description = "If present the response declares the given content_type in the Content-Type header.") }, responseDescription = "The raw byte data of the document. The response type for the HTTP Request is set accordingly to the defined mimetype for this infoitem or the content_type given.")
 @DispatcherNotes(defaultFormat = "file", allowPublicSession = true)
 public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXActionService, LastModifiedAwareAJAXActionService {
+
+    static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(DocumentAction.class);
 
     public static final String DOCUMENT = "com.openexchange.file.storage.json.DocumentAction.DOCUMENT";
 
@@ -135,7 +138,13 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
 
                 @Override
                 public InputStream newStream() throws OXException, IOException {
-                    InputStream inputStream = fileAccess.optThumbnailStream(id, version);
+                    InputStream inputStream;
+                    try {
+                        inputStream = fileAccess.optThumbnailStream(id, version);
+                    } catch (OXException e) {
+                        LOGGER.debug("Unable to retrieve thumbnail for file: {}", id, e);
+                        inputStream = null;
+                    }
                     if (null == inputStream) {
                         inputStream = fileAccess.getDocument(id, version);
                     }

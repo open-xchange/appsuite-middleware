@@ -70,8 +70,8 @@ import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.hazelcast.management.DistributedGroupManagerMBean;
 import com.openexchange.realtime.hazelcast.management.DistributedGroupManagerManagement;
 import com.openexchange.realtime.hazelcast.osgi.Services;
-import com.openexchange.realtime.hazelcast.serialization.PortableID;
-import com.openexchange.realtime.hazelcast.serialization.PortableSelectorChoice;
+import com.openexchange.realtime.hazelcast.serialization.group.PortableSelectorChoice;
+import com.openexchange.realtime.hazelcast.serialization.packet.PortableID;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.synthetic.SyntheticChannel;
@@ -150,7 +150,7 @@ public class DistributedGroupManagerImpl implements ManagementAware<DistributedG
 
     @Override
     public boolean removeClientToSelectorChoice(SelectorChoice selectorChoice) throws OXException {
-        MultiMap<ID, PortableSelectorChoice> clientToGroupsMapping = getClientToGroupsMapping();
+        MultiMap<PortableID,PortableSelectorChoice> clientToGroupsMapping = getClientToGroupsMapping();
 
         boolean clientAssociationRemoved = clientToGroupsMapping.remove(
             new PortableID(selectorChoice.getClient()),
@@ -262,7 +262,7 @@ public class DistributedGroupManagerImpl implements ManagementAware<DistributedG
      * 
      * @return A {@link MultiMap} of one client to many groups
      */
-    private MultiMap<ID, PortableSelectorChoice> getClientToGroupsMapping() throws OXException {
+    private MultiMap<PortableID, PortableSelectorChoice> getClientToGroupsMapping() throws OXException {
         HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
         return hazelcast.getMultiMap(client_map);
     }

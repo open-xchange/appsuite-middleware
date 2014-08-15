@@ -49,6 +49,8 @@
 
 package com.openexchange.subscribe.google;
 
+import static com.openexchange.subscribe.google.utility.AssertField.assertFieldIsNull;
+import static com.openexchange.subscribe.google.utility.AssertField.assertNotNullAndEquals;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.LinkedList;
@@ -80,6 +82,10 @@ public class GoogleContactsTest extends AbstractGoogleTest {
             final String testAccount2 = "Maria Meier";
             boolean testAccount2Success = false;
 
+            //represents a test account with no primary mail information only
+            final String testAccount3 = "No Primary Mail";
+            boolean testAccount3Success = false;
+
             for(Contact c : contacts) {
                 if(c.getDisplayName() != null)
                     if(c.getDisplayName().equals(testAccount1)) {
@@ -91,8 +97,8 @@ public class GoogleContactsTest extends AbstractGoogleTest {
                         assertNotNullAndEquals("suffix", "Ende", c.getSuffix());
 
                         //email
-                        assertNotNullAndEquals("email1", "business@example.com", c.getEmail1());
-                        assertNotNullAndEquals("email2", "privat@example.com", c.getEmail2());
+                        assertNotNullAndEquals("email1", "privat@example.com", c.getEmail1());
+                        assertNotNullAndEquals("email2", "business@example.com", c.getEmail2());
                         assertNotNullAndEquals("email3", "other@example.com", c.getEmail3());
 
                         //organisation
@@ -147,7 +153,7 @@ public class GoogleContactsTest extends AbstractGoogleTest {
 
                         //email
                         assertNotNullAndEquals("email1", "mariameier@example.com", c.getEmail1());
-                        assertNotNullAndEquals("email2", "mariameier@example.com", c.getEmail2());
+                        assertFieldIsNull("email2", c.getEmail2());
                         assertFieldIsNull("email3", c.getEmail3());
 
                         //organisation
@@ -183,16 +189,65 @@ public class GoogleContactsTest extends AbstractGoogleTest {
                         assertFieldIsNull("Image does not equals", c.getImage1());
                         assertFieldIsNull("content type", c.getImageContentType());
                         testAccount2Success = true;
+                    } else if(c.getDisplayName().equals(testAccount3)) {
+                        assertNotNullAndEquals("given name", "No", c.getGivenName());
+                        assertNotNullAndEquals("surname", "Primary", c.getSurName());
+                        assertFieldIsNull("title", c.getTitle());
+                        assertFieldIsNull("middle name", c.getMiddleName());
+                        assertNotNullAndEquals("suffix", "Mail", c.getSuffix());
+
+                        //email
+                        assertNotNullAndEquals("email1", "noprimarybuthomeaddress@example.com" ,c.getEmail1());
+                        assertFieldIsNull("email2", c.getEmail2());
+                        assertFieldIsNull("email3", c.getEmail3());
+
+                        //organisation
+                        assertFieldIsNull("company", c.getCompany());
+                        assertFieldIsNull("job title", c.getPosition());
+
+                        assertFieldIsNull("telephone business 1", c.getTelephoneBusiness1());
+                        assertFieldIsNull("cellular telephone 1", c.getTelephoneHome1());
+                        assertFieldIsNull("telephone other", c.getTelephoneOther());
+                        assertFieldIsNull("fax business", c.getFaxBusiness());
+                        assertFieldIsNull("fax home",  c.getFaxHome());
+                        assertFieldIsNull("cellular telephone 1", c.getCellularTelephone1());
+                        assertFieldIsNull("cellular telephone 2", c.getCellularTelephone2());
+
+                        assertFieldIsNull("birthday", c.getBirthday());
+
+                        //location
+                        assertFieldIsNull("street business", c.getStreetBusiness());
+                        assertFieldIsNull("postal code business", c.getPostalCodeBusiness());
+                        assertFieldIsNull("city business", c.getCityBusiness());
+                        assertFieldIsNull("country business", c.getCountryBusiness());
+                        assertFieldIsNull("street home", c.getStreetHome());
+                        assertFieldIsNull("postal code home", c.getPostalCodeHome());
+                        assertFieldIsNull("city home", c.getCityHome());
+                        assertFieldIsNull("country home", c.getCountryHome());
+                        assertFieldIsNull("street other", c.getStreetOther());
+                        assertFieldIsNull("postal code other", c.getPostalCodeOther());
+                        assertFieldIsNull("city other", c.getCityOther());
+                        assertFieldIsNull("country other", c.getCountryOther());
+
+                        assertFieldIsNull("instant messenger", c.getInstantMessenger1());
+
+                        assertFieldIsNull("Image does not equals", c.getImage1());
+                        assertFieldIsNull("content type", c.getImageContentType());
+                        testAccount3Success = true;
                     }
 
-                if(testAccount1Success && testAccount2Success) {
+                if(testAccount1Success && testAccount2Success && testAccount3Success) {
                     return;
                 }
             }
             assertTrue("Could not find: " + testAccount1 ,testAccount1Success);
             assertTrue("Could not find: " + testAccount2 ,testAccount2Success);
+            assertTrue("Could not find: " + testAccount3 ,testAccount3Success);
         } catch (OXException e) {
             assertFalse(e.getMessage(), true);
+            throw e;
+        } catch (Exception e) {
+            throw e;
         }
     }
 
@@ -204,10 +259,13 @@ public class GoogleContactsTest extends AbstractGoogleTest {
             20, 30, 20, 30, 20, 20, 20, 30, 30, 30, 30, 20, 22, 20, -1, -64, 0, 17, 8, 0, 96, 0, 96, 3, 1, 34, 0, 2, 17, 1, 3, 17, 1, -1, -60, 0,
             29, 0, 1, 1, 0, 3, 1, 0, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 8, 9, 3, 4, 6, 7, 5, -1, -60, 0, 48, 16, 0, 2, 0, 2, 7, 7, 3, 3, 5, 0,
             0, 0, 0, 0, 0, 0, 0, 1, 2, 17, 3, 5, 19, 24, 81, -111, -47, 8, 18, 33, 83, 97, 98, -110, 4, 49, 50, 6, 65, 113, 7, 20, 66, 67, -95, -1,
-            -60, 0, 26, 1, 0, 3, 0, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 6, 5, -1, -60, 0, 32, 17, 1, 0, 2, 1, 4, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-            17, 3, 2, 18, 33, 49, 4, 5, 6, 34, 65, -1, -38, 0, 12, 3, 1, 0, 2, 17, 3, 17, 0, 63, 0, -37, -71, -119, -128, 10, 38, 38, 3, 2, 38, 71, 16, 64, 82, 46, -119,
-            -119, -112, 5, -120, -117, 89, -106, 100, 3, 85, 65, 49, 48, 0, 76, 66, -127, 34, 72, 9, 67, 36, -117, 32, 36, 64, -123, -112, 20, -124, 40, 66, 100, -114, -98, 116, -111, -56, -112, -57,
-            -61, -120, -115, 113, -103, -116, 114, 98, -74, 45, 90, -106, 26, 94, 39, -90, -15, -27, 4, 9, 22, 16, -79, 22, -49, 123, -16, 55,
+            -60, 0, 26, 1, 0, 3, 0, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3,
+                4, 6, 5, -1, -60, 0, 32, 17, 1, 0,
+            2, 1, 4, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 17, 3, 2, 18, 33, 49, 4, 5, 6, 34, 65, -1, -38, 0, 12, 3, 1, 0, 2, 17, 3, 17,
+            0, 63, 0, -37, -71, -119, -128, 10, 38, 38, 3, 2, 38, 71, 16, 64, 82, 46, -119, -119, -112, 5, -120, -117, 89, -106, 100, 3,
+            85, 65, 49, 48, 0, 76, 66, -127, 34, 72, 9, 67, 36, -117, 32, 36, 64, -123, -112, 20, -124, 40, 66, 100, -114, -98, 116, -111,
+            -56, -112, -57, -61, -120, -115, 113, -103, -116, 114, 98, -74, 45, 90, -106, 26, 94, 39, -90, -15, -27, 4, 9, 22, 16, -79, 22,
+            -49, 123, -16, 55,
             -65, 7, 59, -81, 53, 95, 99, 15, -109, -48, -105, -102, -81, -79, -121, -55, -24, 82, -99, 18, -33, 88, -96, -94, 88, -93, -99, -73,
             -102, -81, -79, -121, -55, -24, 91, -51, 87, -40, -61, -28, -12, 0, -24, -118, -119, 98, -77, 46, -14, -23, -103, -50, -37, -51, 87,
             -40, -61, -28, -12, 23, -102, -81, -79, -121, -55, -24, 56, 39, 68, -73, -105, 64, -30, 93, 14, 118, -34, 106, -66, -58, 31, 39, -96,
@@ -223,6 +281,7 @@ public class GoogleContactsTest extends AbstractGoogleTest {
             57, 35, 108, 58, -113, -116, 123, 92, 94, 22, 77, -7, 58, 126, -31, 101, -36, -59, -105, 115, 51, 6, -21, -106, 121, -70, 46, -26,
             85, 69, -35, 17, -104, 2, 97, 103, -35, 16, -77, -18, -120, -91, 0, -62, -49, -71, -106, -49, -71, -103, 0, -95, 124, 60, 35, -94,
             -101, -7, 68, 75, 46, -24, -113, -111, 36, 73, 34, -54, 34, -33, 26, 42, 6, -33, -54, 35, -46, 26, 20, -66, -20, -11, 4, 109, -27, 81,
-            -11, -30, 25, 2, 2, -62, -126, 6, -126, -120, 19, 33, 69, 48, 4, 0, 29, 15, -48, 16, 10, -41, -85, 108, 66, -128, 6, -98, 37, -1, -39 };
+            -11, -30, 25, 2, 2, -62, -126, 6, -126, -120, 19, 33, 69, 48, 4, 0, 29, 15, -48, 16, 10, -41, -85, 108, 66, -128, 6,
+                -98, 37, -1, -39 };
     }
 }

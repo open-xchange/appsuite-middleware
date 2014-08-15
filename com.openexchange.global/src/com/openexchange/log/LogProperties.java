@@ -154,6 +154,8 @@ public final class LogProperties {
         SESSION_USER_ID("com.openexchange.session.userId"),
         /**
          * com.openexchange.session.userName
+         * <p>
+         * The session's full login information; e.g. <code>"user1@foobar.org"</code>
          */
         SESSION_USER_NAME("com.openexchange.session.userName"),
         /**
@@ -168,6 +170,12 @@ public final class LogProperties {
          * com.openexchange.session.session
          */
         SESSION_SESSION("com.openexchange.session.session"),
+        /**
+         * com.openexchange.session.loginName
+         * <p>
+         * The session's login name (<i>not</i> the full login string)
+         */
+        SESSION_LOGIN_NAME("com.openexchange.session.loginName"),
         /**
          * com.openexchange.grizzly.requestURI
          */
@@ -420,10 +428,11 @@ public final class LogProperties {
         if (null == session) {
             return;
         }
-        MDC.put(LogProperties.Name.SESSION_SESSION_ID.getName(), session.getSessionID());
-        MDC.put(LogProperties.Name.SESSION_AUTH_ID.getName(), session.getAuthId());
+        MDC.put(LogProperties.Name.SESSION_SESSION_ID.getName(), getLoggableString(session.getSessionID()));
+        MDC.put(LogProperties.Name.SESSION_AUTH_ID.getName(), getLoggableString(session.getAuthId()));
         MDC.put(LogProperties.Name.SESSION_USER_ID.getName(), Integer.toString(session.getUserId()));
-        MDC.put(LogProperties.Name.SESSION_USER_NAME.getName(), session.getLogin());
+        MDC.put(LogProperties.Name.SESSION_USER_NAME.getName(), getLoggableString(session.getLogin()));
+        MDC.put(LogProperties.Name.SESSION_LOGIN_NAME.getName(), getLoggableString(session.getLoginName()));
         MDC.put(LogProperties.Name.SESSION_CONTEXT_ID.getName(), Integer.toString(session.getContextId()));
         final String client  = session.getClient();
         MDC.put(LogProperties.Name.SESSION_CLIENT_ID.getName(), client == null ? "unknown" : client);
@@ -438,9 +447,14 @@ public final class LogProperties {
         MDC.remove(LogProperties.Name.SESSION_AUTH_ID.getName());
         MDC.remove(LogProperties.Name.SESSION_USER_ID.getName());
         MDC.remove(LogProperties.Name.SESSION_USER_NAME.getName());
+        MDC.remove(LogProperties.Name.SESSION_LOGIN_NAME.getName());
         MDC.remove(LogProperties.Name.SESSION_CONTEXT_ID.getName());
         MDC.remove(LogProperties.Name.SESSION_CLIENT_ID.getName());
         // MDC.remove(LogProperties.Name.SESSION_SESSION.getName());
+    }
+
+    private static String getLoggableString(String str) {
+        return null == str ? "" : str;
     }
 
     /**

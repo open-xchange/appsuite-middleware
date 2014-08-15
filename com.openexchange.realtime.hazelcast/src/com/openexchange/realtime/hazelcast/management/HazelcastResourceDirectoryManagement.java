@@ -50,9 +50,12 @@
 package com.openexchange.realtime.hazelcast.management;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import com.hazelcast.core.IMap;
@@ -60,6 +63,8 @@ import com.hazelcast.core.MultiMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementObject;
 import com.openexchange.realtime.hazelcast.directory.HazelcastResourceDirectory;
+import com.openexchange.realtime.hazelcast.serialization.directory.PortableResource;
+import com.openexchange.realtime.hazelcast.serialization.packet.PortableID;
 
 
 /**
@@ -106,11 +111,16 @@ public class HazelcastResourceDirectoryManagement extends ManagementObject<Hazel
      */
     @Override
     public Map<String, List<String>> getIDMapping() throws OXException {
-        MultiMap<String, String> idMapping = resourceDirectory.getIDMapping();
-        Map<String, List<String>> jmxMap = new HashMap<String, List<String>>(idMapping.keySet().size());
-        for (String id : idMapping.keySet()) {
-            ArrayList<String> valueList = new ArrayList<String>(idMapping.get(id));
-            jmxMap.put(id, valueList);
+        MultiMap<PortableID,PortableID> idMapping = resourceDirectory.getIDMapping();
+        Set<PortableID> generalIds = idMapping.keySet();
+        Map<String, List<String>> jmxMap = new HashMap<String, List<String>>(generalIds.size());
+        for (PortableID generalId : generalIds) {
+            Collection<PortableID> concreteIds = idMapping.get(generalId);
+            ArrayList<String> concreteIdRepresentations = new ArrayList<String>(concreteIds.size());
+            for (PortableID concreteId : concreteIds) {
+                concreteIdRepresentations.add(concreteId.toString());
+            }
+            jmxMap.put(generalId.toString(), concreteIdRepresentations);
         }
         return jmxMap;
     }
@@ -122,17 +132,13 @@ public class HazelcastResourceDirectoryManagement extends ManagementObject<Hazel
      * @throws OXException if the map couldn't be fetched from hazelcast
      */
     @Override
-    public Map<String, Map<String, Object>> getResourceMapping() throws OXException {
-        IMap<String,Map<String,Object>> resourceMapping = resourceDirectory.getResourceMapping();
-        Map<String,Map<String,Object>> jmxMap = new HashMap<String,Map<String,Object>>(resourceMapping.size());
-        for (Map.Entry<String, Map<String, Object>> entry : resourceMapping.entrySet()) {
-            String concreteID = entry.getKey();
-            Map<String, Object> resourceMap = entry.getValue();
-            Object routingInfo = resourceMap.get("routingInfo");
-            if(routingInfo!=null) {
-                resourceMap.put("routingInfo", routingInfo.toString());
-            }
-            jmxMap.put(concreteID, resourceMap);
+    public Map<String, String> getResourceMapping() throws OXException {
+        IMap<PortableID,PortableResource> resourceMapping = resourceDirectory.getResourceMapping();
+        Map<String,String> jmxMap = new HashMap<String,String>(resourceMapping.size());
+        for (Entry<PortableID, PortableResource> entry : resourceMapping.entrySet()) {
+            PortableID concreteID = entry.getKey();
+            PortableResource resource = entry.getValue();
+            jmxMap.put(concreteID.toString(), resource.toString());
         }
         return jmxMap;
     }

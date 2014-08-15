@@ -67,6 +67,19 @@ public final class Utils {
     }
 
     /**
+     * Normalizes given folder identifier
+     *
+     * @param folderId The folder identifier
+     * @return The normalizes folder identifier
+     */
+    public static String normalizeFolderId(String folderId) {
+        if (null == folderId) {
+            return folderId;
+        }
+        return folderId.endsWith("/") ? folderId.substring(0, folderId.length() - 1) : folderId;
+    }
+
+    /**
      * Checks if specified folder identifier ends with a <code>'/'</code> character.
      *
      * @param folderId The folder identifier to check

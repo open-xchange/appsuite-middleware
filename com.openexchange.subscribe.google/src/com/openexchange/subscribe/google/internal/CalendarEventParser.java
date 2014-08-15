@@ -49,9 +49,12 @@
 
 package com.openexchange.subscribe.google.internal;
 
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import org.slf4j.Logger;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
@@ -60,6 +63,9 @@ import com.google.api.services.calendar.model.Event.Reminders;
 import com.google.api.services.calendar.model.EventAttendee;
 import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.EventReminder;
+import com.google.ical.values.Frequency;
+import com.google.ical.values.RRule;
+import com.google.ical.values.WeekdayNum;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -68,6 +74,7 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmStatus;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.google.osgi.Services;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
@@ -88,6 +95,7 @@ public class CalendarEventParser {
         TENTATIVE("tentative", ConfirmStatus.TENTATIVE);
 
         private final String str;
+
         private final ConfirmStatus confirmStatus;
 
         private ResponseStatus(String str, ConfirmStatus confirmStatus) {
@@ -142,6 +150,9 @@ public class CalendarEventParser {
         if (event.getDescription() != null) {
             calendarObject.setNote(event.getDescription());
         }
+        if (event.getColorId() != null) {
+            calendarObject.set(CalendarDataObject.COLOR_LABEL, Integer.parseInt(event.getColorId()));
+        }
 
         // Start, end and creation time
         if (event.getStart() != null) {
@@ -149,6 +160,7 @@ public class CalendarEventParser {
             final long startDate;
             if (eventDateTime.getDate() != null) {
                 startDate = eventDateTime.getDate().getValue();
+                calendarObject.setFullTime(true);
             } else if (eventDateTime.getDateTime() != null) {
                 startDate = eventDateTime.getDateTime().getValue();
             } else {
@@ -176,14 +188,18 @@ public class CalendarEventParser {
             calendarObject.setCreationDate(new Date(dateTime.getValue()));
         }
 
+        // Set creator and organizer
         if (event.getCreator() != null) {
             Creator creator = event.getCreator();
             Boolean isSelf = creator.getSelf();
             if (isSelf != null && isSelf.booleanValue()) {
                 calendarObject.setCreatedBy(session.getUserId());
-            } else {
-                // add external creator?
             }
+        }
+
+        // Events with no organizer are considered to be delete exceptions
+        if (event.getOrganizer() != null) {
+            calendarObject.setOrganizer(event.getOrganizer().getEmail());
         }
 
         // We only support one reminder per calendar Object, thus the first one of the event
@@ -191,6 +207,13 @@ public class CalendarEventParser {
         if (reminders.getOverrides() != null && reminders.getOverrides().size() > 0) {
             final EventReminder eventReminder = reminders.getOverrides().get(0);
             calendarObject.setAlarm(eventReminder.getMinutes().intValue());
+        }
+
+        // Set recurrences
+        final List<String> recurrence = event.getRecurrence();
+        if (recurrence != null && recurrence.size() > 0) {
+            // Recurrence string is the first element
+            handleRecurrence(recurrence.get(0), calendarObject);
         }
 
         // Participants and confirmations
@@ -228,11 +251,30 @@ public class CalendarEventParser {
                 }
                 participants.add(p);
             }
+
+            // Add self
+            final UserParticipant up = new UserParticipant(session.getUserId());
+            participants.add(up);
+
             calendarObject.setConfirmations(confParts);
             calendarObject.setParticipants(participants);
         }
 
+        calendarObject.setIgnoreConflicts(true);
+
         convertExternalToInternal(calendarObject);
+    }
+
+    /**
+     * Parse a delete exception
+     * 
+     * @param event
+     * @param calendarObject
+     */
+    public void parseDeleteException(Event event, CalendarDataObject calendarObject) {
+        calendarObject.setContext(session.getContext());
+        calendarObject.setUid(event.getRecurringEventId() + "@google.com");
+        calendarObject.setStartDate(new Date(event.getOriginalStartTime().getDateTime().getValue()));
     }
 
     /**
@@ -268,5 +310,71 @@ public class CalendarEventParser {
             }
         }
         calendarObject.setParticipants(participants);
+    }
+
+    private void handleRecurrence(final String recurrence, final CalendarDataObject calendarObject) throws OXException {
+        try {
+            final String timezone = (calendarObject.getTimezone() != null) ? calendarObject.getTimezone() : "UTC";
+            final Calendar tzCalendar = Calendar.getInstance(TimeZone.getTimeZone(timezone));
+
+            final RRule r = new RRule(recurrence);
+
+            // Set recurrence type
+            // No support for secondly, minutely and hourly recurrences, set as dailies ?
+            {
+                final Frequency f = r.getFreq();
+                if (f.ordinal() > 2) {
+                    calendarObject.setRecurrenceType(f.ordinal() - 2);
+                }
+            }
+
+            // Set the interval
+            calendarObject.setInterval((r.getInterval() > 0) ? r.getInterval() : 1);
+
+            // Meet preconditions for the relevant recurrence type
+            if (calendarObject.getRecurrenceType() == CalendarDataObject.DAILY && r.getUntil() != null) {
+                // DAILY
+
+            } else if (calendarObject.getRecurrenceType() == CalendarDataObject.WEEKLY && r.getByDay() != null && r.getByDay().size() > 0) {
+                // WEEKLY
+                final List<WeekdayNum> weekdays = r.getByDay();
+                int days = 0;
+                for (WeekdayNum w : weekdays) {
+                    days |= (int) Math.pow(2, w.wday.jsDayNum);
+                }
+                calendarObject.setDays(days);
+            } else if (calendarObject.getRecurrenceType() == CalendarDataObject.MONTHLY) {
+                // MONTHLY
+                final List<WeekdayNum> weekdays = r.getByDay();
+                // When it comes to monthly events, the rule should only contain one entry
+                if (weekdays.isEmpty()) {
+                    tzCalendar.setTime(calendarObject.getStartDate());
+                    calendarObject.setDayInMonth(tzCalendar.get(Calendar.DAY_OF_MONTH));
+                } else {
+                    if (weekdays.size() == 1) {
+                        final WeekdayNum weekdayNum = weekdays.get(0);
+                        calendarObject.setDayInMonth(weekdayNum.num);
+                        calendarObject.setDays((int) Math.pow(2, weekdayNum.wday.jsDayNum));
+                    }
+                }
+            } else if (calendarObject.getRecurrenceType() == CalendarDataObject.YEARLY) {
+                // YEARLY
+                tzCalendar.setTime(calendarObject.getStartDate());
+                calendarObject.setDayInMonth(tzCalendar.get(Calendar.DAY_OF_MONTH));
+                calendarObject.setMonth(tzCalendar.get(Calendar.MONTH));
+            }
+
+            // Set occurrence or until
+            if (r.getUntil() != null) {
+                tzCalendar.set(Calendar.YEAR, r.getUntil().year());
+                tzCalendar.set(Calendar.MONTH, r.getUntil().month());
+                tzCalendar.set(Calendar.DAY_OF_MONTH, r.getUntil().day());
+                calendarObject.setUntil(tzCalendar.getTime());
+            } else if (r.getCount() > 0) {
+                calendarObject.setOccurrence(r.getCount());
+            }
+        } catch (ParseException e) {
+            throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 }

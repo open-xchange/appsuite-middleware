@@ -278,7 +278,7 @@ public interface AppointmentSQLInterface {
      * @param writeCon
      * @throws OXException, OXPermissionException, OXFolderNotFoundException, OXConflictException, OXMandatoryFieldException, OXObjectNotFoundException
      */
-    public void deleteAppointmentsInFolder(int inFolder, Connection writeCon) throws OXException, SQLException;
+    public boolean deleteAppointmentsInFolder(int inFolder, Connection writeCon) throws OXException, SQLException;
 
     /**
      * checks if the given folder contains any foreign objects
@@ -345,7 +345,7 @@ public interface AppointmentSQLInterface {
 
     /**
      * Sets the confirmation of an appointment for a user.
-     * 
+     *
      * @param objectId unique identifier of the appointment.
      * @param folderId folder of the appointment
      * @param optOccurrenceId The numeric identifier of the occurrence to which the confirmation applies in case <code>objectId</code>
@@ -360,7 +360,7 @@ public interface AppointmentSQLInterface {
 
     /**
      * Sets the confirmation of an appointment for an external user, identified with his mail address.
-     * 
+     *
      * @param objectId unique identifier of the appointment.
      * @param folderId folder of the appointment
      * @param optOccurrenceId The numeric identifier of the occurrence to which the confirmation applies in case <code>objectId</code>

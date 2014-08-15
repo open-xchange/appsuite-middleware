@@ -4563,12 +4563,14 @@ public class Contact extends CommonObject {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-
-        for(final int col : Contact.ALL_COLUMNS){
-            if(contains(col)) {
-                result = prime * result + get(col).hashCode();
-            } else {
-                result = prime * result;
+        for (int col : Contact.ALL_COLUMNS) {
+            if (contains(col)) {
+                Object object = get(col);
+                if (null != object) {
+                    result = prime * result + object.hashCode();
+                } else {
+                    result = prime * result;
+                }
             }
         }
         return result;

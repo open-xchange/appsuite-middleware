@@ -49,15 +49,15 @@
 
 package com.openexchange.sessionstorage.hazelcast.portable;
 
+import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
 import com.openexchange.hazelcast.serialization.CustomPortable;
-import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 
 /**
  * {@link PortableSessionFactory}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class PortableSessionFactory implements CustomPortableFactory {
+public class PortableSessionFactory extends AbstractCustomPortableFactory {
 
     @Override
     public CustomPortable create() {

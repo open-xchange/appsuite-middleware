@@ -50,6 +50,7 @@
 
 package com.openexchange.hazelcast.serialization;
 
+import com.hazelcast.nio.serialization.ClassDefinition;
 import com.hazelcast.nio.serialization.Portable;
 
 /**
@@ -75,5 +76,15 @@ public interface CustomPortableFactory {
      * @return The class ID.
      */
     int getClassId();
+    
+    /**
+     * Gets the ClassDefinition of of the associated Portable. This is used to register ClassDefinitions with Hazelcast before a Portable is
+     * written for the first time. This way we can persist nested Portables with possible null values.
+     * 
+     * @see https://github.com/sancar/hazelcast/commit/fb447bdc89b8d448066ba517d22c891dc60b1534
+     * @return Null or the ClassDefinition of of the associated Portable
+     *
+     */
+     ClassDefinition getClassDefinition();
 
 }

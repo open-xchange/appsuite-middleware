@@ -4,6 +4,18 @@ open-xchange-freebusy (7.6.1-0) unstable; urgency=medium
 
  -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Thu, 26 Jun 2014 11:39:44 +0200
 
+open-xchange-freebusy (7.6.0-14) stable; urgency=low
+
+  * Build for patch 2014-08-06
+
+ -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Tue, 05 Aug 2014 15:26:11 +0200
+
+open-xchange-freebusy (7.6.0-13) stable; urgency=low
+
+  * Build for patch 2014-08-11
+
+ -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Mon, 04 Aug 2014 17:09:09 +0200
+
 open-xchange-freebusy (7.6.0-12) stable; urgency=low
 
   * Build for patch 2014-07-30
@@ -81,6 +93,18 @@ open-xchange-freebusy (7.6.0-0) unstable; urgency=low
   * prepare for 7.6.0
 
  -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Wed, 12 Feb 2014 09:35:55 +0100
+
+open-xchange-freebusy (7.4.2-32) stable; urgency=low
+
+  * Build for patch 2014-08-15
+
+ -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Wed, 13 Aug 2014 15:58:14 +0200
+
+open-xchange-freebusy (7.4.2-31) stable; urgency=low
+
+  * Build for patch 2014-08-11
+
+ -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Mon, 04 Aug 2014 17:02:44 +0200
 
 open-xchange-freebusy (7.4.2-30) stable; urgency=low
 

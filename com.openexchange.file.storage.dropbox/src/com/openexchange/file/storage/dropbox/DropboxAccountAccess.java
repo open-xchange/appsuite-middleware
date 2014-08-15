@@ -84,6 +84,15 @@ public final class DropboxAccountAccess implements FileStorageAccountAccess {
         dropboxOAuthAccess = DropboxOAuthAccess.accessFor(account, session);
     }
 
+    /**
+     * Gets the associated account
+     *
+     * @return The account
+     */
+    public FileStorageAccount getAccount() {
+        return account;
+    }
+
     @Override
     public void connect() throws OXException {
         // Nope

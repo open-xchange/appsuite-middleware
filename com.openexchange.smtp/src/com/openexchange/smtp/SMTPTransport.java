@@ -944,13 +944,13 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
         transport(smtpMessage, recipients, transport, smtpConfig, null);
     }
 
-    private void transport(final MimeMessage smtpMessage, final Address[] recipients, final Transport transport, final SMTPConfig smtpConfig, final MtaStatusInfo smtpStatusInfo) throws OXException {
+    private void transport(final MimeMessage smtpMessage, final Address[] recipients, final Transport transport, final SMTPConfig smtpConfig, final MtaStatusInfo mtaInfo) throws OXException {
         // Prepare addresses
         prepareAddresses(recipients);
 
         // Register transport listener to fill addresses to status info
-        if (null != smtpStatusInfo) {
-            transport.addTransportListener(new AddressAddingTransportListener(smtpStatusInfo));
+        if (null != mtaInfo) {
+            transport.addTransportListener(new AddressAddingTransportListener(mtaInfo));
         }
 
         // Try to send the message
@@ -958,11 +958,11 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
             transport.sendMessage(smtpMessage, recipients);
             logMessageTransport(smtpMessage, smtpConfig);
         } catch (SMTPSendFailedException sendFailed) {
-            if (null == smtpStatusInfo) {
-                throw MimeMailException.handleMessagingException(sendFailed, smtpConfig, session);
-            }
-            smtpStatusInfo.setReturnCode(sendFailed.getReturnCode());
             OXException oxe = MimeMailException.handleMessagingException(sendFailed, smtpConfig, session);
+            if (null != mtaInfo) {
+                mtaInfo.setReturnCode(sendFailed.getReturnCode());
+                oxe.setArgument("mta_info", mtaInfo);
+            }
             throw oxe;
         } catch (final MessagingException e) {
             if (e.getNextException() instanceof javax.activation.UnsupportedDataTypeException) {

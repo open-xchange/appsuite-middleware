@@ -49,10 +49,6 @@
 
 package com.openexchange.find.facet;
 
-import com.openexchange.find.common.ContactDisplayItem;
-
-
-
 /**
  * {@link DisplayItemVisitor}
  *
@@ -61,9 +57,9 @@ import com.openexchange.find.common.ContactDisplayItem;
  */
 public interface DisplayItemVisitor {
 
-    void visit(ContactDisplayItem item);
-
     void visit(SimpleDisplayItem item);
+
+    void visit(ComplexDisplayItem complexDisplayItem);
 
     void visit(FormattableDisplayItem formattableDisplayItem);
 
