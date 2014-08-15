@@ -49,10 +49,13 @@
 
 package com.openexchange.file.storage.google_drive;
 
+import java.io.IOException;
 import com.google.api.client.http.HttpResponseException;
+import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.google_drive.access.GoogleDriveAccess;
 import com.openexchange.session.Session;
 
@@ -68,15 +71,31 @@ public abstract class AbstractGoogleDriveAccess {
     protected final GoogleDriveAccess googleDriveAccess;
     protected final Session session;
     protected final FileStorageAccount account;
+    protected final String rootFolderId;
+    protected final String trashFolderId;
 
     /**
      * Initializes a new {@link AbstractGoogleDriveAccess}.
      */
-    protected AbstractGoogleDriveAccess(final GoogleDriveAccess googleDriveAccess, final FileStorageAccount account, final Session session) {
+    protected AbstractGoogleDriveAccess(final GoogleDriveAccess googleDriveAccess, final FileStorageAccount account, final Session session) throws OXException {
         super();
         this.googleDriveAccess = googleDriveAccess;
         this.account = account;
         this.session = session;
+
+        try {
+            Drive drive = googleDriveAccess.getDrive();
+
+            rootFolderId = drive.files().get("root").execute().getId();
+
+            Drive.Children.List list = drive.children().list("root");
+            list.setQ("trashed = true");
+            trashFolderId = list.execute().getItems().get(0).getId();
+        } catch (HttpResponseException e) {
+            throw handleHttpResponseError(null, e);
+        } catch (IOException e) {
+            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        }
     }
 
     /**
@@ -102,6 +121,39 @@ public abstract class AbstractGoogleDriveAccess {
      */
     protected static boolean isDir(File file) {
         return MIME_TYPE_DIRECTORY.equals(file.getMimeType());
+    }
+
+    /**
+     * Checks if given file/directory is trashed
+     *
+     * @param file The file/directory to check
+     * @throws OXException If file/directory is trashed
+     */
+    protected void checkIfTrashed(com.google.api.services.drive.model.File file) throws OXException {
+        Boolean explicitlyTrashed = file.getExplicitlyTrashed();
+        if (null != explicitlyTrashed && explicitlyTrashed.booleanValue()) {
+            throw GoogleDriveExceptionCodes.NOT_FOUND.create(file.getId());
+        }
+    }
+
+    /**
+     * Gets the Google Drive folder identifier from given file storage folder identifier
+     *
+     * @param folderId The file storage folder identifier
+     * @return The appropriate Google Drive folder identifier
+     */
+    protected String toGoogleDriveFolderId(String folderId) {
+        return FileStorageFolder.ROOT_FULLNAME.equals(folderId) ? rootFolderId : folderId;
+    }
+
+    /**
+     * Gets the file storage folder identifier from given Google Drive folder identifier
+     *
+     * @param googleId The Google Drive folder identifier
+     * @return The appropriate file storage folder identifier
+     */
+    protected String toFileStorageFolderId(String googleId) {
+        return rootFolderId.equals(googleId) || "root".equals(googleId) ? FileStorageFolder.ROOT_FULLNAME : googleId;
     }
 
 }
