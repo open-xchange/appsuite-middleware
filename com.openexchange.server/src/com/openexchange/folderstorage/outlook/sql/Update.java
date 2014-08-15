@@ -64,7 +64,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderEventConstants;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
-import com.openexchange.folderstorage.mail.MailServiceRegistry;
+import com.openexchange.folderstorage.outlook.osgi.Services;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -400,7 +400,7 @@ public final class Update {
     }
 
     private static void postChangedId(final String folderId, final int userId, final int contextId) {
-        final EventAdmin eventAdmin = MailServiceRegistry.getServiceRegistry().getService(EventAdmin.class);
+        final EventAdmin eventAdmin = Services.getService(EventAdmin.class);
         if (null != eventAdmin) {
             final Map<String, Object> properties = new HashMap<String, Object>(6);
             properties.put(FolderEventConstants.PROPERTY_CONTEXT, Integer.valueOf(contextId));

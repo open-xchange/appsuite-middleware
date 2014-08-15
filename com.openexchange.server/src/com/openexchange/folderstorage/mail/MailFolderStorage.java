@@ -130,7 +130,7 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.RdbMailAccountStorage;
-import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -153,11 +153,16 @@ public final class MailFolderStorage implements FolderStorage {
 
     private final String paramAccessFast = StorageParameters.PARAM_ACCESS_FAST;
 
+    // -------------------------------------------------------------------------------------------------------------------- //
+
+    private final ServiceLookup services;
+
     /**
      * Initializes a new {@link MailFolderStorage}.
      */
-    public MailFolderStorage() {
+    public MailFolderStorage(ServiceLookup services) {
         super();
+        this.services = services;
         procedure = new TObjectProcedure<MailAccess<?, ?>>() {
 
             @Override
@@ -247,7 +252,7 @@ public final class MailFolderStorage implements FolderStorage {
                             final List<MailAccount> accountList;
                             final Object property = decorator.getProperty("mailRootFolders");
                             if (property != null && Boolean.parseBoolean(property.toString()) && session.getUserPermissionBits().isMultipleMailAccounts()) {
-                                final MailAccountStorageService mass = MailServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
+                                final MailAccountStorageService mass = services.getService(MailAccountStorageService.class);
                                 final MailAccount[] accounts = mass.getUserMailAccounts(storageParameters.getUserId(), storageParameters.getContextId());
                                 accountList = new ArrayList<MailAccount>(accounts.length);
                                 for (final MailAccount mailAccount : accounts) {
@@ -261,7 +266,7 @@ public final class MailFolderStorage implements FolderStorage {
                                      * Ensure Unified Mail is enabled; meaning at least one account is subscribed to Unified Mail
                                      */
                                     final boolean suppressUnifiedMail = StorageParametersUtility.getBoolParameter("suppressUnifiedMail", storageParameters);
-                                    final UnifiedInboxManagement uim = MailServiceRegistry.getServiceRegistry().getService(UnifiedInboxManagement.class);
+                                    final UnifiedInboxManagement uim = services.getService(UnifiedInboxManagement.class);
                                     if (suppressUnifiedMail || null == uim || !uim.isEnabled(session.getUserId(), session.getContextId())) {
                                         accountList.remove(0);
                                     } else {
@@ -322,7 +327,7 @@ public final class MailFolderStorage implements FolderStorage {
                 final List<MailAccount> accountList;
                 final Object property = decorator.getProperty("mailRootFolders");
                 if (property != null && Boolean.parseBoolean(property.toString()) && session.getUserPermissionBits().isMultipleMailAccounts()) {
-                    final MailAccountStorageService mass = MailServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
+                    final MailAccountStorageService mass = services.getService(MailAccountStorageService.class);
                     final MailAccount[] accounts = mass.getUserMailAccounts(storageParameters.getUserId(), storageParameters.getContextId());
                     accountList = new ArrayList<MailAccount>(accounts.length);
                     for (final MailAccount mailAccount : accounts) {
@@ -336,7 +341,7 @@ public final class MailFolderStorage implements FolderStorage {
                          * Ensure Unified Mail is enabled; meaning at least one account is subscribed to Unified Mail
                          */
                         final boolean suppressUnifiedMail = StorageParametersUtility.getBoolParameter("suppressUnifiedMail", storageParameters);
-                        final UnifiedInboxManagement uim = MailServiceRegistry.getServiceRegistry().getService(UnifiedInboxManagement.class);
+                        final UnifiedInboxManagement uim = services.getService(UnifiedInboxManagement.class);
                         if (suppressUnifiedMail || null == uim || !uim.isEnabled(session.getUserId(), session.getContextId())) {
                             accountList.remove(0);
                         } else {
@@ -761,8 +766,7 @@ public final class MailFolderStorage implements FolderStorage {
                 }
                 MailAccount mailAccount = accounts.get(argument.getAccountId());
                 if (null == mailAccount) {
-                    final MailAccountStorageService storageService =
-                        MailServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
+                    final MailAccountStorageService storageService = services.getService(MailAccountStorageService.class);
                     mailAccount = storageService.getMailAccount(accountId, storageParameters.getUserId(), storageParameters.getContextId());
                     accounts.put(accountId, mailAccount);
                 }
@@ -793,8 +797,7 @@ public final class MailFolderStorage implements FolderStorage {
             }
             final MailAccount mailAccount;
             {
-                final MailAccountStorageService storageService =
-                    MailServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
+                final MailAccountStorageService storageService = services.getService(MailAccountStorageService.class);
                 mailAccount = storageService.getMailAccount(argument.getAccountId(), storageParameters.getUserId(), storageParameters.getContextId());
             }
             mailAccess = MailAccess.getInstance(session, argument.getAccountId());
@@ -1052,9 +1055,8 @@ public final class MailFolderStorage implements FolderStorage {
                  * Get all user mail accounts
                  */
                 final List<MailAccount> accounts;
-                final ServiceRegistry serviceRegistry = MailServiceRegistry.getServiceRegistry();
                 if (session.getUserPermissionBits().isMultipleMailAccounts()) {
-                    final MailAccountStorageService storageService = serviceRegistry.getService(MailAccountStorageService.class, true);
+                    final MailAccountStorageService storageService = services.getService(MailAccountStorageService.class);
                     final MailAccount[] accountsArr = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
                     final List<MailAccount> tmp = new ArrayList<MailAccount>(accountsArr.length);
                     tmp.addAll(Arrays.asList(accountsArr));
@@ -1062,7 +1064,7 @@ public final class MailFolderStorage implements FolderStorage {
                     accounts = tmp;
                 } else {
                     accounts = new ArrayList<MailAccount>(1);
-                    final MailAccountStorageService storageService = serviceRegistry.getService(MailAccountStorageService.class, true);
+                    final MailAccountStorageService storageService = services.getService(MailAccountStorageService.class);
                     accounts.add(storageService.getDefaultMailAccount(session.getUserId(), session.getContextId()));
                 }
                 if (!accounts.isEmpty() && UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(accounts.get(0).getMailProtocol())) {
@@ -1073,7 +1075,7 @@ public final class MailFolderStorage implements FolderStorage {
                     if (suppressUnifiedMail) {
                         accounts.remove(0);
                     } else {
-                        final UnifiedInboxManagement uim = serviceRegistry.getService(UnifiedInboxManagement.class);
+                        final UnifiedInboxManagement uim = services.getService(UnifiedInboxManagement.class);
                         if (null == uim || !uim.isEnabled(session.getUserId(), session.getContextId())) {
                             accounts.remove(0);
                         }
@@ -1824,8 +1826,8 @@ public final class MailFolderStorage implements FolderStorage {
         }
     }
 
-    private static void postChangedId(final String newId, final String oldId, final String delim, final Session session) {
-        final EventAdmin eventAdmin = MailServiceRegistry.getServiceRegistry().getService(EventAdmin.class);
+    private void postChangedId(final String newId, final String oldId, final String delim, final Session session) {
+        final EventAdmin eventAdmin = services.getService(EventAdmin.class);
         if (null != eventAdmin) {
             final Map<String, Object> properties = new HashMap<String, Object>(6);
             properties.put(FolderEventConstants.PROPERTY_SESSION, session);

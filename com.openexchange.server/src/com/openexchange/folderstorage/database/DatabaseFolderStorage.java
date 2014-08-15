@@ -128,6 +128,7 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Collators;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -151,8 +152,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage {
 
-    private static final org.slf4j.Logger LOG =
-        org.slf4j.LoggerFactory.getLogger(DatabaseFolderStorage.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DatabaseFolderStorage.class);
 
     private static final String PARAM_CONNECTION = DatabaseParameterConstants.PARAM_CONNECTION;
 
@@ -228,11 +228,16 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
 
     static final EnumSet<Mode> WRITEES = EnumSet.of(Mode.WRITE, Mode.WRITE_AFTER_READ);
 
+    // -------------------------------------------------------------------------------------------------------------------------- //
+
+    private final ServiceLookup services;
+
     /**
      * Initializes a new {@link DatabaseFolderStorage}.
      */
-    public DatabaseFolderStorage() {
+    public DatabaseFolderStorage(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     @Override
@@ -256,7 +261,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         }
         // Delay exceeded
         STAMPS.remove(contextId);
-        final DatabaseService databaseService = DatabaseServiceRegistry.getService(DatabaseService.class, true);
+        final DatabaseService databaseService = services.getService(DatabaseService.class);
         Connection con = null;
         boolean close = true;
         Mode mode = Mode.READ;
@@ -381,7 +386,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
             } finally {
                 DBUtils.autocommit(con.connection);
-                final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class);
+                final DatabaseService databaseService = services.getService(DatabaseService.class);
                 if (null != databaseService) {
                     con.close(databaseService, params.getContext().getContextId());
                 }
@@ -390,7 +395,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 params.markCommitted();
             }
         } else {
-            final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class);
+            final DatabaseService databaseService = services.getService(DatabaseService.class);
             if (null != databaseService) {
                 databaseService.backReadOnly(params.getContext(), con.connection);
             }
@@ -1508,14 +1513,14 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 DBUtils.rollback(con.connection);
             } finally {
                 DBUtils.autocommit(con.connection);
-                final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class);
+                final DatabaseService databaseService = services.getService(DatabaseService.class);
                 if (null != databaseService) {
                     con.close(databaseService, params.getContext().getContextId());
                 }
                 params.putParameter(getFolderType(), PARAM_CONNECTION, null);
             }
         } else {
-            final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class);
+            final DatabaseService databaseService = services.getService(DatabaseService.class);
             if (null != databaseService) {
                 databaseService.backReadOnly(params.getContext(), con.connection);
             }
@@ -1531,7 +1536,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
     public boolean startTransaction(final StorageParameters parameters, final Mode mode) throws OXException {
         final FolderType folderType = getFolderType();
         try {
-            final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
+            final DatabaseService databaseService = services.getService(DatabaseService.class);
             final Context context = parameters.getContext();
             ConnectionMode con = parameters.getParameter(folderType, PARAM_CONNECTION);
             if (null != con) {
@@ -1914,13 +1919,13 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         return new OXFolderAccess(con, ctx);
     }
 
-    private static ConnectionProvider getConnection(final Mode mode, final StorageParameters storageParameters) throws OXException {
+    private ConnectionProvider getConnection(final Mode mode, final StorageParameters storageParameters) throws OXException {
         ConnectionMode connection = optParameter(ConnectionMode.class, PARAM_CONNECTION, storageParameters);
         if (null != connection) {
             return new NonClosingConnectionProvider(connection/*, databaseService, context.getContextId()*/);
         }
         final Context context = storageParameters.getContext();
-        final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
+        final DatabaseService databaseService = services.getService(DatabaseService.class);
         connection = WRITEES.contains(mode) ? new ConnectionMode(databaseService.getWritable(context), mode) : new ConnectionMode(databaseService.getReadOnly(context), mode);
         return new ClosingConnectionProvider(connection, databaseService, context.getContextId());
     }

@@ -47,47 +47,72 @@
  *
  */
 
-package com.openexchange.folderstorage.database;
+package com.openexchange.folderstorage.filestorage.osgi;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.osgi.ServiceRegistry;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link DatabaseServiceRegistry} - The service registry for database folder storage.
+ * {@link Services} - The static service lookup.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DatabaseServiceRegistry {
-
-    private static final ServiceRegistry REGISTRY = new ServiceRegistry();
+public final class Services {
 
     /**
-     * Gets the service registry
-     *
-     * @return The service registry
+     * Initializes a new {@link Services}.
      */
-    public static ServiceRegistry getServiceRegistry() {
-        return REGISTRY;
-    }
-
-    /**
-     * Gets the service defined by given class
-     *
-     * @param <S> The type of service's class
-     * @param clazz The service's class
-     * @param errorOnAbsence <code>true</code> to throw an error on service absence; otherwise <code>false</code>
-     * @return The service if found; otherwise <code>null</code> if <code>errorOnAbsence</code> is <code>false</code>
-     * @throws OXException If <code>errorOnAbsence</code> is <code>true</code> and service could not be found
-     */
-    public static <S extends Object> S getService(final Class<? extends S> clazz, final boolean errorOnAbsence) throws OXException {
-        return REGISTRY.getService(clazz, errorOnAbsence);
-    }
-
-    /**
-     * Initializes a new {@link IMAPServiceRegistry}
-     */
-    private DatabaseServiceRegistry() {
+    private Services() {
         super();
+    }
+
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Sets the service lookup.
+     *
+     * @param serviceLookup The service lookup or <code>null</code>
+     */
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
+    }
+
+    /**
+     * Gets the service lookup.
+     *
+     * @return The service lookup or <code>null</code>
+     */
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
+    }
+
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.folderstorage.filestorage\" not started?");
+        }
+        return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
+        }
     }
 
 }

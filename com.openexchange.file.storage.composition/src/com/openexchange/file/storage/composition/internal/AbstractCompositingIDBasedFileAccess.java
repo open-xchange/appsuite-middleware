@@ -451,15 +451,16 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
     @Override
     public TimedResult<File> getDocuments(final String folderId, final List<Field> columns) throws OXException {
-        final FolderID folderID = new FolderID(folderId);
-        return getFileAccess(folderID.getService(), folderID.getAccountId()).getDocuments(folderID.getFolderId(), addIDColumns(columns));
+        FolderID folderID = new FolderID(folderId);
+        TimedResult<File> result = getFileAccess(folderID.getService(), folderID.getAccountId()).getDocuments(folderID.getFolderId(), addIDColumns(columns));
+        return fixIDs(result, folderID.getService(), folderID.getAccountId());
     }
 
     @Override
     public TimedResult<File> getDocuments(final String folderId, final List<Field> columns, final Field sort, final SortDirection order) throws OXException {
-        final FolderID folderID = new FolderID(folderId);
-        final String service = folderID.getService();
-        final String accountId = folderID.getAccountId();
+        FolderID folderID = new FolderID(folderId);
+        String service = folderID.getService();
+        String accountId = folderID.getAccountId();
         TimedResult<File> result;
         try {
             result = getFileAccess(service, accountId).getDocuments(folderID.getFolderId(), addIDColumns(columns), sort, order);

@@ -49,19 +49,17 @@
 
 package com.openexchange.folderstorage.outlook.osgi;
 
-import static com.openexchange.folderstorage.outlook.OutlookServiceRegistry.getServiceRegistry;
 import java.sql.Connection;
-import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
 import org.osgi.framework.BundleActivator;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
+import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -69,15 +67,13 @@ import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.folderstorage.FolderEventConstants;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
-import com.openexchange.folderstorage.outlook.OutlookServiceRegistry;
 import com.openexchange.folderstorage.outlook.memory.MemoryTable;
 import com.openexchange.folderstorage.outlook.sql.Update;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
-import com.openexchange.osgi.DeferredActivator;
-import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.push.PushEventConstants;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
@@ -89,13 +85,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OutlookFolderStorageActivator extends DeferredActivator {
-
-    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OutlookFolderStorageActivator.class);
-
-    private List<ServiceRegistration<?>> serviceRegistrations;
-
-    private List<ServiceTracker<?,?>> serviceTrackers;
+public class OutlookFolderStorageActivator extends HousekeepingActivator {
 
     /**
      * Initializes a new {@link OutlookFolderStorageActivator}.
@@ -108,52 +98,23 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             DatabaseService.class, MailAccountStorageService.class, ThreadPoolService.class, MessagingServiceRegistry.class,
-            UnifiedInboxManagement.class, ConfigurationService.class, FileStorageServiceRegistry.class, SessiondService.class };
-    }
-
-    @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        LOG.info("Re-available service: {}", clazz.getName());
-        getServiceRegistry().addService(clazz, getService(clazz));
-
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        LOG.warn("Absent service: {}", clazz.getName());
-        getServiceRegistry().removeService(clazz);
+            UnifiedInboxManagement.class, ConfigurationService.class, FileStorageServiceRegistry.class, SessiondService.class,
+            EventAdmin.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
+        final Logger logger = org.slf4j.LoggerFactory.getLogger(OutlookFolderStorageActivator.class);
         try {
-            /*
-             * (Re-)Initialize service registry with available services
-             */
-            {
-                final ServiceRegistry registry = getServiceRegistry();
-                registry.clearRegistry();
-                final Class<?>[] classes = getNeededServices();
-                for (final Class<?> classe : classes) {
-                    final Object service = getService(classe);
-                    if (null != service) {
-                        registry.addService(classe, service);
-                    }
-                }
-            }
+            Services.setServiceLookup(this);
+
             // Trackers
-            serviceTrackers = new ArrayList<ServiceTracker<?,?>>(1);
-            serviceTrackers.add(new ServiceTracker<FolderStorage,FolderStorage>(context, FolderStorage.class, new OutlookFolderStorageServiceTracker(context)));
-            for (final ServiceTracker<?,?> serviceTracker : serviceTrackers) {
-                serviceTracker.open();
-            }
+            rememberTracker(new ServiceTracker<FolderStorage,FolderStorage>(context, FolderStorage.class, new OutlookFolderStorageServiceTracker(context)));
+            openTrackers();
 
             // Register services
-            serviceRegistrations = new ArrayList<ServiceRegistration<?>>(2);
-            // DeleteListener was added statically
-            // serviceRegistrations.add(context.registerService(DeleteListener.class.getName(), new OutlookFolderDeleteListener(), null));
 
-            serviceRegistrations.add(context.registerService(MailAccountDeleteListener.class, new MailAccountDeleteListener() {
+            registerService(MailAccountDeleteListener.class, new MailAccountDeleteListener() {
 
                 @Override
                 public void onBeforeMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
@@ -164,11 +125,14 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
                 public void onAfterMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
                     // Nothing todo
                 }
-            }, null));
+            }, null);
 
-            final Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
-            dictionary.put("tree", OutlookFolderStorage.OUTLOOK_TREE_ID);
-            serviceRegistrations.add(context.registerService(FolderStorage.class, OutlookFolderStorage.getInstance(), dictionary));
+            {
+                final Dictionary<String, String> dictionary = new Hashtable<String, String>(2);
+                dictionary.put("tree", OutlookFolderStorage.OUTLOOK_TREE_ID);
+                registerService(FolderStorage.class, OutlookFolderStorage.getInstance(), dictionary);
+            }
+
             {
                 final EventHandler pushMailEventHandler = new EventHandler() {
 
@@ -182,7 +146,7 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
                 };
                 final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
                 dict.put(EventConstants.EVENT_TOPIC, PushEventConstants.getAllTopics());
-                serviceRegistrations.add(context.registerService(EventHandler.class, pushMailEventHandler, dict));
+                registerService(EventHandler.class, pushMailEventHandler, dict);
             }
             {
                 final EventHandler folderEventHandler = new EventHandler() {
@@ -201,7 +165,7 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
                             try {
                                 Update.updateIds(session.getContextId(), tree, session.getUserId(), newId, oldId, delim);
                             } catch (final Exception e) {
-                                LOG.error("", e);
+                                logger.error("", e);
                             }
 
                             final MemoryTable memoryTable = MemoryTable.optMemoryTableFor(session);
@@ -209,7 +173,7 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
                                 try {
                                     memoryTable.initializeTree(tree, session.getUserId(), session.getContextId());
                                 } catch (final Exception e) {
-                                    LOG.error("", e);
+                                    logger.error("", e);
                                 }
                             }
                         }
@@ -217,7 +181,7 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
                 };
                 final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
                 dict.put(EventConstants.EVENT_TOPIC, FolderEventConstants.getAllTopics());
-                serviceRegistrations.add(context.registerService(EventHandler.class.getName(), folderEventHandler, dict));
+                registerService(EventHandler.class.getName(), folderEventHandler, dict);
             }
             {
                 final EventHandler sessionEventHandler = new EventHandler() {
@@ -247,7 +211,7 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
                         /*
                          * Any active session left?
                          */
-                        final SessiondService service = OutlookServiceRegistry.getServiceRegistry().getService(SessiondService.class);
+                        final SessiondService service = getService(SessiondService.class);
                         if (null == service.getAnyActiveSessionForUser(session.getUserId(), session.getContextId())) {
                             MemoryTable.dropMemoryTableFrom(session);
                         }
@@ -256,45 +220,18 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
                 };
                 final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
                 dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-                serviceRegistrations.add(context.registerService(EventHandler.class.getName(), sessionEventHandler, dict));
+                registerService(EventHandler.class.getName(), sessionEventHandler, dict);
             }
         } catch (final Exception e) {
-            LOG.error("", e);
+            logger.error("", e);
             throw e;
         }
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        try {
-            /*
-             * Drop service registrations
-             */
-            if (null != serviceRegistrations) {
-                for (final ServiceRegistration<?> serviceRegistration : serviceRegistrations) {
-                    serviceRegistration.unregister();
-                }
-                serviceRegistrations.clear();
-                serviceRegistrations = null;
-            }
-            /*
-             * Drop/close service trackers
-             */
-            if (null != serviceTrackers) {
-                for (final ServiceTracker<?,?> serviceTracker : serviceTrackers) {
-                    serviceTracker.close();
-                }
-                serviceTrackers.clear();
-                serviceTrackers = null;
-            }
-            /*
-             * Clear service registry
-             */
-            getServiceRegistry().clearRegistry();
-        } catch (final Exception e) {
-            LOG.error("", e);
-            throw e;
-        }
+        super.stopBundle();
+        Services.setServiceLookup(null);
     }
 
 }
