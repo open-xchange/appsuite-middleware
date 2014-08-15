@@ -112,7 +112,7 @@ public abstract class AbstractGoogleTest extends TestCase {
         MockitoAnnotations.initMocks(this);
 
         //Mocks
-        ConfigurationService cs = new MockConfigurationService(GOOGLE_API_KEY, GOOGLE_API_SECRET, REDIRECT_URL, 10000, 10000);
+        ConfigurationService cs = new MockConfigurationService(GOOGLE_API_KEY, GOOGLE_API_SECRET, REDIRECT_URL, 1000, 1000);
         ThreadPoolService tps = new SimThreadPoolService();
 
         FolderUpdaterRegistry fur = new MockFolderUpdaterRegistry<Object>(new MockFolderUpdateService());
