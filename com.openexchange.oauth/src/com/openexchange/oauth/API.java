@@ -53,5 +53,5 @@ package com.openexchange.oauth;
  * {@link API} - An enumeration for available APIs.
  */
 public enum API {
-	FACEBOOK, TWITTER, LINKEDIN, OTHER, MSN, YAHOO, TUMBLR, FLICKR, DROPBOX, XING, VKONTAKTE, GOOGLE;
+    FACEBOOK, TWITTER, LINKEDIN, OTHER, MSN, YAHOO, TUMBLR, FLICKR, DROPBOX, XING, VKONTAKTE, GOOGLE, BOX_COM;
 }

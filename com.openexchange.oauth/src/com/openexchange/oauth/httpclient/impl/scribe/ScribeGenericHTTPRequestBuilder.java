@@ -55,6 +55,7 @@ import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.util.URIUtil;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.Api;
+import org.scribe.builder.api.BoxApi;
 import org.scribe.builder.api.DropBoxApi;
 import org.scribe.builder.api.FacebookApi;
 import org.scribe.builder.api.FlickrApi;
@@ -140,6 +141,8 @@ public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericReque
             return XingApi.class;
         case GOOGLE:
             return Google2v2Api.class;
+        case BOX_COM:
+            return BoxApi.class;
         case VKONTAKTE:
             return VkontakteApi.class;
             // Add new API enums above
