@@ -717,7 +717,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     @Override
     public SearchIterator<File> search(List<String> folderIds, SearchTerm<?> searchTerm, List<Field> fields, Field sort, final SortDirection order, int start, int end) throws OXException {
-        if (FileNameTerm.class.isInstance(searchTerm) && null == folderIds || 1 == folderIds.size()) {
+        if (FileNameTerm.class.isInstance(searchTerm) && (null == folderIds || 1 == folderIds.size())) {
             String pattern = ((FileNameTerm) searchTerm).getPattern();
             return search(pattern, fields, null != folderIds && 1 == folderIds.size() ? folderIds.get(0) : null, sort, order, start, end);
         }
