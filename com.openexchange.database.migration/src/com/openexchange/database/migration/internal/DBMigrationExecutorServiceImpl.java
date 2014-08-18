@@ -2,7 +2,6 @@ package com.openexchange.database.migration.internal;
 
 import java.io.File;
 import java.sql.Connection;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import liquibase.Liquibase;
@@ -31,11 +30,11 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DBMigrationExecutorServiceImpl.class);
 
-    private List<DatabaseChangeLog> databaseChangeLogs = new CopyOnWriteArrayList<DatabaseChangeLog>();
-
     private DatabaseService databaseService;
 
     private ConfigurationService configurationService;
+
+    private List<ResourceAccessor> accessors = new CopyOnWriteArrayList<ResourceAccessor>();
 
     public DBMigrationExecutorServiceImpl(DatabaseService databaseService, ConfigurationService configurationService) {
         super();
@@ -44,14 +43,9 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
         Validate.notNull(configurationService, "ConfigurationService mustn't be null!");
         this.databaseService = databaseService;
         this.configurationService = configurationService;
-    }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void register(DatabaseChangeLog databaseChangeLog) {
-        databaseChangeLogs.add(databaseChangeLog);
+        accessors.add(new ClassLoaderResourceAccessor());
+        accessors.add(new FileSystemResourceAccessor());
     }
 
     /**
@@ -66,15 +60,11 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
             writable = databaseService.getWritable();
 
             jdbcConnection = new JdbcConnection(writable);
+            jdbcConnection.setAutoCommit(true);
             MySQLDatabase databaseConnection = new MySQLDatabase();
             databaseConnection.setConnection(jdbcConnection);
 
-            List<ResourceAccessor> accessors = new ArrayList<ResourceAccessor>();
-            accessors.add(new ClassLoaderResourceAccessor());
-            accessors.add(new FileSystemResourceAccessor());
-
             liquibase = new Liquibase(databaseChangeLog.getPhysicalFilePath(), new CompositeResourceAccessor(accessors), databaseConnection);
-            // liquibase.validate();
             liquibase.update("");
         } catch (ValidationFailedException validationFailedException) {
             LOG.error("Validation of DatabaseChangeLog failed with the following exception: " + validationFailedException.getLocalizedMessage(), validationFailedException);
@@ -82,6 +72,9 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
             LOG.error("Error using/executing liquibase: " + liquibaseException.getLocalizedMessage(), liquibaseException);
         } catch (OXException oxException) {
             LOG.error("Unable to retrieve database write connection: " + oxException.getLocalizedMessage(), oxException);
+            // } catch (SQLException e) {
+            // // TODO Auto-generated catch block
+            // e.printStackTrace();
         } catch (Exception exception) {
             LOG.error("An unexpected error occurred while executing database migration: " + exception.getLocalizedMessage(), exception);
         } finally {
@@ -110,4 +103,21 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
             LOG.info("No database migration file with name " + fileName + " found! Execution for that file will be skipped.");
         }
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void execute(String fileName, List<ResourceAccessor> additionalAccessors) {
+        if (additionalAccessors == null) {
+            execute(fileName);
+            return;
+        }
+
+        for (ResourceAccessor accessor : additionalAccessors) {
+            accessors.add(accessor);
+        }
+        execute(fileName);
+    }
+
 }

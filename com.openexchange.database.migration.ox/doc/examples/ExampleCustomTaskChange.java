@@ -1,13 +1,14 @@
-package com.openexchange.database.migration.ox.tasks;
+package com.openexchange.database.migration.custom;
 
 import liquibase.change.custom.CustomTaskChange;
 import liquibase.database.Database;
 import liquibase.exception.CustomChangeException;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.resource.ResourceAccessor;
 
 
-public class MyTestClass implements CustomTaskChange {
+public class ExampleCustomTaskChange implements CustomTaskChange {
 
     @Override
     public String getConfirmationMessage() {
@@ -32,8 +33,17 @@ public class MyTestClass implements CustomTaskChange {
         return null;
     }
 
+    /**
+     * Executed when given in the xml file {@inheritDoc}
+     */
     @Override
     public void execute(Database database) throws CustomChangeException {
+        try {
+            database.checkDatabaseChangeLogLockTable();
+        } catch (DatabaseException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         System.out.println(this.getClass().getSimpleName() + ".execute");
     }
 

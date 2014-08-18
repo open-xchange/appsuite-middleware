@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog xmlns="urn:liquibase"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="urn:liquibase ./schema/dbchangelog-3.0.xsd"
+	logicalFilePath="ox-release-changelog">
+
+	<changeSet id="1" author="martin.schneider">
+		<customChange class="com.openexchange.database.migration.custom.ExampleCustomTaskChange" />
+	</changeSet>
+
+</databaseChangeLog>

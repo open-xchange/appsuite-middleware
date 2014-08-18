@@ -49,13 +49,13 @@
 
 package com.openexchange.database.migration.ox.osgi;
 
-import liquibase.servicelocator.CustomResolverServiceLocator;
-import liquibase.servicelocator.DefaultPackageScanClassResolver;
-import liquibase.servicelocator.ServiceLocator;
+import java.util.ArrayList;
+import java.util.List;
+import liquibase.resource.ResourceAccessor;
 import org.osgi.framework.BundleContext;
 import com.openexchange.database.migration.DBMigrationExecutorService;
-import com.openexchange.database.migration.internal.BundlePackageScanClassResolver;
 import com.openexchange.database.migration.ox.internal.Services;
+import com.openexchange.database.migration.ox.internal.accessors.SimpleClassLoaderResourceAccessor;
 import com.openexchange.osgi.HousekeepingActivator;
 
 
@@ -89,18 +89,17 @@ public class OXMigrationActivator extends HousekeepingActivator {
         LOG.info("Starting bundle: " + this.context.getBundle().getSymbolicName());
         Services.setServiceLookup(this);
 
-        // TEST TO FIND CLASSES //
-        DefaultPackageScanClassResolver resolver = new BundlePackageScanClassResolver(this.context.getBundle());
-        ServiceLocator.setInstance(new CustomResolverServiceLocator(resolver));
-        // END OF TEST//
-
         DBMigrationExecutorService dbMigrationExecutorService = Services.getService(DBMigrationExecutorService.class);
 
         if (dbMigrationExecutorService == null) {
             LOG.error("Required service null");
             return;
         }
-        dbMigrationExecutorService.execute(CUSTOM_CHANGELOG_LOCATION);
+
+        List<ResourceAccessor> accessors = new ArrayList<ResourceAccessor>();
+        accessors.add(new SimpleClassLoaderResourceAccessor());
+
+        dbMigrationExecutorService.execute(CUSTOM_CHANGELOG_LOCATION, accessors);
     }
 
     /**
