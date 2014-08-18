@@ -52,7 +52,6 @@ package com.openexchange.subscribe.google;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -87,7 +86,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeService {
 
-    private final int pageSize;
+    final Integer pageSize;
 
     private final SubscriptionSource source;
 
@@ -95,7 +94,7 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
         super(googleMetaData, services);
         source = initSS(FolderObject.CALENDAR, "calendar");
         final ConfigurationService configService = services.getService(ConfigurationService.class);
-        pageSize = configService.getIntProperty("com.openexchange.subscribe.google.calendar.pageSize", 25);
+        pageSize = Integer.valueOf(configService.getIntProperty("com.openexchange.subscribe.google.calendar.pageSize", 25));
     }
 
     @Override
@@ -149,13 +148,18 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
                     }
                     final AppointmentSQLInterface appointmentsql = factoryService.createAppointmentSql(subscription.getSession());
 
-                    final String accessToken = googleCreds.getAccessToken();
+                    // Generate list request...
+                    Calendar.Events.List list = googleCalendarService.events().list(calendarId).setOauthToken(googleCreds.getAccessToken()).setMaxResults(pageSize);
+
+                    // ... and do the pagination
                     String nextPageToken = null;
                     Events e;
                     do {
                         List<CalendarDataObject> single = new LinkedList<CalendarDataObject>();
-                        e = googleCalendarService.events().list(calendarId).setOauthToken(accessToken).setMaxResults(pageSize).setPageToken(
-                            nextPageToken).execute();
+                        if (null != nextPageToken) {
+                            list.setPageToken(nextPageToken);
+                        }
+                        e = list.execute();
                         parseAndAdd(e, parser, single, series, changeExceptions, deleteExceptions);
                         for (CalendarDataObject cdo : single) {
                             cdo.setParentFolderID(subscription.getFolderIdAsInt());
@@ -198,7 +202,7 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
         }
     }
 
-    private void handleSeriesAndSeriesExceptions(final Subscription subscription, final List<CalendarDataObject> changeExceptions, final List<CalendarDataObject> deleteExceptions, final List<CalendarDataObject> series, final AppointmentSQLInterface appointmentsql) throws OXException {
+    protected void handleSeriesAndSeriesExceptions(final Subscription subscription, final List<CalendarDataObject> changeExceptions, final List<CalendarDataObject> deleteExceptions, final List<CalendarDataObject> series, final AppointmentSQLInterface appointmentsql) throws OXException {
         final Map<String, CalendarDataObject> masterMap = new HashMap<String, CalendarDataObject>(series.size());
 
         handleSeries(subscription, series, appointmentsql, masterMap);
