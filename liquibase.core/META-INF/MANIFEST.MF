@@ -28,6 +28,7 @@ Bundle-Activator: liquibase.LiquibaseCoreActivator
 Export-Package: liquibase,
  liquibase.change,
  liquibase.change.core,
+ liquibase.change.custom,
  liquibase.changelog,
  liquibase.changelog.filter,
  liquibase.changelog.visitor,

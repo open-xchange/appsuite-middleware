@@ -18,10 +18,8 @@ package com.openexchange.database.migration.internal;
 
 import java.util.Collection;
 import java.util.Set;
-
 import liquibase.servicelocator.DefaultPackageScanClassResolver;
 import liquibase.servicelocator.PackageScanFilter;
-
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleWiring;
 
@@ -41,7 +39,7 @@ public class BundlePackageScanClassResolver extends DefaultPackageScanClassResol
         packageName = packageName.replace('.', '/');
 
         Collection<String> names =
-                bundleWiring.listResources(packageName, "*.class", BundleWiring.LISTRESOURCES_RECURSE);
+            bundleWiring.listResources(packageName, "*.class", BundleWiring.LISTRESOURCES_RECURSE);
         if (names == null) {
             return;
         }
@@ -55,10 +53,8 @@ public class BundlePackageScanClassResolver extends DefaultPackageScanClassResol
                     classes.add(klass);
                 }
             } catch (ClassNotFoundException e) {
-                log.debug("Cant load class: " + e.getMessage());
+                log.debug("Can't load class: " + e.getMessage());
             }
-
         }
-
     }
 }

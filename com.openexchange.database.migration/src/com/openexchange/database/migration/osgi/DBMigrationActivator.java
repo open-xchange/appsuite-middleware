@@ -59,6 +59,9 @@ public class DBMigrationActivator extends HousekeepingActivator {
         LOG.info("Starting bundle: " + this.context.getBundle().getSymbolicName());
 
         Services.setServiceLookup(this);
+        DefaultPackageScanClassResolver resolver = new BundlePackageScanClassResolver(this.context.getBundle());
+        // Important: At first load classes used for liquibase
+        ServiceLocator.setInstance(new CustomResolverServiceLocator(resolver));
 
         final DatabaseService dbService = getService(DatabaseService.class);
         Validate.notNull(dbService, "Not able to execute database migration! DatabaseService is absent.");
@@ -69,7 +72,5 @@ public class DBMigrationActivator extends HousekeepingActivator {
         DBMigrationExecutorServiceImpl dbMigrationExecutorServiceImpl = new DBMigrationExecutorServiceImpl(dbService, configurationService);
         registerService(DBMigrationExecutorService.class, dbMigrationExecutorServiceImpl);
 
-        DefaultPackageScanClassResolver resolver = new BundlePackageScanClassResolver(this.context.getBundle());
-        ServiceLocator.setInstance(new CustomResolverServiceLocator(resolver));
     }
 }
