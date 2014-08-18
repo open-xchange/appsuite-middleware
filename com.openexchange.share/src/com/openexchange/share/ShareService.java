@@ -104,6 +104,17 @@ public interface ShareService {
     int[] deleteShares(Session session, List<String> tokens, Date clientTimestamp) throws OXException;
 
     /**
+     * Updates an existing share.
+     *
+     * @param session The session
+     * @param share The share to update
+     * @param clientTimestamp The time the tokens were fetched to catch concurrent modifications
+     * @return The update share
+     * @throws OXException
+     */
+    Share updateShare(Session session, Share share, Date clientTimestamp) throws OXException;
+
+    /**
      * Creates shares for a specific folder for the supplied guest users.
      *
      * @param session The session

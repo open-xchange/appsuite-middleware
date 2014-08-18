@@ -47,55 +47,61 @@
  *
  */
 
-package com.openexchange.share.json;
+package com.openexchange.share.json.actions;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import java.util.Date;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.json.actions.AllAction;
-import com.openexchange.share.json.actions.DeleteAction;
-import com.openexchange.share.json.actions.GETAction;
-import com.openexchange.share.json.actions.NewAction;
-import com.openexchange.share.json.actions.NotifyAction;
-import com.openexchange.share.json.actions.UpdateAction;
-
+import com.openexchange.share.DefaultShare;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ShareActionFactory}
+ * {@link UpdateAction}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.6.1
  */
-public class ShareActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AJAXActionService> actions = new HashMap<String, AJAXActionService>();
+public class UpdateAction extends AbstractShareAction {
 
     /**
-     * Initializes a new {@link ShareActionFactory}.
-     * @param shareJsonActivator
+     * Initializes a new {@link UpdateAction}.
+     *
+     * @param services The service lookup
      */
-    public ShareActionFactory(ServiceLookup services) {
-        super();
-        actions.put("GET", new GETAction(services));
-        actions.put("new", new NewAction(services));
-        actions.put("all", new AllAction(services));
-        actions.put("notify", new NotifyAction(services));
-        actions.put("delete", new DeleteAction(services));
-        actions.put("update", new UpdateAction(services));
+    public UpdateAction(ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
-    }
-
-    @Override
-    public Collection<?> getSupportedServices() {
-        return null;
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        /*
+         * extract parameters
+         */
+        String token = requestData.checkParameter("token");
+        Date clientTimestamp = new Date(requestData.getParameter("timestamp", Long.class).longValue());
+        DefaultShare share = new DefaultShare();
+        share.setToken(token);
+        try {
+            JSONObject jsonObject = (JSONObject) requestData.requireData();
+            if (jsonObject.has("expires")) {
+                share.setExpires(new Date(jsonObject.getLong("expires")));
+            }
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
+        /*
+         * update share
+         */
+        getShareService().updateShare(session, share, clientTimestamp);
+        /*
+         * return empty result in case of success
+         */
+        return AJAXRequestResult.EMPTY_REQUEST_RESULT;
     }
 
 }

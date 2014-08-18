@@ -65,9 +65,11 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.userconfiguration.RdbUserPermissionBitsStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.AuthenticationMode;
+import com.openexchange.share.DefaultShare;
 import com.openexchange.share.Guest;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
@@ -91,7 +93,7 @@ public class DefaultShareService implements ShareService {
     /**
      * Initializes a new {@link DefaultShareService}.
      *
-     * @param storage The underlying share storage
+     * @param services The service lookup reference
      */
     public DefaultShareService(ServiceLookup services) {
         super();
@@ -186,6 +188,48 @@ public class DefaultShareService implements ShareService {
             deleteGuestUsers(connectionHelper.getConnection(), session.getContextId(), guestIDs);
             connectionHelper.commit();
             return guestIDs;
+        } finally {
+            connectionHelper.finish();
+        }
+    }
+
+    @Override
+    public Share updateShare(Session session, Share share, Date clientTimestamp) throws OXException {
+        String token = share.getToken();
+        if (Strings.isEmpty(token)) {
+            throw ShareExceptionCodes.UNKNWON_SHARE.create(token);
+        }
+        ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
+        try {
+            connectionHelper.start();
+            /*
+             * load & check share
+             */
+            Share storedShare = services.getService(ShareStorage.class).loadShare(
+                session.getContextId(), token, connectionHelper.getParameters());
+            if (null == share || ShareTool.extractContextId(token) != session.getContextId()) {
+                throw ShareExceptionCodes.UNKNWON_SHARE.create(token);
+            }
+            if (session.getUserId() != share.getCreatedBy()) {
+                throw ShareExceptionCodes.NO_EDIT_PERMISSIONS.create(
+                    Integer.valueOf(session.getUserId()), token, Integer.valueOf(session.getContextId()));
+            }
+            if (share.getLastModified().after(clientTimestamp)) {
+                throw ShareExceptionCodes.CONCURRENT_MODIFICATION.create(token);
+            }
+            /*
+             * prepare update
+             */
+            DefaultShare updatedShare = new DefaultShare(storedShare);
+            updatedShare.setExpires(updatedShare.getExpires());
+            updatedShare.setLastModified(new Date());
+            updatedShare.setModifiedBy(session.getUserId());
+            /*
+             * proceed with update
+             */
+            services.getService(ShareStorage.class).updateShare(updatedShare, connectionHelper.getParameters());
+            connectionHelper.commit();
+            return updatedShare;
         } finally {
             connectionHelper.finish();
         }

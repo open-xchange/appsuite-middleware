@@ -82,6 +82,29 @@ public class DefaultShare implements Share, Serializable {
         super();
     }
 
+    /**
+     * Initializes a new {@link DefaultShare} based on the supplied one.
+     *
+     * @param share The share to take over the properties from
+     */
+    public DefaultShare(Share share) {
+        super();
+        token = share.getToken();
+        contextID = share.getContextID();
+        module = share.getModule();
+        folder = share.getFolder();
+        item = share.getItem();
+        created = share.getCreated();
+        createdBy = share.getCreatedBy();
+        lastModified = share.getLastModified();
+        modifiedBy = share.getModifiedBy();
+        expires = share.getExpires();
+        guest = share.getGuest();
+        if (null != share.getAuthentication()) {
+            authentication = share.getAuthentication().getID();
+        }
+    }
+
     @Override
     public String getToken() {
         return token;
