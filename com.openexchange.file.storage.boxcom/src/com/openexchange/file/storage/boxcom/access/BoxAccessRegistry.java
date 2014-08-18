@@ -84,15 +84,15 @@ public final class BoxAccessRegistry {
     }
 
     /**
-     * Adds specified Dropbox OAuth access.
+     * Adds specified Box access.
      *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
-     * @param fbOAuthInfo The Dropbox OAuth access to add
+     * @param boxAccess The Box access to add
      * @return The previous associated session, or <code>null</code> if there was no session.
      */
-    public BoxAccess addSession(final int contextId, final int userId, final String accountId, final BoxAccess fbOAuthInfo) {
+    public BoxAccess addAccess(final int contextId, final int userId, final String accountId, final BoxAccess boxAccess) {
         final SimpleKey key = SimpleKey.valueOf(contextId, userId);
         ConcurrentMap<String, BoxAccess> inner = map.get(key);
         if (null == inner) {
@@ -102,31 +102,31 @@ public final class BoxAccessRegistry {
                 inner = tmp;
             }
         }
-        return inner.putIfAbsent(accountId, fbOAuthInfo);
+        return inner.putIfAbsent(accountId, boxAccess);
     }
 
     /**
-     * Check presence of the Dropbox OAuth access associated with given user-context-pair.
+     * Check presence of the Box access associated with given user-context-pair.
      *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
-     * @return <code>true</code> if such a Dropbox OAuth access is present; otherwise <code>false</code>
+     * @return <code>true</code> if such a Box access is present; otherwise <code>false</code>
      */
-    public boolean containsSession(final int contextId, final int userId, final String accountId) {
+    public boolean containsAccess(final int contextId, final int userId, final String accountId) {
         final ConcurrentMap<String, BoxAccess> inner = map.get(SimpleKey.valueOf(contextId, userId));
         return null != inner && inner.containsKey(accountId);
     }
 
     /**
-     * Gets the Dropbox OAuth access associated with given user-context-pair.
+     * Gets the Box access associated with given user-context-pair.
      *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
-     * @return The Dropbox OAuth access or <code>null</code>
+     * @return The Box access or <code>null</code>
      */
-    public BoxAccess getSession(final int contextId, final int userId, final String accountId) {
+    public BoxAccess getAccess(final int contextId, final int userId, final String accountId) {
         final ConcurrentMap<String, BoxAccess> inner = map.get(SimpleKey.valueOf(contextId, userId));
         return null == inner ? null : inner.get(accountId);
     }
@@ -136,9 +136,9 @@ public final class BoxAccessRegistry {
      *
      * @param contextId The context identifier
      * @param userId The user identifier
-     * @return <code>true</code> if a Dropbox OAuth access for given user-context-pair was found and removed; otherwise <code>false</code>
+     * @return <code>true</code> if a Box access for given user-context-pair was found and removed; otherwise <code>false</code>
      */
-    public boolean removeSessionIfLast(final int contextId, final int userId) {
+    public boolean removeAccessIfLast(final int contextId, final int userId) {
         final SessiondService sessiondService = Services.getService(SessiondService.class);
         if (null == sessiondService || null == sessiondService.getAnyActiveSessionForUser(userId, contextId)) {
             /*
@@ -148,8 +148,8 @@ public final class BoxAccessRegistry {
             if (null == inner || inner.isEmpty()) {
                 return false;
             }
-            for (final BoxAccess dropboxOAuthAccess : inner.values()) {
-                dropboxOAuthAccess.dispose();
+            for (final BoxAccess boxAccess : inner.values()) {
+                boxAccess.dispose();
             }
             return !inner.isEmpty();
         }
@@ -157,12 +157,12 @@ public final class BoxAccessRegistry {
     }
 
     /**
-     * Purges specified user's Dropbox OAuth access.
+     * Purges specified user's Box access.
      *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
-     * @return <code>true</code> if a Dropbox OAuth access for given user-context-pair was found and purged; otherwise <code>false</code>
+     * @return <code>true</code> if a Box access for given user-context-pair was found and purged; otherwise <code>false</code>
      */
     public boolean purgeUserAccess(final int contextId, final int userId, final String accountId) {
         final SimpleKey key = SimpleKey.valueOf(contextId, userId);
@@ -181,9 +181,9 @@ public final class BoxAccessRegistry {
     }
 
     /**
-     * Gets a {@link Iterator iterator} over the Dropbox OAuth access instances in this registry.
+     * Gets a {@link Iterator iterator} over the Box access instances in this registry.
      *
-     * @return A {@link Iterator iterator} over the Dropbox OAuth access instances in this registry.
+     * @return A {@link Iterator iterator} over the Box access instances in this registry.
      */
     Iterator<ConcurrentMap<String, BoxAccess>> iterator() {
         return map.values().iterator();
