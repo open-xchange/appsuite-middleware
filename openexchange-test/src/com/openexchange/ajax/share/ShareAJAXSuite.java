@@ -52,8 +52,10 @@ package com.openexchange.ajax.share;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import com.openexchange.ajax.share.tests.AddGuestPermissionTest;
+import com.openexchange.ajax.share.tests.AllTest;
 import com.openexchange.ajax.share.tests.CreateSubfolderTest;
 import com.openexchange.ajax.share.tests.CreateWithGuestPermissionTest;
+import com.openexchange.ajax.share.tests.DeleteTest;
 import com.openexchange.ajax.share.tests.ExpiredSharesTest;
 import com.openexchange.ajax.share.tests.RemoveGuestPermissionTest;
 
@@ -76,6 +78,8 @@ public class ShareAJAXSuite extends TestSuite {
         tests.addTestSuite(RemoveGuestPermissionTest.class);
         tests.addTestSuite(ExpiredSharesTest.class);
         tests.addTestSuite(CreateSubfolderTest.class);
+        tests.addTestSuite(AllTest.class);
+        tests.addTestSuite(DeleteTest.class);
         return tests;
     }
 

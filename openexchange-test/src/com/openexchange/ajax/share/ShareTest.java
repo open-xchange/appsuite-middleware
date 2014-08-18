@@ -68,7 +68,6 @@ import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.share.actions.AllRequest;
-import com.openexchange.ajax.share.actions.AllResponse;
 import com.openexchange.ajax.share.actions.ParsedShare;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -208,9 +207,19 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @return The share, or <code>null</code> if not found
      */
     protected ParsedShare discoverShare(int folderID, int guest) throws OXException, IOException, JSONException {
+        return discoverShare(client.execute(new AllRequest()).getParsedShares(), folderID, guest);
+    }
+
+    /**
+     * Discovers a specific share amongst the supplied shares, based on the folder- and guest identifiers.
+     *
+     * @param shares The shares to search
+     * @param folderID The folder ID to discover the share for
+     * @param guest The ID of the guest associated to the share
+     * @return The share, or <code>null</code> if not found
+     */
+    protected ParsedShare discoverShare(List<ParsedShare> shares, int folderID, int guest) throws OXException, IOException, JSONException {
         String folder = String.valueOf(folderID);
-        AllResponse allResponse = client.execute(new AllRequest());
-        List<ParsedShare> shares = allResponse.getParsedShares();
         for (ParsedShare share : shares) {
             if (folder.equals(share.getFolder()) && guest == share.getGuest()) {
                 return share;
