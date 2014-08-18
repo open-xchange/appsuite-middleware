@@ -2683,18 +2683,23 @@ msgstr ""
 msgid "in mail text"
 msgstr ""
 
-#. Search for mails sent from or to ...
+#. Search for mail conversations by people
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:80
+msgid "People"
+msgstr ""
+
+#. Search for mails sent from or to ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:83
 msgid "From/To"
 msgstr ""
 
 #. Search for mails sent from ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:83
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:86
 msgid "From"
 msgstr ""
 
 #. Search for mails sent to ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:86
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:89
 msgid "To"
 msgstr ""
 
