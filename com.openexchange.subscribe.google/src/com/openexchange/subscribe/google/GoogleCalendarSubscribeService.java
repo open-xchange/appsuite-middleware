@@ -52,6 +52,7 @@ package com.openexchange.subscribe.google;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -109,76 +110,54 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
 
     @Override
     public Collection<?> getContent(final Subscription subscription) throws OXException {
-        try {
-            GoogleCredential googleCreds = GoogleApiClients.getCredentials(subscription.getSession());
-            final Calendar googleCalendarService = new Calendar(
-                googleCreds.getTransport(),
-                googleCreds.getJsonFactory(),
-                googleCreds.getRequestInitializer());
 
-            final String calendarId;
-            {
-                final String tmp = (String) subscription.getConfiguration().get("calendarId");
-                calendarId = (tmp == null) ? "primary" : tmp;
-            }
+        // Initialize thread pool service
+        final ThreadPoolService threadPool = services.getOptionalService(ThreadPoolService.class);
 
-            final CalendarEventParser parser = new CalendarEventParser(subscription.getSession());
+        if (null == threadPool) {
+            throw ServiceExceptionCode.absentService(ThreadPoolService.class);
+        }
 
-            // Initialize lists
-            final List<CalendarDataObject> single = new LinkedList<CalendarDataObject>();
-            final List<CalendarDataObject> changeExceptions = new LinkedList<CalendarDataObject>();
-            final List<CalendarDataObject> deleteExceptions = new LinkedList<CalendarDataObject>();
-            final List<CalendarDataObject> series = new LinkedList<CalendarDataObject>();
+        // Handle everything in a background thread
+        threadPool.submit(new AbstractTask<Void>() {
 
-            // Initialize folderUpdater and thread pool services
-            final ThreadPoolService threadPool = services.getOptionalService(ThreadPoolService.class);
+            @Override
+            public Void call() throws Exception {
+                try {
+                    GoogleCredential googleCreds = GoogleApiClients.getCredentials(subscription.getSession());
+                    final Calendar googleCalendarService = new Calendar(
+                        googleCreds.getTransport(),
+                        googleCreds.getJsonFactory(),
+                        googleCreds.getRequestInitializer());
 
-            if (null == threadPool) {
-                throw ServiceExceptionCode.absentService(ThreadPoolService.class);
-            }
-
-            final AppointmentSqlFactoryService factoryService = services.getOptionalService(AppointmentSqlFactoryService.class);
-            if (null == factoryService) {
-                throw ServiceExceptionCode.absentService(AppointmentSqlFactoryService.class);
-            }
-            final AppointmentSQLInterface appointmentsql = factoryService.createAppointmentSql(subscription.getSession());
-
-            // Fetch the events
-            final String accessToken = googleCreds.getAccessToken();
-            Events events = googleCalendarService.events().list(calendarId).setOauthToken(accessToken).setMaxResults(pageSize).execute();
-            parseAndAdd(events, parser, single, series, changeExceptions, deleteExceptions);
-
-            if (!series.isEmpty()) {
-                // handle series and series exceptions in background thread
-                threadPool.submit(new AbstractTask<Void>() {
-
-                    @Override
-                    public Void call() throws Exception {
-                        handleSeriesAndSeriesExceptions(subscription, changeExceptions, deleteExceptions, series, appointmentsql);
-                        return null;
+                    final String calendarId;
+                    {
+                        final String tmp = (String) subscription.getConfiguration().get("calendarId");
+                        calendarId = (tmp == null) ? "primary" : tmp;
                     }
-                });
-            }
 
-            String nextToken = events.getNextPageToken();
-            if (nextToken == null) {
-                return single;
-            }
+                    final CalendarEventParser parser = new CalendarEventParser(subscription.getSession());
 
-            // Or spawn background thread
-            final String tmp = nextToken;
-            threadPool.submit(new AbstractTask<Void>() {
+                    // Initialize lists
+                    final List<CalendarDataObject> changeExceptions = new LinkedList<CalendarDataObject>();
+                    final List<CalendarDataObject> deleteExceptions = new LinkedList<CalendarDataObject>();
+                    final List<CalendarDataObject> series = new LinkedList<CalendarDataObject>();
 
-                @Override
-                public Void call() throws Exception {
-                    String nextPageToken = tmp;
+                    final AppointmentSqlFactoryService factoryService = services.getOptionalService(AppointmentSqlFactoryService.class);
+                    if (null == factoryService) {
+                        throw ServiceExceptionCode.absentService(AppointmentSqlFactoryService.class);
+                    }
+                    final AppointmentSQLInterface appointmentsql = factoryService.createAppointmentSql(subscription.getSession());
+
+                    final String accessToken = googleCreds.getAccessToken();
+                    String nextPageToken = null;
                     Events e;
                     do {
-                        List<CalendarDataObject> appointments = new LinkedList<CalendarDataObject>();
+                        List<CalendarDataObject> single = new LinkedList<CalendarDataObject>();
                         e = googleCalendarService.events().list(calendarId).setOauthToken(accessToken).setMaxResults(pageSize).setPageToken(
                             nextPageToken).execute();
-                        parseAndAdd(e, parser, appointments, series, changeExceptions, deleteExceptions);
-                        for (CalendarDataObject cdo : appointments) {
+                        parseAndAdd(e, parser, single, series, changeExceptions, deleteExceptions);
+                        for (CalendarDataObject cdo : single) {
                             cdo.setParentFolderID(subscription.getFolderIdAsInt());
                             appointmentsql.insertAppointmentObject(cdo);
                         }
@@ -188,12 +167,15 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
                     handleSeriesAndSeriesExceptions(subscription, changeExceptions, deleteExceptions, series, appointmentsql);
 
                     return null;
+                } catch (IOException e) {
+                    throw SubscriptionErrorMessage.IO_ERROR.create(e, e.getMessage());
+                } catch (Exception e) {
+                    throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e);
                 }
-            });
-            return single;
-        } catch (IOException e) {
-            throw SubscriptionErrorMessage.IO_ERROR.create(e, e.getMessage());
-        }
+            }
+        });
+
+        return new LinkedList<CalendarDataObject>();
     }
 
     protected void parseAndAdd(final Events events, final CalendarEventParser parser, final List<CalendarDataObject> singleAppointments, final List<CalendarDataObject> series, final List<CalendarDataObject> changeExceptions, final List<CalendarDataObject> deleteExceptions) throws OXException {
