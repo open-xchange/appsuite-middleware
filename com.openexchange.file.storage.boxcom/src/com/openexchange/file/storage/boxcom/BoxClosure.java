@@ -76,7 +76,7 @@ public abstract class BoxClosure<R> {
     /**
      * Performs the actual operation
      *
-     * @param The Box.com client to use
+     * @param boxClient The Box.com client to use
      * @return The return value
      * @throws OXException If an Open-Xchange error occurred
      * @throws BoxRestException If a REST error occurred
