@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.dropbox.session;
+package com.openexchange.file.storage.dropbox.access;
 
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
