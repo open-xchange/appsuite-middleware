@@ -139,6 +139,7 @@ public class CalendarEventParser {
     public void parseCalendarEvent(final Event event, final CalendarDataObject calendarObject) throws OXException {
         calendarObject.setContext(session.getContext());
         calendarObject.setUid(event.getICalUID());
+        calendarObject.setCreatedBy(session.getUserId());
 
         // Common stuff
         if (event.getSummary() != null) {
@@ -188,18 +189,13 @@ public class CalendarEventParser {
             calendarObject.setCreationDate(new Date(dateTime.getValue()));
         }
 
-        // Set creator and organizer
-        if (event.getCreator() != null) {
-            Creator creator = event.getCreator();
-            Boolean isSelf = creator.getSelf();
-            if (isSelf != null && isSelf.booleanValue()) {
-                calendarObject.setCreatedBy(session.getUserId());
-            }
-        }
-
         // Events with no organizer are considered to be delete exceptions
         if (event.getOrganizer() != null) {
             calendarObject.setOrganizer(event.getOrganizer().getEmail());
+        }
+        
+        if (event.getOrganizer().isSelf()) {
+            calendarObject.setOrganizerId(session.getUserId());
         }
 
         // We only support one reminder per calendar Object, thus the first one of the event
@@ -245,10 +241,6 @@ public class CalendarEventParser {
                 }
                 confParts.add(cp);
 
-                Boolean isOrganizer = a.getOrganizer();
-                if (isOrganizer != null && isOrganizer.booleanValue()) {
-                    calendarObject.setOrganizer(emailAddress);
-                }
                 participants.add(p);
             }
 
@@ -273,6 +265,7 @@ public class CalendarEventParser {
      */
     public void parseDeleteException(Event event, CalendarDataObject calendarObject) {
         calendarObject.setContext(session.getContext());
+        calendarObject.setOrganizerId(91);
         calendarObject.setUid(event.getRecurringEventId() + "@google.com");
         calendarObject.setStartDate(new Date(event.getOriginalStartTime().getDateTime().getValue()));
     }
