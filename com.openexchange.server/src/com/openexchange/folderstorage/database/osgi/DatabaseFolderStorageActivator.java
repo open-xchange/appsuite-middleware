@@ -49,16 +49,13 @@
 
 package com.openexchange.folderstorage.database.osgi;
 
-import static com.openexchange.folderstorage.database.DatabaseServiceRegistry.getServiceRegistry;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.BundleActivator;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.database.DatabaseFolderStorage;
-import com.openexchange.osgi.DeferredActivator;
-import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.userconf.UserPermissionService;
 
 /**
@@ -66,12 +63,7 @@ import com.openexchange.userconf.UserPermissionService;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DatabaseFolderStorageActivator extends DeferredActivator {
-
-    private static final org.slf4j.Logger LOG =
-        org.slf4j.LoggerFactory.getLogger(DatabaseFolderStorageActivator.class);
-
-    private ServiceRegistration<FolderStorage> folderStorageRegistration;
+public final class DatabaseFolderStorageActivator extends HousekeepingActivator {
 
     /**
      * Initializes a new {@link DatabaseFolderStorageActivator}.
@@ -86,57 +78,14 @@ public final class DatabaseFolderStorageActivator extends DeferredActivator {
     }
 
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        LOG.info("Re-available service: {}", clazz.getName());
-        getServiceRegistry().addService(clazz, getService(clazz));
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        LOG.warn("Absent service: {}", clazz.getName());
-        getServiceRegistry().removeService(clazz);
-    }
-
-    @Override
     protected void startBundle() throws Exception {
         try {
-            /*
-             * (Re-)Initialize service registry with available services
-             */
-            {
-                final ServiceRegistry registry = getServiceRegistry();
-                registry.clearRegistry();
-                final Class<?>[] classes = getNeededServices();
-                for (final Class<?> classe : classes) {
-                    final Object service = getService(classe);
-                    if (null != service) {
-                        registry.addService(classe, service);
-                    }
-                }
-            }
             // Register folder storage
-            final Dictionary<String, String> dictionary = new Hashtable<String, String>();
+            final Dictionary<String, String> dictionary = new Hashtable<String, String>(2);
             dictionary.put("tree", FolderStorage.REAL_TREE_ID);
-            folderStorageRegistration = context.registerService(FolderStorage.class, new DatabaseFolderStorage(), dictionary);
+            registerService(FolderStorage.class, new DatabaseFolderStorage(this), dictionary);
         } catch (final Exception e) {
-            LOG.error("", e);
-            throw e;
-        }
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        try {
-            if (null != folderStorageRegistration) {
-                folderStorageRegistration.unregister();
-                folderStorageRegistration = null;
-            }
-            /*
-             * Clear service registry
-             */
-            getServiceRegistry().clearRegistry();
-        } catch (final Exception e) {
-            LOG.error("", e);
+            org.slf4j.LoggerFactory.getLogger(DatabaseFolderStorageActivator.class).error("", e);
             throw e;
         }
     }

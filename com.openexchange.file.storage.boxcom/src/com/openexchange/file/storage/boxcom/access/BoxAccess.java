@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,47 +47,32 @@
  *
  */
 
-package com.openexchange.folderstorage.database;
+package com.openexchange.file.storage.boxcom.access;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.osgi.ServiceRegistry;
 
 /**
- * {@link DatabaseServiceRegistry} - The service registry for database folder storage.
+ * {@link BoxAccess}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.6.1
  */
-public final class DatabaseServiceRegistry {
-
-    private static final ServiceRegistry REGISTRY = new ServiceRegistry();
+public class BoxAccess {
 
     /**
-     * Gets the service registry
-     *
-     * @return The service registry
+     * Initializes a new {@link BoxAccess}.
      */
-    public static ServiceRegistry getServiceRegistry() {
-        return REGISTRY;
-    }
-
-    /**
-     * Gets the service defined by given class
-     *
-     * @param <S> The type of service's class
-     * @param clazz The service's class
-     * @param errorOnAbsence <code>true</code> to throw an error on service absence; otherwise <code>false</code>
-     * @return The service if found; otherwise <code>null</code> if <code>errorOnAbsence</code> is <code>false</code>
-     * @throws OXException If <code>errorOnAbsence</code> is <code>true</code> and service could not be found
-     */
-    public static <S extends Object> S getService(final Class<? extends S> clazz, final boolean errorOnAbsence) throws OXException {
-        return REGISTRY.getService(clazz, errorOnAbsence);
-    }
-
-    /**
-     * Initializes a new {@link IMAPServiceRegistry}
-     */
-    private DatabaseServiceRegistry() {
+    public BoxAccess() {
         super();
+        // TODO Auto-generated constructor stub
+
+    }
+
+    /**
+     * Disposes this access instance.
+     */
+    public void dispose() {
+        // TODO Auto-generated method stub
+
     }
 
 }

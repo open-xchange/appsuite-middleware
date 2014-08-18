@@ -64,7 +64,7 @@ import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.database.DatabaseFolderStorage.ConnectionMode;
 import com.openexchange.folderstorage.database.DatabaseFolderType;
 import com.openexchange.folderstorage.database.DatabaseParameterConstants;
-import com.openexchange.folderstorage.database.DatabaseServiceRegistry;
+import com.openexchange.folderstorage.osgi.DatabaseServiceHolder;
 
 
 /**
@@ -136,7 +136,7 @@ public class TransactionManager {
         this.storageParameters = storageParameters;
         ConnectionMode connectionMode = storageParameters.getParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_CONNECTION);
         if (connectionMode == null) {
-            dbService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
+            dbService = DatabaseServiceHolder.requireDatabaseService();
             connection = dbService.getWritable(storageParameters.getContext());
             connectionMode = new ConnectionMode(new ResilientConnection(connection), Mode.WRITE);
             storageParameters.putParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_CONNECTION, connectionMode);

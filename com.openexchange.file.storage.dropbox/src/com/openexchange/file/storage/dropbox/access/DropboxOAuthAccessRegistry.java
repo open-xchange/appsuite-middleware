@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.dropbox.session;
+package com.openexchange.file.storage.dropbox.access;
 
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
@@ -89,10 +89,10 @@ public final class DropboxOAuthAccessRegistry {
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
-     * @param fbOAuthInfo The Dropbox OAuth access to add
+     * @param dropboxAccess The Dropbox OAuth access to add
      * @return The previous associated session, or <code>null</code> if there was no session.
      */
-    public DropboxOAuthAccess addSession(final int contextId, final int userId, final String accountId, final DropboxOAuthAccess fbOAuthInfo) {
+    public DropboxOAuthAccess addSession(final int contextId, final int userId, final String accountId, final DropboxOAuthAccess dropboxAccess) {
         final SimpleKey key = SimpleKey.valueOf(contextId, userId);
         ConcurrentMap<String, DropboxOAuthAccess> inner = map.get(key);
         if (null == inner) {
@@ -102,7 +102,7 @@ public final class DropboxOAuthAccessRegistry {
                 inner = tmp;
             }
         }
-        return inner.putIfAbsent(accountId, fbOAuthInfo);
+        return inner.putIfAbsent(accountId, dropboxAccess);
     }
 
     /**
@@ -113,7 +113,7 @@ public final class DropboxOAuthAccessRegistry {
      * @param accountId The account identifier
      * @return <code>true</code> if such a Dropbox OAuth access is present; otherwise <code>false</code>
      */
-    public boolean containsSession(final int contextId, final int userId, final String accountId) {
+    public boolean containsAccess(final int contextId, final int userId, final String accountId) {
         final ConcurrentMap<String, DropboxOAuthAccess> inner = map.get(SimpleKey.valueOf(contextId, userId));
         return null != inner && inner.containsKey(accountId);
     }
@@ -126,7 +126,7 @@ public final class DropboxOAuthAccessRegistry {
      * @param accountId The account identifier
      * @return The Dropbox OAuth access or <code>null</code>
      */
-    public DropboxOAuthAccess getSession(final int contextId, final int userId, final String accountId) {
+    public DropboxOAuthAccess getAccess(final int contextId, final int userId, final String accountId) {
         final ConcurrentMap<String, DropboxOAuthAccess> inner = map.get(SimpleKey.valueOf(contextId, userId));
         return null == inner ? null : inner.get(accountId);
     }
@@ -138,7 +138,7 @@ public final class DropboxOAuthAccessRegistry {
      * @param userId The user identifier
      * @return <code>true</code> if a Dropbox OAuth access for given user-context-pair was found and removed; otherwise <code>false</code>
      */
-    public boolean removeSessionIfLast(final int contextId, final int userId) {
+    public boolean removeAccessIfLast(final int contextId, final int userId) {
         final SessiondService sessiondService = DropboxServices.getService(SessiondService.class);
         if (null == sessiondService || null == sessiondService.getAnyActiveSessionForUser(userId, contextId)) {
             /*

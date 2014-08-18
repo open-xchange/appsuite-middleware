@@ -47,33 +47,45 @@
  *
  */
 
-package com.openexchange.folderstorage.virtual;
+package com.openexchange.subscribe.google;
 
-import com.openexchange.osgi.ServiceRegistry;
+import java.util.Collections;
+import junit.framework.TestCase;
 
 /**
- * {@link VirtualServiceRegistry} - The service registry for virtual folder storage.
+ * {@link GoogleCalendarSubscribeTest}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class VirtualServiceRegistry {
+public class GoogleCalendarSubscribeTest extends TestCase {
 
-    private static final ServiceRegistry REGISTRY = new ServiceRegistry();
+    private static final String REDIRECT_URI = "http://google.oxoe.int/ajax/defer";
+
+    private static final String CLIENT_SECRET = "Fdu5CNCR2FuAMJ_G9HdkRtfw";
+
+    private static final String CLIENT_ID = "307697290778-iovilfb6pkh5bmi7c8p10rnmg4oglt80.apps.googleusercontent.com";
 
     /**
-     * Gets the service registry
-     *
-     * @return The service registry
+     * Initializes a new {@link GoogleCalendarSubscribeTest}.
      */
-    public static ServiceRegistry getServiceRegistry() {
-        return REGISTRY;
+    public GoogleCalendarSubscribeTest(final String name) {
+        super(name);
     }
 
     /**
-     * Initializes a new {@link IMAPServiceRegistry}
+     * Simple example on how to fetch the access token
+     * 
+     * @throws Exception
      */
-    private VirtualServiceRegistry() {
-        super();
+    public void testInit() throws Exception {
+        GoogleOAuthClient googleOAuthClient = new GoogleOAuthClient();
+        googleOAuthClient.login("ewaldbartkowiak@googlemail.com", "BewIbgeawn4");
+        final String authCode = googleOAuthClient.getAuthorizationCode(
+            CLIENT_ID,
+            CLIENT_SECRET,
+            REDIRECT_URI,
+            Collections.singletonList("https://www.googleapis.com/auth/calendar.readonly"));
+        String accessToken = googleOAuthClient.getAccessToken(CLIENT_ID, CLIENT_SECRET, authCode, REDIRECT_URI);
+        assertNotNull(accessToken);
     }
-
 }

@@ -63,6 +63,7 @@ import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
 import com.googlecode.concurrentlinkedhashmap.Weighers;
 import com.openexchange.ajax.customizer.folder.AdditionalFieldsUtils;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderService;
@@ -226,6 +227,10 @@ public final class FolderStorageActivator implements BundleActivator {
                 context,
                 UserService.class,
                 new UserServiceHolder(context)));
+            serviceTrackers.add(new ServiceTracker<DatabaseService, DatabaseService>(
+                context,
+                DatabaseService.class,
+                new DatabaseServiceHolder(context)));
             for (final ServiceTracker<?, ?> serviceTracker : serviceTrackers) {
                 serviceTracker.open();
             }

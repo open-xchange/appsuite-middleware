@@ -47,33 +47,57 @@
  *
  */
 
-package com.openexchange.folderstorage.outlook;
+package com.openexchange.file.storage.dropbox.access;
 
-import com.openexchange.osgi.ServiceRegistry;
+import java.util.Map;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondEventConstants;
 
 /**
- * {@link OutlookServiceRegistry} - The service registry for MS Outlook folder storage.
+ * {@link DropboxEventHandler} - The {@link EventHandler event handler}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class OutlookServiceRegistry {
-
-    private static final ServiceRegistry REGISTRY = new ServiceRegistry();
+public final class DropboxEventHandler implements EventHandler {
 
     /**
-     * Gets the service registry
-     *
-     * @return The service registry
+     * The logger constant.
      */
-    public static ServiceRegistry getServiceRegistry() {
-        return REGISTRY;
-    }
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DropboxEventHandler.class);
 
     /**
-     * Initializes a new {@link IMAPServiceRegistry}
+     * Initializes a new {@link DropboxEventHandler}.
      */
-    private OutlookServiceRegistry() {
+    public DropboxEventHandler() {
         super();
     }
 
+    @Override
+    public void handleEvent(final Event event) {
+        final String topic = event.getTopic();
+        try {
+            if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic) || SessiondEventConstants.TOPIC_STORED_SESSION.equals(topic)) {
+                // A single session was removed
+                final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
+                if (!session.isTransient() && DropboxOAuthAccessRegistry.getInstance().removeAccessIfLast(session.getContextId(), session.getUserId())) {
+                    LOG.debug("Dropbox session removed for user {} in context {}", session.getUserId(), session.getContextId());
+                }
+            } else if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
+                // A session container was removed
+                @SuppressWarnings("unchecked") final Map<String, Session> sessionContainer =
+                    (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
+                // For each session
+                final DropboxOAuthAccessRegistry sessionRegistry = DropboxOAuthAccessRegistry.getInstance();
+                for (final Session session : sessionContainer.values()) {
+                    if (!session.isTransient() && sessionRegistry.removeAccessIfLast(session.getContextId(), session.getUserId())) {
+                        LOG.debug("Dropbox session removed for user {} in context {}", session.getUserId(), session.getContextId());
+                    }
+                }
+            }
+        } catch (final Exception e) {
+            LOG.error("Error while handling SessionD event \"{}\"", topic, e);
+        }
+    }
 }

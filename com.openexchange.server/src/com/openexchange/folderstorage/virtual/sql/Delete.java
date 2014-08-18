@@ -62,7 +62,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.internal.Tools;
 import com.openexchange.folderstorage.mail.MailFolderType;
-import com.openexchange.folderstorage.virtual.VirtualServiceRegistry;
+import com.openexchange.folderstorage.virtual.osgi.Services;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.event.EventPool;
 import com.openexchange.mail.event.PooledEvent;
@@ -115,7 +115,7 @@ public final class Delete {
      * @throws FolderException If delete fails
      */
     public static void deleteFolder(final int cid, final int tree, final int user, final String folderId, final boolean backup, final Session session) throws OXException {
-        final DatabaseService databaseService = VirtualServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
+        final DatabaseService databaseService = Services.getService(DatabaseService.class);
         // Get a connection
         final Connection con = databaseService.getWritable(cid);
         try {

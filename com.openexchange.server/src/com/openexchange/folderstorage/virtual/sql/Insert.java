@@ -65,7 +65,7 @@ import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.internal.Tools;
 import com.openexchange.folderstorage.mail.MailFolderType;
-import com.openexchange.folderstorage.virtual.VirtualServiceRegistry;
+import com.openexchange.folderstorage.virtual.osgi.Services;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.event.EventPool;
 import com.openexchange.mail.event.PooledEvent;
@@ -111,7 +111,7 @@ public final class Insert {
      * @throws FolderException If insertion fails
      */
     public static void insertFolder(final int cid, final int tree, final int user, final Folder folder, final String shadow, final Session session) throws OXException {
-        final DatabaseService databaseService = VirtualServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
+        final DatabaseService databaseService = Services.getService(DatabaseService.class);
         // Get a connection
         final Connection con = databaseService.getWritable(cid);
         try {

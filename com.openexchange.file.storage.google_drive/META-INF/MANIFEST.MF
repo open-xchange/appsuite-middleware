@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Open-Xchange File Storage Dropbox Bundle
+Bundle-Name: Open-Xchange File Storage GoogleDrive Bundle
 Bundle-SymbolicName: com.openexchange.file.storage.google_drive
 Bundle-Version: 7.6.1
 Bundle-Vendor: Open-Xchange Inc.

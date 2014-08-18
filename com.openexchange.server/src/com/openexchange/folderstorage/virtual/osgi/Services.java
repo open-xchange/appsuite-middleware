@@ -47,57 +47,72 @@
  *
  */
 
-package com.openexchange.file.storage.dropbox.session;
+package com.openexchange.folderstorage.virtual.osgi;
 
-import java.util.Map;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventHandler;
-import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessiondEventConstants;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link DropboxEventHandler} - The {@link EventHandler event handler}.
+ * {@link Services} - The static service lookup.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DropboxEventHandler implements EventHandler {
+public final class Services {
 
     /**
-     * The logger constant.
+     * Initializes a new {@link Services}.
      */
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DropboxEventHandler.class);
-
-    /**
-     * Initializes a new {@link DropboxEventHandler}.
-     */
-    public DropboxEventHandler() {
+    private Services() {
         super();
     }
 
-    @Override
-    public void handleEvent(final Event event) {
-        final String topic = event.getTopic();
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Sets the service lookup.
+     *
+     * @param serviceLookup The service lookup or <code>null</code>
+     */
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
+    }
+
+    /**
+     * Gets the service lookup.
+     *
+     * @return The service lookup or <code>null</code>
+     */
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
+    }
+
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.folderstorage.virtual\" not started?");
+        }
+        return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
         try {
-            if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic) || SessiondEventConstants.TOPIC_STORED_SESSION.equals(topic)) {
-                // A single session was removed
-                final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
-                if (!session.isTransient() && DropboxOAuthAccessRegistry.getInstance().removeSessionIfLast(session.getContextId(), session.getUserId())) {
-                    LOG.debug("Dropbox session removed for user {} in context {}", session.getUserId(), session.getContextId());
-                }
-            } else if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
-                // A session container was removed
-                @SuppressWarnings("unchecked") final Map<String, Session> sessionContainer =
-                    (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
-                // For each session
-                final DropboxOAuthAccessRegistry sessionRegistry = DropboxOAuthAccessRegistry.getInstance();
-                for (final Session session : sessionContainer.values()) {
-                    if (!session.isTransient() && sessionRegistry.removeSessionIfLast(session.getContextId(), session.getUserId())) {
-                        LOG.debug("Dropbox session removed for user {} in context {}", session.getUserId(), session.getContextId());
-                    }
-                }
-            }
-        } catch (final Exception e) {
-            LOG.error("Error while handling SessionD event \"{}\"", topic, e);
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
         }
     }
+
 }

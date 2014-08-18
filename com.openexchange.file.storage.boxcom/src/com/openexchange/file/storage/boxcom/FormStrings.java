@@ -47,33 +47,20 @@
  *
  */
 
-package com.openexchange.folderstorage.mail;
+package com.openexchange.file.storage.boxcom;
 
-import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link MailServiceRegistry} - The service registry for mail folder storage.
+ * {@link FormStrings}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailServiceRegistry {
+public class FormStrings implements LocalizableStrings {
 
-    private static final ServiceRegistry REGISTRY = new ServiceRegistry();
+    public static final String ACCOUNT_LABEL = "Select an existing account";
 
-    /**
-     * Gets the service registry
-     *
-     * @return The service registry
-     */
-    public static ServiceRegistry getServiceRegistry() {
-        return REGISTRY;
-    }
-
-    /**
-     * Initializes a new {@link IMAPServiceRegistry}
-     */
-    private MailServiceRegistry() {
+    public FormStrings() {
         super();
     }
-
 }

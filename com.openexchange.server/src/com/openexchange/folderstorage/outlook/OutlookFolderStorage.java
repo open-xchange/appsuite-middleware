@@ -49,7 +49,6 @@
 
 package com.openexchange.folderstorage.outlook;
 
-import static com.openexchange.folderstorage.outlook.OutlookServiceRegistry.getServiceRegistry;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import java.sql.Connection;
@@ -122,6 +121,7 @@ import com.openexchange.folderstorage.mail.contentType.TrashContentType;
 import com.openexchange.folderstorage.messaging.MessagingFolderIdentifier;
 import com.openexchange.folderstorage.outlook.memory.MemoryTable;
 import com.openexchange.folderstorage.outlook.memory.MemoryTree;
+import com.openexchange.folderstorage.outlook.osgi.Services;
 import com.openexchange.folderstorage.outlook.sql.Delete;
 import com.openexchange.folderstorage.outlook.sql.Insert;
 import com.openexchange.folderstorage.outlook.sql.Select;
@@ -446,7 +446,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         realTreeId = FolderStorage.REAL_TREE_ID;
         folderType = new OutlookFolderType();
         folderStorageRegistry = OutlookFolderStorageRegistry.getInstance();
-        final ConfigurationService service = OutlookServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+        final ConfigurationService service = Services.getService(ConfigurationService.class);
         if (null == service) {
             publicMailFolderPath = null;
         } else {
@@ -741,7 +741,7 @@ public final class OutlookFolderStorage implements FolderStorage {
             /*
              * Cleanse from other session-bound memory tables, too
              */
-            final SessiondService sessiondService = OutlookServiceRegistry.getServiceRegistry().getService(SessiondService.class);
+            final SessiondService sessiondService = Services.getService(SessiondService.class);
             if (null != sessiondService) {
                 final Session session = storageParameters.getSession();
                 final Collection<Session> sessions = sessiondService.getSessions(session.getUserId(), session.getContextId());
@@ -1586,7 +1586,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                          * File storage accounts
                          */
                         final List<FileStorageAccount> fsAccounts = new LinkedList<FileStorageAccount>();
-                        final FileStorageServiceRegistry fsr = OutlookServiceRegistry.getServiceRegistry().getService(FileStorageServiceRegistry.class);
+                        final FileStorageServiceRegistry fsr = Services.getService(FileStorageServiceRegistry.class);
                         if (null == fsr) {
                             // Do nothing
                         } else {
@@ -1740,7 +1740,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Missing FileStorageService instance.");
             }
             final String serviceId = ((com.openexchange.file.storage.ServiceAware) userAccount).getServiceId();
-            fileStorageService = getServiceRegistry().getService(FileStorageServiceRegistry.class).getFileStorageService(serviceId);
+            fileStorageService = Services.getService(FileStorageServiceRegistry.class).getFileStorageService(serviceId);
         }
         return fileStorageService.getAccountAccess(userAccount.getId(), storageParameters.getSession());
     }
@@ -1978,8 +1978,7 @@ public final class OutlookFolderStorage implements FolderStorage {
     private SortableId[] getPrivateFolderSubfolders(final String parentId, final int tree, final StorageParameters parameters, final User user, final Locale locale, final int contextId) throws OXException {
         final CompletionService<TreeMap<String, List<String>>> completionService;
         {
-            completionService = new ThreadPoolCompletionService<TreeMap<String, List<String>>>(
-                OutlookServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class, true));
+            completionService = new ThreadPoolCompletionService<TreeMap<String, List<String>>>(Services.getService(ThreadPoolService.class));
         }
         int taskCount = 0;
         final FolderNameComparator comparator = new FolderNameComparator(locale);
@@ -2124,7 +2123,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         final List<String> accountSubfolderIDs;
         int unifiedMailIndex = -1;
         if (userPermissionBits.isMultipleMailAccounts()) {
-            final MailAccountStorageService mass = OutlookServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class);
+            final MailAccountStorageService mass = Services.getService(MailAccountStorageService.class);
             if (null == mass) {
                 accountSubfolderIDs = Collections.emptyList();
             } else {
@@ -2148,7 +2147,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                                     /*
                                      * Ensure Unified Mail is enabled; meaning at least one account is subscribed to Unified Mail
                                      */
-                                    final UnifiedInboxManagement uim = OutlookServiceRegistry.getServiceRegistry().getService(UnifiedInboxManagement.class);
+                                    final UnifiedInboxManagement uim = Services.getService(UnifiedInboxManagement.class);
                                     try {
                                         if (null != uim && uim.isEnabled(user.getId(), contextId)) {
                                             accountSubfolderIDs.add(MailFolderUtility.prepareFullname(mailAccount.getId(), MailFolder.DEFAULT_FOLDER_ID));
@@ -2177,7 +2176,7 @@ public final class OutlookFolderStorage implements FolderStorage {
              * Messaging accounts; except mail
              */
             final List<MessagingAccount> messagingAccounts = new ArrayList<MessagingAccount>();
-            final MessagingServiceRegistry msr = OutlookServiceRegistry.getServiceRegistry().getService(MessagingServiceRegistry.class);
+            final MessagingServiceRegistry msr = Services.getService(MessagingServiceRegistry.class);
             if (null == msr) {
                 messagingSubfolderIDs = Collections.emptyList();
             } else {

@@ -56,7 +56,7 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.dropbox.session.DropboxOAuthAccess;
+import com.openexchange.file.storage.dropbox.access.DropboxOAuthAccess;
 import com.openexchange.session.Session;
 
 /**

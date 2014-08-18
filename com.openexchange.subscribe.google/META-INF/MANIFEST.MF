@@ -6,11 +6,13 @@ Bundle-Version: 7.6.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.google.api.client.auth.oauth2,
+ com.google.api.client.googleapis.auth.clientlogin,
  com.google.api.client.googleapis.auth.oauth2,
  com.google.api.client.googleapis.services,
  com.google.api.client.http,
  com.google.api.client.http.javanet,
  com.google.api.client.json,
+ com.google.api.client.json.jackson,
  com.google.api.client.json.jackson2,
  com.google.api.client.util,
  com.google.api.services.calendar,
