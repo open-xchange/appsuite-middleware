@@ -50,14 +50,13 @@
 package com.openexchange.file.storage.boxcom;
 
 import static com.openexchange.java.Strings.isEmpty;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import org.apache.http.client.HttpResponseException;
 import com.box.boxjavalibv2.BoxClient;
+import com.box.boxjavalibv2.dao.BoxCollection;
 import com.box.boxjavalibv2.dao.BoxFile;
 import com.box.boxjavalibv2.dao.BoxFolder;
 import com.box.boxjavalibv2.dao.BoxThumbnail;
@@ -68,8 +67,10 @@ import com.box.boxjavalibv2.exceptions.BoxServerException;
 import com.box.boxjavalibv2.requests.requestobjects.BoxFileRequestObject;
 import com.box.boxjavalibv2.requests.requestobjects.BoxImageRequestObject;
 import com.box.boxjavalibv2.requests.requestobjects.BoxItemCopyRequestObject;
+import com.box.boxjavalibv2.requests.requestobjects.BoxPagingRequestObject;
 import com.box.boxjavalibv2.resourcemanagers.IBoxFilesManager;
 import com.box.restclientv2.exceptions.BoxRestException;
+import com.box.restclientv2.requestsbase.BoxDefaultRequestObject;
 import com.box.restclientv2.requestsbase.BoxFileUploadRequestObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
@@ -108,7 +109,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         userId = session.getUserId();
     }
 
-    private void checkFileValidity(BoxTypedObject typedObject) throws OXException {
+    protected void checkFileValidity(BoxTypedObject typedObject) throws OXException {
         if (isFolder(typedObject) || null != ((BoxFile) typedObject).getTrashedAt()) {
             throw BoxExceptionCodes.NOT_A_FILE.create(typedObject.getId());
         }
@@ -162,12 +163,12 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                     return Boolean.TRUE;
                 } catch (final BoxRestException e) {
                     if (404 == e.getStatusCode()) {
-                        return false;
+                        return Boolean.FALSE;
                     }
                     throw e;
                 } catch (final BoxServerException e) {
                     if (404 == e.getStatusCode()) {
-                        return false;
+                        return Boolean.FALSE;
                     }
                     throw e;
                 }
@@ -536,11 +537,34 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                 BoxFolder boxfolder = boxClient.getFoldersManager().getFolder(toBoxFolderId(folderId), null);
 
                 List<File> files = new LinkedList<File>();
-                for (BoxTypedObject child : boxfolder.getItemCollection().getEntries()) {
-                    if (isFile(child)) {
-                        files.add(new com.openexchange.file.storage.boxcom.BoxFile(folderId, child.getId(), userId, rootFolderId).parseBoxFile((BoxFile) child));
+                BoxCollection itemCollection = boxfolder.getItemCollection();
+                if (itemCollection.getTotalCount().intValue() <= itemCollection.getEntries().size()) {
+                    for (BoxTypedObject child : itemCollection.getEntries()) {
+                        if (isFile(child)) {
+                            files.add(new com.openexchange.file.storage.boxcom.BoxFile(folderId, child.getId(), userId, rootFolderId).parseBoxFile((BoxFile) child));
+                        }
                     }
+                } else {
+                    int offset = 0;
+                    final int limit = 100;
+
+                    int resultsFound;
+                    do {
+                        BoxPagingRequestObject reqObj = BoxPagingRequestObject.pagingRequestObject(limit, offset);
+                        BoxCollection collection = boxClient.getFoldersManager().getFolderItems(toBoxFolderId(folderId), reqObj);
+
+                        List<BoxTypedObject> entries = collection.getEntries();
+                        resultsFound = entries.size();
+                        for (BoxTypedObject typedObject : entries) {
+                            if (isFile(typedObject)) {
+                                files.add(new com.openexchange.file.storage.boxcom.BoxFile(folderId, typedObject.getId(), userId, rootFolderId).parseBoxFile((BoxFile) typedObject));
+                            }
+                        }
+
+                        offset += limit;
+                    } while (resultsFound == limit);
                 }
+
 
                 return new FileTimedResult(files);
             }
@@ -563,10 +587,34 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                 BoxFolder boxfolder = boxClient.getFoldersManager().getFolder(toBoxFolderId(folderId), null);
 
                 List<File> files = new LinkedList<File>();
-                for (BoxTypedObject child : boxfolder.getItemCollection().getEntries()) {
-                    if (isFile(child)) {
-                        files.add(new com.openexchange.file.storage.boxcom.BoxFile(folderId, child.getId(), userId, rootFolderId).parseBoxFile((BoxFile) child));
+
+
+                BoxCollection itemCollection = boxfolder.getItemCollection();
+                if (itemCollection.getTotalCount().intValue() <= itemCollection.getEntries().size()) {
+                    for (BoxTypedObject child : itemCollection.getEntries()) {
+                        if (isFile(child)) {
+                            files.add(new com.openexchange.file.storage.boxcom.BoxFile(folderId, child.getId(), userId, rootFolderId).parseBoxFile((BoxFile) child));
+                        }
                     }
+                } else {
+                    int offset = 0;
+                    final int limit = 100;
+
+                    int resultsFound;
+                    do {
+                        BoxPagingRequestObject reqObj = BoxPagingRequestObject.pagingRequestObject(limit, offset);
+                        BoxCollection collection = boxClient.getFoldersManager().getFolderItems(toBoxFolderId(folderId), reqObj);
+
+                        List<BoxTypedObject> entries = collection.getEntries();
+                        resultsFound = entries.size();
+                        for (BoxTypedObject typedObject : entries) {
+                            if (isFile(typedObject)) {
+                                files.add(new com.openexchange.file.storage.boxcom.BoxFile(folderId, typedObject.getId(), userId, rootFolderId).parseBoxFile((BoxFile) typedObject));
+                            }
+                        }
+
+                        offset += limit;
+                    } while (resultsFound == limit);
                 }
 
                 // Sort collection if needed
@@ -656,40 +704,36 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
     @Override
     public SearchIterator<File> search(final String pattern, List<Field> fields, final String folderId, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
+        return perform(new BoxClosure<SearchIterator<File>>() {
 
+            @Override
+            protected SearchIterator<File> doPerform() throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+                BoxClient boxClient = boxAccess.getBoxClient();
 
-
-
-        try {
-            Drive drive = googleDriveAccess.getDrive();
-
-            if (isEmpty(pattern)) {
-                // Get all files
                 List<File> files = new LinkedList<File>();
-                {
-                    Drive.Files.List list = drive.files().list();
-                    list.setQ(QUERY_STRING_FILES_ONLY_EXCLUDING_TRASH);
 
-                    FileList fileList = list.execute();
-                    if (!fileList.getItems().isEmpty()) {
-                        for (com.google.api.services.drive.model.File file : fileList.getItems()) {
-                            files.add(new GoogleDriveFile(folderId, file.getId(), userId, rootFolderId).parseGoogleDriveFile(file));
-                        }
+                int offset = 0;
+                final int limit = 100;
 
-                        String nextPageToken = list.getPageToken();
-                        while (!isEmpty(nextPageToken)) {
-                            list.setPageToken(nextPageToken);
-                            fileList = list.execute();
-                            if (!fileList.getItems().isEmpty()) {
-                                for (com.google.api.services.drive.model.File file : fileList.getItems()) {
-                                    files.add(new GoogleDriveFile(folderId, file.getId(), userId, rootFolderId).parseGoogleDriveFile(file));
-                                }
-                            }
-
-                            nextPageToken = list.getPageToken();
-                        }
+                int resultsFound;
+                do {
+                    BoxDefaultRequestObject reqObj = new BoxDefaultRequestObject();
+                    reqObj.put("type", "file");
+                    if (null != folderId) {
+                        reqObj.put("ancestor_folder_ids", toBoxFolderId(folderId));
                     }
-                }
+                    reqObj.setPage(limit, offset);
+                    BoxCollection collection = boxClient.getSearchManager().search(null == pattern ? "*" : pattern, reqObj);
+
+                    List<BoxTypedObject> entries = collection.getEntries();
+                    resultsFound = entries.size();
+                    for (BoxTypedObject typedObject : entries) {
+                        BoxFile boxfile = (BoxFile) typedObject;
+                        files.add(new com.openexchange.file.storage.boxcom.BoxFile(toFileStorageFolderId(boxfile.getParent().getId()), boxfile.getId(), userId, rootFolderId).parseBoxFile(boxfile));
+                    }
+
+                    offset += limit;
+                } while (resultsFound == limit);
 
                 // Sort collection
                 sort(files, sort, order);
@@ -714,62 +758,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                 return new SearchIteratorAdapter<File>(files.iterator(), files.size());
             }
 
-            // Search by pattern
-            List<File> files = new LinkedList<File>();
-            {
-                Drive.Children.List list = drive.children().list(toGoogleDriveFolderId(folderId));
-                list.setQ(new StringBuilder().append("title contains '").append(pattern).append("' and ").append(QUERY_STRING_FILES_ONLY).toString());
-
-                ChildList fileList = list.execute();
-                if (!fileList.getItems().isEmpty()) {
-                    for (ChildReference childRef : fileList.getItems()) {
-                        String fileId = childRef.getId();
-                        files.add(new GoogleDriveFile(folderId, fileId, userId, rootFolderId).parseGoogleDriveFile(drive.files().get(fileId).execute()));
-                    }
-
-                    String nextPageToken = list.getPageToken();
-                    while (!isEmpty(nextPageToken)) {
-                        list.setPageToken(nextPageToken);
-                        fileList = list.execute();
-                        if (!fileList.getItems().isEmpty()) {
-                            for (ChildReference childRef : fileList.getItems()) {
-                                String fileId = childRef.getId();
-                                files.add(new GoogleDriveFile(folderId, fileId, userId, rootFolderId).parseGoogleDriveFile(drive.files().get(fileId).execute()));
-                            }
-                        }
-
-                        nextPageToken = list.getPageToken();
-                    }
-                }
-            }
-
-            // Sort collection
-            sort(files, sort, order);
-            if ((start != NOT_SET) && (end != NOT_SET)) {
-                final int size = files.size();
-                if ((start) > size) {
-                    /*
-                     * Return empty iterator if start is out of range
-                     */
-                    return SearchIteratorAdapter.emptyIterator();
-                }
-                /*
-                 * Reset end index if out of range
-                 */
-                int toIndex = end;
-                if (toIndex >= size) {
-                    toIndex = size;
-                }
-                files = files.subList(start, toIndex);
-            }
-            return new SearchIteratorAdapter<File>(files.iterator(), files.size());
-        } catch (final HttpResponseException e) {
-            throw handleHttpResponseError(null, e);
-        } catch (final IOException e) {
-            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
+        });
     }
 
     @Override

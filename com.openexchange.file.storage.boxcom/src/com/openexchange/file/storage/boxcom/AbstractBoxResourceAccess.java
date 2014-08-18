@@ -134,6 +134,16 @@ public abstract class AbstractBoxResourceAccess {
     /**
      * Checks if given typed object is trashed
      *
+     * @param folder The typed object to check
+     * @return <code>true</code> if typed object is trashed; otherwise <code>false</code>
+     */
+    protected static boolean isTrashed(BoxFolder folder) {
+        return hasTrashParent(folder);
+    }
+
+    /**
+     * Checks if given typed object is trashed
+     *
      * @param typedObject The typed object to check
      * @return <code>true</code> if typed object is trashed; otherwise <code>false</code>
      */
