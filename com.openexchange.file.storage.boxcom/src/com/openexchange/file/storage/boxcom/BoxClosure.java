@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.boxcom;
 
 import java.io.UnsupportedEncodingException;
+import com.box.boxjavalibv2.BoxClient;
 import com.box.boxjavalibv2.exceptions.AuthFatalFailureException;
 import com.box.boxjavalibv2.exceptions.BoxServerException;
 import com.box.restclientv2.exceptions.BoxRestException;
@@ -75,6 +76,7 @@ public abstract class BoxClosure<R> {
     /**
      * Performs the actual operation
      *
+     * @param The Box.com client to use
      * @return The return value
      * @throws OXException If an Open-Xchange error occurred
      * @throws BoxRestException If a REST error occurred
@@ -82,37 +84,40 @@ public abstract class BoxClosure<R> {
      * @throws AuthFatalFailureException If an authentication error occurred
      * @throws UnsupportedEncodingException If an encoding problem occurred
      */
-    protected abstract R doPerform() throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException;
+    protected abstract R doPerform(BoxClient boxClient) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException;
 
     /**
      * Performs this closure's operation.
      *
      * @param resourceAccess The associated resource access
+     * @param boxClient The Box.com client to use
      * @param session The associated session
      * @return The return value
      * @throws OXException If operation fails
      */
-    public R perform(AbstractBoxResourceAccess resourceAccess, Session session) throws OXException {
-        return innerPerform(true, resourceAccess, session);
+    public R perform(AbstractBoxResourceAccess resourceAccess, BoxClient boxClient, Session session) throws OXException {
+        return innerPerform(true, resourceAccess, boxClient, session);
     }
 
-    private R innerPerform(boolean handleAuthError, AbstractBoxResourceAccess resourceAccess, Session session) throws OXException {
-        try {
-            return doPerform();
-        } catch (BoxRestException e) {
-            throw resourceAccess.handleRestError(e);
-        } catch (BoxServerException e) {
-            throw resourceAccess.handleHttpResponseError(null, e);
-        } catch (AuthFatalFailureException e) {
-            if (!handleAuthError) {
-                throw BoxExceptionCodes.AUTH_ERROR.create(e, e.getMessage());
+    private R innerPerform(boolean handleAuthError, AbstractBoxResourceAccess resourceAccess, BoxClient boxClient, Session session) throws OXException {
+        synchronized (boxClient) {
+            try {
+                return doPerform(boxClient);
+            } catch (BoxRestException e) {
+                throw resourceAccess.handleRestError(e);
+            } catch (BoxServerException e) {
+                throw resourceAccess.handleHttpResponseError(null, e);
+            } catch (AuthFatalFailureException e) {
+                if (!handleAuthError) {
+                    throw BoxExceptionCodes.AUTH_ERROR.create(e, e.getMessage());
+                }
+                resourceAccess.handleAuthError(e, session);
+                return innerPerform(false, resourceAccess, boxClient, session);
+            } catch (final UnsupportedEncodingException e) {
+                throw BoxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } catch (final RuntimeException e) {
+                throw BoxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
-            resourceAccess.handleAuthError(e, session);
-            return innerPerform(false, resourceAccess, session);
-        } catch (final UnsupportedEncodingException e) {
-            throw BoxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            throw BoxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
