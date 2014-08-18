@@ -95,7 +95,7 @@ public class NotifyAction extends AbstractShareAction {
             token = request.getString("token");
             recipient = request.getString("recipient");
             title = request.getString("title");
-            message = request.getString("message");
+            message = request.optString("message");
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }

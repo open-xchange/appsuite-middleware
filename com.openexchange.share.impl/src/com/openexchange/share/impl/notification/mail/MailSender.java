@@ -67,6 +67,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ContentAwareComposedMailMessage;
 import com.openexchange.mail.mime.ContentType;
@@ -189,7 +190,7 @@ public class MailSender {
         Share share = notification.getShare();
         String displayName;
         String title;
-        String message;
+        String message = null;
         String username = null;
         String password = null;
         if (htmlService == null) {
@@ -199,7 +200,10 @@ public class MailSender {
         } else {
             displayName = htmlService.htmlFormat(user.getDisplayName());
             title = htmlService.htmlFormat(notification.getTitle());
-            message = htmlService.htmlFormat(notification.getMessage());
+            String tmpMessage = notification.getMessage();
+            if (tmpMessage != null) {
+                message = htmlService.htmlFormat(tmpMessage);
+            }
         }
 
         if (share.getAuthentication() != AuthenticationMode.ANONYMOUS) {
@@ -217,8 +221,10 @@ public class MailSender {
         }
 
         Map<String, Object> vars = new HashMap<String, Object>();
-        vars.put("message_intro", String.format(stringHelper.getString(MailStrings.MESSAGE_INTRO), displayName));
-        vars.put("message", message);
+        if (!Strings.isEmpty(message)) {
+            vars.put("message_intro", String.format(stringHelper.getString(MailStrings.MESSAGE_INTRO), displayName));
+            vars.put("message", message);
+        }
         vars.put("link_intro", String.format(stringHelper.getString(MailStrings.LINK_INTRO), title));
         vars.put("link", notification.getUrl());
         vars.put("credentials_intro", stringHelper.getString(MailStrings.CREDENTIALS_INTRO));
