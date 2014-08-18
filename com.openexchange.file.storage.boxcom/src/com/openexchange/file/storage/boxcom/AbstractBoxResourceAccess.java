@@ -51,6 +51,7 @@ package com.openexchange.file.storage.boxcom;
 
 import java.io.IOException;
 import org.slf4j.Logger;
+import com.box.boxjavalibv2.BoxClient;
 import com.box.boxjavalibv2.dao.BoxFile;
 import com.box.boxjavalibv2.dao.BoxFolder;
 import com.box.boxjavalibv2.dao.BoxTypedObject;
@@ -94,11 +95,12 @@ public abstract class AbstractBoxResourceAccess {
      * Performs given closure.
      *
      * @param closure The closure to perform
+     * @param boxClient The Box.com client to use
      * @return The return value
      * @throws OXException If performing closure fails
      */
-    protected <R> R perform(BoxClosure<R> closure) throws OXException {
-        return closure.perform(this, session);
+    protected <R> R perform(BoxClosure<R> closure, BoxClient boxClient) throws OXException {
+        return closure.perform(this, boxClient, session);
     }
 
     /**
