@@ -49,7 +49,6 @@
 
 package com.openexchange.folderstorage.filestorage;
 
-import static com.openexchange.folderstorage.filestorage.FileStorageFolderStorageServiceRegistry.getServiceRegistry;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,12 +65,17 @@ import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.WarningsAware;
 import com.openexchange.file.storage.composition.FolderID;
+import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.folderstorage.ContentType;
@@ -93,7 +97,9 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Collators;
 import com.openexchange.messaging.MessagingPermission;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -104,7 +110,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public final class FileStorageFolderStorage implements FolderStorage {
 
-    private static final String PARAM = FileStorageParameterConstants.PARAM_ID_BASED_FILE_STORAGE_ACCESS;
+    private static final String PARAM = FileStorageParameterConstants.PARAM_ID_BASED_FOLDER_ACCESS;
 
     /**
      * <code>"1"</code>
@@ -118,11 +124,16 @@ public final class FileStorageFolderStorage implements FolderStorage {
 
     private static final String SERVICE_INFOSTORE = "infostore";
 
+    // --------------------------------------------------------------------------------------------------------------------------- //
+
+    private final ServiceLookup services;
+
     /**
      * Initializes a new {@link FileStorageFolderStorage}.
      */
-    public FileStorageFolderStorage() {
+    public FileStorageFolderStorage(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     private IDBasedFolderAccess getFolderAccess(final StorageParameters storageParameters) throws OXException {
@@ -445,7 +456,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
         /*
          * Put map
          */
-        final IDBasedFolderAccessFactory factory = getServiceRegistry().getService(IDBasedFolderAccessFactory.class);
+        final IDBasedFolderAccessFactory factory = services.getService(IDBasedFolderAccessFactory.class);
         if (null == factory) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IDBasedFolderAccessFactory.class.getName());
         }
@@ -600,17 +611,13 @@ public final class FileStorageFolderStorage implements FolderStorage {
                     // Check for duplicate
                     check4DuplicateFolder(folderAccess, newParent, null == newName ? oldName : newName);
                     // Copy
-                    final String destFullname = fullCopy(
-                        folderAccess,
-                        folder.getID(),
-                        newParent,
-                        storageParameters.getUserId(),
-                        p.getCapabilities().contains(FileStorageFolder.CAPABILITY_PERMISSIONS));
+                    final String destFullname = fullCopy(folderAccess, folder.getID(), newParent, storageParameters.getUserId(), supportsPermissions(p), storageParameters.getSession());
                     // Delete source
                     folderAccess.deleteFolder(folder.getID(), true);
                     // Perform other updates
                     String updatedId = folderAccess.updateFolder(destFullname, fsFolder);
                     fsFolder.setId(updatedId);
+                    folder.setID(updatedId);
                 }
             }
         }
@@ -632,6 +639,11 @@ public final class FileStorageFolderStorage implements FolderStorage {
         if ((null != fsPermissions) && StorageParametersUtility.isHandDownPermissions(storageParameters)) {
             handDown(fsFolder.getId(), fsPermissions, folderAccess);
         }
+    }
+
+    private boolean supportsPermissions(final FileStorageFolder p) {
+        Set<String> capabilities = p.getCapabilities();
+        return null != capabilities && capabilities.contains(FileStorageFolder.CAPABILITY_PERMISSIONS);
     }
 
     private static void handDown(final String parentId, final FileStoragePermission[] fsPermissions, final IDBasedFolderAccess folderAccess) throws OXException {
@@ -658,53 +670,53 @@ public final class FileStorageFolderStorage implements FolderStorage {
         }
     }
 
-    private static String fullCopy(final IDBasedFolderAccess folderAccess, final String srcFullname, final String destParent, final int user, final boolean hasPermissions) throws OXException {
-        // Create folder
-        final FileStorageFolder source = folderAccess.getFolder(srcFullname);
-        final DefaultFileStorageFolder mfd = new DefaultFileStorageFolder();
-        mfd.setName(source.getName());
-        mfd.setParentId(destParent);
-        mfd.setSubscribed(source.isSubscribed());
-        if (hasPermissions) {
-            // Copy permissions
-            final List<FileStoragePermission> perms = source.getPermissions();
-            for (final FileStoragePermission perm : perms) {
-                mfd.addPermission((FileStoragePermission) perm.clone());
+    private String fullCopy(IDBasedFolderAccess folderAccess, String srcFullname, String destParent, int user, boolean hasPermissions, Session session) throws OXException {
+        boolean error = true;
+        String destFullName = null;
+        try {
+            // Create folder
+            {
+                FileStorageFolder source = folderAccess.getFolder(srcFullname);
+                DefaultFileStorageFolder mfd = new DefaultFileStorageFolder();
+                mfd.setName(source.getName());
+                mfd.setParentId(destParent);
+                mfd.setSubscribed(source.isSubscribed());
+                if (hasPermissions) {
+                    // Copy permissions
+                    List<FileStoragePermission> perms = source.getPermissions();
+                    for (FileStoragePermission perm : perms) {
+                        mfd.addPermission((FileStoragePermission) perm.clone());
+                    }
+                }
+                destFullName = folderAccess.createFolder(mfd);
             }
-        }
-        final String destFullname = folderAccess.createFolder(mfd);
-        // TODO: Copy files
-        /*
-         * final List<FileStorageMessage> msgs = srcAccess.getMessageAccess().getAllMessages( srcFullname, null,
-         * FileStorageField.RECEIVED_DATE, OrderDirection.ASC, new FileStorageField[] { FileStorageField.FULL }); final
-         * FileStorageMessageAccess destMessageStorage = destAccess.getMessageAccess();
-         */
-        // Append files to destination account
-        /* final String[] mailIds = */// destMessageStorage.appendMessages(destFullname, msgs.toArray(new FileStorageMessage[msgs.size()]));
-        /*-
-         *
-        // Ensure flags
-        final String[] arr = new String[1];
-        for (int i = 0; i < msgs.length; i++) {
-            final MailMessage m = msgs[i];
-            final String mailId = mailIds[i];
-            if (null != m && null != mailId) {
-                arr[0] = mailId;
-                // System flags
-                destMessageStorage.updateMessageFlags(destFullname, arr, m.getFlags(), true);
-                // Color label
-                if (m.containsColorLabel() && m.getColorLabel() != MailMessage.COLOR_LABEL_NONE) {
-                    destMessageStorage.updateMessageColorLabel(destFullname, arr, m.getColorLabel());
+
+            // Copy files
+            {
+                IDBasedFileAccessFactory factory = services.getService(IDBasedFileAccessFactory.class);
+                if (null == factory) {
+                    throw ServiceExceptionCode.absentService(IDBasedFileAccessFactory.class);
+                }
+                IDBasedFileAccess fileAccess = factory.createAccess(session);
+
+                for (SearchIterator<File> documents = fileAccess.getDocuments(srcFullname, Collections.singletonList(Field.ID)).results(); documents.hasNext();) {
+                    String fileId = documents.next().getId();
+                    fileAccess.copy(fileId, FileStorageFileAccess.CURRENT_VERSION, destFullName, null, null, Collections.<Field>emptyList());
                 }
             }
+
+            // Iterate subfolders
+            for (FileStorageFolder element : folderAccess.getSubfolders(srcFullname, true)) {
+                fullCopy(folderAccess, element.getId(), destFullName, user, hasPermissions, session);
+            }
+
+            error = false;
+            return destFullName;
+        } finally {
+            if (error && null != destFullName) {
+                folderAccess.deleteFolder(destFullName, true);
+            }
         }
-         */
-        // Iterate subfolders
-        final FileStorageFolder[] tmp = folderAccess.getSubfolders(srcFullname, true);
-        for (final FileStorageFolder element : tmp) {
-            fullCopy(folderAccess, element.getId(), destFullname, user, hasPermissions);
-        }
-        return destFullname;
     }
 
     private static final class FileStorageAccountComparator implements Comparator<FileStorageAccount> {

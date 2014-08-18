@@ -84,7 +84,11 @@ public class TestConfig extends AbstractConfig {
         /**
          * xingtest.properties
          */
-        XING_PROPS("xingPropertiesFile");
+        XING_PROPS("xingPropertiesFile"),
+        /**
+         * googletest.properties
+         */
+        GOOGLE_PROPS("googlePropertiesFile");
 
         /**
          * Name of the property in the test.properties file.

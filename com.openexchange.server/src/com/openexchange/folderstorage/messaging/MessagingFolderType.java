@@ -52,6 +52,7 @@ package com.openexchange.folderstorage.messaging;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
+import com.openexchange.folderstorage.messaging.osgi.Services;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 
@@ -108,8 +109,7 @@ public final class MessagingFolderType implements FolderType {
         /*
          * Check if service exists
          */
-        final MessagingServiceRegistry registry =
-            MessagingFolderStorageServiceRegistry.getServiceRegistry().getService(MessagingServiceRegistry.class);
+        final MessagingServiceRegistry registry = Services.getService(MessagingServiceRegistry.class);
         if (null == registry) {
             return false;
         }

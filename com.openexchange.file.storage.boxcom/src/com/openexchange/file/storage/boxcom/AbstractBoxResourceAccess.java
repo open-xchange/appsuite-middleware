@@ -1,0 +1,233 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.file.storage.boxcom;
+
+import java.io.IOException;
+import org.slf4j.Logger;
+import com.box.boxjavalibv2.dao.BoxFile;
+import com.box.boxjavalibv2.dao.BoxFolder;
+import com.box.boxjavalibv2.dao.BoxTypedObject;
+import com.box.boxjavalibv2.exceptions.AuthFatalFailureException;
+import com.box.boxjavalibv2.exceptions.BoxServerException;
+import com.box.restclientv2.exceptions.BoxRestException;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.boxcom.access.BoxAccess;
+import com.openexchange.session.Session;
+
+/**
+ * {@link AbstractBoxResourceAccess}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public abstract class AbstractBoxResourceAccess {
+
+    private static final String TYPE_FILE = BoxConstants.TYPE_FILE;
+
+    private static final String TYPE_FOLDER = BoxConstants.TYPE_FOLDER;
+
+    protected final BoxAccess boxAccess;
+    protected final Session session;
+    protected final FileStorageAccount account;
+    protected final String rootFolderId;
+
+    /**
+     * Initializes a new {@link AbstractBoxResourceAccess}.
+     */
+    protected AbstractBoxResourceAccess(BoxAccess boxAccess, FileStorageAccount account, Session session) {
+        super();
+        this.boxAccess = boxAccess;
+        this.account = account;
+        this.session = session;
+        rootFolderId = "0";
+    }
+
+    /**
+     * Performs given closure.
+     *
+     * @param closure The closure to perform
+     * @return The return value
+     * @throws OXException If performing closure fails
+     */
+    protected <R> R perform(BoxClosure<R> closure) throws OXException {
+        return closure.perform(this, session);
+    }
+
+    /**
+     * Checks if given typed object denotes a file
+     *
+     * @param typedObject The typed object to check
+     * @return <code>true</code> if typed object denotes a file; otherwise <code>false</code>
+     */
+    protected static boolean isFile(BoxTypedObject typedObject) {
+        return null != typedObject && TYPE_FILE.equals(typedObject.getType());
+    }
+
+    /**
+     * Checks if given typed object denotes a folder
+     *
+     * @param typedObject The typed object to check
+     * @return <code>true</code> if typed object denotes a folder; otherwise <code>false</code>
+     */
+    protected static boolean isFolder(BoxTypedObject typedObject) {
+        return null != typedObject && TYPE_FOLDER.equals(typedObject.getType());
+    }
+
+    /**
+     * Checks if given typed object is trashed
+     *
+     * @param boxFile The typed object to check
+     * @return <code>true</code> if typed object is trashed; otherwise <code>false</code>
+     */
+    protected static boolean isTrashed(BoxFile boxFile) {
+        return null != boxFile.getTrashedAt();
+    }
+
+    /**
+     * Checks if given typed object is trashed
+     *
+     * @param typedObject The typed object to check
+     * @return <code>true</code> if typed object is trashed; otherwise <code>false</code>
+     */
+    protected static boolean isTrashed(BoxTypedObject typedObject) {
+        if (isFile(typedObject)) {
+            return null != ((BoxFile) typedObject).getTrashedAt();
+        } else if (isFolder(typedObject)) {
+            return hasTrashParent((BoxFolder) typedObject);
+        }
+        return false;
+    }
+
+    private static boolean hasTrashParent(BoxFolder boxFolder) {
+        BoxFolder parent = boxFolder.getParent();
+        if (null == parent) {
+            return false;
+        }
+        if ("trash".equals(parent.getId())) {
+            return true;
+        }
+        return hasTrashParent(parent);
+    }
+
+    /**
+     * Handles authentication error.
+     *
+     * @param e The authentication error
+     * @param session The associated session
+     * @throws OXException If authentication error could not be handled
+     */
+    protected void handleAuthError(AuthFatalFailureException e, Session session) throws OXException {
+        try {
+            boxAccess.reinit(session);
+        } catch (OXException oxe) {
+            Logger logger = org.slf4j.LoggerFactory.getLogger(AbstractBoxResourceAccess.class);
+            logger.warn("Could not re-initialize Box.com access", oxe);
+
+            throw BoxExceptionCodes.BOX_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Handles given REST error.
+     *
+     * @param e The REST error
+     * @return The resulting exception
+     */
+    protected OXException handleRestError(BoxRestException e) {
+        Throwable cause = e.getCause();
+
+        if (cause instanceof BoxServerException) {
+            return handleHttpResponseError(null, (BoxServerException) cause);
+        }
+
+        if (cause instanceof IOException) {
+            return BoxExceptionCodes.IO_ERROR.create(cause, cause.getMessage());
+        }
+
+        return BoxExceptionCodes.BOX_ERROR.create(e, e.getMessage());
+    }
+
+    /**
+     * Handles given HTTP response error.
+     *
+     * @param identifier The option identifier for associated Google Drive resource
+     * @param e The HTTP error
+     * @return The resulting exception
+     */
+    protected OXException handleHttpResponseError(String identifier, BoxServerException e) {
+        if (null != identifier && 404 == e.getStatusCode()) {
+            return BoxExceptionCodes.NOT_FOUND.create(e, identifier);
+        }
+
+        return BoxExceptionCodes.BOX_SERVER_ERROR.create(e, Integer.valueOf(e.getStatusCode()), e.getCustomMessage());
+    }
+
+    /**
+     * Gets the Box folder identifier from given file storage folder identifier
+     *
+     * @param folderId The file storage folder identifier
+     * @return The appropriate Box folder identifier
+     */
+    protected String toBoxFolderId(String folderId) {
+        return FileStorageFolder.ROOT_FULLNAME.equals(folderId) ? rootFolderId : folderId;
+    }
+
+    /**
+     * Gets the file storage folder identifier from given Box folder identifier
+     *
+     * @param googleId The Box folder identifier
+     * @return The appropriate file storage folder identifier
+     */
+    protected String toFileStorageFolderId(String googleId) {
+        return rootFolderId.equals(googleId) || "0".equals(googleId) ? FileStorageFolder.ROOT_FULLNAME : googleId;
+    }
+
+}

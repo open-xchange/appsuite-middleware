@@ -99,7 +99,7 @@ public final class GoogleDriveServiceRegisterer implements ServiceTrackerCustomi
             GoogleDriveFileStorageService service = this.service;
             if (null == service) {
                 /*
-                 * Try to create Dropbox service
+                 * Try to create Google Drive service
                  */
                 service = GoogleDriveFileStorageService.newInstance();
                 this.serviceRegistration = context.registerService(FileStorageService.class, service, null);

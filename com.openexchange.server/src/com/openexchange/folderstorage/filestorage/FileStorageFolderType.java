@@ -54,8 +54,8 @@ import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
+import com.openexchange.folderstorage.filestorage.osgi.Services;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.tools.id.IDMangler;
 
 /**
@@ -85,14 +85,11 @@ public final class FileStorageFolderType implements FolderType {
      * Member stuff
      */
 
-    private final ServiceRegistry serviceRegistry;
-
     /**
      * Initializes a new {@link FileStorageFolderType}.
      */
     private FileStorageFolderType() {
         super();
-        serviceRegistry = FileStorageFolderStorageServiceRegistry.getServiceRegistry();
     }
 
     @Override
@@ -114,7 +111,7 @@ public final class FileStorageFolderType implements FolderType {
          * Check if service exists
          */
         String serviceID = new FolderID(folderId).getService();
-        final FileStorageServiceRegistry registry = serviceRegistry.getService(FileStorageServiceRegistry.class);
+        final FileStorageServiceRegistry registry = Services.getService(FileStorageServiceRegistry.class);
         return null != registry && registry.containsFileStorageService(serviceID);
     }
 

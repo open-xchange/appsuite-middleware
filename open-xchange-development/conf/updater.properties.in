@@ -16,6 +16,6 @@ com.openexchange.outlook.updater.productName=OXUpdater
 # Bytecode of an icon that can be displayed in the updater for this product next to the update entry
 com.openexchange.outlook.updater.icon=AAABAAEAICAQAAAAAADoAgAAFgAAACgAAAAgAAAAQAAAAAEABAAAAAAAgAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAACAAAAAgIAAgAAAAIAAgACAgAAAgICAAMDAwAAAAP8AAP8AAAD//wD/AAAA/wD/AP//AAD///8AAAAAAAAAAAAAAAAAAAAAAACIiIiIiIiIiIiIiIiIiAAIiIiIiIiIiIiIiIiIiIiACIiIiIiIiIiIiIiIiIiIgIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiId3d3d3eId3eIiIh3d4iIh3d3d3d3eHd3eIiHd3eIiHd3eIiHd3eHd3eId3d4iIh3d4iIiHd3iHd3d3d3iIiId3eIiIh3d4iHd3d3eIiIiHd3iIiId3eIiHd3d4iIiP+IiP///4iI//+IiIj/////iIj///+IiP/4iIiIj////4iI////iIj/iIiIiIj///+IiI//+IiI+IiI/4iIj///+IiIiIiIj4iIj//4iIj///+IiIiIiP+IiP///4iI/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////w////////////////////AP///////////////////wAP//////////////////AAAAAAAAAAAAAAAAAAAAAAD/////wAAAA4AAAAGAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAYAAAAHAAAAD/////w
 
-# Possibly branded product name of OX App Suite.
-# Will be used as the name for a hyperlink created by OXUpdater on a users desktop.
-com.openexchange.outlook.updater.appsuiteName=OX App Suite
+# Set this to false if users should not be able to change the URL that points to update.xml.
+# In that case the updater is delivered with an according installation parameter that forbids editing the URL.
+com.openexchange.outlook.updater.allowEditUrl=true

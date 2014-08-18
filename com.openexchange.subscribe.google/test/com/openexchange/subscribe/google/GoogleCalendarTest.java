@@ -55,15 +55,19 @@ import static com.openexchange.subscribe.google.utility.AssertField.assertNotNul
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.TimeZone;
 import org.mockito.Matchers;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.participants.ConfirmStatus;
+import com.openexchange.groupware.container.participants.ConfirmableParticipant;
+import com.openexchange.subscribe.google.mocks.MockAppointmentSqlFactoryService;
 import com.openexchange.subscribe.google.mocks.MockServiceLookup;
 import com.openexchange.user.SimUserService;
 import com.openexchange.user.UserService;
@@ -75,7 +79,7 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  * @since v7.6.1
  */
-@PrepareForTest({com.openexchange.subscribe.google.osgi.Services.class, AppointmentSqlFactoryService.class, AppointmentSQLInterface.class})
+@PrepareForTest({com.openexchange.subscribe.google.osgi.Services.class, AppointmentSqlFactoryService.class, com.openexchange.api2.AppointmentSQLInterface.class})
 public class GoogleCalendarTest extends AbstractGoogleTest {
     public void testCalendar() throws Exception {
         try {
@@ -97,6 +101,9 @@ public class GoogleCalendarTest extends AbstractGoogleTest {
             final String recurrenceYearlyAppointment = "Yearly recurrence appointment | 14 March 2014 - 14 March 2016";
             boolean successYearlyRecurrenceAppointment = false;
 
+            final String recurrenceAppointmentWithExceptions = "Every two days recurrence appointment with exception | 14 March 2014 - Never ending";
+            boolean successRecurrenceAppointmentWithExceptions = false;
+
             for(CalendarDataObject co : calendarObjects) {
                 if(co.getTitle() != null) {
                     if(co.getTitle().equals(singleAppointment)) {
@@ -114,13 +121,16 @@ public class GoogleCalendarTest extends AbstractGoogleTest {
                     } else if(co.getTitle().equals(recurrenceYearlyAppointment)) {
                         testYearlyRecurrenceAppointment(co);
                         successYearlyRecurrenceAppointment = true;
+                    } else if(co.getTitle().equals(recurrenceAppointmentWithExceptions)) {
+                        testAppointmentWithExceptions(co);
+                        successRecurrenceAppointmentWithExceptions = true;
                     }
                 }
 
                 // if all appointments were succeeded break out
                 if(successSingleAppointment && successAllDayAppointment &&
                     successRecurrenceDailyAppointment && successMonthlyRecurrenceAppointment &&
-                    successYearlyRecurrenceAppointment) {
+                    successYearlyRecurrenceAppointment && successRecurrenceAppointmentWithExceptions) {
                     return;
                 }
             }
@@ -198,7 +208,7 @@ public class GoogleCalendarTest extends AbstractGoogleTest {
         assertNotNullAndEquals("start date", getDateTime(15, 3, 2014, 19, 00), co.getStartDate());
         assertFieldIsNull("timezone", co.getTimezone());
         assertNotNullAndEquals("end date", getDateTime(15, 3, 2014, 21, 30), co.getEndDate());
-        assertNotNullAndEquals("creation date", getDateTime(8, 8, 2014, 14, 11, 07), co.getCreationDate());
+        assertNotNullAndEquals("creation date", getDateTime(8, 8, 2014, 14, 11, 43), co.getCreationDate());
         assertNotNullAndEquals("created by", 1, co.getCreatedBy());
         assertNotNullAndEquals("alarm", 10, co.getAlarm());
         assertNotNullAndEquals("fulltime", false, co.getFullTime());
@@ -209,23 +219,10 @@ public class GoogleCalendarTest extends AbstractGoogleTest {
         assertFieldIsNull("occurrence", co.getOccurrence());
         assertFieldIsNull("days", co.getDays());
 
-        // TODO
-//        assertNull("This appointment has no confirmation, but the mapping exist", co.getConfirmations());
-//        assertNull("This appointment has no participants, but the mapping exist", co.getParticipants());
-//        for(ConfirmableParticipant cp : co.getConfirmations()) {
-//            cp.getStatus();
-//            cp.getMessage();
-//            cp.getDisplayName();
-//            cp.getEmailAddress();
-//        }
-//
-//        for(Participant p : co.getParticipants()) {
-//            p.getDisplayName();
-//
-//        }
-//        co.getOrganizer();
-//        co.getCategories();
+        assertNull("This appointment has no confirmation, but the mapping exist", co.getConfirmations());
+        assertNull("This appointment has no participants, but the mapping exist", co.getParticipants());
     }
+
 
     private void testYearlyRecurrenceAppointment(CalendarDataObject co) {
         assertNotNullAndEquals("context", 1, co.getContext().getContextId());
@@ -235,7 +232,7 @@ public class GoogleCalendarTest extends AbstractGoogleTest {
         assertNotNullAndEquals("start date", getDateTime(14, 3, 2014, 19, 00), co.getStartDate());
         assertFieldIsNull("timezone", co.getTimezone());
         assertNotNullAndEquals("end date", getDateTime(14, 3, 2014, 20, 30), co.getEndDate());
-        assertNotNullAndEquals("creation date", getDateTime(8, 8, 2014, 14, 11, 07), co.getCreationDate());
+        assertNotNullAndEquals("creation date", getDateTime(8, 8, 2014, 14, 59, 06), co.getCreationDate());
         assertNotNullAndEquals("created by", 1, co.getCreatedBy());
         assertNotNullAndEquals("alarm", 0, co.getAlarm());
         assertNotNullAndEquals("fulltime", false, co.getFullTime());
@@ -244,24 +241,51 @@ public class GoogleCalendarTest extends AbstractGoogleTest {
         assertFieldIsNull("days", co.getDays());
         assertNotNullAndEquals("interval", 1, co.getInterval());
         assertNotNullAndEquals("occurrence", 2, co.getOccurrence());
+        assertNotNullAndEquals("day in month", 14 ,co.getDayInMonth());
+        assertNotNullAndEquals("month", 3 , co.getMonth());
 
-        // TODO
-//        assertNull("This appointment has no confirmation, but the mapping exist", co.getConfirmations());
-//        assertNull("This appointment has no participants, but the mapping exist", co.getParticipants());
-//        co.getRecurrenceType();
-//        for(ConfirmableParticipant cp : co.getConfirmations()) {
-//            cp.getStatus();
-//            cp.getMessage();
-//            cp.getDisplayName();
-//            cp.getEmailAddress();
-//        }
-//
-//        for(Participant p : co.getParticipants()) {
-//            p.getDisplayName();
-//
-//        }
-//        co.getOrganizer();
-//        co.getCategories();
+        assertNull("This appointment has no confirmation, but the mapping exist", co.getConfirmations());
+        assertNull("This appointment has no participants, but the mapping exist", co.getParticipants());
+    }
+
+    private void testAppointmentWithExceptions(CalendarDataObject co) {
+        assertNotNullAndEquals("context", 1, co.getContext().getContextId());
+        assertFieldNotNull("user id", 1, co.getUid());
+        assertNotNullAndEquals("location", "Hannover, Deutschland" , co.getLocation());
+        assertNotNullAndEquals("note", "Every two days recurrence appointment with exception | 14 March 2014 - Never ending\nDonnerstag 20.03. ChangeException\nMittwoch 26.03. DeleteException" , co.getNote());
+        assertNotNullAndEquals("start date", getDateTime(14, 3, 2014, 12, 00), co.getStartDate());
+        assertNotNullAndEquals("timezone", "Europe/Berlin", co.getTimezone());
+        assertNotNullAndEquals("end date", getDateTime(14, 3, 2014, 14, 00), co.getEndDate());
+        assertNotNullAndEquals("creation date", getDateTime(8, 8, 2014, 15, 38, 29), co.getCreationDate());
+        assertNotNullAndEquals("created by", 1, co.getCreatedBy());
+        assertFieldIsNull("alarm", co.getAlarm());
+        assertNotNullAndEquals("fulltime", false, co.getFullTime());
+
+        assertNotNullAndEquals("recurrence type", CalendarObject.DAILY, co.getRecurrenceType());
+        assertFieldIsNull("days", co.getDays());
+        assertNotNullAndEquals("interval", 2, co.getInterval());
+        assertFieldIsNull("occurrence", co.getOccurrence());
+
+        //List of participants
+        List<Part> participants = new LinkedList<Part>();
+        participants.add(new Part("Ewald Bartkowiak", "ewald.bartkowiak@googlemail.com", Participant.EXTERNAL_USER, ConfirmStatus.ACCEPT));
+        participants.add(new Part("Dimitri Bronkowitsch", "dimitri.bronkowitsch@googlemail.com", Participant.USER, ConfirmStatus.NONE));
+        participants.add(new Part("jan.finsel@premium", "jan.finsel@premium", Participant.USER, ConfirmStatus.NONE));
+
+        assertNotNull(co.getConfirmations());
+        for(ConfirmableParticipant cp : co.getConfirmations()) {
+            int countParts = 0;
+            for(Part p : participants) {
+                if(cp.getEmailAddress().equals(p.getEmailAddress())) {
+                    assertNotNullAndEquals("particiant display name", p.getDisplayName(), cp.getDisplayName());
+                    assertFieldNotNull("participant status", p.getConfirmStatus(), cp.getStatus());
+                    assertNotNullAndEquals("particiant status id", p.getConfirmStatus().getId(), cp.getStatus().getId());
+                    assertNotNullAndEquals("participant type", p.getParticipantType(), cp.getType());
+                    ++countParts;
+                }
+            }
+            assertTrue("Should have found three participants but only got: " + countParts, countParts == 3);
+        }
     }
 
     /**
@@ -294,7 +318,38 @@ public class GoogleCalendarTest extends AbstractGoogleTest {
         SimUserService simUser = new SimUserService();
         PowerMockito.mockStatic(com.openexchange.subscribe.google.osgi.Services.class);
         PowerMockito.doReturn(simUser).when(com.openexchange.subscribe.google.osgi.Services.class, "getService", Matchers.any(UserService.class));
-        AppointmentSqlFactoryService asfs = PowerMockito.mock(AppointmentSqlFactoryService.class);
+        AppointmentSqlFactoryService asfs = new MockAppointmentSqlFactoryService();
         sl.setAppointmentSQLServiceMock(asfs);
+    }
+
+    private class Part {
+        private String displayName;
+        private String emailAddress;
+        private int participantType;
+        private ConfirmStatus confirmStatus;
+
+        public Part(String displayName, String emailAddress, int participantType, ConfirmStatus confirmStatus) {
+            super();
+            this.displayName = displayName;
+            this.emailAddress = emailAddress;
+            this.participantType = participantType;
+            this.confirmStatus = confirmStatus;
+        }
+
+        public String getDisplayName() {
+            return displayName;
+        }
+
+        public String getEmailAddress() {
+            return emailAddress;
+        }
+
+        public int getParticipantType() {
+            return participantType;
+        }
+
+        public ConfirmStatus getConfirmStatus() {
+            return confirmStatus;
+        }
     }
 }

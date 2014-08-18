@@ -14,3 +14,4 @@ Export-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.type,
  com.fasterxml.jackson.core.util,
  org.json
+Bundle-ClassPath: .

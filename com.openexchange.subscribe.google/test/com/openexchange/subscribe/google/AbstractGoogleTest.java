@@ -49,6 +49,7 @@
 
 package com.openexchange.subscribe.google;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import junit.framework.TestCase;
 import org.junit.runner.RunWith;
@@ -58,6 +59,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -82,7 +84,6 @@ import com.openexchange.threadpool.SimThreadPoolService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.session.SimServerSession;
 
-
 /**
  * {@link AbstractGoogleTest}
  *
@@ -91,33 +92,38 @@ import com.openexchange.tools.session.SimServerSession;
  */
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({GoogleApiClients.class})
-@PowerMockIgnore({"javax.net.ssl.*"})
+@PrepareForTest({ GoogleApiClients.class })
+@PowerMockIgnore({ "javax.net.ssl.*" })
 public abstract class AbstractGoogleTest extends TestCase {
 
     private static final String REDIRECT_URL = "";
+
     private static final String GOOGLE_API_KEY = "";
+
     private static final String GOOGLE_API_SECRET = "";
+
     private static final String ACCESS_TOKEN = "";
+
     private static final String REFRESH_TOKEN = "";
 
     private Subscription subscription;
-    private SubscribeService subscribeService;
-    private OAuthServiceMetaData oasdm;
-    private MockServiceLookup sl;
 
+    private SubscribeService subscribeService;
+
+    private OAuthServiceMetaData oasdm;
+
+    private MockServiceLookup sl;
 
     @Override
     protected void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        //Mocks
-        ConfigurationService cs = new MockConfigurationService(GOOGLE_API_KEY, GOOGLE_API_SECRET, REDIRECT_URL, 10000, 10000);
+        // Mocks
+        ConfigurationService cs = new MockConfigurationService(GOOGLE_API_KEY, GOOGLE_API_SECRET, REDIRECT_URL, 1000, 1000);
         ThreadPoolService tps = new SimThreadPoolService();
 
         FolderUpdaterRegistry fur = new MockFolderUpdaterRegistry<Object>(new MockFolderUpdateService());
         sl = new MockServiceLookup(cs, tps, fur);
-
 
         SimServerSession simServer = new SimServerSession(1, 1);
         subscription = new Subscription();
@@ -145,12 +151,20 @@ public abstract class AbstractGoogleTest extends TestCase {
         NetHttpTransport transport = new NetHttpTransport.Builder().doNotValidateCertificate().build();
         JsonFactory jsonFactory = new JacksonFactory();
 
-        GoogleClientSecrets gcs = new GoogleClientSecrets();
-        GoogleCredential credential = new GoogleCredential.Builder()
-        .setTransport(transport)
-        .setJsonFactory(jsonFactory).setClientSecrets(GOOGLE_API_KEY, GOOGLE_API_SECRET).build();
-        credential.setRefreshToken(REFRESH_TOKEN);
-        credential.setAccessToken(ACCESS_TOKEN);
+        GoogleOAuthClient googleOAuthClient = new GoogleOAuthClient();
+        googleOAuthClient.login("ewaldbartkowiak@googlemail.com", "BewIbgeawn4");
+        final String authCode = googleOAuthClient.getAuthorizationCode(
+            GOOGLE_API_KEY,
+            GOOGLE_API_SECRET,
+            REDIRECT_URL,
+            Collections.singletonList("https://www.googleapis.com/auth/calendar.readonly"));
+        TokenResponse tokenResponse = googleOAuthClient.getAccessToken(GOOGLE_API_KEY, GOOGLE_API_SECRET, authCode, REDIRECT_URL);
+        
+        GoogleCredential credential = new GoogleCredential.Builder().setTransport(transport).setJsonFactory(jsonFactory).setClientSecrets(
+            GOOGLE_API_KEY,
+            GOOGLE_API_SECRET).build();
+        credential.setRefreshToken(tokenResponse.getRefreshToken());
+        credential.setAccessToken(tokenResponse.getAccessToken());
 
         PowerMockito.mockStatic(GoogleApiClients.class);
         PowerMockito.doReturn(credential).when(GoogleApiClients.class, "getCredentials", Matchers.any(Session.class));

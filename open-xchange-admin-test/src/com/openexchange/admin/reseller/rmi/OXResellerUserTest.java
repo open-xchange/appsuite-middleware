@@ -115,7 +115,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
                         createUser(ctx, ctxauth);
                     }
                 }
-        
+
                 // 7th user must fail
                 boolean createFailed = false;
                 try {
@@ -152,12 +152,12 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
                 // TODO Here we call change context to apply the restrictions if the create call is ready to handle extensions
                 // this can be done directly with the create call
                 oxctx.change(ctx, creds);
-        
+
                 User oxadmin = ContextAdmin();
                 Credentials ctxadmcreds = new Credentials(oxadmin.getName(), oxadmin.getPassword());
                 createUser(ctx, ctxadmcreds);
                 createUser(ctx, ctxadmcreds);
-        
+
                 // 3rd user must fail
                 boolean createFailed = false;
                 try {
@@ -199,12 +199,18 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
                 // TODO Here we call change context to apply the restrictions if the create call is ready to handle extensions
                 // this can be done directly with the create call
                 oxctx.change(ctx, creds);
-        
+
+                try {
+                    Thread.sleep(500);
+                    // Short sleep so the context is fully ready.
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
+                }
                 // webmail test (default perms)
                 User oxadmin = ContextAdmin();
                 Credentials ctxadmcreds = new Credentials(oxadmin.getName(), oxadmin.getPassword());
                 createUser(ctx, ctxadmcreds);
-        
+
                 // 3rd user must fail
                 boolean createFailed = false;
                 try {
@@ -213,7 +219,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
                     createFailed = true;
                 }
                 assertTrue("Create user must fail",createFailed);
-        
+
                 // premium test
                 // premium=contacts,webmail,calendar,delegatetask,tasks,editpublicfolders,infostore,
                 // readcreatesharedfolders,ical,vcard,webdav,webdavxml
@@ -232,10 +238,10 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
                 access.setWebdav(true);
                 access.setWebdavXml(true);
                 access.setGlobalAddressBookDisabled(false);
-        
+
                 createUser(ctx, access, ctxadmcreds);
                 createUser(ctx, access, ctxadmcreds);
-        
+
                 // 3rd user must fail
                 createFailed = false;
                 try {

@@ -65,7 +65,7 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
  */
 public class Bug15354Test extends AbstractAJAXSession {
 
-    private static final int ITERATIONS = 10000;
+    private static final int ITERATIONS = 1000;
 
     private final BetaWriter[] writer = new BetaWriter[5];
     private final Thread[] thread = new Thread[writer.length];

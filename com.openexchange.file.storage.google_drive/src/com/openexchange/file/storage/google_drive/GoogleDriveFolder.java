@@ -49,10 +49,11 @@
 
 package com.openexchange.file.storage.google_drive;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
-import java.util.List;
-import com.dropbox.client2.RESTUtility;
+import com.google.api.services.drive.Drive;
+import com.google.api.services.drive.model.File;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
@@ -67,6 +68,10 @@ import com.openexchange.file.storage.TypeAware;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class GoogleDriveFolder extends DefaultFileStorageFolder implements TypeAware {
+
+    private static final String QUERY_STRING_DIRECTORIES_ONLY = GoogleDriveConstants.QUERY_STRING_DIRECTORIES_ONLY;
+
+    // ---------------------------------------------------------------------------------------------------------------------- //
 
     private FileStorageFolderType type;
 
@@ -111,63 +116,54 @@ public final class GoogleDriveFolder extends DefaultFileStorageFolder implements
     }
 
     /**
-     * Parses specified Dropbox entry.
+     * Parses specified Google Drive directory.
      *
-     * @param entry The Dropbox entry denoting the directory
-     * @param accountDisplayName The account'S display name
-     * @throws OXException If parsing Dropbox entry fails
+     * @param dir The Google Drive directory
+     * @param rootFolderId The identifier of the root folder
+     * @param accountDisplayName The account's display name
+     * @param drive The Drive reference
+     * @throws OXException If parsing Google Drive directory fails
      */
-    public GoogleDriveFolder parseDirEntry(final com.dropbox.client2.DropboxAPI.Entry entry, String accountDisplayName) throws OXException {
-        if (null != entry) {
+    public GoogleDriveFolder parseDirEntry(File dir, String rootFolderId, String accountDisplayName, Drive drive) throws OXException, IOException {
+        if (null != dir) {
             try {
-                final String path = entry.path;
-                id = path;
-                {
-                    if ("/".equals(path)) {
-                        rootFolder = true;
-                        id = FileStorageFolder.ROOT_FULLNAME;
-                        setParentId(null);
-                        setName(null == accountDisplayName ? entry.root : accountDisplayName);
-                    } else {
-                        rootFolder = false;
-                        final int pos = path.lastIndexOf('/');
-                        setParentId(pos < 0 ? FileStorageFolder.ROOT_FULLNAME : path.substring(0, pos));
-                        setName(pos < 0 ? path : path.substring(pos + 1));
-                    }
-                    b_rootFolder = true;
+                id = dir.getId();
+                rootFolder = isRootFolder(dir.getId(), rootFolderId);
+                b_rootFolder = true;
+
+                if (rootFolder) {
+                    id = FileStorageFolder.ROOT_FULLNAME;
+                    setParentId(null);
+                    setName(null == accountDisplayName ? dir.getTitle() : accountDisplayName);
+                } else {
+                    String tmp = dir.getParents().get(0).getId();
+                    setParentId(isRootFolder(tmp, rootFolderId) ? FileStorageFolder.ROOT_FULLNAME : tmp);
+                    setName(dir.getTitle());
                 }
+
+                creationDate = new Date(dir.getCreatedDate().getValue());
+                lastModifiedDate = new Date(dir.getModifiedDate().getValue());
+
                 {
-                    final String modified = entry.modified;
-                    if (null != modified) {
-                        final Date date = RESTUtility.parseDate(modified);
-                        creationDate = new Date(date.getTime());
-                        lastModifiedDate = new Date(date.getTime());
-                    }
-                }
-                {
-                    final boolean hasSubfolders = hasSubfolder(entry);
+                    final boolean hasSubfolders = hasSubfolder(dir.getId(), drive);
                     setSubfolders(hasSubfolders);
                     setSubscribedSubfolders(hasSubfolders);
                 }
             } catch (final RuntimeException e) {
-                throw GoogleDriveExceptionCodes.GOOGLE_DRIVE_ERROR.create(e, e.getMessage());
+                throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
         return this;
     }
 
-    private boolean hasSubfolder(com.dropbox.client2.DropboxAPI.Entry entry) {
-        List<com.dropbox.client2.DropboxAPI.Entry> contents = entry.contents;
-        if (contents == null || contents.isEmpty()) {
-            return false;
-        }
+    private static boolean isRootFolder(String id, String rootFolderId) {
+        return "root".equals(id) || rootFolderId.equals(id);
+    }
 
-        for (com.dropbox.client2.DropboxAPI.Entry subEntry : contents) {
-            if (subEntry.isDir) {
-                return true;
-            }
-        }
-        return false;
+    private boolean hasSubfolder(String folderId, Drive drive) throws IOException {
+        Drive.Children.List list = drive.children().list(folderId);
+        list.setQ(QUERY_STRING_DIRECTORIES_ONLY);
+        return !list.execute().getItems().isEmpty();
     }
 
 }

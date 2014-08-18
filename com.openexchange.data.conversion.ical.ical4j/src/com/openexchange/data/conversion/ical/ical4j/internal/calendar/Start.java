@@ -104,7 +104,7 @@ public final class Start<T extends CalendarComponent, U extends CalendarObject> 
     }
 
     @Override
-    public void parse(final int index, final T component, final U calendar,        final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
+    public void parse(final int index, final T component, final U calendar, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
         if (overrideFullTimeSetting(component, calendar)) {
             return;
         }
