@@ -208,7 +208,7 @@ public abstract class AbstractBoxResourceAccess {
     /**
      * Handles given HTTP response error.
      *
-     * @param identifier The option identifier for associated Google Drive resource
+     * @param identifier The optional identifier for associated Box.com resource
      * @param e The HTTP error
      * @return The resulting exception
      */
@@ -221,23 +221,23 @@ public abstract class AbstractBoxResourceAccess {
     }
 
     /**
-     * Gets the Box folder identifier from given file storage folder identifier
+     * Gets the Box.com folder identifier from given file storage folder identifier
      *
      * @param folderId The file storage folder identifier
-     * @return The appropriate Box folder identifier
+     * @return The appropriate Box.com folder identifier
      */
     protected String toBoxFolderId(String folderId) {
         return FileStorageFolder.ROOT_FULLNAME.equals(folderId) ? rootFolderId : folderId;
     }
 
     /**
-     * Gets the file storage folder identifier from given Box folder identifier
+     * Gets the file storage folder identifier from given Box.com folder identifier
      *
-     * @param googleId The Box folder identifier
+     * @param boxId The Box.com folder identifier
      * @return The appropriate file storage folder identifier
      */
-    protected String toFileStorageFolderId(String googleId) {
-        return rootFolderId.equals(googleId) || "0".equals(googleId) ? FileStorageFolder.ROOT_FULLNAME : googleId;
+    protected String toFileStorageFolderId(String boxId) {
+        return rootFolderId.equals(boxId) || "0".equals(boxId) ? FileStorageFolder.ROOT_FULLNAME : boxId;
     }
 
 }

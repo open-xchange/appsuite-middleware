@@ -80,7 +80,7 @@ import com.openexchange.oauth.OAuthUtilizerCreator;
 import com.openexchange.session.Session;
 
 /**
- * {@link BoxFileStorageService} - The Google Drive file storage service.
+ * {@link BoxFileStorageService} - The Box.com file storage service.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -91,19 +91,19 @@ public final class BoxFileStorageService implements AccountAware, OAuthUtilizerC
     private static final String SERVICE_ID = BoxConstants.ID;
 
     /**
-     * Creates a new Google Drive file storage service.
+     * Creates a new Box.com file storage service.
      *
-     * @return A new Google Drive file storage service
+     * @return A new Box.com file storage service
      */
     public static BoxFileStorageService newInstance() {
         return new BoxFileStorageService();
     }
 
     /**
-     * Creates a new Google Drive file storage service.
+     * Creates a new Box.com file storage service.
      *
      * @param compositeAccountManager The composite account manager
-     * @return A new Google Drive file storage service
+     * @return A new Box.com file storage service
      */
     public static BoxFileStorageService newInstance(final CompositeFileStorageAccountManagerProvider compositeAccountManager) {
         final BoxFileStorageService newInst = new BoxFileStorageService();

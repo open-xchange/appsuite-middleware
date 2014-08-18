@@ -82,7 +82,7 @@ public final class BoxEventHandler implements EventHandler {
                 // A single session was removed
                 final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
                 if (!session.isTransient() && BoxAccessRegistry.getInstance().removeAccessIfLast(session.getContextId(), session.getUserId())) {
-                    LOG.debug("Google Drive access removed for user {} in context {}", session.getUserId(), session.getContextId());
+                    LOG.debug("Box.com access removed for user {} in context {}", session.getUserId(), session.getContextId());
                 }
             } else if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
                 // A session container was removed
@@ -92,7 +92,7 @@ public final class BoxEventHandler implements EventHandler {
                 final BoxAccessRegistry registry = BoxAccessRegistry.getInstance();
                 for (final Session session : sessionContainer.values()) {
                     if (!session.isTransient() && registry.removeAccessIfLast(session.getContextId(), session.getUserId())) {
-                        LOG.debug("Google Drive access removed for user {} in context {}", session.getUserId(), session.getContextId());
+                        LOG.debug("Box.com access removed for user {} in context {}", session.getUserId(), session.getContextId());
                     }
                 }
             }

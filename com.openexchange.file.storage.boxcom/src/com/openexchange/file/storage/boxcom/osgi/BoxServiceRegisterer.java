@@ -99,7 +99,7 @@ public final class BoxServiceRegisterer implements ServiceTrackerCustomizer<File
             BoxFileStorageService service = this.service;
             if (null == service) {
                 /*
-                 * Try to create Google Drive service
+                 * Try to create Box.com service
                  */
                 service = BoxFileStorageService.newInstance();
                 this.serviceRegistration = context.registerService(FileStorageService.class, service, null);

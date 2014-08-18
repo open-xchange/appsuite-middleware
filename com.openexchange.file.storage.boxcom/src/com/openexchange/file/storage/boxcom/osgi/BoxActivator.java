@@ -69,7 +69,7 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.timer.TimerService;
 
 /**
- * {@link BoxActivator} - Activator for Google Drive bundle.
+ * {@link BoxActivator} - Activator for Box.com bundle.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
