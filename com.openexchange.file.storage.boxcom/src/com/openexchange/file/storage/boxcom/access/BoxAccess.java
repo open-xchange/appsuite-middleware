@@ -185,7 +185,7 @@ public class BoxAccess {
         // Create Scribe Google OAuth service
         final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(Google2v2Api.class);
         serviceBuilder.apiKey(boxOAuthAccount.getMetaData().getAPIKey(session)).apiSecret(boxOAuthAccount.getMetaData().getAPISecret(session));
-        BoxApi.GoogleOAuth2Service scribeOAuthService = (BoxApi.GoogleOAuth2Service) serviceBuilder.build();
+        BoxApi.BoxApiService scribeOAuthService = (BoxApi.BoxApiService) serviceBuilder.build();
 
         // Check expiration
         if (scribeOAuthService.isExpired(boxOAuthAccount.getToken())) {
@@ -199,7 +199,7 @@ public class BoxAccess {
             OAuthService oAuthService = Services.getService(OAuthService.class);
             int accountId = boxOAuthAccount.getId();
             Map<String, Object> arguments = new HashMap<String, Object>(3);
-            arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(accessToken.getToken(), refreshToken));
+            arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(accessToken.getToken(), accessToken.getSecret() == null ? refreshToken : accessToken.getSecret()));
             arguments.put(OAuthConstants.ARGUMENT_SESSION, session);
             oAuthService.updateAccount(accountId, arguments, session.getUserId(), session.getContextId());
 
