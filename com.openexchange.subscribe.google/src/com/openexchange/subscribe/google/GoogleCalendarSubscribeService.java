@@ -191,7 +191,7 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
         return new LinkedList<CalendarDataObject>();
     }
 
-    protected void parseAndAdd(final Events events, final CalendarEventParser parser, final List<CalendarDataObject> singleAppointments, final List<CalendarDataObject> series, final List<CalendarDataObject> changeExceptions, final List<CalendarDataObject> deleteExceptions) throws OXException {
+    private void parseAndAdd(final Events events, final CalendarEventParser parser, final List<CalendarDataObject> singleAppointments, final List<CalendarDataObject> series, final List<CalendarDataObject> changeExceptions, final List<CalendarDataObject> deleteExceptions) throws OXException {
         for (Event event : events.getItems()) {
             // Consider only events with an organizer; the rest are only updates on status, e.g. delete exceptions (handle below)
             final CalendarDataObject calendarObject = new CalendarDataObject();
@@ -211,7 +211,7 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
         }
     }
 
-    protected void handleSeriesAndSeriesExceptions(final Subscription subscription, final List<CalendarDataObject> changeExceptions, final List<CalendarDataObject> deleteExceptions, final List<CalendarDataObject> series, final AppointmentSQLInterface appointmentsql) throws OXException {
+    private void handleSeriesAndSeriesExceptions(final Subscription subscription, final List<CalendarDataObject> changeExceptions, final List<CalendarDataObject> deleteExceptions, final List<CalendarDataObject> series, final AppointmentSQLInterface appointmentsql) throws OXException {
         final Map<String, CalendarDataObject> masterMap = new HashMap<String, CalendarDataObject>(series.size());
 
         handleSeries(subscription, series, appointmentsql, masterMap);
