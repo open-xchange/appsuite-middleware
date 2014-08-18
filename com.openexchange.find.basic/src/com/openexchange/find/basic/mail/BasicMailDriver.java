@@ -214,7 +214,14 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             prefixTokens = tokenize(prefix);
             addSimpleFacets(facets, prefix, prefixTokens);
         }
-        addContactsFacet(facets, contacts, prefix, prefixTokens, session);
+
+        boolean toAsDefaultOption = false;
+        List<ActiveFacet> activeContactFacets = autocompleteRequest.getActiveFacets(MailFacetType.CONTACTS);
+        if (activeContactFacets != null && !activeContactFacets.isEmpty()) {
+            toAsDefaultOption = true;
+        }
+
+        addContactsFacet(toAsDefaultOption, facets, contacts, prefix, prefixTokens, session);
         addTimeFacet(facets);
         return new AutocompleteResult(facets);
     }
@@ -312,18 +319,18 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             .build());
     }
 
-    private static void addContactsFacet(List<Facet> facets, List<Contact> contacts, String prefix, List<String> prefixTokens, ServerSession session) {
+    private static void addContactsFacet(boolean toAsDefaultOption, List<Facet> facets, List<Contact> contacts, String prefix, List<String> prefixTokens, ServerSession session) {
         DefaultFacetBuilder builder = Facets.newDefaultBuilder(CONTACTS);
         boolean valuesAdded = false;
         for (Contact contact : contacts) {
             String valueId = prepareFacetValueId("contact", session.getContextId(), Integer.toString(contact.getObjectID()));
             List<String> queries = extractMailAddessesFrom(contact);
-            builder.addValue(buildContactValue(valueId, queries, DisplayItems.convert(contact), session));
+            builder.addValue(buildContactValue(valueId, queries, DisplayItems.convert(contact), toAsDefaultOption, session));
             valuesAdded = true;
         }
 
         if (!prefix.isEmpty() && !prefixTokens.isEmpty()) {
-            builder.addValue(buildContactValue(prefix, tokenize(prefix), new SimpleDisplayItem(prefix), session));
+            builder.addValue(buildContactValue(prefix, tokenize(prefix), new SimpleDisplayItem(prefix), toAsDefaultOption, session));
             valuesAdded = true;
         }
 
@@ -332,12 +339,25 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         }
     }
 
-    private static FacetValue buildContactValue(String valueId, List<String> queries, DisplayItem item, ServerSession session) {
+    private static FacetValue buildContactValue(String valueId, List<String> queries, DisplayItem item, boolean toAsDefaultOption, ServerSession session) {
+        Option from = Option.newInstance("from", FACET_FROM, Filter.of(FROM_FIELDS, queries));
+        Option to = Option.newInstance("to", FACET_TO, Filter.of(TO_FIELDS, queries));
+        Option all = Option.newInstance("all", FACET_FROM_AND_TO, Filter.of(FROM_AND_TO_FIELDS, queries));
+
+        List<Option> options = new ArrayList<Option>(3);
+        if (toAsDefaultOption) {
+            options.add(to);
+            options.add(from);
+            options.add(all);
+        } else {
+            options.add(from);
+            options.add(to);
+            options.add(all);
+        }
+
         return FacetValue.newBuilder(valueId)
             .withDisplayItem(item)
-            .addOption(Option.newInstance("from", FACET_FROM, Filter.of(FROM_FIELDS, queries)))
-            .addOption(Option.newInstance("to", FACET_TO, Filter.of(TO_FIELDS, queries)))
-            .addOption(Option.newInstance("all", FACET_FROM_AND_TO, Filter.of(FROM_AND_TO_FIELDS, queries)))
+            .withOptions(options)
             .build();
     }
 
