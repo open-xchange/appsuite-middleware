@@ -1,6 +1,8 @@
 opt/open-xchange/etc/deferrer.properties
+opt/open-xchange/etc/boxcomoauth.properties
 opt/open-xchange/etc/dropboxoauth.properties
 opt/open-xchange/etc/facebookoauth.properties
+opt/open-xchange/etc/googleoauth.properties
 opt/open-xchange/etc/linkedinoauth.properties
 opt/open-xchange/etc/msnoauth.properties
 opt/open-xchange/etc/oauth.properties
