@@ -10,7 +10,11 @@ Import-Package: com.openexchange.database.migration,
  com.openexchange.exception,
  com.openexchange.osgi,
  com.openexchange.server,
+ liquibase.change.custom,
  liquibase.changelog,
+ liquibase.database,
+ liquibase.exception,
+ liquibase.resource,
  org.osgi.framework,
  org.slf4j
 Bundle-Vendor: Open-Xchange Inc.
