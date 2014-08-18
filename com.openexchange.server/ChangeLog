@@ -1,3 +1,7 @@
+* 2014-08-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 34071: Properly build up namespace section in IMAP folder tree
+
 * 2014-09-11 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 34281: Facebook made access to permissions more restrictive since April 30th 2014.
