@@ -55,7 +55,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.BoxApi;
-import org.scribe.builder.api.Google2v2Api;
 import org.scribe.model.Token;
 import com.box.boxjavalibv2.BoxClient;
 import com.box.boxjavalibv2.BoxConfigBuilder;
@@ -149,17 +148,17 @@ public class BoxAccess {
             }
         }
 
-        // Grab Google OAuth account
+        // Grab Box.com OAuth account
         OAuthAccount boxOAuthAccount;
         {
             OAuthService oAuthService = Services.getService(OAuthService.class);
             boxOAuthAccount = oAuthService.getAccount(oauthAccountId, session, userId, contextId);
         }
 
-        // Assign OAuth account
+        // Assign Box.com account
         this.boxOAuthAccount = boxOAuthAccount;
 
-        // Initialize Box client
+        // Initialize Box.com client
         BoxClient boxClient = initializeBoxClient(boxOAuthAccount, session);
 
         clientRef = new AtomicReference<BoxClient>(boxClient);
@@ -182,8 +181,8 @@ public class BoxAccess {
     }
 
     private OAuthAccount recreateIfExpired(boolean considerExpired, OAuthAccount boxOAuthAccount, Session session) throws OXException {
-        // Create Scribe Google OAuth service
-        final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(Google2v2Api.class);
+        // Create Scribe Box.com OAuth service
+        final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(BoxApi.class);
         serviceBuilder.apiKey(boxOAuthAccount.getMetaData().getAPIKey(session)).apiSecret(boxOAuthAccount.getMetaData().getAPISecret(session));
         BoxApi.BoxApiService scribeOAuthService = (BoxApi.BoxApiService) serviceBuilder.build();
 
