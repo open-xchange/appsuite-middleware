@@ -81,7 +81,7 @@ public final class DropboxEventHandler implements EventHandler {
             if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic) || SessiondEventConstants.TOPIC_STORED_SESSION.equals(topic)) {
                 // A single session was removed
                 final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
-                if (!session.isTransient() && DropboxOAuthAccessRegistry.getInstance().removeSessionIfLast(session.getContextId(), session.getUserId())) {
+                if (!session.isTransient() && DropboxOAuthAccessRegistry.getInstance().removeAccessIfLast(session.getContextId(), session.getUserId())) {
                     LOG.debug("Dropbox session removed for user {} in context {}", session.getUserId(), session.getContextId());
                 }
             } else if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
@@ -91,7 +91,7 @@ public final class DropboxEventHandler implements EventHandler {
                 // For each session
                 final DropboxOAuthAccessRegistry sessionRegistry = DropboxOAuthAccessRegistry.getInstance();
                 for (final Session session : sessionContainer.values()) {
-                    if (!session.isTransient() && sessionRegistry.removeSessionIfLast(session.getContextId(), session.getUserId())) {
+                    if (!session.isTransient() && sessionRegistry.removeAccessIfLast(session.getContextId(), session.getUserId())) {
                         LOG.debug("Dropbox session removed for user {} in context {}", session.getUserId(), session.getContextId());
                     }
                 }

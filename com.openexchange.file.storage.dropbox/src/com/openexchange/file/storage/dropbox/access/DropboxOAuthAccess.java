@@ -87,7 +87,7 @@ public final class DropboxOAuthAccess {
     public static DropboxOAuthAccess accessFor(final FileStorageAccount fsAccount, final Session session) throws OXException {
         final DropboxOAuthAccessRegistry registry = DropboxOAuthAccessRegistry.getInstance();
         final String accountId = fsAccount.getId();
-        DropboxOAuthAccess dropboxOAuthAccess = registry.getSession(session.getContextId(), session.getUserId(), accountId);
+        DropboxOAuthAccess dropboxOAuthAccess = registry.getAccess(session.getContextId(), session.getUserId(), accountId);
         if (null == dropboxOAuthAccess) {
             final DropboxOAuthAccess newInstance = new DropboxOAuthAccess(fsAccount, session, session.getUserId(), session.getContextId());
             dropboxOAuthAccess = registry.addSession(session.getContextId(), session.getUserId(), accountId, newInstance);
