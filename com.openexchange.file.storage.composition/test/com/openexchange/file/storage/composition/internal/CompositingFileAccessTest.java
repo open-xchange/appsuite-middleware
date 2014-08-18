@@ -584,7 +584,7 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         // Secondly the original must be deleted
 
         fileAccess.expectCall("startTransaction");
-        fileAccess.expectCall("removeDocument", Arrays.asList(new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId())), 1337L);
+        fileAccess.expectCall("removeDocument", Arrays.asList(new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId())), 1337L, true);
         fileAccess.expectCall("commit");
         fileAccess.expectCall("finish");
 
@@ -625,7 +625,7 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         // And lastly the original must be deleted
 
         fileAccess.expectCall("startTransaction");
-        fileAccess.expectCall("removeDocument", Arrays.asList(new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId())), 1337L);
+        fileAccess.expectCall("removeDocument", Arrays.asList(new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId())), 1337L, true);
         fileAccess.expectCall("commit");
         fileAccess.expectCall("finish");
 
@@ -664,7 +664,7 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         // Lastly the original must be deleted
 
         fileAccess.expectCall("startTransaction");
-        fileAccess.expectCall("removeDocument", Arrays.asList(new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId())), 1337L);
+        fileAccess.expectCall("removeDocument", Arrays.asList(new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId())), 1337L, true);
         fileAccess.expectCall("commit");
         fileAccess.expectCall("finish");
 
@@ -705,7 +705,7 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         // And lastly the original must be deleted
 
         fileAccess.expectCall("startTransaction");
-        fileAccess.expectCall("removeDocument", Arrays.asList(new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId())), 1337L);
+        fileAccess.expectCall("removeDocument", Arrays.asList(new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId())), 1337L, true);
         fileAccess.expectCall("commit");
         fileAccess.expectCall("finish");
 
