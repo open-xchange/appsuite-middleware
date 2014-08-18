@@ -154,7 +154,10 @@ public final class BoxFile extends DefaultFile {
                     setFileMIMEType(contentType);
                 }
                 if (set.contains(Field.FILE_SIZE)) {
-                    setFileSize(file.getSize().longValue());
+                    Double size = file.getSize();
+                    if (null != size) {
+                        setFileSize(size.longValue());
+                    }
                 }
                 if (set.contains(Field.URL)) {
                     BoxSharedLink sharedLink = file.getSharedLink();
