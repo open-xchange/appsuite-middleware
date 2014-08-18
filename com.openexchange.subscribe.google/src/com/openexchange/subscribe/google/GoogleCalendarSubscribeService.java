@@ -127,10 +127,10 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
             @Override
             public Void call() throws Exception {
                 GoogleCredential googleCreds = GoogleApiClients.getCredentials(subscription.getSession());
-                final Calendar googleCalendarService = new Calendar(
+                final Calendar googleCalendarService = new Calendar.Builder(
                     googleCreds.getTransport(),
                     googleCreds.getJsonFactory(),
-                    googleCreds.getRequestInitializer());
+                    googleCreds.getRequestInitializer()).setApplicationName(GoogleApiClients.getGoogleProductName()).build();
 
                 final String calendarId;
                 {
