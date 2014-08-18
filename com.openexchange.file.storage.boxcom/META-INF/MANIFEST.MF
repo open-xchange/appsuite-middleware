@@ -114,3 +114,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.slf4j
 Bundle-ClassPath: lib/box-java-sdk-v2-3.0.11.jar,
  .
+Bundle-Activator: com.openexchange.file.storage.boxcom.osgi.BoxActivator
