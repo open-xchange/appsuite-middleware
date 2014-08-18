@@ -1647,6 +1647,17 @@ msgstr ""
 msgid "Bad or expired access token. Need to re-authenticate user."
 msgstr ""
 
+#. An I/O error occurred: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:98
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.google_drive/src/com/openexchange/file/storage/google_drive/GoogleDriveExceptionMessages.java:95
+msgid "An I/O error occurred: %1$s"
+msgstr ""
+
+#. Authentication failed: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:101
+msgid "Authentication failed: %1$s"
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.google_drive/src/com/openexchange/file/storage/google_drive/FormStrings.java:61
@@ -2087,11 +2098,6 @@ msgstr ""
 #. Versioning not supported by Google Drive file storage.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.google_drive/src/com/openexchange/file/storage/google_drive/GoogleDriveExceptionMessages.java:86
 msgid "Versioning not supported by Google Drive file storage."
-msgstr ""
-
-#. An I/O error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.google_drive/src/com/openexchange/file/storage/google_drive/GoogleDriveExceptionMessages.java:95
-msgid "An I/O error occurred: %1$s"
 msgstr ""
 
 #. The file %1$s doesn't have any content stored on Drive
