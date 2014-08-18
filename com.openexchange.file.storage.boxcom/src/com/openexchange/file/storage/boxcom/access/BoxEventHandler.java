@@ -47,64 +47,57 @@
  *
  */
 
-package com.openexchange.file.storage.boxcom;
+package com.openexchange.file.storage.boxcom.access;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.util.Map;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondEventConstants;
 
 /**
- * {@link BoxExceptionMessages} - Exception messages for errors that needs to be translated.
+ * {@link BoxEventHandler} - The {@link EventHandler event handler}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class BoxExceptionMessages implements LocalizableStrings {
-
-    // A Box error occurred: %1$s
-    public static final String BOX_ERROR_MSG = "A Box error occurred: %1$s";
-
-    // A Box error occurred: %1$s
-    public static final String BOX_SERVER_ERROR_MSG = "A Box server error occurred with HTTP status code %1$s. Error message: %2$s";
-
-    // Invalid Box URL: %1$s
-    public static final String INVALID_BOX_URL_MSG = "The provided Box URL: %1$s is invalid";
-
-    // Box URL does not denote a directory: %1$s
-    public static final String NOT_A_FOLDER_MSG = "The provided Box URL does not denote a directory: %1$s";
-
-    // The Box resource does not exist: %1$s
-    public static final String NOT_FOUND_MSG = "The provided Box resource does not exist: %1$s";
-
-    // Update denied for Box resource: %1$s
-    public static final String UPDATE_DENIED_MSG = "Update denied for the provided Box resource: %1$s";
-
-    // Delete denied for Box resource: %1$s
-    public static final String DELETE_DENIED_MSG = "Delete denied for the provided Box resource: %1$s";
-
-    // Box URL does not denote a file: %1$s
-    public static final String NOT_A_FILE_MSG = "The provided Box URL does not denote a file: %1$s";
-
-    // Missing file name.
-    public static final String MISSING_FILE_NAME_MSG = "Missing file name. Please provide one and try again.";
-
-    // Versioning not supported by Box file storage.
-    public static final String VERSIONING_NOT_SUPPORTED_MSG = "Versioning not supported by Box file storage.";
-
-    // Missing configuration for account "%1$s".
-    public static final String MISSING_CONFIG_MSG = "Missing configuration for account \"%1$s\".";
-
-    // Bad or expired access token. Need to re-authenticate user.
-    public static final String UNLINKED_ERROR_MSG = "Bad or expired access token. Need to re-authenticate user.";
-
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
-
-    // Authentication failed: %1$s
-    public static final String AUTH_ERROR_MSG = "Authentication failed: %1$s";
+public final class BoxEventHandler implements EventHandler {
 
     /**
-     * Initializes a new {@link BoxExceptionMessages}.
+     * The logger constant.
      */
-    private BoxExceptionMessages() {
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(BoxEventHandler.class);
+
+    /**
+     * Initializes a new {@link BoxEventHandler}.
+     */
+    public BoxEventHandler() {
         super();
     }
 
+    @Override
+    public void handleEvent(final Event event) {
+        final String topic = event.getTopic();
+        try {
+            if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic) || SessiondEventConstants.TOPIC_STORED_SESSION.equals(topic)) {
+                // A single session was removed
+                final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
+                if (!session.isTransient() && BoxAccessRegistry.getInstance().removeAccessIfLast(session.getContextId(), session.getUserId())) {
+                    LOG.debug("Google Drive access removed for user {} in context {}", session.getUserId(), session.getContextId());
+                }
+            } else if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
+                // A session container was removed
+                @SuppressWarnings("unchecked") final Map<String, Session> sessionContainer =
+                    (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
+                // For each session
+                final BoxAccessRegistry registry = BoxAccessRegistry.getInstance();
+                for (final Session session : sessionContainer.values()) {
+                    if (!session.isTransient() && registry.removeAccessIfLast(session.getContextId(), session.getUserId())) {
+                        LOG.debug("Google Drive access removed for user {} in context {}", session.getUserId(), session.getContextId());
+                    }
+                }
+            }
+        } catch (final Exception e) {
+            LOG.error("Error while handling SessionD event \"{}\"", topic, e);
+        }
+    }
 }

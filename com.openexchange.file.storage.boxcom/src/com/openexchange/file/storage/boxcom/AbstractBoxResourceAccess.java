@@ -49,6 +49,15 @@
 
 package com.openexchange.file.storage.boxcom;
 
+import java.io.IOException;
+import org.slf4j.Logger;
+import com.box.boxjavalibv2.dao.BoxFile;
+import com.box.boxjavalibv2.dao.BoxFolder;
+import com.box.boxjavalibv2.dao.BoxTypedObject;
+import com.box.boxjavalibv2.exceptions.AuthFatalFailureException;
+import com.box.boxjavalibv2.exceptions.BoxServerException;
+import com.box.restclientv2.exceptions.BoxRestException;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.boxcom.access.BoxAccess;
@@ -60,6 +69,10 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractBoxResourceAccess {
+
+    private static final String TYPE_FILE = BoxConstants.TYPE_FILE;
+
+    private static final String TYPE_FOLDER = BoxConstants.TYPE_FOLDER;
 
     protected final BoxAccess boxAccess;
     protected final Session session;
@@ -75,6 +88,126 @@ public abstract class AbstractBoxResourceAccess {
         this.account = account;
         this.session = session;
         rootFolderId = "0";
+    }
+
+    /**
+     * Performs given closure.
+     *
+     * @param closure The closure to perform
+     * @return The return value
+     * @throws OXException If performing closure fails
+     */
+    protected <R> R perform(BoxClosure<R> closure) throws OXException {
+        return closure.perform(this, session);
+    }
+
+    /**
+     * Checks if given typed object denotes a file
+     *
+     * @param typedObject The typed object to check
+     * @return <code>true</code> if typed object denotes a file; otherwise <code>false</code>
+     */
+    protected static boolean isFile(BoxTypedObject typedObject) {
+        return null != typedObject && TYPE_FILE.equals(typedObject.getType());
+    }
+
+    /**
+     * Checks if given typed object denotes a folder
+     *
+     * @param typedObject The typed object to check
+     * @return <code>true</code> if typed object denotes a folder; otherwise <code>false</code>
+     */
+    protected static boolean isFolder(BoxTypedObject typedObject) {
+        return null != typedObject && TYPE_FOLDER.equals(typedObject.getType());
+    }
+
+    /**
+     * Checks if given typed object is trashed
+     *
+     * @param boxFile The typed object to check
+     * @return <code>true</code> if typed object is trashed; otherwise <code>false</code>
+     */
+    protected static boolean isTrashed(BoxFile boxFile) {
+        return null != boxFile.getTrashedAt();
+    }
+
+    /**
+     * Checks if given typed object is trashed
+     *
+     * @param typedObject The typed object to check
+     * @return <code>true</code> if typed object is trashed; otherwise <code>false</code>
+     */
+    protected static boolean isTrashed(BoxTypedObject typedObject) {
+        if (isFile(typedObject)) {
+            return null != ((BoxFile) typedObject).getTrashedAt();
+        } else if (isFolder(typedObject)) {
+            return hasTrashParent((BoxFolder) typedObject);
+        }
+        return false;
+    }
+
+    private static boolean hasTrashParent(BoxFolder boxFolder) {
+        BoxFolder parent = boxFolder.getParent();
+        if (null == parent) {
+            return false;
+        }
+        if ("trash".equals(parent.getId())) {
+            return true;
+        }
+        return hasTrashParent(parent);
+    }
+
+    /**
+     * Handles authentication error.
+     *
+     * @param e The authentication error
+     * @param session The associated session
+     * @throws OXException If authentication error could not be handled
+     */
+    protected void handleAuthError(AuthFatalFailureException e, Session session) throws OXException {
+        try {
+            boxAccess.reinit(session);
+        } catch (OXException oxe) {
+            Logger logger = org.slf4j.LoggerFactory.getLogger(AbstractBoxResourceAccess.class);
+            logger.warn("Could not re-initialize Box.com access", oxe);
+
+            throw BoxExceptionCodes.BOX_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Handles given REST error.
+     *
+     * @param e The REST error
+     * @return The resulting exception
+     */
+    protected OXException handleRestError(BoxRestException e) {
+        Throwable cause = e.getCause();
+
+        if (cause instanceof BoxServerException) {
+            return handleHttpResponseError(null, (BoxServerException) cause);
+        }
+
+        if (cause instanceof IOException) {
+            return BoxExceptionCodes.IO_ERROR.create(cause, cause.getMessage());
+        }
+
+        return BoxExceptionCodes.BOX_ERROR.create(e, e.getMessage());
+    }
+
+    /**
+     * Handles given HTTP response error.
+     *
+     * @param identifier The option identifier for associated Google Drive resource
+     * @param e The HTTP error
+     * @return The resulting exception
+     */
+    protected OXException handleHttpResponseError(String identifier, BoxServerException e) {
+        if (null != identifier && 404 == e.getStatusCode()) {
+            return BoxExceptionCodes.NOT_FOUND.create(e, identifier);
+        }
+
+        return BoxExceptionCodes.BOX_SERVER_ERROR.create(e, Integer.valueOf(e.getStatusCode()), e.getCustomMessage());
     }
 
     /**

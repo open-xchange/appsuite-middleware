@@ -114,6 +114,14 @@ public enum BoxExceptionCodes implements DisplayableOXExceptionCode {
      * A Box server error occurred with HTTP status code %1$s. Error message: %2$s
      */
     BOX_SERVER_ERROR("A Box server error occurred with HTTP status code %1$s. Error message: %2$s", BoxExceptionMessages.BOX_SERVER_ERROR_MSG, Category.CATEGORY_ERROR, 16),
+    /**
+     * An I/O error occurred: %1$s
+     */
+    IO_ERROR("An I/O error occurred: %1$s", BoxExceptionMessages.IO_ERROR_MSG, Category.CATEGORY_ERROR, 17),
+    /**
+     * Authentication failed: %1$s
+     */
+    AUTH_ERROR("Authentication failed: %1$s", BoxExceptionMessages.AUTH_ERROR_MSG, Category.CATEGORY_ERROR, 18),
 
     ;
 

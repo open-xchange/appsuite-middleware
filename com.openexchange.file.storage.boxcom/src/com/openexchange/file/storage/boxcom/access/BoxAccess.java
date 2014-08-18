@@ -181,14 +181,14 @@ public class BoxAccess {
         return boxClient;
     }
 
-    private OAuthAccount recreateIfExpired(OAuthAccount boxOAuthAccount, Session session) throws OXException {
+    private OAuthAccount recreateIfExpired(boolean considerExpired, OAuthAccount boxOAuthAccount, Session session) throws OXException {
         // Create Scribe Google OAuth service
         final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(Google2v2Api.class);
         serviceBuilder.apiKey(boxOAuthAccount.getMetaData().getAPIKey(session)).apiSecret(boxOAuthAccount.getMetaData().getAPISecret(session));
         BoxApi.BoxApiService scribeOAuthService = (BoxApi.BoxApiService) serviceBuilder.build();
 
         // Check expiration
-        if (scribeOAuthService.isExpired(boxOAuthAccount.getToken())) {
+        if (considerExpired || scribeOAuthService.isExpired(boxOAuthAccount.getToken())) {
             // Expired...
             String refreshToken = boxOAuthAccount.getSecret();
             Token accessToken = scribeOAuthService.getAccessToken(new Token(boxOAuthAccount.getToken(), boxOAuthAccount.getSecret()), null);
@@ -220,7 +220,7 @@ public class BoxAccess {
         long now = System.nanoTime();
         if (TimeUnit.NANOSECONDS.toSeconds(now - lastAccessed) > RECHECK_THRESHOLD) {
             synchronized (this) {
-                OAuthAccount newAccount = recreateIfExpired(boxOAuthAccount, session);
+                OAuthAccount newAccount = recreateIfExpired(false, boxOAuthAccount, session);
                 if (newAccount != null) {
                     this.boxOAuthAccount = newAccount;
 
@@ -232,6 +232,26 @@ public class BoxAccess {
             }
         }
         return this;
+    }
+
+    /**
+     * Re-initializes this Box access
+     *
+     * @param session The session
+     * @throws OXException If operation fails
+     */
+    public void reinit(Session session) throws OXException {
+        synchronized (this) {
+            OAuthAccount newAccount = recreateIfExpired(true, boxOAuthAccount, session);
+            if (newAccount != null) {
+                this.boxOAuthAccount = newAccount;
+
+                // Establish new client instance
+                BoxClient boxClient = initializeBoxClient(newAccount, session);
+                clientRef.set(boxClient);
+                lastAccessed = System.nanoTime();
+            }
+        }
     }
 
     /**
