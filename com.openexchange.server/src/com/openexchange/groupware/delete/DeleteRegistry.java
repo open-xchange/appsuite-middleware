@@ -112,6 +112,9 @@ public final class DeleteRegistry {
      * @return The singleton instance of {@link DeleteRegistry}.
      */
     public static DeleteRegistry getInstance() {
+        if (null == instance) {
+            initInstance();
+        }
         return instance;
     }
 
