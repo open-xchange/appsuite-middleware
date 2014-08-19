@@ -224,7 +224,11 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
              * Add to list
              */
             linkBuilder.setLength(0);
-            linkBuilder.append(com.openexchange.java.Strings.isEmpty(protocol) ? (forcedSecure(hostName) ? "https://" : "http://") : saneProtocol(protocol)).append(hostName).append(path);
+            if (path.startsWith("http")) {
+                linkBuilder.append(path);
+            } else {
+                linkBuilder.append(com.openexchange.java.Strings.isEmpty(protocol) ? (forcedSecure(hostName) ? "https://" : "http://") : saneProtocol(protocol)).append(hostName).append(path);
+            }
             links.add(new LinkAndNamePair(attachment.getFileName(), linkBuilder.toString()));
         }
         /*
