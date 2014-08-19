@@ -50,10 +50,18 @@
 package com.openexchange.file.storage.onedrive;
 
 import java.io.IOException;
+import java.io.InputStream;
 import org.apache.http.auth.AuthenticationException;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.slf4j.Logger;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
@@ -71,7 +79,41 @@ public abstract class AbstractOneDriveResourceAccess {
     /**
      * The Jackson object mapper instance.
      */
-    protected static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER;
+    static {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.setSerializationInclusion(Include.NON_NULL);
+        objectMapper.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false);
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        MAPPER = objectMapper;
+    }
+
+    /**
+     * Gets the object mapper.
+     *
+     * @return The object mapper
+     */
+    protected static ObjectMapper getObjectMapper() {
+        return MAPPER;
+    }
+
+    protected static <T> T parseIntoObject(InputStream inputStream, Class<T> theClass) throws OXException {
+        try {
+            JsonFactory jsonFactory = new JsonFactory();
+            JsonParser jp = jsonFactory.createParser(inputStream);
+            return getObjectMapper().readValue(jp, theClass);
+        } catch (JsonGenerationException e) {
+            throw OneDriveExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        } catch (JsonMappingException e) {
+            throw OneDriveExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        } catch (JsonParseException e) {
+            throw OneDriveExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        } catch (IOException e) {
+            throw OneDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    // -------------------------------------------------------------------------------------------------------------- //
 
     /**
      * The OneDrive base URL: <code>"https://apis.live.net/v5.0/"</code>

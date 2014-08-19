@@ -52,8 +52,6 @@ package com.openexchange.file.storage.onedrive;
 import java.text.ParseException;
 import java.util.Collections;
 import org.slf4j.Logger;
-import com.box.boxjavalibv2.dao.BoxTypedObject;
-import com.box.boxjavalibv2.utils.ISO8601DateParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
@@ -61,6 +59,8 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.TypeAware;
+import com.openexchange.file.storage.onedrive.rest.folder.RestFolder;
+import com.openexchange.file.storage.onedrive.utils.ISO8601DateParser;
 
 /**
  * {@link OneDriveFolder}
@@ -114,14 +114,16 @@ public final class OneDriveFolder extends DefaultFileStorageFolder implements Ty
     }
 
     /**
-     * Parses specified Box.com directory.
+     * Parses specified Microsoft OneDrive directory.
      *
-     * @param dir The Box.com directory
+     * @param dir The Microsoft OneDrive directory
      * @param rootFolderId The identifier of the root folder
      * @param accountDisplayName The account's display name
-     * @throws OXException If parsing Box.com directory fails
+     * @param hasSubfolders Whether this folder has subfolders;<br>
+     *                      e.g. <tt>"GET https://apis.live.net/v5.0/&lt;folder-id&gt;/files?access_token=&lt;access-token&gt;"</tt>
+     * @throws OXException If parsing Microsoft OneDrive directory fails
      */
-    public OneDriveFolder parseDirEntry(com.OneDriveFolder.boxjavalibv2.dao.BoxFolder dir, String rootFolderId, String accountDisplayName) throws OXException {
+    public OneDriveFolder parseDirEntry(RestFolder dir, String rootFolderId, String accountDisplayName, boolean hasSubfolders) throws OXException {
         if (null != dir) {
             try {
                 id = dir.getId();
@@ -133,13 +135,13 @@ public final class OneDriveFolder extends DefaultFileStorageFolder implements Ty
                     setParentId(null);
                     setName(null == accountDisplayName ? dir.getName() : accountDisplayName);
                 } else {
-                    com.OneDriveFolder.boxjavalibv2.dao.BoxFolder parent = dir.getParent();
-                    setParentId(isRootFolder(parent.getId(), rootFolderId) ? FileStorageFolder.ROOT_FULLNAME : parent.getId());
+                    String parentId = dir.getParentId();
+                    setParentId(isRootFolder(parentId, rootFolderId) ? FileStorageFolder.ROOT_FULLNAME : parentId);
                     setName(dir.getName());
                 }
 
                 {
-                    String createdAt = dir.getCreatedAt();
+                    String createdAt = dir.getCreatedTime();
                     if (null != createdAt) {
                         try {
                             creationDate = (ISO8601DateParser.parse(createdAt));
@@ -150,7 +152,7 @@ public final class OneDriveFolder extends DefaultFileStorageFolder implements Ty
                     }
                 }
                 {
-                    String modifiedAt = dir.getModifiedAt();
+                    String modifiedAt = dir.getUpdatedTime();
                     if (null != modifiedAt) {
                         try {
                             lastModifiedDate = (ISO8601DateParser.parse(modifiedAt));
@@ -161,17 +163,8 @@ public final class OneDriveFolder extends DefaultFileStorageFolder implements Ty
                     }
                 }
 
-                {
-                    boolean hasSubfolders = false;
-                    for (BoxTypedObject child : dir.getItemCollection().getEntries()) {
-                        if (TYPE_FOLDER.equals(child.getType())) {
-                            hasSubfolders = true;
-                            break;
-                        }
-                    }
-                    setSubfolders(hasSubfolders);
-                    setSubscribedSubfolders(hasSubfolders);
-                }
+                setSubfolders(hasSubfolders);
+                setSubscribedSubfolders(hasSubfolders);
             } catch (final RuntimeException e) {
                 throw OneDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }

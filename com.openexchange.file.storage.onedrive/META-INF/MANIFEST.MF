@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: The MS OneDrive file storage bundle
+Bundle-Name: The Microsoft OneDrive file storage bundle
 Bundle-SymbolicName: com.openexchange.file.storage.onedrive
 Bundle-Version: 7.6.1
 Bundle-Vendor: Open-Xchange Inc.

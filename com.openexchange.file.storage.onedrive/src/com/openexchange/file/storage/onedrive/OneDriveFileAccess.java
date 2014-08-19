@@ -74,6 +74,8 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.onedrive.access.OneDriveAccess;
+import com.openexchange.file.storage.onedrive.rest.file.RestFile;
+import com.openexchange.file.storage.onedrive.rest.file.RestFileResponse;
 import com.openexchange.file.storage.search.FileNameTerm;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
@@ -178,8 +180,10 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                     throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
                 }
 
-                MAPPER.readValue(response.getEntity().getContent(), com.openexchange.file.storage.onedrive.rest.file.File.class);
+                RestFileResponse restResponse = parseIntoObject(response.getEntity().getContent(), RestFileResponse.class);
+                RestFile restFile = restResponse.getData().get(0);
 
+                return new OneDriveFile(folderId, id, userId, rootFolderId).parseBoxFile(restFile);
             }
         }, oneDriveAccess.getHttpClient());
     }

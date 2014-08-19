@@ -54,13 +54,12 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import org.slf4j.Logger;
-import com.box.boxjavalibv2.dao.BoxSharedLink;
-import com.box.boxjavalibv2.utils.ISO8601DateParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.java.Strings;
+import com.openexchange.file.storage.onedrive.rest.file.RestFile;
+import com.openexchange.file.storage.onedrive.utils.ISO8601DateParser;
 import com.openexchange.mime.MimeTypeMap;
 
 /**
@@ -99,35 +98,34 @@ public final class OneDriveFile extends DefaultFile {
     }
 
     /**
-     * Parses specified Box file.
+     * Parses specified Microsoft OneDrive file.
      *
-     * @param file The Box file
+     * @param file The Microsoft OneDrive file
      * @throws OXException If parsing Box file fails
      * @return This Box file
      */
-    public OneDriveFile parseBoxFile(com.OneDriveFile.boxjavalibv2.dao.BoxFile file) throws OXException {
+    public OneDriveFile parseBoxFile(RestFile file) throws OXException {
         return parseBoxFile(file, null);
     }
 
     /**
-     * Parses specified Box file.
+     * Parses specified Microsoft OneDrive file.
      *
-     * @param file The Box file
+     * @param file The Microsoft OneDrive file
      * @param fields The fields to consider
-     * @throws OXException If parsing Box file fails
+     * @throws OXException If parsing Microsoft OneDrive file fails
      * @return This Box file with property set applied
      */
-    public OneDriveFile parseBoxFile(com.OneDriveFile.boxjavalibv2.dao.BoxFile file, List<Field> fields) throws OXException {
+    public OneDriveFile parseBoxFile(RestFile file, List<Field> fields) throws OXException {
         if (null != file) {
             try {
                 final String name = file.getName();
                 setTitle(name);
                 setFileName(name);
-                setVersion(file.getVersionNumber());
                 final Set<Field> set = null == fields || fields.isEmpty() ? EnumSet.allOf(Field.class) : EnumSet.copyOf(fields);
 
                 if (set.contains(Field.CREATED)) {
-                    String createdAt = file.getCreatedAt();
+                    String createdAt = file.getCreatedTime();
                     if (null != createdAt) {
                         try {
                             setCreated(ISO8601DateParser.parse(createdAt));
@@ -138,7 +136,7 @@ public final class OneDriveFile extends DefaultFile {
                     }
                 }
                 if (set.contains(Field.LAST_MODIFIED) || set.contains(Field.LAST_MODIFIED_UTC)) {
-                    String modifiedAt = file.getModifiedAt();
+                    String modifiedAt = file.getUpdatedTime();
                     if (null != modifiedAt) {
                         try {
                             setLastModified(ISO8601DateParser.parse(modifiedAt));
@@ -154,25 +152,22 @@ public final class OneDriveFile extends DefaultFile {
                     setFileMIMEType(contentType);
                 }
                 if (set.contains(Field.FILE_SIZE)) {
-                    Double size = file.getSize();
-                    if (null != size) {
-                        setFileSize(size.longValue());
+                    long size = file.getSize();
+                    if (size >= 0) {
+                        setFileSize(size);
                     }
                 }
                 if (set.contains(Field.URL)) {
-                    BoxSharedLink sharedLink = file.getSharedLink();
-                    if (null != sharedLink) {
-                        setURL(sharedLink.getDownloadUrl());
+                    String link = file.getSource();
+                    if (null != link) {
+                        setURL(link);
                     }
                 }
                 if (set.contains(Field.COLOR_LABEL)) {
                     setColorLabel(0);
                 }
                 if (set.contains(Field.CATEGORIES)) {
-                    String[] tags = file.getTags();
-                    if (null != tags) {
-                        setCategories(Strings.concat(", ", tags));
-                    }
+                    setCategories(null);
                 }
                 if (set.contains(Field.DESCRIPTION)) {
                     setDescription(file.getDescription());

@@ -1,9 +1,11 @@
 
-package com.openexchange.file.storage.onedrive.rest.file;
+package com.openexchange.file.storage.onedrive.rest;
 
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Generated;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
@@ -13,9 +15,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
- * {@link SharedWith} <td>
+ * {@link SharedInfo} - Info about who can access the folder.
  * <p>
- * Info about who can access the folder. The options are:
+ * The options are:
  * </p>
  * <ul>
  * <li><strong>People I selected</strong></li>
@@ -25,18 +27,17 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * <li><strong>My friends and their friends</strong></li>
  * <li><strong>People with a link</strong></li>
  * </ul>
- * The default is <strong>Just me</strong>.</td>
- * <p>
+ * The default is <strong>Just me</strong>.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.1
+ * @since 7.6.1
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("org.jsonschema2pojo")
 @JsonPropertyOrder({
     "access"
 })
-public class SharedWith {
+public class SharedInfo {
 
     @JsonProperty("access")
     private String access;
@@ -44,9 +45,9 @@ public class SharedWith {
     private final Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     /**
-     * Initializes a new {@link SharedWith}.
+     * Initializes a new {@link SharedInfo}.
      */
-    public SharedWith() {
+    public SharedInfo() {
         super();
         access = "Just me";
     }
@@ -61,14 +62,19 @@ public class SharedWith {
         this.access = access;
     }
 
-    public SharedWith withAccess(String access) {
-        this.access = access;
-        return this;
-    }
-
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
+    }
+
+    @Override
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return EqualsBuilder.reflectionEquals(this, other);
     }
 
     @JsonAnyGetter
@@ -79,11 +85,6 @@ public class SharedWith {
     @JsonAnySetter
     public void setAdditionalProperty(String name, Object value) {
         this.additionalProperties.put(name, value);
-    }
-
-    public SharedWith withAdditionalProperty(String name, Object value) {
-        this.additionalProperties.put(name, value);
-        return this;
     }
 
 }

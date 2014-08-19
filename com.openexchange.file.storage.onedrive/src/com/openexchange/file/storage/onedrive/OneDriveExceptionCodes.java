@@ -122,6 +122,10 @@ public enum OneDriveExceptionCodes implements DisplayableOXExceptionCode {
      * Authentication failed: %1$s
      */
     AUTH_ERROR("Authentication failed: %1$s", OneDriveExceptionMessages.AUTH_ERROR_MSG, Category.CATEGORY_ERROR, 18),
+    /**
+     * A JSON error occurred: %1$s
+     */
+    JSON_ERROR("A JSON error occurred: %1$s", Category.CATEGORY_ERROR, 17),
 
     ;
 

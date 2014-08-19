@@ -1,37 +1,33 @@
 
-package com.openexchange.file.storage.onedrive.rest.file;
+package com.openexchange.file.storage.onedrive.rest;
 
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Generated;
-import org.apache.commons.lang.builder.ToStringBuilder;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
-/**
- * {@link From} - Info about the user who uploaded the file.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.1
- */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("org.jsonschema2pojo")
 @JsonPropertyOrder({
     "name",
     "id"
 })
-public class From {
+public class User {
 
     @JsonProperty("name")
     private String name;
     @JsonProperty("id")
     private String id;
     @JsonIgnore
-    private final Map<String, Object> additionalProperties = new HashMap<String, Object>();
+    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     @JsonProperty("name")
     public String getName() {
@@ -41,11 +37,6 @@ public class From {
     @JsonProperty("name")
     public void setName(String name) {
         this.name = name;
-    }
-
-    public From withName(String name) {
-        this.name = name;
-        return this;
     }
 
     @JsonProperty("id")
@@ -58,14 +49,19 @@ public class From {
         this.id = id;
     }
 
-    public From withId(String id) {
-        this.id = id;
-        return this;
-    }
-
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
+    }
+
+    @Override
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return EqualsBuilder.reflectionEquals(this, other);
     }
 
     @JsonAnyGetter
@@ -76,11 +72,6 @@ public class From {
     @JsonAnySetter
     public void setAdditionalProperty(String name, Object value) {
         this.additionalProperties.put(name, value);
-    }
-
-    public From withAdditionalProperty(String name, Object value) {
-        this.additionalProperties.put(name, value);
-        return this;
     }
 
 }
