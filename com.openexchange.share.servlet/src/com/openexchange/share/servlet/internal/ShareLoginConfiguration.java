@@ -50,6 +50,7 @@
 package com.openexchange.share.servlet.internal;
 
 import java.util.Date;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
@@ -65,6 +66,50 @@ import com.openexchange.share.Share;
  */
 public class ShareLoginConfiguration {
 
+    private LoginConfiguration loginConfiguration;
+    private boolean transientShareSessions;
+
+    /**
+     * Initializes a new {@link ShareLoginConfiguration}.
+     *
+     * @param configService A reference to the configuration service for initialization
+     * @throws OXException
+     */
+    public ShareLoginConfiguration(ConfigurationService configService) throws OXException {
+        super();
+        reinitialise(configService);
+    }
+
+    /**
+     * Gets a custom login configuration suitable for the share, where cookie TTLs are adjusted as needed.
+     *
+     * @param share The share to get the login configuration for
+     * @return The login configuration
+     */
+    public LoginConfiguration getLoginConfig(Share share) {
+        return adjustCookieTTL(loginConfiguration, share);
+    }
+
+    /**
+     * Gets the transientShareSessions
+     *
+     * @return The transientShareSessions
+     */
+    public boolean isTransientShareSessions() {
+        return transientShareSessions;
+    }
+
+    /**
+     * (Re-)initializes the configuration.
+     *
+     * @param configService A reference to the configuration service
+     * @throws OXException
+     */
+    void reinitialise(ConfigurationService configService) throws OXException {
+        this.loginConfiguration = init(LoginServlet.getLoginConfiguration(), configService);
+        this.transientShareSessions = configService.getBoolProperty("com.openexchange.share.transientSessions", true);
+    }
+
     /**
      * Adjusts the configured cookie TTL of the login configuration if the share is about to expire soon. In case the default cookie TTL
      * is overridden, a new login configuration instance is created holding the adjusted cookie TTL, otherwise the supplied login config
@@ -75,7 +120,7 @@ public class ShareLoginConfiguration {
      * @return The possibly adjusted login configuration
      * @throws OXException
      */
-    public static LoginConfiguration adjustCookieTTL(LoginConfiguration loginConfig, Share share) throws OXException {
+    private static LoginConfiguration adjustCookieTTL(LoginConfiguration loginConfig, Share share) {
         Date expires = share.getExpires();
         if (null != expires) {
             int shareExpiry = (int) ((expires.getTime() - System.currentTimeMillis()) / 1000);
@@ -118,7 +163,7 @@ public class ShareLoginConfiguration {
      * @return The custom share login configuration
      * @throws OXException
      */
-    public static LoginConfiguration init(LoginConfiguration defaultConfig, ConfigurationService configService) throws OXException {
+    private static LoginConfiguration init(LoginConfiguration defaultConfig, ConfigurationService configService) throws OXException {
         /*
          * configure overrides
          */

@@ -98,7 +98,7 @@ public class ExpiredSharesTest extends ShareTest {
         /*
          * apply expiration time to permission
          */
-        long expirationTime = 5000L; // 5 seconds
+        long expirationTime = 10000L; // 10 seconds
         Date expires = new Date(System.currentTimeMillis() + expirationTime);
         guestPermission = (OCLGuestPermission) guestPermission.clone();
         guestPermission.setExpires(expires);
@@ -146,6 +146,10 @@ public class ExpiredSharesTest extends ShareTest {
         for (OCLPermission permission : folder.getPermissions()) {
             assertTrue("Guest permission still present", permission.getEntity() != matchingPermission.getEntity());
         }
+        /*
+         * check if previous session is still alive
+         */
+        guestClient.checkSessionAlive(true);
     }
 
 }

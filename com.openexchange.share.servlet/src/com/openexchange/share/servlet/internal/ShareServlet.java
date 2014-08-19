@@ -90,16 +90,16 @@ public class ShareServlet extends HttpServlet {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ShareServlet.class);
     private static final Pattern PATH_PATTERN = Pattern.compile("/+([a-f0-9]{32})(?:/+items(?:/+([0-9]+))?)?/*", Pattern.CASE_INSENSITIVE);
 
-    private final LoginConfiguration loginConfig;
+    private final ShareLoginConfiguration shareLoginConfig;
 
     /**
      * Initializes a new {@link ShareServlet}.
      *
-     * @param loginConfig The share login configuration to use
+     * @param shareLoginConfig The share login configuration to use
      */
-    public ShareServlet(LoginConfiguration loginConfig) {
+    public ShareServlet(ShareLoginConfiguration shareLoginConfig) {
         super();
-        this.loginConfig = loginConfig;
+        this.shareLoginConfig = shareLoginConfig;
     }
 
     @Override
@@ -123,7 +123,8 @@ public class ShareServlet extends HttpServlet {
             /*
              * get, authenticate and login as associated guest user
              */
-            LoginResult loginResult = login(share, request, response);
+            LoginConfiguration loginConfig = shareLoginConfig.getLoginConfig(share);
+            LoginResult loginResult = login(share, request, response, loginConfig, shareLoginConfig.isTransientShareSessions());
             if (null == loginResult) {
                 return;
             }
@@ -134,12 +135,12 @@ public class ShareServlet extends HttpServlet {
              */
             Tools.disableCaching(response);
             LoginServlet.addHeadersAndCookies(loginResult, response);
-            LoginServlet.writeSessionCookie(response, session, session.getHash(), request.isSecure(), request.getServerName());
-            LoginServlet.writeSecretCookie(request, response, session, session.getHash(), request.isSecure(), request.getServerName(), loginConfig);
+            LoginServlet.writeSecretCookie(
+                request, response, session, session.getHash(), request.isSecure(), request.getServerName(), loginConfig);
             /*
              * construct redirect URL
              */
-            String url = getRedirectURL(session, guestUser, share);
+            String url = getRedirectURL(session, guestUser, share, loginConfig);
             LOG.info("Redirecting share {} to {}...", share.getToken(), url);
             response.sendRedirect(url);
         } catch (RateLimitedException e) {
@@ -157,9 +158,11 @@ public class ShareServlet extends HttpServlet {
      * @param share The share
      * @param request The request
      * @param response The response
+     * @param loginConfig The login configuration to use
+     * @param tranzient <code>true</code> to mark the session as transient, <code>false</code>, otherwise
      * @return The login result, or <code>null</code> if not successful
      */
-    private LoginResult login(Share share, HttpServletRequest request, HttpServletResponse response) throws OXException, IOException {
+    private static LoginResult login(Share share, HttpServletRequest request, HttpServletResponse response, LoginConfiguration loginConfig, boolean tranzient) throws OXException, IOException {
         /*
          * parse login request
          */
@@ -167,7 +170,7 @@ public class ShareServlet extends HttpServlet {
         User user = ShareServiceLookup.getService(UserService.class, true).getUser(share.getGuest(), context);
         LoginRequestImpl loginRequest = LoginTools.parseLogin(request, user.getMail(), user.getUserPassword(), false,
             loginConfig.getDefaultClient(), loginConfig.isCookieForceHTTPS(), false);
-        loginRequest.setTransient(true);
+        loginRequest.setTransient(tranzient);
         /*
          * login
          */
@@ -226,9 +229,10 @@ public class ShareServlet extends HttpServlet {
      * @param session The session
      * @param user The user
      * @param share The share
+     * @param loginConfig The login configuration to use
      * @return The redirect URL
      */
-    private String getRedirectURL(Session session, User user, Share share) {
+    private static String getRedirectURL(Session session, User user, Share share, LoginConfiguration loginConfig) {
         ConfigurationService configService = ShareServiceLookup.getService(ConfigurationService.class);
         String redirectLink;
         if (share.isFolder()) {

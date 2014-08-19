@@ -50,8 +50,6 @@
 package com.openexchange.share.servlet.osgi;
 
 import org.osgi.service.http.HttpService;
-import com.openexchange.ajax.LoginServlet;
-import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.osgi.AbstractServletActivator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
@@ -83,8 +81,7 @@ public class ShareServletActivator extends AbstractServletActivator {
     protected void startBundle() throws Exception {
         org.slf4j.LoggerFactory.getLogger(ShareServletActivator.class).info("starting bundle: \"com.openexchange.share.servlet\"");
         ShareServiceLookup.set(this);
-        LoginConfiguration loginConfig = ShareLoginConfiguration.init(
-            LoginServlet.getLoginConfiguration(), getService(ConfigurationService.class));
+        ShareLoginConfiguration loginConfig = new ShareLoginConfiguration(getService(ConfigurationService.class));
         super.registerServlet(ALIAS, new ShareServlet(loginConfig), getService(HttpService.class));
     }
 
