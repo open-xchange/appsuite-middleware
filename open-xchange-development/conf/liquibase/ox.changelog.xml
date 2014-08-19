@@ -5,6 +5,14 @@
 	xsi:schemaLocation="urn:liquibase ./schema/dbchangelog-3.0.xsd"
 	logicalFilePath="ox-release-changelog">
 
-	<include file="./release-7.6.1/release-7.6.1.ox.changelog.xml" relativeToChangelogFile="true"/>
-
+	<!-- ******************************************************* -->
+	<!-- ************** Release 7.6.1 starts here ************** -->
+	<!-- ******************************************************* -->
+	<changeSet id="7.6.1:login2context:login_info" author="martin.schneider" logicalFilePath="release-7.6.1/1.login_info.changelog.xml">
+		<comment>Bug 33418: enhances the login_info column to 255 characters</comment>
+		<modifyDataType columnName="login_info" newDataType="varchar(255)"
+			tableName="login2context" />
+		<dropDefaultValue columnDataType="varchar(255)"
+			columnName="login_info" tableName="login2context" />
+	</changeSet>
 </databaseChangeLog>

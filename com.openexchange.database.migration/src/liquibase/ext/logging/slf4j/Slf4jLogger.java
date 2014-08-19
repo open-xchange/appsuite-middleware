@@ -1,19 +1,52 @@
 /*
- * Copyright (c) 2012-2014 Matt Bertolini
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
- * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
- * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *    OPEN-XCHANGE legal information
  *
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
- * Software.
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
- * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
- * OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
- * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
  */
+
 package liquibase.ext.logging.slf4j;
 
 import liquibase.changelog.ChangeSet;
@@ -25,7 +58,8 @@ import org.slf4j.LoggerFactory;
 /**
  * An implementation of the Liquibase Logger that sends log output to SLF4J.
  *
- * @author Matt Bertolini
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.6.1
  */
 public class Slf4jLogger extends AbstractLogger {
     private static final int PRIORITY = 5;
@@ -45,21 +79,24 @@ public class Slf4jLogger extends AbstractLogger {
     }
 
     /**
-     * Sets the log level for Liquibase. Not used in this implementation.
-     *
-     * @param logLevel Log level
-     * @param logFile Log file
+     * {@inheritDoc}
      */
     @Override
     public void setLogLevel(String logLevel, String logFile) {
         super.setLogLevel(logLevel);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void setChangeLog(DatabaseChangeLog databaseChangeLog) {
         changeLogName = (databaseChangeLog == null) ? null : databaseChangeLog.getFilePath();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void setChangeSet(ChangeSet changeSet) {
         changeSetName = (changeSet == null) ? null : changeSet.toString(false);
@@ -183,7 +220,6 @@ public class Slf4jLogger extends AbstractLogger {
      * @param message The basic log message before optional data.
      * @return the complete log message to print to the logger.
      */
-    // @Override
     protected String buildMessage(String message) {
         StringBuilder msg = new StringBuilder();
         if(changeLogName != null) {

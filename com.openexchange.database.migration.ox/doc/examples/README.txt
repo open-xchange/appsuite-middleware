@@ -4,11 +4,10 @@ Programmatically you are able to do exactly the same as by configuring XML files
 implementation of CustomPrecondition will help you to define conditions that have to be true to get
 the defined change executed.
 
-Both example implementations will update the table 'login2context' table to have the column 'login_info'
+The example implementation will update the table 'login2context' table to have the column 'login_info'
 a type of varchar(255) instead of varchar(128).
 
-- ExampleCustomSqlChange:
-- ExampleCustomTaskChange:
+- ExampleCustomSqlChange: Example java class how to execute SQL statements
 
 - custom.changelog.xml:
 	Shows how to include one of the java classes mentioned above. The given filename has to be provided by calling
