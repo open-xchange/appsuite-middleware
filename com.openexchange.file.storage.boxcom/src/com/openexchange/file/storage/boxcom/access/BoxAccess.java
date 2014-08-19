@@ -56,6 +56,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.BoxApi;
 import org.scribe.model.Token;
+import org.slf4j.Logger;
 import com.box.boxjavalibv2.BoxClient;
 import com.box.boxjavalibv2.BoxConfigBuilder;
 import com.box.boxjavalibv2.authorization.OAuthAuthorization;
@@ -82,6 +83,8 @@ import com.openexchange.session.Session;
  * @since v7.6.1
  */
 public class BoxAccess {
+
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(BoxAccess.class);
 
     /** The re-check threshold in seconds (45 minutes) */
     private static final long RECHECK_THRESHOLD = 2700;
@@ -197,7 +200,9 @@ public class BoxAccess {
             } catch (org.scribe.exceptions.OAuthException e) {
                 throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(e, boxOAuthAccount.getDisplayName(), boxOAuthAccount.getId());
             }
-            if (!Strings.isEmpty(accessToken.getSecret())) {
+            if (Strings.isEmpty(accessToken.getSecret())) {
+                LOGGER.warn("Received invalid request_token from Box.com: {}. Response:{}{}", null == accessToken.getSecret() ? "null" : accessToken.getSecret(), Strings.getLineSeparator(), accessToken.getRawResponse());
+            } else {
                 refreshToken = accessToken.getSecret();
             }
             // Update account
