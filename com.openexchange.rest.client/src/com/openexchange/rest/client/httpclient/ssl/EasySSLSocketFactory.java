@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.rest.client.session.ssl;
+package com.openexchange.rest.client.httpclient.ssl;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

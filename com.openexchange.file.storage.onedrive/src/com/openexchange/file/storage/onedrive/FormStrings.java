@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,38 +47,20 @@
  *
  */
 
-package com.openexchange.rest.client.session.ssl;
+package com.openexchange.file.storage.onedrive;
 
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import javax.net.ssl.X509TrustManager;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * The No-Op trust manager.
+ * {@link FormStrings}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TrivialTrustManager implements X509TrustManager {
+public class FormStrings implements LocalizableStrings {
 
-    /**
-     * Initializes a new {@link TrivialTrustManager}.
-     */
-    public TrivialTrustManager() {
+    public static final String ACCOUNT_LABEL = "Select an existing account";
+
+    public FormStrings() {
         super();
-    }
-
-    @Override
-    public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-        // No-op
-    }
-
-    @Override
-    public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-        // No-op
-    }
-
-    @Override
-    public X509Certificate[] getAcceptedIssuers() {
-        return new X509Certificate[0];
     }
 }
