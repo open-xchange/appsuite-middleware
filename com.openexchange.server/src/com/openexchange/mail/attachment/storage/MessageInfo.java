@@ -67,7 +67,7 @@ public class MessageInfo {
     /** The date */
     public final Date date;
 
-    /** The <code>"To"</code> address */
+    /** The <code>"To"</code> addresses */
     public final InternetAddress[] to;
 
     /**
