@@ -87,7 +87,7 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
 
     /**
      * Initializes a new {@link DBMigrationExecutorServiceImpl}.
-     * 
+     *
      * @param databaseService - {@link DatabaseService} to be able to execute migration files
      * @param configurationService - {@link ConfigurationService} to be able to retrieve the configuration files
      */
@@ -116,8 +116,10 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
 
             jdbcConnection = new JdbcConnection(writable);
             jdbcConnection.setAutoCommit(true);
+
             MySQLDatabase databaseConnection = new MySQLDatabase();
             databaseConnection.setConnection(jdbcConnection);
+            databaseConnection.setAutoCommit(true);
 
             liquibase = new Liquibase(databaseChangeLog.getPhysicalFilePath(), new CompositeResourceAccessor(accessors), databaseConnection);
             liquibase.update("");

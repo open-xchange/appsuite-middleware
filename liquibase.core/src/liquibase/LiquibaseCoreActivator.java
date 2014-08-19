@@ -63,11 +63,11 @@ public class LiquibaseCoreActivator implements BundleActivator {
 
     @Override
     public void start(BundleContext context) throws Exception {
-        System.out.println("bundle liquibase.core started");
+        // nothing to do
     }
 
     @Override
     public void stop(BundleContext context) throws Exception {
-        System.out.println("bundle liquibase.core stopped");
+        // nothing to do
     }
 }
