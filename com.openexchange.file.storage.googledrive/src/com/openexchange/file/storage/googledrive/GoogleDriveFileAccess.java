@@ -722,6 +722,11 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
         if (null != folderIds && 1 != folderIds.size()) {
             throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create("Can only search in one or all folders");
         }
+
+        //
+        // https://developers.google.com/drive/web/search-parameters
+        //
+
         String folderID = null == folderIds ? null : folderIds.get(0);
         /*
          * search by one or more filename patterns
