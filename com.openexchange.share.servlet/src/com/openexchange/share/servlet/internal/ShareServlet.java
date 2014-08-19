@@ -55,7 +55,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -77,8 +76,6 @@ import com.openexchange.share.ShareService;
 import com.openexchange.share.servlet.auth.ShareLoginMethod;
 import com.openexchange.tools.servlet.RateLimitedException;
 import com.openexchange.tools.servlet.http.Tools;
-import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.webdav.OXServlet;
 import com.openexchange.user.UserService;
 
 /**
@@ -93,6 +90,18 @@ public class ShareServlet extends HttpServlet {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ShareServlet.class);
     private static final Pattern PATH_PATTERN = Pattern.compile("/+([a-f0-9]{32})(?:/+items(?:/+([0-9]+))?)?/*", Pattern.CASE_INSENSITIVE);
 
+    private final LoginConfiguration loginConfig;
+
+    /**
+     * Initializes a new {@link ShareServlet}.
+     *
+     * @param loginConfig The share login configuration to use
+     */
+    public ShareServlet(LoginConfiguration loginConfig) {
+        super();
+        this.loginConfig = loginConfig;
+    }
+
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
@@ -103,7 +112,8 @@ public class ShareServlet extends HttpServlet {
             /*
              * extract share from path info
              */
-            Share share = resolveShare(request.getPathInfo());
+            String token = extractToken(request.getPathInfo());
+            Share share = null != token ? ShareServiceLookup.getService(ShareService.class, true).resolveToken(token) : null;
             if (null == share) {
                 LOG.debug("No share found at '{}'", request.getPathInfo());
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -111,35 +121,21 @@ public class ShareServlet extends HttpServlet {
             }
             LOG.debug("Successfully resolved share at '{}' to {}", request.getPathInfo(), share);
             /*
-             * check if there's already a valid guest session
+             * get, authenticate and login as associated guest user
              */
-            User guestUser;
-            Session session = OXServlet.findSessionByCookie(request, response);
-            if (null != session && session.getUserId() == share.getGuest() && session.getContextId() == share.getContextID()) {
-                LOG.debug("Existing session found via supplied cookies for share {} with guest user {} in context {}.",
-                    share.getToken(), share.getGuest(), share.getContextID());
-                guestUser = ServerSessionAdapter.valueOf(session).getUser();
-            } else {
-                /*
-                 * get, authenticate and login as associated guest user
-                 */
-                LoginResult loginResult = login(share, request, response);
-                if (null == loginResult) {
-                    return;
-                }
-                session = loginResult.getSession();
-                guestUser = loginResult.getUser();
+            LoginResult loginResult = login(share, request, response);
+            if (null == loginResult) {
+                return;
             }
+            Session session = loginResult.getSession();
+            User guestUser = loginResult.getUser();
             /*
              * prepare response
              */
             Tools.disableCaching(response);
-            LoginServlet.writeSecretCookie(request, response, session, session.getHash(), request.isSecure(), request.getServerName(),
-                LoginServlet.getLoginConfiguration());
-            response.addCookie(new Cookie("sessionid", session.getSessionID()));
-
-//            response.addCookie(new Cookie("JSESSIONID", request.getSession().getId()));
-
+            LoginServlet.addHeadersAndCookies(loginResult, response);
+            LoginServlet.writeSessionCookie(response, session, session.getHash(), request.isSecure(), request.getServerName());
+            LoginServlet.writeSecretCookie(request, response, session, session.getHash(), request.isSecure(), request.getServerName(), loginConfig);
             /*
              * construct redirect URL
              */
@@ -163,13 +159,12 @@ public class ShareServlet extends HttpServlet {
      * @param response The response
      * @return The login result, or <code>null</code> if not successful
      */
-    private static LoginResult login(Share share, HttpServletRequest request, HttpServletResponse response) throws OXException, IOException {
+    private LoginResult login(Share share, HttpServletRequest request, HttpServletResponse response) throws OXException, IOException {
         /*
          * parse login request
          */
         Context context = ShareServiceLookup.getService(UserService.class, true).getContext(share.getContextID());
         User user = ShareServiceLookup.getService(UserService.class, true).getUser(share.getGuest(), context);
-        LoginConfiguration loginConfig = LoginServlet.getLoginConfiguration();
         LoginRequestImpl loginRequest = LoginTools.parseLogin(request, user.getMail(), user.getUserPassword(), false,
             loginConfig.getDefaultClient(), loginConfig.isCookieForceHTTPS(), false);
         loginRequest.setTransient(true);
@@ -180,8 +175,6 @@ public class ShareServlet extends HttpServlet {
         Map<String, Object> properties = new HashMap<String, Object>();
         LoginResult loginResult = LoginPerformer.getInstance().doLogin(loginRequest, properties, loginMethod);
         if (null == loginResult || null == loginResult.getSession()) {
-            LOG.debug("Unsuccessful login for share {} with guest user {} in context {}.",
-                share.getToken(), share.getGuest(), share.getContextID());
             loginMethod.sendUnauthorized(request, response);
             return null;
         }
@@ -211,6 +204,23 @@ public class ShareServlet extends HttpServlet {
     }
 
     /**
+     * Extracts the token from a HTTP request's path info.
+     *
+     * @param pathInfo The path info
+     * @return The token, or <code>null</code> if no token could be extracted
+     * @throws OXException
+     */
+    private static String extractToken(String pathInfo) throws OXException {
+        if (false == Strings.isEmpty(pathInfo)) {
+            Matcher matcher = PATH_PATTERN.matcher(pathInfo);
+            if (matcher.matches()) {
+                return matcher.group(1);
+            }
+        }
+        return null;
+    }
+
+    /**
      * Constructs the redirect URL pointing to the share in the web interface.
      *
      * @param session The session
@@ -218,17 +228,19 @@ public class ShareServlet extends HttpServlet {
      * @param share The share
      * @return The redirect URL
      */
-    private static String getRedirectURL(Session session, User user, Share share) {
+    private String getRedirectURL(Session session, User user, Share share) {
         ConfigurationService configService = ShareServiceLookup.getService(ConfigurationService.class);
         String redirectLink;
         if (share.isFolder()) {
             redirectLink = configService.getProperty("com.openexchange.share.redirectLinkFolder",
-                "/[uiwebpath]#session=[session]&user=[user]&user_id=[user_id]&language=[language]&m=[module]&f=[folder]");
+                "/[uiwebpath]#session=[session]&store=[store]&user=[user]&user_id=[user_id]&language=[language]" +
+                "&m=[module]&f=[folder]");
         } else {
             redirectLink = configService.getProperty("com.openexchange.share.redirectLinkItem",
-                "/[uiwebpath]#session=[session]&user=[user]&user_id=[user_id]&language=[language]&m=[module]&f=[folder]&i=[item]");
+                "/[uiwebpath]#session=[session]&store=[store]&user=[user]&user_id=[user_id]&language=[language]" +
+                "&m=[module]&f=[folder]&i=[item]");
         }
-        String uiWebPath = configService.getProperty("com.openexchange.UIWebPath", "/ox6/index.html");
+        String uiWebPath = loginConfig.getUiWebPath();
         return redirectLink
             .replaceAll("\\[uiwebpath\\]", trimSlashes(uiWebPath))
             .replaceAll("\\[session\\]", session.getSessionID())
@@ -238,6 +250,7 @@ public class ShareServlet extends HttpServlet {
             .replaceAll("\\[module\\]", Module.getForFolderConstant(share.getModule()).getName())
             .replaceAll("\\[folder\\]", share.getFolder())
             .replaceAll("\\[item\\]", share.getItem())
+            .replaceAll("\\[store\\]", String.valueOf(loginConfig.isSessiondAutoLogin()))
         ;
     }
 
