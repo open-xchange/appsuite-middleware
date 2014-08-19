@@ -79,13 +79,21 @@ public class SimPublicationService implements PublicationService {
         publication.setId(newId);
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.publish.PublicationService#delete(com.openexchange.groupware.contexts.Context, int)
+     */
+    @Override
+    public void delete(Context ctx, int publicationId) throws OXException {
+        deletedIds.add(Integer.valueOf(publicationId));
+    }
+
     /*
      * (non-Javadoc)
      * @see com.openexchange.publish.PublicationService#delete(com.openexchange.publish.Publication)
      */
     @Override
     public void delete(final Publication publication) {
-        deletedIds.add(publication.getId());
+        deletedIds.add(Integer.valueOf(publication.getId()));
     }
 
     /*

@@ -127,10 +127,11 @@ public interface PublicationService {
     /**
      * Deletes the publication by identifier
      *
+     * @param ctx The associated context
      * @param publicationId The identifier of the publication to delete
      * @throws OXException If delete attempt fails
      */
-    void delete(int publicationId) throws OXException;
+    void delete(Context ctx, int publicationId) throws OXException;
 
     /**
      * Deletes the given publication
