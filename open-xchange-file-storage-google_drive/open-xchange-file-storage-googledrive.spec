@@ -1,5 +1,5 @@
 
-Name:           open-xchange-file-storage-google_drive
+Name:           open-xchange-file-storage-googledrive
 BuildArch:      noarch
 #!BuildIgnore: post-build-checks
 BuildRequires:  ant
@@ -19,7 +19,7 @@ Summary:        The Open Xchange backend Google Drive file storage extension
 Autoreqprov:   no
 Requires:       open-xchange-core >= @OXVERSION@
 Requires:       open-xchange-oauth >= @OXVERSION@
-Provides:       open-xchange-file-storage-google_drive = %{version}
+Provides:       open-xchange-file-storage-googledrive = %{version}
 
 %description
 Adds Google Drive file storage service to the backend installation.
