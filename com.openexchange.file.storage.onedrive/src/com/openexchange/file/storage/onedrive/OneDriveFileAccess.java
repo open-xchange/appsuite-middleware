@@ -57,13 +57,9 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.StatusLine;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -145,10 +141,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
             @Override
             protected Boolean doPerform(DefaultHttpClient httpClient) throws OXException, IOException {
                 try {
-                    List<NameValuePair> qparams = new LinkedList<NameValuePair>();
-                    qparams.add(new BasicNameValuePair("access_token", oneDriveAccess.getAccessToken()));
-
-                    HttpGet method = new HttpGet(URL_API_BASE + id + "?" + URLEncodedUtils.format(qparams, "UTF-8"));
+                    HttpGet method = new HttpGet(buildUri(id, initiateQueryString()));
 
                     HttpResponse response = httpClient.execute(method);
                     return Boolean.valueOf(200 == response.getStatusLine().getStatusCode());
@@ -169,20 +162,10 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
             @Override
             protected File doPerform(DefaultHttpClient httpClient) throws OXException, IOException {
-                List<NameValuePair> qparams = new LinkedList<NameValuePair>();
-                qparams.add(new BasicNameValuePair("access_token", oneDriveAccess.getAccessToken()));
+                HttpGet method = new HttpGet(buildUri(id, initiateQueryString()));
 
-                HttpGet method = new HttpGet(URL_API_BASE + id + "?" + URLEncodedUtils.format(qparams, "UTF-8"));
-
-                HttpResponse response = httpClient.execute(method);
-                StatusLine statusLine = response.getStatusLine();
-                if (200 != statusLine.getStatusCode()) {
-                    throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
-                }
-
-                RestFileResponse restResponse = parseIntoObject(response.getEntity().getContent(), RestFileResponse.class);
+                RestFileResponse restResponse = handleHttpResponse(httpClient.execute(method), RestFileResponse.class);
                 RestFile restFile = restResponse.getData().get(0);
-
                 return new OneDriveFile(folderId, id, userId, rootFolderId).parseBoxFile(restFile);
             }
         }, oneDriveAccess.getHttpClient());

@@ -51,9 +51,18 @@ package com.openexchange.file.storage.onedrive;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.LinkedList;
+import java.util.List;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.StatusLine;
 import org.apache.http.auth.AuthenticationException;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpResponseException;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonFactory;
@@ -67,6 +76,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.onedrive.access.OneDriveAccess;
+import com.openexchange.file.storage.onedrive.rest.folder.RestFolder;
+import com.openexchange.file.storage.onedrive.rest.folder.RestFolderResponse;
 import com.openexchange.session.Session;
 
 /**
@@ -97,11 +108,11 @@ public abstract class AbstractOneDriveResourceAccess {
         return MAPPER;
     }
 
-    protected static <T> T parseIntoObject(InputStream inputStream, Class<T> theClass) throws OXException {
+    protected static <T> T parseIntoObject(InputStream inputStream, Class<T> clazz) throws OXException {
         try {
             JsonFactory jsonFactory = new JsonFactory();
             JsonParser jp = jsonFactory.createParser(inputStream);
-            return getObjectMapper().readValue(jp, theClass);
+            return getObjectMapper().readValue(jp, clazz);
         } catch (JsonGenerationException e) {
             throw OneDriveExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         } catch (JsonMappingException e) {
@@ -110,6 +121,8 @@ public abstract class AbstractOneDriveResourceAccess {
             throw OneDriveExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         } catch (IOException e) {
             throw OneDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw OneDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -131,13 +144,91 @@ public abstract class AbstractOneDriveResourceAccess {
 
     /**
      * Initializes a new {@link AbstractOneDriveResourceAccess}.
+     *
+     * @throws OXException If initialization fails
      */
-    protected AbstractOneDriveResourceAccess(OneDriveAccess boxAccess, FileStorageAccount account, Session session) {
+    protected AbstractOneDriveResourceAccess(OneDriveAccess oneDriveAccess, FileStorageAccount account, Session session) throws OXException {
         super();
-        this.oneDriveAccess = boxAccess;
+        this.oneDriveAccess = oneDriveAccess;
         this.account = account;
         this.session = session;
-        rootFolderId = "0";
+
+        try {
+            DefaultHttpClient httpClient = oneDriveAccess.getHttpClient();
+            HttpGet method = new HttpGet(buildUri("/me/skydrive", initiateQueryString()));
+
+            RestFolderResponse restResponse = handleHttpResponse(httpClient.execute(method), RestFolderResponse.class);
+            RestFolder restFolder = restResponse.getData().get(0);
+            rootFolderId = restFolder.getId();
+        } catch (HttpResponseException e) {
+            throw handleHttpResponseError(null, e);
+        } catch (IOException e) {
+            throw handleIOError(e);
+        }
+    }
+
+    /**
+     * Initiates the query string parameters
+     *
+     * @return The query string parameters
+     */
+    protected List<NameValuePair> initiateQueryString() {
+        List<NameValuePair> qparams = new LinkedList<NameValuePair>();
+        qparams.add(new BasicNameValuePair("access_token", oneDriveAccess.getAccessToken()));
+        return qparams;
+    }
+
+    /**
+     * Builds the URI from given arguments
+     *
+     * @param resourceId The resource identifier
+     * @param queryString The query string parameters
+     * @return The built URI string
+     */
+    protected String buildUri(String resourceId, List<NameValuePair> queryString) {
+        StringBuilder urlBuilder = new StringBuilder(256);
+        urlBuilder.append(URL_API_BASE);
+        if (null != resourceId) {
+            urlBuilder.append(resourceId);
+        }
+        if (null == queryString) {
+            urlBuilder.append('?').append(URLEncodedUtils.format(queryString, "UTF-8"));
+        }
+        return urlBuilder.toString();
+    }
+
+    /**
+     * Handles given HTTP response while expecting <code>200 (Ok)</code> status code.
+     *
+     * @param httpResponse The HTTP response
+     * @param clazz The class of the result object
+     * @return The result object
+     * @throws OXException If an Open-Xchange error occurs
+     * @throws ClientProtocolException If a client protocol error occurs
+     * @throws IOException If an I/O error occurs
+     */
+    protected <R> R handleHttpResponse(HttpResponse httpResponse, Class<R> clazz) throws OXException, ClientProtocolException, IOException {
+        return handleHttpResponse(httpResponse, 200, clazz);
+    }
+
+    /**
+     * Handles given HTTP response while expecting given status code.
+     *
+     * @param httpResponse The HTTP response
+     * @param expectStatusCode The status code to expect
+     * @param clazz The class of the result object
+     * @return The result object
+     * @throws OXException If an Open-Xchange error occurs
+     * @throws ClientProtocolException If a client protocol error occurs
+     * @throws IOException If an I/O error occurs
+     */
+    protected <R> R handleHttpResponse(HttpResponse httpResponse, int expectStatusCode, Class<R> clazz) throws OXException, ClientProtocolException, IOException {
+        StatusLine statusLine = httpResponse.getStatusLine();
+        if (expectStatusCode != statusLine.getStatusCode()) {
+            throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
+        }
+
+        return parseIntoObject(httpResponse.getEntity().getContent(), clazz);
     }
 
     /**
