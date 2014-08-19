@@ -721,7 +721,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             String pattern = ((FileNameTerm) searchTerm).getPattern();
             return search(pattern, fields, null != folderIds && 1 == folderIds.size() ? folderIds.get(0) : null, sort, order, start, end);
         }
-        throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create("Search term not supported: " + searchTerm);
+        throw FileStorageExceptionCodes.SEARCH_TERM_NOT_SUPPORTED.create(searchTerm.getClass().getSimpleName());
     }
 
     @Override
