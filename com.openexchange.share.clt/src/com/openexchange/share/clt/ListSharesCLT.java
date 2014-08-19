@@ -65,7 +65,7 @@ import com.openexchange.share.impl.mbean.ShareMBean;
 
 /**
  * {@link ListSharesCLT}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.6.1
  */
@@ -107,7 +107,6 @@ public class ListSharesCLT extends AbstractMBeanCLI<Void> {
 
     @Override
     protected String getFooter() {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -138,6 +137,16 @@ public class ListSharesCLT extends AbstractMBeanCLI<Void> {
             }
         } catch (NumberFormatException e) {
             throw new ParseException("Cannot parse value: " + e.getMessage());
+        }
+        for (Share share : result) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Token: ").append(share.getToken()).append(", ");
+            sb.append("Context: ").append(share.getContextID()).append(", ");
+            sb.append("Created by: ").append(share.getCreatedBy()).append(", ");
+            sb.append("Folder: ").append(share.getFolder()).append(", ");
+            sb.append("Module: ").append(share.getModule()).append(", ");
+            sb.append("Guest: ").append(share.getGuest());
+            System.out.println(sb.toString());
         }
         return null;
     }
