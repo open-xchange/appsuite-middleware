@@ -75,9 +75,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.i18n.MailStrings;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
@@ -86,12 +84,10 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.loginhandler.TransportLoginHandler;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.processing.MimeProcessingUtility;
-import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationService;
 import com.openexchange.publish.PublicationTarget;
@@ -160,13 +156,6 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
         return ContextStorage.getStorageContext(session.getContextId());
     }
 
-    private User getSessionUser(Session session) throws OXException {
-        if (session instanceof ServerSession) {
-            return ((ServerSession) session).getUser();
-        }
-        return UserStorage.getInstance().getUser(session.getUserId(), getContext(session));
-    }
-
     private Locale getSessionUserLocale(Session session) throws OXException {
         if (session instanceof ServerSession) {
             return ((ServerSession) session).getUser().getLocale();
@@ -183,7 +172,7 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
     }
 
     @Override
-    public void prepareStorage(Session session) throws OXException {
+    public void prepareStorage(String folderName, boolean checkForExpiredAttachments, long timeToLive, Session session) throws OXException {
         try {
             Context ctx = getContext(session);
             ServerSession serverSession = getServerSessionFrom(session, ctx);
@@ -192,14 +181,11 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
             final OXFolderAccess folderAccess = new OXFolderAccess(ctx);
             final FolderObject defaultInfoStoreFolder = folderAccess.getDefaultFolder(serverSession.getUserId(), FolderObject.INFOSTORE);
             if (defaultInfoStoreFolder.getEffectiveUserPermission(serverSession.getUserId(), permissionBits).canCreateSubfolders()) {
-                String name = TransportProperties.getInstance().getPublishingInfostoreFolder();
-                if ("i18n-defined".equals(name)) {
-                    name = FolderStrings.DEFAULT_EMAIL_ATTACHMENTS_FOLDER_NAME;
-                }
+                String name = folderName;
                 final int folderId;
                 final int lookUpFolder = OXFolderSQL.lookUpFolder(defaultInfoStoreFolder.getObjectID(), name, FolderObject.INFOSTORE, null, ctx);
                 if (-1 == lookUpFolder) {
-                    synchronized (TransportLoginHandler.class) {
+                    synchronized (DefaultMailAttachmentStorage.class) {
                         folderId = createIfAbsent(serverSession, ctx, name, defaultInfoStoreFolder);
                     }
                 } else {
@@ -209,12 +195,12 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
                 /*
                  * Check for elapsed documents inside infostore folder
                  */
-                if (!TransportProperties.getInstance().publishedDocumentsExpire()) {
+                if (!checkForExpiredAttachments) {
                     return;
                 }
                 final IDBasedFileAccess fileAccess = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class).createAccess(serverSession);
                 final long now = System.currentTimeMillis();
-                final List<String> toRemove = getElapsedDocuments(folderId, fileAccess, serverSession, now);
+                final List<String> toRemove = getElapsedDocuments(folderId, fileAccess, serverSession, now, timeToLive);
                 if (!toRemove.isEmpty()) {
                     /*
                      * Remove elapsed documents
@@ -234,7 +220,7 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
     }
 
     @Override
-    public String storeAttachment(MailPart attachment, MessageInfo msgInfo, Session session) throws OXException {
+    public String storeAttachment(MailPart attachment, MessageInfo msgInfo, Locale externalLocale, Session session) throws OXException {
         IDBasedFileAccessFactory fileAccessFactory = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class, true);
 
         // Check for folder ID
@@ -258,7 +244,7 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
         file.setTitle(name);
         if (null != msgInfo) {
             // Description
-            Locale locale = TransportProperties.getInstance().getExternalRecipientsLocale();
+            Locale locale = externalLocale;
             if (null == locale) {
                 locale = getSessionUserLocale(session);
             }
@@ -440,10 +426,9 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
 
     private static final List<Field> FIELDS = Collections.unmodifiableList(new ArrayList<Field>(Arrays.asList(Field.ID, Field.CREATED, Field.CREATED_BY)));
 
-    private List<String> getElapsedDocuments(final int folderId, final IDBasedFileAccess fileAccess, final ServerSession serverSession, final long now) throws OXException {
+    private List<String> getElapsedDocuments(int folderId, IDBasedFileAccess fileAccess, ServerSession serverSession, long now, long timeToLive) throws OXException {
         final SearchIterator<File> searchIterator = fileAccess.getDocuments(String.valueOf(folderId), FIELDS).results();
         try {
-            final long timeToLive = TransportProperties.getInstance().getPublishedDocumentTimeToLive();
             final List<String> ret;
             final int userId = serverSession.getUserId();
             if (searchIterator.size() != -1) {

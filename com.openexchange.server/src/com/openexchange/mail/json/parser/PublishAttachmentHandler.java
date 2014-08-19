@@ -482,7 +482,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
 
     private String publishAttachmentAndGetPath(MessageInfo msgInfo, MailPart attachment, List<PublicationAndInfostoreID> publications, MailAttachmentStorage attachmentStorage) throws OXException, TransactionException, OXException {
         // Store attachment
-        String attachmentId = attachmentStorage.storeAttachment(attachment, msgInfo, session);
+        String attachmentId = attachmentStorage.storeAttachment(attachment, msgInfo, TransportProperties.getInstance().getExternalRecipientsLocale(), session);
 
         // Get its download URI
         DownloadUri downloadUri = attachmentStorage.getDownloadUri(attachmentId, session);

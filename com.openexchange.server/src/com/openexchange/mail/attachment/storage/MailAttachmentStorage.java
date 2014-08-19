@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.attachment.storage;
 
+import java.util.Locale;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.session.Session;
@@ -64,21 +65,25 @@ public interface MailAttachmentStorage {
     /**
      * Performs required preparations in order to store attachments
      *
+     * @param folderName The name of the folder holding the stored attachment (only applicable if storage supports folders visible to user)
+     * @param checkForExpiredAttachments <code>true</code> to check for expired mail attachments; otherwise <code>false</code>
+     * @param timeToLive The time-to-live for stored attachments
      * @param session The associated session
      * @throws OXException If preparations fail
      */
-    void prepareStorage(Session session) throws OXException;
+    void prepareStorage(String folderName, boolean checkForExpiredAttachments, long timeToLive, Session session) throws OXException;
 
     /**
      * Stores specified mail attachment into storage
      *
      * @param attachment The attachment to store
      * @param messageInfo The optional message information
+     * @param externalLocale The locale for external recipients (only needed if <tt>messageInfo</tt> is not <code>null</code>)
      * @param session The associated session
      * @return The identifier of the stored attachment
      * @throws OXException If store operation fails
      */
-    String storeAttachment(MailPart attachment, MessageInfo messageInfo, Session session) throws OXException;
+    String storeAttachment(MailPart attachment, MessageInfo messageInfo, Locale externalLocale, Session session) throws OXException;
 
     /**
      * Gets the mail attachment denoted by given identifier

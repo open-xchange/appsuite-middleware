@@ -52,6 +52,7 @@ package com.openexchange.mail.loginhandler;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
@@ -88,7 +89,16 @@ public final class TransportLoginHandler implements LoginHandlerService {
             if (TransportProperties.getInstance().isPublishOnExceededQuota() && permissionBits.hasInfostore()) {
                 // Get attachment storage
                 MailAttachmentStorage attachmentStorage = DefaultMailAttachmentStorageRegistry.getInstance().getMailAttachmentStorage();
-                attachmentStorage.prepareStorage(serverSession);
+
+                // Folder name
+                String name = TransportProperties.getInstance().getPublishingInfostoreFolder();
+                if ("i18n-defined".equals(name)) {
+                    name = FolderStrings.DEFAULT_EMAIL_ATTACHMENTS_FOLDER_NAME;
+                }
+
+                boolean checkForExpiredAttachments = TransportProperties.getInstance().publishedDocumentsExpire();
+                long timeToLive = TransportProperties.getInstance().getPublishedDocumentTimeToLive();
+                attachmentStorage.prepareStorage(name, checkForExpiredAttachments, timeToLive, serverSession);
             }
         } catch (final RuntimeException e) {
             throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
