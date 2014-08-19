@@ -53,7 +53,6 @@ import static com.openexchange.groupware.upload.impl.UploadUtility.getSize;
 import static com.openexchange.mail.mime.converters.MimeMessageConverter.convertPart;
 import static com.openexchange.mail.text.HtmlProcessing.getConformHTML;
 import static com.openexchange.mail.text.HtmlProcessing.htmlFormat;
-import java.io.InputStream;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,7 +63,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.TimeZone;
 import java.util.regex.Pattern;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
@@ -73,36 +71,27 @@ import javax.mail.internet.idn.IDNA;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.DefaultFile;
-import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.FileStorageFileAccess;
-import com.openexchange.file.storage.composition.IDBasedFileAccess;
-import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.MailSessionParameterNames;
+import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorageRegistry;
+import com.openexchange.mail.attachment.storage.DownloadUri;
+import com.openexchange.mail.attachment.storage.MailAttachmentStorage;
+import com.openexchange.mail.attachment.storage.MessageInfo;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeMailException;
-import com.openexchange.mail.mime.processing.MimeProcessingUtility;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.mail.utils.MessageUtility;
-import com.openexchange.publish.Publication;
-import com.openexchange.publish.PublicationService;
-import com.openexchange.publish.PublicationTarget;
-import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.http.Cookies;
@@ -121,19 +110,12 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PublishAttachmentHandler.class);
 
     private final Session session;
-
     private final TransportProvider transportProvider;
-
     private final String protocol;
-
     private final String hostName;
 
-    private final IDBasedFileAccessFactory fileAccessFactory;
-
     private boolean exceeded;
-
     private TextBodyMailPart textPart;
-
     private long consumed;
 
     /**
@@ -151,7 +133,6 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         this.hostName = hostName;
         this.transportProvider = transportProvider;
         this.session = session;
-        fileAccessFactory = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class, true);
     }
 
     @Override
@@ -201,46 +182,21 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             }
             return new ComposedMailMessage[] { source };
         }
-        /*
-         * Handle exceeded quota through generating appropriate publication links
-         */
+
+        // Handle exceeded quota through generating appropriate publication links
         final List<PublicationAndInfostoreID> publications = new ArrayList<PublicationAndInfostoreID>(attachments.size());
-        /*
-         * Check for folder ID
-         */
-        final String key = MailSessionParameterNames.getParamPublishingInfostoreFolderID();
-        if (!session.containsParameter(key)) {
-            final Throwable t = new Throwable("Missing folder ID of publishing infostore folder.");
-            throw MailExceptionCode.SEND_FAILED_UNKNOWN.create(t, new Object[0]);
-        }
-        final int folderId = ((Integer) session.getParameter(key)).intValue();
-        final Context ctx = getContext();
-        final PublicationTarget target;
-        final PublicationService publisher;
-        /*
-         * Get discovery service
-         */
-        final PublicationTargetDiscoveryService discoveryService = ServerServiceRegistry.getInstance().getService(PublicationTargetDiscoveryService.class, true);
-        /*
-         * Get discovery service's target
-         */
-        target = discoveryService.getTarget("com.openexchange.publish.online.infostore.document");
-        if (null == target) {
-            LOG.warn("Missing publication target for ID \"com.openexchange.publish.online.infostore.document\".\nThrowing quota-exceeded exception instead.");
-            throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED.create(UploadUtility.getSize(uploadQuota));
-        }
-        /*
-         * ... and in turn target's publication service
-         */
-        publisher = target.getPublicationService();
+
+        // Get attachment storage
+        MailAttachmentStorage attachmentStorage = DefaultMailAttachmentStorageRegistry.getInstance().getMailAttachmentStorage();
+
         try {
             warnings.add(MailExceptionCode.USED_PUBLISHING_FEATURE.create());
-            return generateComposedMails0(source, publications, folderId, target, publisher, ctx);
+            return generateComposedMails0(source, publications, attachmentStorage);
         } catch (final OXException e) {
             /*
              * Rollback of publications
              */
-            rollbackPublications(publications, publisher);
+            rollbackPublications(publications, attachmentStorage);
             /*
              * Re-throw exception
              */
@@ -248,7 +204,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         }
     }
 
-    private ComposedMailMessage[] generateComposedMails0(final ComposedMailMessage source, final List<PublicationAndInfostoreID> publications, final int folderId, final PublicationTarget target, final PublicationService publisher, final Context ctx) throws OXException {
+    private ComposedMailMessage[] generateComposedMails0(ComposedMailMessage source, List<PublicationAndInfostoreID> publications, MailAttachmentStorage attachmentStorage) throws OXException {
         final List<LinkAndNamePair> links = new ArrayList<LinkAndNamePair>(attachments.size());
         /*
          * Message information
@@ -263,7 +219,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             /*
              * Generate publish URL: "/publications/infostore/documents/12abead21498754abcfde"
              */
-            final String path = publishAttachmentAndGetPath(msgInfo, attachment, folderId, ctx, publications, target, publisher);
+            final String path = publishAttachmentAndGetPath(msgInfo, attachment, publications, attachmentStorage);
             /*
              * Add to list
              */
@@ -286,6 +242,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             elapsedDate = new Date(now + TransportProperties.getInstance().getPublishedDocumentTimeToLive());
         }
         final UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
+        Context ctx = getContext();
         final Map<Locale, ComposedMailMessage> internalMessages = new HashMap<Locale, ComposedMailMessage>(addresses.size());
         ComposedMailMessage externalMessage = null;
         for (final InternetAddress address : addresses) {
@@ -314,13 +271,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             if (null == user) {
                 // External user
                 if (null == externalMessage) {
-                    externalMessage =
-                        generateExternalVersion(
-                            source,
-                            ctx,
-                            links,
-                            TransportProperties.getInstance().isProvideLinksInAttachment(),
-                            elapsedDate);
+                    externalMessage = generateExternalVersion(source, ctx, links, TransportProperties.getInstance().isProvideLinksInAttachment(), elapsedDate);
                 }
                 externalMessage.addRecipient(address);
             } else {
@@ -328,14 +279,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                 final Locale locale = user.getLocale();
                 ComposedMailMessage localedMessage = internalMessages.get(locale);
                 if (null == localedMessage) {
-                    localedMessage =
-                        generateInternalVersion(
-                            source,
-                            ctx,
-                            links,
-                            TransportProperties.getInstance().isProvideLinksInAttachment(),
-                            elapsedDate,
-                            locale);
+                    localedMessage = generateInternalVersion(source, ctx, links, TransportProperties.getInstance().isProvideLinksInAttachment(), elapsedDate, locale);
                     internalMessages.put(locale, localedMessage);
                 }
                 localedMessage.addRecipient(address);
@@ -353,13 +297,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
          * Any version available?
          */
         if (mails.isEmpty()) {
-            mails.add(generateInternalVersion(
-                source,
-                ctx,
-                links,
-                TransportProperties.getInstance().isProvideLinksInAttachment(),
-                elapsedDate,
-                getSessionUser().getLocale()));
+            mails.add(generateInternalVersion(source, ctx, links, TransportProperties.getInstance().isProvideLinksInAttachment(), elapsedDate, getSessionUser().getLocale()));
         }
         return mails.toArray(new ComposedMailMessage[mails.size()]);
     }
@@ -399,9 +337,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             textBuilder.append(htmlFormat(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_PREFIX))).append("<br>");
             appendLinks(links, textBuilder);
             if (elapsedDate != null) {
-                textBuilder.append(
-                    htmlFormat(PATTERN_DATE.matcher(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_APPENDIX)).replaceFirst(
-                        DateFormat.getDateInstance(DateFormat.LONG, locale).format(elapsedDate)))).append("<br><br>");
+                textBuilder.append(htmlFormat(PATTERN_DATE.matcher(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_APPENDIX)).replaceFirst(DateFormat.getDateInstance(DateFormat.LONG, locale).format(elapsedDate)))).append("<br><br>");
             }
             textBuilder.append(text);
             textPart.setText(textBuilder.toString());
@@ -439,9 +375,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                 textBuilder.append(htmlFormat(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_PREFIX))).append("<br>");
                 appendLinks(links, textBuilder);
                 if (elapsedDate != null) {
-                    textBuilder.append(
-                        htmlFormat(PATTERN_DATE.matcher(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_APPENDIX)).replaceFirst(
-                            DateFormat.getDateInstance(DateFormat.LONG, locale).format(elapsedDate)))).append("<br><br>");
+                    textBuilder.append(htmlFormat(PATTERN_DATE.matcher(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_APPENDIX)).replaceFirst(DateFormat.getDateInstance(DateFormat.LONG, locale).format(elapsedDate)))).append("<br><br>");
                 }
                 textBuilder.append(text);
                 textPart.setText(textBuilder.toString());
@@ -533,167 +467,36 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             MessageUtility.setText(getConformHTML(text, "UTF-8"), "UTF-8", "html", bodyPart);
             // bodyPart.setText(getConformHTML(text, "UTF-8"), "UTF-8", "html");
             bodyPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-            bodyPart.setHeader(
-                MessageHeaders.HDR_CONTENT_TYPE,
-                MimeMessageUtility.foldContentType("text/html; charset=UTF-8; name=links.html"));
+            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType("text/html; charset=UTF-8; name=links.html"));
             bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "base64");
-            bodyPart.setHeader(
-                MessageHeaders.HDR_CONTENT_DISPOSITION,
-                MimeMessageUtility.foldContentDisposition("attachment; filename=links.html"));
+            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MimeMessageUtility.foldContentDisposition("attachment; filename=links.html"));
             return convertPart(bodyPart, false);
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     } // End of createLinksAttachment()
 
-    private String publishAttachmentAndGetPath(final MessageInfo msgInfo, final MailPart attachment, final int folderId, final Context ctx, final List<PublicationAndInfostoreID> publications, final PublicationTarget target, final PublicationService publisher) throws OXException, TransactionException, OXException {
-        /*
-         * Create document meta data for current attachment
-         */
-        String name = attachment.getFileName();
-        if (name == null) {
-            name = "attachment";
-        }
-        final File file = new DefaultFile();
-        file.setId(FileStorageFileAccess.NEW);
-        file.setFolderId(String.valueOf(folderId));
-        file.setFileName(name);
-        file.setFileMIMEType(attachment.getContentType().getBaseType());
-        file.setTitle(name);
-        if (null != msgInfo) {
-            // Description
-            Locale locale = TransportProperties.getInstance().getExternalRecipientsLocale();
-            if (null == locale) {
-                locale = getSessionUserLocale();
-            }
-            final StringHelper stringHelper = StringHelper.valueOf(locale);
-            String desc = stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENT_INFO);
-            {
-                final String subject = msgInfo.subject;
-                desc = desc.replaceFirst("#SUBJECT#", com.openexchange.java.Strings.quoteReplacement(null == subject ? stringHelper.getString(MailStrings.DEFAULT_SUBJECT) : subject));
-            }
-            {
-                final Date date = msgInfo.date;
-                final String repl = date == null ? "" : com.openexchange.java.Strings.quoteReplacement(MimeProcessingUtility.getFormattedDate(date, DateFormat.LONG, locale, TimeZone.getDefault()));
-                desc = desc.replaceFirst("#DATE#", repl);
-            }
-            {
-                final InternetAddress[] to = msgInfo.to;
-                desc = desc.replaceFirst("#TO#", com.openexchange.java.Strings.quoteReplacement(to == null || to.length == 0 ? "" : com.openexchange.java.Strings.quoteReplacement(MimeProcessingUtility.addrs2String(to))));
-            }
-            file.setDescription(desc);
-        }
-        /*
-         * Put attachment's document to dedicated infostore folder
-         */
-        final IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
-        boolean retry = true;
-        int count = 1;
-        final StringBuilder hlp = new StringBuilder(16);
-        while (retry) {
-            /*
-             * Get attachment's input stream
-             */
-            final InputStream in = attachment.getInputStream();
-            boolean rollbackNeeded = false;
-            try {
-                /*
-                 * Start InfoStore transaction
-                 */
-                fileAccess.startTransaction();
-                rollbackNeeded = true;
-                try {
-                    fileAccess.saveDocument(file, in, FileStorageFileAccess.DISTANT_FUTURE);
-                    fileAccess.commit();
-                    rollbackNeeded = false;
-                    retry = false;
-                } catch (final OXException x) {
-                    fileAccess.rollback();
-                    rollbackNeeded = false;
-                    if (!x.isPrefix("IFO")) {
-                        throw x;
-                    }
-                    if (441 != x.getCode()) {
-                        throw x;
-                    }
-                    /*
-                     * Duplicate document name, thus retry with a new name
-                     */
-                    hlp.setLength(0);
-                    final int pos = name.lastIndexOf('.');
-                    final String newName;
-                    if (pos >= 0) {
-                        newName =
-                            hlp.append(name.substring(0, pos)).append("_(").append(++count).append(')').append(name.substring(pos)).toString();
-                    } else {
-                        newName = hlp.append(name).append("_(").append(++count).append(')').toString();
-                    }
-                    file.setFileName(newName);
-                    file.setTitle(newName);
-                } catch (final RuntimeException e) {
-                    throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-                } finally {
-                    if (rollbackNeeded) {
-                        fileAccess.rollback();
-                    }
-                    fileAccess.finish();
-                }
-            } finally {
-                Streams.close(in);
-            }
-        }
-        /*
-         * Generate publication for current attachment
-         */
-        final Publication publication = new Publication();
-        publication.setModule("infostore/object");
-        publication.setEntityId(String.valueOf(file.getId()));
-        publication.setContext(ctx);
-        publication.setUserId(session.getUserId());
-        /*
-         * Set target
-         */
-        publication.setTarget(target);
-        /*
-         * ... and publish
-         */
-        publisher.create(publication);
-        /*
-         * Remember publication in provided list
-         */
-        publications.add(new PublicationAndInfostoreID(publication, file.getId()));
+    private String publishAttachmentAndGetPath(MessageInfo msgInfo, MailPart attachment, List<PublicationAndInfostoreID> publications, MailAttachmentStorage attachmentStorage) throws OXException, TransactionException, OXException {
+        // Store attachment
+        String attachmentId = attachmentStorage.storeAttachment(attachment, msgInfo, session);
+
+        // Get its download URI
+        DownloadUri downloadUri = attachmentStorage.getDownloadUri(attachmentId, session);
+
+        // Remember information
+        publications.add(new PublicationAndInfostoreID(downloadUri, attachmentId));
         /*
          * Return URL
          */
-        return (String) publication.getConfiguration().get("url");
+        return downloadUri.getDownloadUri();
     } // End of publishAttachmentAndGetPath()
 
-    private void rollbackPublications(final List<PublicationAndInfostoreID> publications, final PublicationService publisher) {
-        final IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
-        final long timestamp = System.currentTimeMillis();
-        final List<String> arr = new ArrayList<String>(1);
+    private void rollbackPublications(List<PublicationAndInfostoreID> publications, MailAttachmentStorage attachmentStorage) {
         for (final PublicationAndInfostoreID publication : publications) {
             try {
-                publisher.delete(publication.publication);
+                attachmentStorage.discard(publication.attachmentId, publication.downloadUri, session);
             } catch (final OXException e) {
-                LOG.error("Publication with ID \"{} could not be roll-backed.", publication.publication.getId(),
-                    e);
-            }
-            try {
-                fileAccess.startTransaction();
-                try {
-                    arr.set(0, publication.infostoreId);
-                    fileAccess.removeDocument(arr, timestamp);
-                    fileAccess.commit();
-                } catch (final OXException x) {
-                    fileAccess.rollback();
-                    throw x;
-                } finally {
-                    fileAccess.finish();
-                }
-            } catch (final OXException e) {
-                LOG.error("Transaction error while deleting infostore document with ID \"{}\" failed.", publication.infostoreId,
-                    e);
+                LOG.error("Error while deleting stored attachment with ID \"{}\".", publication.attachmentId, e);
             }
         }
     } // End of rollbackPublications()
@@ -768,29 +571,16 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
 
     private static final class PublicationAndInfostoreID {
 
-        final Publication publication;
-        final String infostoreId;
+        final DownloadUri downloadUri;
+        final String attachmentId;
 
-        PublicationAndInfostoreID(final Publication publication, final String infostoreId) {
+        PublicationAndInfostoreID(DownloadUri downloadUri, String attachmentId) {
             super();
-            this.publication = publication;
-            this.infostoreId = infostoreId;
+            this.downloadUri = downloadUri;
+            this.attachmentId = attachmentId;
         }
 
     } // End of PublicationAndInfostoreID
-
-    private static final class MessageInfo {
-        final String subject;
-        final Date date;
-        final InternetAddress[] to;
-
-        MessageInfo(String subject, Date date, InternetAddress[] to) {
-            super();
-            this.subject = subject;
-            this.date = date;
-            this.to = to;
-        }
-    } // End of MessageInfo
 
     private static String saneProtocol(final String protocol) {
         if (protocol.endsWith("://")) {
