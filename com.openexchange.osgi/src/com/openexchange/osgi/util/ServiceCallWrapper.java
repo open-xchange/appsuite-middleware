@@ -93,6 +93,8 @@ import com.openexchange.server.ServiceExceptionCode;
  */
 public class ServiceCallWrapper {
 
+    static BundleContextProvider BC_PROVIDER = new BundleContextProvider();
+
     /**
      * Performs a call to a specified service. The service is requested from the OSGi service registry and passed
      * to the call()-method of a given {@link ServiceUser}.
@@ -106,16 +108,7 @@ public class ServiceCallWrapper {
      * @throws ServiceException if the service was not available or an error occurred during {@link ServiceUser#call(Object)}.
      */
     public static <S, T> T doServiceCall(Class<?> caller, Class<S> serviceClass, ServiceUser<S, T> serviceUser) throws ServiceException {
-        Bundle bundle = FrameworkUtil.getBundle(caller);
-        if (bundle == null) {
-            throw new ServiceException("Class '" + caller.getName() + "' was loaded outside from OSGi!", serviceClass);
-        }
-
-        BundleContext bundleContext = bundle.getBundleContext();
-        if (bundleContext == null) {
-            throw new ServiceException("No valid bundle context exists for bundle '" + bundle.getSymbolicName() + "'!", serviceClass);
-        }
-
+        BundleContext bundleContext = BC_PROVIDER.getBundleContext(caller, serviceClass);
         ServiceReference<S> serviceReference = bundleContext.getServiceReference(serviceClass);
         if (serviceReference == null) {
             throw new ServiceException("Service '" + serviceClass.getName() + "' is not available!", serviceClass);
@@ -196,6 +189,33 @@ public class ServiceCallWrapper {
             }
 
             return new OXException(cause);
+        }
+
+    }
+
+    static class BundleContextProvider {
+
+        /**
+         * Returns the {@link BundleContext} to retrieve the needed service. If possible the returned context
+         * should always belong to the bundle of the calling class.
+         *
+         * @param caller The calling class
+         * @param serviceClass The class of the needed service
+         * @return The bundle context, never <code>null</code>
+         * @throws ServiceException if no bundle context could be determined
+         */
+        BundleContext getBundleContext(Class<?> caller, Class<?> serviceClass) throws ServiceException {
+            Bundle bundle = FrameworkUtil.getBundle(caller);
+            if (bundle == null) {
+                throw new ServiceException("Class '" + caller.getName() + "' was loaded outside from OSGi!", serviceClass);
+            }
+
+            BundleContext bundleContext = bundle.getBundleContext();
+            if (bundleContext == null) {
+                throw new ServiceException("No valid bundle context exists for bundle '" + bundle.getSymbolicName() + "'!", serviceClass);
+            }
+
+            return bundleContext;
         }
 
     }

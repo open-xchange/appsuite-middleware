@@ -155,6 +155,7 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.MailAccountStorageInit;
 import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.osgi.util.ServiceCallWrapperModifier;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
@@ -355,6 +356,8 @@ public final class Init {
             init.start();
             started.add(init);
         }
+
+        ServiceCallWrapperModifier.initTestRun(services);
     }
 
     private static void injectTestServices() throws Exception {
