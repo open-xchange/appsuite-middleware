@@ -125,7 +125,22 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @throws Exception
      */
     protected FolderObject insertSharedFolder(EnumAPI api, int module, int parent, OCLGuestPermission guestPermission) throws Exception {
-        FolderObject sharedFolder = Create.createPrivateFolder(randomUID(), module, client.getValues().getUserId(), guestPermission);
+        return insertSharedFolder(api, module, parent, randomUID(), guestPermission);
+    }
+
+    /**
+     * Inserts and remembers a new shared folder containing the supplied guest permissions.
+     *
+     * @param api The folder tree to use
+     * @param module The module identifier
+     * @param parent The ID of the parent folder
+     * @param name The folders name
+     * @param guestPermission The guest permission to add
+     * @return The inserted folder
+     * @throws Exception
+     */
+    protected FolderObject insertSharedFolder(EnumAPI api, int module, int parent, String name, OCLGuestPermission guestPermission) throws Exception {
+        FolderObject sharedFolder = Create.createPrivateFolder(name, module, client.getValues().getUserId(), guestPermission);
         sharedFolder.setParentFolderID(parent);
         return insertFolder(api, sharedFolder);
     }

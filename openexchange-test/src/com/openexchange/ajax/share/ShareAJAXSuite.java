@@ -58,6 +58,7 @@ import com.openexchange.ajax.share.tests.CreateWithGuestPermissionTest;
 import com.openexchange.ajax.share.tests.DeleteTest;
 import com.openexchange.ajax.share.tests.ExpiredSharesTest;
 import com.openexchange.ajax.share.tests.RemoveGuestPermissionTest;
+import com.openexchange.ajax.share.tests.TransactionTest;
 
 /**
  * {@link ShareAJAXSuite}
@@ -80,6 +81,7 @@ public class ShareAJAXSuite extends TestSuite {
         tests.addTestSuite(CreateSubfolderTest.class);
         tests.addTestSuite(AllTest.class);
         tests.addTestSuite(DeleteTest.class);
+        tests.addTestSuite(TransactionTest.class);
         return tests;
     }
 
