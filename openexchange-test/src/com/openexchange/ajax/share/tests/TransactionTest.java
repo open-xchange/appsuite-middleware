@@ -79,8 +79,16 @@ public class TransactionTest extends ShareTest {
     }
 
     public void testDontCreateShareOnFailingFolderCreate() throws Exception {
-        FolderObject privateInfostore = getFolder(EnumAPI.OX_NEW, getDefaultFolder(FolderObject.INFOSTORE));
-        FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, privateInfostore.getObjectID());
+        for (EnumAPI api : TESTED_FOLDER_APIS) {
+            for (int module : TESTED_MODULES) {
+                testDontCreateShareOnFailingFolderCreate(api, module);
+            }
+        }
+    }
+
+    public void testDontCreateShareOnFailingFolderCreate(EnumAPI api, int module) throws Exception {
+        FolderObject parent = getFolder(api, getDefaultFolder(module));
+        FolderObject folder = insertPrivateFolder(api, module, parent.getObjectID());
         List<ParsedShare> oldShares = client.execute(new AllRequest()).getParsedShares();
 
         /*
@@ -89,23 +97,31 @@ public class TransactionTest extends ShareTest {
         boolean insertionFailed = false;
         try {
             insertSharedFolder(
-                EnumAPI.OX_NEW,
-                FolderObject.INFOSTORE,
-                privateInfostore.getObjectID(),
+                api,
+                module,
+                parent.getObjectID(),
                 folder.getFolderName(),
                 createAnonymousGuestPermission());
         } catch (Throwable e) {
             insertionFailed = true;
         }
-        assertTrue(insertionFailed);
+        assertTrue("API: " + api + ", Module: " + module, insertionFailed);
 
         List<ParsedShare> newShares = client.execute(new AllRequest()).getParsedShares();
-        assertEquals("The number of shares differs but should not", oldShares.size(), newShares.size());
+        assertEquals("The number of shares differs but should not. " + "API: " + api + ", Module: " + module, oldShares.size(), newShares.size());
     }
 
     public void testDontCreateShareOnFailingFolderUpdate() throws Exception {
-        FolderObject privateInfostore = getFolder(EnumAPI.OX_NEW, getDefaultFolder(FolderObject.INFOSTORE));
-        FolderObject sharedFolder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, privateInfostore.getObjectID());
+        for (EnumAPI api : TESTED_FOLDER_APIS) {
+            for (int module : TESTED_MODULES) {
+                testDontCreateShareOnFailingFolderUpdate(api, module);
+            }
+        }
+    }
+
+    public void testDontCreateShareOnFailingFolderUpdate(EnumAPI api, int module) throws Exception {
+        FolderObject parent = getFolder(api, getDefaultFolder(module));
+        FolderObject sharedFolder = insertPrivateFolder(api, module, parent.getObjectID());
         List<ParsedShare> oldShares = client.execute(new AllRequest()).getParsedShares();
 
         OCLGuestPermission guestPermission = createAnonymousGuestPermission();
@@ -119,23 +135,31 @@ public class TransactionTest extends ShareTest {
         sharedFolder.setLastModified(new Date(sharedFolder.getLastModified().getTime() - 1000));
         boolean updateFailed = false;
         try {
-            updateFolder(EnumAPI.OX_NEW, sharedFolder);
+            updateFolder(api, sharedFolder);
         } catch (Throwable e) {
             updateFailed = true;
         }
-        assertTrue(updateFailed);
+        assertTrue("API: " + api + ", Module: " + module, updateFailed);
 
         List<ParsedShare> newShares = client.execute(new AllRequest()).getParsedShares();
-        assertEquals("The number of shares differs but should not", oldShares.size(), newShares.size());
+        assertEquals("The number of shares differs but should not." + "API: " + api + ", Module: " + module, oldShares.size(), newShares.size());
     }
 
     public void testDontRemoveSharesOnFailingFolderUpdate() throws Exception {
-        FolderObject privateInfostore = getFolder(EnumAPI.OX_NEW, getDefaultFolder(FolderObject.INFOSTORE));
+        for (EnumAPI api : TESTED_FOLDER_APIS) {
+            for (int module : TESTED_MODULES) {
+                testDontRemoveSharesOnFailingFolderUpdate(api, module);
+            }
+        }
+    }
+
+    public void testDontRemoveSharesOnFailingFolderUpdate(EnumAPI api, int module) throws Exception {
+        FolderObject parent = getFolder(api, getDefaultFolder(module));
         OCLGuestPermission guestPermission = createAnonymousGuestPermission();
         FolderObject sharedFolder = insertSharedFolder(
-            EnumAPI.OX_NEW,
-            FolderObject.INFOSTORE,
-            privateInfostore.getObjectID(),
+            api,
+            module,
+            parent.getObjectID(),
             guestPermission);
         /*
          * check permissions
@@ -147,11 +171,11 @@ public class TransactionTest extends ShareTest {
                 break;
             }
         }
-        assertNotNull("No matching permission in created folder found", matchingPermission);
+        assertNotNull("No matching permission in created folder found." + "API: " + api + ", Module: " + module, matchingPermission);
         checkPermissions(guestPermission, matchingPermission);
 
         ParsedShare share = discoverShare(sharedFolder.getObjectID(), matchingPermission.getEntity());
-        assertNotNull(share);
+        assertNotNull("API: " + api + ", Module: " + module, share);
 
         /*
          * Update should fail because of invalid permissions
@@ -159,15 +183,15 @@ public class TransactionTest extends ShareTest {
         sharedFolder.setPermissionsAsArray(new OCLPermission[0]);
         boolean updateFailed = false;
         try {
-            updateFolder(EnumAPI.OX_NEW, sharedFolder);
+            updateFolder(api, sharedFolder);
         } catch (Throwable e) {
             updateFailed = true;
         }
-        assertTrue(updateFailed);
+        assertTrue("API: " + api + ", Module: " + module, updateFailed);
 
         GuestClient guestClient = new GuestClient(share);
         ResolveShareResponse resolveResponse = guestClient.getShareResolveResponse();
-        assertEquals(Integer.toString(sharedFolder.getObjectID()), resolveResponse.getFolder());
+        assertEquals("API: " + api + ", Module: " + module, Integer.toString(sharedFolder.getObjectID()), resolveResponse.getFolder());
     }
 
 }
