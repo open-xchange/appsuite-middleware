@@ -93,7 +93,11 @@ public class DefaultShareService implements ShareService {
     /**
      * Initializes a new {@link DefaultShareService}.
      *
+<<<<<<< HEAD
      * @param services The service lookup reference
+=======
+     * @param storage The underlying share storage
+>>>>>>> US75800670: Use writable connection to delete shares
      */
     public DefaultShareService(ServiceLookup services) {
         super();
@@ -481,7 +485,7 @@ public class DefaultShareService implements ShareService {
             shareMap.put(tokenContextId, shares);
         }
         for (Integer tokenContextId : shareMap.keySet()) {
-            ConnectionHelper helper = new ConnectionHelper(tokenContextId, services, false);
+            ConnectionHelper helper = new ConnectionHelper(tokenContextId, services, true);
             ShareStorage shareStorage = services.getService(ShareStorage.class);
             List<Share> shares = shareStorage.loadShares(tokens, helper.getParameters());
             removeShares(helper, shares);
@@ -504,7 +508,7 @@ public class DefaultShareService implements ShareService {
             }
             shares.add(token);
         }
-        ConnectionHelper helper = new ConnectionHelper(contextId, services, false);
+        ConnectionHelper helper = new ConnectionHelper(contextId, services, true);
         ShareStorage shareStorage = services.getService(ShareStorage.class);
         List<Share> sharesToRemove = shareStorage.loadShares(tokens, helper.getParameters());
         removeShares(helper, sharesToRemove);
@@ -517,7 +521,7 @@ public class DefaultShareService implements ShareService {
      * @throws OXException If removal fails.
      */
     public void removeShares(int contextId) throws OXException {
-        ConnectionHelper helper = new ConnectionHelper(contextId, services, false);
+        ConnectionHelper helper = new ConnectionHelper(contextId, services, true);
         ShareStorage shareStorage = services.getService(ShareStorage.class);
         List<Share> shares = shareStorage.loadSharesForContext(contextId, helper.getParameters());
         removeShares(helper, shares);
@@ -531,7 +535,7 @@ public class DefaultShareService implements ShareService {
      * @throws OXException If removal fails
      */
     public void removeShares(int contextId, int userId) throws OXException {
-        ConnectionHelper helper = new ConnectionHelper(contextId, services, false);
+        ConnectionHelper helper = new ConnectionHelper(contextId, services, true);
         ShareStorage shareStorage = services.getService(ShareStorage.class);
         List<Share> shares = shareStorage.loadSharesCreatedBy(contextId, userId, helper.getParameters());
         removeShares(helper, shares);
