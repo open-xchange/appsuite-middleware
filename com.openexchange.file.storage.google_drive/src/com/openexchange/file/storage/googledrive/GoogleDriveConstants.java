@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.google_drive;
+package com.openexchange.file.storage.googledrive;
 
 import com.openexchange.file.storage.FileStorageConstants;
 
@@ -68,7 +68,7 @@ public final class GoogleDriveConstants implements FileStorageConstants {
     /**
      * The identifier for Google Drive file storage service.
      */
-    public static final String ID = "com.openexchange.file.storage.google_drive";
+    public static final String ID = "com.openexchange.file.storage.googledrive";
 
     /**
      * The special MIME type marking a file as a directory.

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.google_drive.osgi;
+package com.openexchange.file.storage.googledrive.osgi;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -56,8 +56,8 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.file.storage.CompositeFileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.google_drive.GoogleDriveConstants;
-import com.openexchange.file.storage.google_drive.GoogleDriveFileStorageService;
+import com.openexchange.file.storage.googledrive.GoogleDriveConstants;
+import com.openexchange.file.storage.googledrive.GoogleDriveFileStorageService;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthUtilizerCreator;
 

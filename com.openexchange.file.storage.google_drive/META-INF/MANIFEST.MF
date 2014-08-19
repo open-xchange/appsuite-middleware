@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange File Storage GoogleDrive Bundle
-Bundle-SymbolicName: com.openexchange.file.storage.google_drive
+Bundle-SymbolicName: com.openexchange.file.storage.googledrive
 Bundle-Version: 7.6.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -102,4 +102,4 @@ Import-Package: com.google.api.client.auth.oauth2,
  org.scribe.utils,
  org.slf4j
 Bundle-ClassPath: .
-Bundle-Activator: com.openexchange.file.storage.google_drive.osgi.GoogleDriveActivator
+Bundle-Activator: com.openexchange.file.storage.googledrive.osgi.GoogleDriveActivator

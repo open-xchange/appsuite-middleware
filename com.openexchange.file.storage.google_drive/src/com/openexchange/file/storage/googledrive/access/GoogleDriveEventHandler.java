@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.google_drive.access;
+package com.openexchange.file.storage.googledrive.access;
 
 import java.util.Map;
 import org.osgi.service.event.Event;

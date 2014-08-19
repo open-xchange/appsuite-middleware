@@ -47,12 +47,12 @@
  *
  */
 
-package com.openexchange.file.storage.google_drive.access;
+package com.openexchange.file.storage.googledrive.access;
 
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import com.openexchange.file.storage.google_drive.osgi.Services;
+import com.openexchange.file.storage.googledrive.osgi.Services;
 import com.openexchange.sessiond.SessiondService;
 
 /**

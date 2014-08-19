@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.google_drive;
+package com.openexchange.file.storage.googledrive;
 
 import java.util.Date;
 import java.util.EnumSet;
@@ -58,7 +58,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.google_drive.osgi.Services;
+import com.openexchange.file.storage.googledrive.osgi.Services;
 import com.openexchange.mime.MimeTypeMap;
 
 /**

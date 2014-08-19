@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.google_drive;
+package com.openexchange.file.storage.googledrive;
 
 import java.io.Serializable;
 import java.sql.Connection;
@@ -73,7 +73,7 @@ import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.generic.DefaultFileStorageAccount;
-import com.openexchange.file.storage.google_drive.osgi.Services;
+import com.openexchange.file.storage.googledrive.osgi.Services;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthAccountDeleteListener;

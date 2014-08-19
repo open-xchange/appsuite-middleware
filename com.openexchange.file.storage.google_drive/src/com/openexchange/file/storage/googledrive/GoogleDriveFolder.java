@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.google_drive;
+package com.openexchange.file.storage.googledrive;
 
 import java.io.IOException;
 import java.util.Collections;

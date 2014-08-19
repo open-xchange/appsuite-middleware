@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.google_drive;
+package com.openexchange.file.storage.googledrive;
 
 import java.io.IOException;
 import com.google.api.client.http.HttpResponseException;
@@ -57,7 +57,7 @@ import com.google.api.services.drive.model.File.Labels;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.google_drive.access.GoogleDriveAccess;
+import com.openexchange.file.storage.googledrive.access.GoogleDriveAccess;
 import com.openexchange.session.Session;
 
 /**

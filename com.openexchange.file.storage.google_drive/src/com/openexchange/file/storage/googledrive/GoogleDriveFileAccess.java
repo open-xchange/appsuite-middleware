@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.google_drive;
+package com.openexchange.file.storage.googledrive;
 
 import static com.openexchange.java.Strings.isEmpty;
 import java.io.IOException;
@@ -76,7 +76,7 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.ThumbnailAware;
-import com.openexchange.file.storage.google_drive.access.GoogleDriveAccess;
+import com.openexchange.file.storage.googledrive.access.GoogleDriveAccess;
 import com.openexchange.file.storage.search.FileNameTerm;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;

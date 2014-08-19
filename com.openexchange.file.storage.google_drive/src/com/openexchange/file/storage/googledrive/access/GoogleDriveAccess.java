@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.google_drive.access;
+package com.openexchange.file.storage.googledrive.access;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -56,7 +56,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.services.drive.Drive;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.file.storage.google_drive.GoogleDriveExceptionCodes;
+import com.openexchange.file.storage.googledrive.GoogleDriveExceptionCodes;
 import com.openexchange.google.api.client.GoogleApiClients;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.session.Session;

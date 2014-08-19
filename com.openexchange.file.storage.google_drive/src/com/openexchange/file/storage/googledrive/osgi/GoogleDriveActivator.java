@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.google_drive.osgi;
+package com.openexchange.file.storage.googledrive.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -59,7 +59,7 @@ import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
-import com.openexchange.file.storage.google_drive.access.GoogleDriveEventHandler;
+import com.openexchange.file.storage.googledrive.access.GoogleDriveEventHandler;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.osgi.HousekeepingActivator;
