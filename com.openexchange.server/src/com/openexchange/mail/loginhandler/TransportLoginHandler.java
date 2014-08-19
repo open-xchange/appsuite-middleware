@@ -49,32 +49,16 @@
 
 package com.openexchange.mail.loginhandler;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.File.Field;
-import com.openexchange.file.storage.composition.IDBasedFileAccess;
-import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
-import com.openexchange.mail.MailSessionParameterNames;
+import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorageRegistry;
+import com.openexchange.mail.attachment.storage.MailAttachmentStorage;
 import com.openexchange.mail.transport.config.TransportProperties;
-import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.tools.oxfolder.OXFolderManager;
-import com.openexchange.tools.oxfolder.OXFolderSQL;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -85,16 +69,12 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public final class TransportLoginHandler implements LoginHandlerService {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TransportLoginHandler.class);
-
     /**
      * Initializes a new {@link TransportLoginHandler}.
      */
     public TransportLoginHandler() {
         super();
     }
-
-    private static final List<Field> FIELDS = Collections.unmodifiableList(new ArrayList<Field>(Arrays.asList(Field.ID, Field.CREATED, Field.CREATED_BY)));
 
     @Override
     public void handleLogin(final LoginResult login) throws OXException {
@@ -106,126 +86,13 @@ public final class TransportLoginHandler implements LoginHandlerService {
             final ServerSession serverSession = getServerSessionFrom(login.getSession(), ctx);
             final UserPermissionBits permissionBits = serverSession.getUserPermissionBits();
             if (TransportProperties.getInstance().isPublishOnExceededQuota() && permissionBits.hasInfostore()) {
-                final OXFolderAccess folderAccess = new OXFolderAccess(ctx);
-                final FolderObject defaultInfoStoreFolder = folderAccess.getDefaultFolder(serverSession.getUserId(), FolderObject.INFOSTORE);
-                if (defaultInfoStoreFolder.getEffectiveUserPermission(serverSession.getUserId(), permissionBits).canCreateSubfolders()) {
-                    String name = TransportProperties.getInstance().getPublishingInfostoreFolder();
-                    if ("i18n-defined".equals(name)) {
-                        name = FolderStrings.DEFAULT_EMAIL_ATTACHMENTS_FOLDER_NAME;
-                    }
-                    final int folderId;
-                    final int lookUpFolder = OXFolderSQL.lookUpFolder(defaultInfoStoreFolder.getObjectID(), name, FolderObject.INFOSTORE, null, ctx);
-                    if (-1 == lookUpFolder) {
-                        synchronized (TransportLoginHandler.class) {
-                            folderId = createIfAbsent(serverSession, ctx, name, defaultInfoStoreFolder);
-                        }
-                    } else {
-                        folderId = lookUpFolder;
-                    }
-                    serverSession.setParameter(MailSessionParameterNames.getParamPublishingInfostoreFolderID(), Integer.valueOf(folderId));
-                    /*
-                     * Check for elapsed documents inside infostore folder
-                     */
-                    if (!TransportProperties.getInstance().publishedDocumentsExpire()) {
-                        return;
-                    }
-                    final IDBasedFileAccess fileAccess = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class).createAccess(serverSession);
-                    final long now = System.currentTimeMillis();
-                    final List<String> toRemove = getElapsedDocuments(folderId, fileAccess, serverSession, now);
-                    if (!toRemove.isEmpty()) {
-                        /*
-                         * Remove elapsed documents
-                         */
-                        fileAccess.startTransaction();
-                        try {
-                            fileAccess.removeDocument(toRemove, now);
-                            fileAccess.commit();
-                        } finally {
-                            fileAccess.finish();
-                        }
-                    }
-                }
+                // Get attachment storage
+                MailAttachmentStorage attachmentStorage = DefaultMailAttachmentStorageRegistry.getInstance().getMailAttachmentStorage();
+                attachmentStorage.prepareStorage(serverSession);
             }
-        } catch (final SQLException e) {
+        } catch (final RuntimeException e) {
             throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
         }
-    }
-
-    private List<String> getElapsedDocuments(final int folderId, final IDBasedFileAccess fileAccess, final ServerSession serverSession, final long now) throws OXException {
-        final SearchIterator<File> searchIterator = fileAccess.getDocuments(String.valueOf(folderId), FIELDS).results();
-        try {
-            final long timeToLive = TransportProperties.getInstance().getPublishedDocumentTimeToLive();
-            final List<String> ret;
-            final int userId = serverSession.getUserId();
-            if (searchIterator.size() != -1) {
-                final int size = searchIterator.size();
-                ret = new ArrayList<String>(size);
-                for (int i = 0; i < size; i++) {
-                    final File file = searchIterator.next();
-                    if (isOwner(userId, file.getCreatedBy()) && isElapsed(now, file.getCreated().getTime(), timeToLive)) {
-                        ret.add(file.getId());
-                    }
-                }
-            } else {
-                ret = new ArrayList<String>();
-                while (searchIterator.hasNext()) {
-                    final File file = searchIterator.next();
-                    if (isOwner(userId, file.getCreatedBy()) && isElapsed(now, file.getCreated().getTime(), timeToLive)) {
-                        ret.add(file.getId());
-                    }
-                }
-            }
-            return ret;
-        } finally {
-            try {
-                searchIterator.close();
-            } catch (final OXException e) {
-                LOG.error("", e);
-            }
-        }
-    }
-
-    private static boolean isOwner(final int sessionUser, final int createdBy) {
-        return (sessionUser == createdBy);
-    }
-
-    private static boolean isElapsed(final long now, final long creationDate, final long ttl) {
-        return ((now - creationDate) > ttl);
-    }
-
-    private int createIfAbsent(final Session session, final Context ctx, final String name, final FolderObject defaultInfoStoreFolder) throws SQLException, OXException {
-        final int lookUpFolder = OXFolderSQL.lookUpFolder(defaultInfoStoreFolder.getObjectID(), name, FolderObject.INFOSTORE, null, ctx);
-        if (-1 == lookUpFolder) {
-            /*
-             * Create folder
-             */
-            final FolderObject fo = createNewInfostoreFolder(session.getUserId(), name, defaultInfoStoreFolder.getObjectID());
-            return OXFolderManager.getInstance(session).createFolder(fo, true, System.currentTimeMillis()).getObjectID();
-        }
-        return lookUpFolder;
-    }
-
-    private FolderObject createNewInfostoreFolder(final int adminId, final String name, final int parent) {
-        final FolderObject newFolder = new FolderObject();
-        newFolder.setFolderName(name);
-        newFolder.setParentFolderID(parent);
-        newFolder.setType(FolderObject.PUBLIC);
-        newFolder.setModule(FolderObject.INFOSTORE);
-
-        // Admin permission
-        {
-            final OCLPermission perm = new OCLPermission();
-            perm.setEntity(adminId);
-            perm.setFolderAdmin(true);
-            perm.setFolderPermission(OCLPermission.ADMIN_PERMISSION);
-            perm.setReadObjectPermission(OCLPermission.ADMIN_PERMISSION);
-            perm.setWriteObjectPermission(OCLPermission.ADMIN_PERMISSION);
-            perm.setDeleteObjectPermission(OCLPermission.ADMIN_PERMISSION);
-            perm.setGroupPermission(false);
-            newFolder.setPermissions(Collections.singletonList(perm));
-        }
-
-        return newFolder;
     }
 
     @Override

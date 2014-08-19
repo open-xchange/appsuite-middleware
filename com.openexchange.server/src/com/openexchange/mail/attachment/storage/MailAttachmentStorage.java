@@ -62,6 +62,14 @@ import com.openexchange.session.Session;
 public interface MailAttachmentStorage {
 
     /**
+     * Performs required preparations in order to store attachments
+     *
+     * @param session The associated session
+     * @throws OXException If preparations fail
+     */
+    void prepareStorage(Session session) throws OXException;
+
+    /**
      * Stores specified mail attachment into storage
      *
      * @param attachment The attachment to store
