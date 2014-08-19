@@ -100,24 +100,22 @@ public abstract class BoxClosure<R> {
     }
 
     private R innerPerform(boolean handleAuthError, AbstractBoxResourceAccess resourceAccess, BoxClient boxClient, Session session) throws OXException {
-        synchronized (boxClient) {
-            try {
-                return doPerform(boxClient);
-            } catch (BoxRestException e) {
-                throw resourceAccess.handleRestError(e);
-            } catch (BoxServerException e) {
-                throw resourceAccess.handleHttpResponseError(null, e);
-            } catch (AuthFatalFailureException e) {
-                if (!handleAuthError) {
-                    throw BoxExceptionCodes.AUTH_ERROR.create(e, e.getMessage());
-                }
-                resourceAccess.handleAuthError(e, session);
-                return innerPerform(false, resourceAccess, boxClient, session);
-            } catch (final UnsupportedEncodingException e) {
-                throw BoxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            } catch (final RuntimeException e) {
-                throw BoxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        try {
+            return doPerform(boxClient);
+        } catch (BoxRestException e) {
+            throw resourceAccess.handleRestError(e);
+        } catch (BoxServerException e) {
+            throw resourceAccess.handleHttpResponseError(null, e);
+        } catch (AuthFatalFailureException e) {
+            if (!handleAuthError) {
+                throw BoxExceptionCodes.AUTH_ERROR.create(e, e.getMessage());
             }
+            resourceAccess.handleAuthError(e, session);
+            return innerPerform(false, resourceAccess, boxClient, session);
+        } catch (final UnsupportedEncodingException e) {
+            throw BoxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw BoxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
