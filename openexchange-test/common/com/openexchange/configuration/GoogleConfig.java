@@ -47,37 +47,72 @@
  *
  */
 
-package com.openexchange.ajax.contact;
+package com.openexchange.configuration;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.conf.AbstractConfig;
 
-public final class ContactBugTestSuite extends TestSuite {
+/**
+ * {@link GoogleConfig}
+ *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ */
+public class GoogleConfig extends AbstractConfig {
 
-    private ContactBugTestSuite() {
-        super();
+    private static volatile GoogleConfig singleton;
+    
+    private static final TestConfig.Property KEY = TestConfig.Property.GOOGLE_PROPS;
+
+    public static enum Property {
+        EMAIL("com.openexchange.subscribe.google.email"),
+        PASSWORD("com.openexchange.subscribe.google.password"),
+        CLIENT_ID("com.openexchange.subscribe.google.clientId"),
+        CLIENT_SECRET("com.openexchange.subscribe.google.clientSecret"),
+        REDIRECT_URI("com.openexchange.subscribe.google.redirectUri"),
+        SCOPES("com.openexchange.subscribe.google.scopes");
+
+        private String propertyName;
+
+        private Property(final String propName) {
+            this.propertyName = propName;
+        }
+
+        public String getPropertyName() {
+            return propertyName;
+        }
+
+    };
+
+    /**
+     * Reads the configuration.
+     * 
+     * @throws OXException if reading configuration fails.
+     */
+    public static void init() throws OXException {
+        TestConfig.init();
+        if (null == singleton) {
+            synchronized (AJAXConfig.class) {
+                if (null == singleton) {
+                    singleton = new GoogleConfig();
+                    singleton.loadPropertiesInternal();
+                }
+            }
+        }
     }
 
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(Bug4409Test.class);
-        tests.addTestSuite(Bug6335Test.class);
-        tests.addTestSuite(Bug12716Test.class);
-        tests.addTestSuite(Bug13931Test.class);
-        tests.addTestSuite(Bug13960Test.class);
-        tests.addTestSuite(Bug15317Test.class);
-        tests.addTestSuite(Bug15315Test.class);
-        tests.addTestSuite(Bug15937Test.class);
-        tests.addTestSuite(Bug16515Test.class);
-        tests.addTestSuite(Bug16618Test.class);
-        tests.addTestSuite(Bug17513Test.class);
-        tests.addTestSuite(Bug13915FileAsViaJSON.class);
-        tests.addTestSuite(Bug18608Test_SpecialCharsInEmailTest.class);
-        tests.addTestSuite(Bug19827Test.class);
-        tests.addTestSuite(Bug25300Test.class);
-        tests.addTestSuite(Bug28185Test.class);
-        tests.addTestSuite(Bug31993Test.class);
-        tests.addTestSuite(Bug34075Test.class);
-        return tests;
+    public static String getProperty(final String key) {
+        return singleton.getPropertyInternal(key);
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.tools.conf.AbstractConfig#getPropertyFileName()
+     */
+    @Override
+    protected String getPropertyFileName() throws OXException {
+        final String fileName = TestConfig.getProperty(KEY);
+        if (null == fileName) {
+            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(KEY.getPropertyName());
+        }
+        return fileName;
     }
 }

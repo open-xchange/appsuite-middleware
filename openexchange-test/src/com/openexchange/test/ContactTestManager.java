@@ -123,7 +123,7 @@ public class ContactTestManager implements TestManager {
 
     protected AbstractAJAXResponse lastResponse;
 
-    private int sleep = 500;
+    private int sleep = 0;
 
     @Override
     public void setFailOnError(final boolean failOnError) {

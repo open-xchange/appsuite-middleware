@@ -92,13 +92,67 @@ public class Strings {
      * @param objects The objects
      * @return The string build up from concatenating objects' string representation
      */
-    public static String concat(final Object... objects) {
+    public static String concat(Object... objects) {
         if (null == objects || 0 == objects.length) {
             return "";
         }
-        final StringBuilder sb = new StringBuilder(2048);
-        for (final Object object : objects) {
-            sb.append(String.valueOf(object));
+        StringBuilder sb = new StringBuilder(2048);
+        for (Object object : objects) {
+            sb.append(object == null ? "null" : object.toString());
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Builds up a string from passed objects.
+     *
+     * @param delimiter The delimiter string
+     * @param objects The objects
+     * @return The string build up from concatenating objects' string representation
+     */
+    public static String concat(String delimiter, Object... objects) {
+        if (null == objects) {
+            return "";
+        }
+        if (null == delimiter) {
+            return concat(objects);
+        }
+        int length = objects.length;
+        if (length <= 0) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder(2048);
+        sb.append(objects[0] == null ? "null" : objects[0].toString());
+        for (int i = 1; i < length; i++) {
+            sb.append(delimiter);
+            sb.append(objects[i] == null ? "null" : objects[i].toString());
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Builds up a string from passed objects.
+     *
+     * @param delimiter The delimiter string
+     * @param strings The strings
+     * @return The string build up from concatenating objects' string representation
+     */
+    public static String concat(String delimiter, String... strings) {
+        if (null == strings) {
+            return "";
+        }
+        if (null == delimiter) {
+            return concat(strings);
+        }
+        int length = strings.length;
+        if (length <= 0) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder(2048);
+        sb.append(strings[0] == null ? "null" : strings[0]);
+        for (int i = 1; i < length; i++) {
+            sb.append(delimiter);
+            sb.append(strings[i] == null ? "null" : strings[i]);
         }
         return sb.toString();
     }

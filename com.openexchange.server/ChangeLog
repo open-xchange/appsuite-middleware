@@ -1,3 +1,11 @@
+* 2014-08-19 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 34075: Don't take over the UID from the original contact when creating a copy
+
+* 2014-08-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 34071: Properly build up namespace section in IMAP folder tree
+
 * 2014-08-14 - thorben.betten@open-xchange.com
 
  - Fix for bug 34035: Properly acquire message's source

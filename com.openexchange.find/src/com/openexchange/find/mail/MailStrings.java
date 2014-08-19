@@ -76,6 +76,9 @@ public class MailStrings implements LocalizableStrings {
     // The 'user input' part is always prepended, please heed this in translations.
     public static final String FACET_MAIL_TEXT = "in mail text";
 
+    // Search for mail conversations by people
+    public static final String FACET_PEOPLE = "People";
+
     // Search for mails sent from or to ...
     public static final String FACET_FROM_AND_TO = "From/To";
 
