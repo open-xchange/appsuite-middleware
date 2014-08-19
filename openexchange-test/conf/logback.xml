@@ -65,5 +65,8 @@
     <!-- A switch to control which exceptions are logged to the log file -->
     <!-- Set this to DEBUG to log all exceptions -->
     <logger name="com.openexchange.ajax.requesthandler.DispatcherServlet" level="INFO"/>
+    
+    
+    <logger name="com.openexchange.groupware.infostore.search.impl.SearchEngineImpl" level="DEBUG"/>
 
 </configuration>
