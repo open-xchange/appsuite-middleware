@@ -277,6 +277,10 @@ public class AbstractContactTest extends AbstractAJAXSession {
     }
 
     protected void compareObject(final Contact contactObj1, final Contact contactObj2) throws Exception {
+        compareObject(contactObj1, contactObj2, true);
+    }
+
+    protected void compareObject(final Contact contactObj1, final Contact contactObj2, boolean compareUID) throws Exception {
         assertEquals("id is not equals", contactObj1.getObjectID(), contactObj2.getObjectID());
         assertEquals("folder id is not equals", contactObj1.getParentFolderID(), contactObj2.getParentFolderID());
         assertEquals("private flag is not equals", contactObj1.getPrivateFlag(), contactObj2.getPrivateFlag());
@@ -374,7 +378,9 @@ public class AbstractContactTest extends AbstractAJAXSession {
         OXTestToolkit.assertEqualsAndNotNull("userfield20 is not equals", contactObj1.getUserField20(), contactObj2.getUserField20());
         OXTestToolkit.assertEqualsAndNotNull("number of attachments is not equals", contactObj1.getNumberOfAttachments(), contactObj2.getNumberOfAttachments());
         OXTestToolkit.assertEqualsAndNotNull("default address is not equals", contactObj1.getDefaultAddress(), contactObj2.getDefaultAddress());
-        OXTestToolkit.assertEqualsAndNotNull("uid is not equals", contactObj1.getUid(), contactObj2.getUid());
+        if (compareUID) {
+            OXTestToolkit.assertEqualsAndNotNull("uid is not equals", contactObj1.getUid(), contactObj2.getUid());
+        }
 
         //        OXTestToolkit.assertEqualsAndNotNull("links are not equals", links2String(contactObj1.getLinks()), links2String(contactObj2.getLinks()));
         OXTestToolkit.assertEqualsAndNotNull("distribution list is not equals", distributionlist2String(contactObj1.getDistributionList()), distributionlist2String(contactObj2.getDistributionList()));

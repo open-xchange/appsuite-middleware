@@ -407,7 +407,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                         BoxFile boxfile = boxClient.getFilesManager().getFile(id, null);
                         checkFileValidity(boxfile);
 
-                        String prevVersion = boxfile.getVersionNumber();
+                        boxfile.getVersionNumber();
 
                         BoxFileUploadRequestObject reqObj = BoxFileUploadRequestObject.uploadFileRequestObject(boxFolderId, id, data);
                         boxClient.getFilesManager().uploadNewVersion(id, reqObj);
@@ -466,7 +466,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
                 for (IDTuple idTuple : ids) {
                     try {
-                        BoxFile file = boxClient.getFilesManager().getFile(idTuple.getId(), null);
+                        boxClient.getFilesManager().getFile(idTuple.getId(), null);
                         boxClient.getFilesManager().deleteFile(idTuple.getId(), null);
                     } catch (BoxServerException e) {
                         if (404 != e.getStatusCode()) {
@@ -497,7 +497,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
             protected String[] doPerform(BoxClient boxClient) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
 
                 try {
-                    BoxFile file = boxClient.getFilesManager().getFile(id, null);
+                    boxClient.getFilesManager().getFile(id, null);
                     boxClient.getFilesManager().deleteFile(id, null);
                 } catch (BoxServerException e) {
                     if (404 != e.getStatusCode()) {
@@ -535,13 +535,14 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
             protected TimedResult<File> doPerform(BoxClient boxClient) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
 
                 BoxFolder boxfolder = boxClient.getFoldersManager().getFolder(toBoxFolderId(folderId), null);
+                IBoxFilesManager filesManager = boxClient.getFilesManager();
 
                 List<File> files = new LinkedList<File>();
                 BoxCollection itemCollection = boxfolder.getItemCollection();
                 if (itemCollection.getTotalCount().intValue() <= itemCollection.getEntries().size()) {
                     for (BoxTypedObject child : itemCollection.getEntries()) {
                         if (isFile(child)) {
-                            files.add(new com.openexchange.file.storage.boxcom.BoxFile(folderId, child.getId(), userId, rootFolderId).parseBoxFile((BoxFile) child));
+                            files.add(new com.openexchange.file.storage.boxcom.BoxFile(folderId, child.getId(), userId, rootFolderId).parseBoxFile(filesManager.getFile(child.getId(), null)));
                         }
                     }
                 } else {
@@ -557,7 +558,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                         resultsFound = entries.size();
                         for (BoxTypedObject typedObject : entries) {
                             if (isFile(typedObject)) {
-                                files.add(new com.openexchange.file.storage.boxcom.BoxFile(folderId, typedObject.getId(), userId, rootFolderId).parseBoxFile((BoxFile) typedObject));
+                                files.add(new com.openexchange.file.storage.boxcom.BoxFile(folderId, typedObject.getId(), userId, rootFolderId).parseBoxFile(filesManager.getFile(typedObject.getId(), null)));
                             }
                         }
 
@@ -585,15 +586,15 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
             protected TimedResult<File> doPerform(BoxClient boxClient) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
 
                 BoxFolder boxfolder = boxClient.getFoldersManager().getFolder(toBoxFolderId(folderId), null);
+                IBoxFilesManager filesManager = boxClient.getFilesManager();
 
                 List<File> files = new LinkedList<File>();
-
 
                 BoxCollection itemCollection = boxfolder.getItemCollection();
                 if (itemCollection.getTotalCount().intValue() <= itemCollection.getEntries().size()) {
                     for (BoxTypedObject child : itemCollection.getEntries()) {
                         if (isFile(child)) {
-                            files.add(new com.openexchange.file.storage.boxcom.BoxFile(folderId, child.getId(), userId, rootFolderId).parseBoxFile((BoxFile) child));
+                            files.add(new com.openexchange.file.storage.boxcom.BoxFile(folderId, child.getId(), userId, rootFolderId).parseBoxFile(filesManager.getFile(child.getId(), null)));
                         }
                     }
                 } else {
@@ -609,7 +610,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                         resultsFound = entries.size();
                         for (BoxTypedObject typedObject : entries) {
                             if (isFile(typedObject)) {
-                                files.add(new com.openexchange.file.storage.boxcom.BoxFile(folderId, typedObject.getId(), userId, rootFolderId).parseBoxFile((BoxFile) typedObject));
+                                files.add(new com.openexchange.file.storage.boxcom.BoxFile(folderId, typedObject.getId(), userId, rootFolderId).parseBoxFile(filesManager.getFile(typedObject.getId(), null)));
                             }
                         }
 
@@ -699,7 +700,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
             String pattern = ((FileNameTerm) searchTerm).getPattern();
             return search(pattern, fields, null != folderIds && 1 == folderIds.size() ? folderIds.get(0) : null, sort, order, start, end);
         }
-        throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create("Search term not supported: " + searchTerm);
+        throw FileStorageExceptionCodes.SEARCH_TERM_NOT_SUPPORTED.create(searchTerm.getClass().getSimpleName());
     }
 
     @Override
@@ -731,7 +732,6 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                         BoxFile boxfile = (BoxFile) typedObject;
                         files.add(new com.openexchange.file.storage.boxcom.BoxFile(toFileStorageFolderId(boxfile.getParent().getId()), boxfile.getId(), userId, rootFolderId).parseBoxFile(boxfile));
                     }
-
                     offset += limit;
                 } while (resultsFound == limit);
 

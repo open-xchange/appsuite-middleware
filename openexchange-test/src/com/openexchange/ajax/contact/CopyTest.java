@@ -76,7 +76,7 @@ public class CopyTest extends AbstractContactTest {
 		secondContact.setParentFolderID(contactFolderId);
 		ts2 = seconContactResponse.getResponse().getTimestamp().getTime();
 
-		compareObject(firstContact, secondContact);
+		compareObject(firstContact, secondContact, false);
 	}
 
 

@@ -58,23 +58,113 @@ import com.openexchange.groupware.contexts.Context;
  */
 public interface PublicationService {
 
-    public void create(Publication publication) throws OXException;
-    public void update(Publication publication) throws OXException;
-    public Collection<Publication> getAllPublications(Context ctx, int userId, String module) throws OXException;
-    public Collection<Publication> getAllPublications(Context ctx) throws OXException;
-    public Collection<Publication> getAllPublications(Context ctx, String entityId) throws OXException;
-    public boolean knows(Context ctx, int publicationId) throws OXException;
-    public Publication load(Context ctx, int publicationId) throws OXException;
-    public void delete(Publication publication) throws OXException;
-    public PublicationTarget getTarget() throws OXException;
+    /**
+     * Creates the specified publication
+     *
+     * @param publication The publication to create
+     * @throws OXException If creation fails
+     */
+    void create(Publication publication) throws OXException;
+
+    /**
+     * Updates the specified publication
+     *
+     * @param publication The publication to update
+     * @throws OXException If update fails
+     */
+    void update(Publication publication) throws OXException;
+
+    /**
+     * Gets all publications associated with specified user having given module.
+     *
+     * @param ctx The associated context
+     * @param userId The user identifier
+     * @param module The module identifier
+     * @return A collection of all associated publications
+     * @throws OXException If publications cannot be returned
+     */
+    Collection<Publication> getAllPublications(Context ctx, int userId, String module) throws OXException;
+
+    /**
+     * Gets all publications associated with specified context
+     *
+     * @param ctx The associated context
+     * @return A collection of all associated publications
+     * @throws OXException If publications cannot be returned
+     */
+    Collection<Publication> getAllPublications(Context ctx) throws OXException;
+
+    /**
+     * Gets all publications associated with specified entity identifier
+     *
+     * @param ctx The associated context
+     * @param entityId The entity identifier
+     * @return A collection of all associated publications
+     * @throws OXException If publications cannot be returned
+     */
+    Collection<Publication> getAllPublications(Context ctx, String entityId) throws OXException;
+
+    /**
+     * Checks if this publication service knows the publication denoted by given identifier
+     *
+     * @param ctx The associated context
+     * @param publicationId The publication identifier
+     * @return <code>true</code> if such a publication is known; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    boolean knows(Context ctx, int publicationId) throws OXException;
+
+    /**
+     * Loads the publication denoted by given identifier
+     *
+     * @param ctx The associated context
+     * @param publicationId The publication identifier
+     * @return The publication
+     * @throws OXException If publication cannot be returned
+     */
+    Publication load(Context ctx, int publicationId) throws OXException;
+
+    /**
+     * Deletes the publication by identifier
+     *
+     * @param ctx The associated context
+     * @param publicationId The identifier of the publication to delete
+     * @throws OXException If delete attempt fails
+     */
+    void delete(Context ctx, int publicationId) throws OXException;
+
+    /**
+     * Deletes the given publication
+     *
+     * @param publication The publication to delete
+     * @throws OXException If delete attempt fails
+     */
+    void delete(Publication publication) throws OXException;
+
+    /**
+     * Gets the publication target
+     *
+     * @return The publication target
+     * @throws OXException If publication target cannot be returned
+     */
+    PublicationTarget getTarget() throws OXException;
+
     /**
      * This Method should only be used by the admin daemon to get a Publication by its URL
+     *
      * @param ctx context, where this publication is located
      * @param URL the URL for a Publication
      * @return the Publication if found, else null
      * @throws OXException
      */
-    public Publication resolveUrl(Context ctx, String URL) throws OXException;
-    public String getInformation(Publication publication);
+    Publication resolveUrl(Context ctx, String URL) throws OXException;
+
+    /**
+     * Gets the publication information for given publication instance
+     *
+     * @param publication The publication instance to get the information from
+     * @return The publication information
+     */
+    String getInformation(Publication publication);
 
 }
