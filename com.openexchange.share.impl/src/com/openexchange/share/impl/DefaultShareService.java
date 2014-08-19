@@ -50,7 +50,6 @@
 package com.openexchange.share.impl;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -63,7 +62,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
-import com.openexchange.groupware.userconfiguration.RdbUserPermissionBitsStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
@@ -94,11 +92,7 @@ public class DefaultShareService implements ShareService {
     /**
      * Initializes a new {@link DefaultShareService}.
      *
-<<<<<<< HEAD
      * @param services The service lookup reference
-=======
-     * @param storage The underlying share storage
->>>>>>> US75800670: Use writable connection to delete shares
      */
     public DefaultShareService(ServiceLookup services) {
         super();
@@ -115,13 +109,6 @@ public class DefaultShareService implements ShareService {
             return null;
         }
         return share;
-    }
-
-    public List<Share> resolveTokens(String[] tokens) throws OXException {
-        List<Share> result = new ArrayList<Share>(tokens.length);
-        for (String token : tokens) {
-        }
-        return result;
     }
 
     @Override
@@ -383,19 +370,17 @@ public class DefaultShareService implements ShareService {
     private void deleteGuestUsers(Connection connection, int contextID, int[] guestIDs) throws OXException {
         if (null != guestIDs && 0 < guestIDs.length) {
             UserService userService = services.getService(UserService.class);
+            UserPermissionService userPermissionService = services.getService(UserPermissionService.class);
             Context context = userService.getContext(contextID);
-            try {
-                for (int guestID : guestIDs) {
-                    /*
-                     * delete permission bits & user
-                     */
-                    RdbUserPermissionBitsStorage.deleteUserPermissionBits(guestID, connection, context); // TODO: service layer
-                    userService.deleteUser(connection, context, guestID);
-                }
-                LOG.info("Deleted {} guest user(s) in context {}: {}", guestIDs.length, contextID, Arrays.toString(guestIDs));
-            } catch (SQLException e) {
-                throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
+            for (int guestID : guestIDs) {
+                /*
+                 * delete permission bits & user
+                 */
+                userPermissionService.deleteUserPermissionBits(connection, context, guestID);
+                userService.deleteUser(connection, context, guestID);
             }
+
+            LOG.info("Deleted {} guest user(s) in context {}: {}", guestIDs.length, contextID, Arrays.toString(guestIDs));
         }
     }
 

@@ -66,10 +66,10 @@ public interface UserPermissionService {
     /**
      * Determines the instance of <code>UserPermissionBits</code> that corresponds to given user ID.
      *
-     * @param userId - the user ID
-     * @param ctx - the context
+     * @param userId The user ID
+     * @param context The context
      * @return the instance of <code>UserPermissionBits</code>
-     * @throws OXException If user's configuration could not be determined
+     * @throws OXException If users configuration could not be determined
      * @see #getUserPermissionBits(int, int[], Context)
      */
     public UserPermissionBits getUserPermissionBits(int userId, Context context) throws OXException;
@@ -77,9 +77,9 @@ public interface UserPermissionService {
     /**
      * Gets the {@link UserPermissionBits} for a bunch of users.
      *
-     * @param ctx the context
-     * @param users user objects that module access permission should be loaded.
-     * @return an array with the module access permissions of the given users.
+     * @param context The context
+     * @param users User objects that module access permission should be loaded.
+     * @return An array with the module access permissions of the given users.
      * @throws OXException if users configuration could not be loaded.
      */
     public UserPermissionBits[] getUserPermissionBits(Context context, User[] users) throws OXException;
@@ -102,5 +102,27 @@ public interface UserPermissionService {
      * @throws OXException if users configuration could not be saved.
      */
     public void saveUserPermissionBits(Connection connection, UserPermissionBits permissionBits) throws OXException;
+
+    /**
+     * Deletes the permission bits of the given user.
+     *
+     * @param context The context
+     * @param userId The user ID
+     * @throws OXException if users configuration could not be deleted.
+     */
+    public void deleteUserPermissionBits(Context context, int userId) throws OXException;
+
+    /**
+     * Deletes the permission bits of the given user.
+     *
+     * @param connection The database connection to use. Must not be read only.
+     *    No transaction handling is performed, you probably want to commit or rollback
+     *    afterwards, depending on the success of this call.
+     * @param context The context
+     * @param userId The user ID
+     * @throws OXException if users configuration could not be deleted.
+     */
+    public void deleteUserPermissionBits(Connection connection, Context context, int userId) throws OXException;
+
 
 }
