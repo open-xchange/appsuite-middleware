@@ -49,6 +49,7 @@
 
 package com.openexchange.userconf.internal;
 
+import java.sql.Connection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -75,13 +76,13 @@ public class UserPermissionServiceImpl implements UserPermissionService {
     }
 
     @Override
-    public void clearStorage() throws OXException {
-        UserPermissionBitsStorage.getInstance().clearStorage();
+    public void saveUserPermissionBits(UserPermissionBits permissionBits) throws OXException {
+        UserPermissionBitsStorage.getInstance().saveUserPermissionBits(permissionBits.getPermissionBits(), permissionBits.getUserId(), permissionBits.getContext());
     }
 
     @Override
-    public void removeUserPermissionBits(int userId, Context ctx) throws OXException {
-        UserPermissionBitsStorage.getInstance().removeUserPermissionBits(userId, ctx);
+    public void saveUserPermissionBits(Connection connection, UserPermissionBits permissionBits) throws OXException {
+        UserPermissionBitsStorage.getInstance().saveUserPermissionBits(connection, permissionBits.getPermissionBits(), permissionBits.getUserId(), permissionBits.getContext());
     }
 
 }

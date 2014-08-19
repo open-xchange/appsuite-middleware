@@ -64,7 +64,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.userconfiguration.RdbUserPermissionBitsStorage;
-import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -77,6 +77,7 @@ import com.openexchange.share.ShareService;
 import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.share.storage.StorageParameters;
 import com.openexchange.user.UserService;
+import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link DefaultShareService}
@@ -350,11 +351,14 @@ public class DefaultShareService implements ShareService {
      * @throws OXException
      */
     private User createGuestUser(Connection connection, Context context, User sharingUser, int permissionBits, Guest guest) throws OXException {
+        UserService userService = services.getService(UserService.class);
+        UserPermissionService userPermissionService = services.getService(UserPermissionService.class);
+
         UserImpl guestUser = ShareTool.prepareGuestUser(services, sharingUser, guest);
-        int guestID = services.getService(UserService.class).createUser(connection, context, guestUser);
+        int guestID = userService.createUser(connection, context, guestUser);
         guestUser.setId(guestID);
-        UserPermissionBitsStorage.getInstance().saveUserPermissionBits(connection, permissionBits, guestID, context); // FIXME: to service
-                                                                                                                      // layer
+        userPermissionService.saveUserPermissionBits(connection, new UserPermissionBits(permissionBits, guestID, context.getContextId()));
+
         if (AuthenticationMode.ANONYMOUS == guest.getAuthenticationMode()) {
             LOG.info("Created anonymous guest user with permissions {} in context {}: {}", permissionBits, context.getContextId(), guestID);
         } else {

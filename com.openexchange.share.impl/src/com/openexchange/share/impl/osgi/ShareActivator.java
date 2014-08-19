@@ -69,6 +69,7 @@ import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.user.UserService;
+import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link ShareActivator}
@@ -89,7 +90,8 @@ public class ShareActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { UserService.class, ContextService.class, TemplateService.class,
-            ShareStorage.class, ConfigurationService.class, DatabaseService.class, HtmlService.class };
+            ShareStorage.class, ConfigurationService.class, DatabaseService.class, HtmlService.class,
+            UserPermissionService.class };
     }
 
     @Override
