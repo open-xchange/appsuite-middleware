@@ -1610,6 +1610,9 @@ public final class OutlookFolderStorage implements FolderStorage {
                                             if (accountAccess instanceof WarningsAware) {
                                                 addWarnings(storageParameters, (WarningsAware) accountAccess);
                                             }
+                                        } catch (final OXException e) {
+                                            LOG.error("Could not access account {}", userAccount.getDisplayName(), e);
+                                            storageParameters.addWarning(e);
                                         } finally {
                                             accountAccess.close();
                                             LogProperties.remove(LogProperties.Name.FILE_STORAGE_ACCOUNT_ID);
