@@ -54,6 +54,7 @@ import java.util.LinkedList;
 import java.util.List;
 import com.box.boxjavalibv2.BoxClient;
 import com.box.boxjavalibv2.dao.BoxCollection;
+import com.box.boxjavalibv2.dao.BoxFile;
 import com.box.boxjavalibv2.dao.BoxFolder;
 import com.box.boxjavalibv2.dao.BoxTypedObject;
 import com.box.boxjavalibv2.exceptions.AuthFatalFailureException;
@@ -177,8 +178,18 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
             @Override
             protected FileStorageFolder[] doPerform(BoxClient boxClient) throws BoxRestException, BoxServerException, AuthFatalFailureException, OXException {
                 try {
+                    BoxFolder boxfolder = boxClient.getFoldersManager().getFolder(toBoxFolderId(parentIdentifier), null);
+
                     List<FileStorageFolder> folders = new LinkedList<FileStorageFolder>();
-                    {
+
+                    BoxCollection itemCollection = boxfolder.getItemCollection();
+                    if (itemCollection.getTotalCount().intValue() <= itemCollection.getEntries().size()) {
+                        for (BoxTypedObject child : itemCollection.getEntries()) {
+                            if (isFolder(child)) {
+                                folders.add(parseBoxFolder((BoxFolder) child));
+                            }
+                        }
+                    } else {
                         int offset = 0;
                         final int limit = 100;
 
@@ -314,16 +325,16 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
             protected Void doPerform(BoxClient boxClient) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
                 BoxFolder boxfolder = boxClient.getFoldersManager().getFolder(toBoxFolderId(folderId), null);
 
-                List<String> files = new LinkedList<String>();
-                List<String> folders = new LinkedList<String>();
+                List<BoxFile> files = new LinkedList<BoxFile>();
+                List<BoxFolder> folders = new LinkedList<BoxFolder>();
 
                 BoxCollection itemCollection = boxfolder.getItemCollection();
                 if (itemCollection.getTotalCount().intValue() <= itemCollection.getEntries().size()) {
                     for (BoxTypedObject child : itemCollection.getEntries()) {
                         if (isFolder(child)) {
-                            folders.add(child.getId());
+                            folders.add((BoxFolder) child);
                         } else {
-                            files.add(child.getId());
+                            files.add((BoxFile) child);
                         }
                     }
                 } else {
@@ -339,9 +350,9 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
                         resultsFound = entries.size();
                         for (BoxTypedObject typedObject : entries) {
                             if (isFolder(typedObject)) {
-                                folders.add(typedObject.getId());
+                                folders.add((BoxFolder) typedObject);
                             } else {
-                                files.add(typedObject.getId());
+                                files.add((BoxFile) typedObject);
                             }
                         }
 
@@ -349,13 +360,13 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
                     } while (resultsFound == limit);
                 }
 
-                for (String trashMe : folders) {
+                for (BoxFolder trashMe : folders) {
                     BoxFolderDeleteRequestObject reqOb = BoxFolderDeleteRequestObject.deleteFolderRequestObject(true);
-                    boxClient.getFoldersManager().deleteFolder(trashMe, reqOb);
+                    boxClient.getFoldersManager().deleteFolder(folderId, reqOb);
                 }
 
-                for (String trashMe : files) {
-                    boxClient.getFilesManager().deleteFile(trashMe, null);
+                for (BoxFile trashMe : files) {
+                    boxClient.getFilesManager().deleteFile(trashMe.getId(), null);
                 }
 
                 return null;

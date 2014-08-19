@@ -534,8 +534,17 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
             @Override
             protected TimedResult<File> doPerform(BoxClient boxClient) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
 
+                BoxFolder boxfolder = boxClient.getFoldersManager().getFolder(toBoxFolderId(folderId), null);
+
                 List<File> files = new LinkedList<File>();
-                {
+                BoxCollection itemCollection = boxfolder.getItemCollection();
+                if (itemCollection.getTotalCount().intValue() <= itemCollection.getEntries().size()) {
+                    for (BoxTypedObject child : itemCollection.getEntries()) {
+                        if (isFile(child)) {
+                            files.add(new com.openexchange.file.storage.boxcom.BoxFile(folderId, child.getId(), userId, rootFolderId).parseBoxFile((BoxFile) child));
+                        }
+                    }
+                } else {
                     int offset = 0;
                     final int limit = 100;
 
@@ -574,9 +583,20 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
             @Override
             protected TimedResult<File> doPerform(BoxClient boxClient) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+
+                BoxFolder boxfolder = boxClient.getFoldersManager().getFolder(toBoxFolderId(folderId), null);
+
                 List<File> files = new LinkedList<File>();
 
-                {
+
+                BoxCollection itemCollection = boxfolder.getItemCollection();
+                if (itemCollection.getTotalCount().intValue() <= itemCollection.getEntries().size()) {
+                    for (BoxTypedObject child : itemCollection.getEntries()) {
+                        if (isFile(child)) {
+                            files.add(new com.openexchange.file.storage.boxcom.BoxFile(folderId, child.getId(), userId, rootFolderId).parseBoxFile((BoxFile) child));
+                        }
+                    }
+                } else {
                     int offset = 0;
                     final int limit = 100;
 
