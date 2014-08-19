@@ -62,6 +62,7 @@ import com.box.boxjavalibv2.exceptions.BoxServerException;
 import com.box.boxjavalibv2.requests.requestobjects.BoxFolderDeleteRequestObject;
 import com.box.boxjavalibv2.requests.requestobjects.BoxFolderRequestObject;
 import com.box.boxjavalibv2.requests.requestobjects.BoxPagingRequestObject;
+import com.box.boxjavalibv2.resourcemanagers.IBoxFoldersManager;
 import com.box.restclientv2.exceptions.BoxRestException;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
@@ -178,7 +179,8 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
             @Override
             protected FileStorageFolder[] doPerform(BoxClient boxClient) throws BoxRestException, BoxServerException, AuthFatalFailureException, OXException {
                 try {
-                    BoxFolder boxfolder = boxClient.getFoldersManager().getFolder(toBoxFolderId(parentIdentifier), null);
+                    IBoxFoldersManager foldersManager = boxClient.getFoldersManager();
+                    BoxFolder boxfolder = foldersManager.getFolder(toBoxFolderId(parentIdentifier), null);
 
                     List<FileStorageFolder> folders = new LinkedList<FileStorageFolder>();
 
@@ -186,7 +188,7 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
                     if (itemCollection.getTotalCount().intValue() <= itemCollection.getEntries().size()) {
                         for (BoxTypedObject child : itemCollection.getEntries()) {
                             if (isFolder(child)) {
-                                folders.add(parseBoxFolder((BoxFolder) child));
+                                folders.add(parseBoxFolder(foldersManager.getFolder(child.getId(), null)));
                             }
                         }
                     } else {
@@ -196,13 +198,13 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
                         int resultsFound;
                         do {
                             BoxPagingRequestObject reqObj = BoxPagingRequestObject.pagingRequestObject(limit, offset);
-                            BoxCollection collection = boxClient.getFoldersManager().getFolderItems(toBoxFolderId(parentIdentifier), reqObj);
+                            BoxCollection collection = foldersManager.getFolderItems(toBoxFolderId(parentIdentifier), reqObj);
 
                             List<BoxTypedObject> entries = collection.getEntries();
                             resultsFound = entries.size();
                             for (BoxTypedObject typedObject : entries) {
                                 if (isFolder(typedObject)) {
-                                    folders.add(parseBoxFolder((BoxFolder) typedObject));
+                                    folders.add(parseBoxFolder(foldersManager.getFolder(typedObject.getId(), null)));
                                 }
                             }
 
@@ -362,7 +364,7 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
 
                 for (BoxFolder trashMe : folders) {
                     BoxFolderDeleteRequestObject reqOb = BoxFolderDeleteRequestObject.deleteFolderRequestObject(true);
-                    boxClient.getFoldersManager().deleteFolder(folderId, reqOb);
+                    boxClient.getFoldersManager().deleteFolder(trashMe.getId(), reqOb);
                 }
 
                 for (BoxFile trashMe : files) {
