@@ -70,6 +70,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
+import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.session.Session;
 
@@ -190,7 +191,12 @@ public class BoxAccess {
         if (considerExpired || scribeOAuthService.isExpired(boxOAuthAccount.getToken())) {
             // Expired...
             String refreshToken = boxOAuthAccount.getSecret();
-            Token accessToken = scribeOAuthService.getAccessToken(new Token(boxOAuthAccount.getToken(), boxOAuthAccount.getSecret()), null);
+            Token accessToken;
+            try {
+                accessToken = scribeOAuthService.getAccessToken(new Token(boxOAuthAccount.getToken(), boxOAuthAccount.getSecret()), null);
+            } catch (org.scribe.exceptions.OAuthException e) {
+                throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(e, boxOAuthAccount.getDisplayName(), boxOAuthAccount.getId());
+            }
             if (!Strings.isEmpty(accessToken.getSecret())) {
                 refreshToken = accessToken.getSecret();
             }
@@ -198,7 +204,7 @@ public class BoxAccess {
             OAuthService oAuthService = Services.getService(OAuthService.class);
             int accountId = boxOAuthAccount.getId();
             Map<String, Object> arguments = new HashMap<String, Object>(3);
-            arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(accessToken.getToken(), accessToken.getSecret() == null ? refreshToken : accessToken.getSecret()));
+            arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(accessToken.getToken(), refreshToken));
             arguments.put(OAuthConstants.ARGUMENT_SESSION, session);
             oAuthService.updateAccount(accountId, arguments, session.getUserId(), session.getContextId());
 
