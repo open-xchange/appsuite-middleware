@@ -49,35 +49,53 @@
 
 package com.openexchange.ajax.contact;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.UUID;
+import org.json.JSONObject;
+import com.openexchange.ajax.contact.action.CopyRequest;
+import com.openexchange.ajax.contact.action.CopyResponse;
+import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.groupware.container.Contact;
 
-public final class ContactBugTestSuite extends TestSuite {
 
-    private ContactBugTestSuite() {
-        super();
+/**
+ * {@link Bug34075Test}
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ */
+public class Bug34075Test extends AbstractManagedContactTest {
+
+    /**
+     * Initializes a new {@link Bug34075Test}.
+     *
+     * @param name The test name
+     */
+    public Bug34075Test(String name) {
+		super(name);
+	}
+
+	public void testAssignNewUidDuringCopy() throws Exception {
+	    /*
+	     * create contact
+	     */
+	    Contact contact = generateContact();
+	    contact.setUid(UUID.randomUUID().toString());
+	    contact = manager.newAction(contact);
+	    /*
+	     * copy contact
+	     */
+        CopyResponse copyResponse = client.execute(
+            new CopyRequest(contact.getObjectID(), contact.getParentFolderID(), contact.getParentFolderID(), true));
+        assertNotNull("No response", copyResponse);
+        assertFalse("Errors in response", copyResponse.hasError());
+		JSONObject data = (JSONObject)copyResponse.getData();
+		int objectID = data.getInt(DataFields.ID);
+		/*
+		 * check copy
+		 */
+		Contact copiedContact = manager.getAction(contact.getParentFolderID(), objectID);
+        assertNotNull("Copied contact not found", copiedContact);
+        assertEquals("Last name wrong", contact.getSurName(), copiedContact.getSurName());
+        assertFalse("Same UID in copied contact", contact.getUid().equals(copiedContact.getUid()));
     }
 
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(Bug4409Test.class);
-        tests.addTestSuite(Bug6335Test.class);
-        tests.addTestSuite(Bug12716Test.class);
-        tests.addTestSuite(Bug13931Test.class);
-        tests.addTestSuite(Bug13960Test.class);
-        tests.addTestSuite(Bug15317Test.class);
-        tests.addTestSuite(Bug15315Test.class);
-        tests.addTestSuite(Bug15937Test.class);
-        tests.addTestSuite(Bug16515Test.class);
-        tests.addTestSuite(Bug16618Test.class);
-        tests.addTestSuite(Bug17513Test.class);
-        tests.addTestSuite(Bug13915FileAsViaJSON.class);
-        tests.addTestSuite(Bug18608Test_SpecialCharsInEmailTest.class);
-        tests.addTestSuite(Bug19827Test.class);
-        tests.addTestSuite(Bug25300Test.class);
-        tests.addTestSuite(Bug28185Test.class);
-        tests.addTestSuite(Bug31993Test.class);
-        tests.addTestSuite(Bug34075Test.class);
-        return tests;
-    }
 }
