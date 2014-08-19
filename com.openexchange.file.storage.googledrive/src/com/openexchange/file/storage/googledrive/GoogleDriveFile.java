@@ -139,7 +139,10 @@ public final class GoogleDriveFile extends DefaultFile {
                     setFileMIMEType(contentType);
                 }
                 if (set.contains(Field.FILE_SIZE)) {
-                    setFileSize(file.getFileSize().longValue());
+                    Long fileSize = file.getFileSize();
+                    if (null != fileSize) {
+                        setFileSize(fileSize.longValue());
+                    }
                 }
                 if (set.contains(Field.URL)) {
                     setURL(file.getDownloadUrl());
