@@ -501,6 +501,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     private int generateFolderID() throws OXException {
         int fuid = -1;
         boolean created = false;
+        boolean transactionStarted = false;
         Connection wc = writeCon;
         if (wc == null) {
             wc = DBPool.pickupWriteable(ctx);
@@ -510,11 +511,14 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         try {
             if (created) {
                 Databases.startTransaction(wc);
+            } else if (wc.getAutoCommit()) {
+                Databases.startTransaction(wc);
+                transactionStarted = true;
             }
 
             fuid = IDGenerator.getId(ctx, Types.FOLDER, wc);
 
-            if (created) {
+            if (created || transactionStarted) {
                 wc.commit();
             }
         } catch (final SQLException e) {
@@ -526,6 +530,8 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             if (created) {
                 Databases.autocommit(wc);
                 DBPool.closeWriterSilent(ctx, wc);
+            } else if (transactionStarted) {
+                Databases.autocommit(wc);
             }
         }
 
