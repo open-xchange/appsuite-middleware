@@ -236,11 +236,11 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
-    public List<Share> addSharesToFolder(Session session, String folder, int module, List<Guest> guests) throws OXException {
+    public List<Share> createShares(Session session, String folder, int module, int type, List<Guest> guests) throws OXException {
         LOG.info("Adding shares to guest user(s) {} for folder {} in context {}...", guests, folder, session.getContextId());
         List<Share> shares = new ArrayList<Share>(guests.size());
         Context context = services.getService(ContextService.class).getContext(session.getContextId());
-        int permissionBits = ShareTool.getUserPermissionBits(module);
+        int permissionBits = ShareTool.getUserPermissionBits(module, type);
         ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
         try {
             connectionHelper.start();

@@ -61,6 +61,8 @@ import java.util.Set;
 import java.util.UUID;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.type.PublicType;
+import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.modules.Module;
@@ -150,10 +152,35 @@ public class ShareTool {
      * @param module The identifier of the module that should be added to the permissions
      * @return The permission bits
      */
-    public static int getUserPermissionBits(int module) {
+    private static int getUserPermissionBits(int module) {
         Set<Permission> perms = new HashSet<Permission>();
         perms.add(Permission.DENIED_PORTAL);
-        perms.add(Permission.READ_CREATE_SHARED_FOLDERS);
+        perms.add(Permission.EDIT_PUBLIC_FOLDERS);
+//        perms.add(Permission.READ_CREATE_SHARED_FOLDERS);
+        Permission modulePermission = Module.getForFolderConstant(module).getPermission();
+        if (null != modulePermission) {
+            perms.add(modulePermission);
+        }
+        return Permission.toBits(perms);
+    }
+
+    /**
+     * Gets permission bits suitable for a guest user being allowed to access a module and folder type.
+     *
+     * @param module The identifier of the module that should be added to the permissions
+     * @param type The identifier of the folder type (currently shared or public) that should be added to the permissions
+     * @return The permission bits
+     */
+    public static int getUserPermissionBits(int module, int type) {
+        Set<Permission> perms = new HashSet<Permission>();
+        perms.add(Permission.DENIED_PORTAL);
+        if (SharedType.getInstance().getType() == type) {
+            perms.add(Permission.READ_CREATE_SHARED_FOLDERS);
+        } else if (PublicType.getInstance().getType() == type) {
+            perms.add(Permission.EDIT_PUBLIC_FOLDERS);
+        } else {
+            throw new UnsupportedOperationException("Unsupported type: " + type);
+        }
         Permission modulePermission = Module.getForFolderConstant(module).getPermission();
         if (null != modulePermission) {
             perms.add(modulePermission);

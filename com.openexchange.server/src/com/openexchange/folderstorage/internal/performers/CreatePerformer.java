@@ -65,6 +65,7 @@ import com.openexchange.folderstorage.GuestPermission;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
+import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.cache.CacheFolderStorageRegistry;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.internal.CalculatePermission;
@@ -278,9 +279,9 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
              */
             final String newId;
             if (FolderStorage.REAL_TREE_ID.equals(toCreate.getTreeID())) {
-                newId = doCreateReal(toCreate, parentId, treeId, parentStorage, transactionManager);
+                newId = doCreateReal(toCreate, parentId, treeId, parent.getType(), parentStorage, transactionManager);
             } else {
-                newId = doCreateVirtual(toCreate, parentId, treeId, parentStorage, openedStorages, transactionManager);
+                newId = doCreateVirtual(toCreate, parentId, treeId, parent.getType(), parentStorage, openedStorages, transactionManager);
             }
 
             transactionManager.commit();
@@ -312,7 +313,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
         }
     }
 
-    private String doCreateReal(final Folder toCreate, final String parentId, final String treeId, final FolderStorage parentStorage, final TransactionManager transactionManager) throws OXException {
+    private String doCreateReal(final Folder toCreate, final String parentId, final String treeId, Type type, final FolderStorage parentStorage, final TransactionManager transactionManager) throws OXException {
         final ContentType[] contentTypes = parentStorage.getSupportedContentTypes();
         boolean supported = false;
         final ContentType folderContentType = toCreate.getContentType();
@@ -364,7 +365,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
             /*
              * setup shares and guest users
              */
-            processAddedGuestPermissions(folderID, plainFolder.getContentType(), addedGuests, transactionManager.getConnection());
+            processAddedGuestPermissions(folderID, plainFolder.getContentType(), type, addedGuests, transactionManager.getConnection());
             /*
              * update with re-added guest permissions (guest permissions are enriched with real entities now)
              */
@@ -377,11 +378,11 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
         return toCreate.getID();
     }
 
-    private String doCreateVirtual(final Folder toCreate, final String parentId, final String treeId, final FolderStorage virtualStorage, final List<FolderStorage> openedStorages, final TransactionManager transactionManager) throws OXException {
+    private String doCreateVirtual(final Folder toCreate, final String parentId, final String treeId, Type type, final FolderStorage virtualStorage, final List<FolderStorage> openedStorages, final TransactionManager transactionManager) throws OXException {
         final ContentType folderContentType = toCreate.getContentType();
         final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, parentId);
         if (realStorage.equals(virtualStorage)) {
-            doCreateReal(toCreate, parentId, FolderStorage.REAL_TREE_ID, realStorage, transactionManager);
+            doCreateReal(toCreate, parentId, FolderStorage.REAL_TREE_ID, type, realStorage, transactionManager);
         } else {
             /*
              * Check if real storage supports folder's content types
@@ -391,7 +392,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
                 /*
                  * 1. Create in real storage
                  */
-                doCreateReal(toCreate, parentId, FolderStorage.REAL_TREE_ID, realStorage, transactionManager);
+                doCreateReal(toCreate, parentId, FolderStorage.REAL_TREE_ID, type, realStorage, transactionManager);
                 /*
                  * 2. Create in virtual storage
                  */
@@ -498,7 +499,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
                             }
                         }
                     }
-                    doCreateReal(clone4Real, realParentId, FolderStorage.REAL_TREE_ID, capStorage, transactionManager);
+                    doCreateReal(clone4Real, realParentId, FolderStorage.REAL_TREE_ID, type, capStorage, transactionManager);
                     toCreate.setID(clone4Real.getID());
                 }
                 /*
