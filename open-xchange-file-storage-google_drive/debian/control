@@ -1,4 +1,4 @@
-Source: open-xchange-file-storage-google_drive
+Source: open-xchange-file-storage-googledrive
 Section: web
 Priority: optional
 Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
@@ -6,7 +6,7 @@ Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), su
 Standards-Version: 3.8.4
 Homepage: http://www.open-xchange.com
 
-Package: open-xchange-file-storage-google_drive
+Package: open-xchange-file-storage-googledrive
 Architecture: all
 Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@), open-xchange-oauth (>= @OXVERSION@)
 Description: The Open Xchange backend Google Drive file storage extension
