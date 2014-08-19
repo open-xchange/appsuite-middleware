@@ -120,5 +120,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.google.common"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.google.gdata"/>
 	<classpathentry kind="src" path="/com.openexchange.share"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.share.impl"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.share.storage"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
