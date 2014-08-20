@@ -1,3 +1,7 @@
+* 2014-08-20 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 33821: Avoid duplicate entries for participant tables.
+
 * 2014-08-19 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 34075: Don't take over the UID from the original contact when creating a copy

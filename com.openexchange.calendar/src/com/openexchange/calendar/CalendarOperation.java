@@ -59,8 +59,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.calendar.storage.ParticipantStorage;
@@ -1396,12 +1398,12 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         }
     }
 
-    static final Participant[] getNewParticipants(final Participant np[], final Participant op[]) {
-        return getNotContainedParticipants(np, op).getList();
+    static final Set<Participant> getNewParticipants(final Participant np[], final Participant op[]) {
+        return new HashSet<Participant>(Arrays.asList(getNotContainedParticipants(np, op).getList()));
     }
 
-    static final Participant[] getDeletedParticipants(final Participant np[], final Participant op[]) {
-        return getNotContainedParticipants(np, op).getList();
+    static final Set<Participant> getDeletedParticipants(final Participant np[], final Participant op[]) {
+        return new HashSet<Participant>(Arrays.asList(getNotContainedParticipants(np, op).getList()));
     }
 
     static final Participants getNotContainedParticipants(final Participant[] toCheck, final Participant[] participants) {
