@@ -248,7 +248,7 @@ public class DefaultShareServiceTest extends TestCase {
                 toDelete.add(share.getToken());
             }
         }
-        service.removeShares(toDelete.toArray(new String[toDelete.size()]));
+        service.removeShares(toDelete);
         List<Share> after = service.getAllShares(ctx.getContextId());
         assertEquals("Other shares deleted.", before.size() - toDelete.size(), after.size());
         for (Share share : after) {
@@ -266,7 +266,7 @@ public class DefaultShareServiceTest extends TestCase {
                 toDelete.add(share.getToken());
             }
         }
-        service.removeShares(toDelete.toArray(new String[toDelete.size()]), ctx.getContextId());
+        service.removeShares(toDelete);
         List<Share> after = service.getAllShares(ctx.getContextId());
         assertEquals("Other shares deleted.", before.size() - toDelete.size(), after.size());
         for (Share share : after) {
