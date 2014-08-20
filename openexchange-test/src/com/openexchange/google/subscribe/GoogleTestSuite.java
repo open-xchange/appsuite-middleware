@@ -49,6 +49,7 @@
 
 package com.openexchange.google.subscribe;
 
+import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -64,7 +65,19 @@ public class GoogleTestSuite extends TestSuite {
     }
 
     public static Test suite() {
-        final TestSuite suite = new TestSuite("com.openexchange.google.subscribe.XINGTestSuite");
-        return suite;
+        final TestSuite suite = new TestSuite("com.openexchange.google.subscribe.GoogleTestSuite");
+        
+        TestSetup setup = new TestSetup(suite) {
+            @Override
+            protected void setUp() {
+                GoogleSubscribeTestEnvironment.getInstance().init();
+            }
+            @Override
+            protected void tearDown() throws Exception {
+                GoogleSubscribeTestEnvironment.getInstance().cleanup();
+            }
+        };
+
+        return setup;
     }
 }
