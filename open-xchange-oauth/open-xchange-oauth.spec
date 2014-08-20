@@ -117,6 +117,7 @@ fi
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/facebookoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/googleoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/linkedinoauth.properties
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/msliveconnectoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/msnoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/yahoooauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/xingoauth.properties
