@@ -83,12 +83,41 @@ public abstract class AbstractBoxResourceAccess {
     /**
      * Initializes a new {@link AbstractBoxResourceAccess}.
      */
-    protected AbstractBoxResourceAccess(BoxAccess boxAccess, FileStorageAccount account, Session session) {
+    protected AbstractBoxResourceAccess(BoxAccess boxAccess, FileStorageAccount account, Session session) throws OXException {
         super();
         this.boxAccess = boxAccess;
         this.account = account;
         this.session = session;
         rootFolderId = "0";
+
+        /*-
+         *
+        int keepOn = 1;
+        while (keepOn > 0) {
+            // Touch it...
+            try {
+                boxAccess.getBoxClient().getUsersManager().getCurrentUser(null);
+                keepOn = 0;
+            } catch (BoxRestException e) {
+                throw handleRestError(e);
+            } catch (BoxServerException e) {
+                if (SC_UNAUTHORIZED != e.getStatusCode() || keepOn > 1) {
+                    throw handleHttpResponseError(null, e);
+                }
+
+                keepOn = 2;
+                boxAccess.reinit(session);
+            } catch (AuthFatalFailureException e) {
+                if (keepOn > 1) {
+                    throw BoxExceptionCodes.UNLINKED_ERROR.create(e, new Object[0]);
+                }
+
+                keepOn = 2;
+                boxAccess.reinit(session);
+            }
+        }
+         *
+         */
     }
 
     /**
