@@ -193,8 +193,6 @@ public abstract class AbstractOneDriveResourceAccess {
         try {
             int keepOn = 1;
             while (keepOn > 0) {
-                keepOn = 0;
-
                 DefaultHttpClient httpClient = oneDriveAccess.getHttpClient();
                 HttpGet method = new HttpGet(buildUri("/me/skydrive", initiateQueryString()));
                 request = method;
@@ -213,6 +211,7 @@ public abstract class AbstractOneDriveResourceAccess {
                 } else {
                     JSONObject jResponse = handleHttpResponse(httpResponse, JSONObject.class);
                     rootFolderId = jResponse.optString("id", null);
+                    keepOn = 0;
                 }
             }
         } catch (HttpResponseException e) {
