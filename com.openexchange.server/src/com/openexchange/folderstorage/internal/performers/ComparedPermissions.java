@@ -136,10 +136,8 @@ public class ComparedPermissions {
                 } else {
                     newUsers.put(permission.getEntity(), permission);
                 }
-            }
-
-            // Check for guests among the new permissions
-            if (GuestPermission.class.isAssignableFrom(permission.getClass())) {
+            } else if (GuestPermission.class.isAssignableFrom(permission.getClass())) {
+                // Check for guests among the new permissions
                 addedGuests.add((GuestPermission) permission);
             }
         }

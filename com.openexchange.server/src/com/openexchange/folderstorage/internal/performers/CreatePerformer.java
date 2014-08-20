@@ -81,6 +81,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
+import com.openexchange.share.Share;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -365,9 +366,16 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
             /*
              * setup shares and guest users
              */
-            processAddedGuestPermissions(folderID, plainFolder.getContentType(), type, addedGuests, transactionManager.getConnection());
+            List<Share> addedShares = processAddedGuestPermissions(
+                folderID, plainFolder.getContentType(), type, addedGuests, transactionManager.getConnection());
             /*
-             * update with re-added guest permissions (guest permissions are enriched with real entities now)
+             * enrich previously skipped guest permissions with real entities
+             */
+            for (int i = 0; i < addedShares.size(); i++) {
+                addedGuests.get(i).setEntity(addedShares.get(i).getGuest());
+            }
+            /*
+             * update with re-added guest permissions
              */
             toCreate.setID(folderID);
             toCreate.setLastModified(plainFolder.getLastModified());

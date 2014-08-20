@@ -270,13 +270,16 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
          */
         ComparedPermissions comparedPermissions = new ComparedPermissions(
             session.getContext(), new Permission[0], folder.getPermissions(), UserServiceHolder.requireUserService(), transactionManager.getConnection());
-        if (comparedPermissions.hasRemovedGuests()) {
-            processRemovedGuestPermissions(folder.getID(), folder.getContentType(), comparedPermissions.getRemovedGuests(), transactionManager.getConnection());
-        }
         /*
          * delete folder
          */
         storage.deleteFolder(FolderStorage.REAL_TREE_ID, folder.getID(), storageParameters);
+        /*
+         * process removed guest permissions
+         */
+        if (comparedPermissions.hasRemovedGuests()) {
+            processRemovedGuestPermissions(folder.getID(), folder.getContentType(), comparedPermissions.getRemovedGuests(), transactionManager.getConnection());
+        }
     }
 
     private boolean canDeleteAllObjects(final Permission permission, final String folderId, final String treeId, final FolderStorage folderStorage) throws OXException {
