@@ -109,7 +109,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
             int length = jData.length();
             for (int i = 0; i < length; i++) {
                 JSONObject jItem = jData.getJSONObject(i);
-                if (TYPE_FOLDER.equals(jItem.getString("type"))) {
+                if (isFolder(jItem)) {
                     return true;
                 }
             }
@@ -220,7 +220,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
                         resultsFound = length;
                         for (int i = 0; i < length; i++) {
                             JSONObject jItem = jData.getJSONObject(i);
-                            if (TYPE_FOLDER.equals(jItem.getString("type"))) {
+                            if (isFolder(jItem)) {
                                 folders.add(parseFolder(fid, jItem, httpClient));
                             }
                         }

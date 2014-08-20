@@ -56,8 +56,12 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
@@ -145,11 +149,28 @@ public abstract class AbstractOneDriveResourceAccess {
      */
     protected static final String URL_API_BASE = "https://apis.live.net/v5.0/";
 
-    /** The type constant for a file */
-    protected static final String TYPE_FILE = OneDriveConstants.TYPE_FILE;
+    /** The type constants for a folder */
+    private static final Set<String> TYPES_FOLDER = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(OneDriveConstants.TYPE_FOLDER, OneDriveConstants.TYPE_ALBUM)));
 
-    /** The type constant for a folder */
-    protected static final String TYPE_FOLDER = OneDriveConstants.TYPE_FOLDER;
+    /**
+     * Checks if specified JSON item is a folder
+     *
+     * @param jItem The JSON item to check
+     * @return <code>true</code> if folder; otherwise <code>false</code>
+     */
+    protected static boolean isFolder(JSONObject jItem) {
+        return TYPES_FOLDER.contains(jItem.optString("type", null));
+    }
+
+    /**
+     * Checks if specified JSON item is a file
+     *
+     * @param jItem The JSON item to check
+     * @return <code>true</code> if file; otherwise <code>false</code>
+     */
+    protected static boolean isFile(JSONObject jItem) {
+        return false == isFolder(jItem);
+    }
 
     protected final OneDriveAccess oneDriveAccess;
     protected final Session session;

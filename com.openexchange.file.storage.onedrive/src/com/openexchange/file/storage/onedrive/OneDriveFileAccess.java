@@ -483,7 +483,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                         resultsFound = length;
                         for (int i = 0; i < length; i++) {
                             JSONObject jItem = jData.getJSONObject(i);
-                            if (!TYPE_FOLDER.equals(jItem.getString("type"))) {
+                            if (isFile(jItem)) {
                                 ids.add(jItem.getString("id"));
                             }
                         }
@@ -625,7 +625,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                         resultsFound = length;
                         for (int i = 0; i < length; i++) {
                             JSONObject jItem = jData.getJSONObject(i);
-                            if (!TYPE_FOLDER.equals(jItem.getString("type"))) {
+                            if (isFile(jItem)) {
                                 files.add(new OneDriveFile(folderId, jItem.getString("id"), userId, rootFolderId).parseOneDriveFile(jItem));
                             }
                         }
@@ -676,7 +676,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                         resultsFound = length;
                         for (int i = 0; i < length; i++) {
                             JSONObject jItem = jData.getJSONObject(i);
-                            if (!TYPE_FOLDER.equals(jItem.getString("type"))) {
+                            if (isFile(jItem)) {
                                 files.add(new OneDriveFile(folderId, jItem.getString("id"), userId, rootFolderId).parseOneDriveFile(jItem));
                             }
                         }
@@ -825,7 +825,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                         resultsFound = length;
                         for (int i = 0; i < length; i++) {
                             JSONObject jItem = jData.getJSONObject(i);
-                            if (!TYPE_FOLDER.equals(jItem.getString("type"))) {
+                            if (isFile(jItem)) {
                                 if (null != fid) {
                                     if (fid.equals(jItem.optString("parent_id", null))) {
                                         files.add(new OneDriveFile(folderId, jItem.getString("id"), userId, rootFolderId).parseOneDriveFile(jItem));

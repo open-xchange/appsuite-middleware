@@ -82,4 +82,9 @@ public final class OneDriveConstants implements FileStorageConstants {
      */
     public static final String TYPE_FOLDER = "folder";
 
+    /**
+     * The type constant for an album.
+     */
+    public static final String TYPE_ALBUM = "album";
+
 }
