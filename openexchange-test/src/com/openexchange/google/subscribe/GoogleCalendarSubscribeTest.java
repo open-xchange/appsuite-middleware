@@ -85,7 +85,7 @@ public class GoogleCalendarSubscribeTest extends TestCase {
             CLIENT_SECRET,
             REDIRECT_URI,
             Collections.singletonList("https://www.googleapis.com/auth/calendar.readonly"));
-         String accessToken = googleOAuthClient.getAccessToken(CLIENT_ID, CLIENT_SECRET, authCode, REDIRECT_URI).getAccessToken();
+        String accessToken = googleOAuthClient.getAccessToken(CLIENT_ID, CLIENT_SECRET, authCode, REDIRECT_URI).getAccessToken();
         assertNotNull(accessToken);
     }
 }

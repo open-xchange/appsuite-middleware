@@ -55,7 +55,6 @@ import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.tools.iterator.SearchIterator;
 
-
 /**
  * {@link MockFolderUpdateService}
  *
@@ -69,7 +68,6 @@ public class MockFolderUpdateService implements FolderUpdaterService<Object> {
         // TODO Auto-generated method stub
         return false;
     }
-
 
     @Override
     public boolean usesMultipleStrategy() {

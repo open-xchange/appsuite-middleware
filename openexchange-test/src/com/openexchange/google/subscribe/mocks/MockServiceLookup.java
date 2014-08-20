@@ -55,7 +55,6 @@ import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.ThreadPoolService;
 
-
 /**
  * {@link MockServiceLookup}
  *
@@ -64,12 +63,16 @@ import com.openexchange.threadpool.ThreadPoolService;
 public class MockServiceLookup implements ServiceLookup {
 
     private final ConfigurationService csService;
+
     private final ThreadPoolService threadPoolService;
+
     private final FolderUpdaterRegistry fur;
+
     private AppointmentSqlFactoryService as;
 
     /**
      * Initializes a new {@link MockServiceLookup} with generic services to mock.
+     * 
      * @param csService
      * @param threadPoolService
      * @param fur
@@ -87,7 +90,7 @@ public class MockServiceLookup implements ServiceLookup {
 
     @Override
     public <S> S getService(final Class<? extends S> clazz) {
-        if(clazz.equals(ConfigurationService.class)) {
+        if (clazz.equals(ConfigurationService.class)) {
             return (S) csService;
         }
         return null;
@@ -95,11 +98,11 @@ public class MockServiceLookup implements ServiceLookup {
 
     @Override
     public <S> S getOptionalService(final Class<? extends S> clazz) {
-        if(clazz.equals(ThreadPoolService.class)) {
+        if (clazz.equals(ThreadPoolService.class)) {
             return (S) threadPoolService;
-        } else if(clazz.equals(FolderUpdaterRegistry.class)) {
+        } else if (clazz.equals(FolderUpdaterRegistry.class)) {
             return (S) fur;
-        } else if(clazz.equals(AppointmentSqlFactoryService.class)) {
+        } else if (clazz.equals(AppointmentSqlFactoryService.class)) {
             return (S) as;
         }
         return null;

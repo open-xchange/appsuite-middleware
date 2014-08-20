@@ -51,7 +51,6 @@ package com.openexchange.google.subscribe.utility;
 
 import com.openexchange.junit.Assert;
 
-
 /**
  * {@link AssertField}
  *
@@ -59,6 +58,7 @@ import com.openexchange.junit.Assert;
  * @since v7.6.1
  */
 public class AssertField {
+
     public static void assertFieldIsNull(String fieldDesc, Object valueToCheck) {
         Assert.assertNull("The field " + fieldDesc + " should be empty, but is not ", valueToCheck);
     }

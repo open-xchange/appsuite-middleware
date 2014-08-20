@@ -64,7 +64,6 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 
-
 /**
  * {@link MockAppointmentSQLInterface}
  *
@@ -73,7 +72,8 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.api2.AppointmentSQLInterface#setIncludePrivateAppointments(boolean)
      */
     @Override
@@ -82,7 +82,8 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
 
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.api2.AppointmentSQLInterface#getIncludePrivateAppointments()
      */
     @Override
@@ -91,8 +92,10 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
         return false;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.api2.AppointmentSQLInterface#getAppointmentsBetweenInFolder(int, int[], java.util.Date, java.util.Date, int, com.openexchange.groupware.search.Order)
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.api2.AppointmentSQLInterface#getAppointmentsBetweenInFolder(int, int[], java.util.Date, java.util.Date, int,
+     * com.openexchange.groupware.search.Order)
      */
     @Override
     public SearchIterator<Appointment> getAppointmentsBetweenInFolder(int folderId, int[] cols, Date start, Date end, int orderBy, Order order) throws OXException, SQLException {
@@ -100,8 +103,10 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.api2.AppointmentSQLInterface#getAppointmentsBetweenInFolder(int, int[], java.util.Date, java.util.Date, int, int, int, com.openexchange.groupware.search.Order)
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.api2.AppointmentSQLInterface#getAppointmentsBetweenInFolder(int, int[], java.util.Date, java.util.Date, int,
+     * int, int, com.openexchange.groupware.search.Order)
      */
     @Override
     public SearchIterator<Appointment> getAppointmentsBetweenInFolder(int folderId, int[] cols, Date start, Date end, int from, int to, int orderBy, Order orderDir) throws OXException, SQLException {
@@ -109,7 +114,8 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.api2.AppointmentSQLInterface#hasAppointmentsBetween(java.util.Date, java.util.Date)
      */
     @Override
@@ -118,8 +124,10 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.api2.AppointmentSQLInterface#getAppointmentsWithExternalParticipantBetween(java.lang.String, int[], java.util.Date, java.util.Date, int, com.openexchange.groupware.search.Order)
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.api2.AppointmentSQLInterface#getAppointmentsWithExternalParticipantBetween(java.lang.String, int[],
+     * java.util.Date, java.util.Date, int, com.openexchange.groupware.search.Order)
      */
     @Override
     public List<Appointment> getAppointmentsWithExternalParticipantBetween(String email, int[] cols, Date start, Date end, int orderBy, Order order) throws OXException {
@@ -127,8 +135,10 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.api2.AppointmentSQLInterface#getAppointmentsWithUserBetween(com.openexchange.groupware.ldap.User, int[], java.util.Date, java.util.Date, int, com.openexchange.groupware.search.Order)
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.api2.AppointmentSQLInterface#getAppointmentsWithUserBetween(com.openexchange.groupware.ldap.User, int[],
+     * java.util.Date, java.util.Date, int, com.openexchange.groupware.search.Order)
      */
     @Override
     public List<Appointment> getAppointmentsWithUserBetween(User user, int[] cols, Date start, Date end, int orderBy, Order order) throws OXException {
@@ -136,7 +146,8 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.api2.AppointmentSQLInterface#getModifiedAppointmentsInFolder(int, int[], java.util.Date)
      */
     @Override
@@ -145,8 +156,10 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.api2.AppointmentSQLInterface#getModifiedAppointmentsBetween(int, java.util.Date, java.util.Date, int[], java.util.Date, int, com.openexchange.groupware.search.Order)
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.api2.AppointmentSQLInterface#getModifiedAppointmentsBetween(int, java.util.Date, java.util.Date, int[],
+     * java.util.Date, int, com.openexchange.groupware.search.Order)
      */
     @Override
     public SearchIterator<Appointment> getModifiedAppointmentsBetween(int userId, Date start, Date end, int[] cols, Date since, int orderBy, Order orderDir) throws OXException, SQLException {
@@ -154,8 +167,10 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.api2.AppointmentSQLInterface#getModifiedAppointmentsInFolder(int, java.util.Date, java.util.Date, int[], java.util.Date)
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.api2.AppointmentSQLInterface#getModifiedAppointmentsInFolder(int, java.util.Date, java.util.Date, int[],
+     * java.util.Date)
      */
     @Override
     public SearchIterator<Appointment> getModifiedAppointmentsInFolder(int fid, Date start, Date end, int[] cols, Date since) throws OXException, SQLException {
@@ -163,7 +178,8 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.api2.AppointmentSQLInterface#getDeletedAppointmentsInFolder(int, int[], java.util.Date)
      */
     @Override
@@ -172,8 +188,10 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.api2.AppointmentSQLInterface#searchAppointments(com.openexchange.groupware.search.AppointmentSearchObject, int, com.openexchange.groupware.search.Order, int[])
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.api2.AppointmentSQLInterface#searchAppointments(com.openexchange.groupware.search.AppointmentSearchObject, int,
+     * com.openexchange.groupware.search.Order, int[])
      */
     @Override
     public SearchIterator<Appointment> searchAppointments(AppointmentSearchObject searchObj, int orderBy, Order orderDir, int[] cols) throws OXException {
@@ -181,7 +199,8 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.api2.AppointmentSQLInterface#getObjectById(int)
      */
     @Override
@@ -190,7 +209,8 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.api2.AppointmentSQLInterface#getObjectById(int, int)
      */
     @Override
@@ -199,7 +219,8 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.api2.AppointmentSQLInterface#getObjectsById(int[][], int[])
      */
     @Override
@@ -208,7 +229,8 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.api2.AppointmentSQLInterface#insertAppointmentObject(com.openexchange.groupware.calendar.CalendarDataObject)
      */
     @Override
@@ -217,8 +239,10 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.api2.AppointmentSQLInterface#updateAppointmentObject(com.openexchange.groupware.calendar.CalendarDataObject, int, java.util.Date)
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.api2.AppointmentSQLInterface#updateAppointmentObject(com.openexchange.groupware.calendar.CalendarDataObject,
+     * int, java.util.Date)
      */
     @Override
     public Appointment[] updateAppointmentObject(CalendarDataObject cdao, int inFolder, Date clientLastModified) throws OXException {
@@ -226,8 +250,10 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.api2.AppointmentSQLInterface#updateAppointmentObject(com.openexchange.groupware.calendar.CalendarDataObject, int, java.util.Date, boolean)
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.api2.AppointmentSQLInterface#updateAppointmentObject(com.openexchange.groupware.calendar.CalendarDataObject,
+     * int, java.util.Date, boolean)
      */
     @Override
     public Appointment[] updateAppointmentObject(CalendarDataObject cdao, int inFolder, Date clientLastModified, boolean checkPermissions) throws OXException {
@@ -235,8 +261,10 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.api2.AppointmentSQLInterface#deleteAppointmentObject(com.openexchange.groupware.calendar.CalendarDataObject, int, java.util.Date)
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.api2.AppointmentSQLInterface#deleteAppointmentObject(com.openexchange.groupware.calendar.CalendarDataObject,
+     * int, java.util.Date)
      */
     @Override
     public void deleteAppointmentObject(CalendarDataObject appointmentObject, int inFolder, Date clientLastModified) throws OXException, SQLException {
@@ -244,8 +272,10 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
 
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.api2.AppointmentSQLInterface#deleteAppointmentObject(com.openexchange.groupware.calendar.CalendarDataObject, int, java.util.Date, boolean)
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.api2.AppointmentSQLInterface#deleteAppointmentObject(com.openexchange.groupware.calendar.CalendarDataObject,
+     * int, java.util.Date, boolean)
      */
     @Override
     public void deleteAppointmentObject(CalendarDataObject appointmentObject, int inFolder, Date clientLastModified, boolean checkPermissions) throws OXException, SQLException {
@@ -253,7 +283,8 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
 
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.api2.AppointmentSQLInterface#deleteAppointmentsInFolder(int)
      */
     @Override
@@ -262,7 +293,8 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
 
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.api2.AppointmentSQLInterface#deleteAppointmentsInFolder(int, java.sql.Connection)
      */
     @Override
@@ -271,7 +303,8 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
         return false;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.api2.AppointmentSQLInterface#checkIfFolderContainsForeignObjects(int, int)
      */
     @Override
@@ -280,7 +313,8 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
         return false;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.api2.AppointmentSQLInterface#checkIfFolderContainsForeignObjects(int, int, java.sql.Connection)
      */
     @Override
@@ -289,7 +323,8 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
         return false;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.api2.AppointmentSQLInterface#isFolderEmpty(int, int)
      */
     @Override
@@ -298,7 +333,8 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
         return false;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.api2.AppointmentSQLInterface#isFolderEmpty(int, int, java.sql.Connection)
      */
     @Override
@@ -307,7 +343,8 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
         return false;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.api2.AppointmentSQLInterface#setUserConfirmation(int, int, int, int, java.lang.String)
      */
     @Override
@@ -316,7 +353,8 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.api2.AppointmentSQLInterface#setExternalConfirmation(int, int, java.lang.String, int, java.lang.String)
      */
     @Override
@@ -325,7 +363,8 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.api2.AppointmentSQLInterface#setUserConfirmation(int, int, int, int, int, java.lang.String)
      */
     @Override
@@ -334,7 +373,8 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.api2.AppointmentSQLInterface#setExternalConfirmation(int, int, int, java.lang.String, int, java.lang.String)
      */
     @Override
@@ -343,8 +383,10 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.api2.AppointmentSQLInterface#attachmentAction(int, int, int, com.openexchange.session.Session, com.openexchange.groupware.contexts.Context, int)
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.api2.AppointmentSQLInterface#attachmentAction(int, int, int, com.openexchange.session.Session,
+     * com.openexchange.groupware.contexts.Context, int)
      */
     @Override
     public long attachmentAction(int folderId, int objectId, int userId, Session session, Context c, int numberOfAttachments) throws OXException {
@@ -352,7 +394,8 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
         return 0;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.api2.AppointmentSQLInterface#getFreeBusyInformation(int, int, java.util.Date, java.util.Date)
      */
     @Override
@@ -361,7 +404,8 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.api2.AppointmentSQLInterface#getActiveAppointments(int, java.util.Date, java.util.Date, int[])
      */
     @Override
@@ -370,8 +414,10 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.api2.AppointmentSQLInterface#getAppointmentsBetween(int, java.util.Date, java.util.Date, int[], int, com.openexchange.groupware.search.Order)
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.api2.AppointmentSQLInterface#getAppointmentsBetween(int, java.util.Date, java.util.Date, int[], int,
+     * com.openexchange.groupware.search.Order)
      */
     @Override
     public SearchIterator<Appointment> getAppointmentsBetween(int user_uid, Date start, Date end, int[] cols, int orderBy, Order order) throws OXException, SQLException {
@@ -379,8 +425,10 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.api2.AppointmentSQLInterface#getAppointmentsBetween(java.util.Date, java.util.Date, int[], int, com.openexchange.groupware.search.Order)
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.api2.AppointmentSQLInterface#getAppointmentsBetween(java.util.Date, java.util.Date, int[], int,
+     * com.openexchange.groupware.search.Order)
      */
     @Override
     public SearchIterator<Appointment> getAppointmentsBetween(Date start, Date end, int[] cols, int orderBy, Order order) throws OXException, SQLException {
@@ -388,7 +436,8 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.api2.AppointmentSQLInterface#resolveUid(java.lang.String)
      */
     @Override
@@ -397,7 +446,8 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
         return 0;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.api2.AppointmentSQLInterface#resolveFilename(java.lang.String)
      */
     @Override
@@ -406,7 +456,8 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
         return 0;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.api2.AppointmentSQLInterface#getFolder(int)
      */
     @Override
@@ -415,7 +466,8 @@ public class MockAppointmentSQLInterface implements AppointmentSQLInterface {
         return 0;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.api2.AppointmentSQLInterface#countObjectsInFolder(int)
      */
     @Override

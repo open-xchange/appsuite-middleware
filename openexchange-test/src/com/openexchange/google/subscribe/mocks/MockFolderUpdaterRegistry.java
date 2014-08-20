@@ -54,7 +54,6 @@ import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
 
-
 /**
  * {@link MockFolderUpdaterRegistry}
  *
@@ -64,6 +63,7 @@ import com.openexchange.groupware.generic.TargetFolderDefinition;
 public class MockFolderUpdaterRegistry<T> implements FolderUpdaterRegistry {
 
     private FolderUpdaterService<T> fus;
+
     /**
      * Initializes a new {@link MockFolderUpdaterRegistry}.
      */

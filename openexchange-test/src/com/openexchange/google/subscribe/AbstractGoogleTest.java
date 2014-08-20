@@ -50,7 +50,6 @@
 package com.openexchange.google.subscribe;
 
 import java.util.Collections;
-import java.util.LinkedList;
 import junit.framework.TestCase;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
@@ -60,7 +59,6 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.google.api.client.auth.oauth2.TokenResponse;
-import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
@@ -72,8 +70,6 @@ import com.openexchange.google.subscribe.mocks.MockConfigurationService;
 import com.openexchange.google.subscribe.mocks.MockFolderUpdateService;
 import com.openexchange.google.subscribe.mocks.MockFolderUpdaterRegistry;
 import com.openexchange.google.subscribe.mocks.MockServiceLookup;
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.google.GoogleOAuthServiceMetaData;
@@ -157,7 +153,7 @@ public abstract class AbstractGoogleTest extends TestCase {
             REDIRECT_URL,
             Collections.singletonList("https://www.googleapis.com/auth/calendar.readonly"));
         TokenResponse tokenResponse = googleOAuthClient.getAccessToken(GOOGLE_API_KEY, GOOGLE_API_SECRET, authCode, REDIRECT_URL);
-        
+
         GoogleCredential credential = new GoogleCredential.Builder().setTransport(transport).setJsonFactory(jsonFactory).setClientSecrets(
             GOOGLE_API_KEY,
             GOOGLE_API_SECRET).build();

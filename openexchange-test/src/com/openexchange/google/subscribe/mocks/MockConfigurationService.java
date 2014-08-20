@@ -62,18 +62,18 @@ import com.openexchange.config.PropertyFilter;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.exception.OXException;
 
-
 /**
  * {@link MockConfigurationService}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  * @since v7.6.1
  */
-public class MockConfigurationService implements ConfigurationService{
+public class MockConfigurationService implements ConfigurationService {
+
     private final Map<String, Object> props;
 
-    public MockConfigurationService(String apiKey, String apiSecret, String redirectUrl, int pageSizeCal, int pageSizeContact){
-        props = new HashMap<String,Object>();
+    public MockConfigurationService(String apiKey, String apiSecret, String redirectUrl, int pageSizeCal, int pageSizeContact) {
+        props = new HashMap<String, Object>();
         props.put("com.openexchange.oauth.google.apiKey", apiSecret);
         props.put("com.openexchange.oauth.google.apiSecret", apiKey);
         props.put("com.openexchange.oauth.google.productName", apiKey);
@@ -94,7 +94,7 @@ public class MockConfigurationService implements ConfigurationService{
 
     @Override
     public String getProperty(String name, String defaultValue) {
-        if(props.containsKey(name)) {
+        if (props.containsKey(name)) {
             return (String) props.get(name);
         }
         return defaultValue;
@@ -161,7 +161,7 @@ public class MockConfigurationService implements ConfigurationService{
 
     @Override
     public int getIntProperty(String name, int defaultValue) {
-        if(props.containsKey(name)) {
+        if (props.containsKey(name)) {
             return (Integer) props.get(name);
         }
         return defaultValue;
