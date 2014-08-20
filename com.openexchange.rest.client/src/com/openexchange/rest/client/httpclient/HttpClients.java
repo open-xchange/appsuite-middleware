@@ -172,17 +172,32 @@ public final class HttpClients {
     }
 
     /**
-     * Applies the timeout to given HTTP request.
+     * Applies the default timeout of 30sec to given HTTP request.
      *
      * @param request The HTTP request
      */
-    public static void setRequestTimeout(HttpUriRequest request) {
+    public static void setDefaultRequestTimeout(HttpUriRequest request) {
         if (null == request) {
             return;
         }
         final HttpParams reqParams = request.getParams();
         HttpConnectionParams.setSoTimeout(reqParams, DEFAULT_TIMEOUT_MILLIS);
         HttpConnectionParams.setConnectionTimeout(reqParams, DEFAULT_TIMEOUT_MILLIS);
+    }
+
+    /**
+     * Applies the specified timeout to given HTTP request.
+     *
+     * @param timeoutMillis The timeout in milliseconds to apply
+     * @param request The HTTP request
+     */
+    public static void setRequestTimeout(int timeoutMillis, HttpUriRequest request) {
+        if (null == request || timeoutMillis <= 0) {
+            return;
+        }
+        final HttpParams reqParams = request.getParams();
+        HttpConnectionParams.setSoTimeout(reqParams, timeoutMillis);
+        HttpConnectionParams.setConnectionTimeout(reqParams, timeoutMillis);
     }
 
     /*------------------------------------------------------ CLASSES ------------------------------------------------------*/
