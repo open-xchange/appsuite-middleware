@@ -181,14 +181,4 @@ public interface ShareStorage {
      */
     List<Share> loadSharesForContext(int contextID, StorageParameters parameters) throws OXException;
 
-    /**
-     * Loads all shares that are identified by supplied tokens.
-     *
-     * @param tokens The tokens
-     * @param parameters The storage parameters
-     * @return The shares
-     * @throws OXException On error
-     */
-    List<Share> loadShares(String[] tokens, StorageParameters parameters) throws OXException;
-
 }

@@ -114,30 +114,22 @@ public class DefaultShareService implements ShareService {
     @Override
     public List<Share> getAllShares(Session session) throws OXException {
         List<Share> shares = services.getService(ShareStorage.class).loadSharesCreatedBy(
-            session.getContextId(),
-            session.getUserId(),
-            StorageParameters.NO_PARAMETERS);
+            session.getContextId(), session.getUserId(), StorageParameters.NO_PARAMETERS);
         return removeExpired(session, shares);
     }
 
     @Override
     public int[] deleteSharesForFolder(Session session, String folder, int module, int[] guests) throws OXException {
-        LOG.info(
-            "Deleting shares to guest user(s) {} for folder {} in context {}...",
-            Arrays.toString(guests),
-            folder,
-            session.getContextId());
+        LOG.info("Deleting shares to guest user(s) {} for folder {} in context {}...",
+            Arrays.toString(guests), folder, session.getContextId());
         ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
         try {
             connectionHelper.start();
             int[] guestIDs = deleteSharesForFolder(connectionHelper.getParameters(), session.getContextId(), folder, module, guests);
             deleteGuestUsers(connectionHelper.getConnection(), session.getContextId(), guestIDs);
             connectionHelper.commit();
-            LOG.info(
-                "Shares to guest user(s) {} for folder {} in context {} deleted successfully.",
-                Arrays.toString(guestIDs),
-                folder,
-                session.getContextId());
+            LOG.info("Shares to guest user(s) {} for folder {} in context {} deleted successfully.",
+                Arrays.toString(guestIDs), folder, session.getContextId());
             return guestIDs;
         } finally {
             connectionHelper.finish();
@@ -243,12 +235,7 @@ public class DefaultShareService implements ShareService {
             for (Guest guest : guests) {
                 User guestUser = createGuestUser(connectionHelper.getConnection(), context, sharingUser, permissionBits, guest);
                 Share share = ShareTool.prepareShare(
-                    context.getContextId(),
-                    guestUser,
-                    module,
-                    folder,
-                    guest.getExpires(),
-                    guest.getAuthenticationMode());
+                    context.getContextId(), guestUser, module, folder, guest.getExpires(), guest.getAuthenticationMode());
                 services.getService(ShareStorage.class).storeShare(share, connectionHelper.getParameters());
                 shares.add(share);
             }
@@ -266,8 +253,150 @@ public class DefaultShareService implements ShareService {
         for (Share share : shares) {
             urls.add(ShareTool.getShareUrl(share, protocol, fallbackHostname));
         }
-
         return urls;
+    }
+
+    /**
+     * Gets all shares created in the supplied context.
+     *
+     * @param contextId The contextId
+     * @return The shares
+     * @throws OXException
+     */
+    public List<Share> getAllShares(int contextId) throws OXException {
+        ShareStorage shareStorage = services.getService(ShareStorage.class);
+        ConnectionHelper connectionHelper = new ConnectionHelper(contextId, services, false);
+        try {
+            connectionHelper.start();
+            List<Share> shares = shareStorage.loadSharesForContext(contextId, connectionHelper.getParameters());
+            connectionHelper.commit();
+            return shares;
+        } finally {
+            connectionHelper.finish();
+        }
+    }
+
+    /**
+     * Gets all shares created in the supplied context by supplied user.
+     *
+     * @param contextId The contextId
+     * @param userId The userId
+     * @return The shares
+     * @throws OXException
+     */
+    public List<Share> getAllShares(int contextId, int userId) throws OXException {
+        ShareStorage shareStorage = services.getService(ShareStorage.class);
+        ConnectionHelper connectionHelper = new ConnectionHelper(contextId, services, false);
+        try {
+            connectionHelper.start();
+            List<Share> shares = shareStorage.loadSharesCreatedBy(contextId, userId, connectionHelper.getParameters());
+            connectionHelper.commit();
+            return shares;
+        } finally {
+            connectionHelper.finish();
+        }
+    }
+
+    /**
+     * Remove all shares identified by supplied tokens.
+     *
+     * @param tokens The tokens
+     * @throws OXException If removal fails
+     */
+    public void removeShares(List<String> tokens) throws OXException {
+        /*
+         * order tokens by context
+         */
+        Map<Integer, List<String>> tokensByContextID = new HashMap<Integer, List<String>>();
+        for (String token : tokens) {
+            Integer contextId = Integer.valueOf(ShareTool.extractContextId(token));
+            List<String> tokensInContext = tokensByContextID.get(contextId);
+            if (null == tokensInContext) {
+                tokensInContext = new ArrayList<String>();
+                tokensByContextID.put(contextId, tokensInContext);
+            }
+            tokensInContext.add(token);
+        }
+        /*
+         * delete shares per context
+         */
+        ShareStorage shareStorage = services.getService(ShareStorage.class);
+        for (Map.Entry<Integer, List<String>> entry : tokensByContextID.entrySet()) {
+            int contextID = entry.getKey().intValue();
+            ConnectionHelper connectionHelper = new ConnectionHelper(contextID, services, true);
+            try {
+                connectionHelper.start();
+                List<Share> sharesToRemove = shareStorage.loadShares(contextID, entry.getValue(), connectionHelper.getParameters());
+                removeShares(connectionHelper, sharesToRemove);
+                connectionHelper.commit();
+            } finally {
+                connectionHelper.finish();
+            }
+        }
+    }
+
+    /**
+     * Remove all shares in context identified by supplied tokens.
+     *
+     * @param contextId The contextId
+     * @param tokens The tokens
+     * @throws OXException If removal fails
+     */
+    public void removeShares(int contextId, List<String> tokens) throws OXException {
+        for (String token : tokens) {
+            if (ShareTool.extractContextId(token) != contextId) {
+                throw ShareExceptionCodes.UNKNWON_SHARE.create(token);
+            }
+        }
+        ConnectionHelper connectionHelper = new ConnectionHelper(contextId, services, true);
+        try {
+            connectionHelper.start();
+            ShareStorage shareStorage = services.getService(ShareStorage.class);
+            List<Share> sharesToRemove = shareStorage.loadShares(contextId, tokens, connectionHelper.getParameters());
+            removeShares(connectionHelper, sharesToRemove);
+            connectionHelper.commit();
+        } finally {
+            connectionHelper.finish();
+        }
+    }
+
+    /**
+     * Remove all shares in supplied context.
+     *
+     * @param contextId The contextId
+     * @throws OXException If removal fails.
+     */
+    public void removeShares(int contextId) throws OXException {
+        ConnectionHelper connectionHelper = new ConnectionHelper(contextId, services, true);
+        try {
+            connectionHelper.start();
+            ShareStorage shareStorage = services.getService(ShareStorage.class);
+            List<Share> shares = shareStorage.loadSharesForContext(contextId, connectionHelper.getParameters());
+            removeShares(connectionHelper, shares);
+            connectionHelper.commit();
+        } finally {
+            connectionHelper.finish();
+        }
+    }
+
+    /**
+     * Remove all shares created by supplied user in supplied context.
+     *
+     * @param contextId The contextId
+     * @param userId The userId
+     * @throws OXException If removal fails
+     */
+    public void removeShares(int contextId, int userId) throws OXException {
+        ConnectionHelper connectionHelper = new ConnectionHelper(contextId, services, true);
+        try {
+            connectionHelper.start();
+            ShareStorage shareStorage = services.getService(ShareStorage.class);
+            List<Share> shares = shareStorage.loadSharesCreatedBy(contextId, userId, connectionHelper.getParameters());
+            removeShares(connectionHelper, shares);
+            connectionHelper.commit();
+        } finally {
+            connectionHelper.finish();
+        }
     }
 
     /**
@@ -286,7 +415,14 @@ public class DefaultShareService implements ShareService {
                     LOG.info("Detected expired share ({}): {}", share.getExpires(), share);
                 }
             }
-            removeShares(new ConnectionHelper(session, services, true), expiredShares);
+            ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
+            try {
+                connectionHelper.start();
+                removeShares(connectionHelper, expiredShares);
+                connectionHelper.commit();
+            } finally {
+                connectionHelper.finish();
+            }
         }
         return shares;
     }
@@ -294,7 +430,7 @@ public class DefaultShareService implements ShareService {
     /**
      * Removes the supplied shares, i.e. deletes the share entries from the underlying storage along with the associated guest users.
      *
-     * @param connectionHelper A connection helper
+     * @param connectionHelper A (started) connection helper
      * @param shares The shares to delete
      * @throws OXException
      */
@@ -310,19 +446,13 @@ public class DefaultShareService implements ShareService {
                 guestIDs[i] = share.getGuest();
                 tokens.add(share.getToken());
             }
-            try {
-                connectionHelper.start();
-                /*
-                 * delete guest users and share entries
-                 */
-                deleteGuestUsers(connectionHelper.getConnection(), connectionHelper.getContextID(), guestIDs);
-                ShareStorage shareStorage = services.getService(ShareStorage.class);
-                shareStorage.deleteShares(connectionHelper.getContextID(), tokens, connectionHelper.getParameters());
-                LOG.info("Deleted {} share(s) in context {}: {}", tokens.size(), connectionHelper.getContextID(), tokens);
-                connectionHelper.commit();
-            } finally {
-                connectionHelper.finish();
-            }
+            /*
+             * delete guest users and share entries
+             */
+            deleteGuestUsers(connectionHelper.getConnection(), connectionHelper.getContextID(), guestIDs);
+            ShareStorage shareStorage = services.getService(ShareStorage.class);
+            shareStorage.deleteShares(connectionHelper.getContextID(), tokens, connectionHelper.getParameters());
+            LOG.info("Deleted {} share(s) in context {}: {}", tokens.size(), connectionHelper.getContextID(), tokens);
         }
     }
 
@@ -349,12 +479,8 @@ public class DefaultShareService implements ShareService {
         if (AuthenticationMode.ANONYMOUS == guest.getAuthenticationMode()) {
             LOG.info("Created anonymous guest user with permissions {} in context {}: {}", permissionBits, context.getContextId(), guestID);
         } else {
-            LOG.info(
-                "Created guest user {} with permissions {} in context {}: {}",
-                guestUser.getMail(),
-                permissionBits,
-                context.getContextId(),
-                guestID);
+            LOG.info("Created guest user {} with permissions {} in context {}: {}",
+                guestUser.getMail(), permissionBits, context.getContextId(), guestID);
         }
         return guestUser;
     }
@@ -423,111 +549,6 @@ public class DefaultShareService implements ShareService {
             LOG.info("Deleted {} share(s) for folder {} in context {}: {}", tokens.size(), folder, contextID, tokens);
         }
         return getPrimitiveArray(guestIDs);
-    }
-
-    /**
-     * Gets all shares created in the supplied context.
-     *
-     * @param contextId The contextId
-     * @return The shares
-     * @throws OXException
-     */
-    public List<Share> getAllShares(int contextId) throws OXException {
-        List<Share> result = new ArrayList<Share>();
-        ShareStorage shareStorage = services.getService(ShareStorage.class);
-        ConnectionHelper helper = new ConnectionHelper(contextId, services, false);
-        result.addAll(shareStorage.loadSharesForContext(contextId, helper.getParameters()));
-        return result;
-    }
-
-    /**
-     * Gets all shares created in the supplied context by supplied user.
-     *
-     * @param contextId The contextId
-     * @param userId The userId
-     * @return The shares
-     * @throws OXException
-     */
-    public List<Share> getAllShares(int contextId, int userId) throws OXException {
-        List<Share> result = new ArrayList<Share>();
-        ShareStorage shareStorage = services.getService(ShareStorage.class);
-        ConnectionHelper helper = new ConnectionHelper(contextId, services, false);
-        result.addAll(shareStorage.loadSharesCreatedBy(contextId, userId, helper.getParameters()));
-        return result;
-    }
-
-    /**
-     * Remove all shares identified by supplied tokens.
-     *
-     * @param tokens The tokens
-     * @throws OXException If removal fails
-     */
-    public void removeShares(String[] tokens) throws OXException {
-        Map<Integer, List<String>> shareMap = new HashMap<Integer, List<String>>();
-        for (String token : tokens) {
-            int tokenContextId = ShareTool.extractContextId(token);
-            List<String> shares = shareMap.get(tokenContextId);
-            if (null == shares) {
-                shares = new ArrayList<String>();
-            }
-            shares.add(token);
-            shareMap.put(tokenContextId, shares);
-        }
-        for (Integer tokenContextId : shareMap.keySet()) {
-            ConnectionHelper helper = new ConnectionHelper(tokenContextId, services, true);
-            ShareStorage shareStorage = services.getService(ShareStorage.class);
-            List<Share> shares = shareStorage.loadShares(tokens, helper.getParameters());
-            removeShares(helper, shares);
-        }
-    }
-
-    /**
-     * Remove all shares in context identified by supplied tokens.
-     *
-     * @param contextId The contextId
-     * @param tokens The tokens
-     * @throws OXException If removal fails
-     */
-    public void removeShares(String[] tokens, int contextId) throws OXException {
-        List<String> shares = new ArrayList<String>(tokens.length);
-        for (String token : tokens) {
-            int tokenContextId = ShareTool.extractContextId(token);
-            if (tokenContextId != contextId) {
-                throw ShareExceptionCodes.UNKNWON_SHARE.create(token);
-            }
-            shares.add(token);
-        }
-        ConnectionHelper helper = new ConnectionHelper(contextId, services, true);
-        ShareStorage shareStorage = services.getService(ShareStorage.class);
-        List<Share> sharesToRemove = shareStorage.loadShares(tokens, helper.getParameters());
-        removeShares(helper, sharesToRemove);
-    }
-
-    /**
-     * Remove all shares in supplied context.
-     *
-     * @param contextId The contextId
-     * @throws OXException If removal fails.
-     */
-    public void removeShares(int contextId) throws OXException {
-        ConnectionHelper helper = new ConnectionHelper(contextId, services, true);
-        ShareStorage shareStorage = services.getService(ShareStorage.class);
-        List<Share> shares = shareStorage.loadSharesForContext(contextId, helper.getParameters());
-        removeShares(helper, shares);
-    }
-
-    /**
-     * Remove all shares created by supplied user in supplied context.
-     *
-     * @param contextId The contextId
-     * @param userId The userId
-     * @throws OXException If removal fails
-     */
-    public void removeShares(int contextId, int userId) throws OXException {
-        ConnectionHelper helper = new ConnectionHelper(contextId, services, true);
-        ShareStorage shareStorage = services.getService(ShareStorage.class);
-        List<Share> shares = shareStorage.loadSharesCreatedBy(contextId, userId, helper.getParameters());
-        removeShares(helper, shares);
     }
 
     private static int[] getPrimitiveArray(List<Integer> list) {

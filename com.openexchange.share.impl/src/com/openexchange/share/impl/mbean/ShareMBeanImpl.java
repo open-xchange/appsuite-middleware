@@ -49,6 +49,7 @@
 
 package com.openexchange.share.impl.mbean;
 
+import java.util.Arrays;
 import java.util.List;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
@@ -64,7 +65,7 @@ import com.openexchange.share.impl.DefaultShareService;
  * @since v7.6.1
  */
 public class ShareMBeanImpl extends StandardMBean implements ShareMBean {
-    
+
     private final DefaultShareService shareService;
 
     public ShareMBeanImpl(Class<?> mbeanInterface, DefaultShareService shareService) throws NotCompliantMBeanException {
@@ -84,12 +85,16 @@ public class ShareMBeanImpl extends StandardMBean implements ShareMBean {
 
     @Override
     public void removeShares(String[] tokens) throws OXException {
-        shareService.removeShares(tokens);
+        if (null != tokens && 0 < tokens.length) {
+            shareService.removeShares(Arrays.asList(new String[tokens.length]));
+        }
     }
 
     @Override
     public void removeShares(String[] tokens, int contextId) throws OXException {
-        shareService.removeShares(tokens, contextId);
+        if (null != tokens && 0 < tokens.length) {
+            shareService.removeShares(contextId, Arrays.asList(new String[tokens.length]));
+        }
     }
 
     @Override

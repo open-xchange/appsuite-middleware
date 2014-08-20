@@ -60,7 +60,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
@@ -102,21 +101,6 @@ public class RdbShareStorage implements ShareStorage {
         } finally {
             provider.close();
         }
-    }
-
-    @Override
-    public List<Share> loadShares(String[] tokens, StorageParameters parameters) throws OXException {
-        List<Share> result = new ArrayList<Share>(tokens.length);
-        try {
-            if (0 < tokens.length) {
-                int contextID = extractContextId(tokens[0]);
-                ConnectionProvider provider = getReadProvider(contextID, parameters);
-                result.addAll(selectSharesByTokens(provider.get(), contextID, tokens));
-            }
-        } catch (SQLException e) {
-            throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
-        }
-        return result;
     }
 
     @Override
@@ -589,14 +573,6 @@ public class RdbShareStorage implements ShareStorage {
 
     private ConnectionProvider getWriteProvider(int contextId, StorageParameters parameters) throws OXException {
         return new ConnectionProvider(databaseService, parameters, ConnectionMode.WRITE, contextId);
-    }
-
-    private static final long HIGH_BITS = 0xFFFFFFFF00000000L;
-
-    private static int extractContextId(String token) {
-        UUID uuid = UUIDs.fromUnformattedString(token);
-        long mostSignificantBits = uuid.getMostSignificantBits();
-        return (int) ((mostSignificantBits &= HIGH_BITS) >>> 32);
     }
 
 }
