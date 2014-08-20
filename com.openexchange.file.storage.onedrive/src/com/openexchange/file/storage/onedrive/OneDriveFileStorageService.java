@@ -215,7 +215,7 @@ public final class OneDriveFileStorageService implements AccountAware, OAuthUtil
 
         // Create file storage account instance
         DefaultFileStorageAccount fileStorageAccount = new DefaultFileStorageAccount();
-        fileStorageAccount.setDisplayName("Box.com");
+        fileStorageAccount.setDisplayName("OneDrive");
         fileStorageAccount.setFileStorageService(this);
         fileStorageAccount.setServiceId(SERVICE_ID);
 
@@ -226,7 +226,7 @@ public final class OneDriveFileStorageService implements AccountAware, OAuthUtil
 
         // Add that account
         String accountId = accountManager.addAccount(fileStorageAccount, session);
-        LOG.info("Created Box.com account with ID {} for user {} in context {}", accountId, session.getUserId(), session.getContextId());
+        LOG.info("Created OneDrive account with ID {} for user {} in context {}", accountId, session.getUserId(), session.getContextId());
         return accountId;
     }
 
