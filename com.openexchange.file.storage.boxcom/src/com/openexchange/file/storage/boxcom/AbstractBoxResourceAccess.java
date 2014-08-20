@@ -51,13 +51,12 @@ package com.openexchange.file.storage.boxcom;
 
 import java.io.IOException;
 import org.slf4j.Logger;
-import com.box.boxjavalibv2.BoxClient;
 import com.box.boxjavalibv2.dao.BoxFile;
 import com.box.boxjavalibv2.dao.BoxFolder;
 import com.box.boxjavalibv2.dao.BoxTypedObject;
-import com.box.boxjavalibv2.exceptions.AuthFatalFailureException;
 import com.box.boxjavalibv2.exceptions.BoxServerException;
 import com.box.restclientv2.exceptions.BoxRestException;
+import com.box.restclientv2.exceptions.BoxSDKException;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageFolder;
@@ -124,12 +123,11 @@ public abstract class AbstractBoxResourceAccess {
      * Performs given closure.
      *
      * @param closure The closure to perform
-     * @param boxClient The Box.com client to use
      * @return The return value
      * @throws OXException If performing closure fails
      */
-    protected <R> R perform(BoxClosure<R> closure, BoxClient boxClient) throws OXException {
-        return closure.perform(this, boxClient, session);
+    protected <R> R perform(BoxClosure<R> closure) throws OXException {
+        return closure.perform(this, boxAccess, session);
     }
 
     /**
@@ -203,11 +201,13 @@ public abstract class AbstractBoxResourceAccess {
      *
      * @param e The authentication error
      * @param session The associated session
+     * @return The re-initialized Box.com access
      * @throws OXException If authentication error could not be handled
      */
-    protected void handleAuthError(AuthFatalFailureException e, Session session) throws OXException {
+    protected BoxAccess handleAuthError(BoxSDKException e, Session session) throws OXException {
         try {
             boxAccess.reinit(session);
+            return boxAccess;
         } catch (OXException oxe) {
             Logger logger = org.slf4j.LoggerFactory.getLogger(AbstractBoxResourceAccess.class);
             logger.warn("Could not re-initialize Box.com access", oxe);
