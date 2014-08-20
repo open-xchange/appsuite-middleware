@@ -349,14 +349,19 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
             @Override
             protected InputStream doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
                 HttpRequestBase request = null;
+                boolean error = true;
                 try {
                     HttpGet method = new HttpGet(buildUri(id + "/content", initiateQueryString()));
                     request = method;
 
                     HttpResponse httpResponse = httpClient.execute(method);
-                    return httpResponse.getEntity().getContent();
+                    InputStream content = httpResponse.getEntity().getContent();
+                    error = false;
+                    return content;
                 } finally {
-                    reset(request);
+                    if (error) {
+                        reset(request);
+                    }
                 }
             }
 
@@ -370,6 +375,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
             @Override
             protected InputStream doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
                 HttpRequestBase request = null;
+                boolean error = true;
                 try {
                     HttpGet method = new HttpGet(buildUri(id, initiateQueryString()));
                     request = method;
@@ -388,9 +394,13 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                     request = method;
 
                     HttpResponse httpResponse = httpClient.execute(method);
-                    return httpResponse.getEntity().getContent();
+                    InputStream content = httpResponse.getEntity().getContent();
+                    error = false;
+                    return content;
                 } finally {
-                    reset(request);
+                    if (error) {
+                        reset(request);
+                    }
                 }
             }
 
