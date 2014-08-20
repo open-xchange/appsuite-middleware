@@ -360,6 +360,12 @@ public abstract class AbstractOneDriveResourceAccess {
         return OneDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
     }
 
+    /** Status code (401) indicating that the request requires HTTP authentication. */
+    private static final int SC_UNAUTHORIZED = 401;
+
+    /** Status code (404) indicating that the requested resource is not available. */
+    private static final int SC_NOT_FOUND = 404;
+
     /**
      * Handles given HTTP response error.
      *
@@ -368,10 +374,12 @@ public abstract class AbstractOneDriveResourceAccess {
      * @return The resulting exception
      */
     protected OXException handleHttpResponseError(String identifier, HttpResponseException e) {
-        if (null != identifier && 404 == e.getStatusCode()) {
+        if (null != identifier && SC_NOT_FOUND == e.getStatusCode()) {
             return OneDriveExceptionCodes.NOT_FOUND.create(e, identifier);
         }
-
+        if (SC_UNAUTHORIZED == e.getStatusCode()) {
+            return OneDriveExceptionCodes.UNLINKED_ERROR.create();
+        }
         return OneDriveExceptionCodes.ONE_DRIVE_SERVER_ERROR.create(e, Integer.valueOf(e.getStatusCode()), e.getMessage());
     }
 

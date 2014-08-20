@@ -207,6 +207,12 @@ public abstract class AbstractBoxResourceAccess {
         return BoxExceptionCodes.BOX_ERROR.create(e, e.getMessage());
     }
 
+    /** Status code (401) indicating that the request requires HTTP authentication. */
+    private static final int SC_UNAUTHORIZED = 401;
+
+    /** Status code (404) indicating that the requested resource is not available. */
+    private static final int SC_NOT_FOUND = 404;
+
     /**
      * Handles given HTTP response error.
      *
@@ -215,10 +221,12 @@ public abstract class AbstractBoxResourceAccess {
      * @return The resulting exception
      */
     protected OXException handleHttpResponseError(String identifier, BoxServerException e) {
-        if (null != identifier && 404 == e.getStatusCode()) {
+        if (null != identifier && SC_NOT_FOUND == e.getStatusCode()) {
             return BoxExceptionCodes.NOT_FOUND.create(e, identifier);
         }
-
+        if (SC_UNAUTHORIZED == e.getStatusCode()) {
+            return BoxExceptionCodes.UNLINKED_ERROR.create();
+        }
         return BoxExceptionCodes.BOX_SERVER_ERROR.create(e, Integer.valueOf(e.getStatusCode()), e.getCustomMessage());
     }
 
