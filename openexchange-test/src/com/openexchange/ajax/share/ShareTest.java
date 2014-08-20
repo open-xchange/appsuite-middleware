@@ -50,6 +50,7 @@
 package com.openexchange.ajax.share;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -246,8 +247,13 @@ public abstract class ShareTest extends AbstractAJAXSession {
     @Override
     protected void tearDown() throws Exception {
         if (null != client && null != foldersToDelete && 0 < foldersToDelete.size()) {
-            client.execute(new DeleteRequest(
-                EnumAPI.OX_NEW, false, foldersToDelete.values().toArray(new FolderObject[foldersToDelete.size()])));
+            int[] folderIDs = new int[foldersToDelete.size()];
+            int idx = 0;
+            for (Integer folderID : foldersToDelete.keySet()) {
+                folderIDs[idx++] = folderID.intValue();
+            }
+            Date futureTimestamp = new Date(System.currentTimeMillis() + 1000000);
+            client.execute(new DeleteRequest(EnumAPI.OX_NEW, folderIDs, futureTimestamp));
         }
         super.tearDown();
     }
