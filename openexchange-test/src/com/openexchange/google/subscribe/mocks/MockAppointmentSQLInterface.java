@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.subscribe.google.mocks;
+package com.openexchange.google.subscribe.mocks;
 
 import java.sql.Connection;
 import java.sql.SQLException;

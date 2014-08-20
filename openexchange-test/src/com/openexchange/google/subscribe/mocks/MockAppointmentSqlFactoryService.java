@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.subscribe.google.mocks;
+package com.openexchange.google.subscribe.mocks;
 
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;

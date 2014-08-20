@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.subscribe.google;
+package com.openexchange.google.subscribe;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -65,13 +65,13 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
-import com.openexchange.ajax.subscribe.google.mocks.MockConfigurationService;
-import com.openexchange.ajax.subscribe.google.mocks.MockFolderUpdateService;
-import com.openexchange.ajax.subscribe.google.mocks.MockFolderUpdaterRegistry;
-import com.openexchange.ajax.subscribe.google.mocks.MockServiceLookup;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.google.api.client.GoogleApiClients;
+import com.openexchange.google.subscribe.mocks.MockConfigurationService;
+import com.openexchange.google.subscribe.mocks.MockFolderUpdateService;
+import com.openexchange.google.subscribe.mocks.MockFolderUpdaterRegistry;
+import com.openexchange.google.subscribe.mocks.MockServiceLookup;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
@@ -135,7 +135,7 @@ public abstract class AbstractGoogleTest extends TestCase {
         oasdm = new GoogleOAuthServiceMetaData(sl);
     }
 
-    protected void  subscribeCalendar() throws OXException {
+    protected void subscribeCalendar() throws OXException {
         subscribeService = new GoogleCalendarSubscribeService(oasdm, sl);
         subscribeService.getContent(subscription);
     }

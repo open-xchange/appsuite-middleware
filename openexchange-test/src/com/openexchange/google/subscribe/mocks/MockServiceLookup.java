@@ -47,28 +47,62 @@
  *
  */
 
-package com.openexchange.ajax.subscribe.google.utility;
+package com.openexchange.google.subscribe.mocks;
 
-import com.openexchange.junit.Assert;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
+import com.openexchange.groupware.generic.FolderUpdaterRegistry;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.threadpool.ThreadPoolService;
 
 
 /**
- * {@link AssertField}
+ * {@link MockServiceLookup}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
- * @since v7.6.1
  */
-public class AssertField {
-    public static void assertFieldIsNull(String fieldDesc, Object valueToCheck) {
-        Assert.assertNull("The field " + fieldDesc + " should be empty, but is not ", valueToCheck);
+public class MockServiceLookup implements ServiceLookup {
+
+    private final ConfigurationService csService;
+    private final ThreadPoolService threadPoolService;
+    private final FolderUpdaterRegistry fur;
+    private AppointmentSqlFactoryService as;
+
+    /**
+     * Initializes a new {@link MockServiceLookup} with generic services to mock.
+     * @param csService
+     * @param threadPoolService
+     * @param fur
+     */
+    public MockServiceLookup(final ConfigurationService csService, final ThreadPoolService threadPoolService, final FolderUpdaterRegistry fur) {
+        super();
+        this.csService = csService;
+        this.threadPoolService = threadPoolService;
+        this.fur = fur;
     }
 
-    public static void assertNotNullAndEquals(String fieldDesc, Object expected, Object actual) {
-        Assert.assertNotNull("Could not find expected mapping for " + fieldDesc, actual);
-        Assert.assertEquals("Mapping for field '" + fieldDesc + "' differs -->", expected, actual);
+    public void setAppointmentSQLServiceMock(final AppointmentSqlFactoryService as) {
+        this.as = as;
     }
 
-    public static void assertFieldNotNull(String fieldDesc, Object expected, Object actual) {
-        Assert.assertNotNull("Could not find expected mapping for " + fieldDesc, actual);
+    @Override
+    public <S> S getService(final Class<? extends S> clazz) {
+        if(clazz.equals(ConfigurationService.class)) {
+            return (S) csService;
+        }
+        return null;
     }
+
+    @Override
+    public <S> S getOptionalService(final Class<? extends S> clazz) {
+        if(clazz.equals(ThreadPoolService.class)) {
+            return (S) threadPoolService;
+        } else if(clazz.equals(FolderUpdaterRegistry.class)) {
+            return (S) fur;
+        } else if(clazz.equals(AppointmentSqlFactoryService.class)) {
+            return (S) as;
+        }
+        return null;
+    }
+
 }

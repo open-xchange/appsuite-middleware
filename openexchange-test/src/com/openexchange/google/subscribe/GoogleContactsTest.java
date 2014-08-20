@@ -47,10 +47,10 @@
  *
  */
 
-package com.openexchange.ajax.subscribe.google;
+package com.openexchange.google.subscribe;
 
-import static com.openexchange.ajax.subscribe.google.utility.AssertField.assertFieldIsNull;
-import static com.openexchange.ajax.subscribe.google.utility.AssertField.assertNotNullAndEquals;
+import static com.openexchange.google.subscribe.utility.AssertField.assertFieldIsNull;
+import static com.openexchange.google.subscribe.utility.AssertField.assertNotNullAndEquals;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.LinkedList;

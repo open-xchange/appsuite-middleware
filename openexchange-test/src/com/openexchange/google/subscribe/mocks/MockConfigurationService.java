@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.subscribe.google.mocks;
+package com.openexchange.google.subscribe.mocks;
 
 import java.io.File;
 import java.util.Collections;

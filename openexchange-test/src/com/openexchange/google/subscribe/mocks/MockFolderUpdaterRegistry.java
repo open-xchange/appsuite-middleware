@@ -47,45 +47,33 @@
  *
  */
 
-package com.openexchange.ajax.subscribe.google;
+package com.openexchange.google.subscribe.mocks;
 
-import java.util.Collections;
-import junit.framework.TestCase;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.generic.FolderUpdaterRegistry;
+import com.openexchange.groupware.generic.FolderUpdaterService;
+import com.openexchange.groupware.generic.TargetFolderDefinition;
+
 
 /**
- * {@link GoogleCalendarSubscribeTest}
+ * {@link MockFolderUpdaterRegistry}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
+ * @since v7.6.1
  */
-public class GoogleCalendarSubscribeTest extends TestCase {
+public class MockFolderUpdaterRegistry<T> implements FolderUpdaterRegistry {
 
-    private static final String REDIRECT_URI = "https://oxappsuite.qa.open-xchange.com/ajax/defer";
-
-    private static final String CLIENT_SECRET = "g_3bO5B795OF3naL4PlvntG7";
-
-    private static final String CLIENT_ID = "953985963799-l5osk884lhi476u4nd5bulpgblupm1em.apps.googleusercontent.com";
-
+    private FolderUpdaterService<T> fus;
     /**
-     * Initializes a new {@link GoogleCalendarSubscribeTest}.
+     * Initializes a new {@link MockFolderUpdaterRegistry}.
      */
-    public GoogleCalendarSubscribeTest(final String name) {
-        super(name);
+    public MockFolderUpdaterRegistry(FolderUpdaterService<T> fus) {
+        this.fus = fus;
     }
 
-    /**
-     * Simple example on how to fetch the access token
-     * 
-     * @throws Exception
-     */
-    public void testInit() throws Exception {
-        GoogleOAuthClient googleOAuthClient = new GoogleOAuthClient();
-        googleOAuthClient.login("ewaldbartkowiak@googlemail.com", "BewIbgeawn4");
-        final String authCode = googleOAuthClient.getAuthorizationCode(
-            CLIENT_ID,
-            CLIENT_SECRET,
-            REDIRECT_URI,
-            Collections.singletonList("https://www.googleapis.com/auth/calendar.readonly"));
-         String accessToken = googleOAuthClient.getAccessToken(CLIENT_ID, CLIENT_SECRET, authCode, REDIRECT_URI).getAccessToken();
-        assertNotNull(accessToken);
+    @Override
+    public <T> FolderUpdaterService<T> getFolderUpdater(TargetFolderDefinition target) throws OXException {
+        return (FolderUpdaterService<T>) fus;
     }
+
 }

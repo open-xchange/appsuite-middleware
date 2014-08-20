@@ -47,39 +47,45 @@
  *
  */
 
-package com.openexchange.ajax.subscribe.google.mocks;
+package com.openexchange.google.subscribe;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.generic.FolderUpdaterService;
-import com.openexchange.groupware.generic.TargetFolderDefinition;
-import com.openexchange.tools.iterator.SearchIterator;
-
+import java.util.Collections;
+import junit.framework.TestCase;
 
 /**
- * {@link MockFolderUpdateService}
+ * {@link GoogleCalendarSubscribeTest}
  *
- * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
- * @since v7.6.1
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class MockFolderUpdateService implements FolderUpdaterService<Object> {
+public class GoogleCalendarSubscribeTest extends TestCase {
 
-    @Override
-    public boolean handles(FolderObject folder) {
-        // TODO Auto-generated method stub
-        return false;
+    private static final String REDIRECT_URI = "https://oxappsuite.qa.open-xchange.com/ajax/defer";
+
+    private static final String CLIENT_SECRET = "g_3bO5B795OF3naL4PlvntG7";
+
+    private static final String CLIENT_ID = "953985963799-l5osk884lhi476u4nd5bulpgblupm1em.apps.googleusercontent.com";
+
+    /**
+     * Initializes a new {@link GoogleCalendarSubscribeTest}.
+     */
+    public GoogleCalendarSubscribeTest(final String name) {
+        super(name);
     }
 
-
-    @Override
-    public boolean usesMultipleStrategy() {
-        return false;
+    /**
+     * Simple example on how to fetch the access token
+     * 
+     * @throws Exception
+     */
+    public void testInit() throws Exception {
+        GoogleOAuthClient googleOAuthClient = new GoogleOAuthClient();
+        googleOAuthClient.login("ewaldbartkowiak@googlemail.com", "BewIbgeawn4");
+        final String authCode = googleOAuthClient.getAuthorizationCode(
+            CLIENT_ID,
+            CLIENT_SECRET,
+            REDIRECT_URI,
+            Collections.singletonList("https://www.googleapis.com/auth/calendar.readonly"));
+         String accessToken = googleOAuthClient.getAccessToken(CLIENT_ID, CLIENT_SECRET, authCode, REDIRECT_URI).getAccessToken();
+        assertNotNull(accessToken);
     }
-
-    @Override
-    public void save(SearchIterator<Object> data, TargetFolderDefinition target) throws OXException {
-        // TODO Auto-generated method stub
-
-    }
-
 }

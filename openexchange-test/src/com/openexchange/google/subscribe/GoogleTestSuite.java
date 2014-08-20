@@ -47,33 +47,24 @@
  *
  */
 
-package com.openexchange.ajax.subscribe.google.mocks;
+package com.openexchange.google.subscribe;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.generic.FolderUpdaterRegistry;
-import com.openexchange.groupware.generic.FolderUpdaterService;
-import com.openexchange.groupware.generic.TargetFolderDefinition;
-
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
- * {@link MockFolderUpdaterRegistry}
+ * {@link GoogleTestSuite}
  *
- * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
- * @since v7.6.1
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class MockFolderUpdaterRegistry<T> implements FolderUpdaterRegistry {
+public class GoogleTestSuite extends TestSuite {
 
-    private FolderUpdaterService<T> fus;
-    /**
-     * Initializes a new {@link MockFolderUpdaterRegistry}.
-     */
-    public MockFolderUpdaterRegistry(FolderUpdaterService<T> fus) {
-        this.fus = fus;
+    private GoogleTestSuite() {
+        super();
     }
 
-    @Override
-    public <T> FolderUpdaterService<T> getFolderUpdater(TargetFolderDefinition target) throws OXException {
-        return (FolderUpdaterService<T>) fus;
+    public static Test suite() {
+        final TestSuite suite = new TestSuite("com.openexchange.google.subscribe.XINGTestSuite");
+        return suite;
     }
-
 }
