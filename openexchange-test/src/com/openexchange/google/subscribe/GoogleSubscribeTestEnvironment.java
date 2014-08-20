@@ -51,11 +51,7 @@ package com.openexchange.google.subscribe;
 
 import java.io.IOException;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
-import com.openexchange.ajax.oauth.actions.InitOAuthAccountRequest;
-import com.openexchange.ajax.oauth.actions.InitOAuthAccountResponse;
 import com.openexchange.configuration.GoogleConfig;
 import com.openexchange.configuration.GoogleConfig.Property;
 import com.openexchange.exception.OXException;
@@ -68,10 +64,6 @@ import com.openexchange.exception.OXException;
 public class GoogleSubscribeTestEnvironment {
 
     private static final GoogleSubscribeTestEnvironment INSTANCE = new GoogleSubscribeTestEnvironment();
-
-    private static final String SERVICE_ID = "com.openexchange.oauth.google";
-
-    private static final String ACCOUNT_NAME = "My Google account";
 
     private AJAXClient ajaxClient;
 
@@ -98,8 +90,6 @@ public class GoogleSubscribeTestEnvironment {
             GoogleConfig.init();
             initAJAXClient();
             initGoogleOAuthClient();
-            initGoogleOAuthAccount();
-            createGoogleSubscription();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -120,11 +110,9 @@ public class GoogleSubscribeTestEnvironment {
      * Initialize the client
      * 
      * @throws OXException
-     * @throws JSONException
-     * @throws IOException
      */
-    private void initAJAXClient() throws OXException, IOException, JSONException {
-        ajaxClient = new AJAXClient(User.User1);
+    private void initAJAXClient() throws OXException {
+        ajaxClient = new AJAXClient();
     }
 
     /**
@@ -135,47 +123,6 @@ public class GoogleSubscribeTestEnvironment {
     private void initGoogleOAuthClient() throws Exception {
         oauthClient = new GoogleOAuthClient();
         oauthClient.login(GoogleConfig.getProperty(Property.EMAIL), GoogleConfig.getProperty(Property.PASSWORD));
-    }
-
-    /**
-     * Initialize the google oauth account
-     * 
-     * @throws Exception
-     */
-    private void initGoogleOAuthAccount() throws Exception {
-        final InitOAuthAccountRequest req = new InitOAuthAccountRequest(SERVICE_ID, ACCOUNT_NAME, true);
-        final InitOAuthAccountResponse response = ajaxClient.execute(req);
-        final Object data = response.getData();
-        if (data instanceof JSONObject) {
-            final JSONObject j = (JSONObject) data;
-            final String redirectURI = fetchRedirectURI(j.getString("authUrl"));
-        } else {
-            throw new Exception("Invalid response body: " + data);
-        }
-    }
-
-    private String fetchRedirectURI(final String authURL) throws Exception {
-        String redirectURI = null;
-        final String[] split = authURL.split("\\?");
-        if (split.length != 2) {
-            throw new Exception("Invalid authURL");
-        }
-        final String[] params = split[1].split("&");
-        for (String p : params) {
-            String[] sp = p.split("=");
-            if (sp[0].equals("redirect_uri")) {
-                redirectURI = sp[1];
-                break;
-            }
-        }
-        return redirectURI;
-    }
-
-    /**
-     * Create a google subscription for the current user
-     */
-    private void createGoogleSubscription() {
-
     }
 
     /**
