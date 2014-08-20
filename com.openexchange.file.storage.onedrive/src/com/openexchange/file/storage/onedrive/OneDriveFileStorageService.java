@@ -197,12 +197,12 @@ public final class OneDriveFileStorageService implements AccountAware, OAuthUtil
 
     @Override
     public API getApplicableApi() {
-        return API.BOX_COM;
+        return API.MS_LIVE_CONNECT;
     }
 
     @Override
     public String createUtilizer(OAuthAccount oauthAccount, Session session) throws OXException {
-        if (false == API.BOX_COM.equals(oauthAccount.getAPI())) {
+        if (false == API.MS_LIVE_CONNECT.equals(oauthAccount.getAPI())) {
             return null;
         }
 
