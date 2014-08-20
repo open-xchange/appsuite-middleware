@@ -51,6 +51,7 @@ package com.openexchange.file.storage.onedrive;
 
 import java.text.ParseException;
 import java.util.Collections;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
@@ -153,6 +154,65 @@ public final class OneDriveFolder extends DefaultFileStorageFolder implements Ty
                 }
                 {
                     String modifiedAt = dir.getUpdatedTime();
+                    if (null != modifiedAt) {
+                        try {
+                            lastModifiedDate = (ISO8601DateParser.parse(modifiedAt));
+                        } catch (ParseException e) {
+                            Logger logger = org.slf4j.LoggerFactory.getLogger(OneDriveFile.class);
+                            logger.warn("Could not parse date from: {}", modifiedAt, e);
+                        }
+                    }
+                }
+
+                setSubfolders(hasSubfolders);
+                setSubscribedSubfolders(hasSubfolders);
+            } catch (final RuntimeException e) {
+                throw OneDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
+        }
+        return this;
+    }
+
+    /**
+     * Parses specified Microsoft OneDrive directory.
+     *
+     * @param dir The Microsoft OneDrive directory
+     * @param rootFolderId The identifier of the root folder
+     * @param accountDisplayName The account's display name
+     * @param hasSubfolders Whether this folder has subfolders;<br>
+     *                      e.g. <tt>"GET https://apis.live.net/v5.0/&lt;folder-id&gt;/files?access_token=&lt;access-token&gt;"</tt>
+     * @throws OXException If parsing Microsoft OneDrive directory fails
+     */
+    public OneDriveFolder parseDirEntry(JSONObject dir, String rootFolderId, String accountDisplayName, boolean hasSubfolders) throws OXException {
+        if (null != dir) {
+            try {
+                id = dir.optString("id", null);
+                rootFolder = isRootFolder(id, rootFolderId);
+                b_rootFolder = true;
+
+                if (rootFolder) {
+                    id = FileStorageFolder.ROOT_FULLNAME;
+                    setParentId(null);
+                    setName(null == accountDisplayName ? dir.optString("name", null) : accountDisplayName);
+                } else {
+                    String parentId = dir.optString("parent_id", null);
+                    setParentId(isRootFolder(parentId, rootFolderId) ? FileStorageFolder.ROOT_FULLNAME : parentId);
+                    setName(dir.optString("name", null));
+                }
+
+                {
+                    String createdAt = dir.optString("created_time", null);
+                    if (null != createdAt) {
+                        try {
+                            creationDate = (ISO8601DateParser.parse(createdAt));
+                        } catch (ParseException e) {
+                            Logger logger = org.slf4j.LoggerFactory.getLogger(OneDriveFile.class);
+                            logger.warn("Could not parse date from: {}", createdAt, e);
+                        }
+                    }
+                }
+                {
+                    String modifiedAt = dir.optString("updated_time", null);
                     if (null != modifiedAt) {
                         try {
                             lastModifiedDate = (ISO8601DateParser.parse(modifiedAt));

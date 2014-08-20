@@ -53,6 +53,7 @@ import java.text.ParseException;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
@@ -104,8 +105,8 @@ public final class OneDriveFile extends DefaultFile {
      * @throws OXException If parsing Box file fails
      * @return This Box file
      */
-    public OneDriveFile parseBoxFile(RestFile file) throws OXException {
-        return parseBoxFile(file, null);
+    public OneDriveFile parseOneDriveFile(RestFile file) throws OXException {
+        return parseOneDriveFile(file, null);
     }
 
     /**
@@ -116,7 +117,7 @@ public final class OneDriveFile extends DefaultFile {
      * @throws OXException If parsing Microsoft OneDrive file fails
      * @return This Box file with property set applied
      */
-    public OneDriveFile parseBoxFile(RestFile file, List<Field> fields) throws OXException {
+    public OneDriveFile parseOneDriveFile(RestFile file, List<Field> fields) throws OXException {
         if (null != file) {
             try {
                 final String name = file.getName();
@@ -171,6 +172,92 @@ public final class OneDriveFile extends DefaultFile {
                 }
                 if (set.contains(Field.DESCRIPTION)) {
                     setDescription(file.getDescription());
+                }
+                if (set.contains(Field.VERSION_COMMENT)) {
+                    setVersionComment(null);
+                }
+            } catch (final RuntimeException e) {
+                throw OneDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
+        }
+        return this;
+    }
+
+    /**
+     * Parses specified Microsoft OneDrive file.
+     *
+     * @param file The Microsoft OneDrive file
+     * @param fields The fields to consider
+     * @throws OXException If parsing Microsoft OneDrive file fails
+     * @return This Box file with property set applied
+     */
+    public OneDriveFile parseOneDriveFile(JSONObject jFile) throws OXException {
+        return parseOneDriveFile(jFile, null);
+    }
+
+    /**
+     * Parses specified Microsoft OneDrive file.
+     *
+     * @param file The Microsoft OneDrive file
+     * @param fields The fields to consider
+     * @throws OXException If parsing Microsoft OneDrive file fails
+     * @return This Box file with property set applied
+     */
+    public OneDriveFile parseOneDriveFile(JSONObject jFile, List<Field> fields) throws OXException {
+        if (null != jFile) {
+            try {
+                final String name = jFile.optString("name", null);
+                setTitle(name);
+                setFileName(name);
+                final Set<Field> set = null == fields || fields.isEmpty() ? EnumSet.allOf(Field.class) : EnumSet.copyOf(fields);
+
+                if (set.contains(Field.CREATED)) {
+                    String createdAt = jFile.optString("created_time", null);
+                    if (null != createdAt) {
+                        try {
+                            setCreated(ISO8601DateParser.parse(createdAt));
+                        } catch (ParseException e) {
+                            Logger logger = org.slf4j.LoggerFactory.getLogger(OneDriveFile.class);
+                            logger.warn("Could not parse date from: {}", createdAt, e);
+                        }
+                    }
+                }
+                if (set.contains(Field.LAST_MODIFIED) || set.contains(Field.LAST_MODIFIED_UTC)) {
+                    String modifiedAt = jFile.optString("updated_time", null);
+                    if (null != modifiedAt) {
+                        try {
+                            setLastModified(ISO8601DateParser.parse(modifiedAt));
+                        } catch (ParseException e) {
+                            Logger logger = org.slf4j.LoggerFactory.getLogger(OneDriveFile.class);
+                            logger.warn("Could not parse date from: {}", modifiedAt, e);
+                        }
+                    }
+                }
+                if (set.contains(Field.FILE_MIMETYPE)) {
+                    MimeTypeMap map = Services.getService(MimeTypeMap.class);
+                    String contentType = map.getContentType(name);
+                    setFileMIMEType(contentType);
+                }
+                if (set.contains(Field.FILE_SIZE)) {
+                    long size = jFile.optLong("size", -1L);
+                    if (size >= 0) {
+                        setFileSize(size);
+                    }
+                }
+                if (set.contains(Field.URL)) {
+                    String link = jFile.optString("source", null);
+                    if (null != link) {
+                        setURL(link);
+                    }
+                }
+                if (set.contains(Field.COLOR_LABEL)) {
+                    setColorLabel(0);
+                }
+                if (set.contains(Field.CATEGORIES)) {
+                    setCategories(null);
+                }
+                if (set.contains(Field.DESCRIPTION)) {
+                    setDescription(jFile.optString("description", null));
                 }
                 if (set.contains(Field.VERSION_COMMENT)) {
                     setVersionComment(null);

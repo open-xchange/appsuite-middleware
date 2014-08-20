@@ -52,7 +52,10 @@ package com.openexchange.file.storage.onedrive;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.List;
 import org.apache.http.HttpResponse;
@@ -62,12 +65,14 @@ import org.apache.http.auth.AuthenticationException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.json.JSONValue;
 import org.slf4j.Logger;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -80,6 +85,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.onedrive.access.OneDriveAccess;
 import com.openexchange.file.storage.onedrive.rest.folder.RestFolder;
@@ -141,9 +147,11 @@ public abstract class AbstractOneDriveResourceAccess {
      */
     protected static final String URL_API_BASE = "https://apis.live.net/v5.0/";
 
-    private static final String TYPE_FILE = OneDriveConstants.TYPE_FILE;
+    /** The type constant for a file */
+    protected static final String TYPE_FILE = OneDriveConstants.TYPE_FILE;
 
-    private static final String TYPE_FOLDER = OneDriveConstants.TYPE_FOLDER;
+    /** The type constant for a folder */
+    protected static final String TYPE_FOLDER = OneDriveConstants.TYPE_FOLDER;
 
     protected final OneDriveAccess oneDriveAccess;
     protected final Session session;
@@ -161,9 +169,11 @@ public abstract class AbstractOneDriveResourceAccess {
         this.account = account;
         this.session = session;
 
+        HttpRequestBase request = null;
         try {
             DefaultHttpClient httpClient = oneDriveAccess.getHttpClient();
             HttpGet method = new HttpGet(buildUri("/me/skydrive", initiateQueryString()));
+            request = method;
 
             RestFolderResponse restResponse = handleHttpResponse(httpClient.execute(method), RestFolderResponse.class);
             RestFolder restFolder = restResponse.getData().get(0);
@@ -172,6 +182,25 @@ public abstract class AbstractOneDriveResourceAccess {
             throw handleHttpResponseError(null, e);
         } catch (IOException e) {
             throw handleIOError(e);
+        } finally {
+            if (null != request) {
+                request.releaseConnection();
+            }
+        }
+    }
+
+    /**
+     * Resets given HTTP request
+     *
+     * @param request The HTTP request
+     */
+    protected void reset(HttpRequestBase request) {
+        if (null != request) {
+            try {
+                request.reset();
+            } catch (Exception e) {
+                // Ignore
+            }
         }
     }
 
@@ -212,17 +241,16 @@ public abstract class AbstractOneDriveResourceAccess {
      * @param resourceId The resource identifier
      * @param queryString The query string parameters
      * @return The built URI string
+     * @throws IllegalArgumentException If the given string violates RFC 2396
      */
-    protected String buildUri(String resourceId, List<NameValuePair> queryString) {
-        StringBuilder urlBuilder = new StringBuilder(256);
-        urlBuilder.append(URL_API_BASE);
-        if (null != resourceId) {
-            urlBuilder.append(resourceId);
+    protected URI buildUri(String resourceId, List<NameValuePair> queryString) {
+        try {
+            return new URI("https", null, "apis.live.net", -1, "/v5.0/" + resourceId, null == queryString ? null : URLEncodedUtils.format(queryString, "UTF-8"), null);
+        } catch (URISyntaxException x) {
+            IllegalArgumentException y = new IllegalArgumentException();
+            y.initCause(x);
+            throw y;
         }
-        if (null != queryString) {
-            urlBuilder.append('?').append(URLEncodedUtils.format(queryString, "UTF-8"));
-        }
-        return urlBuilder.toString();
     }
 
     /**
@@ -249,6 +277,7 @@ public abstract class AbstractOneDriveResourceAccess {
      * @throws OXException If an Open-Xchange error occurs
      * @throws ClientProtocolException If a client protocol error occurs
      * @throws IOException If an I/O error occurs
+     * @throws IllegalStateException If content stream cannot be created
      */
     protected <R> R handleHttpResponse(HttpResponse httpResponse, int expectStatusCode, Class<R> clazz) throws OXException, ClientProtocolException, IOException {
         StatusLine statusLine = httpResponse.getStatusLine();
@@ -258,6 +287,13 @@ public abstract class AbstractOneDriveResourceAccess {
 
         if (Void.class.equals(clazz)) {
             return null;
+        }
+        if (JSONObject.class.equals(clazz)) {
+            try {
+                return (R) new JSONObject(new InputStreamReader(httpResponse.getEntity().getContent(), Charsets.UTF_8));
+            } catch (JSONException e) {
+                throw FileStorageExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+            }
         }
         return parseIntoObject(httpResponse.getEntity().getContent(), clazz);
     }
