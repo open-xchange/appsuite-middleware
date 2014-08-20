@@ -54,7 +54,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.scribe.builder.ServiceBuilder;
-import org.scribe.builder.api.BoxApi;
 import org.scribe.builder.api.MsLiveConnectApi;
 import org.scribe.model.Token;
 import org.slf4j.Logger;
@@ -173,7 +172,7 @@ public class OneDriveAccess {
 
     private OAuthAccount recreateTokenIfExpired(boolean considerExpired, OAuthAccount liveconnectOAuthAccount, Session session) throws OXException {
         // Create Scribe Box.com OAuth service
-        final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(BoxApi.class);
+        final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(MsLiveConnectApi.class);
         serviceBuilder.apiKey(liveconnectOAuthAccount.getMetaData().getAPIKey(session)).apiSecret(liveconnectOAuthAccount.getMetaData().getAPISecret(session));
         MsLiveConnectApi.MsLiveConnectService scribeOAuthService = (MsLiveConnectApi.MsLiveConnectService) serviceBuilder.build();
 

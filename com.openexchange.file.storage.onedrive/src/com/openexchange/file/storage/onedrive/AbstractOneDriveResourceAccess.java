@@ -188,23 +188,41 @@ public abstract class AbstractOneDriveResourceAccess {
         this.account = account;
         this.session = session;
 
+        String rootFolderId = null;
         HttpRequestBase request = null;
         try {
-            DefaultHttpClient httpClient = oneDriveAccess.getHttpClient();
-            HttpGet method = new HttpGet(buildUri("/me/skydrive", initiateQueryString()));
-            request = method;
+            int keepOn = 1;
+            while (keepOn > 0) {
+                keepOn = 0;
 
-            JSONObject jResponse = handleHttpResponse(httpClient.execute(method), JSONObject.class);
-            rootFolderId = jResponse.optString("id", null);
+                DefaultHttpClient httpClient = oneDriveAccess.getHttpClient();
+                HttpGet method = new HttpGet(buildUri("/me/skydrive", initiateQueryString()));
+                request = method;
+
+                HttpResponse httpResponse = httpClient.execute(method);
+                if (SC_UNAUTHORIZED == httpResponse.getStatusLine().getStatusCode()) {
+                    if (keepOn > 1) {
+                        throw OneDriveExceptionCodes.UNLINKED_ERROR.create();
+                    }
+
+                    reset(request);
+                    request = null;
+                    keepOn = 2;
+
+                    oneDriveAccess.reinit(session);
+                } else {
+                    JSONObject jResponse = handleHttpResponse(httpResponse, JSONObject.class);
+                    rootFolderId = jResponse.optString("id", null);
+                }
+            }
         } catch (HttpResponseException e) {
             throw handleHttpResponseError(null, e);
         } catch (IOException e) {
             throw handleIOError(e);
         } finally {
-            if (null != request) {
-                request.releaseConnection();
-            }
+            reset(request);
         }
+        this.rootFolderId = rootFolderId;
     }
 
     /**
