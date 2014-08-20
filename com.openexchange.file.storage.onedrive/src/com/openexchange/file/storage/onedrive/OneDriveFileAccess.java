@@ -58,6 +58,7 @@ import java.util.List;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
@@ -183,6 +184,11 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                 @Override
                 protected Void doPerform(DefaultHttpClient httpClient) throws OXException, IOException {
                     try {
+                        HttpPost method = new HttpPost(buildUri(file.getId(), null));
+                        method.addHeader("Authorization", "Bearer " + oneDriveAccess.getAccessToken());
+
+
+
                         OneDriveFile boxfile = boxClient.getFilesManager().getFile(file.getId(), null);
                         checkFileValidity(boxfile);
 
