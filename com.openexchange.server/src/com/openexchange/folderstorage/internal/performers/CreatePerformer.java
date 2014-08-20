@@ -279,10 +279,11 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
              * Create folder dependent on folder is virtual or not
              */
             final String newId;
+            Type targetType = FolderStorage.PUBLIC_ID.equals(parent.getID()) ? PublicType.getInstance() : parent.getType();
             if (FolderStorage.REAL_TREE_ID.equals(toCreate.getTreeID())) {
-                newId = doCreateReal(toCreate, parentId, treeId, parent.getType(), parentStorage, transactionManager);
+                newId = doCreateReal(toCreate, parentId, treeId, targetType, parentStorage, transactionManager);
             } else {
-                newId = doCreateVirtual(toCreate, parentId, treeId, parent.getType(), parentStorage, openedStorages, transactionManager);
+                newId = doCreateVirtual(toCreate, parentId, treeId, targetType, parentStorage, openedStorages, transactionManager);
             }
 
             transactionManager.commit();
