@@ -568,7 +568,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
          * search by one or more filename patterns
          */
         List<String> patterns = extractPatterns(searchTerm);
-        List<File> files = new ArrayList<File>();
+        List<File> files = new LinkedList<File>();
         for (String pattern : patterns) {
             files.addAll(searchInFolder(folderID, pattern));
         }
@@ -591,7 +591,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                 if (FileNameTerm.class.isInstance(nestedTerm)) {
                     patterns.add(((FileNameTerm) nestedTerm).getPattern());
                 } else {
-                    throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create("Search term not supported: " + searchTerm);
+                    throw FileStorageExceptionCodes.SEARCH_TERM_NOT_SUPPORTED.create(searchTerm.getClass().getSimpleName());
                 }
             }
             return patterns;
@@ -605,12 +605,12 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                 if (FileNameTerm.class.isInstance(nestedTerm)) {
                     patternBuilder.append(((FileNameTerm) nestedTerm).getPattern()).append(' ');
                 } else {
-                    throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create("Search term not supported: " + searchTerm);
+                    throw FileStorageExceptionCodes.SEARCH_TERM_NOT_SUPPORTED.create(searchTerm.getClass().getSimpleName());
                 }
             }
             return Collections.singletonList(patternBuilder.toString().trim());
         }
-        throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create("Search term not supported: " + searchTerm);
+        throw FileStorageExceptionCodes.SEARCH_TERM_NOT_SUPPORTED.create(searchTerm.getClass().getSimpleName());
     }
 
     @Override

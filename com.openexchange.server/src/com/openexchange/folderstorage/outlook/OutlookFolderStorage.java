@@ -1621,6 +1621,8 @@ public final class OutlookFolderStorage implements FolderStorage {
                                                 } catch (final OXException e) {
                                                     LOG.error("Could not access account {}", userAccount.getDisplayName(), e);
                                                     storageParameters.addWarning(e);
+                                                } catch (final RuntimeException e) {
+                                                    LOG.error("Could not access account {}", userAccount.getDisplayName(), e);
                                                 } finally {
                                                     accountAccess.close();
                                                     LogProperties.remove(LogProperties.Name.FILE_STORAGE_ACCOUNT_ID);

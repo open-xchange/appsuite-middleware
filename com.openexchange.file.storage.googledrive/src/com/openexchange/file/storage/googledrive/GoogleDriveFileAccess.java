@@ -77,7 +77,9 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.googledrive.access.GoogleDriveAccess;
+import com.openexchange.file.storage.search.AndTerm;
 import com.openexchange.file.storage.search.FileNameTerm;
+import com.openexchange.file.storage.search.OrTerm;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
@@ -717,9 +719,83 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     @Override
     public SearchIterator<File> search(List<String> folderIds, SearchTerm<?> searchTerm, List<Field> fields, Field sort, final SortDirection order, int start, int end) throws OXException {
-        if (FileNameTerm.class.isInstance(searchTerm) && (null == folderIds || 1 == folderIds.size())) {
-            String pattern = ((FileNameTerm) searchTerm).getPattern();
-            return search(pattern, fields, null != folderIds && 1 == folderIds.size() ? folderIds.get(0) : null, sort, order, start, end);
+        if (null != folderIds && 1 != folderIds.size()) {
+            throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create("Can only search in one or all folders");
+        }
+
+        //
+        // https://developers.google.com/drive/web/search-parameters
+        //
+
+        String folderID = null == folderIds ? null : folderIds.get(0);
+        /*
+         * search by one or more filename patterns
+         */
+        List<String> patterns = extractPatterns(searchTerm);
+        List<File> files = new LinkedList<File>();
+        for (String pattern : patterns) {
+            files.addAll(searchByFileNamePattern(pattern, folderID));
+        }
+
+        // Sort collection
+        sort(files, sort, order);
+
+        // Start, end...
+        if ((start != NOT_SET) && (end != NOT_SET)) {
+            final int size = files.size();
+            if ((start) > size) {
+                /*
+                 * Return empty iterator if start is out of range
+                 */
+                return SearchIteratorAdapter.emptyIterator();
+            }
+            /*
+             * Reset end index if out of range
+             */
+            int toIndex = end;
+            if (toIndex >= size) {
+                toIndex = size;
+            }
+            files = files.subList(start, toIndex);
+        }
+
+        return new SearchIteratorAdapter<File>(files.iterator(), files.size());
+    }
+
+    private static List<String> extractPatterns(SearchTerm<?> searchTerm) throws OXException {
+        if (FileNameTerm.class.isInstance(searchTerm)) {
+            /*
+             * single filename pattern
+             */
+            return Collections.singletonList(((FileNameTerm) searchTerm).getPattern());
+        } else if (OrTerm.class.isInstance(searchTerm)) {
+            /*
+             * try multiple filename patterns
+             */
+            List<SearchTerm<?>> nestedTerms = ((OrTerm) searchTerm).getPattern();
+            List<String> patterns = new ArrayList<String>(nestedTerms.size());
+            for (SearchTerm<?> nestedTerm : nestedTerms) {
+                if (FileNameTerm.class.isInstance(nestedTerm)) {
+                    patterns.add(((FileNameTerm) nestedTerm).getPattern());
+                } else {
+                    throw FileStorageExceptionCodes.SEARCH_TERM_NOT_SUPPORTED.create(searchTerm.getClass().getSimpleName());
+                }
+            }
+            return patterns;
+        } else if (AndTerm.class.isInstance(searchTerm)) {
+            /*
+             * construct single filename pattern
+             */
+            List<SearchTerm<?>> nestedTerms = ((AndTerm) searchTerm).getPattern();
+            StringBuilder patternBuilder = new StringBuilder();
+            for (SearchTerm<?> nestedTerm : nestedTerms) {
+                if (FileNameTerm.class.isInstance(nestedTerm)) {
+                    patternBuilder.append(((FileNameTerm) nestedTerm).getPattern()).append(' ');
+                } else {
+                    throw FileStorageExceptionCodes.SEARCH_TERM_NOT_SUPPORTED.create(searchTerm.getClass().getSimpleName());
+                }
+            }
+            return Collections.singletonList(patternBuilder.toString().trim());
         }
         throw FileStorageExceptionCodes.SEARCH_TERM_NOT_SUPPORTED.create(searchTerm.getClass().getSimpleName());
     }
@@ -727,14 +803,54 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     @Override
     public SearchIterator<File> search(String pattern, List<Field> fields, String folderId, Field sort, SortDirection order, int start, int end) throws OXException {
         try {
+            // Search by pattern
+            List<File> files = searchByFileNamePattern(pattern, folderId);
+
+            // Sort collection
+            sort(files, sort, order);
+
+            // Start, end...
+            if ((start != NOT_SET) && (end != NOT_SET)) {
+                final int size = files.size();
+                if ((start) > size) {
+                    /*
+                     * Return empty iterator if start is out of range
+                     */
+                    return SearchIteratorAdapter.emptyIterator();
+                }
+                /*
+                 * Reset end index if out of range
+                 */
+                int toIndex = end;
+                if (toIndex >= size) {
+                    toIndex = size;
+                }
+                files = files.subList(start, toIndex);
+            }
+
+            return new SearchIteratorAdapter<File>(files.iterator(), files.size());
+        } catch (final RuntimeException e) {
+            throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private List<File> searchByFileNamePattern(String pattern, String folderId) throws OXException {
+        try {
             Drive drive = googleDriveAccess.getDrive();
+            String fid = null == folderId ? null : toGoogleDriveFolderId(folderId);
 
             if (isEmpty(pattern)) {
                 // Get all files
                 List<File> files = new LinkedList<File>();
                 {
                     Drive.Files.List list = drive.files().list();
-                    list.setQ(QUERY_STRING_FILES_ONLY_EXCLUDING_TRASH);
+                    {
+                        StringBuilder qBuilder = new StringBuilder(128).append(QUERY_STRING_FILES_ONLY);
+                        if (null != fid) {
+                            qBuilder.append(" and '").append(fid).append("' in parents");
+                        }
+                        list.setQ(qBuilder.toString());
+                    }
 
                     FileList fileList = list.execute();
                     if (!fileList.getItems().isEmpty()) {
@@ -757,34 +873,21 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                     }
                 }
 
-                // Sort collection
-                sort(files, sort, order);
-                if ((start != NOT_SET) && (end != NOT_SET)) {
-                    final int size = files.size();
-                    if ((start) > size) {
-                        /*
-                         * Return empty iterator if start is out of range
-                         */
-                        return SearchIteratorAdapter.emptyIterator();
-                    }
-                    /*
-                     * Reset end index if out of range
-                     */
-                    int toIndex = end;
-                    if (toIndex >= size) {
-                        toIndex = size;
-                    }
-                    files = files.subList(start, toIndex);
-                }
-
-                return new SearchIteratorAdapter<File>(files.iterator(), files.size());
+                return files;
             }
 
             // Search by pattern
             List<File> files = new LinkedList<File>();
             {
-                Drive.Children.List list = drive.children().list(toGoogleDriveFolderId(folderId));
-                list.setQ(new StringBuilder().append("title contains '").append(pattern).append("' and ").append(QUERY_STRING_FILES_ONLY).toString());
+                Drive.Children.List list = drive.children().list(fid);
+
+                {
+                    StringBuilder qBuilder = new StringBuilder(128).append("title contains '").append(pattern).append("' and ").append(QUERY_STRING_FILES_ONLY);
+                    if (null != fid) {
+                        qBuilder.append(" and '").append(fid).append("' in parents");
+                    }
+                    list.setQ(qBuilder.toString());
+                }
 
                 ChildList fileList = list.execute();
                 if (!fileList.getItems().isEmpty()) {
@@ -809,26 +912,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 }
             }
 
-            // Sort collection
-            sort(files, sort, order);
-            if ((start != NOT_SET) && (end != NOT_SET)) {
-                final int size = files.size();
-                if ((start) > size) {
-                    /*
-                     * Return empty iterator if start is out of range
-                     */
-                    return SearchIteratorAdapter.emptyIterator();
-                }
-                /*
-                 * Reset end index if out of range
-                 */
-                int toIndex = end;
-                if (toIndex >= size) {
-                    toIndex = size;
-                }
-                files = files.subList(start, toIndex);
-            }
-            return new SearchIteratorAdapter<File>(files.iterator(), files.size());
+            return files;
         } catch (final HttpResponseException e) {
             throw handleHttpResponseError(null, e);
         } catch (final IOException e) {

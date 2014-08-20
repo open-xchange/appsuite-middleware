@@ -93,6 +93,7 @@ Import-Package: com.google.api.client.auth.oauth2,
  javax.mail,
  javax.mail.internet,
  org.apache.commons.lang,
+ org.json,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j

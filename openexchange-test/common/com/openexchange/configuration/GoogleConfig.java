@@ -69,7 +69,8 @@ public class GoogleConfig extends AbstractConfig {
         CLIENT_ID("com.openexchange.subscribe.google.clientId"),
         CLIENT_SECRET("com.openexchange.subscribe.google.clientSecret"),
         REDIRECT_URI("com.openexchange.subscribe.google.redirectUri"),
-        SCOPES("com.openexchange.subscribe.google.scopes");
+        SCOPES("com.openexchange.subscribe.google.scopes"),
+        PRODUCT_NAME("com.openexchange.subscribe.google.productName");
 
         private String propertyName;
 
@@ -100,8 +101,8 @@ public class GoogleConfig extends AbstractConfig {
         }
     }
 
-    public static String getProperty(final String key) {
-        return singleton.getPropertyInternal(key);
+    public static String getProperty(final Property key) {
+        return singleton.getPropertyInternal(key.getPropertyName());
     }
 
     /* (non-Javadoc)

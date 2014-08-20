@@ -1917,33 +1917,31 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
     }
 
     @Override
-    public UserParticipant[] checkAndModifyAlarm(final CalendarDataObject cdao, UserParticipant check[], final int uid,  final UserParticipant orig[]) {
+    public Set<UserParticipant> checkAndModifyAlarm(final CalendarDataObject cdao, Set<UserParticipant> check, final int uid,  final Set<UserParticipant> orig) {
         if (cdao.containsAlarm()) {
             final UserParticipant up = new UserParticipant(uid);
             if (check == null) {
-                check = new UserParticipant[1];
-                check[0] = up;
+                check = new HashSet<UserParticipant>();
+                check.add(up);
             }
 
             UserParticipant current = null;
-            for (int i = 0; i < check.length; i++) {
-                if (check[i].getIdentifier() == uid) {
-                    current = check[i];
-                    break;
+            for (UserParticipant c : check) {
+                if (c.getIdentifier() == uid) {
+                    current = c;
                 }
             }
             UserParticipant old = null;
-            for (int i = 0; i < orig.length; i++) {
-                if (orig[i].getIdentifier() == uid) {
-                    old = orig[i];
-                    break;
+            for (UserParticipant o : orig) {
+                if (o.getIdentifier() == uid) {
+                    old = o;
                 }
             }
             UserParticipant owner = null;
             if (cdao.getFolderType() == FolderObject.SHARED) {
-                for (int i = 0; i < check.length; i++) {
-                    if (check[i].getIdentifier() == cdao.getSharedFolderOwner()) {
-                        owner = check[i];
+                for (UserParticipant c : check) {
+                    if (c.getIdentifier() == cdao.getSharedFolderOwner()) {
+                        owner = c;
                     }
                 }
             }
@@ -3343,11 +3341,8 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         return ret;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#fillEventInformation(com.openexchange.calendar.CalendarDataObject, com.openexchange.calendar.CalendarDataObject, com.openexchange.groupware.container.UserParticipant[], com.openexchange.groupware.container.UserParticipant[], com.openexchange.groupware.container.UserParticipant[], com.openexchange.groupware.container.Participant[], com.openexchange.groupware.container.Participant[], com.openexchange.groupware.container.Participant[])
-     */
     @Override
-    public void fillEventInformation(final CalendarDataObject cdao, final CalendarDataObject edao, UserParticipant up_event[], final UserParticipant[] new_userparticipants, final UserParticipant[] deleted_userparticipants,final UserParticipant[] modified_userparticipants, Participant p_event[], final Participant new_participants[], final Participant deleted_participants[], final Participant[] modified_participants) {
+    public void fillEventInformation(final CalendarDataObject cdao, final CalendarDataObject edao, UserParticipant up_event[], final Set<UserParticipant> new_userparticipants, final Set<UserParticipant> deleted_userparticipants,final Set<UserParticipant> modified_userparticipants, Participant p_event[], final Set<Participant> new_participants, final Set<Participant> deleted_participants, final Participant[] modified_participants) {
         final Participants pu = new Participants();
         final Participants p = new Participants();
         final UserParticipant oup[] = edao.getUsers();
@@ -3368,21 +3363,21 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         for (int a = 0; a < p_event.length; a++) {
             p.add(p_event[a]);
         }
-        if (new_userparticipants != null && new_userparticipants.length > 0) {
-            for (int a = 0; a < new_userparticipants.length; a++) {
-                pu.add(new_userparticipants[a]);
+        if (new_userparticipants != null && new_userparticipants.size() > 0) {
+            for (UserParticipant up : new_userparticipants) {
+                pu.add(up);
             }
         }
-        if (new_participants != null && new_participants.length > 0) {
-            for (int a = 0; a < new_participants.length; a++) {
-                p.add(new_participants[a]);
+        if (new_participants != null && new_participants.size() > 0) {
+            for (Participant np : new_participants) {
+                p.add(np);
             }
         }
         up_event = pu.getUsers();
-        if (deleted_userparticipants != null && deleted_userparticipants.length > 0) {
+        if (deleted_userparticipants != null && deleted_userparticipants.size() > 0) {
             Arrays.sort(up_event);
-            for (int a  = 0; a < deleted_userparticipants.length; a++) {
-                final int x =  Arrays.binarySearch(up_event, deleted_userparticipants[a]);
+            for (UserParticipant dup : deleted_userparticipants) {
+                final int x =  Arrays.binarySearch(up_event, dup);
                 if (x > -1) {
                     final UserParticipant temp[] = new UserParticipant[up_event.length-1];
                     System.arraycopy(up_event, 0, temp, 0, x);
@@ -3393,7 +3388,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         }
 
         // Apply changes
-        if(modified_userparticipants != null && modified_userparticipants.length > 0) {
+        if(modified_userparticipants != null && modified_userparticipants.size() > 0) {
             for (final UserParticipant participant : modified_userparticipants) {
                 if(participant.getType() == Participant.USER) {
                     for(int i = 0; i < up_event.length; i++) {
@@ -3406,10 +3401,10 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         }
 
         p_event = p.getList();
-        if (deleted_participants != null && deleted_participants.length > 0) {
+        if (deleted_participants != null && deleted_participants.size() > 0) {
             Arrays.sort(p_event);
-            for (int a  = 0; a < deleted_participants.length; a++) {
-                final int x =  Arrays.binarySearch(p_event, deleted_participants[a]);
+            for (Participant dp : deleted_participants) {
+                final int x =  Arrays.binarySearch(p_event, dp);
                 if (x > -1) {
                     final Participant temp[] = new Participant[p_event.length-1];
                     System.arraycopy(p_event, 0, temp, 0, x);

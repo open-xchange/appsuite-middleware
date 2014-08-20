@@ -75,6 +75,8 @@ fi
 %doc com.openexchange.parallels/ChangeLog
 
 %changelog
+* Mon Aug 18 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-08-25
 * Wed Aug 13 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-08-15
 * Tue Aug 05 2014 Marcus Klein <marcus.klein@open-xchange.com>
