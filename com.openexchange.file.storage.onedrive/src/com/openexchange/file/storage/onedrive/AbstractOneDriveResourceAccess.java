@@ -88,8 +88,6 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.onedrive.access.OneDriveAccess;
-import com.openexchange.file.storage.onedrive.rest.folder.RestFolder;
-import com.openexchange.file.storage.onedrive.rest.folder.RestFolderResponse;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.session.Session;
@@ -175,9 +173,8 @@ public abstract class AbstractOneDriveResourceAccess {
             HttpGet method = new HttpGet(buildUri("/me/skydrive", initiateQueryString()));
             request = method;
 
-            RestFolderResponse restResponse = handleHttpResponse(httpClient.execute(method), RestFolderResponse.class);
-            RestFolder restFolder = restResponse.getData().get(0);
-            rootFolderId = restFolder.getId();
+            JSONObject jResponse = handleHttpResponse(httpClient.execute(method), JSONObject.class);
+            rootFolderId = jResponse.optString("id", null);
         } catch (HttpResponseException e) {
             throw handleHttpResponseError(null, e);
         } catch (IOException e) {

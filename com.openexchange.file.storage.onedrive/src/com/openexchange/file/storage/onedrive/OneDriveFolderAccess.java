@@ -74,7 +74,6 @@ import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.onedrive.access.OneDriveAccess;
 import com.openexchange.file.storage.onedrive.http.client.methods.HttpMove;
 import com.openexchange.file.storage.onedrive.rest.folder.RestFolder;
-import com.openexchange.file.storage.onedrive.rest.folder.RestFolderResponse;
 import com.openexchange.session.Session;
 
 /**
@@ -167,8 +166,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
                     HttpGet method = new HttpGet(buildUri(fid, initiateQueryString()));
                     request = method;
 
-                    RestFolderResponse restResponse = handleHttpResponse(httpClient.execute(method), RestFolderResponse.class);
-                    RestFolder restFolder = restResponse.getData().get(0);
+                    RestFolder restFolder = handleHttpResponse(httpClient.execute(method), RestFolder.class);
                     return parseFolder(fid, restFolder, httpClient);
                 } finally {
                     if (null != request) {

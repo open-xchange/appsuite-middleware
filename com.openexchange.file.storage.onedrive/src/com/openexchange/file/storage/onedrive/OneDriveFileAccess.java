@@ -185,8 +185,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                     HttpGet method = new HttpGet(buildUri(id, initiateQueryString()));
                     request = method;
 
-                    RestFileResponse restResponse = handleHttpResponse(httpClient.execute(method), RestFileResponse.class);
-                    RestFile restFile = restResponse.getData().get(0);
+                    RestFile restFile = handleHttpResponse(httpClient.execute(method), RestFile.class);
                     return new OneDriveFile(folderId, id, userId, rootFolderId).parseOneDriveFile(restFile);
                 } finally {
                     if (null != request) {
@@ -484,7 +483,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                         resultsFound = length;
                         for (int i = 0; i < length; i++) {
                             JSONObject jItem = jData.getJSONObject(i);
-                            if (TYPE_FILE.equals(jItem.getString("type"))) {
+                            if (!TYPE_FOLDER.equals(jItem.getString("type"))) {
                                 ids.add(jItem.getString("id"));
                             }
                         }
@@ -626,7 +625,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                         resultsFound = length;
                         for (int i = 0; i < length; i++) {
                             JSONObject jItem = jData.getJSONObject(i);
-                            if (TYPE_FILE.equals(jItem.getString("type"))) {
+                            if (!TYPE_FOLDER.equals(jItem.getString("type"))) {
                                 files.add(new OneDriveFile(folderId, jItem.getString("id"), userId, rootFolderId).parseOneDriveFile(jItem));
                             }
                         }
@@ -677,7 +676,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                         resultsFound = length;
                         for (int i = 0; i < length; i++) {
                             JSONObject jItem = jData.getJSONObject(i);
-                            if (TYPE_FILE.equals(jItem.getString("type"))) {
+                            if (!TYPE_FOLDER.equals(jItem.getString("type"))) {
                                 files.add(new OneDriveFile(folderId, jItem.getString("id"), userId, rootFolderId).parseOneDriveFile(jItem));
                             }
                         }
@@ -826,7 +825,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                         resultsFound = length;
                         for (int i = 0; i < length; i++) {
                             JSONObject jItem = jData.getJSONObject(i);
-                            if (TYPE_FILE.equals(jItem.getString("type"))) {
+                            if (!TYPE_FOLDER.equals(jItem.getString("type"))) {
                                 if (null != fid) {
                                     if (fid.equals(jItem.optString("parent_id", null))) {
                                         files.add(new OneDriveFile(folderId, jItem.getString("id"), userId, rootFolderId).parseOneDriveFile(jItem));
