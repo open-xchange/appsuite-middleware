@@ -239,8 +239,8 @@ public abstract class AbstractOneDriveResourceAccess {
      * @return The return value
      * @throws OXException If performing closure fails
      */
-    protected <R> R perform(OneDriveClosure<R> closure, DefaultHttpClient httpClient) throws OXException {
-        return closure.perform(this, httpClient, session);
+    protected <R> R perform(OneDriveClosure<R> closure) throws OXException {
+        return closure.perform(this, oneDriveAccess.getHttpClient(), session);
     }
 
     /**

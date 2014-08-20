@@ -52,7 +52,6 @@ package com.openexchange.file.storage.onedrive;
 import static com.openexchange.java.Strings.isEmpty;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -153,7 +152,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                 }
 
             }
-        }, oneDriveAccess.getHttpClient()).booleanValue();
+        }).booleanValue();
     }
 
     @Override
@@ -168,7 +167,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                 RestFile restFile = restResponse.getData().get(0);
                 return new OneDriveFile(folderId, id, userId, rootFolderId).parseBoxFile(restFile);
             }
-        }, oneDriveAccess.getHttpClient());
+        });
     }
 
     @Override
@@ -179,11 +178,10 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
     @Override
     public void saveFileMetadata(final File file, long sequenceNumber, List<Field> modifiedFields) throws OXException {
         if (null == modifiedFields || modifiedFields.contains(Field.FILENAME)) {
-            BoxClient boxClient = oneDriveAccess.getBoxClient();
             perform(new OneDriveClosure<Void>() {
 
                 @Override
-                protected Void doPerform(BoxClient boxClient) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+                protected Void doPerform(DefaultHttpClient httpClient) throws OXException, IOException {
                     try {
                         OneDriveFile boxfile = boxClient.getFilesManager().getFile(file.getId(), null);
                         checkFileValidity(boxfile);
@@ -197,7 +195,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                         throw handleHttpResponseError(file.getId(), e);
                     }
                 }
-            }, boxClient);
+            });
         }
     }
 
@@ -208,11 +206,10 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
             throw OneDriveExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
         }
 
-        BoxClient boxClient = oneDriveAccess.getBoxClient();
         return perform(new OneDriveClosure<IDTuple>() {
 
             @Override
-            protected IDTuple doPerform(BoxClient boxClient) throws BoxRestException, BoxServerException, AuthFatalFailureException, OXException {
+            protected IDTuple doPerform(DefaultHttpClient httpClient) throws throws OXException, IOException {
                 try {
                     OneDriveFile boxfile = boxClient.getFilesManager().getFile(source.getId(), null);
                     checkFileValidity(boxfile);
@@ -258,16 +255,15 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                     throw handleHttpResponseError(source.getId(), e);
                 }
             }
-        }, boxClient);
+        });
     }
 
     @Override
     public IDTuple move(final IDTuple source, final String destFolder, long sequenceNumber, File update, List<File.Field> modifiedFields) throws OXException {
-        BoxClient boxClient = oneDriveAccess.getBoxClient();
         return perform(new OneDriveClosure<IDTuple>() {
 
             @Override
-            protected IDTuple doPerform(BoxClient boxClient) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+            protected IDTuple doPerform(DefaultHttpClient httpClient) throws OXException, IOException {
                 try {
                     OneDriveFile boxfile = boxClient.getFilesManager().getFile(source.getId(), null);
                     checkFileValidity(boxfile);
@@ -314,16 +310,15 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                     throw handleHttpResponseError(source.getId(), e);
                 }
             }
-        }, boxClient);
+        });
     }
 
     @Override
     public InputStream getDocument(final String folderId, final String id, final String version) throws OXException {
-        BoxClient boxClient = oneDriveAccess.getBoxClient();
         return perform(new OneDriveClosure<InputStream>() {
 
             @Override
-            protected InputStream doPerform(BoxClient boxClient) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+            protected InputStream doPerform(DefaultHttpClient httpClient) throws OXException, IOException {
                 try {
                     OneDriveFile boxfile = boxClient.getFilesManager().getFile(id, null);
                     checkFileValidity(boxfile);
@@ -334,16 +329,15 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                 }
             }
 
-        }, boxClient);
+        });
     }
 
     @Override
     public InputStream getThumbnailStream(String folderId, final String id, String version) throws OXException {
-        BoxClient boxClient = oneDriveAccess.getBoxClient();
         return perform(new OneDriveClosure<InputStream>() {
 
             @Override
-            protected InputStream doPerform(BoxClient boxClient) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+            protected InputStream doPerform(DefaultHttpClient httpClient) throws OXException, IOException {
                 try {
                     OneDriveFile boxfile = boxClient.getFilesManager().getFile(id, null);
                     checkFileValidity(boxfile);
@@ -357,7 +351,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                 }
             }
 
-        }, boxClient);
+        });
     }
 
     @Override
@@ -369,11 +363,10 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
     public void saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
         final String id = file.getId();
         final String boxFolderId = toBoxFolderId(file.getFolderId());
-        BoxClient boxClient = oneDriveAccess.getBoxClient();
         perform(new OneDriveClosure<Void>() {
 
             @Override
-            protected Void doPerform(BoxClient boxClient) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+            protected Void doPerform(DefaultHttpClient httpClient) throws OXException, IOException {
                 try {
 
                     if (isEmpty(id) || !exists(null, id, CURRENT_VERSION)) {
@@ -397,7 +390,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                     throw OneDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
                 }
             }
-        }, boxClient);
+        });
     }
 
     @Override
@@ -406,7 +399,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
         perform(new OneDriveClosure<Void>() {
 
             @Override
-            protected Void doPerform(BoxClient boxClient) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+            protected Void doPerform(DefaultHttpClient httpClient) throws OXException, IOException {
                 OneDriveFolder folder = boxClient.getFoldersManager().getFolder(toBoxFolderId(folderId), null);
 
                 List<String> toDelete = new LinkedList<String>();
@@ -424,7 +417,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                 return null;
             }
 
-        }, boxClient);
+        });
     }
 
     @Override
@@ -434,11 +427,10 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     @Override
     public List<IDTuple> removeDocument(final List<IDTuple> ids, long sequenceNumber, final boolean hardDelete) throws OXException {
-        BoxClient boxClient = oneDriveAccess.getBoxClient();
         return perform(new OneDriveClosure<List<IDTuple>>() {
 
             @Override
-            protected List<IDTuple> doPerform(BoxClient boxClient) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+            protected List<IDTuple> doPerform(DefaultHttpClient httpClient) throws OXException, IOException {
 
                 for (IDTuple idTuple : ids) {
                     try {
@@ -453,7 +445,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
                 return Collections.emptyList();
             }
-        }, boxClient);
+        });
     }
 
     @Override
@@ -466,11 +458,10 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                 throw OneDriveExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
             }
         }
-        BoxClient boxClient = oneDriveAccess.getBoxClient();
         return perform(new OneDriveClosure<String[]>() {
 
             @Override
-            protected String[] doPerform(BoxClient boxClient) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+            protected String[] doPerform(DefaultHttpClient httpClient) throws OXException, IOException {
 
                 try {
                     OneDriveFile file = boxClient.getFilesManager().getFile(id, null);
@@ -484,7 +475,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                 return new String[0];
             }
 
-        }, boxClient);
+        });
     }
 
     @Override
@@ -504,11 +495,10 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     @Override
     public TimedResult<File> getDocuments(final String folderId) throws OXException {
-        BoxClient boxClient = oneDriveAccess.getBoxClient();
         return perform(new OneDriveClosure<TimedResult<File>>() {
 
             @Override
-            protected TimedResult<File> doPerform(BoxClient boxClient) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+            protected TimedResult<File> doPerform(DefaultHttpClient httpClient) throws OXException, IOException {
 
                 OneDriveFolder boxfolder = boxClient.getFoldersManager().getFolder(toBoxFolderId(folderId), null);
                 IBoxFilesManager filesManager = boxClient.getFilesManager();
@@ -545,7 +535,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
                 return new FileTimedResult(files);
             }
-        }, boxClient);
+        });
     }
 
     @Override
@@ -555,11 +545,10 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     @Override
     public TimedResult<File> getDocuments(final String folderId, List<Field> fields, final Field sort, final SortDirection order) throws OXException {
-        BoxClient boxClient = oneDriveAccess.getBoxClient();
         return perform(new OneDriveClosure<TimedResult<File>>() {
 
             @Override
-            protected TimedResult<File> doPerform(BoxClient boxClient) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+            protected TimedResult<File> doPerform(DefaultHttpClient httpClient) throws OXException, IOException {
 
                 OneDriveFolder boxfolder = boxClient.getFoldersManager().getFolder(toBoxFolderId(folderId), null);
                 IBoxFilesManager filesManager = boxClient.getFilesManager();
@@ -599,23 +588,22 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
                 return new FileTimedResult(files);
             }
-        }, boxClient);
+        });
     }
 
     @Override
     public TimedResult<File> getVersions(final String folderId, final String id) throws OXException {
-        BoxClient boxClient = oneDriveAccess.getBoxClient();
         return perform(new OneDriveClosure<TimedResult<File>>() {
 
             @Override
-            protected TimedResult<File> doPerform(BoxClient boxClient) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+            protected TimedResult<File> doPerform(DefaultHttpClient httpClient) throws OXException, IOException {
 
                 OneDriveFile boxfile = boxClient.getFilesManager().getFile(id, null);
                 List<File> files = Collections.<File> singletonList(new com.openexchange.file.storage.onedrive.OneDriveFile(folderId, id, userId, rootFolderId).parseBoxFile(boxfile));
 
                 return new FileTimedResult(files);
             }
-        }, boxClient);
+        });
     }
 
     @Override
@@ -629,23 +617,22 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
         return perform(new OneDriveClosure<TimedResult<File>>() {
 
             @Override
-            protected TimedResult<File> doPerform(BoxClient boxClient) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+            protected TimedResult<File> doPerform(DefaultHttpClient httpClient) throws OXException, IOException {
 
                 OneDriveFile boxfile = boxClient.getFilesManager().getFile(id, null);
                 List<File> files = Collections.<File> singletonList(new com.openexchange.file.storage.onedrive.OneDriveFile(folderId, id, userId, rootFolderId).parseBoxFile(boxfile));
 
                 return new FileTimedResult(files);
             }
-        }, boxClient);
+        });
     }
 
     @Override
     public TimedResult<File> getDocuments(final List<IDTuple> ids, List<Field> fields) throws OXException {
-        BoxClient boxClient = oneDriveAccess.getBoxClient();
         return perform(new OneDriveClosure<TimedResult<File>>() {
 
             @Override
-            protected TimedResult<File> doPerform(BoxClient boxClient) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+            protected TimedResult<File> doPerform(DefaultHttpClient httpClient) throws OXException, IOException {
 
                 List<File> files = new LinkedList<File>();
                 for (IDTuple id : ids) {
@@ -655,7 +642,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
                 return new FileTimedResult(files);
             }
-        }, boxClient);
+        });
     }
 
     private static final SearchIterator<File> EMPTY_ITER = SearchIteratorAdapter.emptyIterator();
@@ -681,11 +668,10 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     @Override
     public SearchIterator<File> search(final String pattern, List<Field> fields, final String folderId, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
-        BoxClient boxClient = oneDriveAccess.getBoxClient();
         return perform(new OneDriveClosure<SearchIterator<File>>() {
 
             @Override
-            protected SearchIterator<File> doPerform(BoxClient boxClient) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+            protected SearchIterator<File> doPerform(DefaultHttpClient httpClient) throws OXException, IOException {
 
                 List<File> files = new LinkedList<File>();
 
@@ -735,7 +721,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                 return new SearchIteratorAdapter<File>(files.iterator(), files.size());
             }
 
-        }, boxClient);
+        });
     }
 
     @Override
