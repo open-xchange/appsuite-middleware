@@ -52,7 +52,9 @@ package com.openexchange.file.storage.onedrive;
 import java.io.IOException;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONException;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.session.Session;
 
 
@@ -77,9 +79,10 @@ public abstract class OneDriveClosure<R> {
      * @param httpClient The HTTP client to use
      * @return The return value
      * @throws OXException If an Open-Xchange error occurred
+     * @throws JSONException If a JSON error occurs
      * @throws IOException If an I/O error occurred
      */
-    protected abstract R doPerform(DefaultHttpClient httpClient) throws OXException, IOException;
+    protected abstract R doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException;
 
     /**
      * Performs this closure's operation.
@@ -109,6 +112,8 @@ public abstract class OneDriveClosure<R> {
             throw resourceAccess.handleHttpResponseError(null, e);
         } catch (IOException e) {
             throw resourceAccess.handleIOError(e);
+        } catch (JSONException e) {
+            throw FileStorageExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw OneDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }

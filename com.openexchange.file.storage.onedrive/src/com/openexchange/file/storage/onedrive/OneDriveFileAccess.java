@@ -59,7 +59,10 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -76,6 +79,7 @@ import com.openexchange.file.storage.search.FileNameTerm;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.java.Charsets;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -185,19 +189,16 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                 protected Void doPerform(DefaultHttpClient httpClient) throws OXException, IOException {
                     try {
                         HttpPost method = new HttpPost(buildUri(file.getId(), null));
-                        method.addHeader("Authorization", "Bearer " + oneDriveAccess.getAccessToken());
+                        method.setHeader("Authorization", "Bearer " + oneDriveAccess.getAccessToken());
+                        method.setHeader("Content-Type", "application/json");
 
+                        byte[] bytes = new JSONObject(2).put("name", file.getFileName()).toString().getBytes(Charsets.UTF_8);
+                        method.setEntity(new ByteArrayEntity(bytes, ContentType.APPLICATION_JSON));
 
-
-                        OneDriveFile boxfile = boxClient.getFilesManager().getFile(file.getId(), null);
-                        checkFileValidity(boxfile);
-
-                        BoxFileRequestObject requestObject = BoxFileRequestObject.getRequestObject();
-                        requestObject.setName(file.getFileName());
-                        boxClient.getFilesManager().updateFileInfo(file.getId(), requestObject);
+                        handleHttpResponse(httpClient.execute(method), Void.class);
 
                         return null;
-                    } catch (final BoxServerException e) {
+                    } catch (HttpResponseException e) {
                         throw handleHttpResponseError(file.getId(), e);
                     }
                 }
@@ -257,7 +258,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                     OneDriveFile copiedFile = boxClient.getFilesManager().copyFile(source.getId(), reqObj);
 
                     return new IDTuple(destFolder, copiedFile.getId());
-                } catch (final BoxServerException e) {
+                } catch (HttpResponseException e) {
                     throw handleHttpResponseError(source.getId(), e);
                 }
             }
@@ -312,7 +313,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                     OneDriveFile movedFile = boxClient.getFilesManager().updateFileInfo(source.getId(), reqObj);
 
                     return new IDTuple(destFolder, movedFile.getId());
-                } catch (final BoxServerException e) {
+                } catch (HttpResponseException e) {
                     throw handleHttpResponseError(source.getId(), e);
                 }
             }
@@ -330,7 +331,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                     checkFileValidity(boxfile);
 
                     return boxClient.getFilesManager().downloadFile(id, null);
-                } catch (final BoxServerException e) {
+                } catch (HttpResponseException e) {
                     throw handleHttpResponseError(id, e);
                 }
             }
@@ -352,7 +353,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                     BoxThumbnail thumbnail = boxClient.getFilesManager().getThumbnail(id, null, reqObj);
 
                     return thumbnail.getContent();
-                } catch (final BoxServerException e) {
+                } catch (HttpResponseException e) {
                     throw handleHttpResponseError(id, e);
                 }
             }
@@ -442,7 +443,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                     try {
                         OneDriveFile file = boxClient.getFilesManager().getFile(idTuple.getId(), null);
                         boxClient.getFilesManager().deleteFile(idTuple.getId(), null);
-                    } catch (BoxServerException e) {
+                    } catch (HttpResponseException e) {
                         if (404 != e.getStatusCode()) {
                             throw e;
                         }
@@ -472,7 +473,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                 try {
                     OneDriveFile file = boxClient.getFilesManager().getFile(id, null);
                     boxClient.getFilesManager().deleteFile(id, null);
-                } catch (BoxServerException e) {
+                } catch (HttpResponseException e) {
                     if (404 != e.getStatusCode()) {
                         throw e;
                     }

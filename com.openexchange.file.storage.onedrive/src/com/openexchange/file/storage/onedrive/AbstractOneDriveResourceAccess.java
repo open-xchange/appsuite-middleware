@@ -191,7 +191,7 @@ public abstract class AbstractOneDriveResourceAccess {
         if (null != resourceId) {
             urlBuilder.append(resourceId);
         }
-        if (null == queryString) {
+        if (null != queryString) {
             urlBuilder.append('?').append(URLEncodedUtils.format(queryString, "UTF-8"));
         }
         return urlBuilder.toString();
@@ -228,6 +228,9 @@ public abstract class AbstractOneDriveResourceAccess {
             throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
         }
 
+        if (Void.class.equals(clazz)) {
+            return null;
+        }
         return parseIntoObject(httpResponse.getEntity().getContent(), clazz);
     }
 
