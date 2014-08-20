@@ -102,10 +102,6 @@ public abstract class AbstractGoogleTest extends TestCase {
 
     private static final String GOOGLE_API_SECRET = "";
 
-    private static final String ACCESS_TOKEN = "";
-
-    private static final String REFRESH_TOKEN = "";
-
     private Subscription subscription;
 
     private SubscribeService subscribeService;
