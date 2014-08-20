@@ -47,24 +47,39 @@
  *
  */
 
-package com.openexchange.subscribe.google.mocks;
+package com.openexchange.ajax.subscribe.google.mocks;
 
-import com.openexchange.api2.AppointmentSQLInterface;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.session.Session;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.generic.FolderUpdaterService;
+import com.openexchange.groupware.generic.TargetFolderDefinition;
+import com.openexchange.tools.iterator.SearchIterator;
 
 
 /**
- * {@link MockAppointmentSqlFactoryService}
+ * {@link MockFolderUpdateService}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  * @since v7.6.1
  */
-public class MockAppointmentSqlFactoryService implements AppointmentSqlFactoryService {
+public class MockFolderUpdateService implements FolderUpdaterService<Object> {
 
     @Override
-    public AppointmentSQLInterface createAppointmentSql(Session session) {
-        return new MockAppointmentSQLInterface();
+    public boolean handles(FolderObject folder) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+
+    @Override
+    public boolean usesMultipleStrategy() {
+        return false;
+    }
+
+    @Override
+    public void save(SearchIterator<Object> data, TargetFolderDefinition target) throws OXException {
+        // TODO Auto-generated method stub
+
     }
 
 }

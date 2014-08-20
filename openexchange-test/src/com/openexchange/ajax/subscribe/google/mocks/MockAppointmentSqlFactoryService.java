@@ -47,62 +47,23 @@
  *
  */
 
-package com.openexchange.subscribe.google.mocks;
+package com.openexchange.ajax.subscribe.google.mocks;
 
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.generic.FolderUpdaterRegistry;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.threadpool.ThreadPoolService;
-
+import com.openexchange.session.Session;
 
 /**
- * {@link MockServiceLookup}
+ * {@link MockAppointmentSqlFactoryService}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
+ * @since v7.6.1
  */
-public class MockServiceLookup implements ServiceLookup {
-
-    private final ConfigurationService csService;
-    private final ThreadPoolService threadPoolService;
-    private final FolderUpdaterRegistry fur;
-    private AppointmentSqlFactoryService as;
-
-    /**
-     * Initializes a new {@link MockServiceLookup} with generic services to mock.
-     * @param csService
-     * @param threadPoolService
-     * @param fur
-     */
-    public MockServiceLookup(final ConfigurationService csService, final ThreadPoolService threadPoolService, final FolderUpdaterRegistry fur) {
-        super();
-        this.csService = csService;
-        this.threadPoolService = threadPoolService;
-        this.fur = fur;
-    }
-
-    public void setAppointmentSQLServiceMock(final AppointmentSqlFactoryService as) {
-        this.as = as;
-    }
+public class MockAppointmentSqlFactoryService implements AppointmentSqlFactoryService {
 
     @Override
-    public <S> S getService(final Class<? extends S> clazz) {
-        if(clazz.equals(ConfigurationService.class)) {
-            return (S) csService;
-        }
-        return null;
-    }
-
-    @Override
-    public <S> S getOptionalService(final Class<? extends S> clazz) {
-        if(clazz.equals(ThreadPoolService.class)) {
-            return (S) threadPoolService;
-        } else if(clazz.equals(FolderUpdaterRegistry.class)) {
-            return (S) fur;
-        } else if(clazz.equals(AppointmentSqlFactoryService.class)) {
-            return (S) as;
-        }
-        return null;
+    public AppointmentSQLInterface createAppointmentSql(Session session) {
+        return new MockAppointmentSQLInterface();
     }
 
 }

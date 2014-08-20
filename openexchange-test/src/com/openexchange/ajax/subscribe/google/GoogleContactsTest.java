@@ -47,13 +47,14 @@
  *
  */
 
-package com.openexchange.subscribe.google;
+package com.openexchange.ajax.subscribe.google;
 
-import static com.openexchange.subscribe.google.utility.AssertField.assertFieldIsNull;
-import static com.openexchange.subscribe.google.utility.AssertField.assertNotNullAndEquals;
+import static com.openexchange.ajax.subscribe.google.utility.AssertField.assertFieldIsNull;
+import static com.openexchange.ajax.subscribe.google.utility.AssertField.assertNotNullAndEquals;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.LinkedList;
+import java.util.List;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
@@ -70,8 +71,8 @@ public class GoogleContactsTest extends AbstractGoogleTest {
 
     public void testContacts() throws Exception {
         try {
-            LinkedList<Contact> contacts = getGoogleContacts();
-
+            subscribeContacts();
+            List<Contact> contacts = new LinkedList<Contact>();
             assertFalse("Received an empty contact list", contacts.isEmpty());
 
             //represents a full supported contact mapping

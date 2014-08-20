@@ -47,11 +47,11 @@
  *
  */
 
-package com.openexchange.subscribe.google;
+package com.openexchange.ajax.subscribe.google;
 
-import static com.openexchange.subscribe.google.utility.AssertField.assertFieldIsNull;
-import static com.openexchange.subscribe.google.utility.AssertField.assertFieldNotNull;
-import static com.openexchange.subscribe.google.utility.AssertField.assertNotNullAndEquals;
+import static com.openexchange.ajax.subscribe.google.utility.AssertField.assertFieldIsNull;
+import static com.openexchange.ajax.subscribe.google.utility.AssertField.assertFieldNotNull;
+import static com.openexchange.ajax.subscribe.google.utility.AssertField.assertNotNullAndEquals;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
@@ -60,6 +60,8 @@ import java.util.TimeZone;
 import org.mockito.Matchers;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import com.openexchange.ajax.subscribe.google.mocks.MockAppointmentSqlFactoryService;
+import com.openexchange.ajax.subscribe.google.mocks.MockServiceLookup;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -67,8 +69,6 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.participants.ConfirmStatus;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
-import com.openexchange.subscribe.google.mocks.MockAppointmentSqlFactoryService;
-import com.openexchange.subscribe.google.mocks.MockServiceLookup;
 import com.openexchange.user.SimUserService;
 import com.openexchange.user.UserService;
 
@@ -83,8 +83,10 @@ import com.openexchange.user.UserService;
 public class GoogleCalendarTest extends AbstractGoogleTest {
     public void testCalendar() throws Exception {
         try {
-            LinkedList<CalendarDataObject> calendarObjects = getGoogleCalendar();
+            subscribeCalendar();
 
+            List<CalendarDataObject> calendarObjects = new LinkedList<CalendarDataObject>();
+            
             // appointments for testing
             final String singleAppointment = "Single appointment | 29 Jan 2014";
             boolean successSingleAppointment = false;

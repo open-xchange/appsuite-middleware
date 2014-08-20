@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.subscribe.google;
+package com.openexchange.ajax.subscribe.google;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -65,6 +65,10 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.openexchange.ajax.subscribe.google.mocks.MockConfigurationService;
+import com.openexchange.ajax.subscribe.google.mocks.MockFolderUpdateService;
+import com.openexchange.ajax.subscribe.google.mocks.MockFolderUpdaterRegistry;
+import com.openexchange.ajax.subscribe.google.mocks.MockServiceLookup;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.google.api.client.GoogleApiClients;
@@ -76,10 +80,8 @@ import com.openexchange.oauth.google.GoogleOAuthServiceMetaData;
 import com.openexchange.session.Session;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.google.mocks.MockConfigurationService;
-import com.openexchange.subscribe.google.mocks.MockFolderUpdateService;
-import com.openexchange.subscribe.google.mocks.MockFolderUpdaterRegistry;
-import com.openexchange.subscribe.google.mocks.MockServiceLookup;
+import com.openexchange.subscribe.google.GoogleCalendarSubscribeService;
+import com.openexchange.subscribe.google.GoogleContactSubscribeService;
 import com.openexchange.threadpool.SimThreadPoolService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.session.SimServerSession;
@@ -133,14 +135,14 @@ public abstract class AbstractGoogleTest extends TestCase {
         oasdm = new GoogleOAuthServiceMetaData(sl);
     }
 
-    protected LinkedList<CalendarDataObject> getGoogleCalendar() throws OXException {
+    protected void  subscribeCalendar() throws OXException {
         subscribeService = new GoogleCalendarSubscribeService(oasdm, sl);
-        return (LinkedList<CalendarDataObject>) subscribeService.getContent(subscription);
+        subscribeService.getContent(subscription);
     }
 
-    protected LinkedList<Contact> getGoogleContacts() throws OXException {
+    protected void subscribeContacts() throws OXException {
         subscribeService = new GoogleContactSubscribeService(oasdm, sl);
-        return (LinkedList<Contact>) subscribeService.getContent(subscription);
+        subscribeService.getContent(subscription);
     }
 
     private void prepareMockitoMocks() throws Exception {

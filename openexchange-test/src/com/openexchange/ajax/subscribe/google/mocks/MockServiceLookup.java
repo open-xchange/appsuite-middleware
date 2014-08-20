@@ -47,45 +47,62 @@
  *
  */
 
-package com.openexchange.subscribe.google;
+package com.openexchange.ajax.subscribe.google.mocks;
 
-import java.util.Collections;
-import junit.framework.TestCase;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
+import com.openexchange.groupware.generic.FolderUpdaterRegistry;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.threadpool.ThreadPoolService;
+
 
 /**
- * {@link GoogleCalendarSubscribeTest}
+ * {@link MockServiceLookup}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class GoogleCalendarSubscribeTest extends TestCase {
+public class MockServiceLookup implements ServiceLookup {
 
-    private static final String REDIRECT_URI = "http://google.oxoe.int/ajax/defer";
-
-    private static final String CLIENT_SECRET = "Fdu5CNCR2FuAMJ_G9HdkRtfw";
-
-    private static final String CLIENT_ID = "307697290778-iovilfb6pkh5bmi7c8p10rnmg4oglt80.apps.googleusercontent.com";
-
-    /**
-     * Initializes a new {@link GoogleCalendarSubscribeTest}.
-     */
-    public GoogleCalendarSubscribeTest(final String name) {
-        super(name);
-    }
+    private final ConfigurationService csService;
+    private final ThreadPoolService threadPoolService;
+    private final FolderUpdaterRegistry fur;
+    private AppointmentSqlFactoryService as;
 
     /**
-     * Simple example on how to fetch the access token
-     * 
-     * @throws Exception
+     * Initializes a new {@link MockServiceLookup} with generic services to mock.
+     * @param csService
+     * @param threadPoolService
+     * @param fur
      */
-    public void testInit() throws Exception {
-        GoogleOAuthClient googleOAuthClient = new GoogleOAuthClient();
-        googleOAuthClient.login("ewaldbartkowiak@googlemail.com", "BewIbgeawn4");
-        final String authCode = googleOAuthClient.getAuthorizationCode(
-            CLIENT_ID,
-            CLIENT_SECRET,
-            REDIRECT_URI,
-            Collections.singletonList("https://www.googleapis.com/auth/calendar.readonly"));
-         String accessToken = googleOAuthClient.getAccessToken(CLIENT_ID, CLIENT_SECRET, authCode, REDIRECT_URI).getAccessToken();
-        assertNotNull(accessToken);
+    public MockServiceLookup(final ConfigurationService csService, final ThreadPoolService threadPoolService, final FolderUpdaterRegistry fur) {
+        super();
+        this.csService = csService;
+        this.threadPoolService = threadPoolService;
+        this.fur = fur;
     }
+
+    public void setAppointmentSQLServiceMock(final AppointmentSqlFactoryService as) {
+        this.as = as;
+    }
+
+    @Override
+    public <S> S getService(final Class<? extends S> clazz) {
+        if(clazz.equals(ConfigurationService.class)) {
+            return (S) csService;
+        }
+        return null;
+    }
+
+    @Override
+    public <S> S getOptionalService(final Class<? extends S> clazz) {
+        if(clazz.equals(ThreadPoolService.class)) {
+            return (S) threadPoolService;
+        } else if(clazz.equals(FolderUpdaterRegistry.class)) {
+            return (S) fur;
+        } else if(clazz.equals(AppointmentSqlFactoryService.class)) {
+            return (S) as;
+        }
+        return null;
+    }
+
 }

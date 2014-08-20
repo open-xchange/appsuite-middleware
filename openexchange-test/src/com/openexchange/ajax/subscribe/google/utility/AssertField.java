@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.subscribe.google.utility;
+package com.openexchange.ajax.subscribe.google.utility;
 
 import com.openexchange.junit.Assert;
 

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.subscribe.google.mocks;
+package com.openexchange.ajax.subscribe.google.mocks;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;

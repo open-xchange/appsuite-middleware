@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.subscribe.google;
+package com.openexchange.ajax.subscribe.google;
 
 import java.io.BufferedReader;
 import java.io.IOException;
