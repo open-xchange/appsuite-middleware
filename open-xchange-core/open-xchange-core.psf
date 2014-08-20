@@ -40,6 +40,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.data.conversion.ical.ical4j"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.database"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.database.migration"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.database.migration.clt"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.database.migration.ox"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.dataretention"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.datatypes.genericonf"/>

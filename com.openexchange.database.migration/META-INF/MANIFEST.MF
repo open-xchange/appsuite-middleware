@@ -9,9 +9,12 @@ Bundle-ClassPath: .
 Import-Package: com.openexchange.config,
  com.openexchange.database,
  com.openexchange.exception,
+ com.openexchange.management,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.startup,
+ com.openexchange.tools.sql,
+ javax.management,
  liquibase,
  liquibase.change,
  liquibase.change.core,
@@ -78,5 +81,6 @@ Import-Package: com.openexchange.config,
  org.osgi.framework.wiring,
  org.osgi.util.tracker,
  org.slf4j
-Export-Package: com.openexchange.database.migration
+Export-Package: com.openexchange.database.migration,
+ com.openexchange.database.migration.mbean
 Bundle-Vendor: Open-Xchange Inc.

@@ -46,10 +46,11 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.database.migration.osgi;
 
 import liquibase.servicelocator.CustomResolverServiceLocator;
-import liquibase.servicelocator.DefaultPackageScanClassResolver;
+import liquibase.servicelocator.PackageScanClassResolver;
 import liquibase.servicelocator.ServiceLocator;
 import org.apache.commons.lang.Validate;
 import com.openexchange.config.ConfigurationService;
@@ -58,6 +59,8 @@ import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.database.migration.internal.BundlePackageScanClassResolver;
 import com.openexchange.database.migration.internal.DBMigrationExecutorServiceImpl;
 import com.openexchange.database.migration.internal.Services;
+import com.openexchange.database.migration.osgi.tracker.ManagementServiceTracker;
+import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.startup.SignalStartedService;
 
@@ -89,7 +92,7 @@ public class DBMigrationActivator extends HousekeepingActivator {
         LOG.info("Starting bundle: " + this.context.getBundle().getSymbolicName());
 
         Services.setServiceLookup(this);
-        DefaultPackageScanClassResolver resolver = new BundlePackageScanClassResolver(this.context.getBundle());
+        PackageScanClassResolver resolver = new BundlePackageScanClassResolver(this.context.getBundle());
         // Important: At first load classes used for liquibase
         ServiceLocator.setInstance(new CustomResolverServiceLocator(resolver));
 
@@ -99,8 +102,11 @@ public class DBMigrationActivator extends HousekeepingActivator {
         final ConfigurationService configurationService = getService(ConfigurationService.class);
         Validate.notNull(configurationService, "Cannot read migration files because ConfigurationService is absent.");
 
-        DBMigrationExecutorServiceImpl dbMigrationExecutorServiceImpl = new DBMigrationExecutorServiceImpl(dbService, configurationService);
-        registerService(DBMigrationExecutorService.class, dbMigrationExecutorServiceImpl);
+        track(ManagementService.class, new ManagementServiceTracker(context, dbService));
+        openTrackers();
+
+        DBMigrationExecutorService dbMigrationExecutorService = new DBMigrationExecutorServiceImpl(dbService, configurationService);
+        registerService(DBMigrationExecutorService.class, dbMigrationExecutorService);
     }
 
     /**
