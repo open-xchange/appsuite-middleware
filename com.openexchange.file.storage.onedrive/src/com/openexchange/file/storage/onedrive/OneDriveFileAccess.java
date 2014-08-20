@@ -62,6 +62,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
@@ -186,17 +187,14 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
             perform(new OneDriveClosure<Void>() {
 
                 @Override
-                protected Void doPerform(DefaultHttpClient httpClient) throws OXException, IOException {
+                protected Void doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
                     try {
                         HttpPost method = new HttpPost(buildUri(file.getId(), null));
                         method.setHeader("Authorization", "Bearer " + oneDriveAccess.getAccessToken());
                         method.setHeader("Content-Type", "application/json");
-
-                        byte[] bytes = new JSONObject(2).put("name", file.getFileName()).toString().getBytes(Charsets.UTF_8);
-                        method.setEntity(new ByteArrayEntity(bytes, ContentType.APPLICATION_JSON));
+                        method.setEntity(asHttpEntity(new JSONObject(2).put("name", file.getFileName())));
 
                         handleHttpResponse(httpClient.execute(method), Void.class);
-
                         return null;
                     } catch (HttpResponseException e) {
                         throw handleHttpResponseError(file.getId(), e);

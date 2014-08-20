@@ -49,8 +49,10 @@
 
 package com.openexchange.file.storage.onedrive;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.util.LinkedList;
 import java.util.List;
 import org.apache.http.HttpResponse;
@@ -61,8 +63,12 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONException;
+import org.json.JSONValue;
 import org.slf4j.Logger;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonFactory;
@@ -78,6 +84,8 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.onedrive.access.OneDriveAccess;
 import com.openexchange.file.storage.onedrive.rest.folder.RestFolder;
 import com.openexchange.file.storage.onedrive.rest.folder.RestFolderResponse;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.session.Session;
 
 /**
@@ -165,6 +173,26 @@ public abstract class AbstractOneDriveResourceAccess {
         } catch (IOException e) {
             throw handleIOError(e);
         }
+    }
+
+    /**
+     * Turns specified JSON value into an appropriate HTTP entity.
+     *
+     * @param jValue The JSON value
+     * @return The HTTP entity
+     * @throws JSONException If a JSON error occurs
+     * @throws IOException If an I/O error occurs
+     */
+    protected InputStreamEntity asHttpEntity(JSONValue jValue) throws JSONException, IOException {
+        if (null == jValue) {
+            return null;
+        }
+
+        ByteArrayOutputStream bStream = Streams.newByteArrayOutputStream(1024);
+        OutputStreamWriter osw = new OutputStreamWriter(bStream, Charsets.UTF_8);
+        jValue.write(osw);
+        osw.flush();
+        return new InputStreamEntity(Streams.asInputStream(bStream), bStream.size(), ContentType.APPLICATION_JSON);
     }
 
     /**
