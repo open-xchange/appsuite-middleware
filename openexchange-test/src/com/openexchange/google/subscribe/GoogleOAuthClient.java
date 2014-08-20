@@ -55,7 +55,9 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -98,7 +100,9 @@ public class GoogleOAuthClient {
 
     private static final String USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.143 Safari/537.36";
 
-    private String cookies;
+    private String cookiesString;
+
+    private final Map<String, String> cookies;
 
     private final HttpClient httpClient;
 
@@ -112,6 +116,7 @@ public class GoogleOAuthClient {
     public GoogleOAuthClient() {
         super();
         httpClient = new DefaultHttpClient();
+        cookies = new HashMap<String, String>();
     }
 
     /**
@@ -161,6 +166,24 @@ public class GoogleOAuthClient {
         return token;
     }
 
+    public Map<String, String> getCookies() {
+        return cookies;
+    }
+
+    private void parseCookies() throws Exception {
+        final String[] splitted = cookiesString.split(";");
+        for (String s : splitted) {
+            final String[] cookie = s.split("=");
+            if (cookie.length == 1) {
+                cookies.put(cookie[0], "true");
+            } else if (cookie.length == 2) {
+                cookies.put(cookie[0], cookie[1]);
+            } else {
+                throw new Exception("Invalid cookie: " + cookie);
+            }
+        }
+    }
+
     private String sendPost(String url, List<NameValuePair> postParams, final boolean hasBody) throws Exception {
         HttpPost post = new HttpPost(url);
         setHeaders(post);
@@ -182,7 +205,10 @@ public class GoogleOAuthClient {
         final String result = parseResponse(response);
 
         // set cookies
-        cookies = response.getFirstHeader("Set-Cookie") == null ? "" : response.getFirstHeader("Set-Cookie").toString();
+        cookiesString = response.getFirstHeader("Set-Cookie") == null ? "" : response.getFirstHeader("Set-Cookie").toString();
+        int idx = cookiesString.indexOf(": ");
+        cookiesString = cookiesString.substring(idx + 2);
+        parseCookies();
 
         return result;
     }
@@ -229,7 +255,7 @@ public class GoogleOAuthClient {
         httpMessage.setHeader("User-Agent", USER_AGENT);
         httpMessage.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
         httpMessage.setHeader("Accept-Language", "en-US,en;q=0.5");
-        httpMessage.setHeader("Cookie", cookies);
+        httpMessage.setHeader("Cookie", cookiesString);
         httpMessage.setHeader("Connection", "keep-alive");
         httpMessage.setHeader("Referer", LOGIN_SERVICE_URL);
         httpMessage.setHeader("Content-Type", "application/x-www-form-urlencoded");
