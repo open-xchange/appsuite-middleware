@@ -76,7 +76,7 @@ public class GoogleContactsTest extends AbstractGoogleTest {
             assertFalse("Received an empty contact list", contacts.isEmpty());
 
             // represents a full supported contact mapping
-            final String testAccount1 = "Herr Paul Müller Van Dyk Ende";
+            final String testAccount1 = "Herr Paul M\u00fcller Van Dyk Ende";
             boolean testAccount1Success = false;
 
             // represents a test account with private information only
@@ -92,7 +92,7 @@ public class GoogleContactsTest extends AbstractGoogleTest {
                     if (c.getDisplayName().equals(testAccount1)) {
                         // name
                         assertNotNullAndEquals("given name", "Paul", c.getGivenName());
-                        assertNotNullAndEquals("middle name", "Müller", c.getMiddleName());
+                        assertNotNullAndEquals("middle name", "M\u00fcller", c.getMiddleName());
                         assertNotNullAndEquals("surname", "Van Dyk", c.getSurName());
                         assertNotNullAndEquals("title", "Herr", c.getTitle());
                         assertNotNullAndEquals("suffix", "Ende", c.getSuffix());

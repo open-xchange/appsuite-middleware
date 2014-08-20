@@ -184,7 +184,7 @@ public class GoogleCalendarTest extends AbstractGoogleTest {
     private void testDailyRecurrenceAppointment(CalendarDataObject co) {
         assertNotNullAndEquals("context", 1, co.getContext().getContextId());
         assertFieldNotNull("user id", 1, co.getUid());
-        assertNotNullAndEquals("location", "Köln", co.getLocation());
+        assertNotNullAndEquals("location", "K\u00F6ln", co.getLocation());
         assertNotNullAndEquals("note", "Daily recurrence appointment | 27 Jan 2014 - 14 March 2014", co.getNote());
         assertNotNullAndEquals("start date", getDateTime(27, 1, 2014, 15, 30), co.getStartDate());
         assertNotNullAndEquals("timezone", "Europe/Berlin", co.getTimezone());
