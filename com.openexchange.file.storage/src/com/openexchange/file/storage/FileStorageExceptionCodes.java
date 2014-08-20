@@ -76,7 +76,7 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
      */
     IO_ERROR("An I/O error occurred: %1$s", Category.CATEGORY_ERROR, 3),
     /**
-     * An I/O error occurred: %1$s
+     * A JSON occurred: %1$s
      */
     JSON_ERROR("A JSON error occurred: %1$s", Category.CATEGORY_ERROR, 14),
     /**
