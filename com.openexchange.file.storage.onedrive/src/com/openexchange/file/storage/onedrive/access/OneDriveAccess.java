@@ -60,7 +60,7 @@ import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.onedrive.OneDriveExceptionCodes;
-import com.openexchange.file.storage.onedrive.Services;
+import com.openexchange.file.storage.onedrive.osgi.Services;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthAccount;

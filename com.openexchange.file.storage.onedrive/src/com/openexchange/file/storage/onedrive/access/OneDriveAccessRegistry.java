@@ -52,7 +52,7 @@ package com.openexchange.file.storage.onedrive.access;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import com.openexchange.file.storage.onedrive.Services;
+import com.openexchange.file.storage.onedrive.osgi.Services;
 import com.openexchange.sessiond.SessiondService;
 
 /**

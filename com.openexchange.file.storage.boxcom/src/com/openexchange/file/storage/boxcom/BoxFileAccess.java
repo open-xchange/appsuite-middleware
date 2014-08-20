@@ -467,7 +467,6 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
                 for (IDTuple idTuple : ids) {
                     try {
-                        BoxFile file = boxClient.getFilesManager().getFile(idTuple.getId(), null);
                         boxClient.getFilesManager().deleteFile(idTuple.getId(), null);
                     } catch (BoxServerException e) {
                         if (404 != e.getStatusCode()) {
@@ -498,7 +497,6 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                 BoxClient boxClient = boxAccess.getBoxClient();
 
                 try {
-                    BoxFile file = boxClient.getFilesManager().getFile(id, null);
                     boxClient.getFilesManager().deleteFile(id, null);
                 } catch (BoxServerException e) {
                     if (404 != e.getStatusCode()) {

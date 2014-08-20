@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.onedrive;
+package com.openexchange.file.storage.onedrive.osgi;
 
 import java.util.concurrent.atomic.AtomicReference;
 
