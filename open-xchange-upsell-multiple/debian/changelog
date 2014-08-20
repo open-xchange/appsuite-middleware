@@ -1,3 +1,9 @@
+open-xchange-upsell-multiple (7.4.2-33) stable; urgency=low
+
+  * Build for patch 2014-08-25
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 20 Aug 2014 11:49:00 +0200
+
 open-xchange-upsell-multiple (7.4.2-32) stable; urgency=low
 
   * Build for patch 2014-08-15
