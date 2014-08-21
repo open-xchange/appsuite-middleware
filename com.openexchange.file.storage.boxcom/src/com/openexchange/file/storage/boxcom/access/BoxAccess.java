@@ -114,17 +114,30 @@ public class BoxAccess {
 
     // ------------------------------------------------------------------------------------------------------------------------ //
 
-    /** The associated OAuth account */
-    private volatile OAuthAccount boxOAuthAccount;
+    private static class BoxOAuthInfo {
+
+        /** The associated OAuth account */
+        final OAuthAccount boxOAuthAccount;
+
+        /** The client identifier */
+        final String clientId;
+
+        /** The client secret */
+        final String clientSecret;
+
+        BoxOAuthInfo(OAuthAccount boxOAuthAccount, Session session) throws OXException {
+            super();
+            this.boxOAuthAccount = boxOAuthAccount;
+            this.clientId = boxOAuthAccount.getMetaData().getAPIKey(session);
+            this.clientSecret = boxOAuthAccount.getMetaData().getAPISecret(session);
+        }
+    }
+
+    /** The associated OAuth information */
+    private volatile BoxOAuthInfo boxOAuthInfo;
 
     /** The last-accessed time stamp */
     private volatile long lastAccessed;
-
-    /** The client identifier */
-    private volatile String clientId;
-
-    /** The client secret */
-    private volatile String clientSecret;
 
     /**
      * Initializes a new {@link BoxAccess}.
@@ -161,20 +174,17 @@ public class BoxAccess {
             boxOAuthAccount = oAuthService.getAccount(oauthAccountId, session, userId, contextId);
         }
 
-        // Assign Box.com account
-        this.boxOAuthAccount = boxOAuthAccount;
-
-        // Initialize rest
-        clientId = boxOAuthAccount.getMetaData().getAPIKey(session);
-        clientSecret = boxOAuthAccount.getMetaData().getAPISecret(session);
+        // Assign Box.com OAuth information
+        this.boxOAuthInfo = new BoxOAuthInfo(boxOAuthAccount, session);
         lastAccessed = System.nanoTime();
     }
 
-    private BoxClient createBoxClient(OAuthAccount boxOAuthAccount) {
-        BoxClient boxClient = new NonRefreshingBoxClient(clientId, clientSecret, new BoxResourceHub(), new BoxJSONParser(new BoxResourceHub()), (new BoxConfigBuilder()).build());
+    private BoxClient createBoxClient(BoxOAuthInfo boxOAuthInfo) {
+        BoxClient boxClient = new NonRefreshingBoxClient(boxOAuthInfo.clientId, boxOAuthInfo.clientSecret, new BoxResourceHub(), new BoxJSONParser(new BoxResourceHub()), (new BoxConfigBuilder()).build());
 
         // Apply access token and refresh token from OAuth account
         Map<String, Object> tokenSpec = new HashMap<String, Object>(6);
+        OAuthAccount boxOAuthAccount = boxOAuthInfo.boxOAuthAccount;
         tokenSpec.put(BoxOAuthToken.FIELD_ACCESS_TOKEN, boxOAuthAccount.getToken());
         tokenSpec.put(BoxOAuthToken.FIELD_REFRESH_TOKEN, boxOAuthAccount.getSecret());
         tokenSpec.put(BoxOAuthToken.FIELD_TOKEN_TYPE, "bearer");
@@ -183,8 +193,9 @@ public class BoxAccess {
         return boxClient;
     }
 
-    private OAuthAccount recreateTokenIfExpired(boolean considerExpired, OAuthAccount boxOAuthAccount, Session session) throws OXException {
+    private OAuthAccount recreateTokenIfExpired(boolean considerExpired, BoxOAuthInfo boxOAuthInfo, Session session) throws OXException {
         // Create Scribe Box.com OAuth service
+        OAuthAccount boxOAuthAccount = boxOAuthInfo.boxOAuthAccount;
         final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(BoxApi.class);
         serviceBuilder.apiKey(boxOAuthAccount.getMetaData().getAPIKey(session)).apiSecret(boxOAuthAccount.getMetaData().getAPISecret(session));
         BoxApi.BoxApiService scribeOAuthService = (BoxApi.BoxApiService) serviceBuilder.build();
@@ -229,12 +240,10 @@ public class BoxAccess {
         long now = System.nanoTime();
         if (TimeUnit.NANOSECONDS.toSeconds(now - lastAccessed) > RECHECK_THRESHOLD) {
             synchronized (this) {
-                OAuthAccount newAccount = recreateTokenIfExpired(false, boxOAuthAccount, session);
+                OAuthAccount newAccount = recreateTokenIfExpired(false, boxOAuthInfo, session);
                 if (newAccount != null) {
-                    clientId = newAccount.getMetaData().getAPIKey(session);
-                    clientSecret = newAccount.getMetaData().getAPISecret(session);
+                    this.boxOAuthInfo = new BoxOAuthInfo(newAccount, session);
                     lastAccessed = System.nanoTime();
-                    this.boxOAuthAccount = newAccount;
                 }
             }
         }
@@ -249,12 +258,10 @@ public class BoxAccess {
      */
     public void reinit(Session session) throws OXException {
         synchronized (this) {
-            OAuthAccount newAccount = recreateTokenIfExpired(true, boxOAuthAccount, session);
+            OAuthAccount newAccount = recreateTokenIfExpired(true, boxOAuthInfo, session);
             if (newAccount != null) {
-                clientId = newAccount.getMetaData().getAPIKey(session);
-                clientSecret = newAccount.getMetaData().getAPISecret(session);
+                this.boxOAuthInfo = new BoxOAuthInfo(newAccount, session);
                 lastAccessed = System.nanoTime();
-                this.boxOAuthAccount = newAccount;
             }
         }
     }
@@ -265,7 +272,7 @@ public class BoxAccess {
      * @return The box client
      */
     public BoxClient getBoxClient() {
-        return createBoxClient(boxOAuthAccount);
+        return createBoxClient(boxOAuthInfo);
     }
 
     /**
