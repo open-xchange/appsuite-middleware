@@ -49,13 +49,25 @@
 
 package com.openexchange.google.subscribe;
 
+import java.io.IOException;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.TimeZone;
+import org.json.JSONException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.participants.ConfirmStatus;
+import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 
 /**
  * {@link GoogleSubscribeCalendarTest}
  *
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.6.1
  */
 public class GoogleSubscribeCalendarTest extends AbstractGoogleSubscribeTest {
 
@@ -68,11 +80,163 @@ public class GoogleSubscribeCalendarTest extends AbstractGoogleSubscribeTest {
         super(name);
     }
 
-    public void testSingleAppointment() {
-        final int parentFolderID = getFolderManager().getFolderFromServer("com.openexchange.subscribe.google.calendar").getObjectID();
-        final Appointment[] appointments = getCalendarManager().all(parentFolderID, new Date(0), new Date(Long.MAX_VALUE));
-        for(Appointment a : appointments) {
-            System.err.println(a.getTitle() + " "  + a.getObjectID());
+    public void testSingleAppointment() throws OXException, IOException, JSONException {
+        final String title = "Single appointment | 29 Jan 2014' not found";
+        Appointment appointment = fetchAppointment(getDateTime(29, 1, 2014, 13, 30), getDateTime(29, 1, 2014, 15, 30), title);
+        assertNotNull("Appointment: '" + title + "' not found", appointment);
+        assertFieldNotNull("user id", 1, appointment.getUid());
+        assertNotNullAndEquals("location", "Olpe, Deutschland", appointment.getLocation());
+        assertNotNullAndEquals("note", "Single appointment | 29 Jan 2014\n\nSome text...", appointment.getNote());
+        assertNotNullAndEquals("start date", getDateTime(29, 1, 2014, 13, 30), appointment.getStartDate());
+        assertNotNullAndEquals("timezone", "America/Santiago", appointment.getTimezone());
+        assertNotNullAndEquals("end date", getDateTime(29, 1, 2014, 15, 30), appointment.getEndDate());
+        assertNotNullAndEquals("creation date", getDateTime(8, 8, 2014, 15, 32, 33), appointment.getCreationDate());
+        assertNotNullAndEquals("created by", 1, appointment.getCreatedBy());
+        assertNotNullAndEquals("alarm", 45, appointment.getAlarm());
+        assertNull("This appointment has no confirmation, but the mapping exist", appointment.getConfirmations());
+        assertNull("This appointment has no participants, but the mapping exist", appointment.getParticipants());
+        assertNotNullAndEquals("recurrence type", CalendarObject.NO_RECURRENCE, appointment.getRecurrenceType());
+        assertNotNullAndEquals("fulltime", false, appointment.getFullTime());
+    }
+
+    public void testAllDayAppointment() throws OXException, IOException, JSONException {
+        final String title = "All day appointment | 30 Jan 2014";
+        Appointment appointment = fetchAppointment(
+            getDateTime(28, 1, 2014, 0, 0, 0, TimeZone.getTimeZone("UTC")),
+            getDateTime(29, 1, 2014, 0, 0, 0, TimeZone.getTimeZone("UTC")),
+            title);
+
+        assertNotNull("Appointment: '" + title + "' not found", appointment);
+        assertFieldNotNull("user id", 1, appointment.getUid());
+        assertNotNullAndEquals("location", "Bremen, Deutschland", appointment.getLocation());
+        assertNotNullAndEquals("note", "All day appointment | 30 Jan 2014", appointment.getNote());
+        assertNotNullAndEquals("start date", getDateTime(28, 1, 2014, 0, 0, 0, TimeZone.getTimeZone("UTC")), appointment.getStartDate());
+        assertFieldIsNull("timezone", appointment.getTimezone());
+        assertNotNullAndEquals("end date", getDateTime(29, 1, 2014, 0, 0, 0, TimeZone.getTimeZone("UTC")), appointment.getEndDate());
+        assertNotNullAndEquals("creation date", getDateTime(8, 8, 2014, 15, 34, 07), appointment.getCreationDate());
+        assertNotNullAndEquals("created by", 1, appointment.getCreatedBy());
+        assertNotNullAndEquals("alarm", 0, appointment.getAlarm());
+        assertNull("This appointment has no confirmation, but the mapping exist", appointment.getConfirmations());
+        assertNull("This appointment has no participants, but the mapping exist", appointment.getParticipants());
+        assertNotNullAndEquals("recurrence type", CalendarObject.NO_RECURRENCE, appointment.getRecurrenceType());
+        assertNotNullAndEquals("fulltime", true, appointment.getFullTime());
+    }
+
+    public void testMonthlyRecurrenceAppointment() {
+        final String title = "Every third month recurrence appointment | 15 March 2014 - Never ending";
+        Appointment appointment = fetchAppointment(getDateTime(15, 3, 2014, 19, 00), getDateTime(15, 3, 2014, 21, 30), title);
+
+        assertNotNull("Appointment: '" + title + "' not found", appointment);
+        assertFieldNotNull("user id", 1, appointment.getUid());
+        assertFieldIsNull("location", appointment.getLocation());
+        assertNotNullAndEquals("note", "Every third month recurrence appointment | 15 March 2014 - Never ending", appointment.getNote());
+        assertNotNullAndEquals("start date", getDateTime(15, 3, 2014, 19, 00), appointment.getStartDate());
+        assertFieldIsNull("timezone", appointment.getTimezone());
+        assertNotNullAndEquals("end date", getDateTime(15, 3, 2014, 21, 30), appointment.getEndDate());
+        assertNotNullAndEquals("creation date", getDateTime(8, 8, 2014, 14, 11, 43), appointment.getCreationDate());
+        assertNotNullAndEquals("created by", 1, appointment.getCreatedBy());
+        assertNotNullAndEquals("alarm", 10, appointment.getAlarm());
+        assertNotNullAndEquals("fulltime", false, appointment.getFullTime());
+
+        assertNotNullAndEquals("recurrence type", CalendarObject.MONTHLY, appointment.getRecurrenceType());
+        assertNotNullAndEquals("day in month", 15, appointment.getDayInMonth());
+        assertNotNullAndEquals("interval", 3, appointment.getInterval());
+        assertFieldIsNull("occurrence", appointment.getOccurrence());
+        assertFieldIsNull("days", appointment.getDays());
+
+        assertNull("This appointment has no confirmation, but the mapping exist", appointment.getConfirmations());
+        assertNull("This appointment has no participants, but the mapping exist", appointment.getParticipants());
+    }
+
+    public void testAppointmentWithExceptions() {
+        final String title = "Every two days recurrence appointment with exception | 14 March 2014 - Never ending";
+        Appointment appointment = fetchAppointment(getDateTime(14, 3, 2014, 12, 00), getDateTime(14, 3, 2014, 14, 00), title);
+
+        assertNotNull("Appointment: '" + title + "' not found", appointment);
+        assertFieldNotNull("user id", 1, appointment.getUid());
+        assertNotNullAndEquals("location", "Hannover, Deutschland", appointment.getLocation());
+        assertNotNullAndEquals(
+            "note",
+            "Every two days recurrence appointment with exception | 14 March 2014 - Never ending\nDonnerstag 20.03. ChangeException\nMittwoch 26.03. DeleteException",
+            appointment.getNote());
+        assertNotNullAndEquals("start date", getDateTime(14, 3, 2014, 12, 00), appointment.getStartDate());
+        assertNotNullAndEquals("timezone", "Europe/Berlin", appointment.getTimezone());
+        assertNotNullAndEquals("end date", getDateTime(14, 3, 2014, 14, 00), appointment.getEndDate());
+        assertNotNullAndEquals("creation date", getDateTime(8, 8, 2014, 15, 38, 29), appointment.getCreationDate());
+        assertNotNullAndEquals("created by", 1, appointment.getCreatedBy());
+        assertFieldIsNull("alarm", appointment.getAlarm());
+        assertNotNullAndEquals("fulltime", false, appointment.getFullTime());
+
+        assertNotNullAndEquals("recurrence type", CalendarObject.DAILY, appointment.getRecurrenceType());
+        assertFieldIsNull("days", appointment.getDays());
+        assertNotNullAndEquals("interval", 2, appointment.getInterval());
+        assertFieldIsNull("occurrence", appointment.getOccurrence());
+
+        // List of participants
+        List<Part> participants = new LinkedList<Part>();
+        participants.add(new Part("Ewald Bartkowiak", "ewald.bartkowiak@googlemail.com", Participant.EXTERNAL_USER, ConfirmStatus.ACCEPT));
+        participants.add(new Part("Dimitri Bronkowitsch", "dimitri.bronkowitsch@googlemail.com", Participant.USER, ConfirmStatus.NONE));
+        participants.add(new Part("jan.finsel@premium", "jan.finsel@premium", Participant.USER, ConfirmStatus.NONE));
+
+        assertNotNull(appointment.getConfirmations());
+        for (ConfirmableParticipant cp : appointment.getConfirmations()) {
+            int countParts = 0;
+            for (Part p : participants) {
+                if (cp.getEmailAddress().equals(p.getEmailAddress())) {
+                    assertNotNullAndEquals("particiant display name", p.getDisplayName(), cp.getDisplayName());
+                    assertFieldNotNull("participant status", p.getConfirmStatus(), cp.getStatus());
+                    assertNotNullAndEquals("particiant status id", p.getConfirmStatus().getId(), cp.getStatus().getId());
+                    assertNotNullAndEquals("participant type", p.getParticipantType(), cp.getType());
+                    ++countParts;
+                }
+            }
+            assertTrue("Should have found three participants but only got: " + countParts, countParts == 3);
+        }
+    }
+
+    private Appointment fetchAppointment(final Date startDate, final Date endDate, final String title) {
+        final int folderId = getCalendarTestFolderID();
+        final Appointment[] appointments = getCalendarManager().all(folderId, startDate, endDate, Appointment.ALL_COLUMNS, false);
+        for (Appointment a : appointments) {
+            if (a.getTitle().equals(title)) {
+                return a;
+            }
+        }
+        return null;
+    }
+
+    private class Part {
+
+        private String displayName;
+
+        private String emailAddress;
+
+        private int participantType;
+
+        private ConfirmStatus confirmStatus;
+
+        public Part(String displayName, String emailAddress, int participantType, ConfirmStatus confirmStatus) {
+            super();
+            this.displayName = displayName;
+            this.emailAddress = emailAddress;
+            this.participantType = participantType;
+            this.confirmStatus = confirmStatus;
+        }
+
+        public String getDisplayName() {
+            return displayName;
+        }
+
+        public String getEmailAddress() {
+            return emailAddress;
+        }
+
+        public int getParticipantType() {
+            return participantType;
+        }
+
+        public ConfirmStatus getConfirmStatus() {
+            return confirmStatus;
         }
     }
 }
