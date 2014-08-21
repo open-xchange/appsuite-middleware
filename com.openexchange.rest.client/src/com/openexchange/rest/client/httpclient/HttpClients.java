@@ -287,13 +287,15 @@ public final class HttpClients {
             final HeaderElementIterator i = new BasicHeaderElementIterator(response.headerIterator(HTTP.CONN_KEEP_ALIVE));
             while (i.hasNext()) {
                 final HeaderElement element = i.nextElement();
-                final String name = element.getName();
-                final String value = element.getValue();
-                if (value != null && name.equalsIgnoreCase("timeout")) {
-                    try {
-                        timeout = Math.min(timeout, Long.parseLong(value) * 1000);
-                    } catch (final NumberFormatException e) {
-                        // Ignore
+                if ("timeout".equalsIgnoreCase(element.getName())) {
+                    final String value = element.getValue();
+                    if (value != null) {
+                        try {
+                            long b = Long.parseLong(value) * 1000;
+                            timeout = (timeout <= b) ? timeout : b;
+                        } catch (final NumberFormatException e) {
+                            // Ignore
+                        }
                     }
                 }
             }
