@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.database.migration;
 
 import java.util.List;
@@ -53,6 +54,7 @@ import liquibase.change.custom.CustomSqlChange;
 import liquibase.change.custom.CustomTaskChange;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.resource.ResourceAccessor;
+import com.openexchange.exception.OXException;
 
 /**
  * Interface that defines the execution of database migration tasks
@@ -66,15 +68,17 @@ public interface DBMigrationExecutorService {
      * Execute database migration based on the given {@link DatabaseChangeLog} file
      *
      * @param databaseChangeLog - file to execute
+     * @throws OXException
      */
-    public void execute(DatabaseChangeLog databaseChangeLog);
+    public void execute(DatabaseChangeLog databaseChangeLog) throws OXException;
 
     /**
      * Execute database migration based on the given file name
      *
      * @param fileName - String with the name of the file to execute
+     * @throws OXException
      */
-    public void execute(String fileName);
+    public void execute(String fileName) throws OXException;
 
     /**
      * Execute database migration based on the given filename. If {@link CustomSqlChange} or {@link CustomTaskChange} are desired to be used
@@ -83,6 +87,19 @@ public interface DBMigrationExecutorService {
      *
      * @param fileName - String with the name of the file to execute
      * @param additionalAccessors - additional {@link ResourceAccessor}s to be able to read custom classes
+     * @throws OXException
      */
-    public void execute(String fileName, List<ResourceAccessor> additionalAccessors);
+    public void execute(String fileName, List<ResourceAccessor> additionalAccessors) throws OXException;
+
+    public void rollback(int numberOfChangeSets) throws OXException;
+
+    /**
+     * Executes a rollback to the given tag
+     *
+     * @param fileName - String with the name of the file where to find the rollback tag
+     * @param changeSetTag - changeset tag to roll back to
+     * @return boolean - true if rollback was successful. Otherwise false
+     * @throws OXException
+     */
+    public boolean rollback(String fileName, String changeSetTag) throws OXException;
 }

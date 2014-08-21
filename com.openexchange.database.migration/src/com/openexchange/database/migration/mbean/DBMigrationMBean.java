@@ -74,18 +74,21 @@ public interface DBMigrationMBean {
     public void forceDBMigration() throws MBeanException;
 
     /**
-     * Rollback previously execute update tasks.
+     * Rollback to the given tag of a changeset within the file
      *
+     * @param fileName
+     * @param changeSetTag
+     * @return
      * @throws MBeanException
      */
-    public void rollbackDBMigration() throws MBeanException;
+    public boolean rollbackDBMigration(String fileName, String changeSetTag) throws MBeanException;
 
     /**
      * Releases the database migration lock table. Use this in case no lock can be acquired by liquibase.
      *
      * @throws MBeanException
      */
-    public void releaseDBMigrationLock() throws MBeanException;
+    public boolean releaseDBMigrationLock() throws MBeanException;
 
     /**
      * List the current status of database migration tasks.

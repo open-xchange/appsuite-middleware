@@ -63,10 +63,16 @@ import com.openexchange.database.migration.mbean.DBMigrationMBean;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.1
  */
-public class RollbackDBMigrationCLT extends AbstractMBeanCLI<Void> {
+public class RollbackDBMigrationCLT extends AbstractMBeanCLI<Boolean> {
 
     public static void main(String[] args) {
-        new RollbackDBMigrationCLT().execute(args);
+        Boolean rollbackSuccessful = new RollbackDBMigrationCLT().execute(args);
+
+        if (rollbackSuccessful) {
+            System.out.println("Rollback executed successfully!");
+        } else {
+            System.out.println("Unable to perform rollback! Please have a look at the server logs for more details!");
+        }
     }
 
     // ------------------------------------------------------------------------------------ //
@@ -83,8 +89,7 @@ public class RollbackDBMigrationCLT extends AbstractMBeanCLI<Void> {
      */
     @Override
     protected void checkOptions(CommandLine cmd) {
-        // TODO Auto-generated method stub
-
+        // nothing to do
     }
 
     /**
@@ -124,17 +129,42 @@ public class RollbackDBMigrationCLT extends AbstractMBeanCLI<Void> {
      */
     @Override
     protected void addOptions(Options options) {
-        // TODO Auto-generated method stub
+        options.addOption("i", "changesetid", true, "Changeset identifier that should be rolled back.");
+        options.addOption("f", "filename", true, "Name of the file the changeset identifier can be found");
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        mbsc.invoke(getObjectName(DBMigrationMBean.class.getName(), DBMigrationMBean.DOMAIN), getName(), null, null);
-        // TODO handle appropriate
+    protected Boolean invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
 
-        return null;
+        boolean rollbackSuccessful = false;
+        if (!cmd.hasOption('i')) {
+            System.err.println("Missing changeset identifier for rollback.");
+            printHelp(option);
+            System.exit(1);
+            return rollbackSuccessful;
+        }
+        final String changeSetIdentifier = cmd.getOptionValue('i');
+
+        if (!cmd.hasOption('f')) {
+            System.err.println("Missing file name for rollback.");
+            printHelp(option);
+            System.exit(1);
+            return rollbackSuccessful;
+        }
+        final String fileName = cmd.getOptionValue('f');
+
+        final String[] signature = new String[] { String.class.getName(), String.class.getName() };
+        final Object[] params = new Object[] { fileName, changeSetIdentifier };
+        Object invoke = mbsc.invoke(getObjectName(DBMigrationMBean.class.getName(), DBMigrationMBean.DOMAIN), getName(), params, signature);
+
+        if (invoke instanceof Boolean) {
+            rollbackSuccessful = (Boolean) invoke;
+        } else {
+            System.out.println("Unexpected result from calling 'rollbackDBMigration'. Neither 'true' nor 'false' received from perform rollback call.");
+        }
+        return rollbackSuccessful;
     }
 }

@@ -52,26 +52,13 @@ package com.openexchange.database.migration.mbean;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
-import liquibase.Liquibase;
-import liquibase.changelog.ChangeSet;
-import liquibase.changelog.RanChangeSet;
-import liquibase.database.core.MySQLDatabase;
-import liquibase.database.jvm.JdbcConnection;
-import liquibase.exception.LiquibaseException;
-import liquibase.exception.ValidationFailedException;
-import liquibase.lockservice.DatabaseChangeLogLock;
-import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.resource.FileSystemResourceAccessor;
-import liquibase.resource.ResourceAccessor;
+import org.apache.commons.lang.Validate;
 import org.slf4j.Logger;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.exception.OXException;
 
 /**
@@ -81,6 +68,8 @@ import com.openexchange.exception.OXException;
  * @since 7.6.1
  */
 public class DBMigrationMBeanImpl extends StandardMBean implements DBMigrationMBean {
+
+    private final DBMigrationExecutorService dbMigrationExecutorService;
 
     private final DatabaseService databaseService;
 
@@ -92,8 +81,12 @@ public class DBMigrationMBeanImpl extends StandardMBean implements DBMigrationMB
      * @param mbeanInterface
      * @throws NotCompliantMBeanException
      */
-    public DBMigrationMBeanImpl(Class<? extends DBMigrationMBean> mbeanInterface, DatabaseService databaseService) throws NotCompliantMBeanException {
+    public DBMigrationMBeanImpl(Class<? extends DBMigrationMBean> mbeanInterface, DBMigrationExecutorService dbMigrationExecutorService, DatabaseService databaseService) throws NotCompliantMBeanException {
         super(mbeanInterface);
+        Validate.notNull(dbMigrationExecutorService, "DBMigrationExecuterService must not be null!");
+        Validate.notNull(databaseService, "DatabaseService must not be null!");
+
+        this.dbMigrationExecutorService = dbMigrationExecutorService;
         this.databaseService = databaseService;
     }
 
@@ -102,45 +95,10 @@ public class DBMigrationMBeanImpl extends StandardMBean implements DBMigrationMB
      */
     @Override
     public void forceDBMigration() throws MBeanException {
-        Connection writable = null;
-        Liquibase liquibase = null;
-        JdbcConnection jdbcConnection = null;
         try {
-            writable = databaseService.getWritable();
-
-            jdbcConnection = new JdbcConnection(writable);
-            jdbcConnection.setAutoCommit(true);
-
-            MySQLDatabase databaseConnection = new MySQLDatabase();
-            databaseConnection.setConnection(jdbcConnection);
-            databaseConnection.setAutoCommit(true);
-
-            List<ResourceAccessor> accessors = new CopyOnWriteArrayList<ResourceAccessor>();
-            accessors.add(new ClassLoaderResourceAccessor());
-            accessors.add(new FileSystemResourceAccessor());
-
-            liquibase = new Liquibase("", null, databaseConnection);
-            // liquibase.;
-            // TODO
-        } catch (ValidationFailedException validationFailedException) {
-            LOG.error("Validation of DatabaseChangeLog failed with the following exception: " + validationFailedException.getLocalizedMessage(), validationFailedException);
-        } catch (LiquibaseException liquibaseException) {
-            LOG.error("Error using/executing liquibase: " + liquibaseException.getLocalizedMessage(), liquibaseException);
-        } catch (OXException oxException) {
-            LOG.error("Unable to retrieve database write connection: " + oxException.getLocalizedMessage(), oxException);
-        } catch (Exception exception) {
-            LOG.error("An unexpected error occurred while executing database migration: " + exception.getLocalizedMessage(), exception);
-        } finally {
-            if (liquibase != null) {
-                try {
-                    liquibase.forceReleaseLocks();
-                } catch (LiquibaseException liquibaseException) {
-                    LOG.error("Unable to release liquibase locks: " + liquibaseException.getLocalizedMessage(), liquibaseException);
-                }
-            }
-            if (writable != null) {
-                databaseService.backWritable(writable);
-            }
+            dbMigrationExecutorService.execute("ox.changelog.xml");
+        } catch (OXException e) {
+            throw new MBeanException(e, e.getMessage());
         }
     }
 
@@ -148,24 +106,27 @@ public class DBMigrationMBeanImpl extends StandardMBean implements DBMigrationMB
      * {@inheritDoc}
      */
     @Override
-    public void releaseDBMigrationLock() throws MBeanException {
+    public boolean releaseDBMigrationLock() throws MBeanException {
+        boolean lockReleased = false;
+
         Connection writable = null;
         PreparedStatement stmt = null;
-        ResultSet result = null;
         try {
             writable = databaseService.getWritable();
             stmt = writable.prepareStatement("UPDATE DATABASECHANGELOGLOCK SET LOCKED=0, LOCKGRANTED=null, LOCKEDBY=null where ID=1;");
             stmt.execute();
+            lockReleased = true;
         } catch (final Exception e) {
-            LOG.error("", e);
+            LOG.error("Not able to release the lock for table DATABASECHANGELOGLOCK", e);
             final String message = e.getMessage();
             throw new MBeanException(new Exception(message), message);
         } finally {
-            closeSQLStuff(result, stmt);
+            closeSQLStuff(stmt);
             if (writable != null) {
                 databaseService.backWritable(writable);
             }
         }
+        return lockReleased;
     }
 
     /**
@@ -173,55 +134,62 @@ public class DBMigrationMBeanImpl extends StandardMBean implements DBMigrationMB
      */
     @Override
     public void listDBMigrationStatus() throws MBeanException {
-        Connection writable = null;
-        Liquibase liquibase = null;
-        JdbcConnection jdbcConnection = null;
-        try {
-            writable = databaseService.getWritable();
 
-            jdbcConnection = new JdbcConnection(writable);
-            jdbcConnection.setAutoCommit(true);
-
-            MySQLDatabase databaseConnection = new MySQLDatabase();
-            databaseConnection.setConnection(jdbcConnection);
-            databaseConnection.setAutoCommit(true);
-
-            List<ResourceAccessor> accessors = new CopyOnWriteArrayList<ResourceAccessor>();
-            accessors.add(new ClassLoaderResourceAccessor());
-            accessors.add(new FileSystemResourceAccessor());
-
-            liquibase = new Liquibase("ox.changelog.xml", null, databaseConnection);
-            DatabaseChangeLogLock[] listLocks = liquibase.listLocks();
-            List<ChangeSet> listUnrunChangeSets = liquibase.listUnrunChangeSets("configdb");
-            Collection<RanChangeSet> listUnexpectedChangeSets = liquibase.listUnexpectedChangeSets("configdb");
-            System.out.println(listLocks.length + listUnrunChangeSets.size() + listUnexpectedChangeSets.size());
-        } catch (ValidationFailedException validationFailedException) {
-            LOG.error("Validation of DatabaseChangeLog failed with the following exception: " + validationFailedException.getLocalizedMessage(), validationFailedException);
-        } catch (LiquibaseException liquibaseException) {
-            LOG.error("Error using/executing liquibase: " + liquibaseException.getLocalizedMessage(), liquibaseException);
-        } catch (OXException oxException) {
-            LOG.error("Unable to retrieve database write connection: " + oxException.getLocalizedMessage(), oxException);
-        } catch (Exception exception) {
-            LOG.error("An unexpected error occurred while executing database migration: " + exception.getLocalizedMessage(), exception);
-        } finally {
-            if (liquibase != null) {
-                try {
-                    liquibase.forceReleaseLocks();
-                } catch (LiquibaseException liquibaseException) {
-                    LOG.error("Unable to release liquibase locks: " + liquibaseException.getLocalizedMessage(), liquibaseException);
-                }
-            }
-            if (writable != null) {
-                databaseService.backWritable(writable);
-            }
-        }
+        // TODO
+        // Connection writable = null;
+        // Liquibase liquibase = null;
+        // JdbcConnection jdbcConnection = null;
+        // try {
+        // writable = databaseService.getWritable();
+        //
+        // jdbcConnection = new JdbcConnection(writable);
+        // jdbcConnection.setAutoCommit(true);
+        //
+        // MySQLDatabase databaseConnection = new MySQLDatabase();
+        // databaseConnection.setConnection(jdbcConnection);
+        // databaseConnection.setAutoCommit(true);
+        //
+        // List<ResourceAccessor> accessors = new CopyOnWriteArrayList<ResourceAccessor>();
+        // accessors.add(new ClassLoaderResourceAccessor());
+        // accessors.add(new FileSystemResourceAccessor());
+        //
+        // liquibase = new Liquibase("ox.changelog.xml", null, databaseConnection);
+        // DatabaseChangeLogLock[] listLocks = liquibase.listLocks();
+        // List<ChangeSet> listUnrunChangeSets = liquibase.listUnrunChangeSets("configdb");
+        // Collection<RanChangeSet> listUnexpectedChangeSets = liquibase.listUnexpectedChangeSets("configdb");
+        // System.out.println(listLocks.length + listUnrunChangeSets.size() + listUnexpectedChangeSets.size());
+        // } catch (ValidationFailedException validationFailedException) {
+        // LOG.error("Validation of DatabaseChangeLog failed with the following exception: " +
+        // validationFailedException.getLocalizedMessage(), validationFailedException);
+        // } catch (LiquibaseException liquibaseException) {
+        // LOG.error("Error using/executing liquibase: " + liquibaseException.getLocalizedMessage(), liquibaseException);
+        // } catch (OXException oxException) {
+        // LOG.error("Unable to retrieve database write connection: " + oxException.getLocalizedMessage(), oxException);
+        // } catch (Exception exception) {
+        // LOG.error("An unexpected error occurred while executing database migration: " + exception.getLocalizedMessage(), exception);
+        // } finally {
+        // if (liquibase != null) {
+        // try {
+        // liquibase.forceReleaseLocks();
+        // } catch (LiquibaseException liquibaseException) {
+        // LOG.error("Unable to release liquibase locks: " + liquibaseException.getLocalizedMessage(), liquibaseException);
+        // }
+        // }
+        // if (writable != null) {
+        // databaseService.backWritable(writable);
+        // }
+        // }
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void rollbackDBMigration() throws MBeanException {
-        // TODO Auto-generated method stub
+    public boolean rollbackDBMigration(String fileName, String changeSetTag) throws MBeanException {
+        try {
+            return dbMigrationExecutorService.rollback(fileName, changeSetTag);
+        } catch (OXException e) {
+            throw new MBeanException(e, e.getMessage());
+        }
     }
 }

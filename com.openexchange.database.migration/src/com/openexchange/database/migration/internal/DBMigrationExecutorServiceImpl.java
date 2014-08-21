@@ -49,6 +49,7 @@
 package com.openexchange.database.migration.internal;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.sql.Connection;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -65,7 +66,9 @@ import liquibase.resource.ResourceAccessor;
 import org.apache.commons.lang.Validate;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.migration.DBMigrationExceptionCodes;
 import com.openexchange.database.migration.DBMigrationExecutorService;
+import com.openexchange.database.migration.internal.accessors.SimpleClassLoaderResourceAccessor;
 import com.openexchange.exception.OXException;
 
 /**
@@ -77,7 +80,7 @@ import com.openexchange.exception.OXException;
  */
 public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorService {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DBMigrationExecutorServiceImpl.class);
+    private static final String LIQUIBASE_CONTEXT_CONFIGDB = "configdb";
 
     private DatabaseService databaseService;
 
@@ -101,60 +104,88 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
 
         accessors.add(new ClassLoaderResourceAccessor());
         accessors.add(new FileSystemResourceAccessor());
+        accessors.add(new SimpleClassLoaderResourceAccessor());
     }
 
     /**
      * {@inheritDoc}
+     *
+     * @throws OXException
      */
     @Override
-    public void execute(DatabaseChangeLog databaseChangeLog) {
+    public void execute(DatabaseChangeLog databaseChangeLog) throws OXException {
+
         Connection writable = null;
         Liquibase liquibase = null;
-        JdbcConnection jdbcConnection = null;
         try {
             writable = databaseService.getWritable();
 
-            jdbcConnection = new JdbcConnection(writable);
-            jdbcConnection.setAutoCommit(true);
+            liquibase = prepareLiquibase(writable, databaseChangeLog.getPhysicalFilePath());
 
-            MySQLDatabase databaseConnection = new MySQLDatabase();
-            databaseConnection.setConnection(jdbcConnection);
-            databaseConnection.setAutoCommit(true);
-
-            liquibase = new Liquibase(databaseChangeLog.getPhysicalFilePath(), new CompositeResourceAccessor(accessors), databaseConnection);
-            liquibase.update("configdb");
-        } catch (ValidationFailedException validationFailedException) {
-            LOG.error("Validation of DatabaseChangeLog failed with the following exception: " + validationFailedException.getLocalizedMessage(), validationFailedException);
-        } catch (LiquibaseException liquibaseException) {
-            LOG.error("Error using/executing liquibase: " + liquibaseException.getLocalizedMessage(), liquibaseException);
-        } catch (OXException oxException) {
-            LOG.error("Unable to retrieve database write connection: " + oxException.getLocalizedMessage(), oxException);
+            liquibase.update(LIQUIBASE_CONTEXT_CONFIGDB);
         } catch (Exception exception) {
-            LOG.error("An unexpected error occurred while executing database migration: " + exception.getLocalizedMessage(), exception);
+            handleExceptions(exception);
         } finally {
-            if (liquibase != null) {
-                try {
-                    liquibase.forceReleaseLocks();
-                } catch (LiquibaseException liquibaseException) {
-                    LOG.error("Unable to release liquibase locks: " + liquibaseException.getLocalizedMessage(), liquibaseException);
-                }
-            }
-            if (writable != null) {
-                databaseService.backWritable(writable);
-            }
+            cleanUpLiquibase(writable, liquibase);
         }
     }
 
     /**
-     * {@inheritDoc}
+     * Handles exceptions occurred while preparing and using liquibase.
+     *
+     * @param exception
+     * @throws OXException
      */
-    @Override
-    public void execute(String fileName) {
-        File xmlConfigFile = configurationService.getFileByName(fileName);
-        if (null != xmlConfigFile) {
-            execute(new DatabaseChangeLog(xmlConfigFile.getAbsolutePath()));
+    private void handleExceptions(Exception exception) throws OXException {
+        if (exception instanceof ValidationFailedException) {
+            throw DBMigrationExceptionCodes.VALIDATION_FAILED_ERROR.create(exception);
+        } else if (exception instanceof LiquibaseException) {
+            throw DBMigrationExceptionCodes.LIQUIBASE_ERROR.create(exception);
+        } else if (exception instanceof OXException) {
+            throw DBMigrationExceptionCodes.DBMIGARTION_ERROR.create(exception);
         } else {
-            LOG.info("No database migration file with name " + fileName + " found! Execution for that file will be skipped.");
+            throw DBMigrationExceptionCodes.UNEXPECTED_ERROR.create(exception);
+        }
+    }
+
+    /**
+     * Prepares liquibase to be able to execute statements
+     *
+     * @param writable
+     * @param databaseChangeLog
+     * @return
+     * @throws LiquibaseException
+     */
+    private Liquibase prepareLiquibase(Connection writable, String filePath) throws LiquibaseException {
+        JdbcConnection jdbcConnection = null;
+
+        jdbcConnection = new JdbcConnection(writable);
+        jdbcConnection.setAutoCommit(true);
+
+        MySQLDatabase databaseConnection = new MySQLDatabase();
+        databaseConnection.setConnection(jdbcConnection);
+        databaseConnection.setAutoCommit(true);
+
+        return new Liquibase(filePath, new CompositeResourceAccessor(accessors), databaseConnection);
+    }
+
+    /**
+     * Cleans up everything used for executing liquibase changelogs
+     *
+     * @param writable
+     * @param liquibase
+     * @throws OXException
+     */
+    private void cleanUpLiquibase(Connection writable, Liquibase liquibase) throws OXException {
+        if (liquibase != null) {
+            try {
+                liquibase.forceReleaseLocks();
+            } catch (LiquibaseException liquibaseException) {
+                throw DBMigrationExceptionCodes.LIQUIBASE_ERROR.create(liquibaseException);
+            }
+        }
+        if (writable != null) {
+            databaseService.backWritable(writable);
         }
     }
 
@@ -162,7 +193,30 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
      * {@inheritDoc}
      */
     @Override
-    public void execute(String fileName, List<ResourceAccessor> additionalAccessors) {
+    public void execute(String fileName) throws OXException {
+        File xmlConfigFile = getChangeLogFile(fileName);
+
+        execute(new DatabaseChangeLog(xmlConfigFile.getAbsolutePath()));
+    }
+
+    /**
+     * @param fileName
+     * @return
+     * @throws OXException
+     */
+    private File getChangeLogFile(String fileName) throws OXException {
+        File xmlConfigFile = configurationService.getFileByName(fileName);
+        if (null == xmlConfigFile) {
+            throw DBMigrationExceptionCodes.CHANGELOG_FILE_NOT_FOUND_ERROR.create(new FileNotFoundException(fileName), fileName);
+        }
+        return xmlConfigFile;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void execute(String fileName, List<ResourceAccessor> additionalAccessors) throws OXException {
         if (additionalAccessors == null) {
             execute(fileName);
             return;
@@ -172,5 +226,43 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
             accessors.add(accessor);
         }
         execute(fileName);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void rollback(int numberOfChangeSets) {
+        // TODO Auto-generated method stub
+
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @throws OXException
+     */
+    @Override
+    public boolean rollback(String fileName, String changeSetTag) throws OXException {
+        boolean rollbackSuccessful = false;
+
+        File xmlConfigFile = getChangeLogFile(fileName);
+
+        Connection writable = null;
+        Liquibase liquibase = null;
+        try {
+            writable = databaseService.getWritable();
+
+            liquibase = prepareLiquibase(writable, xmlConfigFile.getAbsolutePath());
+            liquibase.rollback(changeSetTag, LIQUIBASE_CONTEXT_CONFIGDB);
+
+            rollbackSuccessful = true;
+        } catch (Exception exception) {
+            handleExceptions(exception);
+        } finally {
+            cleanUpLiquibase(writable, liquibase);
+        }
+
+        return rollbackSuccessful;
     }
 }

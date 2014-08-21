@@ -63,10 +63,16 @@ import com.openexchange.database.migration.mbean.DBMigrationMBean;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.1
  */
-public class ReleaseDBMigrationLockCLT extends AbstractMBeanCLI<Void> {
+public class ReleaseDBMigrationLockCLT extends AbstractMBeanCLI<Boolean> {
 
     public static void main(String[] args) {
-        new ReleaseDBMigrationLockCLT().execute(args);
+        Boolean lockReleased = new ReleaseDBMigrationLockCLT().execute(args);
+
+        if (lockReleased) {
+            System.out.println("Lock released successfully!");
+        } else {
+            System.out.println("Unable to release the lock! Please have a look at the server logs for more details!");
+        }
     }
 
     // ------------------------------------------------------------------------------------ //
@@ -83,8 +89,7 @@ public class ReleaseDBMigrationLockCLT extends AbstractMBeanCLI<Void> {
      */
     @Override
     protected void checkOptions(CommandLine cmd) {
-        // TODO Auto-generated method stub
-
+        // nothing to do
     }
 
     /**
@@ -124,17 +129,22 @@ public class ReleaseDBMigrationLockCLT extends AbstractMBeanCLI<Void> {
      */
     @Override
     protected void addOptions(Options options) {
-        // TODO Auto-generated method stub
+        // nothing to do
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        mbsc.invoke(getObjectName(DBMigrationMBean.class.getName(), DBMigrationMBean.DOMAIN), getName(), null, null);
-        // TODO handle appropriate
+    protected Boolean invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
+        Object invoke = mbsc.invoke(getObjectName(DBMigrationMBean.class.getName(), DBMigrationMBean.DOMAIN), getName(), null, null);
 
-        return null;
+        boolean lockReleased = false;
+        if (invoke instanceof Boolean) {
+            lockReleased = (Boolean)invoke;
+        } else {
+            System.out.println("Unexpected result from calling 'releaseDBMigrationLock'. Neither 'true' nor 'false' received from release lock call.");
+        }
+        return lockReleased;
     }
 }

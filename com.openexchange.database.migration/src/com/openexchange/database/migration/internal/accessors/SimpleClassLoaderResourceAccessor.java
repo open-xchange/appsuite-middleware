@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.database.migration.ox.internal.accessors;
+package com.openexchange.database.migration.internal.accessors;
 
 import java.io.IOException;
 import java.io.InputStream;

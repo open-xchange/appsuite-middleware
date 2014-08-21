@@ -56,6 +56,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.database.migration.mbean.DBMigrationMBean;
 import com.openexchange.database.migration.mbean.DBMigrationMBeanImpl;
 import com.openexchange.exception.OXException;
@@ -78,15 +79,18 @@ public class ManagementServiceTracker implements ServiceTrackerCustomizer<Manage
 
     private DatabaseService databaseService;
 
+    private DBMigrationExecutorService dbMigrationExecutorService;
+
     /**
      * Initializes a new {@link ManagementServiceTracker}.
      *
      * @param context
      * @param databaseService
      */
-    public ManagementServiceTracker(final BundleContext context, DatabaseService databaseService) {
+    public ManagementServiceTracker(final BundleContext context, DBMigrationExecutorService dbMigrationExecutorService, DatabaseService databaseService) {
         super();
         this.context = context;
+        this.dbMigrationExecutorService = dbMigrationExecutorService;
         this.databaseService = databaseService;
     }
 
@@ -122,7 +126,7 @@ public class ManagementServiceTracker implements ServiceTrackerCustomizer<Manage
         if (objectName == null) {
             try {
                 objectName = getObjectName(DBMigrationMBean.class.getName(), DBMigrationMBean.DOMAIN);
-                management.registerMBean(objectName, new DBMigrationMBeanImpl(DBMigrationMBean.class, databaseService));
+                management.registerMBean(objectName, new DBMigrationMBeanImpl(DBMigrationMBean.class, dbMigrationExecutorService, databaseService));
             } catch (final MalformedObjectNameException e) {
                 LOG.error("", e);
             } catch (final OXException e) {

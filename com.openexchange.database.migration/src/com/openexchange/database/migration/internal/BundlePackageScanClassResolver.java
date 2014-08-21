@@ -97,7 +97,7 @@ public class BundlePackageScanClassResolver extends DefaultPackageScanClassResol
                     classes.add(klass);
                 }
             } catch (ClassNotFoundException e) {
-                log.debug("Can't load class: " + e.getMessage());
+                log.severe("Can't load class: " + fixedName, e);
             }
         }
     }

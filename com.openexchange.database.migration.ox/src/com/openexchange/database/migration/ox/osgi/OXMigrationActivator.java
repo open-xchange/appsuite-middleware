@@ -49,13 +49,9 @@
 
 package com.openexchange.database.migration.ox.osgi;
 
-import java.util.ArrayList;
-import java.util.List;
-import liquibase.resource.ResourceAccessor;
 import org.osgi.framework.BundleContext;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.database.migration.ox.internal.Services;
-import com.openexchange.database.migration.ox.internal.accessors.SimpleClassLoaderResourceAccessor;
 import com.openexchange.osgi.HousekeepingActivator;
 
 
@@ -96,10 +92,7 @@ public class OXMigrationActivator extends HousekeepingActivator {
             return;
         }
 
-        List<ResourceAccessor> accessors = new ArrayList<ResourceAccessor>();
-        accessors.add(new SimpleClassLoaderResourceAccessor());
-
-        dbMigrationExecutorService.execute(CUSTOM_CHANGELOG_LOCATION, accessors);
+        dbMigrationExecutorService.execute(CUSTOM_CHANGELOG_LOCATION);
     }
 
     /**

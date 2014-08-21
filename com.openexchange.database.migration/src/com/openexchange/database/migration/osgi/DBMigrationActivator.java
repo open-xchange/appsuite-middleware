@@ -102,11 +102,11 @@ public class DBMigrationActivator extends HousekeepingActivator {
         final ConfigurationService configurationService = getService(ConfigurationService.class);
         Validate.notNull(configurationService, "Cannot read migration files because ConfigurationService is absent.");
 
-        track(ManagementService.class, new ManagementServiceTracker(context, dbService));
-        openTrackers();
-
         DBMigrationExecutorService dbMigrationExecutorService = new DBMigrationExecutorServiceImpl(dbService, configurationService);
         registerService(DBMigrationExecutorService.class, dbMigrationExecutorService);
+
+        track(ManagementService.class, new ManagementServiceTracker(context, dbMigrationExecutorService, dbService));
+        openTrackers();
     }
 
     /**
