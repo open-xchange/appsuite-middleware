@@ -171,7 +171,7 @@ public class BoxAccess {
     }
 
     private BoxClient createBoxClient(OAuthAccount boxOAuthAccount) {
-        BoxClient boxClient = new BoxClient(clientId, clientSecret, new BoxResourceHub(), new BoxJSONParser(new BoxResourceHub()), (new BoxConfigBuilder()).build());
+        BoxClient boxClient = new NonRefreshingBoxClient(clientId, clientSecret, new BoxResourceHub(), new BoxJSONParser(new BoxResourceHub()), (new BoxConfigBuilder()).build());
 
         // Apply access token and refresh token from OAuth account
         Map<String, Object> tokenSpec = new HashMap<String, Object>(6);
