@@ -52,6 +52,7 @@ package com.openexchange.file.storage.boxcom.access;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.BoxApi;
 import org.scribe.model.Token;
@@ -134,7 +135,7 @@ public class BoxAccess {
     }
 
     /** The associated OAuth information */
-    private volatile BoxOAuthInfo boxOAuthInfo;
+    private final AtomicReference<BoxOAuthInfo> boxOAuthInfoRef;
 
     /** The last-accessed time stamp */
     private volatile long lastAccessed;
@@ -175,7 +176,7 @@ public class BoxAccess {
         }
 
         // Assign Box.com OAuth information
-        this.boxOAuthInfo = new BoxOAuthInfo(boxOAuthAccount, session);
+        boxOAuthInfoRef = new AtomicReference<BoxAccess.BoxOAuthInfo>(new BoxOAuthInfo(boxOAuthAccount, session));
         lastAccessed = System.nanoTime();
     }
 
@@ -240,9 +241,9 @@ public class BoxAccess {
         long now = System.nanoTime();
         if (TimeUnit.NANOSECONDS.toSeconds(now - lastAccessed) > RECHECK_THRESHOLD) {
             synchronized (this) {
-                OAuthAccount newAccount = recreateTokenIfExpired(false, boxOAuthInfo, session);
+                OAuthAccount newAccount = recreateTokenIfExpired(false, boxOAuthInfoRef.get(), session);
                 if (newAccount != null) {
-                    this.boxOAuthInfo = new BoxOAuthInfo(newAccount, session);
+                    boxOAuthInfoRef.set(new BoxOAuthInfo(newAccount, session));
                     lastAccessed = System.nanoTime();
                 }
             }
@@ -258,9 +259,9 @@ public class BoxAccess {
      */
     public void reinit(Session session) throws OXException {
         synchronized (this) {
-            OAuthAccount newAccount = recreateTokenIfExpired(true, boxOAuthInfo, session);
+            OAuthAccount newAccount = recreateTokenIfExpired(true, boxOAuthInfoRef.get(), session);
             if (newAccount != null) {
-                this.boxOAuthInfo = new BoxOAuthInfo(newAccount, session);
+                boxOAuthInfoRef.set(new BoxOAuthInfo(newAccount, session));
                 lastAccessed = System.nanoTime();
             }
         }
@@ -272,7 +273,7 @@ public class BoxAccess {
      * @return The box client
      */
     public BoxClient getBoxClient() {
-        return createBoxClient(boxOAuthInfo);
+        return createBoxClient(boxOAuthInfoRef.get());
     }
 
     /**
