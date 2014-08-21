@@ -122,5 +122,17 @@
 	<classpathentry kind="src" path="/com.openexchange.share"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.share.impl"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.share.storage"/>
+	<classpathentry kind="src" path="/com.openexchange.subscribe.google"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry exported="true" kind="lib" path="/com.openexchange.test/lib/mockito-all-1.9.5.jar" sourcepath="/com.openexchange.test/lib/source/mockito-all-1.9.5-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/com.openexchange.test/lib/source/mockito-all-1.9.5-sources.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry exported="true" kind="lib" path="/com.openexchange.test/lib/powermock-mockito-1.5.4-full.jar"/>
+	<classpathentry kind="src" path="/com.openexchange.oauth.google"/>
+	<classpathentry kind="src" path="/com.openexchange.oauth"/>
+	<classpathentry kind="src" path="/com.openexchange.google.api.client"/>
+	<classpathentry kind="src" path="/com.openexchange.test"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

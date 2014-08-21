@@ -117,6 +117,7 @@ fi
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/facebookoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/googleoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/linkedinoauth.properties
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/msliveconnectoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/msnoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/yahoooauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/xingoauth.properties
@@ -127,6 +128,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/settings/*
 
 %changelog
+* Mon Aug 18 2014 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2014-08-25
 * Wed Aug 13 2014 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2014-08-15
 * Tue Aug 05 2014 Steffen Templin <marcus.klein@open-xchange.com>

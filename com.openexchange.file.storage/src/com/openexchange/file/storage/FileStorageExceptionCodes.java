@@ -76,7 +76,7 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
      */
     IO_ERROR("An I/O error occurred: %1$s", Category.CATEGORY_ERROR, 3),
     /**
-     * An I/O error occurred: %1$s
+     * A JSON occurred: %1$s
      */
     JSON_ERROR("A JSON error occurred: %1$s", Category.CATEGORY_ERROR, 14),
     /**
@@ -187,6 +187,10 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
      * The allowed quota is reached. Please delete some items in order to store new ones.
      */
     QUOTA_REACHED("The allowed Quota is reached", Category.CATEGORY_CAPACITY, 32, FileStorageExceptionMessages.QUOTA_REACHED_MSG),
+    /**
+     * Search term no supported: %1$s.
+     */
+    SEARCH_TERM_NOT_SUPPORTED("Search term no supported: %1$s.", Category.CATEGORY_ERROR, 33),
 
     ;
 

@@ -57,6 +57,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -80,6 +81,10 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.image.ImageLocation;
+import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorage;
+import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorageRegistry;
+import com.openexchange.mail.attachment.storage.MailAttachmentStorage;
+import com.openexchange.mail.attachment.storage.MailAttachmentStorageRegistry;
 import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailActionFactory;
@@ -182,6 +187,15 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         });
         openTrackers();
 
+        DefaultMailAttachmentStorageRegistry.initInstance(context);
+        registerService(MailAttachmentStorageRegistry.class, DefaultMailAttachmentStorageRegistry.getInstance());
+
+        {
+            Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
+            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
+            registerService(MailAttachmentStorage.class, new DefaultMailAttachmentStorage(), properties);
+        }
+
         registerModule(new MailActionFactory(serviceLookup), "mail");
         final MailConverter converter = MailConverter.getInstance();
         registerService(ResultConverter.class, converter);
@@ -190,14 +204,14 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         registerService(Reloadable.class, MailReloadable.getInstance());
         registerService(Reloadable.class, TransportReloadable.getInstance());
 
-        final ContactField[] fields = new ContactField[] {
-            ContactField.OBJECT_ID, ContactField.INTERNAL_USERID, ContactField.FOLDER_ID, ContactField.NUMBER_OF_IMAGES };
+        final ContactField[] fields = new ContactField[] { ContactField.OBJECT_ID, ContactField.INTERNAL_USERID, ContactField.FOLDER_ID, ContactField.NUMBER_OF_IMAGES };
         registerService(AJAXResultDecorator.class, new DecoratorImpl(converter, fields));
     }
 
     @Override
     protected void stopBundle() throws Exception {
         super.stopBundle();
+        DefaultMailAttachmentStorageRegistry.dropInstance();
         SERVICES.set(null);
     }
 

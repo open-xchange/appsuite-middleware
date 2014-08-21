@@ -193,7 +193,7 @@ public final class MsLiveConnectOAuthServiceMetaData extends AbstractOAuthServic
         }
 
         // Trim redirect URI to have an exact match to deferrer servlet path,
-        // which should be the one defined as "Redirect URL" in Box.com app account
+        // which should be the one defined as "Redirect URL" in MS Live Connect app account
         StringBuilder authUrlBuilder;
         {
             int nextPos = authUrl.indexOf('&', pos + 1);
@@ -216,8 +216,19 @@ public final class MsLiveConnectOAuthServiceMetaData extends AbstractOAuthServic
     }
 
     private String trimRedirectUri(String redirectUri) {
-        String prefix = this.redirectUrl;
-        return redirectUri.startsWith(prefix) ? redirectUri.substring(0, prefix.length()) : redirectUri;
+        if (!stripProtocol(redirectUri).startsWith(stripProtocol(this.redirectUrl))) {
+            return redirectUri;
+        }
+        return this.redirectUrl;
+    }
+
+    private String stripProtocol(String encodedUrl) {
+        if (encodedUrl.startsWith("https")) {
+            return encodedUrl.substring(5);
+        } else if (encodedUrl.startsWith("http")) {
+            return encodedUrl.substring(4);
+        }
+        return encodedUrl;
     }
 
     @Override

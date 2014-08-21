@@ -62,6 +62,7 @@ import com.box.boxjavalibv2.exceptions.BoxServerException;
 import com.box.boxjavalibv2.requests.requestobjects.BoxFolderDeleteRequestObject;
 import com.box.boxjavalibv2.requests.requestobjects.BoxFolderRequestObject;
 import com.box.boxjavalibv2.requests.requestobjects.BoxPagingRequestObject;
+import com.box.boxjavalibv2.resourcemanagers.IBoxFoldersManager;
 import com.box.restclientv2.exceptions.BoxRestException;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
@@ -80,7 +81,7 @@ import com.openexchange.session.Session;
  */
 public final class BoxFolderAccess extends AbstractBoxResourceAccess implements FileStorageFolderAccess {
 
-    private final BoxAccountAccess accountAccess;
+    //private final BoxAccountAccess accountAccess;
     private final int userId;
     private final String accountDisplayName;
 
@@ -89,7 +90,7 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
      */
     public BoxFolderAccess(final BoxAccess boxAccess, final FileStorageAccount account, final Session session, final BoxAccountAccess accountAccess) throws OXException {
         super(boxAccess, account, session);
-        this.accountAccess = accountAccess;
+        //this.accountAccess = accountAccess;
         userId = session.getUserId();
         accountDisplayName = account.getDisplayName();
     }
@@ -112,12 +113,12 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
 
     @Override
     public boolean exists(final String folderId) throws OXException {
-        BoxClient boxClient = boxAccess.getBoxClient();
         return perform(new BoxClosure<Boolean>() {
 
             @Override
-            protected Boolean doPerform(BoxClient boxClient) throws BoxRestException, BoxServerException, AuthFatalFailureException, OXException {
+            protected Boolean doPerform(BoxAccess boxAccess) throws BoxRestException, BoxServerException, AuthFatalFailureException, OXException {
                 try {
+                    BoxClient boxClient = boxAccess.getBoxClient();
                     BoxFolder folder = boxClient.getFoldersManager().getFolder(toBoxFolderId(folderId), null);
                     checkFolderValidity(folder);
                     return Boolean.TRUE;
@@ -133,17 +134,17 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
                     throw e;
                 }
             }
-        }, boxClient).booleanValue();
+        }).booleanValue();
     }
 
     @Override
     public FileStorageFolder getFolder(final String folderId) throws OXException {
-        BoxClient boxClient = boxAccess.getBoxClient();
         return perform(new BoxClosure<FileStorageFolder>() {
 
             @Override
-            protected FileStorageFolder doPerform(BoxClient boxClient) throws BoxRestException, BoxServerException, AuthFatalFailureException, OXException {
+            protected FileStorageFolder doPerform(BoxAccess boxAccess) throws BoxRestException, BoxServerException, AuthFatalFailureException, OXException {
                 try {
+                    BoxClient boxClient = boxAccess.getBoxClient();
                     BoxFolder folder = boxClient.getFoldersManager().getFolder(toBoxFolderId(folderId), null);
                     checkFolderValidity(folder);
 
@@ -152,7 +153,7 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
                     throw handleHttpResponseError(folderId, e);
                 }
             }
-        }, boxClient);
+        });
     }
 
     @Override
@@ -172,13 +173,14 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
 
     @Override
     public FileStorageFolder[] getSubfolders(final String parentIdentifier, final boolean all) throws OXException {
-        BoxClient boxClient = boxAccess.getBoxClient();
         return perform(new BoxClosure<FileStorageFolder[]>() {
 
             @Override
-            protected FileStorageFolder[] doPerform(BoxClient boxClient) throws BoxRestException, BoxServerException, AuthFatalFailureException, OXException {
+            protected FileStorageFolder[] doPerform(BoxAccess boxAccess) throws BoxRestException, BoxServerException, AuthFatalFailureException, OXException {
                 try {
-                    BoxFolder boxfolder = boxClient.getFoldersManager().getFolder(toBoxFolderId(parentIdentifier), null);
+                    BoxClient boxClient = boxAccess.getBoxClient();
+                    IBoxFoldersManager foldersManager = boxClient.getFoldersManager();
+                    BoxFolder boxfolder = foldersManager.getFolder(toBoxFolderId(parentIdentifier), null);
 
                     List<FileStorageFolder> folders = new LinkedList<FileStorageFolder>();
 
@@ -186,7 +188,7 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
                     if (itemCollection.getTotalCount().intValue() <= itemCollection.getEntries().size()) {
                         for (BoxTypedObject child : itemCollection.getEntries()) {
                             if (isFolder(child)) {
-                                folders.add(parseBoxFolder((BoxFolder) child));
+                                folders.add(parseBoxFolder(foldersManager.getFolder(child.getId(), null)));
                             }
                         }
                     } else {
@@ -196,13 +198,13 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
                         int resultsFound;
                         do {
                             BoxPagingRequestObject reqObj = BoxPagingRequestObject.pagingRequestObject(limit, offset);
-                            BoxCollection collection = boxClient.getFoldersManager().getFolderItems(toBoxFolderId(parentIdentifier), reqObj);
+                            BoxCollection collection = foldersManager.getFolderItems(toBoxFolderId(parentIdentifier), reqObj);
 
                             List<BoxTypedObject> entries = collection.getEntries();
                             resultsFound = entries.size();
                             for (BoxTypedObject typedObject : entries) {
                                 if (isFolder(typedObject)) {
-                                    folders.add(parseBoxFolder((BoxFolder) typedObject));
+                                    folders.add(parseBoxFolder(foldersManager.getFolder(typedObject.getId(), null)));
                                 }
                             }
 
@@ -215,7 +217,7 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
                     throw handleHttpResponseError(parentIdentifier, e);
                 }
             }
-        }, boxClient);
+        });
     }
 
     @Override
@@ -225,17 +227,17 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
 
     @Override
     public String createFolder(final FileStorageFolder toCreate) throws OXException {
-        BoxClient boxClient = boxAccess.getBoxClient();
         return perform(new BoxClosure<String>() {
 
             @Override
-            protected String doPerform(BoxClient boxClient) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+            protected String doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+                BoxClient boxClient = boxAccess.getBoxClient();
 
                 BoxFolderRequestObject reqObj = BoxFolderRequestObject.createFolderRequestObject(toCreate.getName(), toBoxFolderId(toCreate.getParentId()));
                 BoxFolder createdFolder = boxClient.getFoldersManager().createFolder(reqObj);
                 return toFileStorageFolderId(createdFolder.getId());
             }
-        }, boxClient);
+        });
     }
 
     @Override
@@ -251,11 +253,11 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
 
     @Override
     public String moveFolder(final String folderId, final String newParentId, final String newName) throws OXException {
-        BoxClient boxClient = boxAccess.getBoxClient();
         return perform(new BoxClosure<String>() {
 
             @Override
-            protected String doPerform(BoxClient boxClient) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+            protected String doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+                BoxClient boxClient = boxAccess.getBoxClient();
 
                 BoxFolderRequestObject reqObj = BoxFolderRequestObject.updateFolderRequestObject();
                 if (null != newName) {
@@ -268,16 +270,16 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
 
                 return toFileStorageFolderId(updatedFolder.getId());
             }
-        }, boxClient);
+        });
     }
 
     @Override
     public String renameFolder(final String folderId, final String newName) throws OXException {
-        BoxClient boxClient = boxAccess.getBoxClient();
         return perform(new BoxClosure<String>() {
 
             @Override
-            protected String doPerform(BoxClient boxClient) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+            protected String doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+                BoxClient boxClient = boxAccess.getBoxClient();
 
                 BoxFolderRequestObject reqObj = BoxFolderRequestObject.updateFolderRequestObject();
                 if (null != newName) {
@@ -287,7 +289,7 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
 
                 return toFileStorageFolderId(updatedFolder.getId());
             }
-        }, boxClient);
+        });
     }
 
     @Override
@@ -297,18 +299,18 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
 
     @Override
     public String deleteFolder(final String folderId, boolean hardDelete) throws OXException {
-        BoxClient boxClient = boxAccess.getBoxClient();
         return perform(new BoxClosure<String>() {
 
             @Override
-            protected String doPerform(BoxClient boxClient) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+            protected String doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+                BoxClient boxClient = boxAccess.getBoxClient();
 
                 BoxFolderDeleteRequestObject reqObj = BoxFolderDeleteRequestObject.deleteFolderRequestObject(true);
                 boxClient.getFoldersManager().deleteFolder(toBoxFolderId(folderId), reqObj);
 
                 return folderId;
             }
-        }, boxClient);
+        });
     }
 
     @Override
@@ -318,11 +320,11 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
 
     @Override
     public void clearFolder(final String folderId, boolean hardDelete) throws OXException {
-        BoxClient boxClient = boxAccess.getBoxClient();
         perform(new BoxClosure<Void>() {
 
             @Override
-            protected Void doPerform(BoxClient boxClient) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+            protected Void doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+                BoxClient boxClient = boxAccess.getBoxClient();
                 BoxFolder boxfolder = boxClient.getFoldersManager().getFolder(toBoxFolderId(folderId), null);
 
                 List<BoxFile> files = new LinkedList<BoxFile>();
@@ -362,7 +364,7 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
 
                 for (BoxFolder trashMe : folders) {
                     BoxFolderDeleteRequestObject reqOb = BoxFolderDeleteRequestObject.deleteFolderRequestObject(true);
-                    boxClient.getFoldersManager().deleteFolder(folderId, reqOb);
+                    boxClient.getFoldersManager().deleteFolder(trashMe.getId(), reqOb);
                 }
 
                 for (BoxFile trashMe : files) {
@@ -371,16 +373,16 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
 
                 return null;
             }
-        }, boxClient);
+        });
     }
 
     @Override
     public FileStorageFolder[] getPath2DefaultFolder(final String folderId) throws OXException {
-        BoxClient boxClient = boxAccess.getBoxClient();
         return perform(new BoxClosure<FileStorageFolder[]>() {
 
             @Override
-            protected FileStorageFolder[] doPerform(BoxClient boxClient) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+            protected FileStorageFolder[] doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+                BoxClient boxClient = boxAccess.getBoxClient();
 
                 List<FileStorageFolder> list = new LinkedList<FileStorageFolder>();
 
@@ -398,7 +400,7 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
 
                 return list.toArray(new FileStorageFolder[list.size()]);
             }
-        }, boxClient);
+        });
     }
 
     @Override

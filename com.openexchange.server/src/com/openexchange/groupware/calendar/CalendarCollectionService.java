@@ -142,7 +142,7 @@ public interface CalendarCollectionService {
 
     public void checkAndConfirmIfUserUserIsParticipantInPublicFolder(final CalendarDataObject cdao, final UserParticipant up);
 
-    public UserParticipant[] checkAndModifyAlarm(final CalendarDataObject cdao, UserParticipant check[], final int uid, final UserParticipant orig[]);
+    public Set<UserParticipant> checkAndModifyAlarm(final CalendarDataObject cdao, Set<UserParticipant> check, final int uid,  final Set<UserParticipant> orig);
 
     public void simpleParticipantCheck(final CalendarDataObject cdao) throws OXException;
 
@@ -411,7 +411,7 @@ public interface CalendarCollectionService {
      */
     public int resolveFolderIDForUser(final int oid, final int uid, final Context c) throws OXException;
 
-    public void fillEventInformation(final CalendarDataObject cdao, final CalendarDataObject edao, UserParticipant up_event[], final UserParticipant[] new_userparticipants, final UserParticipant[] deleted_userparticipants, UserParticipant[] modified_userparticipants, Participant p_event[], final Participant new_participants[], final Participant deleted_participants[], final Participant modified_participants[]);
+    public void fillEventInformation(final CalendarDataObject cdao, final CalendarDataObject edao, UserParticipant up_event[], final Set<UserParticipant> new_userparticipants, final Set<UserParticipant> deleted_userparticipants,final Set<UserParticipant> modified_userparticipants, Participant p_event[], final Set<Participant> new_participants, final Set<Participant> deleted_participants, final Participant[] modified_participants);
 
     /**
      * Gets the calendar data object from specified list whose ID matches given

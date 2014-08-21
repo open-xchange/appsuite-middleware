@@ -67,10 +67,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
@@ -1585,61 +1587,81 @@ public final class OutlookFolderStorage implements FolderStorage {
                         /*
                          * File storage accounts
                          */
-                        final List<FileStorageAccount> fsAccounts = new LinkedList<FileStorageAccount>();
+                        final Queue<FileStorageAccount> fsAccounts = new ConcurrentLinkedQueue<FileStorageAccount>();
                         final FileStorageServiceRegistry fsr = Services.getService(FileStorageServiceRegistry.class);
                         if (null == fsr) {
                             // Do nothing
                         } else {
+                            CompletionService<Void> completionService = new ThreadPoolCompletionService<Void>(ThreadPools.getThreadPool());
+                            int taskCount = 0;
                             try {
                                 final List<FileStorageService> allServices = fsr.getAllServices();
                                 for (final FileStorageService fsService : allServices) {
-                                    /*
-                                     * Check if file storage service provides a root folder
-                                     */
-                                    List<FileStorageAccount> userAccounts = null;
-                                    if (fsService instanceof AccountAware) {
-                                        userAccounts = ((AccountAware) fsService).getAccounts(session);
-                                    }
-                                    if (null == userAccounts) {
-                                        userAccounts = fsService.getAccountManager().getAccounts(session);
-                                    }
-                                    for (final FileStorageAccount userAccount : userAccounts) {
-                                        if (SERVICE_INFOSTORE.equals(userAccount.getId()) || FileStorageAccount.DEFAULT_ID.equals(userAccount.getId())) {
-                                            // Ignore infostore file storage and default account
-                                            continue;
-                                        }
-                                        final FileStorageAccountAccess accountAccess = getFSAccountAccess(storageParameters, userAccount);
-                                        accountAccess.connect();
-                                        try {
-                                            LogProperties.put(LogProperties.Name.FILE_STORAGE_ACCOUNT_ID, userAccount.getId());
-                                            LogProperties.put(LogProperties.Name.FILE_STORAGE_CONFIGURATION, userAccount.getConfiguration().toString());
-                                            LogProperties.put(LogProperties.Name.FILE_STORAGE_SERVICE_ID, fsService.getId());
-                                            final FileStorageFolder rootFolder = accountAccess.getFolderAccess().getRootFolder();
-                                            if (null != rootFolder) {
-                                                fsAccounts.add(userAccount);
+                                    Callable<Void> task = new Callable<Void>() {
+
+                                        @Override
+                                        public Void call() throws Exception {
+                                            /*
+                                             * Check if file storage service provides a root folder
+                                             */
+                                            List<FileStorageAccount> userAccounts = null;
+                                            if (fsService instanceof AccountAware) {
+                                                userAccounts = ((AccountAware) fsService).getAccounts(session);
                                             }
-                                            if (accountAccess instanceof WarningsAware) {
-                                                addWarnings(storageParameters, (WarningsAware) accountAccess);
+                                            if (null == userAccounts) {
+                                                userAccounts = fsService.getAccountManager().getAccounts(session);
                                             }
-                                        } finally {
-                                            accountAccess.close();
-                                            LogProperties.remove(LogProperties.Name.FILE_STORAGE_ACCOUNT_ID);
-                                            LogProperties.remove(LogProperties.Name.FILE_STORAGE_CONFIGURATION);
-                                            LogProperties.remove(LogProperties.Name.FILE_STORAGE_SERVICE_ID);
+                                            for (final FileStorageAccount userAccount : userAccounts) {
+                                                if (SERVICE_INFOSTORE.equals(userAccount.getId()) || FileStorageAccount.DEFAULT_ID.equals(userAccount.getId())) {
+                                                    // Ignore infostore file storage and default account
+                                                    continue;
+                                                }
+                                                final FileStorageAccountAccess accountAccess = getFSAccountAccess(storageParameters, userAccount);
+                                                accountAccess.connect();
+                                                try {
+                                                    LogProperties.put(LogProperties.Name.FILE_STORAGE_ACCOUNT_ID, userAccount.getId());
+                                                    LogProperties.put(LogProperties.Name.FILE_STORAGE_CONFIGURATION, userAccount.getConfiguration().toString());
+                                                    LogProperties.put(LogProperties.Name.FILE_STORAGE_SERVICE_ID, fsService.getId());
+                                                    final FileStorageFolder rootFolder = accountAccess.getFolderAccess().getRootFolder();
+                                                    if (null != rootFolder) {
+                                                        fsAccounts.add(userAccount);
+                                                    }
+                                                    if (accountAccess instanceof WarningsAware) {
+                                                        addWarnings(storageParameters, (WarningsAware) accountAccess);
+                                                    }
+                                                } catch (final OXException e) {
+                                                    LOG.error("Could not access account {}", userAccount.getDisplayName(), e);
+                                                    storageParameters.addWarning(e);
+                                                } catch (final RuntimeException e) {
+                                                    LOG.error("Could not access account {}", userAccount.getDisplayName(), e);
+                                                } finally {
+                                                    accountAccess.close();
+                                                    LogProperties.remove(LogProperties.Name.FILE_STORAGE_ACCOUNT_ID);
+                                                    LogProperties.remove(LogProperties.Name.FILE_STORAGE_CONFIGURATION);
+                                                    LogProperties.remove(LogProperties.Name.FILE_STORAGE_SERVICE_ID);
+                                                }
+                                            }
+                                            return null;
                                         }
-                                    }
+                                    };
+                                    completionService.submit(task);
+                                    taskCount++;
                                 }
                             } catch (final OXException e) {
                                 LOG.error("", e);
                             }
+                            for (int i = taskCount; i-- > 0;) {
+                                completionService.take();
+                            }
                             if (fsAccounts.isEmpty()) {
                                 // Do nothing
                             } else {
-                                Collections.sort(fsAccounts, new FileStorageAccountComparator(locale));
-                                final int sz = fsAccounts.size();
+                                List<FileStorageAccount> accountList = new ArrayList<FileStorageAccount>(fsAccounts);
+                                Collections.sort(accountList, new FileStorageAccountComparator(locale));
+                                final int sz = accountList.size();
                                 final String fid = FileStorageFolder.ROOT_FULLNAME;
                                 for (int i = 0; i < sz; i++) {
-                                    final FileStorageAccount fsa = fsAccounts.get(i);
+                                    final FileStorageAccount fsa = accountList.get(i);
                                     final String serviceId;
                                     if (fsa instanceof com.openexchange.file.storage.ServiceAware) {
                                         serviceId = ((com.openexchange.file.storage.ServiceAware) fsa).getServiceId();
@@ -1733,7 +1755,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         return null;
     }
 
-    private FileStorageAccountAccess getFSAccountAccess(final StorageParameters storageParameters, final FileStorageAccount userAccount) throws OXException {
+    FileStorageAccountAccess getFSAccountAccess(final StorageParameters storageParameters, final FileStorageAccount userAccount) throws OXException {
         FileStorageService fileStorageService = userAccount.getFileStorageService();
         if (null == fileStorageService) {
             if (!(userAccount instanceof com.openexchange.file.storage.ServiceAware)) {
@@ -2802,7 +2824,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         return DatabaseFolderStorageUtility.getUnsignedInteger(folderId) >= 0;
     }
 
-    private static void addWarnings(final StorageParameters storageParameters, final WarningsAware warningsAware) {
+    static void addWarnings(final StorageParameters storageParameters, final WarningsAware warningsAware) {
         final List<OXException> list = warningsAware.getAndFlushWarnings();
         if (null != list && !list.isEmpty()) {
             for (OXException warning : list) {
