@@ -54,6 +54,7 @@ import java.util.LinkedHashMap;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.oauth.actions.AllOAuthAccountRequest;
@@ -70,9 +71,12 @@ import com.openexchange.configuration.GoogleConfig.Property;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
+import com.openexchange.google.subscribe.old.GoogleOAuthClient;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
+import com.openexchange.test.CalendarTestManager;
+import com.openexchange.test.ContactTestManager;
 import com.openexchange.test.FolderTestManager;
 import edu.emory.mathcs.backport.java.util.Collections;
 
@@ -95,6 +99,10 @@ public class GoogleSubscribeTestEnvironment {
 
     private FolderTestManager folderMgr;
 
+    private CalendarTestManager calendarMgr;
+
+    private ContactTestManager contactMgr;
+    
     /**
      * Get the instance of the environment
      * 
@@ -149,7 +157,7 @@ public class GoogleSubscribeTestEnvironment {
         ajaxClient = new AJAXClient(User.User1);
     }
 
-    private void initManagers() {
+    private void initManagers() throws OXException, IOException, SAXException, JSONException {
         folderMgr = new FolderTestManager(ajaxClient);
     }
 
@@ -333,5 +341,4 @@ public class GoogleSubscribeTestEnvironment {
             ajaxClient.logout();
         }
     }
-
 }
