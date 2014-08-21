@@ -50,7 +50,10 @@
 package com.openexchange.google.subscribe;
 
 import java.io.IOException;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -71,11 +74,10 @@ import com.openexchange.configuration.GoogleConfig.Property;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
-import com.openexchange.test.CalendarTestManager;
-import com.openexchange.test.ContactTestManager;
 import com.openexchange.test.FolderTestManager;
 import edu.emory.mathcs.backport.java.util.Collections;
 
@@ -85,6 +87,10 @@ import edu.emory.mathcs.backport.java.util.Collections;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class GoogleSubscribeTestEnvironment {
+
+    protected static final String CONTACT_SOURCE_ID = "com.openexchange.subscribe.google.contact";
+
+    protected static final String CALENDAR_SOURCE_ID = "com.openexchange.subscribe.google.calendar";
 
     private static final GoogleSubscribeTestEnvironment INSTANCE = new GoogleSubscribeTestEnvironment();
 
@@ -97,11 +103,9 @@ public class GoogleSubscribeTestEnvironment {
     private GoogleOAuthClient oauthClient;
 
     private FolderTestManager folderMgr;
-
-    private CalendarTestManager calendarMgr;
-
-    private ContactTestManager contactMgr;
     
+    protected static final Map<String, Integer> testFolders = new HashMap<String, Integer>();
+
     /**
      * Get the instance of the environment
      * 
@@ -126,6 +130,8 @@ public class GoogleSubscribeTestEnvironment {
             // initGoogleOAuthClient();
             // initGoogleOAuthAccount();
             createGoogleSubscription();
+            // wait for the async subscribe to finish
+            Thread.sleep(15000);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -194,7 +200,6 @@ public class GoogleSubscribeTestEnvironment {
      * @throws IOException
      * @throws OXException
      */
-    @SuppressWarnings("unchecked")
     private void createGoogleSubscription() throws Exception {
         // Get account id
         final int accountId = getAccountId();
@@ -206,13 +211,13 @@ public class GoogleSubscribeTestEnvironment {
         int userId = ajaxClient.getValues().getUserId();
         createGoogleSubscription(
             accountId,
-            "com.openexchange.subscribe.google.calendar",
+            CALENDAR_SOURCE_ID,
             FolderObject.CALENDAR,
             ajaxClient.getValues().getPrivateAppointmentFolder(),
             userId);
         createGoogleSubscription(
             accountId,
-            "com.openexchange.subscribe.google.contact",
+            CONTACT_SOURCE_ID,
             FolderObject.CONTACT,
             ajaxClient.getValues().getPrivateContactFolder(),
             userId);
@@ -240,8 +245,10 @@ public class GoogleSubscribeTestEnvironment {
 
         final RefreshSubscriptionRequest refreshReq = new RefreshSubscriptionRequest(subId, Integer.toString(folder.getObjectID()));
         ajaxClient.execute(refreshReq);
+        testFolders.put(sourceId, folder.getObjectID());
     }
 
+    @SuppressWarnings("unchecked")
     private int getAccountId() throws OXException, IOException, JSONException {
         AllOAuthAccountRequest oauthReq = new AllOAuthAccountRequest();
         AllOAuthAccountResponse oauthResp = ajaxClient.execute(oauthReq);
@@ -315,6 +322,7 @@ public class GoogleSubscribeTestEnvironment {
      * @param folderId
      * @return
      */
+    @SuppressWarnings("unchecked")
     private Subscription createSubscription(final DynamicFormDescription desc, final String sourceId, final int accountId, final int folderId) {
         SubscriptionSource source = new SubscriptionSource();
         source.setId(sourceId);
