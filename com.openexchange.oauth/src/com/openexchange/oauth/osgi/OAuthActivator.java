@@ -57,6 +57,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DBProvider;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.http.client.builder.HTTPResponseProcessor;
 import com.openexchange.http.deferrer.CustomRedirectURLDetermination;
@@ -105,7 +106,7 @@ public final class OAuthActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             DatabaseService.class, SessiondService.class, EventAdmin.class, SecretEncryptionFactoryService.class, SessionHolder.class,
-            CryptoService.class, ConfigViewFactory.class, TimerService.class };
+            CryptoService.class, ConfigViewFactory.class, TimerService.class, DispatcherPrefixService.class };
     }
 
     @Override

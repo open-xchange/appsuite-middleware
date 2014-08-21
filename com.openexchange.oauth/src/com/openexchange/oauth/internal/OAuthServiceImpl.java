@@ -53,6 +53,8 @@ import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -84,6 +86,7 @@ import org.scribe.model.Verifier;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.provider.DBProvider;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.html.HtmlService;
@@ -281,19 +284,53 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
              */
             DeferringURLService ds = Services.getService(DeferringURLService.class);
             {
+                boolean deferred = false;
                 if (isDeferrerAvailable(ds, userId, contextId)) {
                     String deferredURL = ds.getDeferredURL(cbUrl, userId, contextId);
                     if (deferredURL != null) {
                         cbUrl = deferredURL;
+                        deferred = true;
                     }
+                }
+                if (false == deferred && metaData.registerTokenBasedDeferrer()) {
+                    // Not yet deferred, but wants to
                 }
             }
             /*
-             * Get associated Scribe service
+             * Get token & authorization URL
              */
-            final org.scribe.oauth.OAuthService service = getScribeService(metaData, cbUrl, session);
-            final Token scribeToken = metaData.needsRequestToken() ? service.getRequestToken() : null;
-            final StringBuilder authorizationURL = new StringBuilder(service.getAuthorizationUrl(scribeToken));
+            boolean tokenRegistered = false;
+            Token scribeToken;
+            StringBuilder authorizationURL;
+            if (metaData.registerTokenBasedDeferrer() && metaData.needsRequestToken()) {
+                try {
+                    URI uri = new URI(cbUrl);
+
+                    DispatcherPrefixService prefixService = Services.getService(DispatcherPrefixService.class);
+                    String path = new StringBuilder(prefixService.getPrefix()).append("defer").toString();
+                    if (!path.startsWith("/")) {
+                        path = new StringBuilder(path.length() + 1).append('/').append(path).toString();
+                    }
+
+                    String prevCbUrl = cbUrl;
+                    cbUrl = new StringBuilder(uri.getScheme()).append("://").append(uri.getHost()).append(path).toString();
+
+                    org.scribe.oauth.OAuthService service = getScribeService(metaData, cbUrl, session);
+                    scribeToken = service.getRequestToken();
+                    authorizationURL = new StringBuilder(service.getAuthorizationUrl(scribeToken));
+
+                    callbackRegistry.add(scribeToken.getToken(), prevCbUrl);
+                    tokenRegistered = true;
+                } catch (URISyntaxException e) {
+                    org.scribe.oauth.OAuthService service = getScribeService(metaData, cbUrl, session);
+                    scribeToken = service.getRequestToken();
+                    authorizationURL = new StringBuilder(service.getAuthorizationUrl(scribeToken));
+                }
+            } else {
+                org.scribe.oauth.OAuthService service = getScribeService(metaData, cbUrl, session);
+                scribeToken = metaData.needsRequestToken() ? service.getRequestToken() : null;
+                authorizationURL = new StringBuilder(service.getAuthorizationUrl(scribeToken));
+            }
             /*
              * Add optional scope
              */
@@ -310,7 +347,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             /*
              * Register deferrer
              */
-            if (metaData.registerTokenBasedDeferrer()) {
+            if (!tokenRegistered && metaData.registerTokenBasedDeferrer()) {
                 // Register by token
                 if (null != scribeToken) {
                     registerTokenForDeferredAccess(scribeToken.getToken(), cbUrl, ds, userId, contextId);

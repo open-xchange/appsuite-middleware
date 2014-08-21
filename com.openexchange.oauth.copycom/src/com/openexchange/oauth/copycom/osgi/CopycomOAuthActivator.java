@@ -47,11 +47,38 @@
  *
  */
 
-package com.openexchange.oauth;
+package com.openexchange.oauth.copycom.osgi;
+
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
+import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.http.deferrer.DeferringURLService;
+import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.copycom.CopycomOAuthServiceMetaData;
+import com.openexchange.osgi.HousekeepingActivator;
+
 
 /**
- * {@link API} - An enumeration for available APIs.
+ * {@link CopycomOAuthActivator}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum API {
-    FACEBOOK, TWITTER, LINKEDIN, OTHER, MSN, YAHOO, TUMBLR, FLICKR, DROPBOX, XING, VKONTAKTE, GOOGLE, BOX_COM, MS_LIVE_CONNECT, COPY_COM;
+public final class CopycomOAuthActivator extends HousekeepingActivator {
+
+    public CopycomOAuthActivator() {
+        super();
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigurationService.class, DeferringURLService.class, DispatcherPrefixService.class };
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        CopycomOAuthServiceMetaData service = new CopycomOAuthServiceMetaData(this);
+        registerService(OAuthServiceMetaData.class, service);
+        registerService(Reloadable.class, service);
+    }
+
 }
