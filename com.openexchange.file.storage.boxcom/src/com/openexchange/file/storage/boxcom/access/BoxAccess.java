@@ -231,10 +231,10 @@ public class BoxAccess {
             synchronized (this) {
                 OAuthAccount newAccount = recreateTokenIfExpired(false, boxOAuthAccount, session);
                 if (newAccount != null) {
-                    this.boxOAuthAccount = newAccount;
                     clientId = newAccount.getMetaData().getAPIKey(session);
                     clientSecret = newAccount.getMetaData().getAPISecret(session);
                     lastAccessed = System.nanoTime();
+                    this.boxOAuthAccount = newAccount;
                 }
             }
         }
@@ -251,10 +251,10 @@ public class BoxAccess {
         synchronized (this) {
             OAuthAccount newAccount = recreateTokenIfExpired(true, boxOAuthAccount, session);
             if (newAccount != null) {
-                this.boxOAuthAccount = newAccount;
                 clientId = newAccount.getMetaData().getAPIKey(session);
                 clientSecret = newAccount.getMetaData().getAPISecret(session);
                 lastAccessed = System.nanoTime();
+                this.boxOAuthAccount = newAccount;
             }
         }
     }
