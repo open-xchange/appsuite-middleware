@@ -68,7 +68,7 @@ import com.openexchange.oauth.OAuthHTTPClientFactory;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.oauth.httpclient.impl.scribe.ScribeHTTPClientFactoryImpl;
-import com.openexchange.oauth.internal.CallbackRegistry;
+import com.openexchange.oauth.internal.CallbackRegistryImpl;
 import com.openexchange.oauth.internal.DeleteListenerRegistry;
 import com.openexchange.oauth.internal.InvalidationListenerRegistry;
 import com.openexchange.oauth.internal.OAuthServiceImpl;
@@ -136,7 +136,7 @@ public final class OAuthActivator extends HousekeepingActivator {
             /*
              * Register
              */
-            final CallbackRegistry cbRegistry = new CallbackRegistry();
+            final CallbackRegistryImpl cbRegistry = new CallbackRegistryImpl();
             {
                 final TimerService timerService = getService(TimerService.class);
                 final ScheduledTimerTask timerTask = timerService.scheduleAtFixedRate(cbRegistry, 600000, 600000);

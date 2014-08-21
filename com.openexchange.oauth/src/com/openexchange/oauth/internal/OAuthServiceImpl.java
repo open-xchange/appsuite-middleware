@@ -137,7 +137,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
 
     private final ContextService contexts;
 
-    private final CallbackRegistry callbackRegistry;
+    private final CallbackRegistryImpl callbackRegistry;
 
     /**
      * Initializes a new {@link OAuthServiceImpl}.
@@ -145,7 +145,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
      * @param provider
      * @param simIDGenerator
      */
-    public OAuthServiceImpl(final DBProvider provider, final IDGeneratorService idGenerator, final OAuthServiceMetaDataRegistry registry, final ContextService contexts, CallbackRegistry cbRegistry) {
+    public OAuthServiceImpl(final DBProvider provider, final IDGeneratorService idGenerator, final OAuthServiceMetaDataRegistry registry, final ContextService contexts, CallbackRegistryImpl cbRegistry) {
         super();
         this.registry = registry;
         this.provider = provider;
@@ -279,10 +279,10 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             /*
              * Check for available deferrer service
              */
-            final DeferringURLService ds = Services.getService(DeferringURLService.class);
+            DeferringURLService ds = Services.getService(DeferringURLService.class);
             {
                 if (isDeferrerAvailable(ds, userId, contextId)) {
-                    final String deferredURL = ds.getDeferredURL(cbUrl, userId, contextId);
+                    String deferredURL = ds.getDeferredURL(cbUrl, userId, contextId);
                     if (deferredURL != null) {
                         cbUrl = deferredURL;
                     }
@@ -324,10 +324,9 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             /*
              * Return interaction
              */
-            return new OAuthInteractionImpl(
-                scribeToken == null ? OAuthToken.EMPTY_TOKEN : new ScribeOAuthToken(scribeToken),
-                authURL,
-                cbUrl == null ? OAuthInteractionType.OUT_OF_BAND : OAuthInteractionType.CALLBACK);
+            OAuthToken requestToken = scribeToken == null ? OAuthToken.EMPTY_TOKEN : new ScribeOAuthToken(scribeToken);
+            OAuthInteractionType interactionType = cbUrl == null ? OAuthInteractionType.OUT_OF_BAND : OAuthInteractionType.CALLBACK;
+            return new OAuthInteractionImpl(requestToken, authURL, interactionType);
         } catch (final org.scribe.exceptions.OAuthException e) {
             throw handleScribeOAuthException(e);
         } catch (final Exception e) {
