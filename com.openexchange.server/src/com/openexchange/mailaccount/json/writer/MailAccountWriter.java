@@ -226,6 +226,7 @@ public final class MailAccountWriter implements MailAccountFields {
             json.put(CONFIRMED_HAM, account.getConfirmedHam());
 
             // Folder full names
+            json.put(INBOX_FULLNAME, prepareFullname(accountId, "INBOX"));
             json.put(TRASH_FULLNAME, prepareFullname(accountId, account.getTrashFullname()));
             json.put(SENT_FULLNAME, prepareFullname(accountId, account.getSentFullname()));
             json.put(DRAFTS_FULLNAME, prepareFullname(accountId, account.getDraftsFullname()));
