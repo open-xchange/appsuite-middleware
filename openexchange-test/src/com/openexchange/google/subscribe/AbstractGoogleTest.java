@@ -54,10 +54,6 @@ import junit.framework.TestCase;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.MockitoAnnotations;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -89,9 +85,6 @@ import com.openexchange.tools.session.SimServerSession;
  * @since v7.6.1
  */
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ GoogleApiClients.class })
-@PowerMockIgnore({ "javax.net.ssl.*" })
 public abstract class AbstractGoogleTest extends TestCase {
 
     private static final String REDIRECT_URL = "";
@@ -160,8 +153,8 @@ public abstract class AbstractGoogleTest extends TestCase {
         credential.setRefreshToken(tokenResponse.getRefreshToken());
         credential.setAccessToken(tokenResponse.getAccessToken());
 
-        PowerMockito.mockStatic(GoogleApiClients.class);
-        PowerMockito.doReturn(credential).when(GoogleApiClients.class, "getCredentials", Matchers.any(Session.class));
+//        PowerMockito.mockStatic(GoogleApiClients.class);
+//        PowerMockito.doReturn(credential).when(GoogleApiClients.class, "getCredentials", Matchers.any(Session.class));
     }
 
     protected void prepareAdditionalMocks(MockServiceLookup sl) throws Exception {
