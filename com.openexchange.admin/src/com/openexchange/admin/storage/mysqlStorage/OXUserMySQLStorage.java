@@ -1919,15 +1919,25 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     @Override
     public User[] list(final Context ctx, final String search_pattern) throws StorageException {
-        return listInternal(ctx, search_pattern, false);
+        return list(ctx, search_pattern, false, false);
+    }
+
+    @Override
+    public User[] list(final Context ctx, final String search_pattern, final boolean includeGuests, final boolean excludeUsers) throws StorageException {
+        return listInternal(ctx, search_pattern, false, includeGuests, excludeUsers);
     }
 
     @Override
     public User[] listCaseInsensitive(final Context ctx, final String search_pattern) throws StorageException {
-        return listInternal(ctx, search_pattern, true);
+        return listCaseInsensitive(ctx, search_pattern, false, false);
     }
 
-    private User[] listInternal(final Context ctx, final String search_pattern, final boolean ignoreCase) throws StorageException {
+    @Override
+    public User[] listCaseInsensitive(final Context ctx, final String search_pattern, final boolean includeGuests, final boolean excludeUsers) throws StorageException {
+        return listInternal(ctx, search_pattern, true, includeGuests, excludeUsers);
+    }
+
+    private User[] listInternal(final Context ctx, final String search_pattern, final boolean ignoreCase, final boolean includeGuests, final boolean excludeUsers) throws StorageException {
         Connection read_ox_con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -1935,15 +1945,24 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         if (null != search_pattern) {
             new_search_pattern = search_pattern.replace('*', '%');
         }
+        String condition = "AND";
         final int context_id = ctx.getId().intValue();
         try {
             final ArrayList<User> retval = new ArrayList<User>();
             read_ox_con = cache.getConnectionForContext(context_id);
-            String sql = "SELECT con.userid FROM prg_contacts con JOIN login2user lu ON con.userid = lu.id AND con.cid = lu.cid WHERE con.cid = ? AND ";
+            String sql = "SELECT us.id FROM user us LEFT JOIN login2user lu ON us.id = lu.id AND us.cid = lu.cid LEFT JOIN prg_contacts con ON us.id = con.userid AND us.cid = con.cid WHERE us.cid = ?";
+            if (!includeGuests) {
+                sql += " AND us.guestCreatedBy = 0";
+                condition = "OR";
+            }
+            if (excludeUsers) {
+                sql += " AND us.guestCreatedBy > 0";
+                condition = "OR";
+            }
             if (ignoreCase) {
-                sql += "(lower(lu.uid) LIKE lower(?) OR lower(con.field01) LIKE lower(?))";
+                sql += " AND ((lower(lu.uid) LIKE lower(?) OR lu.uid IS NULL) " + condition +" lower(con.field01) LIKE lower(?))";
             } else {
-                sql += "(lu.uid LIKE ? OR con.field01 LIKE ?)";
+                sql += " AND ((lu.uid LIKE ? OR lu.uid IS NULL) " + condition +" con.field01 LIKE ?)";
             }
             stmt = read_ox_con.prepareStatement(sql);
 
@@ -2052,6 +2071,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         notallowed.add("setMailFolderConfirmedSpam");
         notallowed.add("setMailFolderConfirmedHam");
 
+        // TODO: load data for guests too
         final StringBuilder query = new StringBuilder("SELECT ");
 
         for (final Method method : theMethods) {

@@ -1225,6 +1225,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             prep_check.setInt(2, user_id);
             rs = prep_check.executeQuery();
             if (!rs.next()) {
+                if (isGuest(con, ctx, user_id)) {
+                    return "Guest User";
+                }
                 throw new StorageException("No such user "+user_id+" in context "+ctx.getId().intValue());
             }
             // grab user name and return
@@ -1246,6 +1249,22 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     log.error("Error pushing ox db read connection to pool!", e);
                 }
             }
+        }
+    }
+
+    private boolean isGuest(Connection con, Context ctx, int userId) throws SQLException {
+        String sql = "SELECT id FROM user WHERE cid = ? AND id = ? AND guestCreatedBy > 0";
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement(sql);
+            stmt.setInt(1, ctx.getId());
+            stmt.setInt(2, userId);
+            rs = stmt.executeQuery();
+            return rs.next();
+        } finally {
+            closeRecordSet(rs);
+            closePreparedStatement(stmt);
         }
     }
 
