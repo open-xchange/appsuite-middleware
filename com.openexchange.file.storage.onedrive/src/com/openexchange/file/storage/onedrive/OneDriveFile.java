@@ -59,6 +59,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.onedrive.osgi.Services;
 import com.openexchange.file.storage.onedrive.rest.file.RestFile;
 import com.openexchange.file.storage.onedrive.utils.ISO8601DateParser;
 import com.openexchange.mime.MimeTypeMap;

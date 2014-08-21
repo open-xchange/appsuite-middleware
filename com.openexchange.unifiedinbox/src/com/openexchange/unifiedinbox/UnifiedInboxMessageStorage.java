@@ -88,6 +88,7 @@ import com.openexchange.mail.api.MailMessageStorage;
 import com.openexchange.mail.api.unified.UnifiedFullName;
 import com.openexchange.mail.api.unified.UnifiedViewService;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.search.SearchTerm;
@@ -386,6 +387,85 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             closeSafe(mailAccess);
         }
     }
+
+    @Override
+    public MailPart getImageAttachment(String fullName, String mailId, String contentId) throws OXException {
+        if (DEFAULT_FOLDER_ID.equals(fullName)) {
+            throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
+        }
+        if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
+            final UnifiedInboxUID uid = new UnifiedInboxUID(mailId);
+            MailAccess<?, ?> mailAccess = null;
+            try {
+                // Get part
+                mailAccess = MailAccess.getInstance(session, uid.getAccountId());
+                mailAccess.connect();
+                MailPart part = mailAccess.getMessageStorage().getImageAttachment(uid.getFullName(), uid.getId(), contentId);
+                if (null == part) {
+                    return null;
+                }
+                part.loadContent();
+                return part;
+            } finally {
+                closeSafe(mailAccess);
+            }
+        }
+        final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullName(fullName);
+        MailAccess<?, ?> mailAccess = null;
+        try {
+            mailAccess = MailAccess.getInstance(session, fa.getAccountId());
+            mailAccess.connect();
+            // Get part
+            final MailPart part = mailAccess.getMessageStorage().getImageAttachment(fa.getFullname(), mailId, contentId);
+            if (null == part) {
+                return null;
+            }
+            part.loadContent();
+            return part;
+        } finally {
+            closeSafe(mailAccess);
+        }
+    }
+
+    @Override
+    public MailPart getAttachment(String fullName, String mailId, String sequenceId) throws OXException {
+        if (DEFAULT_FOLDER_ID.equals(fullName)) {
+            throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
+        }
+        if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
+            final UnifiedInboxUID uid = new UnifiedInboxUID(mailId);
+            MailAccess<?, ?> mailAccess = null;
+            try {
+                // Get part
+                mailAccess = MailAccess.getInstance(session, uid.getAccountId());
+                mailAccess.connect();
+                MailPart part = mailAccess.getMessageStorage().getAttachment(uid.getFullName(), uid.getId(), sequenceId);
+                if (null == part) {
+                    return null;
+                }
+                part.loadContent();
+                return part;
+            } finally {
+                closeSafe(mailAccess);
+            }
+        }
+        final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullName(fullName);
+        MailAccess<?, ?> mailAccess = null;
+        try {
+            mailAccess = MailAccess.getInstance(session, fa.getAccountId());
+            mailAccess.connect();
+            // Get part
+            final MailPart part = mailAccess.getMessageStorage().getAttachment(fa.getFullname(), mailId, sequenceId);
+            if (null == part) {
+                return null;
+            }
+            part.loadContent();
+            return part;
+        } finally {
+            closeSafe(mailAccess);
+        }
+    }
+
     @Override
     public MailMessage getMessage(final String fullName, final String mailId, final boolean markSeen) throws OXException {
         return getMessage(fullName, mailId, markSeen, session, access);

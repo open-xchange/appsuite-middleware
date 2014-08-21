@@ -94,6 +94,7 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.onedrive.access.OneDriveAccess;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.session.Session;
 
 /**
@@ -196,6 +197,7 @@ public abstract class AbstractOneDriveResourceAccess {
                 DefaultHttpClient httpClient = oneDriveAccess.getHttpClient();
                 HttpGet method = new HttpGet(buildUri("/me/skydrive", initiateQueryString()));
                 request = method;
+                HttpClients.setRequestTimeout(3500, method);
 
                 HttpResponse httpResponse = httpClient.execute(method);
                 if (SC_UNAUTHORIZED == httpResponse.getStatusLine().getStatusCode()) {

@@ -172,17 +172,32 @@ public final class HttpClients {
     }
 
     /**
-     * Applies the timeout to given HTTP request.
+     * Applies the default timeout of 30sec to given HTTP request.
      *
      * @param request The HTTP request
      */
-    public static void setRequestTimeout(HttpUriRequest request) {
+    public static void setDefaultRequestTimeout(HttpUriRequest request) {
         if (null == request) {
             return;
         }
         final HttpParams reqParams = request.getParams();
         HttpConnectionParams.setSoTimeout(reqParams, DEFAULT_TIMEOUT_MILLIS);
         HttpConnectionParams.setConnectionTimeout(reqParams, DEFAULT_TIMEOUT_MILLIS);
+    }
+
+    /**
+     * Applies the specified timeout to given HTTP request.
+     *
+     * @param timeoutMillis The timeout in milliseconds to apply
+     * @param request The HTTP request
+     */
+    public static void setRequestTimeout(int timeoutMillis, HttpUriRequest request) {
+        if (null == request || timeoutMillis <= 0) {
+            return;
+        }
+        final HttpParams reqParams = request.getParams();
+        HttpConnectionParams.setSoTimeout(reqParams, timeoutMillis);
+        HttpConnectionParams.setConnectionTimeout(reqParams, timeoutMillis);
     }
 
     /*------------------------------------------------------ CLASSES ------------------------------------------------------*/
@@ -272,13 +287,15 @@ public final class HttpClients {
             final HeaderElementIterator i = new BasicHeaderElementIterator(response.headerIterator(HTTP.CONN_KEEP_ALIVE));
             while (i.hasNext()) {
                 final HeaderElement element = i.nextElement();
-                final String name = element.getName();
-                final String value = element.getValue();
-                if (value != null && name.equalsIgnoreCase("timeout")) {
-                    try {
-                        timeout = Math.min(timeout, Long.parseLong(value) * 1000);
-                    } catch (final NumberFormatException e) {
-                        // Ignore
+                if ("timeout".equalsIgnoreCase(element.getName())) {
+                    final String value = element.getValue();
+                    if (value != null) {
+                        try {
+                            long b = Long.parseLong(value) * 1000;
+                            timeout = (timeout <= b) ? timeout : b;
+                        } catch (final NumberFormatException e) {
+                            // Ignore
+                        }
                     }
                 }
             }

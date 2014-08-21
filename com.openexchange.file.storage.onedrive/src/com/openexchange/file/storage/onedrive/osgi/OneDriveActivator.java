@@ -59,7 +59,6 @@ import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
-import com.openexchange.file.storage.onedrive.Services;
 import com.openexchange.file.storage.onedrive.access.OneDriveEventHandler;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.oauth.OAuthService;
