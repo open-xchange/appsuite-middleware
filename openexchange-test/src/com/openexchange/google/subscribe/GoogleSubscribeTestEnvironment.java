@@ -58,14 +58,11 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.oauth.actions.AllOAuthAccountRequest;
 import com.openexchange.ajax.oauth.actions.AllOAuthAccountResponse;
-import com.openexchange.ajax.oauth.actions.GetOAuthServiceRequest;
 import com.openexchange.ajax.oauth.actions.InitOAuthAccountRequest;
 import com.openexchange.ajax.oauth.actions.InitOAuthAccountResponse;
-import com.openexchange.ajax.oauth.actions.OAuthServicesResponse;
 import com.openexchange.ajax.subscribe.actions.NewSubscriptionRequest;
 import com.openexchange.ajax.subscribe.actions.NewSubscriptionResponse;
 import com.openexchange.ajax.subscribe.actions.RefreshSubscriptionRequest;
-import com.openexchange.ajax.subscribe.actions.RefreshSubscriptionResponse;
 import com.openexchange.ajax.subscribe.source.action.GetSourceRequest;
 import com.openexchange.ajax.subscribe.source.action.GetSourceResponse;
 import com.openexchange.configuration.GoogleConfig;
@@ -95,7 +92,7 @@ public class GoogleSubscribeTestEnvironment {
     private AJAXClient ajaxClient;
 
     private GoogleOAuthClient oauthClient;
-    
+
     private FolderTestManager folderMgr;
 
     /**
@@ -119,8 +116,8 @@ public class GoogleSubscribeTestEnvironment {
             GoogleConfig.init();
             initAJAXClient();
             initManagers();
-            initGoogleOAuthClient();
-            initGoogleOAuthAccount();
+            // initGoogleOAuthClient();
+            // initGoogleOAuthAccount();
             createGoogleSubscription();
         } catch (Exception e) {
             e.printStackTrace();
@@ -135,6 +132,9 @@ public class GoogleSubscribeTestEnvironment {
      * @throws JSONException
      */
     public void cleanup() throws OXException, IOException, JSONException {
+        if (folderMgr != null) {
+            folderMgr.cleanUp();
+        }
         logout();
     }
 
@@ -148,7 +148,7 @@ public class GoogleSubscribeTestEnvironment {
     private void initAJAXClient() throws OXException, IOException, JSONException {
         ajaxClient = new AJAXClient(User.User1);
     }
-    
+
     private void initManagers() {
         folderMgr = new FolderTestManager(ajaxClient);
     }
@@ -189,59 +189,136 @@ public class GoogleSubscribeTestEnvironment {
      */
     @SuppressWarnings("unchecked")
     private void createGoogleSubscription() throws Exception {
-        // Create new folder for the subscription
-        FolderObject folder = folderMgr.generatePublicFolder("subscriptionTestForGoogle", FolderObject.CALENDAR, ajaxClient.getValues().getPrivateContactFolder(), ajaxClient.getValues().getUserId());
-        folderMgr.insertFolderOnServer(folder);
-        
         // Get account id
+        final int accountId = getAccountId();
+
+        if (accountId <= 0) {
+            throw new Exception("No account found");
+        }
+
+        int userId = ajaxClient.getValues().getUserId();
+        createGoogleSubscription(
+            accountId,
+            "com.openexchange.subscribe.google.calendar",
+            FolderObject.CALENDAR,
+            ajaxClient.getValues().getPrivateAppointmentFolder(),
+            userId);
+        createGoogleSubscription(
+            accountId,
+            "com.openexchange.subscribe.google.contact",
+            FolderObject.CONTACT,
+            ajaxClient.getValues().getPrivateContactFolder(),
+            userId);
+    }
+
+    /**
+     * Create a google subscription
+     * 
+     * @param accountId
+     * @param sourceId
+     * @param module
+     * @param parent
+     * @param userId
+     * @throws Exception
+     */
+    private void createGoogleSubscription(final int accountId, final String sourceId, final int module, final int parent, final int userId) throws Exception {
+        // Get subscription source for calendar
+        FolderObject folder = createSubscriptionFolder(sourceId, module, parent, userId);
+        final DynamicFormDescription formDescription = createDynamicFormDescription(sourceId);
+        final Subscription calendarSubscription = createSubscription(formDescription, sourceId, accountId, folder.getObjectID());
+
+        final NewSubscriptionRequest subReq = new NewSubscriptionRequest(calendarSubscription, formDescription);
+        NewSubscriptionResponse subResp = ajaxClient.execute(subReq);
+        int subId = (Integer) subResp.getData();
+
+        final RefreshSubscriptionRequest refreshReq = new RefreshSubscriptionRequest(subId, Integer.toString(folder.getObjectID()));
+        ajaxClient.execute(refreshReq);
+    }
+
+    private int getAccountId() throws OXException, IOException, JSONException {
         AllOAuthAccountRequest oauthReq = new AllOAuthAccountRequest();
         AllOAuthAccountResponse oauthResp = ajaxClient.execute(oauthReq);
         Object data = oauthResp.getData();
 
-        int accountId = 0;
         if (data instanceof JSONArray) {
             final JSONArray array = (JSONArray) data;
             for (Object o : array.asList()) {
                 LinkedHashMap<String, Object> json = (LinkedHashMap<String, Object>) o;
                 if (json.get("serviceId").equals(SERVICE_ID)) {
-                    accountId = (Integer) json.get("id");
+                    return (Integer) json.get("id");
                 }
             }
         }
-        
-        final String sourceId = "com.openexchange.subscribe.google.calendar";
+        return 0;
+    }
+
+    /**
+     * Create a subscription folder
+     * 
+     * @param name
+     * @param module
+     * @param parentId
+     * @param userId
+     * @return
+     * @throws OXException
+     * @throws IOException
+     * @throws JSONException
+     */
+    private FolderObject createSubscriptionFolder(final String name, final int module, final int parentId, final int userId) throws OXException, IOException, JSONException {
+        FolderObject object = folderMgr.generatePublicFolder(name, module, parentId, userId);
+        folderMgr.insertFolderOnServer(object);
+        return object;
+    }
+
+    /**
+     * Create a DynamicFormDescription object for the specified sourceId.
+     * 
+     * @param sourceId
+     * @return
+     * @throws Exception
+     */
+    private DynamicFormDescription createDynamicFormDescription(final String sourceId) throws Exception {
         GetSourceRequest getSrcReq = new GetSourceRequest(sourceId);
         GetSourceResponse getSrcResp = ajaxClient.execute(getSrcReq);
-        data = getSrcResp.getData();
-        if (data instanceof JSONObject) {
-            final JSONObject json = (JSONObject) data;
-            json.getString("id");
-            final JSONObject jsonFormDesc = json.getJSONArray("formDescription").getJSONObject(0);
-            DynamicFormDescription formDescription = new DynamicFormDescription();
-            FormElement fe = FormElement.custom(
-                jsonFormDesc.getString("widget"),
-                jsonFormDesc.getString("name"),
-                jsonFormDesc.getString("displayName"));
-            fe.setOption("type", jsonFormDesc.getJSONObject("options").getString("type"));
-            fe.setMandatory(jsonFormDesc.getBoolean("mandatory"));
-            formDescription.add(fe);
-
-            SubscriptionSource source = new SubscriptionSource();
-            source.setId(sourceId);
-            source.setFormDescription(formDescription);
-
-            Subscription subscription = new Subscription();
-            subscription.setSource(source);
-            subscription.setFolderId(folder.getObjectID());
-            subscription.setConfiguration(Collections.singletonMap("account", accountId));
-
-            final NewSubscriptionRequest subReq = new NewSubscriptionRequest(subscription, formDescription);
-            NewSubscriptionResponse subResp = ajaxClient.execute(subReq);
-            int subId = (Integer) subResp.getData();
-            
-            final RefreshSubscriptionRequest refreshReq = new RefreshSubscriptionRequest(subId, Integer.toString(folder.getObjectID()));
-            ajaxClient.execute(refreshReq);
+        Object data = getSrcResp.getData();
+        if (getSrcResp.hasError()) {
+            throw new Exception("Returned with errors: " + data);
         }
+
+        final JSONObject json = (JSONObject) data;
+        final JSONObject jsonFormDesc = json.getJSONArray("formDescription").getJSONObject(0);
+
+        DynamicFormDescription formDescription = new DynamicFormDescription();
+        FormElement fe = FormElement.custom(
+            jsonFormDesc.getString("widget"),
+            jsonFormDesc.getString("name"),
+            jsonFormDesc.getString("displayName"));
+        fe.setOption("type", jsonFormDesc.getJSONObject("options").getString("type"));
+        fe.setMandatory(jsonFormDesc.getBoolean("mandatory"));
+        formDescription.add(fe);
+        return formDescription;
+    }
+
+    /**
+     * Create a Subscription object
+     * 
+     * @param desc
+     * @param sourceId
+     * @param accountId
+     * @param folderId
+     * @return
+     */
+    private Subscription createSubscription(final DynamicFormDescription desc, final String sourceId, final int accountId, final int folderId) {
+        SubscriptionSource source = new SubscriptionSource();
+        source.setId(sourceId);
+        source.setFormDescription(desc);
+
+        Subscription subscription = new Subscription();
+        subscription.setSource(source);
+        subscription.setFolderId(folderId);
+        subscription.setConfiguration(Collections.singletonMap("account", accountId));
+
+        return subscription;
     }
 
     /**
