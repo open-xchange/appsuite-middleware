@@ -162,6 +162,12 @@ public abstract class BasicCommandlineOptions {
     protected static final String OPT_NAME_CSVOUTPUT_LONG = "csv";
     protected static final String OPT_NAME_CSVOUTPUT_DESCRIPTION = "Format output to csv";
 
+    protected static final String OPT_NAME_INCLUDEGUESTS_LONG = "includeguests";
+    protected static final String OPT_NAME_INCLUDEGUESTS_DESCRIPTION = "Include guest users";
+
+    protected static final String OPT_NAME_EXCLUDEUSERS_LONG = "excludeusers";
+    protected static final String OPT_NAME_EXCLUDEUSERS_DESCRIPTION = "Exclude users, only show guests";
+
     private static final String[] ENV_OPTIONS = new String[] {
         "RMI_HOSTNAME", "COMMANDLINE_TIMEZONE", "COMMANDLINE_DATEFORMAT", "ADMIN_PASSWORD", "NEW_USER_PASSWORD" };
 
@@ -178,6 +184,8 @@ public abstract class BasicCommandlineOptions {
     protected CLIOption searchOption = null;
     protected CLIOption ignoreCaseOption = null;
     protected CLIOption csvOutputOption = null;
+    protected CLIOption includeGuestsOption = null;
+    protected CLIOption excludeUsersOption = null;
 
     // Used for right error output
     protected Integer ctxid = null;
@@ -450,6 +458,14 @@ public abstract class BasicCommandlineOptions {
 
     protected final void setCSVOutputOption(final AdminParser admp) {
         this.csvOutputOption = setLongOpt(admp, OPT_NAME_CSVOUTPUT_LONG, OPT_NAME_CSVOUTPUT_DESCRIPTION, false, false);
+    }
+
+    protected final void setIncludeGuestsOption(final AdminParser admp) {
+        this.includeGuestsOption = setLongOpt(admp, OPT_NAME_INCLUDEGUESTS_LONG, OPT_NAME_INCLUDEGUESTS_DESCRIPTION, false, false);
+    }
+
+    protected final void setExcludeUsersOption(final AdminParser admp) {
+        this.excludeUsersOption = setLongOpt(admp, OPT_NAME_EXCLUDEUSERS_LONG, OPT_NAME_EXCLUDEUSERS_DESCRIPTION, false, false);
     }
 
     // ------------------------------------------------------------------------------------- //
