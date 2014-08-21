@@ -49,7 +49,11 @@
 
 package com.openexchange.google.subscribe;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.CalendarTestManager;
 import com.openexchange.test.ContactTestManager;
 import com.openexchange.test.FolderTestManager;
@@ -57,7 +61,9 @@ import com.openexchange.test.FolderTestManager;
 /**
  * {@link AbstractGoogleSubscribeTest}
  *
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.6.1
  */
 public abstract class AbstractGoogleSubscribeTest extends AbstractAJAXSession {
 
@@ -103,6 +109,57 @@ public abstract class AbstractGoogleSubscribeTest extends AbstractAJAXSession {
 
     public FolderTestManager getFolderManager() {
         return folderMgr;
+    }
+
+    public static void assertFieldIsNull(String fieldDesc, Object valueToCheck) {
+        assertNull("The field " + fieldDesc + " should be empty, but is not ", valueToCheck);
+    }
+
+    public static void assertNotNullAndEquals(String fieldDesc, Object expected, Object actual) {
+        assertNotNull("Could not find expected mapping for " + fieldDesc, actual);
+        assertEquals("Mapping for field '" + fieldDesc + "' differs -->", expected, actual);
+    }
+
+    public static void assertFieldNotNull(String fieldDesc, Object expected, Object actual) {
+        assertNotNull("Could not find expected mapping for " + fieldDesc, actual);
+    }
+
+    /**
+     * Gets date / time with the default time zone Europe / Berlin.
+     */
+    protected Date getDateTime(int day, int month, int year, int hour, int minute) {
+        return getDateTime(day, month, year, hour, minute, 0, TimeZone.getTimeZone("Europe/Berlin"));
+    }
+
+    /**
+     * Gets date / time with precisions seconds with the default time zone Europe / Berlin.
+     */
+    protected Date getDateTime(int day, int month, int year, int hour, int minute, int seconds) {
+        return getDateTime(day, month, year, hour, minute, seconds, TimeZone.getTimeZone("Europe/Berlin"));
+    }
+
+    protected Date getDateTime(int day, int month, int year, int hour, int minute, int seconds, TimeZone timezone) {
+        Calendar cal = Calendar.getInstance(timezone);
+        cal.clear();
+        cal.set(Calendar.YEAR, year);
+        cal.set(Calendar.MONTH, month - 1);
+        cal.set(Calendar.DAY_OF_MONTH, day);
+        cal.set(Calendar.HOUR, hour);
+        cal.set(Calendar.MINUTE, minute);
+        cal.set(Calendar.SECOND, seconds);
+        return cal.getTime();
+    }
+
+    private int getTestFolderID(final String id) {
+        return GoogleSubscribeTestEnvironment.testFolders.get(id);
+    }
+
+    protected int getCalendarTestFolderID() {
+        return getTestFolderID(GoogleSubscribeTestEnvironment.CALENDAR_SOURCE_ID);
+    }
+
+    protected int getContactTestFolderID() {
+        return getTestFolderID(GoogleSubscribeTestEnvironment.CONTACT_SOURCE_ID);
     }
 
 }
