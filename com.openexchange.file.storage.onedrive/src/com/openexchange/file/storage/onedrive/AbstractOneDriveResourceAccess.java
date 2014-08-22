@@ -151,18 +151,22 @@ public abstract class AbstractOneDriveResourceAccess {
          * Examines given status line
          *
          * @param statusLine The status line
+         * @throws OXException If an Open-Xchange error is yielded from status
          * @throws HttpResponseException If status is interpreted as an error
          */
-        void handleStatusCode(StatusLine statusLine) throws HttpResponseException;
+        void handleStatusCode(StatusLine statusLine) throws OXException, HttpResponseException;
     }
 
     /** The default status code policy; accepting greater than/equal to <code>200</code> and lower than <code>300</code> */
     public static final StatusCodePolicy STATUS_CODE_POLICY_DEFAULT = new StatusCodePolicy() {
 
         @Override
-        public void handleStatusCode(StatusLine statusLine) throws HttpResponseException {
+        public void handleStatusCode(StatusLine statusLine) throws OXException, HttpResponseException {
             int statusCode = statusLine.getStatusCode();
             if (statusCode < 200 || statusCode >= 300) {
+                if (404 == statusCode) {
+                    throw OneDriveExceptionCodes.NOT_FOUND_SIMPLE.create();
+                }
                 throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
             }
         }
