@@ -65,7 +65,6 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.HeaderCollection;
-import com.openexchange.session.Session;
 
 /**
  * {@link UnifiedMailMessage}
@@ -76,9 +75,7 @@ public final class UnifiedMailMessage extends MailMessage implements Delegatized
 
     private static final long serialVersionUID = 9180380482758580171L;
 
-    private MailMessage delegatee;
-    private final int delegatedAccountId;
-    private final Session session;
+    private final MailMessage delegatee;
     private String mailId;
     private String folder;
     private Integer accountId;
@@ -89,17 +86,8 @@ public final class UnifiedMailMessage extends MailMessage implements Delegatized
      * Initializes a new {@link UnifiedMailMessage}.
      */
     public UnifiedMailMessage(MailMessage delegatee, int undelegatedAccountId) {
-        this(delegatee, undelegatedAccountId, -1, null);
-    }
-
-    /**
-     * Initializes a new {@link UnifiedMailMessage}.
-     */
-    public UnifiedMailMessage(MailMessage delegatee, int undelegatedAccountId, int delegatedAccountId, Session session) {
         super();
-        this.session = session;
         this.undelegatedAccountId = undelegatedAccountId;
-        this.delegatedAccountId = delegatedAccountId;
         this.delegatee = delegatee;
     }
 
@@ -618,7 +606,6 @@ public final class UnifiedMailMessage extends MailMessage implements Delegatized
 
     @Override
     public Object getContent() throws OXException {
-        loadContent();
         return delegatee.getContent();
     }
 
@@ -639,7 +626,6 @@ public final class UnifiedMailMessage extends MailMessage implements Delegatized
 
     @Override
     public DataHandler getDataHandler() throws OXException {
-        loadContent();
         return delegatee.getDataHandler();
     }
 
@@ -655,7 +641,6 @@ public final class UnifiedMailMessage extends MailMessage implements Delegatized
 
     @Override
     public InputStream getInputStream() throws OXException {
-        loadContent();
         return delegatee.getInputStream();
     }
 
@@ -671,7 +656,6 @@ public final class UnifiedMailMessage extends MailMessage implements Delegatized
 
     @Override
     public int getEnclosedCount() throws OXException {
-        loadContent();
         return delegatee.getEnclosedCount();
     }
 
@@ -682,7 +666,6 @@ public final class UnifiedMailMessage extends MailMessage implements Delegatized
 
     @Override
     public MailPart getEnclosedMailPart(final int index) throws OXException {
-        loadContent();
         return delegatee.getEnclosedMailPart(index);
     }
 
@@ -693,21 +676,7 @@ public final class UnifiedMailMessage extends MailMessage implements Delegatized
 
     @Override
     public void loadContent() throws OXException {
-        if (delegatedAccountId >= 0) {
-            MailAccess<?, ?> mailAccess = null;
-            try {
-                // Get the message
-                mailAccess = MailAccess.getInstance(session, delegatedAccountId);
-                mailAccess.connect();
-
-                delegatee = mailAccess.getMessageStorage().getMessage(delegatee.getFolder(), delegatee.getMailId(), false);
-                delegatee.loadContent();
-            } finally {
-                closeSafe(mailAccess);
-            }
-        } else {
-            delegatee.loadContent();
-        }
+        delegatee.loadContent();
     }
 
     @Override
