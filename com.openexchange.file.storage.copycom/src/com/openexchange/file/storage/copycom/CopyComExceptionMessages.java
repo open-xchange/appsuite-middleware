@@ -100,6 +100,9 @@ public final class CopyComExceptionMessages implements LocalizableStrings {
     // Authentication failed: %1$s
     public static final String AUTH_ERROR_MSG = "Authentication failed: %1$s";
 
+    // The Copy.com resource does not exist
+    public static final String NOT_FOUND_SIMPLE_MSG = "The Copy.com resource does not exist";
+
     /**
      * Initializes a new {@link CopyComExceptionMessages}.
      */

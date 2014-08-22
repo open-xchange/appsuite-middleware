@@ -51,11 +51,10 @@ package com.openexchange.file.storage.copycom;
 
 import java.io.IOException;
 import org.apache.http.client.HttpResponseException;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
-import com.openexchange.session.Session;
+import com.openexchange.file.storage.copycom.access.CopyComAccess;
 
 
 /**
@@ -76,38 +75,28 @@ public abstract class CopyComClosure<R> {
     /**
      * Performs the actual operation
      *
-     * @param httpClient The HTTP client to use
+     * @param access The Copy.com access to use
      * @return The return value
      * @throws OXException If an Open-Xchange error occurred
      * @throws JSONException If a JSON error occurs
      * @throws IOException If an I/O error occurred
      */
-    protected abstract R doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException;
+    protected abstract R doPerform(CopyComAccess access) throws OXException, JSONException, IOException;
 
     /**
      * Performs this closure's operation.
      *
      * @param resourceAccess The associated resource access
-     * @param httpClient The HTTP client to use
-     * @param session The associated session
+     * @param access The Copy.com access to use
      * @return The return value
      * @throws OXException If operation fails
      */
-    public R perform(AbstractCopyComResourceAccess resourceAccess, DefaultHttpClient httpClient, Session session) throws OXException {
-        return innerPerform(true, resourceAccess, httpClient, session);
-    }
-
-    private R innerPerform(boolean handleAuthError, AbstractCopyComResourceAccess resourceAccess, DefaultHttpClient httpClient, Session session) throws OXException {
+    public R perform(AbstractCopyComResourceAccess resourceAccess, CopyComAccess access) throws OXException {
         try {
-            return doPerform(httpClient);
+            return doPerform(access);
         } catch (HttpResponseException e) {
-            if (400 == e.getStatusCode() || 401 == e.getStatusCode()) {
-                // Authentication failed -- recreate token
-                if (!handleAuthError) {
-                    throw CopyComExceptionCodes.AUTH_ERROR.create(e, e.getMessage());
-                }
-                resourceAccess.handleAuthError(e, session);
-                return innerPerform(false, resourceAccess, httpClient, session);
+            if (401 == e.getStatusCode()) {
+                throw CopyComExceptionCodes.AUTH_ERROR.create(e, e.getMessage());
             }
             throw resourceAccess.handleHttpResponseError(null, e);
         } catch (IOException e) {
