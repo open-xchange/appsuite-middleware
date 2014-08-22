@@ -110,11 +110,11 @@ public class GoogleSubscribeCalendarTest extends AbstractGoogleSubscribeTest {
         assertNotNullAndEquals("location", "Bremen, Deutschland", appointment.getLocation());
         assertNotNullAndEquals("note", "All day appointment | 30 Jan 2014", appointment.getNote());
         assertNotNullAndEquals("start date", getDateTime(28, 1, 2014, 0, 0, 0, TimeZone.getTimeZone("UTC")), appointment.getStartDate());
-        assertFieldIsNull("timezone", appointment.getTimezone());
+        assertEquals("timezone", client.getValues().getTimeZone().getID(), appointment.getTimezone());
         assertNotNullAndEquals("end date", getDateTime(29, 1, 2014, 0, 0, 0, TimeZone.getTimeZone("UTC")), appointment.getEndDate());
         assertNotNullAndEquals("created by", client.getValues().getUserId(), appointment.getCreatedBy());
         assertNotNullAndEquals("alarm", 0, appointment.getAlarm());
-        assertNull("This appointment has no confirmation, but the mapping exist", appointment.getConfirmations());
+        assertEquals("This appointment has no confirmation, but the mapping exist", 0, appointment.getConfirmations().length);
         assertNull("This appointment has no participants, but the mapping exist", appointment.getParticipants());
         assertNotNullAndEquals("recurrence type", CalendarObject.NO_RECURRENCE, appointment.getRecurrenceType());
         assertNotNullAndEquals("fulltime", true, appointment.getFullTime());
@@ -129,7 +129,7 @@ public class GoogleSubscribeCalendarTest extends AbstractGoogleSubscribeTest {
         assertFieldIsNull("location", appointment.getLocation());
         assertNotNullAndEquals("note", "Every third month recurrence appointment | 15 March 2014 - Never ending", appointment.getNote());
         assertNotNullAndEquals("start date", getDateTime(15, 3, 2014, 19, 00, 00, TimeZone.getTimeZone("UTC")), appointment.getStartDate());
-        assertFieldIsNull("timezone", appointment.getTimezone());
+        assertEquals("timezone", client.getValues().getTimeZone().getID(), appointment.getTimezone());
         assertNotNullAndEquals("end date", getDateTime(15, 3, 2014, 21, 30, 00, TimeZone.getTimeZone("UTC")), appointment.getEndDate());
         assertNotNullAndEquals("created by", client.getValues().getUserId(), appointment.getCreatedBy());
         assertNotNullAndEquals("alarm", 10, appointment.getAlarm());
@@ -138,10 +138,10 @@ public class GoogleSubscribeCalendarTest extends AbstractGoogleSubscribeTest {
         assertNotNullAndEquals("recurrence type", CalendarObject.MONTHLY, appointment.getRecurrenceType());
         assertNotNullAndEquals("day in month", 15, appointment.getDayInMonth());
         assertNotNullAndEquals("interval", 3, appointment.getInterval());
-        assertFieldIsNull("occurrence", appointment.getOccurrence());
-        assertFieldIsNull("days", appointment.getDays());
+        assertEquals("occurrence", 0, appointment.getOccurrence());
+        assertEquals("days", 0, appointment.getDays());
 
-        assertNull("This appointment has no confirmation, but the mapping exist", appointment.getConfirmations());
+        assertEquals("This appointment has no confirmation, but the mapping exist", 0, appointment.getConfirmations().length);
         assertNull("This appointment has no participants, but the mapping exist", appointment.getParticipants());
     }
 
@@ -164,16 +164,16 @@ public class GoogleSubscribeCalendarTest extends AbstractGoogleSubscribeTest {
         assertNotNullAndEquals("fulltime", false, appointment.getFullTime());
 
         assertNotNullAndEquals("recurrence type", CalendarObject.DAILY, appointment.getRecurrenceType());
-        assertFieldIsNull("days", appointment.getDays());
+        assertEquals("days", 0, appointment.getDays());
         assertNotNullAndEquals("interval", 2, appointment.getInterval());
-        assertFieldIsNull("occurrence", appointment.getOccurrence());
+        assertEquals("occurrence", 0, appointment.getOccurrence());
 
         // List of participants
         List<Part> participants = new LinkedList<Part>();
-        participants.add(new Part("Ewald Bartkowiak", "ewald.bartkowiak@googlemail.com", Participant.EXTERNAL_USER, ConfirmStatus.ACCEPT));
-        participants.add(new Part("Dimitri Bronkowitsch", "dimitri.bronkowitsch@googlemail.com", Participant.USER, ConfirmStatus.NONE));
+        participants.add(new Part("Ewald Bartkowiak", "ewaldbartkowiak@googlemail.com", Participant.EXTERNAL_USER, ConfirmStatus.ACCEPT));
+        participants.add(new Part("Dimitri Bronkowitsch", "dimitribronkowitsch@googlemail.com", Participant.USER, ConfirmStatus.NONE));
         participants.add(new Part("jan.finsel@premium", "jan.finsel@premium", Participant.USER, ConfirmStatus.NONE));
-
+        
         assertNotNull(appointment.getConfirmations());
         for (ConfirmableParticipant cp : appointment.getConfirmations()) {
             int countParts = 0;
