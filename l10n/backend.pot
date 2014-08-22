@@ -2070,6 +2070,11 @@ msgstr ""
 msgid "Versioning not supported by Copy.com file storage."
 msgstr ""
 
+#. The Copy.com resource does not exist
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:104
+msgid "The Copy.com resource does not exist"
+msgstr ""
+
 #. A Dropbox error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:62
 msgid "A Dropbox error occurred: %1$s"
