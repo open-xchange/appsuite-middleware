@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -46,67 +46,16 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-
-package com.openexchange.database.migration.ox.osgi;
-
-import org.osgi.framework.BundleContext;
-import com.openexchange.database.migration.DBMigrationExecutorService;
-import com.openexchange.database.migration.ox.DBMigrationOXExcecutorService;
-import com.openexchange.database.migration.ox.internal.DBMigrationOXExcecutorServiceImpl;
-import com.openexchange.database.migration.ox.internal.Services;
-import com.openexchange.osgi.HousekeepingActivator;
+package com.openexchange.database.migration.ox;
 
 
 /**
- * {@link OXMigrationActivator}
+ * Track this service to be able to verify that database migration statements provided by Open-Xchange are executed before providing custom
+ * migration statements via your own bundle. {@link DBMigrationOXExcecutorService}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.1
  */
-public class OXMigrationActivator extends HousekeepingActivator {
+public interface DBMigrationOXExcecutorService {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXMigrationActivator.class);
-
-    private static final Class<?>[] NEEDED_SERVICES = { DBMigrationExecutorService.class };
-
-    private static final String CUSTOM_CHANGELOG_LOCATION = "ox.changelog.xml";
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("Starting bundle: " + this.context.getBundle().getSymbolicName());
-        Services.setServiceLookup(this);
-
-        DBMigrationExecutorService dbMigrationExecutorService = Services.getService(DBMigrationExecutorService.class);
-
-        if (dbMigrationExecutorService == null) {
-            LOG.error("Required service null");
-            return;
-        }
-
-        dbMigrationExecutorService.execute(CUSTOM_CHANGELOG_LOCATION);
-
-        registerService(DBMigrationOXExcecutorService.class, new DBMigrationOXExcecutorServiceImpl());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void stop(BundleContext bundleContext) throws Exception {
-        super.stopBundle();
-
-        LOG.info("Stopping bundle: " + this.context.getBundle().getSymbolicName());
-        Services.setServiceLookup(null);
-    }
 }

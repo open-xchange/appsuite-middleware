@@ -22,3 +22,4 @@ Import-Package: com.openexchange.database.migration,
  org.osgi.framework,
  org.slf4j
 Bundle-Vendor: Open-Xchange Inc.
+Export-Package: com.openexchange.database.migration.ox
