@@ -119,6 +119,29 @@ public class GoogleSubscribeCalendarTest extends AbstractGoogleSubscribeTest {
         assertNotNullAndEquals("recurrence type", CalendarObject.NO_RECURRENCE, appointment.getRecurrenceType());
         assertNotNullAndEquals("fulltime", true, appointment.getFullTime());
     }
+    
+    public void testDailyRecurrenceAppointment() throws OXException, IOException, JSONException {
+        final String title = "Daily recurrence appointment | 27 Jan 2014 - 14 March 2014";
+        Appointment appointment = fetchAppointment(getDateTime(27, 1, 2014, 15, 30), getDateTime(27, 1, 2014, 17, 30), title, true);
+
+        assertNotNull("Appointment: '" + title + "' not found", appointment);
+        assertFieldNotNull("user id", 1, appointment.getUid());
+        assertNotNullAndEquals("location", "K\u00F6ln", appointment.getLocation());
+        assertNotNullAndEquals("note", "Daily recurrence appointment | 27 Jan 2014 - 14 March 2014", appointment.getNote());
+        assertNotNullAndEquals("start date", getDateTime(27, 1, 2014, 15, 30, 00, TimeZone.getTimeZone("UTC")), appointment.getStartDate());
+        assertNotNullAndEquals("timezone", "Europe/Berlin", appointment.getTimezone());
+        assertNotNullAndEquals("end date", getDateTime(27, 1, 2014, 17, 30, 00, TimeZone.getTimeZone("UTC")), appointment.getEndDate());
+        assertNotNullAndEquals("created by", client.getValues().getUserId(), appointment.getCreatedBy());
+        assertNotNullAndEquals("alarm", 0, appointment.getAlarm());
+        assertEquals("This appointment has no confirmation, but the mapping exist", 0, appointment.getConfirmations().length);
+        assertNull("This appointment has no participants, but the mapping exist", appointment.getParticipants());
+        assertNotNullAndEquals("fulltime", false, appointment.getFullTime());
+
+        assertNotNullAndEquals("recurrence type", CalendarObject.WEEKLY, appointment.getRecurrenceType());
+        assertNotNullAndEquals("days", 62, appointment.getDays());
+        assertNotNullAndEquals("interval", 1, appointment.getInterval());
+        assertNotNullAndEquals("occurrence", 35, appointment.getOccurrence());
+    }
 
     public void testMonthlyRecurrenceAppointment() throws OXException, IOException, JSONException {
         final String title = "Every third month recurrence appointment | 15 March 2014 - Never ending";
@@ -140,6 +163,32 @@ public class GoogleSubscribeCalendarTest extends AbstractGoogleSubscribeTest {
         assertNotNullAndEquals("interval", 3, appointment.getInterval());
         assertEquals("occurrence", 0, appointment.getOccurrence());
         assertEquals("days", 0, appointment.getDays());
+
+        assertEquals("This appointment has no confirmation, but the mapping exist", 0, appointment.getConfirmations().length);
+        assertNull("This appointment has no participants, but the mapping exist", appointment.getParticipants());
+    }
+    
+    public void testYearlyRecurrenceAppointment() throws OXException, IOException, JSONException {
+        final String title = "Yearly recurrence appointment | 14 March 2014 - 14 March 2016";
+        Appointment appointment = fetchAppointment(getDateTime(14, 3, 2014, 19, 00), getDateTime(14, 3, 2014, 20, 30), title, true);
+
+        assertNotNull("Appointment: '" + title + "' not found", appointment);
+        assertFieldNotNull("user id", 1, appointment.getUid());
+        assertFieldIsNull("location", appointment.getLocation());
+        assertNotNullAndEquals("note", "Yearly recurrence appointment | 14 March 2014 - 14 March 2016", appointment.getNote());
+        assertNotNullAndEquals("start date", getDateTime(14, 3, 2014, 19, 00, 00, TimeZone.getTimeZone("UTC")), appointment.getStartDate());
+        assertEquals("timezone", client.getValues().getTimeZone().getID(), appointment.getTimezone());
+        assertNotNullAndEquals("end date", getDateTime(14, 3, 2014, 20, 30, 00, TimeZone.getTimeZone("UTC")), appointment.getEndDate());
+        assertNotNullAndEquals("created by", client.getValues().getUserId(), appointment.getCreatedBy());
+        assertNotNullAndEquals("alarm", 0, appointment.getAlarm());
+        assertNotNullAndEquals("fulltime", false, appointment.getFullTime());
+
+        assertNotNullAndEquals("recurrence type", CalendarObject.YEARLY, appointment.getRecurrenceType());
+        assertEquals("days", 0, appointment.getDays());
+        assertNotNullAndEquals("interval", 1, appointment.getInterval());
+        assertNotNullAndEquals("occurrence", 2, appointment.getOccurrence());
+        assertNotNullAndEquals("day in month", 14, appointment.getDayInMonth());
+        assertNotNullAndEquals("month", 3, appointment.getMonth());
 
         assertEquals("This appointment has no confirmation, but the mapping exist", 0, appointment.getConfirmations().length);
         assertNull("This appointment has no participants, but the mapping exist", appointment.getParticipants());
@@ -189,7 +238,7 @@ public class GoogleSubscribeCalendarTest extends AbstractGoogleSubscribeTest {
             assertTrue("Should have found three participants but only got: " + countParts, countParts == 3);
         }
     }
-
+    
     private Appointment fetchAppointment(final Date startDate, final Date endDate, final String title, final boolean reccurence) {
         final int folderId = getCalendarTestFolderID();
         final Appointment[] appointments = getCalendarManager().all(folderId, startDate, endDate, Appointment.ALL_COLUMNS, reccurence);
