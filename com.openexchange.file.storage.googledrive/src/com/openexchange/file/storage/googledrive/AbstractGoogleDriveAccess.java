@@ -84,14 +84,20 @@ public abstract class AbstractGoogleDriveAccess {
         this.account = account;
         this.session = session;
 
-        try {
-            Drive drive = googleDriveAccess.getDrive();
-            rootFolderId = drive.files().get("root").execute().getId();
-        } catch (HttpResponseException e) {
-            throw handleHttpResponseError(null, e);
-        } catch (IOException e) {
-            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        String key = "com.openexchange.file.storage.googledrive.rootFolderId";
+        String tmp = (String) session.getParameter(key);
+        if (null == tmp) {
+            try {
+                Drive drive = googleDriveAccess.getDrive();
+                tmp = drive.files().get("root").execute().getId();
+                session.setParameter(key, tmp);
+            } catch (HttpResponseException e) {
+                throw handleHttpResponseError(null, e);
+            } catch (IOException e) {
+                throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            }
         }
+        rootFolderId = tmp;
     }
 
     /** Status code (401) indicating that the request requires HTTP authentication. */

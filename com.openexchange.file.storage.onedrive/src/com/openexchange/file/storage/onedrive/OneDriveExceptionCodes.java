@@ -83,6 +83,10 @@ public enum OneDriveExceptionCodes implements DisplayableOXExceptionCode {
      */
     NOT_FOUND("The OneDrive resource does not exist: %1$s", OneDriveExceptionMessages.NOT_FOUND_MSG, Category.CATEGORY_ERROR, 5),
     /**
+     * The OneDrive resource does not exist
+     */
+    NOT_FOUND_SIMPLE("The OneDrive resource does not exist", OneDriveExceptionMessages.NOT_FOUND_SIMPLE_MSG, NOT_FOUND.getCategory(), NOT_FOUND.getNumber()),
+    /**
      * Update denied for OneDrive resource: %1$s
      */
     UPDATE_DENIED("Update denied for OneDrive resource: %1$s", OneDriveExceptionMessages.UPDATE_DENIED_MSG, Category.CATEGORY_ERROR, 6),

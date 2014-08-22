@@ -49,7 +49,8 @@
 
 package com.openexchange.mail.attachment.storage;
 
-import java.util.Locale;
+import java.io.InputStream;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.session.Session;
@@ -77,13 +78,13 @@ public interface MailAttachmentStorage {
      * Stores specified mail attachment into storage
      *
      * @param attachment The attachment to store
-     * @param messageInfo The optional message information
-     * @param externalLocale The locale for external recipients (only needed if <tt>messageInfo</tt> is not <code>null</code>)
+     * @param op The store operation
+     * @param storeProps Additional properties for the store operation
      * @param session The associated session
      * @return The identifier of the stored attachment
      * @throws OXException If store operation fails
      */
-    String storeAttachment(MailPart attachment, MessageInfo messageInfo, Locale externalLocale, Session session) throws OXException;
+    String storeAttachment(MailPart attachment, StoreOperation op, Map<String, Object> storeProps, Session session) throws OXException;
 
     /**
      * Gets the mail attachment denoted by given identifier
@@ -94,6 +95,26 @@ public interface MailAttachmentStorage {
      * @throws OXException If mail attachment cannot be returned
      */
     MailPart getAttachment(String id, Session session) throws OXException;
+
+    /**
+     * Gets the information for the mail attachment denoted by given identifier
+     *
+     * @param id The identifier of the attachment held in storage
+     * @param session The associated session
+     * @return The mail attachment information
+     * @throws OXException If mail attachment cannot be returned
+     */
+    MailAttachmentInfo getAttachmentInfo(String id, Session session) throws OXException;
+
+    /**
+     * Gets the input stream of the mail attachment denoted by given identifier
+     *
+     * @param id The identifier of the attachment held in storage
+     * @param session The associated session
+     * @return The mail attachment stream
+     * @throws OXException If mail attachment cannot be returned
+     */
+    InputStream getAttachmentStream(String id, Session session) throws OXException;
 
     /**
      * Removes the mail attachment denoted by given identifier from storage

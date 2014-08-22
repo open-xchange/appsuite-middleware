@@ -94,7 +94,6 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.onedrive.access.OneDriveAccess;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.session.Session;
 
 /**
@@ -145,6 +144,48 @@ public abstract class AbstractOneDriveResourceAccess {
 
     // -------------------------------------------------------------------------------------------------------------- //
 
+    /** The status code policy to obey */
+    public static interface StatusCodePolicy {
+
+        /**
+         * Examines given status line
+         *
+         * @param statusLine The status line
+         * @throws OXException If an Open-Xchange error is yielded from status
+         * @throws HttpResponseException If status is interpreted as an error
+         */
+        void handleStatusCode(StatusLine statusLine) throws OXException, HttpResponseException;
+    }
+
+    /** The default status code policy; accepting greater than/equal to <code>200</code> and lower than <code>300</code> */
+    public static final StatusCodePolicy STATUS_CODE_POLICY_DEFAULT = new StatusCodePolicy() {
+
+        @Override
+        public void handleStatusCode(StatusLine statusLine) throws OXException, HttpResponseException {
+            int statusCode = statusLine.getStatusCode();
+            if (statusCode < 200 || statusCode >= 300) {
+                if (404 == statusCode) {
+                    throw OneDriveExceptionCodes.NOT_FOUND_SIMPLE.create();
+                }
+                throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
+            }
+        }
+    };
+
+    /** The status code policy; accepting greater than/equal to <code>200</code> and lower than <code>300</code> while ignoring <code>404</code> */
+    public static final StatusCodePolicy STATUS_CODE_POLICY_IGNORE_NOT_FOUND = new StatusCodePolicy() {
+
+        @Override
+        public void handleStatusCode(StatusLine statusLine) throws HttpResponseException {
+            int statusCode = statusLine.getStatusCode();
+            if ((statusCode < 200 || statusCode >= 300) && statusCode != 404) {
+                throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
+            }
+        }
+    };
+
+    // -------------------------------------------------------------------------------------------------------------- //
+
     /**
      * The OneDrive base URL: <code>"https://apis.live.net/v5.0/"</code>
      */
@@ -189,39 +230,43 @@ public abstract class AbstractOneDriveResourceAccess {
         this.account = account;
         this.session = session;
 
-        String rootFolderId = null;
-        HttpRequestBase request = null;
-        try {
-            int keepOn = 1;
-            while (keepOn > 0) {
-                DefaultHttpClient httpClient = oneDriveAccess.getHttpClient();
-                HttpGet method = new HttpGet(buildUri("/me/skydrive", initiateQueryString()));
-                request = method;
-                HttpClients.setRequestTimeout(3500, method);
+        String key = "com.openexchange.file.storage.onedrive.rootFolderId";
+        String rootFolderId = (String) session.getParameter(key);
+        if (null == rootFolderId) {
+            HttpRequestBase request = null;
+            try {
+                int keepOn = 1;
+                while (keepOn > 0) {
+                    DefaultHttpClient httpClient = oneDriveAccess.getHttpClient();
+                    HttpGet method = new HttpGet(buildUri("/me/skydrive", initiateQueryString()));
+                    request = method;
+                    // HttpClients.setRequestTimeout(3500, method);
 
-                HttpResponse httpResponse = httpClient.execute(method);
-                if (SC_UNAUTHORIZED == httpResponse.getStatusLine().getStatusCode()) {
-                    if (keepOn > 1) {
-                        throw OneDriveExceptionCodes.UNLINKED_ERROR.create();
+                    HttpResponse httpResponse = httpClient.execute(method);
+                    if (SC_UNAUTHORIZED == httpResponse.getStatusLine().getStatusCode()) {
+                        if (keepOn > 1) {
+                            throw OneDriveExceptionCodes.UNLINKED_ERROR.create();
+                        }
+
+                        reset(request);
+                        request = null;
+                        keepOn = 2;
+
+                        oneDriveAccess.reinit(session);
+                    } else {
+                        JSONObject jResponse = handleHttpResponse(httpResponse, JSONObject.class);
+                        rootFolderId = jResponse.optString("id", null);
+                        keepOn = 0;
                     }
-
-                    reset(request);
-                    request = null;
-                    keepOn = 2;
-
-                    oneDriveAccess.reinit(session);
-                } else {
-                    JSONObject jResponse = handleHttpResponse(httpResponse, JSONObject.class);
-                    rootFolderId = jResponse.optString("id", null);
-                    keepOn = 0;
                 }
+            } catch (HttpResponseException e) {
+                throw handleHttpResponseError(null, e);
+            } catch (IOException e) {
+                throw handleIOError(e);
+            } finally {
+                reset(request);
             }
-        } catch (HttpResponseException e) {
-            throw handleHttpResponseError(null, e);
-        } catch (IOException e) {
-            throw handleIOError(e);
-        } finally {
-            reset(request);
+            session.setParameter(key, rootFolderId);
         }
         this.rootFolderId = rootFolderId;
     }
@@ -301,14 +346,14 @@ public abstract class AbstractOneDriveResourceAccess {
      * @throws IOException If an I/O error occurs
      */
     protected <R> R handleHttpResponse(HttpResponse httpResponse, Class<R> clazz) throws OXException, ClientProtocolException, IOException {
-        return handleHttpResponse(httpResponse, 200, clazz);
+        return handleHttpResponse(httpResponse, STATUS_CODE_POLICY_DEFAULT, clazz);
     }
 
     /**
      * Handles given HTTP response while expecting given status code.
      *
      * @param httpResponse The HTTP response
-     * @param expectStatusCode The status code to expect
+     * @param policy The status code policy to obey
      * @param clazz The class of the result object
      * @return The result object
      * @throws OXException If an Open-Xchange error occurs
@@ -316,12 +361,10 @@ public abstract class AbstractOneDriveResourceAccess {
      * @throws IOException If an I/O error occurs
      * @throws IllegalStateException If content stream cannot be created
      */
-    protected <R> R handleHttpResponse(HttpResponse httpResponse, int expectStatusCode, Class<R> clazz) throws OXException, ClientProtocolException, IOException {
-        StatusLine statusLine = httpResponse.getStatusLine();
-        if (expectStatusCode != statusLine.getStatusCode()) {
-            throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
-        }
+    protected <R> R handleHttpResponse(HttpResponse httpResponse, StatusCodePolicy policy, Class<R> clazz) throws OXException, ClientProtocolException, IOException {
+        policy.handleStatusCode(httpResponse.getStatusLine());
 
+        // OK, continue
         if (Void.class.equals(clazz)) {
             return null;
         }
@@ -334,6 +377,8 @@ public abstract class AbstractOneDriveResourceAccess {
         }
         return parseIntoObject(httpResponse.getEntity().getContent(), clazz);
     }
+
+
 
     /**
      * Performs given closure.

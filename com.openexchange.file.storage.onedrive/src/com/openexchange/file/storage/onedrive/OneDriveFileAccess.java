@@ -55,14 +55,16 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.StatusLine;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.mime.FormBodyPart;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.InputStreamBody;
@@ -89,6 +91,7 @@ import com.openexchange.file.storage.search.FileNameTerm;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.java.Streams;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -423,15 +426,11 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                 HttpRequestBase request = null;
                 try {
                     if (isEmpty(id) || !exists(null, id, CURRENT_VERSION)) {
-                        HttpPost method = new HttpPost(buildUri(oneDriveFolderId + "/files", initiateQueryString()));
+                        HttpPut method = new HttpPut(buildUri(oneDriveFolderId + "/files/" + file.getFileName(), initiateQueryString()));
                         request = method;
 
-                        //MimeTypeMap map = Services.getService(MimeTypeMap.class);
-                        //String contentType = map.getContentType(fileName);
-
-                        MultipartEntity multipartEntity = new MultipartEntity();
-                        multipartEntity.addPart(new FormBodyPart("file", new InputStreamBody(data, "application/octet-stream", file.getFileName())));
-                        method.setEntity(multipartEntity);
+                        HttpEntity entity = new InputStreamEntity(data, -1);
+                        method.setEntity(entity);
 
                         JSONObject jResponse = handleHttpResponse(httpClient.execute(method), JSONObject.class);
                         file.setId(jResponse.getString("id"));
@@ -441,18 +440,15 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                     } else {
                         List<NameValuePair> qparams = initiateQueryString();
                         qparams.add(new BasicNameValuePair("overwrite", "true"));
-
-                        HttpPost method = new HttpPost(buildUri(id, qparams));
+                        HttpPut method = new HttpPut(buildUri(oneDriveFolderId + "/files/" + file.getFileName(), qparams));
                         request = method;
 
-                        //MimeTypeMap map = Services.getService(MimeTypeMap.class);
-                        //String contentType = map.getContentType(fileName);
+                        HttpEntity entity = new InputStreamEntity(data, -1);
+                        method.setEntity(entity);
 
-                        MultipartEntity multipartEntity = new MultipartEntity();
-                        multipartEntity.addPart(new FormBodyPart("file", new InputStreamBody(data, "application/octet-stream", file.getFileName())));
-                        method.setEntity(multipartEntity);
+                        JSONObject jResponse = handleHttpResponse(httpClient.execute(method), JSONObject.class);
+                        file.setId(jResponse.getString("id"));
 
-                        handleHttpResponse(httpClient.execute(method), Void.class);
                         reset(request);
                         request = null;
                     }
@@ -460,6 +456,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                     return null;
                 } finally {
                     reset(request);
+                    Streams.close(data);
                 }
             }
         });
@@ -506,12 +503,9 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                     for (String id : ids) {
                         HttpDelete method = new HttpDelete(buildUri(id, initiateQueryString()));
                         request = method;
-                        HttpResponse httpResponse = httpClient.execute(method);
-                        StatusLine statusLine = httpResponse.getStatusLine();
-                        int statusCode = statusLine.getStatusCode();
-                        if (200 != statusCode && 404 != statusCode) {
-                            throw new HttpResponseException(statusCode, statusLine.getReasonPhrase());
-                        }
+
+                        handleHttpResponse(httpClient.execute(method), STATUS_CODE_POLICY_IGNORE_NOT_FOUND, Void.class);
+
                         reset(request);
                         request = null;
                     }
@@ -540,12 +534,9 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                     for (IDTuple idTuple : ids) {
                         HttpDelete method = new HttpDelete(buildUri(idTuple.getId(), initiateQueryString()));
                         request = method;
-                        HttpResponse httpResponse = httpClient.execute(method);
-                        StatusLine statusLine = httpResponse.getStatusLine();
-                        int statusCode = statusLine.getStatusCode();
-                        if (200 != statusCode && 404 != statusCode) {
-                            throw new HttpResponseException(statusCode, statusLine.getReasonPhrase());
-                        }
+
+                        handleHttpResponse(httpClient.execute(method), STATUS_CODE_POLICY_IGNORE_NOT_FOUND, Void.class);
+
                         reset(request);
                         request = null;
                     }
@@ -576,12 +567,8 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                 try {
                     HttpDelete method = new HttpDelete(buildUri(id, initiateQueryString()));
                     request = method;
-                    HttpResponse httpResponse = httpClient.execute(method);
-                    StatusLine statusLine = httpResponse.getStatusLine();
-                    int statusCode = statusLine.getStatusCode();
-                    if (200 != statusCode && 404 != statusCode) {
-                        throw new HttpResponseException(statusCode, statusLine.getReasonPhrase());
-                    }
+
+                    handleHttpResponse(httpClient.execute(method), STATUS_CODE_POLICY_IGNORE_NOT_FOUND, Void.class);
 
                     return new String[0];
                 } finally {

@@ -83,6 +83,7 @@ import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.infostore.utils.InfostoreConfigUtils;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
+import com.openexchange.java.FileKnowingInputStream;
 import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -397,7 +398,8 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             try {
                 final UploadFile uploadFile = data.getFiles().get(0);
                 checkSize( uploadFile );
-                return new FileInputStream(uploadFile.getTmpFile());
+                java.io.File tmpFile = uploadFile.getTmpFile();
+                return new FileKnowingInputStream(new FileInputStream(tmpFile), tmpFile);
             } catch (final FileNotFoundException e) {
                 throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
             }
