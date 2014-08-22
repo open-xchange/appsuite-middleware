@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.attachment.storage;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -85,8 +84,10 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
-import com.openexchange.mail.mime.datasource.MessageDataSource;
+import com.openexchange.mail.mime.datasource.DocumentDataSource;
 import com.openexchange.mail.mime.processing.MimeProcessingUtility;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationService;
@@ -210,7 +211,7 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
                         fileAccess.removeDocument(toRemove, now);
                         fileAccess.commit();
                     } finally {
-                        fileAccess.finish();
+                        finishSafe(fileAccess);
                     }
                 }
             }
@@ -318,7 +319,7 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
                     if (rollbackNeeded) {
                         fileAccess.rollback();
                     }
-                    fileAccess.finish();
+                    finishSafe(fileAccess);
                 }
             } finally {
                 Streams.close(in);
@@ -329,22 +330,70 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
 
     @Override
     public MailPart getAttachment(String id, Session session) throws OXException {
+        IDBasedFileAccess fileAccess = null;
         try {
             IDBasedFileAccessFactory fileAccessFactory = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class, true);
 
-            IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
+            fileAccess = fileAccessFactory.createAccess(session);
             File fileMetadata = fileAccess.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
 
-            MimeBodyPart mimeBodyPart = new MimeBodyPart();
-            mimeBodyPart.setDataHandler(new DataHandler(new MessageDataSource(fileAccess.getDocument(id, FileStorageFileAccess.CURRENT_VERSION), fileMetadata.getFileMIMEType())));
-            mimeBodyPart.setFileName(fileMetadata.getFileName());
-            mimeBodyPart.setHeader("Content-Type", fileMetadata.getFileMIMEType());
+            String fileName = fileMetadata.getFileName();
+            String fileMIMEType = fileMetadata.getFileMIMEType();
+            if (Strings.isEmpty(fileMIMEType) || MimeTypes.MIME_APPL_OCTET.equalsIgnoreCase(fileMIMEType)) {
+                fileMIMEType = MimeType2ExtMap.getContentType(fileName, MimeTypes.MIME_APPL_OCTET);
+            }
 
-            return MimeMessageConverter.convertPart(mimeBodyPart, false);
+            MimeBodyPart mimeBodyPart = new MimeBodyPart();
+            mimeBodyPart.setDataHandler(new DataHandler(new DocumentDataSource(id, fileMIMEType, fileName, session)));
+            mimeBodyPart.setFileName(fileName);
+            mimeBodyPart.setHeader("Content-Type", fileMIMEType);
+
+            MailPart mailPart = MimeMessageConverter.convertPart(mimeBodyPart, false);
+            mailPart.setSize(fileMetadata.getFileSize());
+            return mailPart;
         } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
-        } catch (IOException e) {
-            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            finishSafe(fileAccess);
+        }
+    }
+
+    @Override
+    public MailAttachmentInfo getAttachmentInfo(String id, Session session) throws OXException {
+        IDBasedFileAccess fileAccess = null;
+        try {
+            IDBasedFileAccessFactory fileAccessFactory = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class, true);
+
+            fileAccess = fileAccessFactory.createAccess(session);
+            File fileMetadata = fileAccess.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
+
+            String fileName = fileMetadata.getFileName();
+            String fileMIMEType = fileMetadata.getFileMIMEType();
+            if (Strings.isEmpty(fileMIMEType) || MimeTypes.MIME_APPL_OCTET.equalsIgnoreCase(fileMIMEType)) {
+                fileMIMEType = MimeType2ExtMap.getContentType(fileName, MimeTypes.MIME_APPL_OCTET);
+            }
+
+            return new MailAttachmentInfo(id, fileMIMEType, fileName, fileMetadata.getFileSize());
+        } catch (RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            finishSafe(fileAccess);
+        }
+    }
+
+    @Override
+    public InputStream getAttachmentStream(String id, Session session) throws OXException {
+        IDBasedFileAccess fileAccess = null;
+        try {
+            IDBasedFileAccessFactory fileAccessFactory = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class, true);
+            fileAccess = fileAccessFactory.createAccess(session);
+            return fileAccess.getDocument(id, FileStorageFileAccess.CURRENT_VERSION);
+        } catch (RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            finishSafe(fileAccess);
         }
     }
 
@@ -363,7 +412,7 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
             fileAccess.rollback();
             throw x;
         } finally {
-            fileAccess.finish();
+            finishSafe(fileAccess);
         }
     }
 
@@ -394,10 +443,7 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
     @Override
     public void discard(String id, DownloadUri downloadUri, Session session) throws OXException {
         IDBasedFileAccessFactory fileAccessFactory = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class, true);
-        IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
-
         PublicationRefs publicationRefs = getPublicationRefs();
-
         long timestamp = System.currentTimeMillis();
 
         // Delete publication
@@ -409,6 +455,7 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
 
         // Delete file
         try {
+            IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
             fileAccess.startTransaction();
             try {
                 fileAccess.removeDocument(Collections.singletonList(id), timestamp);
@@ -417,7 +464,7 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
                 fileAccess.rollback();
                 throw x;
             } finally {
-                fileAccess.finish();
+                finishSafe(fileAccess);
             }
         } catch (final OXException e) {
             LOG.error("Transaction error while deleting file with ID \"{}\" failed.", id, e);
@@ -500,6 +547,16 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
         }
 
         return newFolder;
+    }
+
+    private static void finishSafe(IDBasedFileAccess fileAccess) {
+        if (fileAccess != null) {
+            try {
+                fileAccess.finish();
+            } catch (final Exception e) {
+                // IGNORE
+            }
+        }
     }
 
 }

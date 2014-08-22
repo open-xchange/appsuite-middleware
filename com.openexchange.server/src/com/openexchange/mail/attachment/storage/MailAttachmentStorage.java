@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.attachment.storage;
 
+import java.io.InputStream;
 import java.util.Locale;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -94,6 +95,26 @@ public interface MailAttachmentStorage {
      * @throws OXException If mail attachment cannot be returned
      */
     MailPart getAttachment(String id, Session session) throws OXException;
+
+    /**
+     * Gets the information for the mail attachment denoted by given identifier
+     *
+     * @param id The identifier of the attachment held in storage
+     * @param session The associated session
+     * @return The mail attachment information
+     * @throws OXException If mail attachment cannot be returned
+     */
+    MailAttachmentInfo getAttachmentInfo(String id, Session session) throws OXException;
+
+    /**
+     * Gets the input stream of the mail attachment denoted by given identifier
+     *
+     * @param id The identifier of the attachment held in storage
+     * @param session The associated session
+     * @return The mail attachment stream
+     * @throws OXException If mail attachment cannot be returned
+     */
+    InputStream getAttachmentStream(String id, Session session) throws OXException;
 
     /**
      * Removes the mail attachment denoted by given identifier from storage
