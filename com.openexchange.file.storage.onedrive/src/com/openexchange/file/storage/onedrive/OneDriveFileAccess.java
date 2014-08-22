@@ -55,6 +55,7 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
@@ -62,7 +63,9 @@ import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.mime.FormBodyPart;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ContentBody;
@@ -427,26 +430,11 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                 HttpRequestBase request = null;
                 try {
                     if (isEmpty(id) || !exists(null, id, CURRENT_VERSION)) {
-                        HttpPost method = new HttpPost(buildUri(oneDriveFolderId + "/files", initiateQueryString()));
+                        HttpPut method = new HttpPut(buildUri(oneDriveFolderId + "/files/" + file.getFileName(), initiateQueryString()));
                         request = method;
 
-                        //MimeTypeMap map = Services.getService(MimeTypeMap.class);
-                        //String contentType = map.getContentType(fileName);
-
-                        MultipartEntity multipartEntity = new MultipartEntity();
-                        java.io.File theFile = null;
-                        if (data instanceof FileKnowingInputStream) {
-                            theFile = ((FileKnowingInputStream) data).getFile();
-                        }
-                        ContentBody body;
-                        if (null == theFile) {
-                            body = new InputStreamBody(data, "application/octet-stream", file.getFileName());
-                        } else {
-                            Streams.close(data);
-                            body = new FileBody(theFile, file.getFileName(), "application/octet-stream", null);
-                        }
-                        multipartEntity.addPart(new FormBodyPart("file", body));
-                        method.setEntity(multipartEntity);
+                        HttpEntity entity = new InputStreamEntity(data, -1);
+                        method.setEntity(entity);
 
                         JSONObject jResponse = handleHttpResponse(httpClient.execute(method), JSONObject.class);
                         file.setId(jResponse.getString("id"));
@@ -486,6 +474,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                     return null;
                 } finally {
                     reset(request);
+                    Streams.close(data);
                 }
             }
         });

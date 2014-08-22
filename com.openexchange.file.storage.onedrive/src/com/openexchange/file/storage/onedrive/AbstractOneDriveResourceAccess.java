@@ -144,6 +144,32 @@ public abstract class AbstractOneDriveResourceAccess {
 
     // -------------------------------------------------------------------------------------------------------------- //
 
+    /** The status code policy to obey */
+    public static interface StatusCodePolicy {
+
+        /**
+         * Examines given status line
+         *
+         * @param statusLine The status line
+         * @throws HttpResponseException If status is interpreted as an error
+         */
+        void handleStatusCode(StatusLine statusLine) throws HttpResponseException;
+    }
+
+    /** The default status code policy; accepting greater than/equal to <code>200</code> and lower than <code>300</code> */
+    public static final StatusCodePolicy DEFAULT_STATUS_CODE_POLICY = new StatusCodePolicy() {
+
+        @Override
+        public void handleStatusCode(StatusLine statusLine) throws HttpResponseException {
+            int statusCode = statusLine.getStatusCode();
+            if (statusCode < 200 || statusCode >= 300) {
+                throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
+            }
+        }
+    };
+
+    // -------------------------------------------------------------------------------------------------------------- //
+
     /**
      * The OneDrive base URL: <code>"https://apis.live.net/v5.0/"</code>
      */
@@ -300,14 +326,14 @@ public abstract class AbstractOneDriveResourceAccess {
      * @throws IOException If an I/O error occurs
      */
     protected <R> R handleHttpResponse(HttpResponse httpResponse, Class<R> clazz) throws OXException, ClientProtocolException, IOException {
-        return handleHttpResponse(httpResponse, 200, clazz);
+        return handleHttpResponse(httpResponse, DEFAULT_STATUS_CODE_POLICY, clazz);
     }
 
     /**
      * Handles given HTTP response while expecting given status code.
      *
      * @param httpResponse The HTTP response
-     * @param expectStatusCode The status code to expect
+     * @param policy The status code policy to obey
      * @param clazz The class of the result object
      * @return The result object
      * @throws OXException If an Open-Xchange error occurs
@@ -315,12 +341,10 @@ public abstract class AbstractOneDriveResourceAccess {
      * @throws IOException If an I/O error occurs
      * @throws IllegalStateException If content stream cannot be created
      */
-    protected <R> R handleHttpResponse(HttpResponse httpResponse, int expectStatusCode, Class<R> clazz) throws OXException, ClientProtocolException, IOException {
-        StatusLine statusLine = httpResponse.getStatusLine();
-        if (expectStatusCode != statusLine.getStatusCode()) {
-            throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
-        }
+    protected <R> R handleHttpResponse(HttpResponse httpResponse, StatusCodePolicy policy, Class<R> clazz) throws OXException, ClientProtocolException, IOException {
+        policy.handleStatusCode(httpResponse.getStatusLine());
 
+        // OK, continue
         if (Void.class.equals(clazz)) {
             return null;
         }
@@ -333,6 +357,8 @@ public abstract class AbstractOneDriveResourceAccess {
         }
         return parseIntoObject(httpResponse.getEntity().getContent(), clazz);
     }
+
+
 
     /**
      * Performs given closure.
