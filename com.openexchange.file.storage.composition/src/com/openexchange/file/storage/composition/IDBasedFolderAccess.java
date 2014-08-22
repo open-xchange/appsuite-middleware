@@ -88,7 +88,7 @@ public interface IDBasedFolderAccess extends TransactionAware {
     /**
      * Gets the folder identified through given identifier
      *
-     * @param folderId The identifier
+     * @param folderID The identifier object
      * @return The corresponding instance of {@link FileStorageFolder}
      * @throws OXException If either folder does not exist or could not be fetched
      */
