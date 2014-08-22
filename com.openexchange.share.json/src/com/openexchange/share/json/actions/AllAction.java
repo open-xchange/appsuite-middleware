@@ -61,6 +61,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.Share;
@@ -104,12 +105,7 @@ public class AllAction extends AbstractShareAction {
             }
             guestIDs.add(Integer.valueOf(share.getGuest()));
         }
-        int[] ids = new int[guestIDs.size()];
-        int idx = 0;
-        for (Integer guestID : guestIDs) {
-            ids[idx++] = guestID.intValue();
-        }
-        User[] guestUsers = services.getService(UserService.class).getUser(session.getContext(), ids);
+        User[] guestUsers = services.getService(UserService.class).getUser(session.getContext(), Autoboxing.I2i(guestIDs));
         Map<Integer, User> guestUsersByID = new HashMap<Integer, User>();
         for (User user : guestUsers) {
             guestUsersByID.put(Integer.valueOf(user.getId()), user);
