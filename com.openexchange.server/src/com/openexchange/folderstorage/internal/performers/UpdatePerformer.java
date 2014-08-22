@@ -296,7 +296,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                      * prepare new shares for added guest permissions
                      */
                     if (!isRecursion && comparedPermissions.hasNewGuests()) {
-                        processAddedGuestPermissions(folderId, storageFolder.getContentType(), storageFolder.getType(),
+                        processAddedGuestPermissions(folderId, storageFolder.getContentType(),
                             comparedPermissions.getAddedGuests(), transactionManager.getConnection());
                     }
                     /*

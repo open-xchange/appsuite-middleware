@@ -79,6 +79,11 @@ public class UserPermissionServiceImpl implements UserPermissionService {
     }
 
     @Override
+    public UserPermissionBits getUserPermissionBits(Connection connection, int userId, Context ctx) throws OXException {
+        return UserPermissionBitsStorage.getInstance().getUserPermissionBits(connection, userId, ctx);
+    }
+
+    @Override
     public void saveUserPermissionBits(UserPermissionBits permissionBits) throws OXException {
         UserPermissionBitsStorage.getInstance().saveUserPermissionBits(permissionBits.getPermissionBits(), permissionBits.getUserId(), permissionBits.getContext());
     }

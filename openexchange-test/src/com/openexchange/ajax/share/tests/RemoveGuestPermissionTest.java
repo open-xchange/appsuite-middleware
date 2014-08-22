@@ -119,7 +119,7 @@ public class RemoveGuestPermissionTest extends ShareTest {
          * check access to share
          */
         GuestClient guestClient = resolveShare(share);
-        guestClient.checkShareModuleAvailableExclusively();
+        guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
         /*
          * update folder, revoke permissions

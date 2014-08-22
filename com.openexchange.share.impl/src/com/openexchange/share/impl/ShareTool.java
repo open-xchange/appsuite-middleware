@@ -61,8 +61,6 @@ import java.util.Set;
 import java.util.UUID;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.type.PublicType;
-import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.modules.Module;
@@ -79,6 +77,7 @@ import com.openexchange.share.DefaultShare;
 import com.openexchange.share.Guest;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareCryptoService;
+import com.openexchange.share.ShareExceptionCodes;
 
 
 /**
@@ -147,45 +146,61 @@ public class ShareTool {
     }
 
     /**
-     * Gets permission bits suitable for a guest user being allowed to access a module.
+     * Gets permission bits suitable for a guest user being allowed to access a module. Besides the module permission, this includes the
+     * permission bits to access shared and public folders, as well as the bit to turn off portal access.
      *
      * @param module The identifier of the module that should be added to the permissions
      * @return The permission bits
+     * @throws OXException
      */
-    private static int getUserPermissionBits(int module) {
-        Set<Permission> perms = new HashSet<Permission>();
+    public static int getUserPermissionBits(int module) throws OXException {
+        Set<Permission> perms = new HashSet<Permission>(4);
         perms.add(Permission.DENIED_PORTAL);
         perms.add(Permission.EDIT_PUBLIC_FOLDERS);
-//        perms.add(Permission.READ_CREATE_SHARED_FOLDERS);
-        Permission modulePermission = Module.getForFolderConstant(module).getPermission();
-        if (null != modulePermission) {
-            perms.add(modulePermission);
+        perms.add(Permission.READ_CREATE_SHARED_FOLDERS);
+        addModulePermissions(perms, module);
+        return Permission.toBits(perms);
+    }
+
+    /**
+     * Gets permission bits suitable for a guest user being allowed to access all supplied shares. Besides the concrete module
+     * permission(s), this includes the permission bits to access shared and public folders, as well as the bit to turn off portal
+     * access.
+     *
+     * @param module The identifier of the module that should be added to the permissions
+     * @return The permission bits
+     * @throws OXException
+     */
+    public static int getUserPermissionBits(List<Share> shares) throws OXException {
+        Set<Permission> perms = new HashSet<Permission>(8);
+        perms.add(Permission.DENIED_PORTAL);
+        perms.add(Permission.EDIT_PUBLIC_FOLDERS);
+        perms.add(Permission.READ_CREATE_SHARED_FOLDERS);
+        for (Share share : shares) {
+            addModulePermissions(perms, share.getModule());
         }
         return Permission.toBits(perms);
     }
 
     /**
-     * Gets permission bits suitable for a guest user being allowed to access a module and folder type.
+     * Adds a module permission to the supplied permission set.
      *
-     * @param module The identifier of the module that should be added to the permissions
-     * @param type The identifier of the folder type (currently shared or public) that should be added to the permissions
-     * @return The permission bits
+     * @param perms The permission set
+     * @param module The module to add the permissions for
+     * @return The adjusted permission set
+     * @throws OXException
      */
-    public static int getUserPermissionBits(int module, int type) {
-        Set<Permission> perms = new HashSet<Permission>();
-        perms.add(Permission.DENIED_PORTAL);
-        if (SharedType.getInstance().getType() == type) {
-            perms.add(Permission.READ_CREATE_SHARED_FOLDERS);
-        } else if (PublicType.getInstance().getType() == type) {
-            perms.add(Permission.EDIT_PUBLIC_FOLDERS);
-        } else {
-            throw new UnsupportedOperationException("Unsupported type: " + type);
+    private static Set<Permission> addModulePermissions(Set<Permission> perms, int module) throws OXException {
+        Module matchingModule = Module.getForFolderConstant(module);
+        if (null == matchingModule) {
+            throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Unknwon module: " + module);
         }
-        Permission modulePermission = Module.getForFolderConstant(module).getPermission();
-        if (null != modulePermission) {
-            perms.add(modulePermission);
+        Permission modulePermission = matchingModule.getPermission();
+        if (null == modulePermission) {
+            throw ShareExceptionCodes.UNEXPECTED_ERROR.create("No module permission for module " + matchingModule);
         }
-        return Permission.toBits(perms);
+        perms.add(modulePermission);
+        return perms;
     }
 
     /**

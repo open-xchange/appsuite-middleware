@@ -126,7 +126,7 @@ public class DeleteTest extends ShareTest {
          * check access to share
          */
         GuestClient guestClient = resolveShare(share);
-        guestClient.checkShareModuleAvailableExclusively();
+        guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
         /*
          * delete share

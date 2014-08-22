@@ -127,7 +127,7 @@ public class ExpiredSharesTest extends ShareTest {
          * check access to share
          */
         GuestClient guestClient = resolveShare(share);
-        guestClient.checkShareModuleAvailableExclusively();
+        guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
         /*
          * wait some time until the share is expired

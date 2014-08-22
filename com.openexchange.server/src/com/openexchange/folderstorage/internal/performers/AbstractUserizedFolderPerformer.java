@@ -83,7 +83,6 @@ import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.internal.UserizedFolderImpl;
 import com.openexchange.folderstorage.osgi.ShareServiceHolder;
 import com.openexchange.folderstorage.type.PrivateType;
-import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -448,14 +447,13 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      *
      * @param folderID The ID of the parent folder
      * @param contentType The content type / module of the parent folder
-     * @param folderType The folder type of the parent folder
      * @param addedPermissions The added permissions; the entity identifiers of the corresponding guest users will be inserted implicitly
      *                         upon share creation
      * @param connection The database connection to use or <code>null</code>
      * @return The created shares, where each share corresponds to a guest user that has been added through the creation of the shares,
      *         in the same order as the supplied guest permissions list
      */
-    protected List<Share> processAddedGuestPermissions(String folderID, ContentType contentType, Type folderType, List<GuestPermission> addedPermissions, Connection connection) throws OXException {
+    protected List<Share> processAddedGuestPermissions(String folderID, ContentType contentType, List<GuestPermission> addedPermissions, Connection connection) throws OXException {
         List<Guest> guests = new ArrayList<Guest>(addedPermissions.size());
         for (GuestPermission permission : addedPermissions) {
             guests.add(createGuest(permission));
@@ -463,8 +461,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         try {
             ShareService shareService = ShareServiceHolder.requireShareService();
             session.setParameter(Connection.class.getName(), connection);
-            List<Share> shares = shareService.createShares(
-                session, folderID, contentType.getModule(), getTypeForGuest(contentType, folderType), guests);
+            List<Share> shares = shareService.createShares(session, folderID, contentType.getModule(), guests);
             if (null == shares || shares.size() != addedPermissions.size()) {
                 throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Shares not created as expected");
             }
@@ -475,27 +472,6 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         } finally {
             session.setParameter(Connection.class.getName(), null);
         }
-    }
-
-    /**
-     * Gets the folder type ID appropriate as seen by guests for the supplied content- and folder-type combination.
-     *
-     * @param contentType The content type of the folder that is shared to guests
-     * @param folderType The folder type of the folder that is shared to guests
-     * @return The folder type ID from a guest's point of view
-     * @throws OXException
-     */
-    private static int getTypeForGuest(ContentType contentType, Type folderType) throws OXException {
-        if (PublicType.getInstance().equals(folderType)) {
-            if (InfostoreContentType.getInstance().equals(contentType)) {
-                return SharedType.getInstance().getType();
-            } else {
-                return PublicType.getInstance().getType();
-            }
-        } else if (SharedType.getInstance().equals(folderType) || PrivateType.getInstance().equals(folderType)) {
-            return SharedType.getInstance().getType();
-        }
-        throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Unsupported folder type: " + folderType);
     }
 
     /**

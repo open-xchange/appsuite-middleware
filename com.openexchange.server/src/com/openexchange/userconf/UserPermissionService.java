@@ -85,6 +85,18 @@ public interface UserPermissionService {
     public UserPermissionBits[] getUserPermissionBits(Context context, User[] users) throws OXException;
 
     /**
+     * Determines the instance of <code>UserPermissionBits</code> that corresponds to given user ID.
+     *
+     * @param connection The database connection to use. May be read only.
+     * @param userId The user ID
+     * @param context The context
+     * @return the instance of <code>UserPermissionBits</code>
+     * @throws OXException If users configuration could not be determined
+     * @see #getUserPermissionBits(int, int[], Context)
+     */
+    UserPermissionBits getUserPermissionBits(Connection connection, int userId, Context context) throws OXException;
+
+    /**
      * Saves the given permission bits.
      *
      * @param permissionBits The permission bits.

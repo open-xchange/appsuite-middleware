@@ -213,7 +213,7 @@ public class DefaultShareServiceTest extends TestCase {
                 g.setDisplayName("Guest " + i);
                 guests.add(g);
             }
-            service.createShares(session, String.valueOf(share1.getObjectID()), share1.getModule(), FolderObject.SHARED, guests);
+            service.createShares(session, String.valueOf(share1.getObjectID()), share1.getModule(), guests);
 
             FolderObject share2 = access.getDefaultFolder(user.getId(), FolderObject.CALENDAR);
             count = new Random().nextInt(5);
@@ -224,7 +224,7 @@ public class DefaultShareServiceTest extends TestCase {
                 g.setDisplayName("Guest " + i);
                 guests.add(g);
             }
-            service.createShares(session, String.valueOf(share2.getObjectID()), share2.getModule(), FolderObject.SHARED, guests);
+            service.createShares(session, String.valueOf(share2.getObjectID()), share2.getModule(), guests);
         }
     }
 

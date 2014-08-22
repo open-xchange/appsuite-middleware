@@ -49,19 +49,25 @@
 
 package com.openexchange.share.impl;
 
+import static com.openexchange.java.Autoboxing.I2i;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
+import com.openexchange.groupware.userconfiguration.UserConfigurationCodes;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
@@ -105,7 +111,14 @@ public class DefaultShareService implements ShareService {
         Share share = services.getService(ShareStorage.class).loadShare(contextID, token, StorageParameters.NO_PARAMETERS);
         if (null != share && share.isExpired()) {
             LOG.info("Detected expired share ({}): {}", share.getExpires(), share);
-            removeShares(new ConnectionHelper(contextID, services, true), Collections.singletonList(share));
+            ConnectionHelper connectionHelper = new ConnectionHelper(contextID, services, true);
+            try {
+                connectionHelper.start();
+                removeShares(connectionHelper, Collections.singletonList(share));
+                connectionHelper.commit();
+            } finally {
+                connectionHelper.finish();
+            }
             return null;
         }
         return share;
@@ -125,12 +138,23 @@ public class DefaultShareService implements ShareService {
         ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
         try {
             connectionHelper.start();
-            int[] guestIDs = deleteSharesForFolder(connectionHelper.getParameters(), session.getContextId(), folder, module, guests);
-            deleteGuestUsers(connectionHelper.getConnection(), session.getContextId(), guestIDs);
+            /*
+             * remove shares for folder / guest user(s)
+             */
+            int[] affectedGuestIDs = deleteSharesForFolder(
+                connectionHelper.getParameters(), session.getContextId(), folder, module, guests);
+            if (null == affectedGuestIDs || 0 == affectedGuestIDs.length) {
+                LOG.info("No guest users affected for shares in folder {}.", folder);
+                return new int[0];
+            }
+            /*
+             * delete / adjust guest users as needed
+             */
+            int[] deletedGuestIDs = cleanupGuestUsers(connectionHelper, session.getContextId(), affectedGuestIDs);
             connectionHelper.commit();
             LOG.info("Shares to guest user(s) {} for folder {} in context {} deleted successfully.",
-                Arrays.toString(guestIDs), folder, session.getContextId());
-            return guestIDs;
+                Arrays.toString(guests), folder, session.getContextId());
+            return deletedGuestIDs;
         } finally {
             connectionHelper.finish();
         }
@@ -149,7 +173,7 @@ public class DefaultShareService implements ShareService {
              */
             List<Share> shares = services.getService(ShareStorage.class).loadShares(
                 session.getContextId(), tokens, connectionHelper.getParameters());
-            List<Integer> guestIDList = new ArrayList<Integer>(shares.size());
+            Set<Integer> affectedGuestIDs = new HashSet<Integer>(shares.size());
             for (String token : tokens) {
                 Share share = ShareTool.findShare(shares, token);
                 if (null == share || ShareTool.extractContextId(token) != session.getContextId()) {
@@ -162,16 +186,18 @@ public class DefaultShareService implements ShareService {
                 if (share.getLastModified().after(clientTimestamp)) {
                     throw ShareExceptionCodes.CONCURRENT_MODIFICATION.create(token);
                 }
-                guestIDList.add(Integer.valueOf(share.getGuest()));
+                affectedGuestIDs.add(Integer.valueOf(share.getGuest()));
             }
             /*
              * proceed with deletion
              */
             services.getService(ShareStorage.class).deleteShares(session.getContextId(), tokens, connectionHelper.getParameters());
-            int[] guestIDs = getPrimitiveArray(guestIDList);
-            deleteGuestUsers(connectionHelper.getConnection(), session.getContextId(), guestIDs);
+            /*
+             * delete / adjust guest users as needed
+             */
+            int[] deletedGuestIDs = cleanupGuestUsers(connectionHelper, session.getContextId(), I2i(affectedGuestIDs));
             connectionHelper.commit();
-            return guestIDs;
+            return deletedGuestIDs;
         } finally {
             connectionHelper.finish();
         }
@@ -220,20 +246,18 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
-    public List<Share> createShares(Session session, String folder, int module, int type, List<Guest> guests) throws OXException {
+    public List<Share> createShares(Session session, String folder, int module, List<Guest> guests) throws OXException {
         LOG.info("Adding shares to guest user(s) {} for folder {} in context {}...", guests, folder, session.getContextId());
         List<Share> shares = new ArrayList<Share>(guests.size());
         Context context = services.getService(ContextService.class).getContext(session.getContextId());
-        int permissionBits = ShareTool.getUserPermissionBits(module, type);
+        int permissionBits = ShareTool.getUserPermissionBits(module);
         ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
         try {
             connectionHelper.start();
             User sharingUser = services.getService(UserService.class).getUser(
-                connectionHelper.getConnection(),
-                session.getUserId(),
-                context);
+                connectionHelper.getConnection(), session.getUserId(), context);
             for (Guest guest : guests) {
-                User guestUser = createGuestUser(connectionHelper.getConnection(), context, sharingUser, permissionBits, guest);
+                User guestUser = getGuestUser(connectionHelper.getConnection(), context, sharingUser, permissionBits, guest);
                 Share share = ShareTool.prepareShare(
                     context.getContextId(), guestUser, module, folder, guest.getExpires(), guest.getAuthenticationMode());
                 services.getService(ShareStorage.class).storeShare(share, connectionHelper.getParameters());
@@ -439,43 +463,72 @@ public class DefaultShareService implements ShareService {
             /*
              * gather share tokens / guest user ids
              */
-            int[] guestIDs = new int[shares.size()];
+            Set<Integer> affectedGuestIDs = new HashSet<Integer>(shares.size());
             List<String> tokens = new ArrayList<String>(shares.size());
             for (int i = 0; i < shares.size(); i++) {
                 Share share = shares.get(i);
-                guestIDs[i] = share.getGuest();
+                affectedGuestIDs.add(Integer.valueOf(share.getGuest()));
                 tokens.add(share.getToken());
             }
             /*
-             * delete guest users and share entries
+             * proceed with deletion
              */
-            deleteGuestUsers(connectionHelper.getConnection(), connectionHelper.getContextID(), guestIDs);
-            ShareStorage shareStorage = services.getService(ShareStorage.class);
-            shareStorage.deleteShares(connectionHelper.getContextID(), tokens, connectionHelper.getParameters());
+            services.getService(ShareStorage.class).deleteShares(
+                connectionHelper.getContextID(), tokens, connectionHelper.getParameters());
+            /*
+             * delete / adjust guest users as needed
+             */
+            cleanupGuestUsers(connectionHelper, connectionHelper.getContextID(), I2i(affectedGuestIDs));
+            connectionHelper.commit();
             LOG.info("Deleted {} share(s) in context {}: {}", tokens.size(), connectionHelper.getContextID(), tokens);
         }
     }
 
     /**
-     * Creates a guest user.
+     * Gets a guest user for a new share. A new guest use is created if no matching one exists, the permission bits are applied as needed.
      *
      * @param connection A (writable) connection to the database
      * @param context The context
      * @param sharingUser The sharing user
      * @param permissionBits The permission bits to apply to the guest user
      * @param guest The guest description
-     * @return The created guest user
+     * @return The guest user
      * @throws OXException
      */
-    private User createGuestUser(Connection connection, Context context, User sharingUser, int permissionBits, Guest guest) throws OXException {
+    private User getGuestUser(Connection connection, Context context, User sharingUser, int permissionBits, Guest guest) throws OXException {
         UserService userService = services.getService(UserService.class);
-        UserPermissionService userPermissionService = services.getService(UserPermissionService.class);
-
+        if (AuthenticationMode.ANONYMOUS != guest.getAuthenticationMode() && services.getService(
+            ConfigurationService.class).getBoolProperty("com.openexchange.share.aggregateShares", false)) {
+            /*
+             * re-use existing, non-anonymous guest user if possible
+             */
+            User existingGuestUser = null;
+            try {
+                existingGuestUser = userService.searchUser(guest.getMailAddress(), context, false, true, true);
+            } catch (OXException e) {
+                if (false == LdapExceptionCode.NO_USER_BY_MAIL.equals(e)) {
+                    throw e;
+                }
+            }
+            if (null != existingGuestUser) {
+                /*
+                 * combine permission bits with existing ones
+                 */
+                UserPermissionBits userPermissionBits = setPermissionBits(
+                    connection, context, existingGuestUser.getId(), permissionBits, true);
+                LOG.info("Using existing guest user {} with permissions {} in context {}: {}", existingGuestUser.getMail(),
+                    userPermissionBits.getPermissionBits(), context.getContextId(), existingGuestUser.getId());
+                return existingGuestUser;
+            }
+        }
+        /*
+         * create new guest user
+         */
         UserImpl guestUser = ShareTool.prepareGuestUser(services, sharingUser, guest);
         int guestID = userService.createUser(connection, context, guestUser);
         guestUser.setId(guestID);
-        userPermissionService.saveUserPermissionBits(connection, new UserPermissionBits(permissionBits, guestID, context.getContextId()));
-
+        services.getService(UserPermissionService.class).saveUserPermissionBits(
+            connection, new UserPermissionBits(permissionBits, guestID, context.getContextId()));
         if (AuthenticationMode.ANONYMOUS == guest.getAuthenticationMode()) {
             LOG.info("Created anonymous guest user with permissions {} in context {}: {}", permissionBits, context.getContextId(), guestID);
         } else {
@@ -486,28 +539,46 @@ public class DefaultShareService implements ShareService {
     }
 
     /**
-     * Deletes guest users.
+     * Deletes guest users that are no longer needed after all shares to them has been revoked. Guest users that are referenced by
+     * existing shares are skipped, while there module permissions are adjusted to reflect access to the remaining shares.
      *
-     * @param connection A (writable) database connection
+     * @param connectionHelper A (started) connection helper
      * @param contextID The context ID
      * @param guestIDs The identifiers of the guest users to delete
+     * @return The identifiers of the deleted guest users
      * @throws OXException
      */
-    private void deleteGuestUsers(Connection connection, int contextID, int[] guestIDs) throws OXException {
-        if (null != guestIDs && 0 < guestIDs.length) {
-            UserService userService = services.getService(UserService.class);
-            UserPermissionService userPermissionService = services.getService(UserPermissionService.class);
-            Context context = userService.getContext(contextID);
-            for (int guestID : guestIDs) {
-                /*
-                 * delete permission bits & user
-                 */
-                userPermissionService.deleteUserPermissionBits(connection, context, guestID);
-                userService.deleteUser(connection, context, guestID);
-            }
-
-            LOG.info("Deleted {} guest user(s) in context {}: {}", guestIDs.length, contextID, Arrays.toString(guestIDs));
+    private int[] cleanupGuestUsers(ConnectionHelper connectionHelper, int contextID, int[] guestIDs) throws OXException {
+        if (null == guestIDs || 0 == guestIDs.length) {
+            return new int[0];
         }
+        ShareStorage shareStorage = services.getService(ShareStorage.class);
+        UserService userService = services.getService(UserService.class);
+        Context context = userService.getContext(contextID);
+        /*
+         * check which guest users can be deleted
+         */
+        List<Integer> deletedGuestIDs = new ArrayList<Integer>(guestIDs.length);
+        for (int guestID : guestIDs) {
+            List<Share> sharesForGuest = shareStorage.loadSharesForGuest(contextID, guestID, connectionHelper.getParameters());
+            if (null != sharesForGuest && 0 < sharesForGuest.size()) {
+                /*
+                 * guest user still has shares, adjust permissions as needed
+                 */
+                int requiredPermissionBits = ShareTool.getUserPermissionBits(sharesForGuest);
+                setPermissionBits(connectionHelper.getConnection(), context, guestID, requiredPermissionBits, true);
+            } else {
+                /*
+                 * no shares remaining, delete permission bits & user
+                 */
+                services.getService(UserPermissionService.class).deleteUserPermissionBits(
+                    connectionHelper.getConnection(), context, guestID);
+                userService.deleteUser(connectionHelper.getConnection(), context, guestID);
+                LOG.info("Deleted {} guest user(s) in context {}: {}", guestIDs.length, contextID, Arrays.toString(guestIDs));
+                deletedGuestIDs.add(Integer.valueOf(guestID));
+            }
+        }
+        return I2i(deletedGuestIDs);
     }
 
     /**
@@ -531,7 +602,7 @@ public class DefaultShareService implements ShareService {
          * collect share tokens for matching guest users
          */
         List<String> tokens = new ArrayList<String>(shares.size());
-        List<Integer> guestIDs = new ArrayList<Integer>(shares.size());
+        Set<Integer> guestIDs = new HashSet<Integer>(shares.size());
         for (Share share : shares) {
             for (int i = 0; i < guests.length; i++) {
                 if (guests[i] == share.getGuest()) {
@@ -548,15 +619,44 @@ public class DefaultShareService implements ShareService {
             shareStorage.deleteShares(contextID, tokens, storageParameters);
             LOG.info("Deleted {} share(s) for folder {} in context {}: {}", tokens.size(), folder, contextID, tokens);
         }
-        return getPrimitiveArray(guestIDs);
+        return I2i(guestIDs);
     }
 
-    private static int[] getPrimitiveArray(List<Integer> list) {
-        int[] array = new int[list.size()];
-        for (int i = 0; i < list.size(); i++) {
-            array[i] = list.get(i).intValue();
+    /**
+     * Sets a user's permission bits. This includes assigning initial permission bits, as well as updating already existing permissions.
+     *
+     * @param connection The database connection to use
+     * @param context The context
+     * @param userID The identifier of the user to set the permission bits for
+     * @param permissionBits The permission bits to set
+     * @param merge <code>true</code> to merge with the previously assigned permissions, <code>false</code> to overwrite
+     * @return The updated permission bits
+     * @throws OXException
+     */
+    private UserPermissionBits setPermissionBits(Connection connection, Context context, int userID, int permissionBits, boolean merge) throws OXException {
+        UserPermissionService userPermissionService = services.getService(UserPermissionService.class);
+        UserPermissionBits userPermissionBits = null;
+        try {
+            userPermissionBits = userPermissionService.getUserPermissionBits(connection, userID, context);
+        } catch (OXException e) {
+            if (false == UserConfigurationCodes.NOT_FOUND.equals(e)) {
+                throw e;
+            }
         }
-        return array;
+        if (null == userPermissionBits) {
+            /*
+             * save permission bits
+             */
+            userPermissionBits = new UserPermissionBits(permissionBits, userID, context.getContextId());
+            userPermissionService.saveUserPermissionBits(connection, userPermissionBits);
+        } else if (userPermissionBits.getPermissionBits() != permissionBits) {
+            /*
+             * update permission bits
+             */
+            userPermissionBits.setPermissionBits(merge ? permissionBits | userPermissionBits.getPermissionBits() : permissionBits);
+            userPermissionService.saveUserPermissionBits(connection, userPermissionBits);
+        }
+        return userPermissionBits;
     }
 
 }

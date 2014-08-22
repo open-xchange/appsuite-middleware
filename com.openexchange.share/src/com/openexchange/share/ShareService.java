@@ -120,12 +120,11 @@ public interface ShareService {
      * @param session The session
      * @param folder The identifier of the folder to remove the shares for
      * @param module The module of the folder
-     * @param type The identifier of the folder's type (currently shared or public), from the guest users point of view
      * @param guests The guest users for the shares
      * @return The created shares, where each share corresponds to a guest user that has been added through the creation of the shares,
      *         in the same order as the supplied guests list
      */
-    List<Share> createShares(Session session, String folder, int module, int type, List<Guest> guests) throws OXException;
+    List<Share> createShares(Session session, String folder, int module, List<Guest> guests) throws OXException;
 
     /**
      * Generates a URL for every share that is passed.

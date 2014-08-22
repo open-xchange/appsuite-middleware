@@ -90,7 +90,7 @@ public class CreateSubfolderTest extends ShareTest {
         testCreateSubfolderWithoutAdminFlag(randomFolderAPI(), randomModule());
     }
 
-    public void testCreateSubfolderWithoutAdminFlagExtensively() throws Exception {
+    public void noTestCreateSubfolderWithoutAdminFlagExtensively() throws Exception {
         for (EnumAPI api : TESTED_FOLDER_APIS) {
             for (int module : TESTED_MODULES) {
                 testCreateSubfolderWithoutAdminFlag(api, module);
@@ -148,7 +148,7 @@ public class CreateSubfolderTest extends ShareTest {
          * check access to share
          */
         GuestClient guestClient = resolveShare(share);
-        guestClient.checkShareModuleAvailableExclusively();
+        guestClient.checkShareModuleAvailable();
         /*
          * create subfolder as guest
          */
@@ -228,7 +228,7 @@ public class CreateSubfolderTest extends ShareTest {
          * check access to share
          */
         GuestClient guestClient = resolveShare(share);
-        guestClient.checkShareModuleAvailableExclusively();
+        guestClient.checkShareModuleAvailable();
         /*
          * create subfolder as guest
          */

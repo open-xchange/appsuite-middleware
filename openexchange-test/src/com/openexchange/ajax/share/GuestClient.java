@@ -198,6 +198,22 @@ public class GuestClient extends AJAXClient {
     }
 
     /**
+     * Checks that the share's module is available.
+     */
+    public void checkShareModuleAvailable() throws Exception {
+        com.openexchange.ajax.config.actions.GetResponse getResponse =
+            execute(new com.openexchange.ajax.config.actions.GetRequest(Tree.AvailableModules));
+        String module = getContentType(getModuleID());
+        Object[] array = getResponse.getArray();
+        for (Object object : array) {
+            if (module.equals(object)) {
+                return;
+            }
+        }
+        Assert.fail("Module " + getModule() + " not found");
+    }
+
+    /**
      * Checks that the share's module is available, as well as all others modules are not.
      */
     public void checkShareModuleAvailableExclusively() throws Exception {

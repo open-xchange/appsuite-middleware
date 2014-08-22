@@ -1252,6 +1252,7 @@ public class RdbUserStorage extends UserStorage {
                     }
                 }
                 if (userId == -1) {
+                    //FIXME: javadoc claims to return null if not found...
                     throw LdapExceptionCode.NO_USER_BY_MAIL.create(email).setPrefix("USR");
                 }
                 return getUser(context, con, new int[] { userId })[0];
