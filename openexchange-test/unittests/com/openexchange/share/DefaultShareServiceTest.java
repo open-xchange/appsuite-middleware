@@ -78,7 +78,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
  */
 public class DefaultShareServiceTest extends TestCase {
 
-    private boolean init;
+    private static boolean init;
     private Context ctx;
     private List<User> users;
     private DefaultShareService service;
@@ -275,7 +275,7 @@ public class DefaultShareServiceTest extends TestCase {
         }
     }
 
-    public void testDeleteByContext() throws Exception {
+    public void testRemoveByContext() throws Exception {
         service.removeShares(ctx.getContextId());
         List<Share> shares = service.getAllShares(ctx.getContextId());
         assertTrue("Not all shares in context have been deleted.", shares.isEmpty());
