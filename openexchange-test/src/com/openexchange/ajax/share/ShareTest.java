@@ -50,6 +50,7 @@
 package com.openexchange.ajax.share;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -67,11 +68,13 @@ import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.folder.actions.UpdateRequest;
+import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.share.actions.AllRequest;
 import com.openexchange.ajax.share.actions.ParsedShare;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.AuthenticationMode;
@@ -223,6 +226,18 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @return The share, or <code>null</code> if not found
      */
     protected ParsedShare discoverShare(int folderID, int guest) throws OXException, IOException, JSONException {
+        return discoverShare(client, folderID, guest);
+    }
+
+    /**
+     * Discovers a specific share amongst all available shares of the current user, based on the folder- and guest identifiers.
+     *
+     * @param client The ajax client to use
+     * @param folderID The folder ID to discover the share for
+     * @param guest The ID of the guest associated to the share
+     * @return The share, or <code>null</code> if not found
+     */
+    protected static ParsedShare discoverShare(AJAXClient client, int folderID, int guest) throws OXException, IOException, JSONException {
         return discoverShare(client.execute(new AllRequest()).getParsedShares(), folderID, guest);
     }
 
@@ -234,7 +249,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @param guest The ID of the guest associated to the share
      * @return The share, or <code>null</code> if not found
      */
-    protected ParsedShare discoverShare(List<ParsedShare> shares, int folderID, int guest) throws OXException, IOException, JSONException {
+    protected static ParsedShare discoverShare(List<ParsedShare> shares, int folderID, int guest) throws OXException, IOException, JSONException {
         String folder = String.valueOf(folderID);
         for (ParsedShare share : shares) {
             if (folder.equals(share.getFolder()) && guest == share.getGuest()) {
@@ -246,16 +261,19 @@ public abstract class ShareTest extends AbstractAJAXSession {
 
     @Override
     protected void tearDown() throws Exception {
-        if (null != client && null != foldersToDelete && 0 < foldersToDelete.size()) {
-            int[] folderIDs = new int[foldersToDelete.size()];
-            int idx = 0;
-            for (Integer folderID : foldersToDelete.keySet()) {
-                folderIDs[idx++] = folderID.intValue();
-            }
-            Date futureTimestamp = new Date(System.currentTimeMillis() + 1000000);
-            client.execute(new DeleteRequest(EnumAPI.OX_NEW, folderIDs, futureTimestamp));
-        }
+        deleteFoldersSilently(client, foldersToDelete);
         super.tearDown();
+    }
+
+    protected static void deleteFoldersSilently(AJAXClient client, Map<Integer, FolderObject> foldersToDelete) throws Exception {
+        deleteFoldersSilently(client, foldersToDelete.keySet());
+    }
+
+    protected static void deleteFoldersSilently(AJAXClient client, Collection<Integer> foldersIDs) throws Exception {
+        if (null != client && null != foldersIDs && 0 < foldersIDs.size()) {
+            Date futureTimestamp = new Date(System.currentTimeMillis() + 1000000);
+            client.execute(new DeleteRequest(EnumAPI.OX_NEW, Autoboxing.I2i(foldersIDs), futureTimestamp));
+        }
     }
 
     /**
@@ -346,6 +364,10 @@ public abstract class ShareTest extends AbstractAJAXSession {
     }
 
     protected int getDefaultFolder(int module) throws Exception {
+        return getDefaultFolder(client, module);
+    }
+
+    protected static int getDefaultFolder(AJAXClient client, int module) throws Exception {
         switch (module) {
         case FolderObject.CONTACT:
             return client.getValues().getPrivateContactFolder();

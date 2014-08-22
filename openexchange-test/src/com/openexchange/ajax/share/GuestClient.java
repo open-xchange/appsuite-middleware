@@ -62,6 +62,8 @@ import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.contact.action.InsertResponse;
 import com.openexchange.ajax.folder.actions.EnumAPI;
+import com.openexchange.ajax.folder.actions.GetRequest;
+import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.folder.actions.VisibleFoldersRequest;
 import com.openexchange.ajax.folder.actions.VisibleFoldersResponse;
@@ -177,33 +179,52 @@ public class GuestClient extends AJAXClient {
      * @throws Exception
      */
     public void checkShareAccessible(OCLGuestPermission permissions) throws Exception {
+        checkFolderAccessible(getFolder(), permissions);
+    }
+
+    /**
+     * Checks that a folder is accessible for the guest according to the granted permissions.
+     *
+     * @param folderID The identifier of the folder to check
+     * @param permissions The guest permissions in that folder
+     * @throws Exception
+     */
+    public void checkFolderAccessible(String folderID, OCLGuestPermission permissions) throws Exception {
+        /*
+         * get folder
+         */
+        GetResponse getResponse = execute(new GetRequest(EnumAPI.OX_NEW, Integer.valueOf(folderID)));
+        FolderObject folder = getResponse.getFolder();
+        folder.setLastModified(getResponse.getTimestamp());
         /*
          * check item creation
          */
-        String id = createItem(false == permissions.canCreateObjects());
+        String id = createItem(folder, false == permissions.canCreateObjects());
         if (null != id) {
             /*
              * check item retrieval
              */
-            getItem(id, false == permissions.canReadOwnObjects());
+            getItem(folder, id, false == permissions.canReadOwnObjects());
             /*
              * check item deletion
              */
-            deleteItem(id, false == permissions.canDeleteAllObjects());
+            deleteItem(folder, id, false == permissions.canDeleteAllObjects());
         }
         /*
          * check item listing
          */
-        getAll(false == permissions.canReadOwnObjects());
+        getAll(folder, false == permissions.canReadOwnObjects());
     }
 
     /**
-     * Checks that the share's module is available.
+     * Checks that a module is available.
+     *
+     * @param moduleID The identifier of the module to be available
      */
-    public void checkShareModuleAvailable() throws Exception {
+    public void checkModuleAvailable(int moduleID) throws Exception {
         com.openexchange.ajax.config.actions.GetResponse getResponse =
             execute(new com.openexchange.ajax.config.actions.GetRequest(Tree.AvailableModules));
-        String module = getContentType(getModuleID());
+        String module = getContentType(moduleID);
         Object[] array = getResponse.getArray();
         for (Object object : array) {
             if (module.equals(object)) {
@@ -211,6 +232,13 @@ public class GuestClient extends AJAXClient {
             }
         }
         Assert.fail("Module " + getModule() + " not found");
+    }
+
+    /**
+     * Checks that the share's module is available.
+     */
+    public void checkShareModuleAvailable() throws Exception {
+        checkModuleAvailable(getModuleID());
     }
 
     /**
@@ -269,12 +297,12 @@ public class GuestClient extends AJAXClient {
         }
     }
 
-    private void deleteItem(String id, boolean expectToFail) throws Exception {
-        int folderID = getIntFolder();
+    private void deleteItem(FolderObject folder, String id, boolean expectToFail) throws Exception {
+        int folderID = folder.getObjectID();
         int objectID = Integer.parseInt(id);
         Date timestamp = getFutureTimestamp();
         boolean failOnError = false == expectToFail;
-        switch (getModuleID()) {
+        switch (folder.getModule()) {
         case FolderObject.CONTACT:
             CommonDeleteResponse deleteContactResponse = execute(
                 new com.openexchange.ajax.contact.action.DeleteRequest(folderID, objectID, timestamp, failOnError));
@@ -297,17 +325,17 @@ public class GuestClient extends AJAXClient {
             checkResponse(deleteAppointmentResponse, expectToFail);
             break;
         default:
-            Assert.fail("no delete item request for " + getModule() + " implemented");
+            Assert.fail("no delete item request for " + folder.getModule() + " implemented");
             break;
         }
     }
 
-    private Object getItem(String id, boolean expectToFail) throws Exception {
-        int folderID = getIntFolder();
+    private Object getItem(FolderObject folder, String id, boolean expectToFail) throws Exception {
+        int folderID = folder.getObjectID();
         int objectID = Integer.parseInt(id);
         boolean failOnError = false == expectToFail;
         TimeZone timeZone = TimeZones.UTC;
-        switch (getModuleID()) {
+        switch (folder.getModule()) {
         case FolderObject.CONTACT:
             com.openexchange.ajax.contact.action.GetResponse contactGetResponse = execute(
                 new com.openexchange.ajax.contact.action.GetRequest(folderID, objectID, timeZone, failOnError));
@@ -330,16 +358,16 @@ public class GuestClient extends AJAXClient {
             checkResponse(getAppointmentResponse, expectToFail);
             return expectToFail ? null : getAppointmentResponse.getAppointment(timeZone);
         default:
-            Assert.fail("no get item request for " + getModule() + " implemented");
+            Assert.fail("no get item request for " + folder.getModule() + " implemented");
             return null;
         }
     }
 
-    private String createItem(boolean expectToFail) throws Exception {
+    private String createItem(FolderObject folder, boolean expectToFail) throws Exception {
         boolean failOnError = false == expectToFail;
-        int folderID = getIntFolder();
+        int folderID = folder.getObjectID();
         TimeZone timeZone = TimeZones.UTC;
-        switch (getModuleID()) {
+        switch (folder.getModule()) {
         case FolderObject.CONTACT:
             Contact contact = new Contact();
             contact.setParentFolderID(folderID);
@@ -377,14 +405,14 @@ public class GuestClient extends AJAXClient {
             checkResponse(insertAppointmentResponse, expectToFail);
             return expectToFail ? null : String.valueOf(insertAppointmentResponse.getId());
         default:
-            Assert.fail("no create item request for " + getModule() + " implemented");
+            Assert.fail("no create item request for " + folder.getModule() + " implemented");
             return null;
         }
     }
 
-    private AbstractColumnsResponse getAll(boolean expectToFail) throws Exception {
-        int folderID = getIntFolder();
-        switch (getModuleID()) {
+    private AbstractColumnsResponse getAll(FolderObject folder, boolean expectToFail) throws Exception {
+        int folderID = folder.getObjectID();
+        switch (folder.getModule()) {
         case FolderObject.CONTACT:
             CommonAllResponse allContactResponse = execute(
                 new com.openexchange.ajax.contact.action.AllRequest(folderID, Contact.ALL_COLUMNS));
@@ -408,7 +436,7 @@ public class GuestClient extends AJAXClient {
             checkResponse(allCalendarResponse, expectToFail);
             return allCalendarResponse;
         default:
-            Assert.fail("no all request for " + getModule() + " implemented");
+            Assert.fail("no all request for " + folder.getModule() + " implemented");
             return null;
         }
     }

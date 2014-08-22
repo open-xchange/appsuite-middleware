@@ -102,7 +102,7 @@ public class CreateSubfolderTest extends ShareTest {
         testCreateSubfolderWithAdminFlag(randomFolderAPI(), FolderObject.INFOSTORE);
     }
 
-    public void testCreateSubfolderWithAdminFlagExtensively() throws Exception {
+    public void noTestCreateSubfolderWithAdminFlagExtensively() throws Exception {
         for (EnumAPI api : TESTED_FOLDER_APIS) {
             testCreateSubfolderWithAdminFlag(api, FolderObject.INFOSTORE);
         }

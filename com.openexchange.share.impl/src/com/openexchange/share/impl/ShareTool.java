@@ -206,15 +206,16 @@ public class ShareTool {
     /**
      * Prepares a new share for a folder.
      *
+     * @param sharingUser The sharing user
      * @param contextID The context ID
-     * @param guestUser The guest user
      * @param module The module ID
      * @param folder The folder ID
+     * @param guest The guest ID
      * @param expires The expiry date, or <code>null</code> if not defined
      * @param authenticationMode The authentication mode
      * @return The share
      */
-    public static Share prepareShare(int contextID, User guestUser, int module, String folder, Date expires, AuthenticationMode authenticationMode) {
+    public static Share prepareShare(User sharingUser, int contextID, int module, String folder, int guest, Date expires, AuthenticationMode authenticationMode) {
         Date now = new Date();
         DefaultShare share = new DefaultShare();
         share.setToken(ShareTool.generateToken(contextID));
@@ -223,9 +224,9 @@ public class ShareTool {
         share.setContextID(contextID);
         share.setCreated(now);
         share.setLastModified(now);
-        share.setCreatedBy(guestUser.getCreatedBy());
-        share.setModifiedBy(guestUser.getCreatedBy());
-        share.setGuest(guestUser.getId());
+        share.setCreatedBy(sharingUser.getId());
+        share.setModifiedBy(sharingUser.getId());
+        share.setGuest(guest);
         share.setModule(module);
         share.setFolder(folder);
         return share;

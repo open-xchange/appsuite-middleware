@@ -258,8 +258,8 @@ public class DefaultShareService implements ShareService {
                 connectionHelper.getConnection(), session.getUserId(), context);
             for (Guest guest : guests) {
                 User guestUser = getGuestUser(connectionHelper.getConnection(), context, sharingUser, permissionBits, guest);
-                Share share = ShareTool.prepareShare(
-                    context.getContextId(), guestUser, module, folder, guest.getExpires(), guest.getAuthenticationMode());
+                Share share = ShareTool.prepareShare(sharingUser, context.getContextId(), module, folder, guestUser.getId(),
+                    guest.getExpires(), guest.getAuthenticationMode());
                 services.getService(ShareStorage.class).storeShare(share, connectionHelper.getParameters());
                 shares.add(share);
             }
@@ -498,7 +498,7 @@ public class DefaultShareService implements ShareService {
     private User getGuestUser(Connection connection, Context context, User sharingUser, int permissionBits, Guest guest) throws OXException {
         UserService userService = services.getService(UserService.class);
         if (AuthenticationMode.ANONYMOUS != guest.getAuthenticationMode() && services.getService(
-            ConfigurationService.class).getBoolProperty("com.openexchange.share.aggregateShares", false)) {
+            ConfigurationService.class).getBoolProperty("com.openexchange.share.aggregateShares", true)) {
             /*
              * re-use existing, non-anonymous guest user if possible
              */
