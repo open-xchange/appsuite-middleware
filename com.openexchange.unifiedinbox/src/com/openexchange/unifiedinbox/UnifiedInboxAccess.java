@@ -138,8 +138,27 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
 
     private void reset() {
         super.resetFields();
-        folderStorage = null;
-        messageStorage = null;
+
+        UnifiedInboxFolderStorage folderStorage = this.folderStorage;
+        if (null != folderStorage) {
+            try {
+                folderStorage.releaseResources();
+            } catch (Exception e) {
+                // Ignore
+            }
+            this.folderStorage = null;
+        }
+
+        UnifiedInboxMessageStorage messageStorage = this.messageStorage;
+        if (null != messageStorage) {
+            try {
+                messageStorage.releaseResources();
+            } catch (Exception e) {
+                // Ignore
+            }
+            this.messageStorage = null;
+        }
+
         logicTools = null;
         connected = false;
     }
@@ -213,28 +232,7 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
 
     @Override
     protected void releaseResources() {
-        if (folderStorage != null) {
-            try {
-                folderStorage.releaseResources();
-            } catch (final OXException e) {
-                LOG.error("Error while closing Unified Mail folder storage", e);
-            } finally {
-                folderStorage = null;
-            }
-        }
-        if (messageStorage != null) {
-            try {
-                messageStorage.releaseResources();
-            } catch (final OXException e) {
-                LOG.error("Error while closing Unified Mail message storage", e);
-            } finally {
-                messageStorage = null;
-
-            }
-        }
-        if (logicTools != null) {
-            logicTools = null;
-        }
+        reset();
     }
 
     @Override
