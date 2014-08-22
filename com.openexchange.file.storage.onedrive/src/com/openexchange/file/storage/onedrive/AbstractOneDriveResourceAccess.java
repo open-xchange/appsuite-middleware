@@ -230,39 +230,43 @@ public abstract class AbstractOneDriveResourceAccess {
         this.account = account;
         this.session = session;
 
-        String rootFolderId = null;
-        HttpRequestBase request = null;
-        try {
-            int keepOn = 1;
-            while (keepOn > 0) {
-                DefaultHttpClient httpClient = oneDriveAccess.getHttpClient();
-                HttpGet method = new HttpGet(buildUri("/me/skydrive", initiateQueryString()));
-                request = method;
-                // HttpClients.setRequestTimeout(3500, method);
+        String key = "com.openexchange.file.storage.onedrive.rootFolderId";
+        String rootFolderId = (String) session.getParameter(key);
+        if (null == rootFolderId) {
+            HttpRequestBase request = null;
+            try {
+                int keepOn = 1;
+                while (keepOn > 0) {
+                    DefaultHttpClient httpClient = oneDriveAccess.getHttpClient();
+                    HttpGet method = new HttpGet(buildUri("/me/skydrive", initiateQueryString()));
+                    request = method;
+                    // HttpClients.setRequestTimeout(3500, method);
 
-                HttpResponse httpResponse = httpClient.execute(method);
-                if (SC_UNAUTHORIZED == httpResponse.getStatusLine().getStatusCode()) {
-                    if (keepOn > 1) {
-                        throw OneDriveExceptionCodes.UNLINKED_ERROR.create();
+                    HttpResponse httpResponse = httpClient.execute(method);
+                    if (SC_UNAUTHORIZED == httpResponse.getStatusLine().getStatusCode()) {
+                        if (keepOn > 1) {
+                            throw OneDriveExceptionCodes.UNLINKED_ERROR.create();
+                        }
+
+                        reset(request);
+                        request = null;
+                        keepOn = 2;
+
+                        oneDriveAccess.reinit(session);
+                    } else {
+                        JSONObject jResponse = handleHttpResponse(httpResponse, JSONObject.class);
+                        rootFolderId = jResponse.optString("id", null);
+                        keepOn = 0;
                     }
-
-                    reset(request);
-                    request = null;
-                    keepOn = 2;
-
-                    oneDriveAccess.reinit(session);
-                } else {
-                    JSONObject jResponse = handleHttpResponse(httpResponse, JSONObject.class);
-                    rootFolderId = jResponse.optString("id", null);
-                    keepOn = 0;
                 }
+            } catch (HttpResponseException e) {
+                throw handleHttpResponseError(null, e);
+            } catch (IOException e) {
+                throw handleIOError(e);
+            } finally {
+                reset(request);
             }
-        } catch (HttpResponseException e) {
-            throw handleHttpResponseError(null, e);
-        } catch (IOException e) {
-            throw handleIOError(e);
-        } finally {
-            reset(request);
+            session.setParameter(key, rootFolderId);
         }
         this.rootFolderId = rootFolderId;
     }
