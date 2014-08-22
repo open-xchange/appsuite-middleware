@@ -140,7 +140,7 @@ public class CalendarEventParser {
         calendarObject.setContext(session.getContext());
         calendarObject.setUid(event.getICalUID());
         calendarObject.setCreatedBy(session.getUserId());
-        calendarObject.setImported(true);
+        calendarObject.setNotification(false);
 
         // Common stuff
         if (event.getSummary() != null) {
