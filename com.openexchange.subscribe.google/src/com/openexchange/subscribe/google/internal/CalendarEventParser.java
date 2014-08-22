@@ -140,6 +140,7 @@ public class CalendarEventParser {
         calendarObject.setContext(session.getContext());
         calendarObject.setUid(event.getICalUID());
         calendarObject.setCreatedBy(session.getUserId());
+        calendarObject.setImported(true);
 
         // Common stuff
         if (event.getSummary() != null) {
@@ -247,6 +248,7 @@ public class CalendarEventParser {
             // Add self
             final UserParticipant up = new UserParticipant(session.getUserId());
             participants.add(up);
+            up.setAlarmMinutes(calendarObject.getAlarm());
 
             calendarObject.setConfirmations(confParts);
             calendarObject.setParticipants(participants);
