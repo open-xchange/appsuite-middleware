@@ -86,6 +86,15 @@ public interface IDBasedFolderAccess extends TransactionAware {
     FileStorageFolder getFolder(String folderId) throws OXException;
 
     /**
+     * Gets the folder identified through given identifier
+     *
+     * @param folderId The identifier
+     * @return The corresponding instance of {@link FileStorageFolder}
+     * @throws OXException If either folder does not exist or could not be fetched
+     */
+    FileStorageFolder getFolder(FolderID folderID) throws OXException;
+
+    /**
      * Gets the folder considered as personal folder for the account the supplied folder belongs to.
      * <p>
      * <b>Note</b>: If personal folder is not supported by this file storage, {@link FileStorageExceptionCodes#NO_SUCH_FOLDER

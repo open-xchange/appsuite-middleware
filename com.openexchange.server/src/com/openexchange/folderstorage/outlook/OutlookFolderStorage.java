@@ -140,8 +140,8 @@ import com.openexchange.groupware.infostore.InfostoreFacades;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
+import com.openexchange.java.CallerRunsCompletionService;
 import com.openexchange.java.Collators;
-import com.openexchange.log.LogProperties;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -1581,7 +1581,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                         if (null == fsr) {
                             // Do nothing
                         } else {
-                            CompletionService<Void> completionService = new ThreadPoolCompletionService<Void>(ThreadPools.getThreadPool());
+                            CompletionService<Void> completionService = new CallerRunsCompletionService<Void>();
                             int taskCount = 0;
                             try {
                                 final List<FileStorageService> allServices = fsr.getAllServices();
@@ -1605,30 +1605,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                                                     // Ignore infostore file storage and default account
                                                     continue;
                                                 }
-                                                final FileStorageAccountAccess accountAccess = getFSAccountAccess(storageParameters, userAccount);
-                                                accountAccess.connect();
-                                                try {
-                                                    LogProperties.put(LogProperties.Name.FILE_STORAGE_ACCOUNT_ID, userAccount.getId());
-                                                    LogProperties.put(LogProperties.Name.FILE_STORAGE_CONFIGURATION, userAccount.getConfiguration().toString());
-                                                    LogProperties.put(LogProperties.Name.FILE_STORAGE_SERVICE_ID, fsService.getId());
-                                                    final FileStorageFolder rootFolder = accountAccess.getFolderAccess().getRootFolder();
-                                                    if (null != rootFolder) {
-                                                        fsAccounts.add(userAccount);
-                                                    }
-                                                    if (accountAccess instanceof WarningsAware) {
-                                                        addWarnings(storageParameters, (WarningsAware) accountAccess);
-                                                    }
-                                                } catch (final OXException e) {
-                                                    LOG.error("Could not access account {}", userAccount.getDisplayName(), e);
-                                                    storageParameters.addWarning(e);
-                                                } catch (final RuntimeException e) {
-                                                    LOG.error("Could not access account {}", userAccount.getDisplayName(), e);
-                                                } finally {
-                                                    accountAccess.close();
-                                                    LogProperties.remove(LogProperties.Name.FILE_STORAGE_ACCOUNT_ID);
-                                                    LogProperties.remove(LogProperties.Name.FILE_STORAGE_CONFIGURATION);
-                                                    LogProperties.remove(LogProperties.Name.FILE_STORAGE_SERVICE_ID);
-                                                }
+                                                fsAccounts.add(userAccount);
                                             }
                                             return null;
                                         }
