@@ -57,7 +57,6 @@ import java.util.LinkedList;
 import java.util.List;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.StatusLine;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -459,47 +458,33 @@ public class CopyComFileAccess extends AbstractCopyComResourceAccess implements 
             protected Void doPerform(CopyComAccess access) throws OXException, JSONException, IOException {
                 HttpRequestBase request = null;
                 try {
-                    String fid = toCopyComFolderId(folderId);
                     List<String> ids = new LinkedList<String>();
 
-                    int limit = 100;
-                    int offset = 0;
-                    int resultsFound;
-
-                    do {
-                        List<NameValuePair> qparams = initiateQueryString();
-                        qparams.add(new BasicNameValuePair("offset", Integer.toString(offset)));
-                        qparams.add(new BasicNameValuePair("limit", Integer.toString(limit)));
-                        HttpGet method = new HttpGet(buildUri(fid+"/files", qparams));
+                    {
+                        HttpGet method = new HttpGet(buildUri("meta/" + toCopyComFolderId(folderId), null));
                         request = method;
                         access.sign(request);
 
                         JSONObject jResponse = handleHttpResponse(access.getHttpClient().execute(method), JSONObject.class);
-                        JSONArray jData = jResponse.getJSONArray("data");
-                        int length = jData.length();
-                        resultsFound = length;
+                        JSONArray jChildren = jResponse.getJSONArray("children");
+
+                        int length = jChildren.length();
                         for (int i = 0; i < length; i++) {
-                            JSONObject jItem = jData.getJSONObject(i);
-                            if (isFile(jItem)) {
+                            JSONObject jItem = jChildren.getJSONObject(i);
+                            if ("file".equals(jItem.optString("type", null))) {
                                 ids.add(jItem.getString("id"));
                             }
                         }
                         reset(request);
                         request = null;
-
-                        offset += limit;
-                    } while (resultsFound == limit);
+                    }
 
                     for (String id : ids) {
-                        HttpDelete method = new HttpDelete(buildUri(id, initiateQueryString()));
+                        HttpDelete method = new HttpDelete(buildUri("files/" + id, null));
                         request = method;
                         access.sign(request);
-                        HttpResponse httpResponse = access.getHttpClient().execute(method);
-                        StatusLine statusLine = httpResponse.getStatusLine();
-                        int statusCode = statusLine.getStatusCode();
-                        if (200 != statusCode && 404 != statusCode) {
-                            throw new HttpResponseException(statusCode, statusLine.getReasonPhrase());
-                        }
+
+                        handleHttpResponse(access.getHttpClient().execute(method), STATUS_CODE_POLICY_IGNORE_NOT_FOUND, Void.class);
                         reset(request);
                         request = null;
                     }
@@ -526,15 +511,11 @@ public class CopyComFileAccess extends AbstractCopyComResourceAccess implements 
                 HttpRequestBase request = null;
                 try {
                     for (IDTuple idTuple : ids) {
-                        HttpDelete method = new HttpDelete(buildUri(idTuple.getId(), initiateQueryString()));
+                        HttpDelete method = new HttpDelete(buildUri("files/" + idTuple.getId(), null));
                         request = method;
                         access.sign(request);
-                        HttpResponse httpResponse = access.getHttpClient().execute(method);
-                        StatusLine statusLine = httpResponse.getStatusLine();
-                        int statusCode = statusLine.getStatusCode();
-                        if (200 != statusCode && 404 != statusCode) {
-                            throw new HttpResponseException(statusCode, statusLine.getReasonPhrase());
-                        }
+
+                        handleHttpResponse(access.getHttpClient().execute(method), STATUS_CODE_POLICY_IGNORE_NOT_FOUND, Void.class);
                         reset(request);
                         request = null;
                     }
@@ -563,15 +544,13 @@ public class CopyComFileAccess extends AbstractCopyComResourceAccess implements 
             protected String[] doPerform(CopyComAccess access) throws OXException, JSONException, IOException {
                 HttpRequestBase request = null;
                 try {
-                    HttpDelete method = new HttpDelete(buildUri(id, initiateQueryString()));
+                    HttpDelete method = new HttpDelete(buildUri("files/" + id, null));
                     request = method;
                     access.sign(request);
-                    HttpResponse httpResponse = access.getHttpClient().execute(method);
-                    StatusLine statusLine = httpResponse.getStatusLine();
-                    int statusCode = statusLine.getStatusCode();
-                    if (200 != statusCode && 404 != statusCode) {
-                        throw new HttpResponseException(statusCode, statusLine.getReasonPhrase());
-                    }
+
+                    handleHttpResponse(access.getHttpClient().execute(method), STATUS_CODE_POLICY_IGNORE_NOT_FOUND, Void.class);
+                    reset(request);
+                    request = null;
 
                     return new String[0];
                 } finally {
@@ -605,36 +584,26 @@ public class CopyComFileAccess extends AbstractCopyComResourceAccess implements 
             protected TimedResult<File> doPerform(CopyComAccess access) throws OXException, JSONException, IOException {
                 HttpRequestBase request = null;
                 try {
-                    String fid = toCopyComFolderId(folderId);
                     List<File> files = new LinkedList<File>();
 
-                    int limit = 100;
-                    int offset = 0;
-                    int resultsFound;
-
-                    do {
-                        List<NameValuePair> qparams = initiateQueryString();
-                        qparams.add(new BasicNameValuePair("offset", Integer.toString(offset)));
-                        qparams.add(new BasicNameValuePair("limit", Integer.toString(limit)));
-                        HttpGet method = new HttpGet(buildUri(fid+"/files", qparams));
+                    {
+                        HttpGet method = new HttpGet(buildUri("meta/" + toCopyComFolderId(folderId), null));
                         request = method;
                         access.sign(request);
 
                         JSONObject jResponse = handleHttpResponse(access.getHttpClient().execute(method), JSONObject.class);
-                        JSONArray jData = jResponse.getJSONArray("data");
-                        int length = jData.length();
-                        resultsFound = length;
+                        JSONArray jChildren = jResponse.getJSONArray("children");
+
+                        int length = jChildren.length();
                         for (int i = 0; i < length; i++) {
-                            JSONObject jItem = jData.getJSONObject(i);
-                            if (isFile(jItem)) {
+                            JSONObject jItem = jChildren.getJSONObject(i);
+                            if ("file".equals(jItem.optString("type", null))) {
                                 files.add(new CopyComFile(folderId, jItem.getString("id"), userId, rootFolderId).parseCopyComFile(jItem));
                             }
                         }
                         reset(request);
                         request = null;
-
-                        offset += limit;
-                    } while (resultsFound == limit);
+                    }
 
                     return new FileTimedResult(files);
                 } finally {
@@ -660,34 +629,24 @@ public class CopyComFileAccess extends AbstractCopyComResourceAccess implements 
                     String fid = toCopyComFolderId(folderId);
                     List<File> files = new LinkedList<File>();
 
-                    int limit = 100;
-                    int offset = 0;
-                    int resultsFound;
-
-                    do {
-                        List<NameValuePair> qparams = initiateQueryString();
-                        qparams.add(new BasicNameValuePair("offset", Integer.toString(offset)));
-                        qparams.add(new BasicNameValuePair("limit", Integer.toString(limit)));
-                        HttpGet method = new HttpGet(buildUri(fid+"/files", qparams));
+                    {
+                        HttpGet method = new HttpGet(buildUri("meta/" + toCopyComFolderId(folderId), null));
                         request = method;
                         access.sign(request);
 
                         JSONObject jResponse = handleHttpResponse(access.getHttpClient().execute(method), JSONObject.class);
-                        JSONArray jData = jResponse.getJSONArray("data");
-                        int length = jData.length();
-                        resultsFound = length;
+                        JSONArray jChildren = jResponse.getJSONArray("children");
+
+                        int length = jChildren.length();
                         for (int i = 0; i < length; i++) {
-                            JSONObject jItem = jData.getJSONObject(i);
-                            if (isFile(jItem)) {
+                            JSONObject jItem = jChildren.getJSONObject(i);
+                            if ("file".equals(jItem.optString("type", null))) {
                                 files.add(new CopyComFile(folderId, jItem.getString("id"), userId, rootFolderId).parseCopyComFile(jItem));
                             }
                         }
-
                         reset(request);
                         request = null;
-
-                        offset += limit;
-                    } while (resultsFound == limit);
+                    }
 
                     // Sort collection if needed
                     sort(files, sort, order);
@@ -706,18 +665,8 @@ public class CopyComFileAccess extends AbstractCopyComResourceAccess implements 
 
             @Override
             protected TimedResult<File> doPerform(CopyComAccess access) throws OXException, JSONException, IOException {
-                HttpRequestBase request = null;
-                try {
-                    HttpGet method = new HttpGet(buildUri(id, initiateQueryString()));
-                    request = method;
-                    access.sign(request);
-
-                    RestFileResponse restResponse = handleHttpResponse(access.getHttpClient().execute(method), RestFileResponse.class);
-                    RestFile restFile = restResponse.getData().get(0);
-                    return new FileTimedResult(Collections.<File> singletonList(new CopyComFile(folderId, id, userId, rootFolderId).parseCopyComFile(restFile)));
-                } finally {
-                    reset(request);
-                }
+                File file = getFileMetadata(folderId, id, CURRENT_VERSION);
+                return new FileTimedResult(Collections.<File> singletonList(file));
             }
         });
     }
@@ -733,18 +682,8 @@ public class CopyComFileAccess extends AbstractCopyComResourceAccess implements 
 
             @Override
             protected TimedResult<File> doPerform(CopyComAccess access) throws OXException, JSONException, IOException {
-                HttpRequestBase request = null;
-                try {
-                    HttpGet method = new HttpGet(buildUri(id, initiateQueryString()));
-                    request = method;
-                    access.sign(request);
-
-                    RestFileResponse restResponse = handleHttpResponse(access.getHttpClient().execute(method), RestFileResponse.class);
-                    RestFile restFile = restResponse.getData().get(0);
-                    return new FileTimedResult(Collections.<File> singletonList(new CopyComFile(folderId, id, userId, rootFolderId).parseCopyComFile(restFile)));
-                } finally {
-                    reset(request);
-                }
+                File file = getFileMetadata(folderId, id, CURRENT_VERSION);
+                return new FileTimedResult(Collections.<File> singletonList(file));
             }
         });
     }
@@ -755,26 +694,13 @@ public class CopyComFileAccess extends AbstractCopyComResourceAccess implements 
 
             @Override
             protected TimedResult<File> doPerform(CopyComAccess access) throws OXException, JSONException, IOException {
-                HttpRequestBase request = null;
-                try {
-                    List<File> files = new LinkedList<File>();
+                List<File> files = new LinkedList<File>();
 
-                    for (IDTuple id : ids) {
-                        HttpGet method = new HttpGet(buildUri(id.getId(), initiateQueryString()));
-                        request = method;
-                        access.sign(request);
-
-                        RestFileResponse restResponse = handleHttpResponse(access.getHttpClient().execute(method), RestFileResponse.class);
-                        RestFile restFile = restResponse.getData().get(0);
-                        files.add(new CopyComFile(id.getFolder(), id.getId(), userId, rootFolderId).parseCopyComFile(restFile));
-                        reset(request);
-                        request = null;
-                    }
-
-                    return new FileTimedResult(files);
-                } finally {
-                    reset(request);
+                for (IDTuple id : ids) {
+                    files.add(getFileMetadata(id.getFolder(), id.getId(), CURRENT_VERSION));
                 }
+
+                return new FileTimedResult(files);
             }
         });
     }
@@ -802,79 +728,7 @@ public class CopyComFileAccess extends AbstractCopyComResourceAccess implements 
 
     @Override
     public SearchIterator<File> search(final String pattern, List<Field> fields, final String folderId, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
-        return perform(new CopyComClosure<SearchIterator<File>>() {
-
-            @Override
-            protected SearchIterator<File> doPerform(CopyComAccess access) throws OXException, JSONException, IOException {
-                HttpRequestBase request = null;
-                try {
-                    List<File> files = new LinkedList<File>();
-                    String fid = null == folderId ? null : toCopyComFolderId(folderId);
-                    int limit = 100;
-                    int offset = 0;
-                    int resultsFound;
-
-                    do {
-                        List<NameValuePair> qparams = initiateQueryString();
-                        if (null != pattern) {
-                            qparams.add(new BasicNameValuePair("q", pattern));
-                        }
-                        qparams.add(new BasicNameValuePair("offset", Integer.toString(offset)));
-                        qparams.add(new BasicNameValuePair("limit", Integer.toString(limit)));
-                        HttpGet method = new HttpGet(buildUri("me/skydrive/search", qparams));
-                        request = method;
-                        access.sign(request);
-
-                        JSONObject jResponse = handleHttpResponse(access.getHttpClient().execute(method), JSONObject.class);
-                        JSONArray jData = jResponse.getJSONArray("data");
-                        int length = jData.length();
-                        resultsFound = length;
-                        for (int i = 0; i < length; i++) {
-                            JSONObject jItem = jData.getJSONObject(i);
-                            if (isFile(jItem)) {
-                                if (null != fid) {
-                                    if (fid.equals(jItem.optString("parent_id", null))) {
-                                        files.add(new CopyComFile(folderId, jItem.getString("id"), userId, rootFolderId).parseCopyComFile(jItem));
-                                    }
-                                } else {
-                                    files.add(new CopyComFile(folderId, jItem.getString("id"), userId, rootFolderId).parseCopyComFile(jItem));
-                                }
-                            }
-                        }
-
-                        reset(request);
-                        request = null;
-
-                        offset += limit;
-                    } while (resultsFound == limit);
-
-                    // Sort collection
-                    sort(files, sort, order);
-                    if ((start != NOT_SET) && (end != NOT_SET)) {
-                        final int size = files.size();
-                        if ((start) > size) {
-                            /*
-                             * Return empty iterator if start is out of range
-                             */
-                            return SearchIteratorAdapter.emptyIterator();
-                        }
-                        /*
-                         * Reset end index if out of range
-                         */
-                        int toIndex = end;
-                        if (toIndex >= size) {
-                            toIndex = size;
-                        }
-                        files = files.subList(start, toIndex);
-                    }
-
-                    return new SearchIteratorAdapter<File>(files.iterator(), files.size());
-                } finally {
-                    reset(request);
-                }
-            }
-
-        });
+        throw FileStorageExceptionCodes.SEARCH_TERM_NOT_SUPPORTED.create("Nuthin");
     }
 
     @Override
