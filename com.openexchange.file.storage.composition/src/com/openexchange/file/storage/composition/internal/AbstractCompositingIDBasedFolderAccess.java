@@ -340,7 +340,7 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
             } catch (final OXException e) {
                 // Check for com.openexchange.folderstorage.FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE -- 'FLD-0003'
                 if (3 != e.getCode() || !"FLD".equals(e.getPrefix())) {
-                    throw e;
+                    LOG.warn("Could not load root folder for account {}", accessWrapper.displayName, e);
                 }
             }
         }

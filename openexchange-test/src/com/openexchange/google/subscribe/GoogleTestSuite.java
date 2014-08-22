@@ -65,8 +65,8 @@ public class GoogleTestSuite extends TestSuite {
     }
 
     public static Test suite() {
-        final TestSuite suite = new TestSuite("com.openexchange.google.subscribe.GoogleTestSuite");
-        
+        final TestSuite suite = new TestSuite("com.openexchange.subscribe.google.GoogleTestSuite");
+        suite.addTestSuite(GoogleSubscribeCalendarTest.class);
         TestSetup setup = new TestSetup(suite) {
             @Override
             protected void setUp() {
