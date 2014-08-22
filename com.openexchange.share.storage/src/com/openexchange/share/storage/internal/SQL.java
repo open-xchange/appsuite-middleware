@@ -110,7 +110,7 @@ public class SQL {
         "FROM share " +
         "WHERE cid=? AND folder=?;"
     ;
-    
+
     public static final String SELECT_SHARES_BY_CONTEXT_STMT =
         "SELECT token,module,folder,item,created,createdBy,lastModified,modifiedBy,expires,guest,auth " +
         "FROM share " +
@@ -151,6 +151,22 @@ public class SQL {
         "WHERE cid=? AND token=?;"
     ;
 
+    public static final String DELETE_SHARES_IN_CONTEXT_STMT =
+        "DELETE FROM share " +
+        "WHERE cid=?;"
+    ;
+
+    public static final String DELETE_SHARES_FOR_GUEST_STMT =
+        "DELETE FROM share " +
+        "WHERE cid=? AND guest=?;"
+    ;
+
+    public static final String REASSIGN_SHARES_STMT =
+        "UPDATE share " +
+        "SET createdBy=? " +
+        "WHERE cid=? AND createdBy=?;"
+    ;
+
     /**
      * DELETE FROM share
      * WHERE cid=? AND token IN (...);"
@@ -160,7 +176,7 @@ public class SQL {
         stringBuilder.append("DELETE FROM share WHERE cid=? AND token");
         return appendPlaceholders(stringBuilder, length).append(';').toString();
     }
-    
+
     public static final String SELECT_SHARES_BY_TOKENS_STMT(int length) {
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT token,module,folder,item,created,createdBy,lastModified,modifiedBy,expires,guest,auth " +
