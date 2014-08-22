@@ -49,6 +49,7 @@
 
 package com.openexchange.http.grizzly.osgi;
 
+import static com.openexchange.servlet.Constants.FILTER_PATHS;
 import java.util.Collection;
 import java.util.Iterator;
 import javax.servlet.Filter;
@@ -154,8 +155,6 @@ public class ServletFilterTracker implements ServiceTrackerCustomizer<Filter, Fi
             return this;
         }
     }
-    
-    public static String PATH_INFO = "path.info";
 
     // ------------------------------------------------------------------------------------------------------------------------------- //
 
@@ -198,7 +197,7 @@ public class ServletFilterTracker implements ServiceTrackerCustomizer<Filter, Fi
     }
 
     private String[] getPathsFrom(ServiceReference<Filter> reference) throws InvalidFilterPathsException {
-        final Object filterPathObj = reference.getProperty("filter.paths");
+        final Object filterPathObj = reference.getProperty(FILTER_PATHS);
         if (filterPathObj instanceof String) {
             return filterPathObj.toString().equals("*") ? null : new String[] { filterPathObj.toString() };
         } else if (filterPathObj instanceof String[]) {
