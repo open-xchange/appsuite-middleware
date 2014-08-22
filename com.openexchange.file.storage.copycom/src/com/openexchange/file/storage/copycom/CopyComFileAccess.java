@@ -82,8 +82,6 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.copycom.access.CopyComAccess;
-import com.openexchange.file.storage.copycom.http.client.methods.HttpCopy;
-import com.openexchange.file.storage.copycom.http.client.methods.HttpMove;
 import com.openexchange.file.storage.copycom.osgi.Services;
 import com.openexchange.file.storage.search.FileNameTerm;
 import com.openexchange.file.storage.search.SearchTerm;
@@ -91,6 +89,7 @@ import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.FileKnowingInputStream;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -247,61 +246,26 @@ public class CopyComFileAccess extends AbstractCopyComResourceAccess implements 
             @Override
             protected IDTuple doPerform(CopyComAccess access) throws OXException, JSONException, IOException {
                 HttpRequestBase request = null;
+                InputStream in = null;
                 try {
-                    String newFileId;
-                    {
-                        HttpCopy method = new HttpCopy(buildUri(source.getId(), null));
-                        request = method;
-                        access.sign(request);
-                        method.setHeader("Authorization", "Bearer " + copyComAccess.getAccessToken());
-                        method.setHeader("Content-Type", "application/json");
-                        method.setEntity(asHttpEntity(new JSONObject(2).put("destination", toCopyComFolderId(destFolder))));
+                    // Create file
+                    File fileMetadata = getFileMetadata(source.getFolder(), source.getId(), CURRENT_VERSION);
 
-                        JSONObject jResponse = handleHttpResponse(access.getHttpClient().execute(method), JSONObject.class);
-                        newFileId = jResponse.getString("id");
-                        reset(request);
-                        request = null;
+                    if (null != update && (null == modifiedFields || modifiedFields.contains(Field.FILENAME))) {
+                        String fileName = update.getFileName();
+                        if (!Strings.isEmpty(fileName)) {
+                            fileMetadata.setFileName(fileName);
+                        }
                     }
+                    fileMetadata.setFolderId(destFolder);
 
-                    String fileName = null;
-                    if (null == modifiedFields || modifiedFields.contains(Field.FILENAME)) {
-                        HttpPost method = new HttpPost(buildUri(newFileId, null));
-                        request = method;
-                        access.sign(request);
-                        method.setHeader("Authorization", "Bearer " + copyComAccess.getAccessToken());
-                        method.setHeader("Content-Type", "application/json");
-                        fileName = update.getFileName();
-                        method.setEntity(asHttpEntity(new JSONObject(2).put("name", fileName)));
-
-                        handleHttpResponse(access.getHttpClient().execute(method), Void.class);
-                        reset(request);
-                        request = null;
-                    }
-
-                    if (null != newFile) {
-                        List<NameValuePair> qparams = initiateQueryString();
-                        qparams.add(new BasicNameValuePair("overwrite", "true"));
-
-                        HttpPost method = new HttpPost(buildUri(newFileId, qparams));
-                        request = method;
-                        access.sign(request);
-
-                        //MimeTypeMap map = Services.getService(MimeTypeMap.class);
-                        //String contentType = map.getContentType(fileName);
-
-                        MultipartEntity multipartEntity = new MultipartEntity();
-                        multipartEntity.addPart(new FormBodyPart("file", new InputStreamBody(newFile, "application/octet-stream", fileName)));
-                        method.setEntity(multipartEntity);
-
-                        handleHttpResponse(access.getHttpClient().execute(method), Void.class);
-                        reset(request);
-                        request = null;
-                    }
+                    in = null == newFile ? getDocument(source.getFolder(), source.getId(), CURRENT_VERSION) : newFile;
+                    saveDocument(fileMetadata, in, DISTANT_FUTURE);
+                    String newFileId = fileMetadata.getId();
 
                     return new IDTuple(destFolder, newFileId);
-                } catch (HttpResponseException e) {
-                    throw handleHttpResponseError(source.getId(), e);
                 } finally {
+                    Streams.close(in);
                     reset(request);
                 }
             }
@@ -316,33 +280,31 @@ public class CopyComFileAccess extends AbstractCopyComResourceAccess implements 
             protected IDTuple doPerform(CopyComAccess access) throws OXException, JSONException, IOException {
                 HttpRequestBase request = null;
                 try {
-                    String newFileId;
-                    {
-                        HttpMove method = new HttpMove(buildUri(source.getId(), null));
-                        request = method;
-                        access.sign(request);
-                        method.setHeader("Authorization", "Bearer " + copyComAccess.getAccessToken());
-                        method.setHeader("Content-Type", "application/json");
-                        method.setEntity(asHttpEntity(new JSONObject(2).put("destination", toCopyComFolderId(destFolder))));
-
-                        JSONObject jResponse = handleHttpResponse(access.getHttpClient().execute(method), JSONObject.class);
-                        newFileId = jResponse.getString("id");
-                        reset(request);
-                        request = null;
+                    String path = "/";
+                    String fileName = source.getId();
+                    int pos = fileName.lastIndexOf('/');
+                    if (pos > 0) {
+                        fileName = fileName.substring(pos + 1);
+                        path = fileName.substring(0, pos);
+                    }
+                    if (null != update && (null == modifiedFields || modifiedFields.contains(Field.FILENAME))) {
+                        String tmp = update.getFileName();
+                        if (!Strings.isEmpty(tmp)) {
+                            fileName = tmp;
+                        }
                     }
 
-                    String fileName = null;
-                    if (null == modifiedFields || modifiedFields.contains(Field.FILENAME)) {
-                        HttpPost method = new HttpPost(buildUri(newFileId, initiateQueryString()));
-                        request = method;
-                        access.sign(request);
-                        fileName = update.getFileName();
-                        method.setEntity(asHttpEntity(new JSONObject(2).put("name", fileName)));
+                    String newFileId = path + "/" + fileName;
+                    List<NameValuePair> qparams = new LinkedList<NameValuePair>();
+                    qparams.add(new BasicNameValuePair("path", newFileId));
+                    qparams.add(new BasicNameValuePair("overwrite", "true"));
+                    HttpPut method = new HttpPut(buildUri("files/"+source.getId(), qparams));
+                    request = method;
+                    access.sign(request);
 
-                        handleHttpResponse(access.getHttpClient().execute(method), Void.class);
-                        reset(request);
-                        request = null;
-                    }
+                    handleHttpResponse(access.getHttpClient().execute(method), Void.class);
+                    reset(request);
+                    request = null;
 
                     return new IDTuple(destFolder, newFileId);
                 } catch (HttpResponseException e) {
@@ -363,7 +325,7 @@ public class CopyComFileAccess extends AbstractCopyComResourceAccess implements 
                 HttpRequestBase request = null;
                 boolean error = true;
                 try {
-                    HttpGet method = new HttpGet(buildUri(id + "/content", initiateQueryString()));
+                    HttpGet method = new HttpGet(buildUri("files/" + id, null));
                     request = method;
                     access.sign(request);
 
@@ -377,7 +339,6 @@ public class CopyComFileAccess extends AbstractCopyComResourceAccess implements 
                     }
                 }
             }
-
         });
     }
 
@@ -390,21 +351,9 @@ public class CopyComFileAccess extends AbstractCopyComResourceAccess implements 
                 HttpRequestBase request = null;
                 boolean error = true;
                 try {
-                    HttpGet method = new HttpGet(buildUri(id, initiateQueryString()));
-                    request = method;
-                    access.sign(request);
-
-                    RestFileResponse restResponse = handleHttpResponse(access.getHttpClient().execute(method), RestFileResponse.class);
-                    RestFile restFile = restResponse.getData().get(0);
-
-                    String thumbnailUrl = (String) restFile.getAdditionalProperties().get("picture");
-                    if (null == thumbnailUrl) {
-                        return null;
-                    }
-
-                    reset(request);
-                    request = null;
-                    method = new HttpGet(thumbnailUrl);
+                    List<NameValuePair> qparams = new LinkedList<NameValuePair>();
+                    qparams.add(new BasicNameValuePair("size", "64"));
+                    HttpGet method = new HttpGet(buildUri("thumbs/" + id, qparams));
                     request = method;
                     access.sign(request);
 
@@ -418,7 +367,6 @@ public class CopyComFileAccess extends AbstractCopyComResourceAccess implements 
                     }
                 }
             }
-
         });
     }
 
