@@ -58,7 +58,6 @@ import java.util.List;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.StatusLine;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -68,8 +67,6 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.mime.FormBodyPart;
 import org.apache.http.entity.mime.MultipartEntity;
-import org.apache.http.entity.mime.content.ContentBody;
-import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.InputStreamBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
@@ -94,7 +91,6 @@ import com.openexchange.file.storage.search.FileNameTerm;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.java.FileKnowingInputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -444,29 +440,15 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                     } else {
                         List<NameValuePair> qparams = initiateQueryString();
                         qparams.add(new BasicNameValuePair("overwrite", "true"));
-
-                        HttpPost method = new HttpPost(buildUri(id, qparams));
+                        HttpPut method = new HttpPut(buildUri(oneDriveFolderId + "/files/" + file.getFileName(), qparams));
                         request = method;
 
-                        //MimeTypeMap map = Services.getService(MimeTypeMap.class);
-                        //String contentType = map.getContentType(fileName);
+                        HttpEntity entity = new InputStreamEntity(data, -1);
+                        method.setEntity(entity);
 
-                        MultipartEntity multipartEntity = new MultipartEntity();
-                        java.io.File theFile = null;
-                        if (data instanceof FileKnowingInputStream) {
-                            theFile = ((FileKnowingInputStream) data).getFile();
-                        }
-                        ContentBody body;
-                        if (null == theFile) {
-                            body = new InputStreamBody(data, "application/octet-stream", file.getFileName());
-                        } else {
-                            Streams.close(data);
-                            body = new FileBody(theFile, file.getFileName(), "application/octet-stream", null);
-                        }
-                        multipartEntity.addPart(new FormBodyPart("file", body));
-                        method.setEntity(multipartEntity);
+                        JSONObject jResponse = handleHttpResponse(httpClient.execute(method), JSONObject.class);
+                        file.setId(jResponse.getString("id"));
 
-                        handleHttpResponse(httpClient.execute(method), Void.class);
                         reset(request);
                         request = null;
                     }
@@ -521,12 +503,9 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                     for (String id : ids) {
                         HttpDelete method = new HttpDelete(buildUri(id, initiateQueryString()));
                         request = method;
-                        HttpResponse httpResponse = httpClient.execute(method);
-                        StatusLine statusLine = httpResponse.getStatusLine();
-                        int statusCode = statusLine.getStatusCode();
-                        if (200 != statusCode && 404 != statusCode) {
-                            throw new HttpResponseException(statusCode, statusLine.getReasonPhrase());
-                        }
+
+                        handleHttpResponse(httpClient.execute(method), STATUS_CODE_POLICY_IGNORE_NOT_FOUND, Void.class);
+
                         reset(request);
                         request = null;
                     }
@@ -555,12 +534,9 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                     for (IDTuple idTuple : ids) {
                         HttpDelete method = new HttpDelete(buildUri(idTuple.getId(), initiateQueryString()));
                         request = method;
-                        HttpResponse httpResponse = httpClient.execute(method);
-                        StatusLine statusLine = httpResponse.getStatusLine();
-                        int statusCode = statusLine.getStatusCode();
-                        if (200 != statusCode && 404 != statusCode) {
-                            throw new HttpResponseException(statusCode, statusLine.getReasonPhrase());
-                        }
+
+                        handleHttpResponse(httpClient.execute(method), STATUS_CODE_POLICY_IGNORE_NOT_FOUND, Void.class);
+
                         reset(request);
                         request = null;
                     }
@@ -591,12 +567,8 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                 try {
                     HttpDelete method = new HttpDelete(buildUri(id, initiateQueryString()));
                     request = method;
-                    HttpResponse httpResponse = httpClient.execute(method);
-                    StatusLine statusLine = httpResponse.getStatusLine();
-                    int statusCode = statusLine.getStatusCode();
-                    if (200 != statusCode && 404 != statusCode) {
-                        throw new HttpResponseException(statusCode, statusLine.getReasonPhrase());
-                    }
+
+                    handleHttpResponse(httpClient.execute(method), STATUS_CODE_POLICY_IGNORE_NOT_FOUND, Void.class);
 
                     return new String[0];
                 } finally {

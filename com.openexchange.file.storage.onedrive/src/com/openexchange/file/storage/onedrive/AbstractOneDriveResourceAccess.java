@@ -157,12 +157,24 @@ public abstract class AbstractOneDriveResourceAccess {
     }
 
     /** The default status code policy; accepting greater than/equal to <code>200</code> and lower than <code>300</code> */
-    public static final StatusCodePolicy DEFAULT_STATUS_CODE_POLICY = new StatusCodePolicy() {
+    public static final StatusCodePolicy STATUS_CODE_POLICY_DEFAULT = new StatusCodePolicy() {
 
         @Override
         public void handleStatusCode(StatusLine statusLine) throws HttpResponseException {
             int statusCode = statusLine.getStatusCode();
             if (statusCode < 200 || statusCode >= 300) {
+                throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
+            }
+        }
+    };
+
+    /** The status code policy; accepting greater than/equal to <code>200</code> and lower than <code>300</code> while ignoring <code>404</code> */
+    public static final StatusCodePolicy STATUS_CODE_POLICY_IGNORE_NOT_FOUND = new StatusCodePolicy() {
+
+        @Override
+        public void handleStatusCode(StatusLine statusLine) throws HttpResponseException {
+            int statusCode = statusLine.getStatusCode();
+            if ((statusCode < 200 || statusCode >= 300) && statusCode != 404) {
                 throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
             }
         }
@@ -326,7 +338,7 @@ public abstract class AbstractOneDriveResourceAccess {
      * @throws IOException If an I/O error occurs
      */
     protected <R> R handleHttpResponse(HttpResponse httpResponse, Class<R> clazz) throws OXException, ClientProtocolException, IOException {
-        return handleHttpResponse(httpResponse, DEFAULT_STATUS_CODE_POLICY, clazz);
+        return handleHttpResponse(httpResponse, STATUS_CODE_POLICY_DEFAULT, clazz);
     }
 
     /**
