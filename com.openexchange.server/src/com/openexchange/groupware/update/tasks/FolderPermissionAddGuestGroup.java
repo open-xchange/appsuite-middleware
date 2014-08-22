@@ -135,6 +135,11 @@ public final class FolderPermissionAddGuestGroup extends UpdateTaskAdapter {
      * @throws SQLException
      */
     private static int[] insertGroupPermission(Connection connection, int contextID) throws SQLException {
+        int[] systemFolderIDs = new int[] {
+            FolderObject.SYSTEM_PRIVATE_FOLDER_ID, FolderObject.SYSTEM_SHARED_FOLDER_ID,
+            FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,
+            FolderObject.SYSTEM_PUBLIC_FOLDER_ID, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID
+        };
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(
@@ -143,6 +148,7 @@ public final class FolderPermissionAddGuestGroup extends UpdateTaskAdapter {
             );
             stmt.setInt(1, contextID);
             stmt.setInt(3, OCLPermission.ALL_GUESTS);
+            stmt.setInt(4, OCLPermission.READ_FOLDER);
             stmt.setInt(5, OCLPermission.NO_PERMISSIONS);
             stmt.setInt(6, OCLPermission.NO_PERMISSIONS);
             stmt.setInt(7, OCLPermission.NO_PERMISSIONS);
@@ -150,19 +156,9 @@ public final class FolderPermissionAddGuestGroup extends UpdateTaskAdapter {
             stmt.setInt(9, 1);
             stmt.setInt(10, 0);
             /*
-             * add folders with "read_folder" folder access
+             * add permissions to system folders with "read_folder" folder access
              */
-            stmt.setInt(4, OCLPermission.READ_FOLDER);
-            for (int folderID : new int[] { FolderObject.SYSTEM_PRIVATE_FOLDER_ID, FolderObject.SYSTEM_SHARED_FOLDER_ID,
-                FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID }) {
-                stmt.setInt(2, folderID);
-                stmt.addBatch();
-            }
-            /*
-             * add folders with "no_permissions" folder access
-             */
-            stmt.setInt(4, OCLPermission.NO_PERMISSIONS);
-            for (int folderID : new int[] { FolderObject.SYSTEM_PUBLIC_FOLDER_ID, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID }) {
+            for (int folderID : systemFolderIDs) {
                 stmt.setInt(2, folderID);
                 stmt.addBatch();
             }
