@@ -49,39 +49,23 @@
 
 package com.openexchange.mail.attachment.storage;
 
-import java.util.Date;
-import javax.mail.internet.InternetAddress;
-
 
 /**
- * {@link MessageInfo} - A message information object.
+ * {@link StoreOperation}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.1
  */
-public class MessageInfo {
-
-    /** The subject */
-    public final String subject;
-
-    /** The date */
-    public final Date date;
-
-    /** The <code>"To"</code> addresses */
-    public final InternetAddress[] to;
+public enum StoreOperation {
 
     /**
-     * Initializes a new {@link MessageInfo}.
-     *
-     * @param subject The subject
-     * @param date The date
-     * @param to The <code>"To"</code> address
+     * The store operation for a simple store into attachment storage
      */
-    public MessageInfo(String subject, Date date, InternetAddress[] to) {
-        super();
-        this.subject = subject;
-        this.date = date;
-        this.to = to;
-    }
+    SIMPLE_STORE,
+    /**
+     * The store operation for a store into attachment storage for a publish purpose
+     */
+    PUBLISH_STORE,
+    ;
 
 }

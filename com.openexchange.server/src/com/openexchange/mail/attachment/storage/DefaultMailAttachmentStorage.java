@@ -58,6 +58,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 import javax.activation.DataHandler;
 import javax.mail.MessagingException;
@@ -221,16 +222,27 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
     }
 
     @Override
-    public String storeAttachment(MailPart attachment, MessageInfo msgInfo, Locale externalLocale, Session session) throws OXException {
+    public String storeAttachment(MailPart attachment, StoreOperation op, Map<String, Object> storeProps, Session session) throws OXException {
         IDBasedFileAccessFactory fileAccessFactory = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class, true);
+        boolean publishStore = StoreOperation.PUBLISH_STORE.equals(op);
 
         // Check for folder ID
-        final String key = MailSessionParameterNames.getParamPublishingInfostoreFolderID();
-        if (!session.containsParameter(key)) {
-            final Throwable t = new Throwable("Missing folder ID of publishing infostore folder.");
-            throw MailExceptionCode.SEND_FAILED_UNKNOWN.create(t, new Object[0]);
+        String folderId;
+        {
+            String sFolderId = null == storeProps ? null : (String) storeProps.get("folder");
+            if (null != sFolderId) {
+                folderId = sFolderId;
+            } else if (publishStore) {
+                final String key = MailSessionParameterNames.getParamPublishingInfostoreFolderID();
+                if (!session.containsParameter(key)) {
+                    final Throwable t = new Throwable("Missing folder ID of publishing infostore folder.");
+                    throw MailExceptionCode.SEND_FAILED_UNKNOWN.create(t, new Object[0]);
+                }
+                folderId = ((Integer) session.getParameter(key)).toString();
+            } else {
+                throw MailExceptionCode.MISSING_PARAM.create("folder");
+            }
         }
-        final int folderId = ((Integer) session.getParameter(key)).intValue();
 
         // Create document meta data for current attachment
         String name = attachment.getFileName();
@@ -239,32 +251,37 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
         }
         final File file = new DefaultFile();
         file.setId(FileStorageFileAccess.NEW);
-        file.setFolderId(String.valueOf(folderId));
+        file.setFolderId(folderId);
         file.setFileName(name);
         file.setFileMIMEType(attachment.getContentType().getBaseType());
         file.setTitle(name);
-        if (null != msgInfo) {
-            // Description
-            Locale locale = externalLocale;
-            if (null == locale) {
-                locale = getSessionUserLocale(session);
+        if (null != storeProps) {
+            String description = (String) storeProps.get("description");
+            if (null != description) {
+                file.setDescription(description);
+            } else if (publishStore) {
+                // Description
+                Locale locale = (Locale) storeProps.get("externalLocale");
+                if (null == locale) {
+                    locale = getSessionUserLocale(session);
+                }
+                final StringHelper stringHelper = StringHelper.valueOf(locale);
+                String desc = stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENT_INFO);
+                {
+                    final String subject = (String) storeProps.get("subject");
+                    desc = desc.replaceFirst("#SUBJECT#", com.openexchange.java.Strings.quoteReplacement(null == subject ? stringHelper.getString(MailStrings.DEFAULT_SUBJECT) : subject));
+                }
+                {
+                    final Date date = (Date) storeProps.get("date");
+                    final String repl = date == null ? "" : com.openexchange.java.Strings.quoteReplacement(MimeProcessingUtility.getFormattedDate(date, DateFormat.LONG, locale, TimeZone.getDefault()));
+                    desc = desc.replaceFirst("#DATE#", repl);
+                }
+                {
+                    final InternetAddress[] to = (InternetAddress[]) storeProps.get("to");
+                    desc = desc.replaceFirst("#TO#", com.openexchange.java.Strings.quoteReplacement(to == null || to.length == 0 ? "" : com.openexchange.java.Strings.quoteReplacement(MimeProcessingUtility.addrs2String(to))));
+                }
+                file.setDescription(desc);
             }
-            final StringHelper stringHelper = StringHelper.valueOf(locale);
-            String desc = stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENT_INFO);
-            {
-                final String subject = msgInfo.subject;
-                desc = desc.replaceFirst("#SUBJECT#", com.openexchange.java.Strings.quoteReplacement(null == subject ? stringHelper.getString(MailStrings.DEFAULT_SUBJECT) : subject));
-            }
-            {
-                final Date date = msgInfo.date;
-                final String repl = date == null ? "" : com.openexchange.java.Strings.quoteReplacement(MimeProcessingUtility.getFormattedDate(date, DateFormat.LONG, locale, TimeZone.getDefault()));
-                desc = desc.replaceFirst("#DATE#", repl);
-            }
-            {
-                final InternetAddress[] to = msgInfo.to;
-                desc = desc.replaceFirst("#TO#", com.openexchange.java.Strings.quoteReplacement(to == null || to.length == 0 ? "" : com.openexchange.java.Strings.quoteReplacement(MimeProcessingUtility.addrs2String(to))));
-            }
-            file.setDescription(desc);
         }
         /*
          * Put attachment's document to dedicated infostore folder
@@ -306,8 +323,7 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
                     final int pos = name.lastIndexOf('.');
                     final String newName;
                     if (pos >= 0) {
-                        newName =
-                            hlp.append(name.substring(0, pos)).append("_(").append(++count).append(')').append(name.substring(pos)).toString();
+                        newName = hlp.append(name.substring(0, pos)).append("_(").append(++count).append(')').append(name.substring(pos)).toString();
                     } else {
                         newName = hlp.append(name).append("_(").append(++count).append(')').toString();
                     }
