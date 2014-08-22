@@ -67,8 +67,8 @@ import com.openexchange.http.grizzly.service.http.ServletFilterRegistration;
  * accordingly so the filters are applied to new incoming requests/outgoing responses.
  * 
  * <p>
- * A Filter service may be registered with an additional <strong>filter.paths</strong> property. This property may consist of path
- * expressions including wildcards. The path property should be provided as:
+ * A Filter service may be registered with an additional <strong>com.openexchange.servlet.Constants.FILTER_PATHS</strong> property. This
+ * property may consist of path expressions including wildcards. The path property should be provided as:
  * 
  * <ol>
  *   <li>A single String for a single path</li>
@@ -128,7 +128,7 @@ import com.openexchange.http.grizzly.service.http.ServletFilterRegistration;
  *
  *      Hashtable<String, Object> serviceProperties = new Hashtable<String, Object>();
  *      serviceProperties.put(Constants.SERVICE_RANKING, 0);
- *      serviceProperties.put(ServletFilterTracker.PATH_INFO, "*");
+ *      serviceProperties.put(FILTER_PATHS, "*");
  *
  *      registerService(Filter.class, yourFilter, serviceProperties);
  *}
