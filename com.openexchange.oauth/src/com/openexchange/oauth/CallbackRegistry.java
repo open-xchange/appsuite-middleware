@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,28 +47,22 @@
  *
  */
 
-package com.openexchange.google.subscribe.utility;
-
-import com.openexchange.junit.Assert;
+package com.openexchange.oauth;
 
 /**
- * {@link AssertField}
+ * {@link CallbackRegistry}
  *
- * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.1
  */
-public class AssertField {
+public interface CallbackRegistry {
 
-    public static void assertFieldIsNull(String fieldDesc, Object valueToCheck) {
-        Assert.assertNull("The field " + fieldDesc + " should be empty, but is not ", valueToCheck);
-    }
+    /**
+     * Adds given call-back URL and token pair.
+     *
+     * @param token The token
+     * @param callbackUrl The associated call-back URL
+     */
+    void add(String token, String callbackUrl);
 
-    public static void assertNotNullAndEquals(String fieldDesc, Object expected, Object actual) {
-        Assert.assertNotNull("Could not find expected mapping for " + fieldDesc, actual);
-        Assert.assertEquals("Mapping for field '" + fieldDesc + "' differs -->", expected, actual);
-    }
-
-    public static void assertFieldNotNull(String fieldDesc, Object expected, Object actual) {
-        Assert.assertNotNull("Could not find expected mapping for " + fieldDesc, actual);
-    }
 }

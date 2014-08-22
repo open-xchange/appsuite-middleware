@@ -47,33 +47,73 @@
  *
  */
 
-package com.openexchange.google.subscribe.mocks;
+package com.openexchange.ajax.subscribe.source.action;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.generic.FolderUpdaterRegistry;
-import com.openexchange.groupware.generic.FolderUpdaterService;
-import com.openexchange.groupware.generic.TargetFolderDefinition;
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * {@link MockFolderUpdaterRegistry}
+ * {@link GetSourceRequest}
  *
- * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
- * @since v7.6.1
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class MockFolderUpdaterRegistry<T> implements FolderUpdaterRegistry {
+public class GetSourceRequest extends AbstractSubscriptionSourceRequest<GetSourceResponse> {
 
-    private FolderUpdaterService<T> fus;
+    private final String id;
 
-    /**
-     * Initializes a new {@link MockFolderUpdaterRegistry}.
-     */
-    public MockFolderUpdaterRegistry(FolderUpdaterService<T> fus) {
-        this.fus = fus;
+    public GetSourceRequest(final String id) {
+        this.id = id;
+
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
+     */
     @Override
-    public <T> FolderUpdaterService<T> getFolderUpdater(TargetFolderDefinition target) throws OXException {
-        return (FolderUpdaterService<T>) fus;
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return Method.GET;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
+     */
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        List<Parameter> params = new LinkedList<Parameter>();
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "getSource"));
+        params.add(new Parameter("id", id));
+        return params.toArray(new Parameter[] {});
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
+     */
+    @Override
+    public AbstractAJAXParser<? extends GetSourceResponse> getParser() {
+        return new AbstractAJAXParser<GetSourceResponse>(getFailOnError()) {
+
+            @Override
+            protected GetSourceResponse createResponse(final Response response) throws JSONException {
+                return new GetSourceResponse(response);
+            }
+        };
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
+     */
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null;
     }
 
 }

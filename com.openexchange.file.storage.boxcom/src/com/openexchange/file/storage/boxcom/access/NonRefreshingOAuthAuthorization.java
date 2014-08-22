@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,11 +47,34 @@
  *
  */
 
-package com.openexchange.oauth;
+package com.openexchange.file.storage.boxcom.access;
+
+import com.box.boxjavalibv2.authorization.OAuthAuthorization;
+import com.box.boxjavalibv2.authorization.OAuthDataController;
+import com.box.boxjavalibv2.exceptions.AuthFatalFailureException;
+
 
 /**
- * {@link API} - An enumeration for available APIs.
+ * {@link NonRefreshingOAuthAuthorization} - The non-refreshing Box.com OAuth authorization.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.6.1
  */
-public enum API {
-    FACEBOOK, TWITTER, LINKEDIN, OTHER, MSN, YAHOO, TUMBLR, FLICKR, DROPBOX, XING, VKONTAKTE, GOOGLE, BOX_COM, MS_LIVE_CONNECT, COPY_COM;
+public class NonRefreshingOAuthAuthorization extends OAuthAuthorization {
+
+    /**
+     * Initializes a new {@link NonRefreshingOAuthAuthorization}.
+     *
+     * @param oAuth The OAuth data controller
+     */
+    public NonRefreshingOAuthAuthorization(OAuthDataController oAuth) {
+        super(oAuth);
+    }
+
+    @Override
+    public void refresh() throws AuthFatalFailureException {
+        // {"error":"invalid_grant","error_description":"Refresh token has expired"}
+        throw new AuthFatalFailureException("Invalid grant. Refresh token has expired");
+    }
+
 }

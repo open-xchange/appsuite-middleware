@@ -47,37 +47,36 @@
  *
  */
 
-package com.openexchange.google.subscribe.mocks;
+package com.openexchange.ajax.subscribe.source.action;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.generic.FolderUpdaterService;
-import com.openexchange.groupware.generic.TargetFolderDefinition;
-import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Header;
 
 /**
- * {@link MockFolderUpdateService}
+ * {@link AbstractSubscriptionSourceRequest}
  *
- * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
- * @since v7.6.1
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class MockFolderUpdateService implements FolderUpdaterService<Object> {
+public abstract class AbstractSubscriptionSourceRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
+
+    private boolean failOnError;
 
     @Override
-    public boolean handles(FolderObject folder) {
-        // TODO Auto-generated method stub
-        return false;
+    public String getServletPath() {
+        return "/ajax/subscriptionSources";
     }
 
     @Override
-    public boolean usesMultipleStrategy() {
-        return false;
+    public Header[] getHeaders() {
+        return NO_HEADER;
     }
 
-    @Override
-    public void save(SearchIterator<Object> data, TargetFolderDefinition target) throws OXException {
-        // TODO Auto-generated method stub
-
+    public void setFailOnError(boolean failOnError) {
+        this.failOnError = failOnError;
     }
 
+    public boolean getFailOnError() {
+        return failOnError;
+    }
 }

@@ -47,45 +47,24 @@
  *
  */
 
-package com.openexchange.google.subscribe;
+package com.openexchange.ajax.subscribe.source.action;
 
-import java.util.Collections;
-import junit.framework.TestCase;
+import com.openexchange.ajax.container.Response;
 
 /**
- * {@link GoogleCalendarSubscribeTest}
+ * {@link ListSourcesResponse}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class GoogleCalendarSubscribeTest extends TestCase {
-
-    private static final String REDIRECT_URI = "https://oxappsuite.qa.open-xchange.com/ajax/defer";
-
-    private static final String CLIENT_SECRET = "g_3bO5B795OF3naL4PlvntG7";
-
-    private static final String CLIENT_ID = "953985963799-l5osk884lhi476u4nd5bulpgblupm1em.apps.googleusercontent.com";
+public class ListSourcesResponse extends AbstractSubscriptionSourceResponse {
 
     /**
-     * Initializes a new {@link GoogleCalendarSubscribeTest}.
-     */
-    public GoogleCalendarSubscribeTest(final String name) {
-        super(name);
-    }
-
-    /**
-     * Simple example on how to fetch the access token
+     * Initializes a new {@link ListSourcesResponse}.
      * 
-     * @throws Exception
+     * @param response
      */
-    public void testInit() throws Exception {
-        GoogleOAuthClient googleOAuthClient = new GoogleOAuthClient();
-        googleOAuthClient.login("ewaldbartkowiak@googlemail.com", "BewIbgeawn4");
-        final String authCode = googleOAuthClient.getAuthorizationCode(
-            CLIENT_ID,
-            CLIENT_SECRET,
-            REDIRECT_URI,
-            Collections.singletonList("https://www.googleapis.com/auth/calendar.readonly"));
-        String accessToken = googleOAuthClient.getAccessToken(CLIENT_ID, CLIENT_SECRET, authCode, REDIRECT_URI).getAccessToken();
-        assertNotNull(accessToken);
+    protected ListSourcesResponse(Response response) {
+        super(response);
     }
+
 }

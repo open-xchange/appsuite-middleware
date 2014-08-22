@@ -47,23 +47,38 @@
  *
  */
 
-package com.openexchange.google.subscribe.mocks;
+package com.openexchange.oauth.copycom.osgi;
 
-import com.openexchange.api2.AppointmentSQLInterface;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.session.Session;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
+import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.http.deferrer.DeferringURLService;
+import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.copycom.CopycomOAuthServiceMetaData;
+import com.openexchange.osgi.HousekeepingActivator;
+
 
 /**
- * {@link MockAppointmentSqlFactoryService}
+ * {@link CopycomOAuthActivator}
  *
- * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
- * @since v7.6.1
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MockAppointmentSqlFactoryService implements AppointmentSqlFactoryService {
+public final class CopycomOAuthActivator extends HousekeepingActivator {
+
+    public CopycomOAuthActivator() {
+        super();
+    }
 
     @Override
-    public AppointmentSQLInterface createAppointmentSql(Session session) {
-        return new MockAppointmentSQLInterface();
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigurationService.class, DeferringURLService.class, DispatcherPrefixService.class };
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        CopycomOAuthServiceMetaData service = new CopycomOAuthServiceMetaData(this);
+        registerService(OAuthServiceMetaData.class, service);
+        registerService(Reloadable.class, service);
     }
 
 }

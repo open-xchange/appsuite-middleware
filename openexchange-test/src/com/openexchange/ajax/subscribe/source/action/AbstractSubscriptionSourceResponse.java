@@ -47,11 +47,20 @@
  *
  */
 
-package com.openexchange.oauth;
+package com.openexchange.ajax.subscribe.source.action;
+
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * {@link API} - An enumeration for available APIs.
+ * {@link AbstractSubscriptionSourceResponse}
+ *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum API {
-    FACEBOOK, TWITTER, LINKEDIN, OTHER, MSN, YAHOO, TUMBLR, FLICKR, DROPBOX, XING, VKONTAKTE, GOOGLE, BOX_COM, MS_LIVE_CONNECT, COPY_COM;
+public class AbstractSubscriptionSourceResponse extends AbstractAJAXResponse {
+
+    protected AbstractSubscriptionSourceResponse(Response response) {
+        super(response);
+    }
+
 }

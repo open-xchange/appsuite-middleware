@@ -47,37 +47,89 @@
  *
  */
 
-package com.openexchange.google.subscribe;
+package com.openexchange.ajax.subscribe.source.action;
 
-import junit.extensions.TestSetup;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.java.Strings;
 
 /**
- * {@link GoogleTestSuite}
+ * {@link ListSourcesRequest}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class GoogleTestSuite extends TestSuite {
+public class ListSourcesRequest extends AbstractSubscriptionSourceRequest<ListSourcesResponse> {
 
-    private GoogleTestSuite() {
-        super();
+    private final String module;
+
+    private List<String> columns;
+
+    public ListSourcesRequest(final String module) {
+        this.module = module;
     }
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite("com.openexchange.subscribe.google.GoogleTestSuite");
-        suite.addTestSuite(GoogleSubscribeCalendarTest.class);
-        TestSetup setup = new TestSetup(suite) {
+    public void setColumns(List<String> columns) {
+        this.columns = columns;
+    }
+
+    public List<String> getColumns() {
+        return columns;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
+     */
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return Method.GET;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
+     */
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        List<Parameter> params = new LinkedList<Parameter>();
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "listSources"));
+        if (module != null) {
+            params.add(new Parameter("module", module));
+        }
+        if (getColumns() != null) {
+            params.add(new Parameter("columns", Strings.join(getColumns(), ",")));
+        }
+        return params.toArray(new Parameter[] {});
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
+     */
+    @Override
+    public AbstractAJAXParser<? extends ListSourcesResponse> getParser() {
+        return new AbstractAJAXParser<ListSourcesResponse>(getFailOnError()) {
+
             @Override
-            protected void setUp() {
-                GoogleSubscribeTestEnvironment.getInstance().init();
-            }
-            @Override
-            protected void tearDown() throws Exception {
-                GoogleSubscribeTestEnvironment.getInstance().cleanup();
+            protected ListSourcesResponse createResponse(final Response response) throws JSONException {
+                return new ListSourcesResponse(response);
             }
         };
-
-        return setup;
     }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
+     */
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

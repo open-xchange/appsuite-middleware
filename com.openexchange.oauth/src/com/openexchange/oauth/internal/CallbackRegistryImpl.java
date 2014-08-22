@@ -54,13 +54,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.servlet.http.HttpServletRequest;
 import com.openexchange.http.deferrer.CustomRedirectURLDetermination;
+import com.openexchange.oauth.CallbackRegistry;
 
 /**
- * {@link CallbackRegistry}
+ * {@link CallbackRegistryImpl}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class CallbackRegistry implements CustomRedirectURLDetermination, Runnable {
+public class CallbackRegistryImpl implements CustomRedirectURLDetermination, Runnable, CallbackRegistry {
 
     private static final class UrlAndStamp {
 
@@ -79,9 +80,9 @@ public class CallbackRegistry implements CustomRedirectURLDetermination, Runnabl
     private final ConcurrentMap<String, UrlAndStamp> tokenMap;
 
     /**
-     * Initializes a new {@link CallbackRegistry}.
+     * Initializes a new {@link CallbackRegistryImpl}.
      */
-    public CallbackRegistry() {
+    public CallbackRegistryImpl() {
         super();
         tokenMap = new ConcurrentHashMap<String, UrlAndStamp>();
     }
@@ -93,12 +94,7 @@ public class CallbackRegistry implements CustomRedirectURLDetermination, Runnabl
         tokenMap.clear();
     }
 
-    /**
-     * Adds given call-back URL and token pair.
-     *
-     * @param token The token
-     * @param callbackUrl The associated call-back URL
-     */
+    @Override
     public void add(final String token, final String callbackUrl) {
         if (null != token && null != callbackUrl) {
             tokenMap.put(token, new UrlAndStamp(callbackUrl, System.currentTimeMillis()));
@@ -132,7 +128,7 @@ public class CallbackRegistry implements CustomRedirectURLDetermination, Runnabl
                 }
             }
         } catch (final Exception e) {
-            final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CallbackRegistry.class);
+            final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CallbackRegistryImpl.class);
             logger.error("", e);
         }
     }

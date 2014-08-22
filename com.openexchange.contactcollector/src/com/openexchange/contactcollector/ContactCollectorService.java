@@ -49,12 +49,8 @@
 
 package com.openexchange.contactcollector;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.List;
 import javax.mail.internet.InternetAddress;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 
 /**
@@ -71,17 +67,5 @@ public interface ContactCollectorService {
      * @param session The user-session
      */
     void memorizeAddresses(List<InternetAddress> addresses, Session session);
-
-    /**
-     * Creates a contact collect folder if necessary.
-     *
-     * @param session
-     * @param ctx
-     * @param folderName
-     * @param con
-     * @throws SQLException
-     * @throws OXException
-     */
-    void createCollectFolder(Session session, Context ctx, String folderName, Connection con) throws SQLException, OXException;
 
 }

@@ -56,14 +56,18 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.message.AbstractHttpMessage;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.BasicHttpContext;
@@ -100,9 +104,11 @@ public class GoogleOAuthClient {
 
     private String cookies;
 
-    private final HttpClient httpClient;
+    private final PoolingClientConnectionManager connectionManager = new PoolingClientConnectionManager();
 
     private TokenResponse token;
+
+    private final HttpClient httpClient;
 
     /**
      * Initializes a new {@link GoogleOAuthClient}.
@@ -111,7 +117,11 @@ public class GoogleOAuthClient {
      */
     public GoogleOAuthClient() {
         super();
-        httpClient = new DefaultHttpClient();
+        connectionManager.setMaxTotal(200);
+        connectionManager.setDefaultMaxPerRoute(20);
+        HttpHost googleoxoe = new HttpHost("google.oxoe.int", 80);
+        connectionManager.setMaxPerRoute(new HttpRoute(googleoxoe), 50);
+        httpClient = new DefaultHttpClient(connectionManager);
     }
 
     /**
@@ -233,5 +243,16 @@ public class GoogleOAuthClient {
         httpMessage.setHeader("Connection", "keep-alive");
         httpMessage.setHeader("Referer", LOGIN_SERVICE_URL);
         httpMessage.setHeader("Content-Type", "application/x-www-form-urlencoded");
+    }
+
+    /**
+     * @param string
+     * @throws IOException
+     * @throws ClientProtocolException
+     */
+    public void requestCallback(String string) throws ClientProtocolException, IOException {
+        HttpGet method = new HttpGet(string);
+        setHeaders(method);
+        httpClient.execute(method);
     }
 }

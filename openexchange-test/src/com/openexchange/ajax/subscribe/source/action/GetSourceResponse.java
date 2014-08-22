@@ -47,65 +47,24 @@
  *
  */
 
-package com.openexchange.google.subscribe.mocks;
+package com.openexchange.ajax.subscribe.source.action;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.generic.FolderUpdaterRegistry;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.ajax.container.Response;
 
 /**
- * {@link MockServiceLookup}
+ * {@link GetSourceResponse}
  *
- * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class MockServiceLookup implements ServiceLookup {
-
-    private final ConfigurationService csService;
-
-    private final ThreadPoolService threadPoolService;
-
-    private final FolderUpdaterRegistry fur;
-
-    private AppointmentSqlFactoryService as;
+public class GetSourceResponse extends AbstractSubscriptionSourceResponse {
 
     /**
-     * Initializes a new {@link MockServiceLookup} with generic services to mock.
+     * Initializes a new {@link GetSourceResponse}.
      * 
-     * @param csService
-     * @param threadPoolService
-     * @param fur
+     * @param response
      */
-    public MockServiceLookup(final ConfigurationService csService, final ThreadPoolService threadPoolService, final FolderUpdaterRegistry fur) {
-        super();
-        this.csService = csService;
-        this.threadPoolService = threadPoolService;
-        this.fur = fur;
-    }
-
-    public void setAppointmentSQLServiceMock(final AppointmentSqlFactoryService as) {
-        this.as = as;
-    }
-
-    @Override
-    public <S> S getService(final Class<? extends S> clazz) {
-        if (clazz.equals(ConfigurationService.class)) {
-            return (S) csService;
-        }
-        return null;
-    }
-
-    @Override
-    public <S> S getOptionalService(final Class<? extends S> clazz) {
-        if (clazz.equals(ThreadPoolService.class)) {
-            return (S) threadPoolService;
-        } else if (clazz.equals(FolderUpdaterRegistry.class)) {
-            return (S) fur;
-        } else if (clazz.equals(AppointmentSqlFactoryService.class)) {
-            return (S) as;
-        }
-        return null;
+    protected GetSourceResponse(Response response) {
+        super(response);
     }
 
 }

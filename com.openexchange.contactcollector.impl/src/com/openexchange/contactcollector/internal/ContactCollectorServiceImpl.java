@@ -49,14 +49,10 @@
 
 package com.openexchange.contactcollector.internal;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.List;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.contactcollector.ContactCollectorService;
-import com.openexchange.contactcollector.folder.ContactCollectorFolderCreator;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 
 /**
@@ -67,6 +63,7 @@ import com.openexchange.session.Session;
  */
 public class ContactCollectorServiceImpl implements ContactCollectorService {
 
+    public static final Integer RANKING = 0;
     private MemorizerWorker worker;
 
     /**
@@ -115,10 +112,5 @@ public class ContactCollectorServiceImpl implements ContactCollectorService {
     public void stop() {
         worker.close();
         AliasesProvider.getInstance().stop();
-    }
-
-    @Override
-    public void createCollectFolder(final Session session, final Context ctx, final String folderName, final Connection con) throws OXException, SQLException {
-        ContactCollectorFolderCreator.create(session, ctx, folderName, con);
     }
 }
