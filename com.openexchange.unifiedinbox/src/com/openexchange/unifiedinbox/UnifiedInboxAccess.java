@@ -214,7 +214,7 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
         logicTools = null;
 
         if (markClosed) {
-            openedMailAccessed.forEachValue(new MailAccessCloser());
+            openedMailAccessed.forEachValue(CLOSER);
             openedMailAccessed.clear();
             connected = false;
         }
@@ -317,17 +317,13 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
 
     // ----------------------------------------------------------------------------------------------------------------------- //
 
-    private static class MailAccessCloser implements TObjectProcedure<MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> {
-
-        MailAccessCloser() {
-            super();
-        }
+    private static final TObjectProcedure<MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> CLOSER = new TObjectProcedure<MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage>>() {
 
         @Override
         public boolean execute(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> openedMailAccess) {
             Streams.close(openedMailAccess);
             return true;
         }
-    }
+    };
 
 }
