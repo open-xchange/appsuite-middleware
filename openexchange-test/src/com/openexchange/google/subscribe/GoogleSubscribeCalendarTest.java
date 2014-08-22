@@ -91,8 +91,8 @@ public class GoogleSubscribeCalendarTest extends AbstractGoogleSubscribeTest {
         assertNotNullAndEquals("timezone", "America/Santiago", appointment.getTimezone());
         assertNotNullAndEquals("end date", getDateTime(29, 1, 2014, 15, 30, 00, TimeZone.getTimeZone("UTC")), appointment.getEndDate());
         assertNotNullAndEquals("created by", client.getValues().getUserId(), appointment.getCreatedBy());
-        assertNotNullAndEquals("alarm", 45, appointment.getAlarm());
-        assertNull("This appointment has no confirmation, but the mapping exist", appointment.getConfirmations());
+        assertNotNullAndEquals("alarm", 0, appointment.getAlarm());
+        assertEquals("This appointment has no confirmation, but the mapping exist", 0, appointment.getConfirmations().length);
         assertNull("This appointment has no participants, but the mapping exist", appointment.getParticipants());
         assertNotNullAndEquals("recurrence type", CalendarObject.NO_RECURRENCE, appointment.getRecurrenceType());
         assertNotNullAndEquals("fulltime", false, appointment.getFullTime());
@@ -160,7 +160,7 @@ public class GoogleSubscribeCalendarTest extends AbstractGoogleSubscribeTest {
         assertNotNullAndEquals("timezone", "Europe/Berlin", appointment.getTimezone());
         assertNotNullAndEquals("end date", getDateTime(14, 3, 2014, 14, 00, 00, TimeZone.getTimeZone("UTC")), appointment.getEndDate());
         assertNotNullAndEquals("created by", client.getValues().getUserId(), appointment.getCreatedBy());
-        assertFieldIsNull("alarm", appointment.getAlarm());
+        assertNotNullAndEquals("alarm", 30, appointment.getAlarm());
         assertNotNullAndEquals("fulltime", false, appointment.getFullTime());
 
         assertNotNullAndEquals("recurrence type", CalendarObject.DAILY, appointment.getRecurrenceType());
