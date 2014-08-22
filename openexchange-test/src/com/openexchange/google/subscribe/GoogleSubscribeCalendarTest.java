@@ -180,7 +180,7 @@ public class GoogleSubscribeCalendarTest extends AbstractGoogleSubscribeTest {
         assertEquals("timezone", client.getValues().getTimeZone().getID(), appointment.getTimezone());
         assertNotNullAndEquals("end date", getDateTime(14, 3, 2014, 20, 30, 00, TimeZone.getTimeZone("UTC")), appointment.getEndDate());
         assertNotNullAndEquals("created by", client.getValues().getUserId(), appointment.getCreatedBy());
-        assertNotNullAndEquals("alarm", 0, appointment.getAlarm());
+        assertNotNullAndEquals("alarm", 10, appointment.getAlarm());
         assertNotNullAndEquals("fulltime", false, appointment.getFullTime());
 
         assertNotNullAndEquals("recurrence type", CalendarObject.YEARLY, appointment.getRecurrenceType());
@@ -188,7 +188,7 @@ public class GoogleSubscribeCalendarTest extends AbstractGoogleSubscribeTest {
         assertNotNullAndEquals("interval", 1, appointment.getInterval());
         assertNotNullAndEquals("occurrence", 2, appointment.getOccurrence());
         assertNotNullAndEquals("day in month", 14, appointment.getDayInMonth());
-        assertNotNullAndEquals("month", 3, appointment.getMonth());
+        assertNotNullAndEquals("month", 2, appointment.getMonth());
 
         assertEquals("This appointment has no confirmation, but the mapping exist", 0, appointment.getConfirmations().length);
         assertNull("This appointment has no participants, but the mapping exist", appointment.getParticipants());
