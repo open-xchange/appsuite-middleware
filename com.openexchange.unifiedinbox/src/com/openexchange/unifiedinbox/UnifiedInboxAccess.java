@@ -136,7 +136,7 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
         cacheable = false;
     }
 
-    private void reset() {
+    private void reset(boolean markClosed) {
         super.resetFields();
 
         UnifiedInboxFolderStorage folderStorage = this.folderStorage;
@@ -160,7 +160,10 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
         }
 
         logicTools = null;
-        connected = false;
+
+        if (markClosed) {
+            connected = false;
+        }
     }
 
     @Override
@@ -173,7 +176,7 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
         /*
          * Reset
          */
-        reset();
+        reset(true);
     }
 
     @Override
@@ -232,7 +235,7 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
 
     @Override
     protected void releaseResources() {
-        reset();
+        reset(false);
     }
 
     @Override
