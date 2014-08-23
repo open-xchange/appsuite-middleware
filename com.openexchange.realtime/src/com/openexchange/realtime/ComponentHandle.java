@@ -81,7 +81,8 @@ public @NotThreadSafe interface ComponentHandle {
     ID getId();
 
     /**
-     * Dispose this Componenthandle
+     * Dispose this Componenthandle. Stanzas that are currently being delivered to this ComponentHandle will either be silently discarded or
+     * cause an Exception due to the missing ComponentHandle depending on the position of the {@link Stanza} in the backend stack.
      */
     void dispose();
 

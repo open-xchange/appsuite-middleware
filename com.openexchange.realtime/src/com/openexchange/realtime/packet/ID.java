@@ -50,14 +50,8 @@
 package com.openexchange.realtime.packet;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.realtime.exception.RealtimeException;
@@ -98,8 +92,6 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class ID implements Serializable {
-    
-    private static final Logger LOG = LoggerFactory.getLogger(ID.class);
 
     private static final long serialVersionUID = -5237507998711320109L;
 
@@ -468,98 +460,6 @@ public class ID implements Serializable {
      */
     public boolean isInternal() {
         return INTERNAL_CONTEXT.equals(context);
-    }
-
-
-
-
-    /*
-     **************************************************************************************************************************************
-     * EVENT SYSTEM
-     **************************************************************************************************************************************
-     */
-
-    /**
-     * {@link Events} is a collection of event constants to be used with {@link ID#trigger(String, Object)} and
-     * {@link ID#on(String, IDEventHandler)}
-     * 
-     * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
-     */
-    public static interface Events {
-
-        /**
-         * Triggered before dispose. Offers the chance to veto the disposal of the ID by adding a key named "veto" with a value of true to
-         * the properties
-         */
-        public static final String BEFOREDISPOSE = "beforedispose";
-
-    }
-
-    /**
-     * Execute the event handler when the "event" happens
-     * @throws RealtimeException 
-     */
-    public void on(String event, IDEventHandler handler) throws RealtimeException {
-        getManager().getEventHandlers(this, event).add(handler);
-    }
-
-    /**
-     * Remove the event handler
-     * @throws RealtimeException 
-     */
-    public void off(String event, IDEventHandler handler) throws RealtimeException {
-        getManager().getEventHandlers(this, event).remove(handler);
-    }
-
-    /**
-     * Trigger an event on this ID, with the give properties
-     * 
-     * @throws RealtimeException When triffering the event failed
-     */
-    public void trigger(String event, Object source, Map<String, Object> properties) throws RealtimeException {
-        if (properties == null) {
-            properties = new HashMap<String, Object>();
-        }
-        List<IDEventHandler> handlerList = new ArrayList<IDEventHandler>(getManager().getEventHandlers(this, event));
-        for (IDEventHandler handler : handlerList) {
-            handler.handle(event, this, source, properties);
-        }
-    }
-
-    /**
-     * Trigger an event on this ID.
-     * 
-     * @throws RealtimeException When triggering the event failed.
-     */
-    public void trigger(String event, Object source) throws RealtimeException {
-        trigger(event, source, new HashMap<String, Object>());
-    }
-
-    /**
-     * Check if this ID is disposable. This may be vetoed by components that listen on ID.Events.BEFOREDISPOSE (e.g. SyntheticChannel)
-     * 
-     * @param source The event source
-     * @param properties The event properties
-     * @return False if the ID wasn't disposed due to a veto or an ongoing dispose call
-     * @throws RealtimeException When checking if this {@link ID} is disposable fails 
-     */
-    public boolean isDisposable() throws RealtimeException {
-        boolean disposingSucceeded = getManager().setDisposing(this, true);
-        if (!disposingSucceeded) {
-            //The ID is already being disposed
-            return false;
-        }
-        try {
-            Map<String, Object> vetoProperties = new HashMap<String, Object>();
-            this.trigger(Events.BEFOREDISPOSE, this, vetoProperties);
-            Boolean veto = (Boolean) vetoProperties.get("veto");
-            if (veto == null || !veto) {
-                return true;
-            }
-            return false;
-        } finally {
-            getManager().setDisposing(this, false);
-        }
     }
 
 }

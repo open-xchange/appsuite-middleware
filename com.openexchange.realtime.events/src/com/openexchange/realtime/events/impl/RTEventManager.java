@@ -59,7 +59,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.realtime.cleanup.RealtimeJanitor;
+import com.openexchange.realtime.cleanup.AbstractRealtimeJanitor;
 import com.openexchange.realtime.events.RTEventEmitterService;
 import com.openexchange.realtime.events.RTEventManagerService;
 import com.openexchange.realtime.packet.ID;
@@ -73,7 +73,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class RTEventManager implements RTEventManagerService, RealtimeJanitor {
+public class RTEventManager extends AbstractRealtimeJanitor implements RTEventManagerService {
 
     private static final Logger LOG = LoggerFactory.getLogger(RTEventManager.class);
 

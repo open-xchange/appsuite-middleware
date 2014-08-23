@@ -49,19 +49,14 @@
 
 package com.openexchange.realtime.packet;
 
-import static com.openexchange.realtime.packet.ID.Events.BEFOREDISPOSE;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import com.openexchange.realtime.exception.RealtimeException;
 
@@ -74,27 +69,8 @@ import com.openexchange.realtime.exception.RealtimeException;
  */
 public class IDManagerTest extends IDManager {
 
-    private static IDEventHandler handler1, handler2, handler3;
     private static String scope1 = "scope1", scope2="scope2", scope3="scope3";
     private ID marens, cisco;
-
-    @BeforeClass
-    public static void setUpClass() {
-        handler1 = new IDEventHandler() {
-            @Override
-            public void handle(String event, ID id, Object source, Map<String, Object> properties) {}
-        };
-
-        handler2 = new IDEventHandler() {
-            @Override
-            public void handle(String event, ID id, Object source, Map<String, Object> properties) {}
-        };
-
-        handler3 = new IDEventHandler() {
-            @Override
-            public void handle(String event, ID id, Object source, Map<String, Object> properties) {}
-        };
-    }
 
     @Before
     public void setUp() {
@@ -106,28 +82,6 @@ public class IDManagerTest extends IDManager {
     @After
     public void tearDown() {
         ID.ID_MANAGER_REF.set(null);
-    }
-
-    @Test
-    public void testAddIDEventHandlers() throws RealtimeException {
-        assertEquals(0, getEventHandlers(marens, BEFOREDISPOSE).size());
-        marens.on(BEFOREDISPOSE, handler1);
-        assertEquals(1, getEventHandlers(marens, BEFOREDISPOSE).size());
-        marens.on(BEFOREDISPOSE, handler2);
-        assertEquals(2, getEventHandlers(marens, BEFOREDISPOSE) .size());
-    }
-
-    @Test
-    public void testRemoveIDEventHandlers() throws RealtimeException {
-        marens.on(BEFOREDISPOSE, handler1);
-        marens.on(BEFOREDISPOSE, handler2);
-        marens.on(BEFOREDISPOSE, handler3);
-        assertEquals(3, getEventHandlers(marens, BEFOREDISPOSE) .size());
-        
-        assertEquals(3, getEventHandlers(marens, BEFOREDISPOSE) .size());
-        
-        marens.off(BEFOREDISPOSE, handler3);
-        assertEquals(2, getEventHandlers(marens, BEFOREDISPOSE) .size());
     }
 
     @Test
@@ -146,24 +100,7 @@ public class IDManagerTest extends IDManager {
     }
 
     @Test
-    public void testDisposing() {
-        assertTrue(setDisposing(marens, true));
-        assertFalse(setDisposing(marens, true));
-        assertTrue(DISPOSING.get(marens));
-        assertTrue(setDisposing(marens, false));
-        assertNull(DISPOSING.get(marens));
-    }
-
-    @Test
     public void testCleanup() throws RealtimeException {
-        marens.on(BEFOREDISPOSE, handler1);
-        marens.on(BEFOREDISPOSE, handler2);
-        marens.on(BEFOREDISPOSE, handler3);
-
-        cisco.on(BEFOREDISPOSE, handler1);
-        cisco.on(BEFOREDISPOSE, handler2);
-        cisco.on(BEFOREDISPOSE, handler3);
-
         getLock(marens, scope1);
         getLock(marens, scope2);
         getLock(marens, scope3);
@@ -173,17 +110,12 @@ public class IDManagerTest extends IDManager {
 
         cleanupForId(marens);
         assertNull(LOCKS.get(marens));
-        assertNull(EVENT_HANDLERS.get(marens));
         assertEquals(3, LOCKS.get(cisco).size());
-        assertEquals(3, getEventHandlers(cisco, BEFOREDISPOSE).size());
 
         cleanupForId(cisco);
         assertNull(LOCKS.get(marens));
-        assertNull(EVENT_HANDLERS.get(marens));
         assertNull(LOCKS.get(cisco));
-        assertNull(EVENT_HANDLERS.get(cisco));
 
         assertEquals(0, LOCKS.entrySet().size());
-        assertEquals(0, EVENT_HANDLERS.entrySet().size());
     }
 }

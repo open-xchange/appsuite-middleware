@@ -159,7 +159,7 @@ public class RTJSONActivator extends AJAXModuleActivator {
          * Register all RealtimeJanitor services contained in this bundle
          */
         for(RealtimeJanitor realtimeJanitor : RealtimeJanitors.getInstance().getJanitors()) {
-            registerService(RealtimeJanitor.class, realtimeJanitor);
+            registerService(RealtimeJanitor.class, realtimeJanitor, realtimeJanitor.getServiceProperties());
         }
     }
 

@@ -49,15 +49,12 @@
 
 package com.openexchange.realtime.json.impl;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.cleanup.AbstractRealtimeJanitor;
 import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
-import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.group.DistributedGroupManager;
-import com.openexchange.realtime.group.GroupManagerService;
 import com.openexchange.realtime.json.osgi.JSONServiceRegistry;
 import com.openexchange.realtime.json.protocol.RTClientState;
 import com.openexchange.realtime.json.protocol.StanzaTransmitter;
@@ -70,7 +67,7 @@ import com.openexchange.realtime.util.Duration;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class StateManager implements RealtimeJanitor {
+public class StateManager extends AbstractRealtimeJanitor {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(StateManager.class);
 
