@@ -361,7 +361,7 @@ public abstract class AbstractCopyComResourceAccess {
     /**
      * Handles given HTTP response error.
      *
-     * @param identifier The optional identifier for associated Box.com resource
+     * @param identifier The optional identifier for associated Copy.com resource
      * @param e The HTTP error
      * @return The resulting exception
      */

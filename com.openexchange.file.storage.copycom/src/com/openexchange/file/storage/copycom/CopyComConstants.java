@@ -66,7 +66,7 @@ public final class CopyComConstants implements FileStorageConstants {
     }
 
     /**
-     * The identifier for Box file storage service.
+     * The identifier for Copy.com file storage service.
      */
     public static final String ID = "com.openexchange.file.storage.copycom";
 

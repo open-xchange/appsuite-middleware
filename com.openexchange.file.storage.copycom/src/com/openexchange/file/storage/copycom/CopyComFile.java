@@ -104,8 +104,8 @@ public final class CopyComFile extends DefaultFile {
      * Parses specified Copy.com file.
      *
      * @param file The Copy.com file
-     * @throws OXException If parsing Box file fails
-     * @return This Box file
+     * @throws OXException If parsing Copy.com file fails
+     * @return This Copy.com file
      */
     public CopyComFile parseCopyComFile(File file) throws OXException {
         return parseCopyComFile(file, null);
@@ -117,7 +117,7 @@ public final class CopyComFile extends DefaultFile {
      * @param file The Copy.com file
      * @param fields The fields to consider
      * @throws OXException If parsing Copy.com file fails
-     * @return This Box file with property set applied
+     * @return This Copy.com file with property set applied
      */
     public CopyComFile parseCopyComFile(File file, List<Field> fields) throws OXException {
         if (null != file) {
@@ -200,7 +200,7 @@ public final class CopyComFile extends DefaultFile {
      * @param file The Copy.com file
      * @param fields The fields to consider
      * @throws OXException If parsing Copy.com file fails
-     * @return This Box file with property set applied
+     * @return This Copy.com file with property set applied
      */
     public CopyComFile parseCopyComFile(JSONObject jFile) throws OXException {
         return parseCopyComFile(jFile, null);
@@ -212,7 +212,7 @@ public final class CopyComFile extends DefaultFile {
      * @param file The Copy.com file
      * @param fields The fields to consider
      * @throws OXException If parsing Copy.com file fails
-     * @return This Box file with property set applied
+     * @return This Copy.com file with property set applied
      */
     public CopyComFile parseCopyComFile(JSONObject jFile, List<Field> fields) throws OXException {
         if (null != jFile) {

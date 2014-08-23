@@ -84,15 +84,15 @@ public final class CopyComAccessRegistry {
     }
 
     /**
-     * Adds specified Box access.
+     * Adds specified Copy.com access.
      *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
-     * @param boxAccess The Box access to add
+     * @param copyComAccess The Copy.com access to add
      * @return The previous associated session, or <code>null</code> if there was no session.
      */
-    public CopyComAccess addAccess(final int contextId, final int userId, final String accountId, final CopyComAccess boxAccess) {
+    public CopyComAccess addAccess(final int contextId, final int userId, final String accountId, final CopyComAccess copyComAccess) {
         final SimpleKey key = SimpleKey.valueOf(contextId, userId);
         ConcurrentMap<String, CopyComAccess> inner = map.get(key);
         if (null == inner) {
@@ -102,16 +102,16 @@ public final class CopyComAccessRegistry {
                 inner = tmp;
             }
         }
-        return inner.putIfAbsent(accountId, boxAccess);
+        return inner.putIfAbsent(accountId, copyComAccess);
     }
 
     /**
-     * Check presence of the Box access associated with given user-context-pair.
+     * Check presence of the Copy.com access associated with given user-context-pair.
      *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
-     * @return <code>true</code> if such a Box access is present; otherwise <code>false</code>
+     * @return <code>true</code> if such a Copy.com access is present; otherwise <code>false</code>
      */
     public boolean containsAccess(final int contextId, final int userId, final String accountId) {
         final ConcurrentMap<String, CopyComAccess> inner = map.get(SimpleKey.valueOf(contextId, userId));
@@ -119,12 +119,12 @@ public final class CopyComAccessRegistry {
     }
 
     /**
-     * Gets the Box access associated with given user-context-pair.
+     * Gets the Copy.com access associated with given user-context-pair.
      *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
-     * @return The Box access or <code>null</code>
+     * @return The Copy.com access or <code>null</code>
      */
     public CopyComAccess getAccess(final int contextId, final int userId, final String accountId) {
         final ConcurrentMap<String, CopyComAccess> inner = map.get(SimpleKey.valueOf(contextId, userId));
@@ -136,7 +136,7 @@ public final class CopyComAccessRegistry {
      *
      * @param contextId The context identifier
      * @param userId The user identifier
-     * @return <code>true</code> if a Box access for given user-context-pair was found and removed; otherwise <code>false</code>
+     * @return <code>true</code> if a Copy.com access for given user-context-pair was found and removed; otherwise <code>false</code>
      */
     public boolean removeAccessIfLast(final int contextId, final int userId) {
         final SessiondService sessiondService = Services.getService(SessiondService.class);
@@ -148,8 +148,8 @@ public final class CopyComAccessRegistry {
             if (null == inner || inner.isEmpty()) {
                 return false;
             }
-            for (final CopyComAccess boxAccess : inner.values()) {
-                boxAccess.dispose();
+            for (final CopyComAccess copyComAccess : inner.values()) {
+                copyComAccess.dispose();
             }
             return !inner.isEmpty();
         }
@@ -157,12 +157,12 @@ public final class CopyComAccessRegistry {
     }
 
     /**
-     * Purges specified user's Box access.
+     * Purges specified user's Copy.com access.
      *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
-     * @return <code>true</code> if a Box access for given user-context-pair was found and purged; otherwise <code>false</code>
+     * @return <code>true</code> if a Copy.com access for given user-context-pair was found and purged; otherwise <code>false</code>
      */
     public boolean purgeUserAccess(final int contextId, final int userId, final String accountId) {
         final SimpleKey key = SimpleKey.valueOf(contextId, userId);
@@ -181,9 +181,9 @@ public final class CopyComAccessRegistry {
     }
 
     /**
-     * Gets a {@link Iterator iterator} over the Box access instances in this registry.
+     * Gets a {@link Iterator iterator} over the Copy.com access instances in this registry.
      *
-     * @return A {@link Iterator iterator} over the Box access instances in this registry.
+     * @return A {@link Iterator iterator} over the Copy.com access instances in this registry.
      */
     Iterator<ConcurrentMap<String, CopyComAccess>> iterator() {
         return map.values().iterator();

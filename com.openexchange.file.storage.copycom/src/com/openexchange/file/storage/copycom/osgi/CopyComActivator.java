@@ -68,7 +68,7 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.timer.TimerService;
 
 /**
- * {@link CopyComActivator} - Activator for Box.com bundle.
+ * {@link CopyComActivator} - Activator for Copy.com bundle.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

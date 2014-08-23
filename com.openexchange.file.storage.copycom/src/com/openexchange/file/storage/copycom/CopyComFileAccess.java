@@ -107,8 +107,8 @@ public class CopyComFileAccess extends AbstractCopyComResourceAccess implements 
     /**
      * Initializes a new {@link CopyComFileAccess}.
      */
-    public CopyComFileAccess(CopyComAccess boxAccess, FileStorageAccount account, Session session, CopyComAccountAccess accountAccess) throws OXException {
-        super(boxAccess, account, session);
+    public CopyComFileAccess(CopyComAccess copyComAccess, FileStorageAccount account, Session session, CopyComAccountAccess accountAccess) throws OXException {
+        super(copyComAccess, account, session);
         this.accountAccess = accountAccess;
         userId = session.getUserId();
     }

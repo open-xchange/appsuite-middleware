@@ -81,7 +81,7 @@ import com.openexchange.oauth.OAuthUtilizerCreator;
 import com.openexchange.session.Session;
 
 /**
- * {@link CopyComFileStorageService} - The Box.com file storage service.
+ * {@link CopyComFileStorageService} - The Copy.com file storage service.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -92,19 +92,19 @@ public final class CopyComFileStorageService implements AccountAware, OAuthUtili
     private static final String SERVICE_ID = CopyComConstants.ID;
 
     /**
-     * Creates a new Box.com file storage service.
+     * Creates a new Copy.com file storage service.
      *
-     * @return A new Box.com file storage service
+     * @return A new Copy.com file storage service
      */
     public static CopyComFileStorageService newInstance() {
         return new CopyComFileStorageService();
     }
 
     /**
-     * Creates a new Box.com file storage service.
+     * Creates a new Copy.com file storage service.
      *
      * @param compositeAccountManager The composite account manager
-     * @return A new Box.com file storage service
+     * @return A new Copy.com file storage service
      */
     public static CopyComFileStorageService newInstance(final CompositeFileStorageAccountManagerProvider compositeAccountManager) {
         final CopyComFileStorageService newInst = new CopyComFileStorageService();
@@ -131,7 +131,7 @@ public final class CopyComFileStorageService implements AccountAware, OAuthUtili
          * API & secret key
          */
         final FormElement oauthAccount = FormElement.custom("oauthAccount", "account", FormStrings.ACCOUNT_LABEL);
-        oauthAccount.setOption("type", "com.openexchange.oauth.boxcom");
+        oauthAccount.setOption("type", "com.openexchange.oauth.copycom");
         tmpDescription.add(oauthAccount);
         formDescription = new ReadOnlyDynamicFormDescription(tmpDescription);
     }
@@ -192,18 +192,18 @@ public final class CopyComFileStorageService implements AccountAware, OAuthUtili
             }
 
         } catch (Exception e) {
-            LOG.warn("Could not delete possibly existing Box.com accounts associated with deleted OAuth account {} for user {} in context {}", oauthAccountId, user, cid, e);
+            LOG.warn("Could not delete possibly existing Copy.com accounts associated with deleted OAuth account {} for user {} in context {}", oauthAccountId, user, cid, e);
         }
     }
 
     @Override
     public API getApplicableApi() {
-        return API.MS_LIVE_CONNECT;
+        return API.COPY_COM;
     }
 
     @Override
     public String createUtilizer(OAuthAccount oauthAccount, Session session) throws OXException {
-        if (false == API.MS_LIVE_CONNECT.equals(oauthAccount.getAPI())) {
+        if (false == API.COPY_COM.equals(oauthAccount.getAPI())) {
             return null;
         }
 
@@ -240,7 +240,7 @@ public final class CopyComFileStorageService implements AccountAware, OAuthUtili
 
     @Override
     public String getDisplayName() {
-        return "Box File Storage Service";
+        return "Copy.com File Storage Service";
     }
 
     @Override

@@ -93,8 +93,8 @@ public final class CopyComFolderAccess extends AbstractCopyComResourceAccess imp
     /**
      * Initializes a new {@link CopyComFolderAccess}.
      */
-    public CopyComFolderAccess(final CopyComAccess boxAccess, final FileStorageAccount account, final Session session, final CopyComAccountAccess accountAccess) {
-        super(boxAccess, account, session);
+    public CopyComFolderAccess(final CopyComAccess copyComAccess, final FileStorageAccount account, final Session session, final CopyComAccountAccess accountAccess) {
+        super(copyComAccess, account, session);
         this.accountAccess = accountAccess;
         userId = session.getUserId();
         accountDisplayName = account.getDisplayName();
