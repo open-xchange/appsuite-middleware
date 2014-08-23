@@ -404,7 +404,7 @@ public abstract class AbstractOneDriveResourceAccess {
             oneDriveAccess.reinit(session);
         } catch (OXException oxe) {
             Logger logger = org.slf4j.LoggerFactory.getLogger(AbstractOneDriveResourceAccess.class);
-            logger.warn("Could not re-initialize Box.com access", oxe);
+            logger.warn("Could not re-initialize Microsoft OneDrive access", oxe);
 
             throw OneDriveExceptionCodes.ONE_DRIVE_ERROR.create(e, e.getMessage());
         }
@@ -433,7 +433,7 @@ public abstract class AbstractOneDriveResourceAccess {
     /**
      * Handles given HTTP response error.
      *
-     * @param identifier The optional identifier for associated Box.com resource
+     * @param identifier The optional identifier for associated Microsoft OneDrive resource
      * @param e The HTTP error
      * @return The resulting exception
      */
@@ -460,11 +460,11 @@ public abstract class AbstractOneDriveResourceAccess {
     /**
      * Gets the file storage folder identifier from given OneDrive folder identifier
      *
-     * @param boxId The OneDrive folder identifier
+     * @param oneDriveId The OneDrive folder identifier
      * @return The appropriate file storage folder identifier
      */
-    protected String toFileStorageFolderId(String boxId) {
-        return rootFolderId.equals(boxId) || "0".equals(boxId) ? FileStorageFolder.ROOT_FULLNAME : boxId;
+    protected String toFileStorageFolderId(String oneDriveId) {
+        return rootFolderId.equals(oneDriveId) ? FileStorageFolder.ROOT_FULLNAME : oneDriveId;
     }
 
 }

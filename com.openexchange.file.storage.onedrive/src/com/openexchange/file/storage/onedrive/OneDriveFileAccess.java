@@ -109,8 +109,8 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
     /**
      * Initializes a new {@link OneDriveFileAccess}.
      */
-    public OneDriveFileAccess(OneDriveAccess boxAccess, FileStorageAccount account, Session session, OneDriveAccountAccess accountAccess) throws OXException {
-        super(boxAccess, account, session);
+    public OneDriveFileAccess(OneDriveAccess oneDriveAccess, FileStorageAccount account, Session session, OneDriveAccountAccess accountAccess) throws OXException {
+        super(oneDriveAccess, account, session);
         this.accountAccess = accountAccess;
         userId = session.getUserId();
     }

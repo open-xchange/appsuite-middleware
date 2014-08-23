@@ -66,7 +66,7 @@ public final class OneDriveConstants implements FileStorageConstants {
     }
 
     /**
-     * The identifier for Box file storage service.
+     * The identifier for Microsoft OneDrive file storage service.
      */
     public static final String ID = "com.openexchange.file.storage.onedrive";
 

@@ -90,8 +90,8 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
     /**
      * Initializes a new {@link OneDriveFolderAccess}.
      */
-    public OneDriveFolderAccess(final OneDriveAccess boxAccess, final FileStorageAccount account, final Session session, final OneDriveAccountAccess accountAccess) throws OXException {
-        super(boxAccess, account, session);
+    public OneDriveFolderAccess(final OneDriveAccess oneDriveAccess, final FileStorageAccount account, final Session session, final OneDriveAccountAccess accountAccess) throws OXException {
+        super(oneDriveAccess, account, session);
         this.accountAccess = accountAccess;
         userId = session.getUserId();
         accountDisplayName = account.getDisplayName();

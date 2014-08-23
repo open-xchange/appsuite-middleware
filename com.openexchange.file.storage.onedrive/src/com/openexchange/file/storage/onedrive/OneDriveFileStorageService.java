@@ -81,7 +81,7 @@ import com.openexchange.oauth.OAuthUtilizerCreator;
 import com.openexchange.session.Session;
 
 /**
- * {@link OneDriveFileStorageService} - The Box.com file storage service.
+ * {@link OneDriveFileStorageService} - The Microsoft OneDrive file storage service.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -92,19 +92,19 @@ public final class OneDriveFileStorageService implements AccountAware, OAuthUtil
     private static final String SERVICE_ID = OneDriveConstants.ID;
 
     /**
-     * Creates a new Box.com file storage service.
+     * Creates a new Microsoft OneDrive file storage service.
      *
-     * @return A new Box.com file storage service
+     * @return A new Microsoft OneDrive file storage service
      */
     public static OneDriveFileStorageService newInstance() {
         return new OneDriveFileStorageService();
     }
 
     /**
-     * Creates a new Box.com file storage service.
+     * Creates a new Microsoft OneDrive file storage service.
      *
      * @param compositeAccountManager The composite account manager
-     * @return A new Box.com file storage service
+     * @return A new Microsoft OneDrive file storage service
      */
     public static OneDriveFileStorageService newInstance(final CompositeFileStorageAccountManagerProvider compositeAccountManager) {
         final OneDriveFileStorageService newInst = new OneDriveFileStorageService();
@@ -131,7 +131,7 @@ public final class OneDriveFileStorageService implements AccountAware, OAuthUtil
          * API & secret key
          */
         final FormElement oauthAccount = FormElement.custom("oauthAccount", "account", FormStrings.ACCOUNT_LABEL);
-        oauthAccount.setOption("type", "com.openexchange.oauth.boxcom");
+        oauthAccount.setOption("type", "com.openexchange.oauth.onedrive");
         tmpDescription.add(oauthAccount);
         formDescription = new ReadOnlyDynamicFormDescription(tmpDescription);
     }
@@ -188,11 +188,11 @@ public final class OneDriveFileStorageService implements AccountAware, OAuthUtil
 
             for (FileStorageAccount deleteMe : toDelete) {
                 accountManager.deleteAccount(deleteMe, session);
-                LOG.info("Deleted Box.com account with ID {} as OAuth account {} was deleted for user {} in context {}", deleteMe.getId(), oauthAccountId, user, cid);
+                LOG.info("Deleted Microsoft OneDrive account with ID {} as OAuth account {} was deleted for user {} in context {}", deleteMe.getId(), oauthAccountId, user, cid);
             }
 
         } catch (Exception e) {
-            LOG.warn("Could not delete possibly existing Box.com accounts associated with deleted OAuth account {} for user {} in context {}", oauthAccountId, user, cid, e);
+            LOG.warn("Could not delete possibly existing Microsoft OneDrive accounts associated with deleted OAuth account {} for user {} in context {}", oauthAccountId, user, cid, e);
         }
     }
 
@@ -240,7 +240,7 @@ public final class OneDriveFileStorageService implements AccountAware, OAuthUtil
 
     @Override
     public String getDisplayName() {
-        return "Box File Storage Service";
+        return "Microsoft OneDrive File Storage Service";
     }
 
     @Override

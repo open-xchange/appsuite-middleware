@@ -103,8 +103,8 @@ public final class OneDriveFile extends DefaultFile {
      * Parses specified Microsoft OneDrive file.
      *
      * @param file The Microsoft OneDrive file
-     * @throws OXException If parsing Box file fails
-     * @return This Box file
+     * @throws OXException If parsing Microsoft OneDrive file fails
+     * @return This Microsoft OneDrive file
      */
     public OneDriveFile parseOneDriveFile(RestFile file) throws OXException {
         return parseOneDriveFile(file, null);
@@ -116,7 +116,7 @@ public final class OneDriveFile extends DefaultFile {
      * @param file The Microsoft OneDrive file
      * @param fields The fields to consider
      * @throws OXException If parsing Microsoft OneDrive file fails
-     * @return This Box file with property set applied
+     * @return This Microsoft OneDrive file with property set applied
      */
     public OneDriveFile parseOneDriveFile(RestFile file, List<Field> fields) throws OXException {
         if (null != file) {
@@ -190,7 +190,7 @@ public final class OneDriveFile extends DefaultFile {
      * @param file The Microsoft OneDrive file
      * @param fields The fields to consider
      * @throws OXException If parsing Microsoft OneDrive file fails
-     * @return This Box file with property set applied
+     * @return This Microsoft OneDrive file with property set applied
      */
     public OneDriveFile parseOneDriveFile(JSONObject jFile) throws OXException {
         return parseOneDriveFile(jFile, null);
@@ -202,7 +202,7 @@ public final class OneDriveFile extends DefaultFile {
      * @param file The Microsoft OneDrive file
      * @param fields The fields to consider
      * @throws OXException If parsing Microsoft OneDrive file fails
-     * @return This Box file with property set applied
+     * @return This Microsoft OneDrive file with property set applied
      */
     public OneDriveFile parseOneDriveFile(JSONObject jFile, List<Field> fields) throws OXException {
         if (null != jFile) {
