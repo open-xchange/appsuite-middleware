@@ -272,6 +272,23 @@ public abstract class AbstractOneDriveResourceAccess {
     }
 
     /**
+     * Executes specified HTTP method/request using given HTTP client instance.
+     *
+     * @param method The method/request to execute
+     * @param httpClient The HTTP client to use
+     * @return The HTTP response
+     * @throws ClientProtocolException If client protocol error occurs
+     * @throws IOException If an I/O error occurs
+     */
+    protected HttpResponse execute(HttpRequestBase method, DefaultHttpClient httpClient) throws ClientProtocolException, IOException {
+        //long st = System.currentTimeMillis();
+        HttpResponse httpResponse = httpClient.execute(method);
+        //long dur = System.currentTimeMillis() - st;
+        //System.out.println("Executing " + method.getMethod() + " took " + dur + "msec");
+        return httpResponse;
+    }
+
+    /**
      * Resets given HTTP request
      *
      * @param request The HTTP request

@@ -161,7 +161,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                     HttpGet method = new HttpGet(buildUri(id, initiateQueryString()));
                     request = method;
 
-                    HttpResponse response = httpClient.execute(method);
+                    HttpResponse response = execute(method, httpClient);
                     return Boolean.valueOf(200 == response.getStatusLine().getStatusCode());
                 } catch (HttpResponseException e) {
                     if (404 == e.getStatusCode()) {
@@ -188,7 +188,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                     HttpGet method = new HttpGet(buildUri(id, initiateQueryString()));
                     request = method;
 
-                    RestFile restFile = handleHttpResponse(httpClient.execute(method), RestFile.class);
+                    RestFile restFile = handleHttpResponse(execute(method, httpClient), RestFile.class);
                     return new OneDriveFile(folderId, id, userId, rootFolderId).parseOneDriveFile(restFile);
                 } finally {
                     if (null != request) {
@@ -219,7 +219,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                         method.setHeader("Content-Type", "application/json");
                         method.setEntity(asHttpEntity(new JSONObject(2).put("name", file.getFileName())));
 
-                        handleHttpResponse(httpClient.execute(method), Void.class);
+                        handleHttpResponse(execute(method, httpClient), Void.class);
                         return null;
                     } catch (HttpResponseException e) {
                         throw handleHttpResponseError(file.getId(), e);
@@ -252,7 +252,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                         method.setHeader("Content-Type", "application/json");
                         method.setEntity(asHttpEntity(new JSONObject(2).put("destination", toOneDriveFolderId(destFolder))));
 
-                        JSONObject jResponse = handleHttpResponse(httpClient.execute(method), JSONObject.class);
+                        JSONObject jResponse = handleHttpResponse(execute(method, httpClient), JSONObject.class);
                         newFileId = jResponse.getString("id");
                         reset(request);
                         request = null;
@@ -267,7 +267,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                         fileName = update.getFileName();
                         method.setEntity(asHttpEntity(new JSONObject(2).put("name", fileName)));
 
-                        handleHttpResponse(httpClient.execute(method), Void.class);
+                        handleHttpResponse(execute(method, httpClient), Void.class);
                         reset(request);
                         request = null;
                     }
@@ -286,7 +286,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                         multipartEntity.addPart(new FormBodyPart("file", new InputStreamBody(newFile, "application/octet-stream", fileName)));
                         method.setEntity(multipartEntity);
 
-                        handleHttpResponse(httpClient.execute(method), Void.class);
+                        handleHttpResponse(execute(method, httpClient), Void.class);
                         reset(request);
                         request = null;
                     }
@@ -317,7 +317,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                         method.setHeader("Content-Type", "application/json");
                         method.setEntity(asHttpEntity(new JSONObject(2).put("destination", toOneDriveFolderId(destFolder))));
 
-                        JSONObject jResponse = handleHttpResponse(httpClient.execute(method), JSONObject.class);
+                        JSONObject jResponse = handleHttpResponse(execute(method, httpClient), JSONObject.class);
                         newFileId = jResponse.getString("id");
                         reset(request);
                         request = null;
@@ -330,7 +330,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                         fileName = update.getFileName();
                         method.setEntity(asHttpEntity(new JSONObject(2).put("name", fileName)));
 
-                        handleHttpResponse(httpClient.execute(method), Void.class);
+                        handleHttpResponse(execute(method, httpClient), Void.class);
                         reset(request);
                         request = null;
                     }
@@ -357,7 +357,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                     HttpGet method = new HttpGet(buildUri(id + "/content", initiateQueryString()));
                     request = method;
 
-                    HttpResponse httpResponse = httpClient.execute(method);
+                    HttpResponse httpResponse = execute(method, httpClient);
                     InputStream content = httpResponse.getEntity().getContent();
                     error = false;
                     return content;
@@ -383,7 +383,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                     HttpGet method = new HttpGet(buildUri(id, initiateQueryString()));
                     request = method;
 
-                    RestFileResponse restResponse = handleHttpResponse(httpClient.execute(method), RestFileResponse.class);
+                    RestFileResponse restResponse = handleHttpResponse(execute(method, httpClient), RestFileResponse.class);
                     RestFile restFile = restResponse.getData().get(0);
 
                     String thumbnailUrl = (String) restFile.getAdditionalProperties().get("picture");
@@ -396,7 +396,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                     method = new HttpGet(thumbnailUrl);
                     request = method;
 
-                    HttpResponse httpResponse = httpClient.execute(method);
+                    HttpResponse httpResponse = execute(method, httpClient);
                     InputStream content = httpResponse.getEntity().getContent();
                     error = false;
                     return content;
@@ -432,7 +432,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                         HttpEntity entity = new InputStreamEntity(data, -1);
                         method.setEntity(entity);
 
-                        JSONObject jResponse = handleHttpResponse(httpClient.execute(method), JSONObject.class);
+                        JSONObject jResponse = handleHttpResponse(execute(method, httpClient), JSONObject.class);
                         file.setId(jResponse.getString("id"));
 
                         reset(request);
@@ -446,7 +446,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                         HttpEntity entity = new InputStreamEntity(data, -1);
                         method.setEntity(entity);
 
-                        JSONObject jResponse = handleHttpResponse(httpClient.execute(method), JSONObject.class);
+                        JSONObject jResponse = handleHttpResponse(execute(method, httpClient), JSONObject.class);
                         file.setId(jResponse.getString("id"));
 
                         reset(request);
@@ -484,7 +484,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                         HttpGet method = new HttpGet(buildUri(fid+"/files", qparams));
                         request = method;
 
-                        JSONObject jResponse = handleHttpResponse(httpClient.execute(method), JSONObject.class);
+                        JSONObject jResponse = handleHttpResponse(execute(method, httpClient), JSONObject.class);
                         JSONArray jData = jResponse.getJSONArray("data");
                         int length = jData.length();
                         resultsFound = length;
@@ -504,7 +504,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                         HttpDelete method = new HttpDelete(buildUri(id, initiateQueryString()));
                         request = method;
 
-                        handleHttpResponse(httpClient.execute(method), STATUS_CODE_POLICY_IGNORE_NOT_FOUND, Void.class);
+                        handleHttpResponse(execute(method, httpClient), STATUS_CODE_POLICY_IGNORE_NOT_FOUND, Void.class);
 
                         reset(request);
                         request = null;
@@ -535,7 +535,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                         HttpDelete method = new HttpDelete(buildUri(idTuple.getId(), initiateQueryString()));
                         request = method;
 
-                        handleHttpResponse(httpClient.execute(method), STATUS_CODE_POLICY_IGNORE_NOT_FOUND, Void.class);
+                        handleHttpResponse(execute(method, httpClient), STATUS_CODE_POLICY_IGNORE_NOT_FOUND, Void.class);
 
                         reset(request);
                         request = null;
@@ -568,7 +568,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                     HttpDelete method = new HttpDelete(buildUri(id, initiateQueryString()));
                     request = method;
 
-                    handleHttpResponse(httpClient.execute(method), STATUS_CODE_POLICY_IGNORE_NOT_FOUND, Void.class);
+                    handleHttpResponse(execute(method, httpClient), STATUS_CODE_POLICY_IGNORE_NOT_FOUND, Void.class);
 
                     return new String[0];
                 } finally {
@@ -616,7 +616,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                         HttpGet method = new HttpGet(buildUri(fid+"/files", qparams));
                         request = method;
 
-                        JSONObject jResponse = handleHttpResponse(httpClient.execute(method), JSONObject.class);
+                        JSONObject jResponse = handleHttpResponse(execute(method, httpClient), JSONObject.class);
                         JSONArray jData = jResponse.getJSONArray("data");
                         int length = jData.length();
                         resultsFound = length;
@@ -667,7 +667,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                         HttpGet method = new HttpGet(buildUri(fid+"/files", qparams));
                         request = method;
 
-                        JSONObject jResponse = handleHttpResponse(httpClient.execute(method), JSONObject.class);
+                        JSONObject jResponse = handleHttpResponse(execute(method, httpClient), JSONObject.class);
                         JSONArray jData = jResponse.getJSONArray("data");
                         int length = jData.length();
                         resultsFound = length;
@@ -706,7 +706,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                     HttpGet method = new HttpGet(buildUri(id, initiateQueryString()));
                     request = method;
 
-                    RestFileResponse restResponse = handleHttpResponse(httpClient.execute(method), RestFileResponse.class);
+                    RestFileResponse restResponse = handleHttpResponse(execute(method, httpClient), RestFileResponse.class);
                     RestFile restFile = restResponse.getData().get(0);
                     return new FileTimedResult(Collections.<File> singletonList(new OneDriveFile(folderId, id, userId, rootFolderId).parseOneDriveFile(restFile)));
                 } finally {
@@ -732,7 +732,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                     HttpGet method = new HttpGet(buildUri(id, initiateQueryString()));
                     request = method;
 
-                    RestFileResponse restResponse = handleHttpResponse(httpClient.execute(method), RestFileResponse.class);
+                    RestFileResponse restResponse = handleHttpResponse(execute(method, httpClient), RestFileResponse.class);
                     RestFile restFile = restResponse.getData().get(0);
                     return new FileTimedResult(Collections.<File> singletonList(new OneDriveFile(folderId, id, userId, rootFolderId).parseOneDriveFile(restFile)));
                 } finally {
@@ -756,7 +756,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                         HttpGet method = new HttpGet(buildUri(id.getId(), initiateQueryString()));
                         request = method;
 
-                        RestFileResponse restResponse = handleHttpResponse(httpClient.execute(method), RestFileResponse.class);
+                        RestFileResponse restResponse = handleHttpResponse(execute(method, httpClient), RestFileResponse.class);
                         RestFile restFile = restResponse.getData().get(0);
                         files.add(new OneDriveFile(id.getFolder(), id.getId(), userId, rootFolderId).parseOneDriveFile(restFile));
                         reset(request);
@@ -816,7 +816,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                         HttpGet method = new HttpGet(buildUri("me/skydrive/search", qparams));
                         request = method;
 
-                        JSONObject jResponse = handleHttpResponse(httpClient.execute(method), JSONObject.class);
+                        JSONObject jResponse = handleHttpResponse(execute(method, httpClient), JSONObject.class);
                         JSONArray jData = jResponse.getJSONArray("data");
                         int length = jData.length();
                         resultsFound = length;
