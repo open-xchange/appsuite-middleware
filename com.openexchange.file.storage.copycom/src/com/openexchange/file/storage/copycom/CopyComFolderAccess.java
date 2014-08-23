@@ -50,20 +50,25 @@
 package com.openexchange.file.storage.copycom;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.copy.api.Folder;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -72,7 +77,6 @@ import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.copycom.access.CopyComAccess;
-import com.openexchange.file.storage.copycom.http.client.methods.HttpMove;
 import com.openexchange.session.Session;
 
 /**
@@ -83,48 +87,27 @@ import com.openexchange.session.Session;
 public final class CopyComFolderAccess extends AbstractCopyComResourceAccess implements FileStorageFolderAccess {
 
     private final CopyComAccountAccess accountAccess;
-    private final int userId;
-    private final String accountDisplayName;
+    final int userId;
+    final String accountDisplayName;
 
     /**
      * Initializes a new {@link CopyComFolderAccess}.
      */
-    public CopyComFolderAccess(final CopyComAccess boxAccess, final FileStorageAccount account, final Session session, final CopyComAccountAccess accountAccess) throws OXException {
+    public CopyComFolderAccess(final CopyComAccess boxAccess, final FileStorageAccount account, final Session session, final CopyComAccountAccess accountAccess) {
         super(boxAccess, account, session);
         this.accountAccess = accountAccess;
         userId = session.getUserId();
         accountDisplayName = account.getDisplayName();
     }
 
-    private boolean hasSubfolders(String copyComFolderId, DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
-        HttpRequestBase request = null;
-        try {
-            List<NameValuePair> qparams = initiateQueryString();
-            HttpGet method = new HttpGet(buildUri(copyComFolderId+"/files", qparams));
-            request = method;
-            access.sign(request);
+    static final Set<String> TYPES_FOLDER = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("dir", "copy", "root")));
 
-            JSONObject jResponse = handleHttpResponse(access.getHttpClient().execute(method), JSONObject.class);
-            JSONArray jData = jResponse.getJSONArray("data");
-            int length = jData.length();
-            for (int i = 0; i < length; i++) {
-                JSONObject jItem = jData.getJSONObject(i);
-                if (isFolder(jItem)) {
-                    return true;
-                }
-            }
-            return false;
-        } finally {
-            reset(request);
-        }
+    protected CopyComFolder parseFolder(Folder restFolder) throws OXException {
+        return new CopyComFolder(userId).parseDirEntry(restFolder, rootFolderId, accountDisplayName);
     }
 
-    protected CopyComFolder parseFolder(String copyComFolderId, RestFolder restFolder, DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
-        return new CopyComFolder(userId).parseDirEntry(restFolder, rootFolderId, accountDisplayName, hasSubfolders(copyComFolderId, httpClient));
-    }
-
-    protected CopyComFolder parseFolder(String copyComFolderId, JSONObject jFolder, DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
-        return new CopyComFolder(userId).parseDirEntry(jFolder, rootFolderId, accountDisplayName, hasSubfolders(copyComFolderId, httpClient));
+    protected CopyComFolder parseFolder(JSONObject jFolder) throws OXException {
+        return new CopyComFolder(userId).parseDirEntry(jFolder, rootFolderId, accountDisplayName);
     }
 
     @Override
@@ -135,7 +118,7 @@ public final class CopyComFolderAccess extends AbstractCopyComResourceAccess imp
             protected Boolean doPerform(CopyComAccess access) throws OXException, JSONException, IOException {
                 HttpRequestBase request = null;
                 try {
-                    HttpGet method = new HttpGet(buildUri(toCopyComFolderId(folderId), initiateQueryString()));
+                    HttpGet method = new HttpGet(buildUri("meta/" + toCopyComFolderId(folderId), null));
                     request = method;
                     access.sign(request);
 
@@ -164,12 +147,12 @@ public final class CopyComFolderAccess extends AbstractCopyComResourceAccess imp
                 HttpRequestBase request = null;
                 try {
                     String fid = toCopyComFolderId(folderId);
-                    HttpGet method = new HttpGet(buildUri(fid, initiateQueryString()));
+                    HttpGet method = new HttpGet(buildUri("meta/"+fid, null));
                     request = method;
                     access.sign(request);
 
-                    RestFolder restFolder = handleHttpResponse(access.getHttpClient().execute(method), RestFolder.class);
-                    return parseFolder(fid, restFolder, httpClient);
+                    Folder restFolder = handleHttpResponse(access.getHttpClient().execute(method), Folder.class);
+                    return parseFolder(restFolder);
                 } finally {
                     if (null != request) {
                         request.releaseConnection();
@@ -199,39 +182,30 @@ public final class CopyComFolderAccess extends AbstractCopyComResourceAccess imp
         return perform(new CopyComClosure<FileStorageFolder[]>() {
 
             @Override
-            protected FileStorageFolder[] doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+            protected FileStorageFolder[] doPerform(CopyComAccess access) throws OXException, JSONException, IOException {
                 HttpRequestBase request = null;
                 try {
                     String fid = toCopyComFolderId(parentIdentifier);
                     List<FileStorageFolder> folders = new LinkedList<FileStorageFolder>();
 
-                    int limit = 100;
-                    int offset = 0;
-                    int resultsFound;
-
-                    do {
-                        List<NameValuePair> qparams = initiateQueryString();
-                        qparams.add(new BasicNameValuePair("offset", Integer.toString(offset)));
-                        qparams.add(new BasicNameValuePair("limit", Integer.toString(limit)));
-                        HttpGet method = new HttpGet(buildUri(fid+"/files", qparams));
+                    {
+                        HttpGet method = new HttpGet(buildUri("meta/" + fid, null));
                         request = method;
                         access.sign(request);
 
                         JSONObject jResponse = handleHttpResponse(access.getHttpClient().execute(method), JSONObject.class);
-                        JSONArray jData = jResponse.getJSONArray("data");
-                        int length = jData.length();
-                        resultsFound = length;
+                        JSONArray jChildren = jResponse.getJSONArray("children");
+
+                        int length = jChildren.length();
                         for (int i = 0; i < length; i++) {
-                            JSONObject jItem = jData.getJSONObject(i);
-                            if (isFolder(jItem)) {
-                                folders.add(parseFolder(fid, jItem, httpClient));
+                            JSONObject jItem = jChildren.getJSONObject(i);
+                            if (TYPES_FOLDER.contains(jItem.optString("type", null))) {
+                                folders.add(new CopyComFolder(userId).parseDirEntry(jItem, rootFolderId, accountDisplayName));
                             }
                         }
                         reset(request);
                         request = null;
-
-                        offset += limit;
-                    } while (resultsFound == limit);
+                    }
 
                     return folders.toArray(new FileStorageFolder[folders.size()]);
                 } finally {
@@ -254,19 +228,15 @@ public final class CopyComFolderAccess extends AbstractCopyComResourceAccess imp
             protected String doPerform(CopyComAccess access) throws OXException, JSONException, IOException {
                 HttpRequestBase request = null;
                 try {
-                    HttpMove method = new HttpMove(buildUri(toCopyComFolderId(toCreate.getParentId()), null));
+                    HttpPost method = new HttpPost(buildUri("files/" + toCopyComFolderId(toCreate.getParentId()) + "/" + toCreate.getName(), null));
                     request = method;
                     access.sign(request);
-                    method.setHeader("Authorization", "Bearer " + copyComAccess.getAccessToken());
-                    method.setHeader("Content-Type", "application/json");
-                    method.setEntity(asHttpEntity(new JSONObject(2).put("name", toCreate.getName())));
 
                     JSONObject jResponse = handleHttpResponse(access.getHttpClient().execute(method), JSONObject.class);
                     return jResponse.getString("id");
                 } finally {
                     reset(request);
                 }
-
             }
         });
     }
@@ -290,33 +260,26 @@ public final class CopyComFolderAccess extends AbstractCopyComResourceAccess imp
             protected String doPerform(CopyComAccess access) throws OXException, JSONException, IOException {
                 HttpRequestBase request = null;
                 try {
-                    {
-                        HttpMove method = new HttpMove(buildUri(toCopyComFolderId(folderId), null));
-                        request = method;
-                        access.sign(request);
-                        method.setHeader("Authorization", "Bearer " + copyComAccess.getAccessToken());
-                        method.setHeader("Content-Type", "application/json");
-                        method.setEntity(asHttpEntity(new JSONObject(2).put("destination", toCopyComFolderId(newParentId))));
-
-                        handleHttpResponse(access.getHttpClient().execute(method), Void.class);
-                        reset(request);
-                        request = null;
+                    String fid = toCopyComFolderId(folderId);
+                    String name = newName;
+                    if (null == name) {
+                        int pos = fid.lastIndexOf('/');
+                        name = fid.substring(pos+1);
                     }
 
-                    if (null != newName) {
-                        HttpPut method = new HttpPut(buildUri(toCopyComFolderId(folderId), null));
-                        request = method;
-                        access.sign(request);
-                        method.setHeader("Authorization", "Bearer " + copyComAccess.getAccessToken());
-                        method.setHeader("Content-Type", "application/json");
-                        method.setEntity(asHttpEntity(new JSONObject(2).put("name", newName)));
+                    List<NameValuePair> qparams = new LinkedList<NameValuePair>();
+                    String newPath = newParentId + "/" + name;
+                    qparams.add(new BasicNameValuePair("path", newPath));
+                    qparams.add(new BasicNameValuePair("overwrite", "true"));
+                    HttpPut method = new HttpPut(buildUri("files/" + fid, null));
+                    request = method;
+                    access.sign(request);
 
-                        handleHttpResponse(access.getHttpClient().execute(method), Void.class);
-                        reset(request);
-                        request = null;
-                    }
+                    handleHttpResponse(access.getHttpClient().execute(method), Void.class);
+                    reset(request);
+                    request = null;
 
-                    return folderId;
+                    return newPath;
                 } catch (HttpResponseException e) {
                     throw handleHttpResponseError(folderId, e);
                 } finally {
@@ -334,18 +297,21 @@ public final class CopyComFolderAccess extends AbstractCopyComResourceAccess imp
             protected String doPerform(CopyComAccess access) throws OXException, JSONException, IOException {
                 HttpRequestBase request = null;
                 try {
-                    HttpPut method = new HttpPut(buildUri(toCopyComFolderId(folderId), null));
+                    List<NameValuePair> qparams = new LinkedList<NameValuePair>();
+                    qparams.add(new BasicNameValuePair("name", newName));
+                    String fid = toCopyComFolderId(folderId);
+                    HttpPut method = new HttpPut(buildUri("files/" + fid, null));
                     request = method;
                     access.sign(request);
-                    method.setHeader("Authorization", "Bearer " + copyComAccess.getAccessToken());
-                    method.setHeader("Content-Type", "application/json");
-                    method.setEntity(asHttpEntity(new JSONObject(2).put("name", newName)));
 
                     handleHttpResponse(access.getHttpClient().execute(method), Void.class);
                     reset(request);
                     request = null;
 
-                    return folderId;
+                    int pos = fid.lastIndexOf('/');
+                    String parentId = pos > 0 ? fid.substring(pos, pos) : "";
+
+                    return parentId + "/" + newName;
                 } catch (HttpResponseException e) {
                     throw handleHttpResponseError(folderId, e);
                 } finally {
@@ -368,11 +334,12 @@ public final class CopyComFolderAccess extends AbstractCopyComResourceAccess imp
             protected String doPerform(CopyComAccess access) throws OXException, JSONException, IOException {
                 HttpRequestBase request = null;
                 try {
-                    HttpDelete method = new HttpDelete(buildUri(toCopyComFolderId(folderId), initiateQueryString()));
+
+                    HttpDelete method = new HttpDelete(buildUri("files/" + toCopyComFolderId(folderId),null));
                     request = method;
                     access.sign(request);
 
-                    handleHttpResponse(access.getHttpClient().execute(method), Void.class);
+                    handleHttpResponse(access.getHttpClient().execute(method), STATUS_CODE_POLICY_IGNORE_NOT_FOUND, Void.class);
                     reset(request);
                     request = null;
 
@@ -402,39 +369,29 @@ public final class CopyComFolderAccess extends AbstractCopyComResourceAccess imp
                     String fid = toCopyComFolderId(folderId);
                     List<String> list = new LinkedList<String>();
 
-                    int limit = 100;
-                    int offset = 0;
-                    int resultsFound;
-
-                    do {
-                        List<NameValuePair> qparams = initiateQueryString();
-                        qparams.add(new BasicNameValuePair("offset", Integer.toString(offset)));
-                        qparams.add(new BasicNameValuePair("limit", Integer.toString(limit)));
-                        HttpGet method = new HttpGet(buildUri(fid+"/files", qparams));
+                    {
+                        HttpGet method = new HttpGet(buildUri("meta/" + fid, null));
                         request = method;
                         access.sign(request);
 
                         JSONObject jResponse = handleHttpResponse(access.getHttpClient().execute(method), JSONObject.class);
-                        JSONArray jData = jResponse.getJSONArray("data");
-                        int length = jData.length();
-                        resultsFound = length;
-                        for (int i = 0; i < length; i++) {
-                            JSONObject jItem = jData.getJSONObject(i);
-                            list.add(jItem.getString("id"));
-                        }
+                        JSONArray jChildren = jResponse.getJSONArray("children");
 
+                        int length = jChildren.length();
+                        for (int i = 0; i < length; i++) {
+                            JSONObject jItem = jChildren.getJSONObject(i);
+                            list.add(jItem.optString("id", null));
+                        }
                         reset(request);
                         request = null;
-
-                        offset += limit;
-                    } while (resultsFound == limit);
+                    }
 
                     for (String id : list) {
-                        HttpDelete method = new HttpDelete(buildUri(id, initiateQueryString()));
+                        HttpDelete method = new HttpDelete(buildUri("files/" + id,null));
                         request = method;
                         access.sign(request);
 
-                        handleHttpResponse(access.getHttpClient().execute(method), Void.class);
+                        handleHttpResponse(access.getHttpClient().execute(method), STATUS_CODE_POLICY_IGNORE_NOT_FOUND, Void.class);
                         reset(request);
                         request = null;
                     }
