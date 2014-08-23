@@ -112,11 +112,6 @@ public final class OneDriveFileStorageService implements AccountAware, OAuthUtil
         return newInst;
     }
 
-    /**
-     * The attribute expiration in millis.
-     */
-    public static final int DEFAULT_ATTR_EXPIRATION_PERIOD = 300000;
-
     private final DynamicFormDescription formDescription;
     private volatile FileStorageAccountManager accountManager;
     private volatile CompositeFileStorageAccountManagerProvider compositeAccountManager;
