@@ -53,7 +53,7 @@ import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Map;
 import org.scribe.builder.ServiceBuilder;
-import org.scribe.builder.api.Google2v2Api;
+import org.scribe.builder.api.Google2Api;
 import org.scribe.model.Token;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -125,9 +125,9 @@ public class GoogleApiClients {
 
         if (reacquireIfExpired) {
             // Create Scribe Google OAuth service
-            final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(Google2v2Api.class);
+            final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(Google2Api.class);
             serviceBuilder.apiKey(defaultAccount.getMetaData().getAPIKey(session)).apiSecret(defaultAccount.getMetaData().getAPISecret(session));
-            Google2v2Api.GoogleOAuth2Service scribeOAuthService = (Google2v2Api.GoogleOAuth2Service) serviceBuilder.build();
+            Google2Api.GoogleOAuth2Service scribeOAuthService = (Google2Api.GoogleOAuth2Service) serviceBuilder.build();
 
             // Check expiry
             int expiry = scribeOAuthService.getExpiry(defaultAccount.getToken());
@@ -189,9 +189,9 @@ public class GoogleApiClients {
 
         if (reacquireIfExpired) {
             // Create Scribe Google OAuth service
-            final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(Google2v2Api.class);
+            final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(Google2Api.class);
             serviceBuilder.apiKey(googleAccount.getMetaData().getAPIKey(session)).apiSecret(googleAccount.getMetaData().getAPISecret(session));
-            Google2v2Api.GoogleOAuth2Service scribeOAuthService = (Google2v2Api.GoogleOAuth2Service) serviceBuilder.build();
+            Google2Api.GoogleOAuth2Service scribeOAuthService = (Google2Api.GoogleOAuth2Service) serviceBuilder.build();
 
             // Check expiry
             int expiry = scribeOAuthService.getExpiry(googleAccount.getToken());
@@ -230,9 +230,9 @@ public class GoogleApiClients {
         }
 
         // Create Scribe Google OAuth service
-        final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(Google2v2Api.class);
+        final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(Google2Api.class);
         serviceBuilder.apiKey(googleAccount.getMetaData().getAPIKey(session)).apiSecret(googleAccount.getMetaData().getAPISecret(session));
-        Google2v2Api.GoogleOAuth2Service scribeOAuthService = (Google2v2Api.GoogleOAuth2Service) serviceBuilder.build();
+        Google2Api.GoogleOAuth2Service scribeOAuthService = (Google2Api.GoogleOAuth2Service) serviceBuilder.build();
 
         // Check expiry
         int expiry = scribeOAuthService.getExpiry(googleAccount.getToken());
@@ -259,9 +259,9 @@ public class GoogleApiClients {
         }
 
         // Create Scribe Google OAuth service
-        final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(Google2v2Api.class);
+        final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(Google2Api.class);
         serviceBuilder.apiKey(googleAccount.getMetaData().getAPIKey(session)).apiSecret(googleAccount.getMetaData().getAPISecret(session));
-        Google2v2Api.GoogleOAuth2Service scribeOAuthService = (Google2v2Api.GoogleOAuth2Service) serviceBuilder.build();
+        Google2Api.GoogleOAuth2Service scribeOAuthService = (Google2Api.GoogleOAuth2Service) serviceBuilder.build();
 
         // Check expiry
         int expiry = scribeOAuthService.getExpiry(googleAccount.getToken());
