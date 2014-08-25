@@ -2,6 +2,10 @@
 
  - Fix for bug 33354: Added display message for invalid characters in folder name
 
+* 2014-08-25 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 33748: Don't attempt to read more bytes from the buffer than available 
+
 * 2014-08-14 - thorben.betten@open-xchange.com
 
  - Fix for bug 34035: Properly acquire message's source
