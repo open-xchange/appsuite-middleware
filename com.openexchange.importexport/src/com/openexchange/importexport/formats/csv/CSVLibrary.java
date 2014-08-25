@@ -260,7 +260,7 @@ public final class CSVLibrary {
             	if(firstPartSpecialTreatment){
             		firstPartSpecialTreatment = false;
             		int offset = lengthOfBOM(buf);
-            		bob.append(buf, offset, length);
+            		bob.append(buf, offset, length - offset);
             	} else {
             		bob.append(buf, 0, length);
             	}
