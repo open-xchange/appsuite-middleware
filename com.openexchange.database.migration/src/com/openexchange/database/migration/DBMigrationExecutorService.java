@@ -91,7 +91,15 @@ public interface DBMigrationExecutorService {
      */
     public void execute(String fileName, List<ResourceAccessor> additionalAccessors) throws OXException;
 
-    public void rollback(int numberOfChangeSets) throws OXException;
+    /**
+     * Executes a rollback for the given number of ChangeSets
+     *
+     * @param fileName - String with the name of the file where to find the rollback tag
+     * @param numberOfChangeSets - number of ChangeSets to roll back to
+     * @return boolean - true if rollback was successful. Otherwise false
+     * @throws OXException
+     */
+    public boolean rollback(String fileName, int numberOfChangeSets) throws OXException;
 
     /**
      * Executes a rollback to the given tag

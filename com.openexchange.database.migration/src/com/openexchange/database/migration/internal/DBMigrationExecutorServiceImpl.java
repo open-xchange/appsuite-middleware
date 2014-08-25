@@ -136,12 +136,12 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
      * @throws OXException
      */
     private void handleExceptions(Exception exception) throws OXException {
-        if (exception instanceof ValidationFailedException) {
+        if (exception instanceof OXException) {
+            throw DBMigrationExceptionCodes.DBMIGARTION_ERROR.create(exception);
+        } else if (exception instanceof ValidationFailedException) {
             throw DBMigrationExceptionCodes.VALIDATION_FAILED_ERROR.create(exception);
         } else if (exception instanceof LiquibaseException) {
             throw DBMigrationExceptionCodes.LIQUIBASE_ERROR.create(exception);
-        } else if (exception instanceof OXException) {
-            throw DBMigrationExceptionCodes.DBMIGARTION_ERROR.create(exception);
         } else if (exception instanceof SQLException) {
             throw DBMigrationExceptionCodes.SQL_ERROR.create(exception);
         } else {
@@ -233,11 +233,12 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
 
     /**
      * {@inheritDoc}
+     * 
+     * @throws OXException
      */
     @Override
-    public void rollback(int numberOfChangeSets) {
-        // TODO Auto-generated method stub
-
+    public boolean rollback(String fileName, int numberOfChangeSets) throws OXException {
+        return rollbackChangeSets(fileName, numberOfChangeSets);
     }
 
     /**
@@ -247,6 +248,19 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
      */
     @Override
     public boolean rollback(String fileName, String changeSetTag) throws OXException {
+        return rollbackChangeSets(fileName, changeSetTag);
+    }
+
+    /**
+     * General method for a rollback. Provide an Integer as <code>target</code> param for number of changesets to rollback or provide a
+     * String as <code>target</code> param for a tag name to rollback.
+     *
+     * @param fileName
+     * @param target
+     * @return
+     * @throws OXException
+     */
+    private boolean rollbackChangeSets(String fileName, Object target) throws OXException {
         boolean rollbackSuccessful = false;
 
         File xmlConfigFile = getChangeLogFile(fileName);
@@ -257,15 +271,22 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
             writable = databaseService.getWritable();
 
             liquibase = prepareLiquibase(writable, xmlConfigFile.getAbsolutePath());
-            liquibase.rollback(changeSetTag, LIQUIBASE_CONTEXT_CONFIGDB);
 
+            if (target instanceof Integer) {
+                int numberOfChangeSetsToRollback = (Integer) target;
+                liquibase.rollback(numberOfChangeSetsToRollback, LIQUIBASE_CONTEXT_CONFIGDB);
+            } else if (target instanceof String) {
+                String changeSetTag = (String) target;
+                liquibase.rollback(changeSetTag, LIQUIBASE_CONTEXT_CONFIGDB);
+            } else {
+                throw DBMigrationExceptionCodes.WRONG_TYPE_OF_DATA_ROLLBACK_ERROR.create();
+            }
             rollbackSuccessful = true;
         } catch (Exception exception) {
             handleExceptions(exception);
         } finally {
             cleanUpLiquibase(writable, liquibase);
         }
-
         return rollbackSuccessful;
     }
 }
