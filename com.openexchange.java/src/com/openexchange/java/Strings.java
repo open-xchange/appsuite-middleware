@@ -246,6 +246,46 @@ public class Strings {
         Charsets.writeAsciiBytes(str, out);
     }
 
+    /**
+     * Splits given string by comma separator.
+     *
+     * @param s The string to split
+     * @return The splitted string
+     */
+    public static String[] splitByCommaNotInQuotes(String str) {
+        if (null == str) {
+            return null;
+        }
+        List<String> splitted = new LinkedList<String>();
+        int skipCommas = 0;
+        boolean inQuotes = false;
+        String s = "";
+
+        int length = str.length();
+        for (int i = 0; i < length; i++) {
+            char c = str.charAt(i);
+            if (c == ',' && skipCommas == 0 && !inQuotes) {
+                splitted.add(s);
+                s = "";
+            } else {
+                /*
+                if (c == '(') {
+                    skipCommas++;
+                }
+                if (c == ')') {
+                    skipCommas--;
+                }
+                */
+                if ('"' == c) {
+                    inQuotes = !inQuotes;
+                }
+                s += c;
+            }
+        }
+        splitted.add(s);
+        return splitted.toArray(new String[splitted.size()]);
+    }
+
     private static final Pattern P_SPLIT_COMMA = Pattern.compile("\\s*,\\s*");
 
     /**
