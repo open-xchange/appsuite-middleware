@@ -59,7 +59,7 @@ import org.scribe.builder.api.BoxApi;
 import org.scribe.builder.api.DropBoxApi;
 import org.scribe.builder.api.FacebookApi;
 import org.scribe.builder.api.FlickrApi;
-import org.scribe.builder.api.Google2v2Api;
+import org.scribe.builder.api.Google2Api;
 import org.scribe.builder.api.LinkedInApi;
 import org.scribe.builder.api.MsLiveConnectApi;
 import org.scribe.builder.api.TumblrApi;
@@ -141,7 +141,7 @@ public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericReque
         case XING:
             return XingApi.class;
         case GOOGLE:
-            return Google2v2Api.class;
+            return Google2Api.class;
         case BOX_COM:
             return BoxApi.class;
         case MS_LIVE_CONNECT:

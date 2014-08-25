@@ -74,7 +74,7 @@ import org.scribe.builder.api.DropBoxApi;
 import org.scribe.builder.api.FacebookApi;
 import org.scribe.builder.api.FlickrApi;
 import org.scribe.builder.api.FoursquareApi;
-import org.scribe.builder.api.Google2v2Api;
+import org.scribe.builder.api.Google2Api;
 import org.scribe.builder.api.LinkedInApi;
 import org.scribe.builder.api.TumblrApi;
 import org.scribe.builder.api.TwitterApi;
@@ -839,7 +839,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             } else if (serviceId.indexOf("linkedin") >= 0) {
                 apiClass = LinkedInApi.class;
             } else if (serviceId.indexOf("google") >= 0) {
-                apiClass = Google2v2Api.class;
+                apiClass = Google2Api.class;
             } else if (serviceId.indexOf("yahoo") >= 0) {
                 apiClass = YahooApi.class;
             } else if (serviceId.indexOf("foursquare") >= 0) {

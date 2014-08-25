@@ -353,7 +353,6 @@ public class TestCommand extends Command {
         public List<String[]> getJsonMatchTypes() {
             return jsonMatchTypes;
         }
-
     }
 
     private Commands command;

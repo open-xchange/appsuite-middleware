@@ -1,3 +1,15 @@
+* 2014-08-25 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 33748: Don't attempt to read more bytes from the buffer than available
+
+* 2014-08-25 - thorben.betten@open-xchange.com
+
+ - Fix for bug 34070: Fixed parsing of E-Mail address in case personal is mail-safe encoded
+
+* 2014-08-24 - thorben.betten@open-xchange.com
+
+ - Fix for bug 33979: Restored libraries in c.o.subscribe.crawler bundle to maintain package compatibility
+
 * 2014-08-20 - martin.herfurth@open-xchange.com
 
  - Fix for bug 33821: Avoid duplicate entries for participant tables.

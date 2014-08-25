@@ -606,11 +606,11 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
             Drive.Children.List list = drive.children().list(fid);
             list.setQ(QUERY_STRING_FILES_ONLY_EXCLUDING_TRASH);
-            ChildList childList = list.execute();
 
+            List<ChildReference> items = list.execute().getItems();
             List<File> files = new LinkedList<File>();
-            if (!childList.getItems().isEmpty()) {
-                for (ChildReference child : childList.getItems()) {
+            if (!items.isEmpty()) {
+                for (ChildReference child : items) {
                     String fileId = child.getId();
                     files.add(new GoogleDriveFile(folderId, fileId, userId, rootFolderId).parseGoogleDriveFile(drive.files().get(fileId).execute()));
                 }
@@ -618,9 +618,9 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 String nextPageToken = list.getPageToken();
                 while (!isEmpty(nextPageToken)) {
                     list.setPageToken(nextPageToken);
-                    childList = list.execute();
-                    if (!childList.getItems().isEmpty()) {
-                        for (ChildReference child : childList.getItems()) {
+                    items = list.execute().getItems();
+                    if (!items.isEmpty()) {
+                        for (ChildReference child : items) {
                             String fileId = child.getId();
                             files.add(new GoogleDriveFile(folderId, fileId, userId, rootFolderId).parseGoogleDriveFile(drive.files().get(fileId).execute()));
                         }

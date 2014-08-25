@@ -53,5 +53,69 @@ package com.openexchange.oauth;
  * {@link API} - An enumeration for available APIs.
  */
 public enum API {
-    FACEBOOK, TWITTER, LINKEDIN, OTHER, MSN, YAHOO, TUMBLR, FLICKR, DROPBOX, XING, VKONTAKTE, GOOGLE, BOX_COM, MS_LIVE_CONNECT, COPY_COM;
+    /**
+     * Facebook
+     */
+    FACEBOOK,
+    /**
+     * Twitter
+     */
+    TWITTER,
+    /**
+     * LinkedIn
+     */
+    LINKEDIN,
+    /**
+     * Other/unknown
+     */
+    OTHER,
+    /**
+     * MSN
+     */
+    MSN,
+    /**
+     * Yahoo
+     */
+    YAHOO,
+    /**
+     * Tumblr
+     */
+    TUMBLR,
+    /**
+     * Flickr
+     */
+    FLICKR,
+    /**
+     * Dropbox
+     */
+    DROPBOX,
+    /**
+     * XING
+     */
+    XING,
+    /**
+     * vkontakte
+     */
+    VKONTAKTE,
+    /**
+     * Google
+     */
+    GOOGLE,
+    /**
+     * Box.com
+     */
+    BOX_COM,
+    /**
+     * Microsoft Live Connect
+     */
+    MS_LIVE_CONNECT,
+    /**
+     * Copy.com
+     */
+    COPY_COM,
+    /**
+     * SurDoc
+     */
+    SURDOC,
+    ;
 }

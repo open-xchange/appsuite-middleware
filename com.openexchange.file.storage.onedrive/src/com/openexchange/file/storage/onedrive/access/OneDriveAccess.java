@@ -85,27 +85,27 @@ public class OneDriveAccess {
     private static final long RECHECK_THRESHOLD = 2700;
 
     /**
-     * Gets the Box access for given Box account.
+     * Gets the Microsoft OneDrive access for given Microsoft OneDrive account.
      *
-     * @param fsAccount The Box account providing credentials and settings
+     * @param fsAccount The Microsoft OneDrive account providing credentials and settings
      * @param session The user session
-     * @return The Box access; either newly created or fetched from underlying registry
-     * @throws OXException If a Box access could not be created
+     * @return The Microsoft OneDrive access; either newly created or fetched from underlying registry
+     * @throws OXException If a Microsoft OneDrive access could not be created
      */
     public static OneDriveAccess accessFor(final FileStorageAccount fsAccount, final Session session) throws OXException {
         final OneDriveAccessRegistry registry = OneDriveAccessRegistry.getInstance();
         final String accountId = fsAccount.getId();
-        OneDriveAccess boxAccess = registry.getAccess(session.getContextId(), session.getUserId(), accountId);
-        if (null == boxAccess) {
+        OneDriveAccess oneDriveAccess = registry.getAccess(session.getContextId(), session.getUserId(), accountId);
+        if (null == oneDriveAccess) {
             final OneDriveAccess newInstance = new OneDriveAccess(fsAccount, session, session.getUserId(), session.getContextId());
-            boxAccess = registry.addAccess(session.getContextId(), session.getUserId(), accountId, newInstance);
-            if (null == boxAccess) {
-                boxAccess = newInstance;
+            oneDriveAccess = registry.addAccess(session.getContextId(), session.getUserId(), accountId, newInstance);
+            if (null == oneDriveAccess) {
+                oneDriveAccess = newInstance;
             }
         } else {
-            boxAccess.ensureNotExpired(session);
+            oneDriveAccess.ensureNotExpired(session);
         }
-        return boxAccess;
+        return oneDriveAccess;
     }
 
     // ------------------------------------------------------------------------------------------------------------------------ //
@@ -171,7 +171,7 @@ public class OneDriveAccess {
     }
 
     private OAuthAccount recreateTokenIfExpired(boolean considerExpired, OAuthAccount liveconnectOAuthAccount, Session session) throws OXException {
-        // Create Scribe Box.com OAuth service
+        // Create Scribe Microsoft OneDrive OAuth service
         final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(MsLiveConnectApi.class);
         serviceBuilder.apiKey(liveconnectOAuthAccount.getMetaData().getAPIKey(session)).apiSecret(liveconnectOAuthAccount.getMetaData().getAPISecret(session));
         MsLiveConnectApi.MsLiveConnectService scribeOAuthService = (MsLiveConnectApi.MsLiveConnectService) serviceBuilder.build();
@@ -228,7 +228,7 @@ public class OneDriveAccess {
     }
 
     /**
-     * Re-initializes this Box access
+     * Re-initializes this Microsoft OneDrive access
      *
      * @param session The session
      * @throws OXException If operation fails
@@ -245,9 +245,9 @@ public class OneDriveAccess {
     }
 
     /**
-     * Gets the current Box client instance
+     * Gets the current HTTP client instance
      *
-     * @return The box client
+     * @return The HTTP client
      */
     public DefaultHttpClient getHttpClient() {
         return httpClient;

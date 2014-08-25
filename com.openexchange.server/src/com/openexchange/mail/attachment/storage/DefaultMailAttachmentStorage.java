@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.attachment.storage;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -59,6 +58,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 import javax.activation.DataHandler;
 import javax.mail.MessagingException;
@@ -85,8 +85,10 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
-import com.openexchange.mail.mime.datasource.MessageDataSource;
+import com.openexchange.mail.mime.datasource.DocumentDataSource;
 import com.openexchange.mail.mime.processing.MimeProcessingUtility;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationService;
@@ -210,7 +212,7 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
                         fileAccess.removeDocument(toRemove, now);
                         fileAccess.commit();
                     } finally {
-                        fileAccess.finish();
+                        finishSafe(fileAccess);
                     }
                 }
             }
@@ -220,16 +222,27 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
     }
 
     @Override
-    public String storeAttachment(MailPart attachment, MessageInfo msgInfo, Locale externalLocale, Session session) throws OXException {
+    public String storeAttachment(MailPart attachment, StoreOperation op, Map<String, Object> storeProps, Session session) throws OXException {
         IDBasedFileAccessFactory fileAccessFactory = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class, true);
+        boolean publishStore = StoreOperation.PUBLISH_STORE.equals(op);
 
         // Check for folder ID
-        final String key = MailSessionParameterNames.getParamPublishingInfostoreFolderID();
-        if (!session.containsParameter(key)) {
-            final Throwable t = new Throwable("Missing folder ID of publishing infostore folder.");
-            throw MailExceptionCode.SEND_FAILED_UNKNOWN.create(t, new Object[0]);
+        String folderId;
+        {
+            String sFolderId = null == storeProps ? null : (String) storeProps.get("folder");
+            if (null != sFolderId) {
+                folderId = sFolderId;
+            } else if (publishStore) {
+                final String key = MailSessionParameterNames.getParamPublishingInfostoreFolderID();
+                if (!session.containsParameter(key)) {
+                    final Throwable t = new Throwable("Missing folder ID of publishing infostore folder.");
+                    throw MailExceptionCode.SEND_FAILED_UNKNOWN.create(t, new Object[0]);
+                }
+                folderId = ((Integer) session.getParameter(key)).toString();
+            } else {
+                throw MailExceptionCode.MISSING_PARAM.create("folder");
+            }
         }
-        final int folderId = ((Integer) session.getParameter(key)).intValue();
 
         // Create document meta data for current attachment
         String name = attachment.getFileName();
@@ -238,32 +251,37 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
         }
         final File file = new DefaultFile();
         file.setId(FileStorageFileAccess.NEW);
-        file.setFolderId(String.valueOf(folderId));
+        file.setFolderId(folderId);
         file.setFileName(name);
         file.setFileMIMEType(attachment.getContentType().getBaseType());
         file.setTitle(name);
-        if (null != msgInfo) {
-            // Description
-            Locale locale = externalLocale;
-            if (null == locale) {
-                locale = getSessionUserLocale(session);
+        if (null != storeProps) {
+            String description = (String) storeProps.get("description");
+            if (null != description) {
+                file.setDescription(description);
+            } else if (publishStore) {
+                // Description
+                Locale locale = (Locale) storeProps.get("externalLocale");
+                if (null == locale) {
+                    locale = getSessionUserLocale(session);
+                }
+                final StringHelper stringHelper = StringHelper.valueOf(locale);
+                String desc = stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENT_INFO);
+                {
+                    final String subject = (String) storeProps.get("subject");
+                    desc = desc.replaceFirst("#SUBJECT#", com.openexchange.java.Strings.quoteReplacement(null == subject ? stringHelper.getString(MailStrings.DEFAULT_SUBJECT) : subject));
+                }
+                {
+                    final Date date = (Date) storeProps.get("date");
+                    final String repl = date == null ? "" : com.openexchange.java.Strings.quoteReplacement(MimeProcessingUtility.getFormattedDate(date, DateFormat.LONG, locale, TimeZone.getDefault()));
+                    desc = desc.replaceFirst("#DATE#", repl);
+                }
+                {
+                    final InternetAddress[] to = (InternetAddress[]) storeProps.get("to");
+                    desc = desc.replaceFirst("#TO#", com.openexchange.java.Strings.quoteReplacement(to == null || to.length == 0 ? "" : com.openexchange.java.Strings.quoteReplacement(MimeProcessingUtility.addrs2String(to))));
+                }
+                file.setDescription(desc);
             }
-            final StringHelper stringHelper = StringHelper.valueOf(locale);
-            String desc = stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENT_INFO);
-            {
-                final String subject = msgInfo.subject;
-                desc = desc.replaceFirst("#SUBJECT#", com.openexchange.java.Strings.quoteReplacement(null == subject ? stringHelper.getString(MailStrings.DEFAULT_SUBJECT) : subject));
-            }
-            {
-                final Date date = msgInfo.date;
-                final String repl = date == null ? "" : com.openexchange.java.Strings.quoteReplacement(MimeProcessingUtility.getFormattedDate(date, DateFormat.LONG, locale, TimeZone.getDefault()));
-                desc = desc.replaceFirst("#DATE#", repl);
-            }
-            {
-                final InternetAddress[] to = msgInfo.to;
-                desc = desc.replaceFirst("#TO#", com.openexchange.java.Strings.quoteReplacement(to == null || to.length == 0 ? "" : com.openexchange.java.Strings.quoteReplacement(MimeProcessingUtility.addrs2String(to))));
-            }
-            file.setDescription(desc);
         }
         /*
          * Put attachment's document to dedicated infostore folder
@@ -305,8 +323,7 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
                     final int pos = name.lastIndexOf('.');
                     final String newName;
                     if (pos >= 0) {
-                        newName =
-                            hlp.append(name.substring(0, pos)).append("_(").append(++count).append(')').append(name.substring(pos)).toString();
+                        newName = hlp.append(name.substring(0, pos)).append("_(").append(++count).append(')').append(name.substring(pos)).toString();
                     } else {
                         newName = hlp.append(name).append("_(").append(++count).append(')').toString();
                     }
@@ -318,7 +335,7 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
                     if (rollbackNeeded) {
                         fileAccess.rollback();
                     }
-                    fileAccess.finish();
+                    finishSafe(fileAccess);
                 }
             } finally {
                 Streams.close(in);
@@ -329,22 +346,70 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
 
     @Override
     public MailPart getAttachment(String id, Session session) throws OXException {
+        IDBasedFileAccess fileAccess = null;
         try {
             IDBasedFileAccessFactory fileAccessFactory = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class, true);
 
-            IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
+            fileAccess = fileAccessFactory.createAccess(session);
             File fileMetadata = fileAccess.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
 
-            MimeBodyPart mimeBodyPart = new MimeBodyPart();
-            mimeBodyPart.setDataHandler(new DataHandler(new MessageDataSource(fileAccess.getDocument(id, FileStorageFileAccess.CURRENT_VERSION), fileMetadata.getFileMIMEType())));
-            mimeBodyPart.setFileName(fileMetadata.getFileName());
-            mimeBodyPart.setHeader("Content-Type", fileMetadata.getFileMIMEType());
+            String fileName = fileMetadata.getFileName();
+            String fileMIMEType = fileMetadata.getFileMIMEType();
+            if (Strings.isEmpty(fileMIMEType) || MimeTypes.MIME_APPL_OCTET.equalsIgnoreCase(fileMIMEType)) {
+                fileMIMEType = MimeType2ExtMap.getContentType(fileName, MimeTypes.MIME_APPL_OCTET);
+            }
 
-            return MimeMessageConverter.convertPart(mimeBodyPart, false);
+            MimeBodyPart mimeBodyPart = new MimeBodyPart();
+            mimeBodyPart.setDataHandler(new DataHandler(new DocumentDataSource(id, fileMIMEType, fileName, session)));
+            mimeBodyPart.setFileName(fileName);
+            mimeBodyPart.setHeader("Content-Type", fileMIMEType);
+
+            MailPart mailPart = MimeMessageConverter.convertPart(mimeBodyPart, false);
+            mailPart.setSize(fileMetadata.getFileSize());
+            return mailPart;
         } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
-        } catch (IOException e) {
-            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            finishSafe(fileAccess);
+        }
+    }
+
+    @Override
+    public MailAttachmentInfo getAttachmentInfo(String id, Session session) throws OXException {
+        IDBasedFileAccess fileAccess = null;
+        try {
+            IDBasedFileAccessFactory fileAccessFactory = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class, true);
+
+            fileAccess = fileAccessFactory.createAccess(session);
+            File fileMetadata = fileAccess.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
+
+            String fileName = fileMetadata.getFileName();
+            String fileMIMEType = fileMetadata.getFileMIMEType();
+            if (Strings.isEmpty(fileMIMEType) || MimeTypes.MIME_APPL_OCTET.equalsIgnoreCase(fileMIMEType)) {
+                fileMIMEType = MimeType2ExtMap.getContentType(fileName, MimeTypes.MIME_APPL_OCTET);
+            }
+
+            return new MailAttachmentInfo(id, fileMIMEType, fileName, fileMetadata.getFileSize());
+        } catch (RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            finishSafe(fileAccess);
+        }
+    }
+
+    @Override
+    public InputStream getAttachmentStream(String id, Session session) throws OXException {
+        IDBasedFileAccess fileAccess = null;
+        try {
+            IDBasedFileAccessFactory fileAccessFactory = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class, true);
+            fileAccess = fileAccessFactory.createAccess(session);
+            return fileAccess.getDocument(id, FileStorageFileAccess.CURRENT_VERSION);
+        } catch (RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            finishSafe(fileAccess);
         }
     }
 
@@ -363,7 +428,7 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
             fileAccess.rollback();
             throw x;
         } finally {
-            fileAccess.finish();
+            finishSafe(fileAccess);
         }
     }
 
@@ -394,10 +459,7 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
     @Override
     public void discard(String id, DownloadUri downloadUri, Session session) throws OXException {
         IDBasedFileAccessFactory fileAccessFactory = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class, true);
-        IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
-
         PublicationRefs publicationRefs = getPublicationRefs();
-
         long timestamp = System.currentTimeMillis();
 
         // Delete publication
@@ -409,6 +471,7 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
 
         // Delete file
         try {
+            IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
             fileAccess.startTransaction();
             try {
                 fileAccess.removeDocument(Collections.singletonList(id), timestamp);
@@ -417,7 +480,7 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
                 fileAccess.rollback();
                 throw x;
             } finally {
-                fileAccess.finish();
+                finishSafe(fileAccess);
             }
         } catch (final OXException e) {
             LOG.error("Transaction error while deleting file with ID \"{}\" failed.", id, e);
@@ -500,6 +563,16 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
         }
 
         return newFolder;
+    }
+
+    private static void finishSafe(IDBasedFileAccess fileAccess) {
+        if (fileAccess != null) {
+            try {
+                fileAccess.finish();
+            } catch (final Exception e) {
+                // IGNORE
+            }
+        }
     }
 
 }

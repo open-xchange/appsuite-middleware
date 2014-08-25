@@ -68,7 +68,7 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.timer.TimerService;
 
 /**
- * {@link OneDriveActivator} - Activator for Box.com bundle.
+ * {@link OneDriveActivator} - Activator for Microsoft OneDrive bundle.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

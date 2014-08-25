@@ -49,6 +49,7 @@
 
 package com.openexchange.http.grizzly.osgi;
 
+import static com.openexchange.servlet.Constants.FILTER_PATHS;
 import java.util.Collection;
 import java.util.Iterator;
 import javax.servlet.Filter;
@@ -66,8 +67,8 @@ import com.openexchange.http.grizzly.service.http.ServletFilterRegistration;
  * accordingly so the filters are applied to new incoming requests/outgoing responses.
  * 
  * <p>
- * A Filter service may be registered with an additional <strong>filter.paths</strong> property. This property may consist of path
- * expressions including wildcards. The path property should be provided as:
+ * A Filter service may be registered with an additional <strong>com.openexchange.servlet.Constants.FILTER_PATHS</strong> property. This
+ * property may consist of path expressions including wildcards. The path property should be provided as:
  * 
  * <ol>
  *   <li>A single String for a single path</li>
@@ -127,7 +128,7 @@ import com.openexchange.http.grizzly.service.http.ServletFilterRegistration;
  *
  *      Hashtable<String, Object> serviceProperties = new Hashtable<String, Object>();
  *      serviceProperties.put(Constants.SERVICE_RANKING, 0);
- *      serviceProperties.put(ServletFilterTracker.PATH_INFO, "*");
+ *      serviceProperties.put(FILTER_PATHS, "*");
  *
  *      registerService(Filter.class, yourFilter, serviceProperties);
  *}
@@ -154,8 +155,6 @@ public class ServletFilterTracker implements ServiceTrackerCustomizer<Filter, Fi
             return this;
         }
     }
-    
-    public static String PATH_INFO = "path.info";
 
     // ------------------------------------------------------------------------------------------------------------------------------- //
 
@@ -198,7 +197,7 @@ public class ServletFilterTracker implements ServiceTrackerCustomizer<Filter, Fi
     }
 
     private String[] getPathsFrom(ServiceReference<Filter> reference) throws InvalidFilterPathsException {
-        final Object filterPathObj = reference.getProperty("filter.paths");
+        final Object filterPathObj = reference.getProperty(FILTER_PATHS);
         if (filterPathObj instanceof String) {
             return filterPathObj.toString().equals("*") ? null : new String[] { filterPathObj.toString() };
         } else if (filterPathObj instanceof String[]) {

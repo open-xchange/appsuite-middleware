@@ -47,41 +47,41 @@
  *
  */
 
-package com.openexchange.mail.attachment.storage;
+package com.openexchange.file.storage.copycom.http.client.methods;
 
-import java.util.Date;
-import javax.mail.internet.InternetAddress;
-
+import java.net.URI;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 
 /**
- * {@link MessageInfo} - A message information object.
+ * {@link HttpMove}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.1
  */
-public class MessageInfo {
+public class HttpMove extends HttpEntityEnclosingRequestBase {
 
-    /** The subject */
-    public final String subject;
+    public final static String METHOD_NAME = "MOVE";
 
-    /** The date */
-    public final Date date;
+    public HttpMove() {
+        super();
+    }
 
-    /** The <code>"To"</code> addresses */
-    public final InternetAddress[] to;
+    public HttpMove(final URI uri) {
+        super();
+        setURI(uri);
+    }
 
     /**
-     * Initializes a new {@link MessageInfo}.
-     *
-     * @param subject The subject
-     * @param date The date
-     * @param to The <code>"To"</code> address
+     * @throws IllegalArgumentException if the uri is invalid.
      */
-    public MessageInfo(String subject, Date date, InternetAddress[] to) {
+    public HttpMove(final String uri) {
         super();
-        this.subject = subject;
-        this.date = date;
-        this.to = to;
+        setURI(URI.create(uri));
+    }
+
+    @Override
+    public String getMethod() {
+        return METHOD_NAME;
     }
 
 }

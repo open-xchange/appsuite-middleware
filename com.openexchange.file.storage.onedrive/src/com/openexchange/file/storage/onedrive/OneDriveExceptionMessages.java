@@ -100,6 +100,9 @@ public final class OneDriveExceptionMessages implements LocalizableStrings {
     // Authentication failed: %1$s
     public static final String AUTH_ERROR_MSG = "Authentication failed: %1$s";
 
+    // The OneDrive resource does not exist
+    public static final String NOT_FOUND_SIMPLE_MSG = "The OneDrive resource does not exist";
+
     /**
      * Initializes a new {@link OneDriveExceptionMessages}.
      */

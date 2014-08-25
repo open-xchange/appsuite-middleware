@@ -130,7 +130,11 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
 
     @Override
     public FileStorageFolder getFolder(String folderId) throws OXException {
-        FolderID folderID = new FolderID(folderId);
+        return getFolder(new FolderID(folderId));
+    }
+
+    @Override
+    public FileStorageFolder getFolder(FolderID folderID) throws OXException {
         FileStorageFolder folder = getFolderAccess(folderID).getFolder(folderID.getFolderId());
         return withUniqueID(folder, folderID.getService(), folderID.getAccountId());
     }

@@ -78,6 +78,10 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  */
 @SuppressWarnings("unchecked")
 public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
+    
+    private final static String dateFormatPattern = "yyyy-MM-dd";
+    
+    private final static String timeFormatPattern = "HH:mm:ss";
 
     private final static String[] RULE_FIELDS_LIST = {
         RuleFields.ID,
@@ -290,18 +294,18 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
         return retval;
     }
 
-    static List<String> JSONDateArrayToStringList(final JSONArray jarray) throws JSONException {
+    static List<String> JSONDateArrayToStringList(final JSONArray jarray, final String formatPattern) throws JSONException {
         final ArrayList<String> retval = new ArrayList<String>(jarray.length());
         for (int i = 0; i < jarray.length(); i++) {
-            retval.add(convertJSONDate2Sieve(jarray.getString(i)));
+            retval.add(convertJSONDate2Sieve(jarray.getString(i), formatPattern));
         }
         return retval;
     }
 
-    private static String convertJSONDate2Sieve(String string) throws JSONException {
+    private static String convertJSONDate2Sieve(final String string, final String formatPattern) throws JSONException {
         try {
             final Date date = new Date(Long.parseLong(string));
-            final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+            final SimpleDateFormat df = new SimpleDateFormat(formatPattern);
             df.setTimeZone(TimeZone.getTimeZone("UTC"));
             return df.format(date);
         } catch (NumberFormatException e) {
@@ -531,12 +535,17 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                         throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Currentdate rule: The comparison \"" + comparison + "\" is not a valid comparison");
                     }
                     final String datepart = getString(jobj, CurrentDateTestFields.DATEPART, id);
+                    final String pattern;
                     if ("date".equals(datepart)) {
                         argList.add(getArrayFromString(datepart));
+                        pattern = dateFormatPattern;
+                    } else if ("time".equals(datepart)) {
+                        argList.add(getArrayFromString(datepart));
+                        pattern = timeFormatPattern;
                     } else {
                         throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Currentdate rule: The datepart \"" + datepart + "\" is not a valid datepart");
                     }
-                    argList.add(JSONDateArrayToStringList(getJSONArray(jobj, CurrentDateTestFields.DATEVALUE, id)));
+                    argList.add(JSONDateArrayToStringList(getJSONArray(jobj, CurrentDateTestFields.DATEVALUE, id), pattern));
                     return new TestCommand(TestCommand.Commands.CURRENTDATE, argList, new ArrayList<TestCommand>());
                 } else if (TestCommand.Commands.ALLOF.getCommandname().equals(id)) {
                     return createAllofOrAnyofTestCommand(jobj, id, TestCommand.Commands.ALLOF);
@@ -614,7 +623,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                             tmp.put(BodyTestFields.VALUES, new JSONArray((List)testCommand.getArguments().get(2)));
                         }
                     } else if (TestCommand.Commands.CURRENTDATE.equals(testCommand.getCommand())) {
-                        tmp.put(GeneralFields.ID, TestCommand.Commands.CURRENTDATE.getCommandname());
+                        tmp.put(GeneralFields.ID, testCommand.getCommand().getCommandname());
                         final String comparison = testCommand.getMatchtype().substring(1);
                         if ("value".equals(comparison)) {
                             tmp.put(CurrentDateTestFields.COMPARISON, ((List)testCommand.getArguments().get(testCommand.getTagarguments().size())).get(0));
@@ -624,7 +633,9 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                         final List value = (List)testCommand.getArguments().get(testCommand.getArguments().size()-2);
                         tmp.put(CurrentDateTestFields.DATEPART, value.get(0));
                         if ("date".equals(value.get(0))) {
-                            tmp.put(CurrentDateTestFields.DATEVALUE, getJSONDateArray((List)testCommand.getArguments().get(testCommand.getArguments().size()-1)));
+                            tmp.put(CurrentDateTestFields.DATEVALUE, getJSONDateArray((List)testCommand.getArguments().get(testCommand.getArguments().size()-1), dateFormatPattern));
+                        } else if ("time".equals(value.get(0))) {
+                            tmp.put(CurrentDateTestFields.DATEVALUE, getJSONDateArray((List)testCommand.getArguments().get(testCommand.getArguments().size()-1), timeFormatPattern));
                         } else {
                             tmp.put(CurrentDateTestFields.DATEVALUE, new JSONArray((List)testCommand.getArguments().get(testCommand.getArguments().size()-1)));
                         }
@@ -636,8 +647,8 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 }
             }
 
-            private JSONArray getJSONDateArray(final List<String> collection) throws JSONException {
-                final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+            private JSONArray getJSONDateArray(final List<String> collection, final String formatPattern) throws JSONException {
+                final SimpleDateFormat df = new SimpleDateFormat(formatPattern);
                 df.setTimeZone(TimeZone.getTimeZone("UTC"));
                 final JSONArray retval = new JSONArray();
                 for (final String part : collection) {
