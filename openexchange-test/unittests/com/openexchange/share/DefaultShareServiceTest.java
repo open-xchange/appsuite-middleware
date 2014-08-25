@@ -206,9 +206,9 @@ public class DefaultShareServiceTest extends TestCase {
             OXFolderAccess access = new OXFolderAccess(ctx);
             FolderObject share1 = access.getDefaultFolder(user.getId(), FolderObject.CONTACT);
             int count = new Random().nextInt(5);
-            List<Guest> guests = new ArrayList<Guest>(count);
+            List<AddedGuest> guests = new ArrayList<AddedGuest>(count);
             for (int i = 1; i <= count; i++) {
-                Guest g = new Guest();
+                AddedGuest g = new AddedGuest();
                 g.setAuthenticationMode(AuthenticationMode.ANONYMOUS);
                 g.setDisplayName("Guest " + i);
                 guests.add(g);
@@ -217,9 +217,9 @@ public class DefaultShareServiceTest extends TestCase {
 
             FolderObject share2 = access.getDefaultFolder(user.getId(), FolderObject.CALENDAR);
             count = new Random().nextInt(5);
-            guests = new ArrayList<Guest>(count);
+            guests = new ArrayList<AddedGuest>(count);
             for (int i = 1; i <= count; i++) {
-                Guest g = new Guest();
+                AddedGuest g = new AddedGuest();
                 g.setAuthenticationMode(AuthenticationMode.ANONYMOUS);
                 g.setDisplayName("Guest " + i);
                 guests.add(g);
