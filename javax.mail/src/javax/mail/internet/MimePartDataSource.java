@@ -78,7 +78,7 @@ public class MimePartDataSource implements DataSource, MessageAware {
     /**
      * Returns an input stream from this  MimePart. <p>
      *
-     * This method applies the appropriate transfer-decoding, based 
+     * This method applies the appropriate transfer-decoding, based
      * on the Content-Transfer-Encoding attribute of this MimePart.
      * Thus the returned input stream is a decoded stream of bytes.<p>
      *
@@ -101,7 +101,7 @@ public class MimePartDataSource implements DataSource, MessageAware {
 		is = ((MimeMessage)part).getContentStream();
 	    else
 		throw new MessagingException("Unknown part");
-	    
+
 	    String encoding =
 		MimeBodyPart.restrictEncoding(part, part.getEncoding());
 	    if (encoding != null)
@@ -112,7 +112,7 @@ public class MimePartDataSource implements DataSource, MessageAware {
 	    throw new FolderClosedIOException(fex.getFolder(),
 						fex.getMessage());
 	} catch (MessagingException mex) {
-	    throw new IOException(mex.getMessage());
+	    throw new IOException(mex.getMessage(), mex);
 	}
     }
 
