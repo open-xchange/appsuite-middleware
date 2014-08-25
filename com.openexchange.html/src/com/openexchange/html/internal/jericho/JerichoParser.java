@@ -65,6 +65,7 @@ import net.htmlparser.jericho.StreamedSource;
 import net.htmlparser.jericho.Tag;
 import net.htmlparser.jericho.TagType;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.html.HtmlServices;
 import com.openexchange.html.internal.parser.HtmlHandler;
 import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.java.Streams;
@@ -174,24 +175,17 @@ public final class JerichoParser {
      * @return The checked HTML content possibly with surrounded with a <code>&lt;body&gt;</code> tag
      * @throws ParsingDeniedException If specified HTML content cannot be parsed without wasting too many JVM resources
      */
-    private StreamedSource checkBody(final String html) {
+    private boolean checkBody(String html, boolean checkSize) {
         if (null == html) {
-            return null;
+            return false;
         }
-        final int maxLength = maxLength();
-        final boolean big = html.length() > maxLength;
-        if (big) {
-            throw new ParsingDeniedException("HTML content is too big: max. " + maxLength + ", but is " + html.length());
+        if (checkSize) {
+            int maxLength = HtmlServices.htmlThreshold();
+            if (html.length() > maxLength) {
+                throw new ParsingDeniedException("HTML content is too big: max. " + maxLength + ", but is " + html.length());
+            }
         }
-        if (BODY_START.matcher(html).find()) {
-            return new StreamedSource(html);
-        }
-        // <body> tag missing
-        String sep = System.getProperty("line.separator");
-        if (null == sep) {
-            sep = "\n";
-        }
-        return new StreamedSource(new StringBuilder(html.length() + 16).append("<body>").append(sep).append(html).append(sep).append("</body>"));
+        return (html.indexOf("<body") >= 0) || (html.indexOf("<BODY") >= 0);
     }
 
     private static final Pattern INVALID_DELIM = Pattern.compile("\" *, *\"");
@@ -204,29 +198,43 @@ public final class JerichoParser {
      * @param handler The HTML handler
      * @throws ParsingDeniedException If specified HTML content cannot be parsed without wasting too many JVM resources
      */
-    public void parse(final String html, final JerichoHandler handler) {
+    public void parse(String html, JerichoHandler handler) {
+        parse(html, handler, true);
+    }
+
+    /**
+     * Parses specified real-life HTML document and delegates events to given instance of {@link HtmlHandler}
+     *
+     * @param html The real-life HTML document
+     * @param handler The HTML handler
+     * @param checkSize Whether this call is supposed to check the size of given HTML content against <i>"com.openexchange.html.maxLength"</i> property
+     * @throws ParsingDeniedException If specified HTML content cannot be parsed without wasting too many JVM resources
+     */
+    public void parse(String html, JerichoHandler handler, boolean checkSize) {
         StreamedSource streamedSource = null;
         try {
-            streamedSource = checkBody(html);
+            if (false == checkBody(html, checkSize)) {
+                // <body> tag not available
+                handler.markBodyAbsent();
+            }
+
+            // Start regular parsing
+            streamedSource = new StreamedSource(html);
             streamedSource.setLogger(null);
-            final Thread thread = Thread.currentThread();
+            Thread thread = Thread.currentThread();
             int lastSegmentEnd = 0;
-            for (final Iterator<Segment> iter = streamedSource.iterator(); !thread.isInterrupted() && iter.hasNext();) {
-                final Segment segment = iter.next();
+            for (Iterator<Segment> iter = streamedSource.iterator(); !thread.isInterrupted() && iter.hasNext();) {
+                Segment segment = iter.next();
                 if (segment.getEnd() <= lastSegmentEnd) {
-                    /*
-                     * If this tag is inside the previous tag (e.g. a server tag) then ignore it as it was already output along with the
-                     * previous tag.
-                     */
+                    // If this tag is inside the previous tag (e.g. a server tag) then ignore it as it was already output along with the previous tag.
                     continue;
                 }
                 lastSegmentEnd = segment.getEnd();
-                /*
-                 * Handle current segment
-                 */
-                handleSegment(handler, segment);
+
+                // Handle current segment
+                handleSegment(handler, segment, true);
             }
-        } catch (final StackOverflowError parserOverflow) {
+        } catch (StackOverflowError parserOverflow) {
             throw new ParsingDeniedException("Parser overflow detected.", parserOverflow);
         } finally {
             Streams.close(streamedSource);
@@ -252,12 +260,12 @@ public final class JerichoParser {
         }
     }
 
-    private static void handleSegment(final JerichoHandler handler, final Segment segment) {
+    private static void handleSegment(JerichoHandler handler, Segment segment, boolean fixStartTags) {
         if (segment instanceof Tag) {
-            final Tag tag = (Tag) segment;
-            final TagType tagType = tag.getTagType();
+            Tag tag = (Tag) segment;
+            TagType tagType = tag.getTagType();
 
-            final EnumTagType enumType = EnumTagType.enumFor(tagType);
+            EnumTagType enumType = EnumTagType.enumFor(tagType);
             if (null == enumType) {
                 if (!segment.isWhiteSpace()) {
                     handler.handleUnknownTag(tag);
@@ -284,23 +292,28 @@ public final class JerichoParser {
                 }
             }
         } else if (segment instanceof CharacterReference) {
-            final CharacterReference characterReference = (CharacterReference) segment;
+            CharacterReference characterReference = (CharacterReference) segment;
             handler.handleCharacterReference(characterReference);
         } else {
             /*
              * Safety re-parse
              */
-            if (contains('<', segment)) {
-                final Matcher m = FIX_START_TAG.matcher(segment);
-                if (m.find() && Strings.isEmpty(m.group(2))) {
+            if (fixStartTags && contains('<', segment)) {
+                Matcher m = FIX_START_TAG.matcher(segment);
+                if (m.find()) {
                     /*
                      * Re-parse start tag
                      */
-                    final StreamedSource nestedSource = new StreamedSource(new StringBuilder(m.group(1)).append('>').toString());
-                    final Thread thread = Thread.currentThread();
-                    for (final Iterator<Segment> iter = nestedSource.iterator(); !thread.isInterrupted() && iter.hasNext();) {
-                        final Segment nestedSegment = iter.next();
-                        handleSegment(handler, nestedSegment);
+                    int start = m.start();
+                    if (start > 0) {
+                        handler.handleSegment(segment.subSequence(0, start));
+                    }
+
+                    StreamedSource nestedSource = new StreamedSource(dropWeirdAttributes(m.group(2)));
+                    Thread thread = Thread.currentThread();
+                    for (Iterator<Segment> iter = nestedSource.iterator(); !thread.isInterrupted() && iter.hasNext();) {
+                        Segment nestedSegment = iter.next();
+                        handleSegment(handler, nestedSegment, false);
                     }
                 } else {
                     handler.handleSegment(segment);
@@ -352,6 +365,37 @@ public final class JerichoParser {
             }
         }
         return false;
+    }
+
+    private static Pattern PATTERN_ATTRIBUTE = Pattern.compile("([a-zA-Z_0-9-]+)=((?:\".*?\")|(?:'.*?')|(?:[a-zA-Z_0-9-]+))");
+
+    private static String dropWeirdAttributes(String startTag) {
+        int length = startTag.length();
+        if (length <= 0 || '<' != startTag.charAt(0)) {
+            return startTag;
+        }
+
+        StringBuilder sb = new StringBuilder(length).append('<');
+        int i = 1;
+
+        // Consume tag name
+        boolean ws = false;
+        for (; !ws && i < length; i++) {
+            char c = startTag.charAt(i);
+            if (Strings.isWhitespace(c)) {
+                ws = true;
+            } else {
+                sb.append(c);
+            }
+        }
+
+        // Grep attributes
+        Matcher m = PATTERN_ATTRIBUTE.matcher(startTag.substring(i));
+        while (m.find()) {
+            sb.append(' ').append(m.group());
+        }
+        sb.append('>');
+        return sb.toString();
     }
 
 }

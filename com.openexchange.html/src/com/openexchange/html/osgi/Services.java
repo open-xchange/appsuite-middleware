@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,56 +47,72 @@
  *
  */
 
-package com.openexchange.html.internal;
+package com.openexchange.html.osgi;
 
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link OneCharSequence}
+ * {@link Services} - The static service lookup.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.1
  */
-public class OneCharSequence implements CharSequence {
-
-    private char ch;
+public final class Services {
 
     /**
-     * Initializes a new {@link OneCharSequence}.
+     * Initializes a new {@link Services}.
      */
-    public OneCharSequence(char ch) {
+    private Services() {
         super();
-        this.ch = ch;
+    }
+
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Sets the service lookup.
+     *
+     * @param serviceLookup The service lookup or <code>null</code>
+     */
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
     }
 
     /**
-     * Sets the character
+     * Gets the service lookup.
      *
-     * @param ch The character
+     * @return The service lookup or <code>null</code>
      */
-    public void setCharacter(char ch) {
-        this.ch = ch;
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
     }
 
-    @Override
-    public int length() {
-        return 1;
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.html\" not started?");
+        }
+        return serviceLookup.getService(clazz);
     }
 
-    @Override
-    public char charAt(int index) {
-        return ch;
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            return null;
+        }
+        return serviceLookup.getOptionalService(clazz);
     }
 
-    @Override
-    public CharSequence subSequence(int start, int end) {
-        return String.valueOf(ch).subSequence(start, end);
-    }
-
-<<<<<<< HEAD
-    @Override
-    public String toString() {
-        return String.valueOf(ch);
-    }
-=======
->>>>>>> bcb8fd0... Fix for bug 33966: Apply string normalization only to non-ascii characters
 }
