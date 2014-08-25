@@ -584,18 +584,18 @@ public final class HtmlServiceImpl implements HtmlService {
 
             // CSS- and tag-wise sanitizing
             try {
-                // Determine the definition to use
-                final String definition;
-                {
-                    String confName = optConfigName;
-                    if (null != confName && !confName.endsWith(".properties")) {
-                        confName += ".properties";
-                    }
-                    definition = null == confName ? null : getConfiguration().getText(confName);
+                // Initialize the handler
+                FilterJerichoHandler handler;
+                if (null == optConfigName) {
+                    handler = new FilterJerichoHandler(html.length(), this);
+                } else {
+                    String definition = getConfiguration().getText(optConfigName.endsWith(".properties") ? optConfigName : optConfigName + ".properties");
+                    handler = null == definition ? new FilterJerichoHandler(html.length(), this) : new FilterJerichoHandler(html.length(), definition, this);
                 }
-                // Handle HTML content
-                final FilterJerichoHandler handler = null == definition ? new FilterJerichoHandler(html.length(), this) : new FilterJerichoHandler(html.length(), definition, this);
-                JerichoParser.getInstance().parse(html, handler.setDropExternalImages(dropExternalImages).setCssPrefix(cssPrefix).setMaxContentSize(maxContentSize));
+                handler.setDropExternalImages(dropExternalImages).setCssPrefix(cssPrefix).setMaxContentSize(maxContentSize);
+
+                // Parse the HTML content
+                JerichoParser.getInstance().parse(html, handler);
                 if (dropExternalImages && null != modified) {
                     modified[0] |= handler.isImageURLFound();
                 }
