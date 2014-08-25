@@ -68,7 +68,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.migration.DBMigrationExceptionCodes;
 import com.openexchange.database.migration.DBMigrationExecutorService;
-import com.openexchange.database.migration.internal.accessors.SimpleClassLoaderResourceAccessor;
 import com.openexchange.exception.OXException;
 
 /**
@@ -104,7 +103,6 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
 
         accessors.add(new ClassLoaderResourceAccessor());
         accessors.add(new FileSystemResourceAccessor());
-        accessors.add(new SimpleClassLoaderResourceAccessor());
     }
 
     /**

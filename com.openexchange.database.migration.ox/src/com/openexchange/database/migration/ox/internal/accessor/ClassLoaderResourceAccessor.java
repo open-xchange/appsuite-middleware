@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.database.migration.internal.accessors;
+package com.openexchange.database.migration.ox.internal.accessor;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -56,23 +56,26 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import liquibase.change.custom.CustomSqlChange;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtils;
 
 /**
- * Simple {@link ResourceAccessor} to get content of specified resources.
+ * Class loader that is required to get access to custom java class migration files (implementations like {@link CustomSqlChange}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.1
  */
-public class SimpleClassLoaderResourceAccessor implements ResourceAccessor {
+public class ClassLoaderResourceAccessor implements ResourceAccessor {
+
     private ClassLoader classLoader;
 
-    /**
-     * Initializes a new {@link SimpleClassLoaderResourceAccessor}.
-     */
-    public SimpleClassLoaderResourceAccessor() {
+    public ClassLoaderResourceAccessor() {
         classLoader = getClass().getClassLoader();
+    }
+
+    public ClassLoaderResourceAccessor(final ClassLoader classLoader) {
+        this.classLoader = classLoader;
     }
 
     /**
