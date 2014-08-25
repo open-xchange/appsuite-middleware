@@ -101,7 +101,7 @@ public class QuotedInternetAddressTest extends TestCase {
         String s = "=?windows-1252?Q?Betz=2C_C=E4cilia?= <caecilia.betz@invalid.org>";
         QuotedInternetAddress addr = new QuotedInternetAddress(s);
 
-        assertEquals("Display name does not match \"Betz, Cäcilia\"", "Betz, C\u00e4cilia", addr.getPersonal());
+        assertEquals("Display name does not match \"Betz, C\u00e4cilia\"", "Betz, C\u00e4cilia", addr.getPersonal());
         assertEquals("Address does not match \"caecilia.betz@open-xchange.com\"", "caecilia.betz@invalid.org", addr.getAddress());
 
     }
