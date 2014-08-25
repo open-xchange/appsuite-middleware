@@ -1,6 +1,10 @@
 * 2014-08-25 - tobias.friedrich@open-xchange.com
 
- - Fix for bug 33748: Don't attempt to read more bytes from the buffer than available 
+ - Fix for bug 33748: Don't attempt to read more bytes from the buffer than available
+
+* 2014-08-25 - thorben.betten@open-xchange.com
+
+ - Fix for bug 34070: Fixed parsing of E-Mail address in case personal is mail-safe encoded
 
 * 2014-08-24 - thorben.betten@open-xchange.com
 
