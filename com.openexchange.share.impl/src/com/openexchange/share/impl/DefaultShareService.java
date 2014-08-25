@@ -81,6 +81,7 @@ import com.openexchange.share.ShareService;
 import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.share.storage.StorageParameters;
 import com.openexchange.user.UserService;
+import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.UserPermissionService;
 
 /**
@@ -655,6 +656,10 @@ public class DefaultShareService implements ShareService {
              */
             userPermissionBits.setPermissionBits(merge ? permissionBits | userPermissionBits.getPermissionBits() : permissionBits);
             userPermissionService.saveUserPermissionBits(connection, userPermissionBits);
+            /*
+             * invalidate affected user configuration
+             */
+            services.getService(UserConfigurationService.class).removeUserConfiguration(userID, context);
         }
         return userPermissionBits;
     }

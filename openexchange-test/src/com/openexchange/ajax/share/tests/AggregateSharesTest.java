@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
@@ -60,11 +61,13 @@ import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
+import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ParsedShare;
+import com.openexchange.ajax.share.actions.ResolveShareResponse;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.AuthenticationMode;
@@ -123,6 +126,25 @@ public class AggregateSharesTest extends ShareTest {
                     for (AJAXClient client2 : ajaxClients) {
                         for (int module2 : TESTED_MODULES) {
                             testAggregateShares(api, client1, module1, client2, module2);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public void testRemoveAggregateSharesRandomly() throws Exception {
+        testRemoveAggregateShares(randomFolderAPI(), randomClient(), randomModule(), randomClient(), randomModule());
+    }
+
+    public void noTestRemoveAggregateSharesExtensively() throws Exception {
+        AJAXClient[] ajaxClients = clientsAndFolders.keySet().toArray(new AJAXClient[clientsAndFolders.size()]);
+        for (EnumAPI api : TESTED_FOLDER_APIS) {
+            for (AJAXClient client1 : ajaxClients) {
+                for (int module1 : TESTED_MODULES) {
+                    for (AJAXClient client2 : ajaxClients) {
+                        for (int module2 : TESTED_MODULES) {
+                            testRemoveAggregateShares(api, client1, module1, client2, module2);
                         }
                     }
                 }
@@ -212,6 +234,129 @@ public class AggregateSharesTest extends ShareTest {
         guestClientB.checkModuleAvailable(shareB.getModule());
         guestClientB.checkFolderAccessible(shareA.getFolder(), guestPermission);
         guestClientB.checkFolderAccessible(shareB.getFolder(), guestPermission);
+    }
+
+    private void testRemoveAggregateShares(EnumAPI api, AJAXClient client1, int module1, AJAXClient client2, int module2) throws Exception {
+        /*
+         * prepare guest permission
+         */
+        String name = randomUID();
+        OCLGuestPermission guestPermission = createNamedGuestPermission(name + "@example.com", name, "secret", AuthenticationMode.BASIC);
+        /*
+         * as user 1 with client 1, create folder A shared to guest user
+         */
+        FolderObject folderA = Create.createPrivateFolder(randomUID(), module1, client1.getValues().getUserId(), guestPermission);
+        folderA.setParentFolderID(getDefaultFolder(client1, module1));
+        InsertResponse insertResponse1 = client1.execute(new InsertRequest(api, folderA));
+        insertResponse1.fillObject(folderA);
+        clientsAndFolders.get(client1).add(Integer.valueOf(folderA.getObjectID()));
+        GetResponse getResponse1 = client1.execute(new GetRequest(api, folderA.getObjectID()));
+        folderA = getResponse1.getFolder();
+        folderA.setLastModified(getResponse1.getTimestamp());
+        /*
+         * check permissions
+         */
+        OCLPermission matchingPermissionA = null;
+        for (OCLPermission permission : folderA.getPermissions()) {
+            if (permission.getEntity() != client1.getValues().getUserId()) {
+                matchingPermissionA = permission;
+                break;
+            }
+        }
+        assertNotNull("No matching permission in created folder found", matchingPermissionA);
+        checkPermissions(guestPermission, matchingPermissionA);
+        /*
+         * discover share
+         */
+        ParsedShare shareA = discoverShare(client1, folderA.getObjectID(), matchingPermissionA.getEntity());
+        /*
+         * as user 2 with client 2, create folder B shared to guest user
+         */
+        FolderObject folderB = Create.createPrivateFolder(randomUID(), module2, client2.getValues().getUserId(), guestPermission);
+        folderB.setParentFolderID(getDefaultFolder(client2, module2));
+        InsertResponse insertResponse2 = client2.execute(new InsertRequest(api, folderB));
+        insertResponse2.fillObject(folderB);
+        clientsAndFolders.get(client2).add(Integer.valueOf(folderB.getObjectID()));
+        GetResponse getResponse2 = client2.execute(new GetRequest(api, folderB.getObjectID()));
+        folderB = getResponse2.getFolder();
+        folderB.setLastModified(getResponse2.getTimestamp());
+        /*
+         * check permissions
+         */
+        OCLPermission matchingPermissionB = null;
+        for (OCLPermission permission : folderB.getPermissions()) {
+            if (permission.getEntity() != client2.getValues().getUserId()) {
+                matchingPermissionB = permission;
+                break;
+            }
+        }
+        assertNotNull("No matching permission in created folder found", matchingPermissionB);
+        checkPermissions(guestPermission, matchingPermissionB);
+        /*
+         * discover share
+         */
+        ParsedShare shareB = discoverShare(client2, folderB.getObjectID(), matchingPermissionB.getEntity());
+        /*
+         * check permission entities
+         */
+        assertEquals("Permission entities differ", matchingPermissionA.getEntity(), matchingPermissionB.getEntity());
+        /*
+         * check access to shares via link to folder A
+         */
+        GuestClient guestClientA = resolveShare(shareA);
+        guestClientA.checkModuleAvailable(shareA.getModule());
+        guestClientA.checkModuleAvailable(shareB.getModule());
+        guestClientA.checkFolderAccessible(shareA.getFolder(), guestPermission);
+        guestClientA.checkFolderAccessible(shareB.getFolder(), guestPermission);
+        /*
+         * check access to shares via link to folder B
+         */
+        GuestClient guestClientB = resolveShare(shareB);
+        guestClientB.checkModuleAvailable(shareA.getModule());
+        guestClientB.checkModuleAvailable(shareB.getModule());
+        guestClientB.checkFolderAccessible(shareA.getFolder(), guestPermission);
+        guestClientB.checkFolderAccessible(shareB.getFolder(), guestPermission);
+        /*
+         * update folder A, revoke guest permissions
+         */
+        folderA.getPermissions().remove(matchingPermissionA);
+        insertResponse1 = client1.execute(new UpdateRequest(api, folderA));
+        insertResponse1.fillObject(folderA);
+        clientsAndFolders.get(client1).add(Integer.valueOf(folderA.getObjectID()));
+        getResponse1 = client1.execute(new GetRequest(api, folderA.getObjectID()));
+        folderA = getResponse1.getFolder();
+        folderA.setLastModified(getResponse1.getTimestamp());
+        /*
+         * check permissions
+         */
+        for (OCLPermission permission : folderA.getPermissions()) {
+            assertTrue("Guest permission still present", permission.getEntity() != matchingPermissionA.getEntity());
+        }
+        /*
+         * check access with previous guest sessions
+         */
+        guestClientA.checkSessionAlive(false);
+        // FIXME: capabilities are cached and not invalidated
+        // guestClientA.checkModuleNotAvailable(module1);
+        guestClientA.checkModuleAvailable(shareB.getModule());
+        guestClientA.checkFolderNotAccessible(shareA.getFolder());
+        guestClientA.checkFolderAccessible(shareB.getFolder(), guestPermission);
+        guestClientB.checkSessionAlive(false);
+        // FIXME: capabilities are cached and not invalidated
+        // guestClientB.checkModuleNotAvailable(module1);
+        guestClientB.checkModuleAvailable(shareB.getModule());
+        guestClientB.checkFolderNotAccessible(shareA.getFolder());
+        guestClientB.checkFolderAccessible(shareB.getFolder(), guestPermission);
+        /*
+         * check if share link to folder A still accessible
+         */
+        ResolveShareResponse shareResolveResponse = new GuestClient(shareA, false).getShareResolveResponse();
+        assertEquals("Status code wrong", HttpServletResponse.SC_NOT_FOUND, shareResolveResponse.getStatusCode());
+        /*
+         * check if share link to folder A still accessible
+         */
+        shareResolveResponse = new GuestClient(shareB).getShareResolveResponse();
+        assertEquals("Status code wrong", HttpServletResponse.SC_MOVED_TEMPORARILY, shareResolveResponse.getStatusCode());
     }
 
 }

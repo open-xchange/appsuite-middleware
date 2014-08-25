@@ -217,6 +217,18 @@ public class GuestClient extends AJAXClient {
     }
 
     /**
+     * Checks that a folder is not accessible for the guest.
+     *
+     * @param folderID The identifier of the folder to check
+     * @throws Exception
+     */
+    public void checkFolderNotAccessible(String folderID) throws Exception {
+        GetResponse getResponse = execute(new GetRequest(EnumAPI.OX_NEW, Integer.valueOf(folderID), false));
+        Assert.assertTrue("No errors in response", getResponse.hasError());
+        Assert.assertNull("Folder in response", getResponse.getFolder());
+    }
+
+    /**
      * Checks that a module is available.
      *
      * @param moduleID The identifier of the module to be available
@@ -231,7 +243,22 @@ public class GuestClient extends AJAXClient {
                 return;
             }
         }
-        Assert.fail("Module " + getModule() + " not found");
+        Assert.fail("Module " + getContentType(moduleID) + " not found");
+    }
+
+    /**
+     * Checks that a module is not available.
+     *
+     * @param moduleID The identifier of the module to be not available
+     */
+    public void checkModuleNotAvailable(int moduleID) throws Exception {
+        com.openexchange.ajax.config.actions.GetResponse getResponse =
+            execute(new com.openexchange.ajax.config.actions.GetRequest(Tree.AvailableModules));
+        String module = getContentType(moduleID);
+        Object[] array = getResponse.getArray();
+        for (Object object : array) {
+            Assert.assertNotEquals("Module " + getContentType(moduleID) + " found", object, module);
+        }
     }
 
     /**

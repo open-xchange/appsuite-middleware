@@ -101,6 +101,8 @@ public class VisibleFoldersResponse extends AbstractAJAXResponse {
         if (object.has("private")) {
             final Object[][] privateArray = parseData(object.getJSONArray("private"));
             ret.add(Collections.unmodifiableList(Arrays.asList(privateArray)));
+        } else {
+            ret.add(Collections.<Object[]>emptyList());
         }
         // Parse public folders
         if (object.has("public")) {
