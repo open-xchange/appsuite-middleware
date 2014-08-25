@@ -109,7 +109,7 @@ public class FacebookServiceImpl implements FacebookService {
             final Token accessToken = new Token(checkToken(account.getToken()), account.getSecret());
             final OAuthRequest ownProfileRequest = new OAuthRequest(Verb.GET, "https://graph.facebook.com/me");
             service.signRequest(accessToken, ownProfileRequest);
-            final Response ownProfileResponse = ownProfileRequest.send();
+            final Response ownProfileResponse = ownProfileRequest.send(FacebookRequestTuner.getInstance());
 
             String myuid = "";
             try {
@@ -124,7 +124,7 @@ public class FacebookServiceImpl implements FacebookService {
                 Verb.GET,
                 "https://api.facebook.com/method/fql.query?query=SELECT%20name,first_name,last_name,email,birthday_date,pic_big,current_location,profile_url%20from%20user%20where%20uid%20in%20%28SELECT%20uid2%20from%20friend%20where%20uid1=" + myuid + "%29&format=JSON");
             service.signRequest(accessToken, connectionsRequest);
-            final Response connectionsResponse = connectionsRequest.send();
+            final Response connectionsResponse = connectionsRequest.send(FacebookRequestTuner.getInstance());
 
             // parse the returned JSON into neat little contacts
             String jsonString = connectionsResponse.getBody();

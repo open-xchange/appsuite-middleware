@@ -98,6 +98,7 @@ import com.openexchange.messaging.facebook.utility.FacebookMessagingUtility.FQLQ
 import com.openexchange.messaging.facebook.utility.FacebookMessagingUtility.FQLQueryType;
 import com.openexchange.messaging.facebook.utility.FacebookMessagingUtility.StaticFiller;
 import com.openexchange.messaging.facebook.utility.FacebookPage;
+import com.openexchange.messaging.facebook.utility.FacebookRequestTuner;
 import com.openexchange.messaging.facebook.utility.FacebookUser;
 import com.openexchange.messaging.generic.AttachmentFinderHandler;
 import com.openexchange.messaging.generic.MessageParser;
@@ -523,7 +524,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                         Verb.POST,
                         "https://graph.facebook.com/" + facebookUserId + "/feed?message=" + encode(content.getData()));
                 facebookOAuthAccess.getFacebookOAuthService().signRequest(facebookOAuthAccess.getFacebookAccessToken(), request);
-                final Response response = request.send();
+                final Response response = request.send(FacebookRequestTuner.getInstance());
                 final JSONObject result = new JSONObject(response.getBody());
                 if (result.has("error")) {
                     final JSONObject error = result.getJSONObject("error");
