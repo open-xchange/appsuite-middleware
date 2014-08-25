@@ -59,7 +59,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.cleanup.RealtimeJanitor;
+import com.openexchange.realtime.cleanup.AbstractRealtimeJanitor;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.group.commands.LeaveCommand;
 import com.openexchange.realtime.group.commands.LeaveStanza;
@@ -77,7 +77,7 @@ import com.openexchange.server.ServiceExceptionCode;
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class GroupManager implements RealtimeJanitor, GroupManagerService {
+public class GroupManager extends AbstractRealtimeJanitor implements GroupManagerService {
 
 
     private static final Logger LOG = LoggerFactory.getLogger(GroupManager.class);

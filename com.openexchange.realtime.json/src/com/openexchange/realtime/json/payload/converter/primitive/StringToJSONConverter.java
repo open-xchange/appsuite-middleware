@@ -51,13 +51,13 @@ package com.openexchange.realtime.json.payload.converter.primitive;
 
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.json.JSONExceptionCode;
 import com.openexchange.realtime.json.payload.converter.AbstractPOJOConverter;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link StringToJSONConverter}
- *
+ * 
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
 public class StringToJSONConverter extends AbstractPOJOConverter {
@@ -69,8 +69,12 @@ public class StringToJSONConverter extends AbstractPOJOConverter {
 
     @Override
     public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
-        //String to JSON, do nothing
-        return data;
+        if (String.class.isInstance(data)) {
+            // String to JSON, do nothing
+            return data;
+        } else {
+            throw JSONExceptionCode.ERROR_WHILE_CONVERTING.create("Expected input format " + getInputFormat() + " but got " + data.getClass().getSimpleName());
+        }
     }
 
 }

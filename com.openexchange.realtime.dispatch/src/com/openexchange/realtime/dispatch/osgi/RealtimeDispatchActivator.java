@@ -102,7 +102,7 @@ public class RealtimeDispatchActivator extends HousekeepingActivator {
         registerService(LocalMessageDispatcher.class, dispatcher);
         Collection<RealtimeJanitor> realtimeJanitors = RealtimeJanitors.getInstance().getJanitors();
         for (RealtimeJanitor realtimeJanitor : realtimeJanitors) {
-            registerService(RealtimeJanitor.class, realtimeJanitor);
+            registerService(RealtimeJanitor.class, realtimeJanitor, realtimeJanitor.getServiceProperties());
         }
 
         track(Channel.class, new SimpleRegistryListener<Channel>() {

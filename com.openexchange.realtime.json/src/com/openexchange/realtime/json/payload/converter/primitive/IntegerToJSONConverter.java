@@ -47,37 +47,36 @@
  *
  */
 
-package com.openexchange.realtime.cleanup;
+package com.openexchange.realtime.json.payload.converter.primitive;
 
-import java.util.Dictionary;
-import com.openexchange.realtime.packet.ID;
+import com.openexchange.conversion.simple.SimpleConverter;
+import com.openexchange.exception.OXException;
+import com.openexchange.realtime.json.JSONExceptionCode;
+import com.openexchange.realtime.json.payload.converter.AbstractPOJOConverter;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link RealtimeJanitor} - A service that can be instructed to execute different housekeeping and cleanup tasks. The service should be
- * implemented by realtime components that keep a local state so that a node-wide cleanup an be initiated by the
- * {@link LocalRealtimeCleanup} service that just collects all {@link RealtimeJanitor}s from the service registry (see OSGI whiteboard
- * pattern). Janitors can indicate a priority via {@link Constant.SERVICE_RANKING}
+ * {@link IntegerToJSONConverter}
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since 7.6.1
  */
-public interface RealtimeJanitor {
+public class IntegerToJSONConverter extends AbstractPOJOConverter {
 
-    static final int RANKING_SYNTHETIC_CHANNEL = 500;
+    @Override
+    public String getInputFormat() {
+        return Integer.class.getSimpleName();
+    }
 
-    /**
-     * Clean up states that were kept for the given id.
-     * 
-     * @param id
-     */
-    void cleanupForId(ID id);
-
-    /**
-     * Get the properties used when registering the service. The SERVICE_RANKING property is used to determine the order when instructing
-     * all the RealtimeJanitors to execute a cleanup task. The first entry is the service with the highest ranking and the lowest service
-     * id.
-     * 
-     * @return the properties used when registering the service
-     */
-    Dictionary<String, Object> getServiceProperties();
+    @Override
+    public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
+        if (Integer.class.isInstance(data)) {
+            Integer incoming = Integer.class.cast(data);
+            String transformed = incoming.toString();
+            return transformed;
+        } else {
+            throw JSONExceptionCode.ERROR_WHILE_CONVERTING.create("Expected input format " + getInputFormat() + " but got " + data.getClass().getSimpleName());
+        }
+    }
 
 }

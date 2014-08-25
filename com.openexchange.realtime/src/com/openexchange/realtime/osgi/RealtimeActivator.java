@@ -134,7 +134,7 @@ public class RealtimeActivator extends HousekeepingActivator {
         });
         
         synth = new SyntheticChannel(this, localRealtimeCleanup);
-
+        RealtimeJanitors.getInstance().addJanitor(synth);
         TimerService timerService = getService(TimerService.class);
         timerService.scheduleAtFixedRate(synth, 0, 1, TimeUnit.MINUTES);
 
@@ -165,7 +165,7 @@ public class RealtimeActivator extends HousekeepingActivator {
 
         //Register all RealtimeJanitors
         for(RealtimeJanitor realtimeJanitor : RealtimeJanitors.getInstance().getJanitors()) {
-            registerService(RealtimeJanitor.class, realtimeJanitor);
+            registerService(RealtimeJanitor.class, realtimeJanitor, realtimeJanitor.getServiceProperties());
         }
 
         //Expose all ManagementObjects for this bundle

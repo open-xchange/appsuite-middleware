@@ -50,6 +50,7 @@
 package com.openexchange.realtime.hazelcast.directory;
 
 import java.util.Collection;
+import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -65,6 +66,7 @@ import com.hazelcast.query.Predicate;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementAware;
 import com.openexchange.management.ManagementObject;
+import com.openexchange.realtime.cleanup.AbstractRealtimeJanitor;
 import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.directory.DefaultResource;
 import com.openexchange.realtime.directory.DefaultResourceDirectory;
@@ -486,6 +488,11 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
             }
         }
         return foundIds;
+    }
+
+    @Override
+    public Dictionary<String, Object> getServiceProperties() {
+        return AbstractRealtimeJanitor.NO_PROPERTIES;
     }
 
 }
