@@ -74,7 +74,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.DefaultShare;
-import com.openexchange.share.Guest;
+import com.openexchange.share.AddedGuest;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
@@ -247,7 +247,7 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
-    public List<Share> createShares(Session session, String folder, int module, List<Guest> guests) throws OXException {
+    public List<Share> createShares(Session session, String folder, int module, List<AddedGuest> guests) throws OXException {
         LOG.info("Adding shares to guest user(s) {} for folder {} in context {}...", guests, folder, session.getContextId());
         List<Share> shares = new ArrayList<Share>(guests.size());
         Context context = services.getService(ContextService.class).getContext(session.getContextId());
@@ -257,7 +257,7 @@ public class DefaultShareService implements ShareService {
             connectionHelper.start();
             User sharingUser = services.getService(UserService.class).getUser(
                 connectionHelper.getConnection(), session.getUserId(), context);
-            for (Guest guest : guests) {
+            for (AddedGuest guest : guests) {
                 User guestUser = getGuestUser(connectionHelper.getConnection(), context, sharingUser, permissionBits, guest);
                 Share share = ShareTool.prepareShare(sharingUser, context.getContextId(), module, folder, guestUser.getId(),
                     guest.getExpires(), guest.getAuthenticationMode());
@@ -496,7 +496,7 @@ public class DefaultShareService implements ShareService {
      * @return The guest user
      * @throws OXException
      */
-    private User getGuestUser(Connection connection, Context context, User sharingUser, int permissionBits, Guest guest) throws OXException {
+    private User getGuestUser(Connection connection, Context context, User sharingUser, int permissionBits, AddedGuest guest) throws OXException {
         UserService userService = services.getService(UserService.class);
         if (AuthenticationMode.ANONYMOUS != guest.getAuthenticationMode() && services.getService(
             ConfigurationService.class).getBoolProperty("com.openexchange.share.aggregateShares", true)) {

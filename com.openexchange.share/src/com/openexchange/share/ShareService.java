@@ -124,7 +124,7 @@ public interface ShareService {
      * @return The created shares, where each share corresponds to a guest user that has been added through the creation of the shares,
      *         in the same order as the supplied guests list
      */
-    List<Share> createShares(Session session, String folder, int module, List<Guest> guests) throws OXException;
+    List<Share> createShares(Session session, String folder, int module, List<AddedGuest> guests) throws OXException;
 
     /**
      * Generates a URL for every share that is passed.

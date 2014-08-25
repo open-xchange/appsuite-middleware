@@ -87,7 +87,7 @@ import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.share.Guest;
+import com.openexchange.share.AddedGuest;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareService;
 import com.openexchange.tools.TimeZoneUtils;
@@ -454,7 +454,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      *         in the same order as the supplied guest permissions list
      */
     protected List<Share> processAddedGuestPermissions(String folderID, ContentType contentType, List<GuestPermission> addedPermissions, Connection connection) throws OXException {
-        List<Guest> guests = new ArrayList<Guest>(addedPermissions.size());
+        List<AddedGuest> guests = new ArrayList<AddedGuest>(addedPermissions.size());
         for (GuestPermission permission : addedPermissions) {
             guests.add(createGuest(permission));
         }
@@ -480,8 +480,8 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * @param permission The guest permissions to create the guest for
      * @return The guest
      */
-    private static Guest createGuest(GuestPermission permission) {
-        Guest guest = new Guest();
+    private static AddedGuest createGuest(GuestPermission permission) {
+        AddedGuest guest = new AddedGuest();
         guest.setAuthenticationMode(permission.getAuthenticationMode());
         guest.setContactFolderID(permission.getContactFolderID());
         guest.setContactID(permission.getContactID());

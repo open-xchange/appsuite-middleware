@@ -49,77 +49,101 @@
 
 package com.openexchange.share;
 
-import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Date;
+import com.openexchange.java.Strings;
 
 /**
- * Encapsulates requests for creating new shares.
+ * Describes a guest user to which a item or folder shall be shared.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class CreateRequest {
+public class AddedGuest {
 
-    private final List<Guest> guests = new ArrayList<Guest>(4);
+    private String contactID;
 
-    private int module;
+    private String contactFolderID;
 
-    private String folder;
+    private String mailAddress;
 
-    private String item;
+    private String displayName;
+
+    private Date expires;
+
+    private AuthenticationMode authenticationMode;
+
+    private String password;
 
 
-    private Connection connection;
-
-    public int getModule() {
-        return module;
+    public String getContactID() {
+        return contactID;
     }
 
-    public void setModule(int module) {
-        this.module = module;
+    public void setContactID(String contactID) {
+        this.contactID = contactID;
     }
 
-    public String getFolder() {
-        return folder;
+    public String getContactFolderID() {
+        return contactFolderID;
     }
 
-    public void setFolder(String folder) {
-        this.folder = folder;
+    public void setContactFolderID(String contactFolderID) {
+        this.contactFolderID = contactFolderID;
+    }
+
+    public String getMailAddress() {
+        return mailAddress;
+    }
+
+    public void setMailAddress(String mailAddress) {
+        this.mailAddress = mailAddress;
+    }
+
+    public Date getExpires() {
+        return expires;
+    }
+
+    public void setExpires(Date expires) {
+        this.expires = expires;
+    }
+
+    public AuthenticationMode getAuthenticationMode() {
+        return authenticationMode;
+    }
+
+    public void setAuthenticationMode(AuthenticationMode authenticationMode) {
+        this.authenticationMode = authenticationMode;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     /**
-     * Gets the ID of the item to be shared.
+     * Gets the displayName
      *
-     * @return The ID or <code>null</code>, if the whole folder shall be shared.
+     * @return The displayName
      */
-    public String getItem() {
-        return item;
-    }
-
-    public void setItem(String item) {
-        this.item = item;
-    }
-
-    public List<Guest> getGuests() {
-        return guests;
-    }
-
-    public void addGuest(Guest guest) {
-        guests.add(guest);
+    public String getDisplayName() {
+        return displayName;
     }
 
     /**
-     * Gets the database connection that shall be used to make the according database changed.
+     * Sets the displayName
      *
-     * @return The connection or <code>null</code>.
+     * @param displayName The displayName to set
      */
-    public Connection getConnection() {
-        return connection;
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
-    public void setConnection(Connection connection) {
-        this.connection = connection;
+    @Override
+    public String toString() {
+        return Strings.isEmpty(mailAddress) ? "Anonymous" : mailAddress;
     }
 
 }
