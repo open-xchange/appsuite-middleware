@@ -56,21 +56,22 @@ import com.openexchange.realtime.json.payload.converter.AbstractPOJOConverter;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ByteToJSONConverter}
+ * {@link IntegerToJSONConverter}
  * 
- * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since 7.6.1
  */
-public class ByteToJSONConverter extends AbstractPOJOConverter {
+public class IntegerToJSONConverter extends AbstractPOJOConverter {
 
     @Override
     public String getInputFormat() {
-        return Byte.class.getSimpleName();
+        return Integer.class.getSimpleName();
     }
 
     @Override
     public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
-        if (Byte.class.isInstance(data)) {
-            Byte incoming = Byte.class.cast(data);
+        if (Integer.class.isInstance(data)) {
+            Integer incoming = Integer.class.cast(data);
             String transformed = incoming.toString();
             return transformed;
         } else {

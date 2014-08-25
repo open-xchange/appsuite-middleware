@@ -52,30 +52,33 @@ package com.openexchange.realtime.json.payload.converter.primitive;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.json.JSONExceptionCode;
-import com.openexchange.realtime.json.payload.converter.AbstractPOJOConverter;
+import com.openexchange.realtime.json.payload.converter.AbstractJSONConverter;
 import com.openexchange.tools.session.ServerSession;
 
+
 /**
- * {@link ByteToJSONConverter}
- * 
- * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
+ * {@link JSONToIntegerConverter}
+ *
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since 7.6.1
  */
-public class ByteToJSONConverter extends AbstractPOJOConverter {
+public class JSONToIntegerConverter extends AbstractJSONConverter {
 
     @Override
-    public String getInputFormat() {
-        return Byte.class.getSimpleName();
+    public String getOutputFormat() {
+        return Integer.class.getSimpleName();
     }
 
     @Override
     public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
-        if (Byte.class.isInstance(data)) {
-            Byte incoming = Byte.class.cast(data);
-            String transformed = incoming.toString();
-            return transformed;
-        } else {
-            throw JSONExceptionCode.ERROR_WHILE_CONVERTING.create("Expected input format " + getInputFormat() + " but got " + data.getClass().getSimpleName());
+        String incoming = (String) data;
+        Integer transformed = 0;
+        try {
+            transformed = Integer.valueOf(incoming);
+        } catch (NumberFormatException ex) {
+            throw JSONExceptionCode.ERROR_WHILE_CONVERTING.create(ex);
         }
+        return transformed;
     }
 
 }

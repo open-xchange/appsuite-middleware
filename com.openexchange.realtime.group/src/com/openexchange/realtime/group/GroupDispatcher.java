@@ -134,7 +134,6 @@ public class GroupDispatcher implements ComponentHandle {
         super();
         this.groupId = id;
         this.handler = handler;
-        LOG.info("Creating GroupDispatcher {} - {}", groupId, super.hashCode());
     }
 
     /**
@@ -661,11 +660,4 @@ public class GroupDispatcher implements ComponentHandle {
         }
     }
 
-    @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-        LOG.info("Finalizing GroupDispatcher {} - {}", groupId, super.hashCode());
-    }
-
-    
 }
