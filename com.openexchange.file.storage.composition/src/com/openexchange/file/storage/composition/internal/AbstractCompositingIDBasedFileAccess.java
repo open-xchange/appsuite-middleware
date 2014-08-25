@@ -64,9 +64,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -1206,27 +1209,25 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
          */
         Collections.sort(all, infostoreFirstFileAccessComparator);
         LinkedList<Future<SearchIterator<File>>> tasks = new LinkedList<Future<SearchIterator<File>>>();
-        {
-            ThreadPoolService threadPool = ThreadPools.getThreadPool();
-            for (int i = 0; i < numOfStorages; i++) {
-                final FileStorageFileAccess files = all.get(i);
-                tasks.add(threadPool.submit(new AbstractTask<SearchIterator<File>>() {
+        ThreadPoolService threadPool = ThreadPools.getThreadPool();
+        for (int i = 0; i < numOfStorages; i++) {
+            final FileStorageFileAccess files = all.get(i);
+            tasks.add(threadPool.submit(new AbstractTask<SearchIterator<File>>() {
 
-                    @Override
-                    public SearchIterator<File> call() {
-                        try {
-                            final SearchIterator<File> result = files.search(query, cols, folderId, sort, order, start, end);
-                            if (result != null) {
-                                final FileStorageAccountAccess accountAccess = files.getAccountAccess();
-                                return fixIDs(result, accountAccess.getService().getId(), accountAccess.getAccountId());
-                            }
-                        } catch (final Exception e) {
-                            // Ignore failed one in composite search results
+                @Override
+                public SearchIterator<File> call() {
+                    try {
+                        final SearchIterator<File> result = files.search(query, cols, folderId, sort, order, start, end);
+                        if (result != null) {
+                            final FileStorageAccountAccess accountAccess = files.getAccountAccess();
+                            return fixIDs(result, accountAccess.getService().getId(), accountAccess.getAccountId());
                         }
-                        return SearchIteratorAdapter.emptyIterator();
+                    } catch (final Exception e) {
+                        // Ignore failed one in composite search results
                     }
-                }));
-            }
+                    return SearchIteratorAdapter.emptyIterator();
+                }
+            }));
         }
 
         /*-
@@ -1234,25 +1235,48 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
          *
          * Take first from InfoStore using this thread
          */
-        List<SearchIterator<File>> results = new ArrayList<SearchIterator<File>>(numOfStorages);
-        SearchIterator<File> it = getFrom(tasks.removeFirst());
-        if (null != it) {
-            results.add(it);
-        }
-
-        // Take from rest
-        SearchIterator<File> fallback = SearchIteratorAdapter.<File> emptyIterator();
-        for (int i = 1; i < numOfStorages; i++) {
-            it = getFrom(tasks.removeFirst(), 5, TimeUnit.SECONDS, fallback);
+        final Queue<SearchIterator<File>> results = new ConcurrentLinkedQueue<SearchIterator<File>>();
+        {
+            SearchIterator<File> it = getFrom(tasks.removeFirst());
             if (null != it) {
-                results.add(it);
+                results.offer(it);
             }
         }
 
-        return new MergingSearchIterator<File>(order.comparatorBy(sort), results);
+        // Take from rest concurrently
+        final SearchIterator<File> fallback = SearchIteratorAdapter.<File> emptyIterator();
+        final CountDownLatch latch = new CountDownLatch(numOfStorages - 1);
+        for (int i = 1; i < numOfStorages; i++) {
+            final Future<SearchIterator<File>> future = tasks.removeFirst();
+            threadPool.submit(new AbstractTask<Void>() {
+
+                @Override
+                public Void call() throws Exception {
+                    try {
+                        SearchIterator<File> it = getFrom(future, 5, TimeUnit.SECONDS, fallback);
+                        if (null != it) {
+                            results.offer(it);
+                        }
+                        return null;
+                    } finally {
+                        latch.countDown();
+                    }
+                }
+            });
+        }
+
+        // Await
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+
+        return new MergingSearchIterator<File>(order.comparatorBy(sort), new LinkedList<SearchIterator<File>>(results));
     }
 
-    private static <V> V getFrom(Future<V> future) throws OXException {
+    static <V> V getFrom(Future<V> future) throws OXException {
         try {
             return future.get();
         } catch (final InterruptedException e) {
@@ -1263,7 +1287,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
         }
     }
 
-    private static <V> V getFrom(Future<V> future, long timeout, TimeUnit unit, V fallbackOnTimeout) throws OXException {
+    static <V> V getFrom(Future<V> future, long timeout, TimeUnit unit, V fallbackOnTimeout) throws OXException {
         try {
             return future.get(timeout, unit);
         } catch (final InterruptedException e) {
