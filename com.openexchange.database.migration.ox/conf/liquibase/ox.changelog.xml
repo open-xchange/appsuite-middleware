@@ -5,16 +5,17 @@
 	xsi:schemaLocation="urn:liquibase ./schema/dbchangelog-3.0.xsd"
 	logicalFilePath="ox-release-changelog">
 
-	<changeSet id="7.6.0-milestone" author="martin.schneider" logicalFilePath="release-7.6.0-milestone" context="configdb">
-		<tagDatabase tag="7.6.0-milestone" />
-	</changeSet>
-
 	<!-- ******************************************************* -->
 	<!-- ************** Release 7.6.1 starts here ************** -->
 	<!-- ******************************************************* -->
+
+	<changeSet id="7.6.1-milestone" author="martin.schneider" logicalFilePath="release-7.6.1-milestone" context="configdb">
+		<tagDatabase tag="7.6.1-milestone" />
+	</changeSet>
+
 	<changeSet id="7.6.1:login2context:login_info" author="martin.schneider" logicalFilePath="release-7.6.1/1.login_info.changelog.xml" context="configdb">
 		<preConditions>
-			<changeSetExecuted changeLogFile="release-7.6.0-milestone" author="martin.schneider" id="7.6.0-milestone"/>
+			<changeSetExecuted changeLogFile="release-7.6.1-milestone" author="martin.schneider" id="7.6.1-milestone"/>
 		</preConditions>
 		<comment>Bug 33418: enhances the login_info column to 255 characters</comment>
 		<modifyDataType columnName="login_info" newDataType="varchar(255)"

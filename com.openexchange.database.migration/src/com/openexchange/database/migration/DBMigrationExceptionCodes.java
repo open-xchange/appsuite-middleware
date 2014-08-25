@@ -82,6 +82,10 @@ public enum DBMigrationExceptionCodes implements OXExceptionCode {
      * No changelog file for database migration with name %1$s found! Execution for that file will be skipped.
      */
     CHANGELOG_FILE_NOT_FOUND_ERROR(DBMigrationExceptionCodes.CHANGELOG_FILE_NOT_FOUND_ERROR_MSG, Category.CATEGORY_ERROR, 5),
+    /**
+     * Error while reading/writing data from/to the database.
+     */
+    SQL_ERROR(DBMigrationExceptionCodes.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 6),
 
     ;
 
@@ -92,6 +96,8 @@ public enum DBMigrationExceptionCodes implements OXExceptionCode {
     private static final String LIQUIBASE_ERROR_MSG = "Error while using/executing liquibase.";
 
     private static final String CHANGELOG_FILE_NOT_FOUND_ERROR_MSG = "No changelog file for database migration with name %1$s found! Execution for that file will be skipped.";
+
+    private static final String SQL_ERROR_MSG = "Error while reading/writing data from/to the database.";
 
     /**
      * The error code prefix for quota module.

@@ -51,6 +51,7 @@ package com.openexchange.database.migration.internal;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import liquibase.Liquibase;
@@ -141,6 +142,8 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
             throw DBMigrationExceptionCodes.LIQUIBASE_ERROR.create(exception);
         } else if (exception instanceof OXException) {
             throw DBMigrationExceptionCodes.DBMIGARTION_ERROR.create(exception);
+        } else if (exception instanceof SQLException) {
+            throw DBMigrationExceptionCodes.SQL_ERROR.create(exception);
         } else {
             throw DBMigrationExceptionCodes.UNEXPECTED_ERROR.create(exception);
         }
@@ -153,10 +156,12 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
      * @param databaseChangeLog
      * @return
      * @throws LiquibaseException
+     * @throws SQLException
      */
-    private Liquibase prepareLiquibase(Connection writable, String filePath) throws LiquibaseException {
+    private Liquibase prepareLiquibase(Connection writable, String filePath) throws LiquibaseException, SQLException {
         JdbcConnection jdbcConnection = null;
 
+        writable.setAutoCommit(true);
         jdbcConnection = new JdbcConnection(writable);
         jdbcConnection.setAutoCommit(true);
 
