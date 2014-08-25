@@ -267,7 +267,7 @@ public class SyntheticChannel extends AbstractRealtimeJanitor implements Channel
             this.id = id;
         }
 
-        public void tick() throws OXException {
+        public void tick() {
             if (shuttingDown.get()) {
                 return;
             }
@@ -299,11 +299,7 @@ public class SyntheticChannel extends AbstractRealtimeJanitor implements Channel
             return;
         }
         for(TimeoutEviction eviction: new ArrayList<TimeoutEviction>(timeouts.values())) {
-            try {
                 eviction.tick();
-            } catch (OXException e) {
-                LOG.error("", e);
-            }
         }
     }
 
@@ -328,7 +324,7 @@ public class SyntheticChannel extends AbstractRealtimeJanitor implements Channel
                     return;
                 }
             } else {
-                LOG.info("Couldn't find ComponentHandle for ID {}, nothing to clean up", id);
+                LOG.debug("Couldn't find ComponentHandle for ID {}, nothing to clean up", id);
             }
         } catch (Exception e) {
             LOG.error("Error during cleanup for ID: {}", id, e);
