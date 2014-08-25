@@ -599,24 +599,23 @@ public final class HtmlServiceImpl implements HtmlService {
                 if (dropExternalImages && null != modified) {
                     modified[0] |= handler.isImageURLFound();
                 }
-                htmlSanitizeResult.setContent(handler.getHTML());
+                html = handler.getHTML();
                 htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
             } catch (final ParsingDeniedException e) {
                 LOG.warn("HTML content will be returned un-white-listed.", e);
             }
-            String content = htmlSanitizeResult.getContent();
 
             // Repetitive sanitizing until no further replacement/changes performed
             final boolean[] sanitized = new boolean[] { true };
             while (sanitized[0]) {
                 sanitized[0] = false;
                 // Start sanitizing round
-                content = SaneScriptTags.saneScriptTags(content, sanitized);
+                html = SaneScriptTags.saneScriptTags(html, sanitized);
             }
 
             // Replace HTML entities
-            content = keepUnicodeForEntities(content);
-            htmlSanitizeResult.setContent(content);
+            html = keepUnicodeForEntities(html);
+            htmlSanitizeResult.setContent(html);
             return htmlSanitizeResult;
         } catch (final RuntimeException e) {
             LOG.warn("HTML content will be returned un-sanitized.", e);
