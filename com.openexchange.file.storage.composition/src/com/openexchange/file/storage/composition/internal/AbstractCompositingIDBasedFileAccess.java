@@ -51,7 +51,6 @@ package com.openexchange.file.storage.composition.internal;
 
 import static com.openexchange.file.storage.composition.internal.IDManglingFileCustomizer.fixIDs;
 import static com.openexchange.java.Autoboxing.I;
-import gnu.trove.ConcurrentTIntObjectHashMap;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -69,6 +68,9 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -109,6 +111,7 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.CallerRunsCompletionService;
 import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -1179,9 +1182,8 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
                 end);
             return fixIDs(iterator, id.getService(), id.getAccountId());
         }
-        /*
-         * Search in all available folders
-         */
+
+        // Search in all available folders
         final List<FileStorageFileAccess> all = getAllFileStorageAccesses();
         final int numOfStorages = all.size();
         if (0 >= numOfStorages) {
@@ -1196,90 +1198,81 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
             final FileStorageAccountAccess accountAccess = files.getAccountAccess();
             return fixIDs(result, accountAccess.getService().getId(), accountAccess.getAccountId());
         }
+
         /*-
          * We have to consider multiple file storages
          *
          * Poll them concurrently...
          */
         Collections.sort(all, infostoreFirstFileAccessComparator);
-        final ConcurrentTIntObjectHashMap<SearchIterator<File>> resultMap = new ConcurrentTIntObjectHashMap<SearchIterator<File>>(numOfStorages);
-        final CompletionService<Void> completionService;
+        LinkedList<Future<SearchIterator<File>>> tasks = new LinkedList<Future<SearchIterator<File>>>();
         {
             ThreadPoolService threadPool = ThreadPools.getThreadPool();
-            if (null == threadPool) {
-                CallerRunsCompletionService<Void> cCompletionService = new CallerRunsCompletionService<Void>();
-                completionService = cCompletionService;
-                for (int i = 0; i < numOfStorages; i++) {
-                    final FileStorageFileAccess files = all.get(i);
-                    final int index = i;
-                    cCompletionService.submit(new Callable<Void>() {
+            for (int i = 0; i < numOfStorages; i++) {
+                final FileStorageFileAccess files = all.get(i);
+                tasks.add(threadPool.submit(new AbstractTask<SearchIterator<File>>() {
 
-                        @Override
-                        public Void call() throws Exception {
-                            try {
-                                final SearchIterator<File> result = files.search(query, cols, folderId, sort, order, start, end);
-                                if (result != null) {
-                                    final FileStorageAccountAccess accountAccess = files.getAccountAccess();
-                                    resultMap.put(index, fixIDs(result, accountAccess.getService().getId(), accountAccess.getAccountId()));
-                                }
-                            } catch (final Exception e) {
-                                // Ignore failed one in composite search results
+                    @Override
+                    public SearchIterator<File> call() {
+                        try {
+                            final SearchIterator<File> result = files.search(query, cols, folderId, sort, order, start, end);
+                            if (result != null) {
+                                final FileStorageAccountAccess accountAccess = files.getAccountAccess();
+                                return fixIDs(result, accountAccess.getService().getId(), accountAccess.getAccountId());
                             }
-                            return null;
+                        } catch (final Exception e) {
+                            // Ignore failed one in composite search results
                         }
-                    });
-                }
-            } else {
-                ThreadPoolCompletionService<Void> tcompletionService = new ThreadPoolCompletionService<Void>(threadPool);
-                completionService = tcompletionService;
-                for (int i = 0; i < numOfStorages; i++) {
-                    final FileStorageFileAccess files = all.get(i);
-                    final int index = i;
-                    tcompletionService.submit(new Callable<Void>() {
-
-                        @Override
-                        public Void call() throws OXException {
-                            try {
-                                final SearchIterator<File> result = files.search(query, cols, folderId, sort, order, start, end);
-                                if (result != null) {
-                                    final FileStorageAccountAccess accountAccess = files.getAccountAccess();
-                                    resultMap.put(index, fixIDs(result, accountAccess.getService().getId(), accountAccess.getAccountId()));
-                                }
-                            } catch (final Exception e) {
-                                // Ignore failed one in composite search results
-                            }
-                            return null;
-                        }
-                    });
-                }
+                        return SearchIteratorAdapter.emptyIterator();
+                    }
+                }));
             }
         }
+
         /*-
-         * Take from completion service
+         * Await completion
          *
-         * Take first from InfoStore
+         * Take first from InfoStore using this thread
          */
-        takeInterruptionAware(completionService);
-        // Take from rest
-        for (int i = 1; i < numOfStorages; i++) {
-            takeInterruptionAware(completionService);
+        List<SearchIterator<File>> results = new ArrayList<SearchIterator<File>>(numOfStorages);
+        SearchIterator<File> it = getFrom(tasks.removeFirst());
+        if (null != it) {
+            results.add(it);
         }
-        final List<SearchIterator<File>> results = new ArrayList<SearchIterator<File>>(numOfStorages);
-        for (int i = 0; i < numOfStorages; i++) {
-            final SearchIterator<File> result = resultMap.get(i);
-            if (null != result) {
-                results.add(result);
+
+        // Take from rest
+        SearchIterator<File> fallback = SearchIteratorAdapter.<File> emptyIterator();
+        for (int i = 1; i < numOfStorages; i++) {
+            it = getFrom(tasks.removeFirst(), 5, TimeUnit.SECONDS, fallback);
+            if (null != it) {
+                results.add(it);
             }
         }
+
         return new MergingSearchIterator<File>(order.comparatorBy(sort), results);
     }
 
-    private void takeInterruptionAware(CompletionService<Void> completionService) throws OXException {
+    private static <V> V getFrom(Future<V> future) throws OXException {
         try {
-            completionService.take();
+            return future.get();
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (ExecutionException e) {
+            throw ThreadPools.launderThrowable(e, OXException.class);
+        }
+    }
+
+    private static <V> V getFrom(Future<V> future, long timeout, TimeUnit unit, V fallbackOnTimeout) throws OXException {
+        try {
+            return future.get(timeout, unit);
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (ExecutionException e) {
+            throw ThreadPools.launderThrowable(e, OXException.class);
+        } catch (TimeoutException e) {
+            return fallbackOnTimeout;
         }
     }
 
