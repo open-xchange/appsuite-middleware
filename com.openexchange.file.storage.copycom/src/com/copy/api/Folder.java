@@ -1,20 +1,20 @@
 
 package com.copy.api;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Generated;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("org.jsonschema2pojo")
@@ -63,21 +63,21 @@ public class Folder {
     @JsonProperty("stub")
     private Boolean stub;
     @JsonProperty("children")
-    private List<Object> children = new ArrayList<Object>();
+    private List<Object> children = new LinkedList<Object>();
     @JsonProperty("counts")
-    private List<Object> counts = new ArrayList<Object>();
+    private List<Object> counts = new LinkedList<Object>();
     @JsonProperty("recipient_confirmed")
     private Boolean recipientConfirmed;
     @JsonProperty("object_available")
     private Boolean objectAvailable;
     @JsonProperty("links")
-    private List<Link> links = new ArrayList<Link>();
+    private List<Link> links = new LinkedList<Link>();
     @JsonProperty("url")
     private String url;
     @JsonProperty("thumb")
     private Boolean thumb;
     @JsonIgnore
-    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
+    private final Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     @JsonProperty("id")
     public String getId() {

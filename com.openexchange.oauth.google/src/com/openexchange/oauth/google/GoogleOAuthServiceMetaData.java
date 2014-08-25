@@ -56,7 +56,7 @@ import java.util.Map;
 import java.util.UUID;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.Api;
-import org.scribe.builder.api.Google2v2Api;
+import org.scribe.builder.api.Google2Api;
 import org.scribe.model.Token;
 import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuthService;
@@ -151,7 +151,7 @@ public final class GoogleOAuthServiceMetaData extends AbstractOAuthServiceMetaDa
 
     @Override
     public Class<? extends Api> getScribeService() {
-        return Google2v2Api.class;
+        return Google2Api.class;
     }
 
     @Override

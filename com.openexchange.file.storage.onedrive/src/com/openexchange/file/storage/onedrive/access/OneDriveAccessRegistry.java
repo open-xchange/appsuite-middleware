@@ -84,15 +84,15 @@ public final class OneDriveAccessRegistry {
     }
 
     /**
-     * Adds specified Box access.
+     * Adds specified Microsoft OneDrive access.
      *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
-     * @param boxAccess The Box access to add
+     * @param oneDriveAccess The Microsoft OneDrive access to add
      * @return The previous associated session, or <code>null</code> if there was no session.
      */
-    public OneDriveAccess addAccess(final int contextId, final int userId, final String accountId, final OneDriveAccess boxAccess) {
+    public OneDriveAccess addAccess(final int contextId, final int userId, final String accountId, final OneDriveAccess oneDriveAccess) {
         final SimpleKey key = SimpleKey.valueOf(contextId, userId);
         ConcurrentMap<String, OneDriveAccess> inner = map.get(key);
         if (null == inner) {
@@ -102,16 +102,16 @@ public final class OneDriveAccessRegistry {
                 inner = tmp;
             }
         }
-        return inner.putIfAbsent(accountId, boxAccess);
+        return inner.putIfAbsent(accountId, oneDriveAccess);
     }
 
     /**
-     * Check presence of the Box access associated with given user-context-pair.
+     * Check presence of the Microsoft OneDrive access associated with given user-context-pair.
      *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
-     * @return <code>true</code> if such a Box access is present; otherwise <code>false</code>
+     * @return <code>true</code> if such a Microsoft OneDrive access is present; otherwise <code>false</code>
      */
     public boolean containsAccess(final int contextId, final int userId, final String accountId) {
         final ConcurrentMap<String, OneDriveAccess> inner = map.get(SimpleKey.valueOf(contextId, userId));
@@ -119,12 +119,12 @@ public final class OneDriveAccessRegistry {
     }
 
     /**
-     * Gets the Box access associated with given user-context-pair.
+     * Gets the Microsoft OneDrive access associated with given user-context-pair.
      *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
-     * @return The Box access or <code>null</code>
+     * @return The Microsoft OneDrive access or <code>null</code>
      */
     public OneDriveAccess getAccess(final int contextId, final int userId, final String accountId) {
         final ConcurrentMap<String, OneDriveAccess> inner = map.get(SimpleKey.valueOf(contextId, userId));
@@ -136,7 +136,7 @@ public final class OneDriveAccessRegistry {
      *
      * @param contextId The context identifier
      * @param userId The user identifier
-     * @return <code>true</code> if a Box access for given user-context-pair was found and removed; otherwise <code>false</code>
+     * @return <code>true</code> if a Microsoft OneDrive access for given user-context-pair was found and removed; otherwise <code>false</code>
      */
     public boolean removeAccessIfLast(final int contextId, final int userId) {
         final SessiondService sessiondService = Services.getService(SessiondService.class);
@@ -148,8 +148,8 @@ public final class OneDriveAccessRegistry {
             if (null == inner || inner.isEmpty()) {
                 return false;
             }
-            for (final OneDriveAccess boxAccess : inner.values()) {
-                boxAccess.dispose();
+            for (final OneDriveAccess oneDriveAccess : inner.values()) {
+                oneDriveAccess.dispose();
             }
             return !inner.isEmpty();
         }
@@ -157,12 +157,12 @@ public final class OneDriveAccessRegistry {
     }
 
     /**
-     * Purges specified user's Box access.
+     * Purges specified user's Microsoft OneDrive access.
      *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
-     * @return <code>true</code> if a Box access for given user-context-pair was found and purged; otherwise <code>false</code>
+     * @return <code>true</code> if a Microsoft OneDrive access for given user-context-pair was found and purged; otherwise <code>false</code>
      */
     public boolean purgeUserAccess(final int contextId, final int userId, final String accountId) {
         final SimpleKey key = SimpleKey.valueOf(contextId, userId);
@@ -181,9 +181,9 @@ public final class OneDriveAccessRegistry {
     }
 
     /**
-     * Gets a {@link Iterator iterator} over the Box access instances in this registry.
+     * Gets a {@link Iterator iterator} over the Microsoft OneDrive access instances in this registry.
      *
-     * @return A {@link Iterator iterator} over the Box access instances in this registry.
+     * @return A {@link Iterator iterator} over the Microsoft OneDrive access instances in this registry.
      */
     Iterator<ConcurrentMap<String, OneDriveAccess>> iterator() {
         return map.values().iterator();

@@ -98,7 +98,7 @@ public final class BoxComOAuthServiceMetaData extends AbstractOAuthServiceMetaDa
         super();
         this.services = services;
         id = "com.openexchange.oauth.boxcom";
-        displayName = "Box";
+        displayName = "Box.com";
         setAPIKeyName("com.openexchange.oauth.boxcom.apiKey");
         setAPISecretName("com.openexchange.oauth.boxcom.apiSecret");
 

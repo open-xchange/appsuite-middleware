@@ -99,7 +99,7 @@ public final class CopyComServiceRegisterer implements ServiceTrackerCustomizer<
             CopyComFileStorageService service = this.service;
             if (null == service) {
                 /*
-                 * Try to create Box.com service
+                 * Try to create Copy.com service
                  */
                 service = CopyComFileStorageService.newInstance();
                 this.serviceRegistration = context.registerService(FileStorageService.class, service, null);

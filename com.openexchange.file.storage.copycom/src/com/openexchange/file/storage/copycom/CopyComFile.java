@@ -49,19 +49,20 @@
 
 package com.openexchange.file.storage.copycom;
 
-import java.text.ParseException;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import org.json.JSONArray;
 import org.json.JSONObject;
-import org.slf4j.Logger;
+import com.copy.api.Creator;
+import com.copy.api.File;
+import com.copy.api.Revision;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.copycom.osgi.Services;
-import com.openexchange.file.storage.copycom.rest.file.RestFile;
-import com.openexchange.file.storage.copycom.utils.ISO8601DateParser;
 import com.openexchange.mime.MimeTypeMap;
 
 /**
@@ -103,10 +104,10 @@ public final class CopyComFile extends DefaultFile {
      * Parses specified Copy.com file.
      *
      * @param file The Copy.com file
-     * @throws OXException If parsing Box file fails
-     * @return This Box file
+     * @throws OXException If parsing Copy.com file fails
+     * @return This Copy.com file
      */
-    public CopyComFile parseCopyComFile(RestFile file) throws OXException {
+    public CopyComFile parseCopyComFile(File file) throws OXException {
         return parseCopyComFile(file, null);
     }
 
@@ -116,36 +117,29 @@ public final class CopyComFile extends DefaultFile {
      * @param file The Copy.com file
      * @param fields The fields to consider
      * @throws OXException If parsing Copy.com file fails
-     * @return This Box file with property set applied
+     * @return This Copy.com file with property set applied
      */
-    public CopyComFile parseCopyComFile(RestFile file, List<Field> fields) throws OXException {
+    public CopyComFile parseCopyComFile(File file, List<Field> fields) throws OXException {
         if (null != file) {
             try {
-                final String name = file.getName();
-                setTitle(name);
+                String name = file.getPath();
+                int pos = name.lastIndexOf('/');
+                name = pos > 0 ? name.substring(pos + 1) : name;
+
+                setTitle(file.getName());
                 setFileName(name);
                 final Set<Field> set = null == fields || fields.isEmpty() ? EnumSet.allOf(Field.class) : EnumSet.copyOf(fields);
 
                 if (set.contains(Field.CREATED)) {
-                    String createdAt = file.getCreatedTime();
+                    Integer createdAt = getCreatedTime(file);
                     if (null != createdAt) {
-                        try {
-                            setCreated(ISO8601DateParser.parse(createdAt));
-                        } catch (ParseException e) {
-                            Logger logger = org.slf4j.LoggerFactory.getLogger(CopyComFile.class);
-                            logger.warn("Could not parse date from: {}", createdAt, e);
-                        }
+                        setCreated(new Date(createdAt.intValue() * 1000L));
                     }
                 }
                 if (set.contains(Field.LAST_MODIFIED) || set.contains(Field.LAST_MODIFIED_UTC)) {
-                    String modifiedAt = file.getUpdatedTime();
+                    Integer modifiedAt = getModifiedAt(file);
                     if (null != modifiedAt) {
-                        try {
-                            setLastModified(ISO8601DateParser.parse(modifiedAt));
-                        } catch (ParseException e) {
-                            Logger logger = org.slf4j.LoggerFactory.getLogger(CopyComFile.class);
-                            logger.warn("Could not parse date from: {}", modifiedAt, e);
-                        }
+                        setLastModified(new Date(modifiedAt.intValue() * 1000L));
                     }
                 }
                 if (set.contains(Field.FILE_MIMETYPE)) {
@@ -154,13 +148,13 @@ public final class CopyComFile extends DefaultFile {
                     setFileMIMEType(contentType);
                 }
                 if (set.contains(Field.FILE_SIZE)) {
-                    long size = file.getSize();
-                    if (size >= 0) {
-                        setFileSize(size);
+                    Integer size = file.getSize();
+                    if (null != size) {
+                        setFileSize(size.longValue());
                     }
                 }
                 if (set.contains(Field.URL)) {
-                    String link = file.getSource();
+                    String link = file.getUrl();
                     if (null != link) {
                         setURL(link);
                     }
@@ -170,9 +164,6 @@ public final class CopyComFile extends DefaultFile {
                 }
                 if (set.contains(Field.CATEGORIES)) {
                     setCategories(null);
-                }
-                if (set.contains(Field.DESCRIPTION)) {
-                    setDescription(file.getDescription());
                 }
                 if (set.contains(Field.VERSION_COMMENT)) {
                     setVersionComment(null);
@@ -184,13 +175,32 @@ public final class CopyComFile extends DefaultFile {
         return this;
     }
 
+    private Integer getModifiedAt(File file) {
+        List<Revision> revisions = file.getRevisions();
+        if (null != revisions && !revisions.isEmpty()) {
+            return revisions.get(0).getModifiedTime();
+        }
+        return null;
+    }
+
+    private Integer getCreatedTime(File file) {
+        List<Revision> revisions = file.getRevisions();
+        if (null != revisions && !revisions.isEmpty()) {
+            Creator creator = revisions.get(0).getCreator();
+            if (null != creator) {
+                return creator.getCreatedTime();
+            }
+        }
+        return null;
+    }
+
     /**
      * Parses specified Copy.com file.
      *
      * @param file The Copy.com file
      * @param fields The fields to consider
      * @throws OXException If parsing Copy.com file fails
-     * @return This Box file with property set applied
+     * @return This Copy.com file with property set applied
      */
     public CopyComFile parseCopyComFile(JSONObject jFile) throws OXException {
         return parseCopyComFile(jFile, null);
@@ -202,36 +212,29 @@ public final class CopyComFile extends DefaultFile {
      * @param file The Copy.com file
      * @param fields The fields to consider
      * @throws OXException If parsing Copy.com file fails
-     * @return This Box file with property set applied
+     * @return This Copy.com file with property set applied
      */
     public CopyComFile parseCopyComFile(JSONObject jFile, List<Field> fields) throws OXException {
         if (null != jFile) {
             try {
-                final String name = jFile.optString("name", null);
-                setTitle(name);
+                String name = jFile.optString("path", null);
+                int pos = name.lastIndexOf('/');
+                name = pos > 0 ? name.substring(pos + 1) : name;
+
+                setTitle(jFile.optString("name", null));
                 setFileName(name);
                 final Set<Field> set = null == fields || fields.isEmpty() ? EnumSet.allOf(Field.class) : EnumSet.copyOf(fields);
 
                 if (set.contains(Field.CREATED)) {
-                    String createdAt = jFile.optString("created_time", null);
+                    Integer createdAt = getCreatedTime(jFile);
                     if (null != createdAt) {
-                        try {
-                            setCreated(ISO8601DateParser.parse(createdAt));
-                        } catch (ParseException e) {
-                            Logger logger = org.slf4j.LoggerFactory.getLogger(CopyComFile.class);
-                            logger.warn("Could not parse date from: {}", createdAt, e);
-                        }
+                        setCreated(new Date(createdAt.intValue() * 1000L));
                     }
                 }
                 if (set.contains(Field.LAST_MODIFIED) || set.contains(Field.LAST_MODIFIED_UTC)) {
-                    String modifiedAt = jFile.optString("updated_time", null);
+                    Integer modifiedAt = getModifiedAt(jFile);
                     if (null != modifiedAt) {
-                        try {
-                            setLastModified(ISO8601DateParser.parse(modifiedAt));
-                        } catch (ParseException e) {
-                            Logger logger = org.slf4j.LoggerFactory.getLogger(CopyComFile.class);
-                            logger.warn("Could not parse date from: {}", modifiedAt, e);
-                        }
+                        setLastModified(new Date(modifiedAt.intValue() * 1000L));
                     }
                 }
                 if (set.contains(Field.FILE_MIMETYPE)) {
@@ -240,13 +243,13 @@ public final class CopyComFile extends DefaultFile {
                     setFileMIMEType(contentType);
                 }
                 if (set.contains(Field.FILE_SIZE)) {
-                    long size = jFile.optLong("size", -1L);
-                    if (size >= 0) {
-                        setFileSize(size);
+                    Integer size = (Integer) jFile.opt("size");
+                    if (null != size) {
+                        setFileSize(size.longValue());
                     }
                 }
                 if (set.contains(Field.URL)) {
-                    String link = jFile.optString("source", null);
+                    String link = (String) jFile.opt("url");
                     if (null != link) {
                         setURL(link);
                     }
@@ -257,9 +260,6 @@ public final class CopyComFile extends DefaultFile {
                 if (set.contains(Field.CATEGORIES)) {
                     setCategories(null);
                 }
-                if (set.contains(Field.DESCRIPTION)) {
-                    setDescription(jFile.optString("description", null));
-                }
                 if (set.contains(Field.VERSION_COMMENT)) {
                     setVersionComment(null);
                 }
@@ -268,6 +268,25 @@ public final class CopyComFile extends DefaultFile {
             }
         }
         return this;
+    }
+
+    private Integer getModifiedAt(JSONObject jFile) {
+        JSONArray revisions = jFile.optJSONArray("revisions");
+        if (null != revisions && !revisions.isEmpty()) {
+            return (Integer) revisions.optJSONObject(0).opt("modified_time");
+        }
+        return null;
+    }
+
+    private Integer getCreatedTime(JSONObject jFile) {
+        JSONArray revisions = jFile.optJSONArray("revisions");
+        if (null != revisions && !revisions.isEmpty()) {
+            JSONObject creator = revisions.optJSONObject(0).optJSONObject("creator");
+            if (null != creator) {
+                return (Integer) creator.opt("created_time");
+            }
+        }
+        return null;
     }
 
 }

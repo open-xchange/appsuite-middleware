@@ -59,7 +59,6 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import org.apache.http.HttpResponse;
@@ -68,17 +67,13 @@ import org.apache.http.StatusLine;
 import org.apache.http.auth.AuthenticationException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
-import org.slf4j.Logger;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerationException;
@@ -94,7 +89,6 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.copycom.access.CopyComAccess;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.session.Session;
 
 /**
@@ -145,6 +139,48 @@ public abstract class AbstractCopyComResourceAccess {
 
     // -------------------------------------------------------------------------------------------------------------- //
 
+    /** The status code policy to obey */
+    public static interface StatusCodePolicy {
+
+        /**
+         * Examines given status line
+         *
+         * @param statusLine The status line
+         * @throws OXException If an Open-Xchange error is yielded from status
+         * @throws HttpResponseException If status is interpreted as an error
+         */
+        void handleStatusCode(StatusLine statusLine) throws OXException, HttpResponseException;
+    }
+
+    /** The default status code policy; accepting greater than/equal to <code>200</code> and lower than <code>300</code> */
+    public static final StatusCodePolicy STATUS_CODE_POLICY_DEFAULT = new StatusCodePolicy() {
+
+        @Override
+        public void handleStatusCode(StatusLine statusLine) throws OXException, HttpResponseException {
+            int statusCode = statusLine.getStatusCode();
+            if (statusCode < 200 || statusCode >= 300) {
+                if (404 == statusCode) {
+                    throw CopyComExceptionCodes.NOT_FOUND_SIMPLE.create();
+                }
+                throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
+            }
+        }
+    };
+
+    /** The status code policy; accepting greater than/equal to <code>200</code> and lower than <code>300</code> while ignoring <code>404</code> */
+    public static final StatusCodePolicy STATUS_CODE_POLICY_IGNORE_NOT_FOUND = new StatusCodePolicy() {
+
+        @Override
+        public void handleStatusCode(StatusLine statusLine) throws HttpResponseException, OXException {
+            int statusCode = statusLine.getStatusCode();
+            if ((statusCode < 200 || statusCode >= 300) && statusCode != 404) {
+                throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
+            }
+        }
+    };
+
+    // -------------------------------------------------------------------------------------------------------------- //
+
     /** The type constants for a folder */
     private static final Set<String> TYPES_FOLDER = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(CopyComConstants.TYPE_FOLDER, CopyComConstants.TYPE_ALBUM)));
 
@@ -175,50 +211,13 @@ public abstract class AbstractCopyComResourceAccess {
 
     /**
      * Initializes a new {@link AbstractCopyComResourceAccess}.
-     *
-     * @throws OXException If initialization fails
      */
-    protected AbstractCopyComResourceAccess(CopyComAccess copyComAccess, FileStorageAccount account, Session session) throws OXException {
+    protected AbstractCopyComResourceAccess(CopyComAccess copyComAccess, FileStorageAccount account, Session session) {
         super();
         this.copyComAccess = copyComAccess;
         this.account = account;
         this.session = session;
-
-        String rootFolderId = null;
-        HttpRequestBase request = null;
-        try {
-            int keepOn = 1;
-            while (keepOn > 0) {
-                DefaultHttpClient httpClient = copyComAccess.getHttpClient();
-                HttpGet method = new HttpGet(buildUri("/me/skydrive", initiateQueryString()));
-                request = method;
-                HttpClients.setRequestTimeout(3500, method);
-
-                HttpResponse httpResponse = httpClient.execute(method);
-                if (SC_UNAUTHORIZED == httpResponse.getStatusLine().getStatusCode()) {
-                    if (keepOn > 1) {
-                        throw CopyComExceptionCodes.UNLINKED_ERROR.create();
-                    }
-
-                    reset(request);
-                    request = null;
-                    keepOn = 2;
-
-                    copyComAccess.reinit(session);
-                } else {
-                    JSONObject jResponse = handleHttpResponse(httpResponse, JSONObject.class);
-                    rootFolderId = jResponse.optString("id", null);
-                    keepOn = 0;
-                }
-            }
-        } catch (HttpResponseException e) {
-            throw handleHttpResponseError(null, e);
-        } catch (IOException e) {
-            throw handleIOError(e);
-        } finally {
-            reset(request);
-        }
-        this.rootFolderId = rootFolderId;
+        rootFolderId = "/copy";
     }
 
     /**
@@ -257,17 +256,6 @@ public abstract class AbstractCopyComResourceAccess {
     }
 
     /**
-     * Initiates the query string parameters
-     *
-     * @return The query string parameters
-     */
-    protected List<NameValuePair> initiateQueryString() {
-        List<NameValuePair> qparams = new LinkedList<NameValuePair>();
-        qparams.add(new BasicNameValuePair("access_token", copyComAccess.getAccessToken()));
-        return qparams;
-    }
-
-    /**
      * Builds the URI from given arguments
      *
      * @param resourceId The resource identifier
@@ -277,7 +265,7 @@ public abstract class AbstractCopyComResourceAccess {
      */
     protected URI buildUri(String resourceId, List<NameValuePair> queryString) {
         try {
-            return new URI("https", null, "apis.live.net", -1, "/v5.0/" + resourceId, null == queryString ? null : URLEncodedUtils.format(queryString, "UTF-8"), null);
+            return new URI("https", null, "api.copy.com", -1, "/rest/" + resourceId, null == queryString ? null : URLEncodedUtils.format(queryString, "UTF-8"), null);
         } catch (URISyntaxException x) {
             IllegalArgumentException y = new IllegalArgumentException();
             y.initCause(x);
@@ -296,14 +284,14 @@ public abstract class AbstractCopyComResourceAccess {
      * @throws IOException If an I/O error occurs
      */
     protected <R> R handleHttpResponse(HttpResponse httpResponse, Class<R> clazz) throws OXException, ClientProtocolException, IOException {
-        return handleHttpResponse(httpResponse, 200, clazz);
+        return handleHttpResponse(httpResponse, STATUS_CODE_POLICY_DEFAULT, clazz);
     }
 
     /**
      * Handles given HTTP response while expecting given status code.
      *
      * @param httpResponse The HTTP response
-     * @param expectStatusCode The status code to expect
+     * @param policy The policy to obey
      * @param clazz The class of the result object
      * @return The result object
      * @throws OXException If an Open-Xchange error occurs
@@ -311,11 +299,8 @@ public abstract class AbstractCopyComResourceAccess {
      * @throws IOException If an I/O error occurs
      * @throws IllegalStateException If content stream cannot be created
      */
-    protected <R> R handleHttpResponse(HttpResponse httpResponse, int expectStatusCode, Class<R> clazz) throws OXException, ClientProtocolException, IOException {
-        StatusLine statusLine = httpResponse.getStatusLine();
-        if (expectStatusCode != statusLine.getStatusCode()) {
-            throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
-        }
+    protected <R> R handleHttpResponse(HttpResponse httpResponse, StatusCodePolicy policy, Class<R> clazz) throws OXException, ClientProtocolException, IOException {
+        policy.handleStatusCode(httpResponse.getStatusLine());
 
         if (Void.class.equals(clazz)) {
             return null;
@@ -339,7 +324,7 @@ public abstract class AbstractCopyComResourceAccess {
      * @throws OXException If performing closure fails
      */
     protected <R> R perform(CopyComClosure<R> closure) throws OXException {
-        return closure.perform(this, copyComAccess.getHttpClient(), session);
+        return closure.perform(this, copyComAccess);
     }
 
     /**
@@ -350,14 +335,7 @@ public abstract class AbstractCopyComResourceAccess {
      * @throws OXException If authentication error could not be handled
      */
     protected void handleAuthError(HttpResponseException e, Session session) throws OXException {
-        try {
-            copyComAccess.reinit(session);
-        } catch (OXException oxe) {
-            Logger logger = org.slf4j.LoggerFactory.getLogger(AbstractCopyComResourceAccess.class);
-            logger.warn("Could not re-initialize Box.com access", oxe);
-
-            throw CopyComExceptionCodes.COPY_COM_ERROR.create(e, e.getMessage());
-        }
+        throw CopyComExceptionCodes.UNLINKED_ERROR.create(e, new Object[0]);
     }
 
     /**
@@ -383,7 +361,7 @@ public abstract class AbstractCopyComResourceAccess {
     /**
      * Handles given HTTP response error.
      *
-     * @param identifier The optional identifier for associated Box.com resource
+     * @param identifier The optional identifier for associated Copy.com resource
      * @param e The HTTP error
      * @return The resulting exception
      */
@@ -410,11 +388,11 @@ public abstract class AbstractCopyComResourceAccess {
     /**
      * Gets the file storage folder identifier from given Copy.com folder identifier
      *
-     * @param boxId The Copy.com folder identifier
+     * @param copyComId The Copy.com folder identifier
      * @return The appropriate file storage folder identifier
      */
-    protected String toFileStorageFolderId(String boxId) {
-        return rootFolderId.equals(boxId) || "0".equals(boxId) ? FileStorageFolder.ROOT_FULLNAME : boxId;
+    protected String toFileStorageFolderId(String copyComId) {
+        return rootFolderId.equals(copyComId) ? FileStorageFolder.ROOT_FULLNAME : copyComId;
     }
 
 }

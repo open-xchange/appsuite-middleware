@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,41 +47,39 @@
  *
  */
 
-package com.openexchange.mail.attachment.storage;
-
-import java.util.Date;
-import javax.mail.internet.InternetAddress;
+package com.openexchange.file.storage;
 
 
 /**
- * {@link MessageInfo} - A message information object.
+ * {@link DefaultTypeAwareFileStorageFolder} - The default file storage folder providing setter methods.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.1
  */
-public class MessageInfo {
+public class DefaultTypeAwareFileStorageFolder extends DefaultFileStorageFolder implements TypeAware {
 
-    /** The subject */
-    public final String subject;
-
-    /** The date */
-    public final Date date;
-
-    /** The <code>"To"</code> addresses */
-    public final InternetAddress[] to;
+    private FileStorageFolderType type;
 
     /**
-     * Initializes a new {@link MessageInfo}.
-     *
-     * @param subject The subject
-     * @param date The date
-     * @param to The <code>"To"</code> address
+     * Initializes a new {@link DefaultTypeAwareFileStorageFolder}.
      */
-    public MessageInfo(String subject, Date date, InternetAddress[] to) {
+    public DefaultTypeAwareFileStorageFolder() {
         super();
-        this.subject = subject;
-        this.date = date;
-        this.to = to;
+    }
+
+    @Override
+    public FileStorageFolderType getType() {
+        return type;
+    }
+
+    /**
+     * Sets the type.
+     *
+     * @param type The type to set
+     * @return This folder with type applied
+     */
+    public DefaultTypeAwareFileStorageFolder setType(FileStorageFolderType type) {
+        this.type = type;
+        return this;
     }
 
 }

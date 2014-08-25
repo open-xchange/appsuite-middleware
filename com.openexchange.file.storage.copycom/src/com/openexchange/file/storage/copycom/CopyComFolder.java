@@ -49,10 +49,10 @@
 
 package com.openexchange.file.storage.copycom;
 
-import java.text.ParseException;
 import java.util.Collections;
+import org.json.JSONArray;
 import org.json.JSONObject;
-import org.slf4j.Logger;
+import com.copy.api.Folder;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
@@ -60,8 +60,6 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.TypeAware;
-import com.openexchange.file.storage.copycom.rest.folder.RestFolder;
-import com.openexchange.file.storage.copycom.utils.ISO8601DateParser;
 
 /**
  * {@link CopyComFolder}
@@ -120,11 +118,9 @@ public final class CopyComFolder extends DefaultFileStorageFolder implements Typ
      * @param dir The Copy.com directory
      * @param rootFolderId The identifier of the root folder
      * @param accountDisplayName The account's display name
-     * @param hasSubfolders Whether this folder has subfolders;<br>
-     *                      e.g. <tt>"GET https://apis.live.net/v5.0/&lt;folder-id&gt;/files?access_token=&lt;access-token&gt;"</tt>
      * @throws OXException If parsing Copy.com directory fails
      */
-    public CopyComFolder parseDirEntry(RestFolder dir, String rootFolderId, String accountDisplayName, boolean hasSubfolders) throws OXException {
+    public CopyComFolder parseDirEntry(Folder dir, String rootFolderId, String accountDisplayName) throws OXException {
         if (null != dir) {
             try {
                 id = dir.getId();
@@ -136,31 +132,20 @@ public final class CopyComFolder extends DefaultFileStorageFolder implements Typ
                     setParentId(null);
                     setName(null == accountDisplayName ? dir.getName() : accountDisplayName);
                 } else {
-                    String parentId = dir.getParentId();
+                    String parentId;
+                    {
+                        int pos = id.lastIndexOf('/');
+                        parentId = pos > 0 ? id.substring(0, pos) : null;
+                    }
                     setParentId(isRootFolder(parentId, rootFolderId) ? FileStorageFolder.ROOT_FULLNAME : parentId);
                     setName(dir.getName());
                 }
 
-                {
-                    String createdAt = dir.getCreatedTime();
-                    if (null != createdAt) {
-                        try {
-                            creationDate = (ISO8601DateParser.parse(createdAt));
-                        } catch (ParseException e) {
-                            Logger logger = org.slf4j.LoggerFactory.getLogger(CopyComFile.class);
-                            logger.warn("Could not parse date from: {}", createdAt, e);
-                        }
-                    }
-                }
-                {
-                    String modifiedAt = dir.getUpdatedTime();
-                    if (null != modifiedAt) {
-                        try {
-                            lastModifiedDate = (ISO8601DateParser.parse(modifiedAt));
-                        } catch (ParseException e) {
-                            Logger logger = org.slf4j.LoggerFactory.getLogger(CopyComFile.class);
-                            logger.warn("Could not parse date from: {}", modifiedAt, e);
-                        }
+                boolean hasSubfolders = false;
+                for (Object child : dir.getChildren()) {
+                    if (child instanceof Folder) {
+                        hasSubfolders = true;
+                        break;
                     }
                 }
 
@@ -179,11 +164,9 @@ public final class CopyComFolder extends DefaultFileStorageFolder implements Typ
      * @param dir The Copy.com directory
      * @param rootFolderId The identifier of the root folder
      * @param accountDisplayName The account's display name
-     * @param hasSubfolders Whether this folder has subfolders;<br>
-     *                      e.g. <tt>"GET https://apis.live.net/v5.0/&lt;folder-id&gt;/files?access_token=&lt;access-token&gt;"</tt>
      * @throws OXException If parsing Copy.com directory fails
      */
-    public CopyComFolder parseDirEntry(JSONObject dir, String rootFolderId, String accountDisplayName, boolean hasSubfolders) throws OXException {
+    public CopyComFolder parseDirEntry(JSONObject dir, String rootFolderId, String accountDisplayName) throws OXException {
         if (null != dir) {
             try {
                 id = dir.optString("id", null);
@@ -195,30 +178,25 @@ public final class CopyComFolder extends DefaultFileStorageFolder implements Typ
                     setParentId(null);
                     setName(null == accountDisplayName ? dir.optString("name", null) : accountDisplayName);
                 } else {
-                    String parentId = dir.optString("parent_id", null);
+                    String parentId;
+                    {
+                        int pos = id.lastIndexOf('/');
+                        parentId = pos > 0 ? id.substring(0, pos) : null;
+                    }
                     setParentId(isRootFolder(parentId, rootFolderId) ? FileStorageFolder.ROOT_FULLNAME : parentId);
                     setName(dir.optString("name", null));
                 }
 
-                {
-                    String createdAt = dir.optString("created_time", null);
-                    if (null != createdAt) {
-                        try {
-                            creationDate = (ISO8601DateParser.parse(createdAt));
-                        } catch (ParseException e) {
-                            Logger logger = org.slf4j.LoggerFactory.getLogger(CopyComFile.class);
-                            logger.warn("Could not parse date from: {}", createdAt, e);
-                        }
-                    }
-                }
-                {
-                    String modifiedAt = dir.optString("updated_time", null);
-                    if (null != modifiedAt) {
-                        try {
-                            lastModifiedDate = (ISO8601DateParser.parse(modifiedAt));
-                        } catch (ParseException e) {
-                            Logger logger = org.slf4j.LoggerFactory.getLogger(CopyComFile.class);
-                            logger.warn("Could not parse date from: {}", modifiedAt, e);
+                boolean hasSubfolders = false;
+                JSONArray children = dir.optJSONArray("children");
+                if (null != children && !children.isEmpty()) {
+                    int length = children.length();
+                    for (int i = 0; i < length; i++) {
+                        JSONObject child = children.optJSONObject(i);
+                        String type = (String) child.opt("type");
+                        if ("dir".equals(type)) {
+                            hasSubfolders = true;
+                            break;
                         }
                     }
                 }
@@ -233,7 +211,7 @@ public final class CopyComFolder extends DefaultFileStorageFolder implements Typ
     }
 
     private static boolean isRootFolder(String id, String rootFolderId) {
-        return "0".equals(id) || rootFolderId.equals(id);
+        return rootFolderId.equals(id);
     }
 
 }

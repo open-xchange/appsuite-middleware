@@ -99,7 +99,7 @@ public final class OneDriveServiceRegisterer implements ServiceTrackerCustomizer
             OneDriveFileStorageService service = this.service;
             if (null == service) {
                 /*
-                 * Try to create Box.com service
+                 * Try to create Microsoft OneDrive service
                  */
                 service = OneDriveFileStorageService.newInstance();
                 this.serviceRegistration = context.registerService(FileStorageService.class, service, null);

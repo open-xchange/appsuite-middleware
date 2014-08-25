@@ -490,6 +490,12 @@ public class CalendarTestManager implements TestManager {
                             if (!tryDate(app, actualColumns[i], (Long) row[i])) {
                                 tryInteger(app, actualColumns[i], (Long) row[i]);
                             }
+                        } else if (x.getMessage().equals("java.lang.Long cannot be cast to java.util.Date")) {
+                            app.set(actualColumns[i], new Date((Long)row[i]));
+                        } else if (x.getMessage().equals("java.lang.String cannot be cast to java.lang.Long")) {
+                            app.set(actualColumns[i], Long.parseLong((String) row[i]));
+                        } else if (x.getMessage().equals("org.json.JSONArray cannot be cast to [Ljava.util.Date;")) {
+                            //
                         }
                     }
                 }

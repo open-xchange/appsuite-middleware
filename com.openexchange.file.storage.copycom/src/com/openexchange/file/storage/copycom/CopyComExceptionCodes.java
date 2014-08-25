@@ -83,6 +83,10 @@ public enum CopyComExceptionCodes implements DisplayableOXExceptionCode {
      */
     NOT_FOUND("The Copy.com resource does not exist: %1$s", CopyComExceptionMessages.NOT_FOUND_MSG, Category.CATEGORY_ERROR, 5),
     /**
+     * The Copy.com resource does not exist
+     */
+    NOT_FOUND_SIMPLE("The Copy.com resource does not exist", CopyComExceptionMessages.NOT_FOUND_SIMPLE_MSG, Category.CATEGORY_ERROR, 5),
+    /**
      * Update denied for Copy.com resource: %1$s
      */
     UPDATE_DENIED("Update denied for Copy.com resource: %1$s", CopyComExceptionMessages.UPDATE_DENIED_MSG, Category.CATEGORY_ERROR, 6),

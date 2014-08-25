@@ -56,7 +56,6 @@ import oauth.signpost.exception.OAuthExpectationFailedException;
 import oauth.signpost.exception.OAuthMessageSignerException;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.copycom.CopyComExceptionCodes;
@@ -75,13 +74,8 @@ import com.openexchange.session.Session;
  */
 public class CopyComAccess {
 
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CopyComAccess.class);
-
-    /** The re-check threshold in seconds (45 minutes) */
-    private static final long RECHECK_THRESHOLD = 2700;
-
     /**
-     * Gets the Copy.com access for given Box account.
+     * Gets the Copy.com access for given Copy.com account.
      *
      * @param fsAccount The Copy.com account providing credentials and settings
      * @param session The user session
@@ -91,15 +85,15 @@ public class CopyComAccess {
     public static CopyComAccess accessFor(final FileStorageAccount fsAccount, final Session session) throws OXException {
         final CopyComAccessRegistry registry = CopyComAccessRegistry.getInstance();
         final String accountId = fsAccount.getId();
-        CopyComAccess boxAccess = registry.getAccess(session.getContextId(), session.getUserId(), accountId);
-        if (null == boxAccess) {
+        CopyComAccess copyComAccess = registry.getAccess(session.getContextId(), session.getUserId(), accountId);
+        if (null == copyComAccess) {
             final CopyComAccess newInstance = new CopyComAccess(fsAccount, session, session.getUserId(), session.getContextId());
-            boxAccess = registry.addAccess(session.getContextId(), session.getUserId(), accountId, newInstance);
-            if (null == boxAccess) {
-                boxAccess = newInstance;
+            copyComAccess = registry.addAccess(session.getContextId(), session.getUserId(), accountId, newInstance);
+            if (null == copyComAccess) {
+                copyComAccess = newInstance;
             }
         }
-        return boxAccess;
+        return copyComAccess;
     }
 
     // ------------------------------------------------------------------------------------------------------------------------ //

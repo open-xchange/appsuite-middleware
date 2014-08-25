@@ -82,7 +82,7 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorageRegistry;
 import com.openexchange.mail.attachment.storage.DownloadUri;
 import com.openexchange.mail.attachment.storage.MailAttachmentStorage;
-import com.openexchange.mail.attachment.storage.MessageInfo;
+import com.openexchange.mail.attachment.storage.StoreOperation;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
@@ -210,7 +210,10 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
          * Message information
          */
         final long now = System.currentTimeMillis();
-        final MessageInfo msgInfo = new MessageInfo(source.getSubject(), new Date(now), source.getTo());
+        Map<String, Object> storeProps = new HashMap<String, Object>(8);
+        storeProps.put("subject", source.getSubject());
+        storeProps.put("date", new Date(now));
+        storeProps.put("to", source.getTo());
         /*
          * Generate publication link for each attachment
          */
@@ -219,7 +222,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             /*
              * Generate publish URL: "/publications/infostore/documents/12abead21498754abcfde"
              */
-            final String path = publishAttachmentAndGetPath(msgInfo, attachment, publications, attachmentStorage);
+            final String path = publishAttachmentAndGetPath(storeProps, attachment, publications, attachmentStorage);
             /*
              * Add to list
              */
@@ -480,9 +483,10 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         }
     } // End of createLinksAttachment()
 
-    private String publishAttachmentAndGetPath(MessageInfo msgInfo, MailPart attachment, List<PublicationAndInfostoreID> publications, MailAttachmentStorage attachmentStorage) throws OXException, TransactionException, OXException {
+    private String publishAttachmentAndGetPath(Map<String, Object> storeProps, MailPart attachment, List<PublicationAndInfostoreID> publications, MailAttachmentStorage attachmentStorage) throws OXException, TransactionException, OXException {
         // Store attachment
-        String attachmentId = attachmentStorage.storeAttachment(attachment, msgInfo, TransportProperties.getInstance().getExternalRecipientsLocale(), session);
+        storeProps.put("externalLocale", TransportProperties.getInstance().getExternalRecipientsLocale());
+        String attachmentId = attachmentStorage.storeAttachment(attachment, StoreOperation.PUBLISH_STORE, storeProps, session);
 
         // Get its download URI
         DownloadUri downloadUri = attachmentStorage.getDownloadUri(attachmentId, session);
