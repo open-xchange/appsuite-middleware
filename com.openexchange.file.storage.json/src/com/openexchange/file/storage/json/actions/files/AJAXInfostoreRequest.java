@@ -76,6 +76,7 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.json.FileMetadataParser;
 import com.openexchange.file.storage.json.actions.files.AbstractFileAction.Param;
 import com.openexchange.file.storage.json.services.Services;
@@ -104,7 +105,8 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     private byte[] contentData;
     private List<File.Field> fields;
     private File file;
-    private IDBasedFileAccess files;
+    private IDBasedFileAccess fileAccess;
+    private IDBasedFolderAccess folderAccess;
     private Map<String, String> folderMapping;
     private Map<String, Set<String>> versionMapping;
     private List<String> folders;
@@ -219,10 +221,18 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     @Override
     public IDBasedFileAccess getFileAccess() {
-        if(files != null) {
-            return files;
+        if (fileAccess != null) {
+            return fileAccess;
         }
-        return files = Services.getFileAccessFactory().createAccess(session);
+        return fileAccess = Services.getFileAccessFactory().createAccess(session);
+    }
+
+    @Override
+    public IDBasedFolderAccess getFolderAccess() throws OXException {
+        if (folderAccess != null) {
+            return folderAccess;
+        }
+        return folderAccess = Services.getFolderAccessFactory().createAccess(session);
     }
 
     @Override
