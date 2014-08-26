@@ -269,6 +269,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                         // Unknown. Then detect MIME type by content.
                         fileHolder = new ThresholdFileHolder().write(stream).setContentInfo(fileHolder);
                         mimeType = AJAXUtility.detectMimeType(fileHolder.getStream());
+                        stream = fileHolder.getStream();
                         LOG.debug("Determined MIME type for file {} by content: {}", fileHolder.getName(), mimeType);
                     } else {
                         LOG.debug("Determined MIME type for file {} by name: {}", fileHolder.getName(), mimeType);
