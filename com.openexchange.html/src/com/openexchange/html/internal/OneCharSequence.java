@@ -92,11 +92,8 @@ public class OneCharSequence implements CharSequence {
         return String.valueOf(ch).subSequence(start, end);
     }
 
-<<<<<<< HEAD
     @Override
     public String toString() {
         return String.valueOf(ch);
     }
-=======
->>>>>>> bcb8fd0... Fix for bug 33966: Apply string normalization only to non-ascii characters
 }
