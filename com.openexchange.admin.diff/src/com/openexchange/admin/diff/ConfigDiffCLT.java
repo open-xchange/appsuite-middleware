@@ -63,7 +63,7 @@ import com.openexchange.admin.diff.result.DiffResult;
 
 /**
  * CLT to execute the configuration diff tool.
- * 
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 @SuppressWarnings("static-access")
@@ -72,15 +72,13 @@ public class ConfigDiffCLT {
     private static final Options options = new Options();
 
     static {
-        options.addOption(OptionBuilder.withLongOpt("original").hasArgs(1).withDescription("The original configuration folder provided by OX; '/opt/open-xchange/bundles/' if nothing provided.").isRequired(false).create("o"));
-        options.addOption(OptionBuilder.withLongOpt("installed").hasArgs(1).withDescription("The installed configuration folder; '/opt/open-xchange/etc/' if nothing provided.").isRequired(false).create("i"));
         options.addOption(OptionBuilder.withLongOpt("file").hasArgs(1).withDescription("Export diff to file").isRequired(false).create("f"));
         options.addOption(OptionBuilder.withLongOpt("help").hasArg(false).withDescription("Print usage").isRequired(false).create("h"));
     }
 
     /**
      * Entry point
-     * 
+     *
      * @param args
      */
     public static void main(String[] args) {
@@ -98,16 +96,7 @@ public class ConfigDiffCLT {
                 file = null;
             }
 
-            String originalFolder = null;
-            if (cl.hasOption("o")) {
-                originalFolder = cl.getOptionValue("o");
-            }
-
-            String installationFolder = null;
-            if (cl.hasOption("i")) {
-                installationFolder = cl.getOptionValue("i");
-            }
-            executeDiff(originalFolder, installationFolder, file);
+            executeDiff(file);
         } catch (ParseException e) {
             System.out.println(e.getMessage());
             printUsage(-1);
@@ -119,14 +108,12 @@ public class ConfigDiffCLT {
 
     /**
      * Execute diff
-     * 
-     * @param original folder
-     * @param installed folder
+     *
      * @param file optional file to store the diff
      * @throws IOException
      */
-    private static void executeDiff(String original, String installed, String file) throws IOException {
-        ConfigDiff configDiff = new ConfigDiff(original, installed);
+    private static void executeDiff(String file) throws IOException {
+        ConfigDiff configDiff = new ConfigDiff();
         DiffResult diffResult = configDiff.run();
 
         if (file == null) {
@@ -140,7 +127,7 @@ public class ConfigDiffCLT {
 
     /**
      * Print usage
-     * 
+     *
      * @param exitCode
      */
     private static final void printUsage(int exitCode) {
