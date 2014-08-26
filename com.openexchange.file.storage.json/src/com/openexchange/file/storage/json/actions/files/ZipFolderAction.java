@@ -72,6 +72,7 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -97,6 +98,9 @@ public class ZipFolderAction extends AbstractFileAction {
         IDBasedFileAccess fileAccess = request.getFileAccess();
 
         String folderId = request.getFolderId();
+        if (Strings.isEmpty(folderId)) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(Param.FOLDER_ID.getName());
+        }
 
         boolean recursive;
         {
@@ -128,23 +132,23 @@ public class ZipFolderAction extends AbstractFileAction {
         zipOutput.setUseLanguageEncodingFlag(true);
 
         try {
-            int buflen = 8192;
+            int buflen = 65536;
             byte[] buf = new byte[buflen];
 
-            addFolder2Archive(folderId, fileAccess, idBasedFolderAccess, zipOutput, buflen, buf);
+            addFolder2Archive(folderId, fileAccess, idBasedFolderAccess, zipOutput, "", buflen, buf);
         } finally {
             // Complete the ZIP file
             Streams.close(zipOutput);
         }
     }
 
-    private void addFolder2Archive(String folderId, IDBasedFileAccess fileAccess, IDBasedFolderAccess idBasedFolderAccess, final ZipArchiveOutputStream zipOutput, int buflen, byte[] buf) throws OXException {
+    private void addFolder2Archive(String folderId, IDBasedFileAccess fileAccess, IDBasedFolderAccess idBasedFolderAccess, ZipArchiveOutputStream zipOutput, String pathPrefix, int buflen, byte[] buf) throws OXException {
         List<Field> columns = Arrays.<File.Field> asList(File.Field.ID, File.Field.FOLDER_ID, File.Field.FILENAME, File.Field.FILE_MIMETYPE);
         SearchIterator<File> it = fileAccess.getDocuments(folderId, columns).results();
         try {
             while (it.hasNext()) {
                 File file = it.next();
-                addFile2Archive(file, fileAccess.getDocument(file.getId(), FileStorageFileAccess.CURRENT_VERSION), zipOutput, buflen, buf);
+                addFile2Archive(file, fileAccess.getDocument(file.getId(), FileStorageFileAccess.CURRENT_VERSION), zipOutput, pathPrefix, buflen, buf);
             }
 
             SearchIterators.close(it);
@@ -155,6 +159,7 @@ public class ZipFolderAction extends AbstractFileAction {
                     String name = f.getName();
                     int num = 1;
                     ZipArchiveEntry entry;
+                    String path;
                     while (true) {
                         try {
                             final String entryName;
@@ -166,7 +171,10 @@ public class ZipFolderAction extends AbstractFileAction {
                                     entryName = name.substring(0, pos) + (num > 1 ? "_(" + num + ")" : "") + name.substring(pos);
                                 }
                             }
-                            entry = new ZipArchiveEntry(entryName);
+
+                            // Assumes the entry represents a directory if and only if the name ends with a forward slash "/".
+                            path = pathPrefix + entryName + "/";
+                            entry = new ZipArchiveEntry(path);
                             zipOutput.putArchiveEntry(entry);
                             break;
                         } catch (final java.util.zip.ZipException e) {
@@ -179,7 +187,7 @@ public class ZipFolderAction extends AbstractFileAction {
                     }
                     zipOutput.closeArchiveEntry();
                     // Add its files
-                    addFolder2Archive(f.getId(), fileAccess, idBasedFolderAccess, zipOutput, buflen, buf);
+                    addFolder2Archive(f.getId(), fileAccess, idBasedFolderAccess, zipOutput, path, buflen, buf);
                 }
             }
         } catch (final IOException e) {
@@ -189,11 +197,9 @@ public class ZipFolderAction extends AbstractFileAction {
         }
     }
 
-    private void addFile2Archive(File file, InputStream in, final ZipArchiveOutputStream zipOutput, final int buflen, final byte[] buf) throws OXException {
+    private void addFile2Archive(File file, InputStream in, ZipArchiveOutputStream zipOutput, String pathPrefix, int buflen, byte[] buf) throws OXException {
         try {
-            /*
-             * Add ZIP entry to output stream
-             */
+            // Add ZIP entry to output stream
             String name = file.getFileName();
             if (null == name) {
                 final List<String> extensions = MimeType2ExtMap.getFileExtensions(file.getFileMIMEType());
@@ -212,7 +218,7 @@ public class ZipFolderAction extends AbstractFileAction {
                             entryName = name.substring(0, pos) + (num > 1 ? "_(" + num + ")" : "") + name.substring(pos);
                         }
                     }
-                    entry = new ZipArchiveEntry(entryName);
+                    entry = new ZipArchiveEntry(pathPrefix + entryName);
                     zipOutput.putArchiveEntry(entry);
                     break;
                 } catch (final java.util.zip.ZipException e) {
@@ -223,18 +229,16 @@ public class ZipFolderAction extends AbstractFileAction {
                     num++;
                 }
             }
-            /*
-             * Transfer bytes from the file to the ZIP file
-             */
+
+            // Transfer bytes from the file to the ZIP file
             long size = 0;
             for (int read; (read = in.read(buf, 0, buflen)) > 0;) {
                 zipOutput.write(buf, 0, read);
                 size += read;
             }
             entry.setSize(size);
-            /*
-             * Complete the entry
-             */
+
+            // Complete the entry
             zipOutput.closeArchiveEntry();
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
