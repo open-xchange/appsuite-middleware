@@ -74,6 +74,7 @@ import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 
@@ -145,6 +146,10 @@ public class ZipFolderAction extends AbstractFileAction {
                 File file = it.next();
                 addFile2Archive(file, fileAccess.getDocument(file.getId(), FileStorageFileAccess.CURRENT_VERSION), zipOutput, buflen, buf);
             }
+
+            SearchIterators.close(it);
+            it = null;
+
             if (null != idBasedFolderAccess) {
                 for (FileStorageFolder f : idBasedFolderAccess.getSubfolders(folderId, false)) {
                     String name = f.getName();
@@ -180,11 +185,7 @@ public class ZipFolderAction extends AbstractFileAction {
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
-            try {
-                it.close();
-            } catch (Exception e) {
-                // Ignore
-            }
+            SearchIterators.close(it);
         }
     }
 
