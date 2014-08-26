@@ -45,7 +45,7 @@ modules/mail/vcard > io.ox/mail//appendVcard
 modules/mail/unifiedinboxidentifier > io.ox/mail//unifiedInboxIdentifier
 modules/mail/msgformat > io.ox/mail//messageFormat
 modules/mail/displayReceiptNotification > io.ox/mail//sendDispositionNotification
-modules/mail/enforceSecureConnection > io.ox/mail//enforceSecureConnection
+modules/mail/enforcesecureconnection > io.ox/mail//enforcesecureconnection
 
 # Migration
 gui > io.ox/migration//gui
