@@ -99,10 +99,10 @@ public class ConfigDiffCLT {
             executeDiff(file);
         } catch (ParseException e) {
             System.out.println(e.getMessage());
-            printUsage(-1);
+            printUsage(1);
         } catch (IOException e) {
             System.out.println(e.getMessage());
-            printUsage(-1);
+            printUsage(1);
         }
     }
 
@@ -122,6 +122,10 @@ public class ConfigDiffCLT {
             File output = new File(file);
 
             FileUtils.write(output, diffResult.toString());
+        }
+
+        if (diffResult.getProcessingErrors().size() > 0) {
+            System.exit(1);
         }
     }
 
