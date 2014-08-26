@@ -415,7 +415,15 @@ public class ContactRequest {
     }
 
     public boolean isExcludeAdmin() throws OXException {
-    	return request.containsParameter("admin") && false == request.getParameter("admin", boolean.class);
+        return request.containsParameter("admin") && false == request.getParameter("admin", boolean.class);
+    }
+
+    public boolean isRequireEmail() throws OXException {
+        return false == request.containsParameter("email") || request.getParameter("email", boolean.class);
+    }
+
+    public String getQuery() throws OXException {
+        return request.getParameter("query");
     }
 
     public int[][] getListRequestData() throws OXException {

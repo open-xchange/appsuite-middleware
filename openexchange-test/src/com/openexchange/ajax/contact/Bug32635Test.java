@@ -49,46 +49,53 @@
 
 package com.openexchange.ajax.contact;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import com.openexchange.ajax.contact.action.ExemplaryContactTestManagerTest;
+import java.util.List;
+import org.json.JSONArray;
+import com.openexchange.ajax.contact.action.AutocompleteRequest;
+import com.openexchange.ajax.framework.CommonSearchResponse;
+import com.openexchange.groupware.container.Contact;
 
-public class ContactAJAXSuite extends TestSuite {
+/**
+ * {@link Bug32635Test}
+ *
+ * auto complete broken for contacts
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ */
+public class Bug32635Test extends AbstractManagedContactTest {
 
-    public static Test suite() {
-        final TestSuite tests = new TestSuite("com.openexchange.ajax.contact.ContactAJAXSuite");
-        tests.addTestSuite(AllTest.class);
-        tests.addTestSuite(CopyTest.class);
-        tests.addTestSuite(DeleteTest.class);
-        tests.addTestSuite(ListTest.class);
-        tests.addTestSuite(MoveTest.class);
-        tests.addTestSuite(NewTest.class);
-        tests.addTestSuite(SearchTest.class);
-        tests.addTestSuite(UpdateTest.class);
-        tests.addTestSuite(UpdatesTest.class);
-        tests.addTestSuite(MultipleTest.class);
-        tests.addTestSuite(NewListTest.class);
-        tests.addTestSuite(SearchInAllContactFoldersTest.class);
-        tests.addTestSuite(BasicManagedContactTests.class);
-        tests.addTestSuite(ExemplaryContactTestManagerTest.class);
-        tests.addTestSuite(ContactAttachmentTests.class);
-        tests.addTestSuite(AllAliasTest.class);
-        tests.addTestSuite(ListAliasTest.class);
-        tests.addTestSuite(DeleteMultipleContactsTest.class);
-
-        tests.addTestSuite(YomiTest.class);
-        tests.addTestSuite(YomiContactSearchTests.class);
-        tests.addTestSuite(ContactSearchTests.class);
-        tests.addTestSuite(Bug18608Test_SpecialCharsInEmailTest.class);
-        tests.addTestSuite(DistListTest.class);
-        tests.addTestSuite(DistListMemberUpdateTest.class);
-        tests.addTestSuite(DistListPermissionsTest.class);
-        tests.addTestSuite(BirthdayAndAnniversaryTest.class);
-        tests.addTestSuite(UpdateNotAllowedFieldsTest.class);
-        tests.addTestSuite(SortingInJapanTest.class);
-        tests.addTestSuite(AutocompleteTest.class);
-
-        tests.addTest(ContactBugTestSuite.suite());
-        return tests;
+    /**
+     * Initializes a new {@link Bug32635Test}.
+     *
+     * @param name The test name
+     */
+    public Bug32635Test(String name) {
+        super(name);
     }
+
+	@Override
+	public void setUp() throws Exception {
+	    super.setUp();
+	}
+
+    public void testAutocomplete() throws Exception {
+    	/*
+    	 * create contact
+    	 */
+        Contact contact = super.generateContact("Preuß");
+        contact.setGivenName("Stefan");
+        contact.setDisplayName("Preuß, Stefan");
+        contact = manager.newAction(contact);
+        /*
+         * check auto-complete
+         */
+        String parentFolderID = String.valueOf(contact.getParentFolderID());
+        AutocompleteRequest request = new AutocompleteRequest("Stefan Preuß", false, parentFolderID, Contact.ALL_COLUMNS, true);
+        CommonSearchResponse response = client.execute(request);
+        List<Contact> contacts = manager.transform((JSONArray) response.getResponse().getData(), Contact.ALL_COLUMNS);
+        assertNotNull(contacts);
+        assertEquals("wrong number of results", 1, contacts.size());
+        assertEquals(contact.getDisplayName(), contacts.get(0).getDisplayName());
+    }
+
 }

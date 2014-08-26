@@ -399,4 +399,21 @@ public interface ContactStorage {
      * @throws OXException
      */
     SearchIterator<Contact> searchByAnniversary(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException;
+
+
+    /**
+     * Performs an optimized "auto-complete" lookup for contacts.
+     *
+     * @param session The session
+     * @param folderIDs A list of folder IDs to restrict the search to
+     * @param query The search query as supplied by the client
+     * @param requireEmail <code>true</code> if the returned contacts should have at least one e-mail address, <code>false</code>,
+     *                     otherwise
+     * @param fields The contact fields that should be retrieved
+     * @param sortOptions The options to sort the results
+     * @return The contacts found with the search
+     * @throws OXException
+     */
+    SearchIterator<Contact> autoComplete(Session session, List<String> folderIDs, String query, boolean requireEmail, ContactField[] fields, SortOptions sortOptions) throws OXException;
+
 }
