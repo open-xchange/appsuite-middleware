@@ -77,9 +77,9 @@ public class AutocompleteTest extends AbstractManagedContactTest {
 	}
 
     public void testAutocompleteFirstAndLastname() throws Exception {
-    	/*
-    	 * create contact
-    	 */
+        /*
+         * create contact
+         */
         Contact contact = super.generateContact("Otto");
         contact.setGivenName("Heinz");
         contact.setDisplayName("Otto, Heinz");
@@ -97,6 +97,34 @@ public class AutocompleteTest extends AbstractManagedContactTest {
             assertEquals("wrong number of results", 1, contacts.size());
             assertEquals(contact.getDisplayName(), contacts.get(0).getDisplayName());
         }
+    }
+
+    public void testAutocompleteSpecificContact() throws Exception {
+        /*
+         * create contacts
+         */
+        Contact contact = super.generateContact("Otto");
+        contact.setGivenName("Heinz");
+        contact.setDisplayName("Otto, Heinz");
+        contact = manager.newAction(contact);
+        Contact contact2 = super.generateContact("Otto");
+        contact2.setGivenName("Horst");
+        contact2.setDisplayName("Otto, Horst");
+        contact2 = manager.newAction(contact2);
+        Contact contact3 = super.generateContact("Wurst");
+        contact3.setGivenName("Heinz");
+        contact3.setDisplayName("Wurst, Heinz");
+        contact3 = manager.newAction(contact3);
+        /*
+         * check query
+         */
+        String parentFolderID = String.valueOf(contact.getParentFolderID());
+        AutocompleteRequest request = new AutocompleteRequest("Heinz Otto", false, parentFolderID, Contact.ALL_COLUMNS, true);
+        CommonSearchResponse response = client.execute(request);
+        List<Contact> contacts = manager.transform((JSONArray) response.getResponse().getData(), Contact.ALL_COLUMNS);
+        assertNotNull(contacts);
+        assertEquals("wrong number of results", 1, contacts.size());
+        assertEquals(contact.getDisplayName(), contacts.get(0).getDisplayName());
     }
 
 }
