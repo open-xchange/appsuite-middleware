@@ -333,10 +333,15 @@ public final class TNEF2ICal {
                     try {
                         final int p1 = tmp.indexOf('(') + 1;
                         final int p2 = tmp.indexOf(')', p1);
-                        tmp = tmp.substring(p1, p2);
-                        tzid = java.util.TimeZone.getTimeZone(tmp).getID();
+                        if (p1 >= 0 && p2 > 0) {
+                            tmp = tmp.substring(p1, p2);
+                            tzid = java.util.TimeZone.getTimeZone(tmp).getID();
+                        } else {
+                            LOG.warn("Cannot parse time zone information from: \"{}\"", tmp);
+                            tzid = "GMT";
+                        }
                     } catch (Exception e) {
-                        LOG.warn("Cannot parse time zone information from: \"{}\"", tmp);
+                        LOG.warn("Cannot parse time zone information from: \"{}\"", tmp, e);
                         tzid = "GMT";
                     }
                 }
