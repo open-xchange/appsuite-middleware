@@ -1,3 +1,7 @@
+* 2014-08-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 33535: Respect info store quota when "publish attachment on exceeded quota" is enabled
+
 * 2014-08-26 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 34147: Supply OneCharSequence with proper toString() implementation

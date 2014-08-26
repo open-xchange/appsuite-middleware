@@ -111,7 +111,7 @@ public abstract class MimeFileStoreMailPart extends MailPart {
      * @param fileDataSource The file data source
      * @throws OXException If upload file's content type cannot be parsed
      */
-    protected MimeFileStoreMailPart(final DataSource dataSource, final Session session) throws OXException {
+    protected MimeFileStoreMailPart(final DataSource dataSource, final long size, final Session session) throws OXException {
         super();
         try {
             final File file = new DefaultFile();
@@ -133,6 +133,7 @@ public abstract class MimeFileStoreMailPart extends MailPart {
             file.setFileName(name);
             file.setFileMIMEType(getContentType().toString());
             file.setTitle(name);
+            file.setFileSize(size);
             /*
              * Put attachment's document to dedicated infostore folder
              */

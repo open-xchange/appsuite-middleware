@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,87 +49,56 @@
 
 package com.openexchange.groupware.infostore.validation;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.utils.InfostoreConfigUtils;
+import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
+
 
 /**
- * {@link DocumentMetadataValidation}
+ * {@link SizeInfostoreValidator}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.6.1
  */
-public class DocumentMetadataValidation {
+public class SizeInfostoreValidator implements InfostoreValidator {
 
-    private final Map<Metadata, String> errors;
-    private final List<Metadata> errorFields;
-    private OXException exception;
-    private OXException fatalException;
+    private static final String NAME = SizeInfostoreValidator.class.getSimpleName();
 
     /**
-     * Initializes a new {@link DocumentMetadataValidation}.
+     * Initializes a new {@link SizeInfostoreValidator}.
      */
-    public DocumentMetadataValidation() {
+    public SizeInfostoreValidator() {
         super();
-        errors = new HashMap<Metadata, String>();
-        errorFields = new ArrayList<Metadata>();
     }
 
-    public boolean isValid() {
-        return errors.isEmpty() && null == fatalException;
+    @Override
+    public DocumentMetadataValidation validate(DocumentMetadata metadata) {
+        DocumentMetadataValidation validation = new DocumentMetadataValidation();
+        OXException exception = checkSize(metadata);
+        if (null != exception) {
+            validation.setFatalException(exception);
+        }
+
+        return validation;
     }
 
-    public boolean hasErrors(final Metadata field) {
-        return errors.containsKey(field);
+    private OXException checkSize(final DocumentMetadata metadata) {
+        final long maxSize = InfostoreConfigUtils.determineRelevantUploadSize();
+        if (maxSize == 0) {
+            return null;
+        }
+
+        final long size = metadata.getFileSize();
+        if (size > maxSize) {
+            return UploadSizeExceededException.create(size, maxSize, true);
+        }
+        return null;
     }
 
-    public String getError(final Metadata field) {
-        return errors.get(field);
-    }
-
-    public void setError(final Metadata field, final String error) {
-        errors.put(field, error);
-        errorFields.add(field);
-    }
-
-    public List<Metadata> getInvalidFields() {
-        return errorFields;
-    }
-
-    /**
-     * Gets the fatal exception
-     *
-     * @return The fatal exception
-     */
-    public OXException getFatalException() {
-        return fatalException;
-    }
-
-    /**
-     * Sets the fatal exception
-     *
-     * @param fatalException The fatal exception to set
-     */
-    public void setFatalException(OXException fatalException) {
-        this.fatalException = fatalException;
-    }
-
-    /**
-     * Gets the exception
-     *
-     * @return The exception
-     */
-    public OXException getException() {
-        return exception;
-    }
-
-    /**
-     * Sets the exception
-     *
-     * @param exception The exception to set
-     */
-    public void setException(OXException exception) {
-        this.exception = exception;
+    @Override
+    public String getName() {
+        return NAME;
     }
 
 }
