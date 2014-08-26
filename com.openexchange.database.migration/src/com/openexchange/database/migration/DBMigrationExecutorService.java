@@ -52,6 +52,7 @@ package com.openexchange.database.migration;
 import java.util.List;
 import liquibase.change.custom.CustomSqlChange;
 import liquibase.change.custom.CustomTaskChange;
+import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.resource.ResourceAccessor;
 import com.openexchange.exception.OXException;
@@ -99,7 +100,7 @@ public interface DBMigrationExecutorService {
      * @return boolean - true if rollback was successful. Otherwise false
      * @throws OXException
      */
-    public boolean rollback(String fileName, int numberOfChangeSets) throws OXException;
+    public void rollback(String fileName, int numberOfChangeSets) throws OXException;
 
     /**
      * Executes a rollback to the given tag
@@ -109,5 +110,13 @@ public interface DBMigrationExecutorService {
      * @return boolean - true if rollback was successful. Otherwise false
      * @throws OXException
      */
-    public boolean rollback(String fileName, String changeSetTag) throws OXException;
+    public void rollback(String fileName, String changeSetTag) throws OXException;
+
+    /**
+     * Returns a list of the currently not executed ChangeSets
+     *
+     * @param fileName - String with the name of the file to get the current database migration status for
+     * @return List<ChangeSet> with the currently not executed liquibase changesets
+     */
+    public List<ChangeSet> listUnexecutedChangeSets(String fileName) throws OXException;
 }

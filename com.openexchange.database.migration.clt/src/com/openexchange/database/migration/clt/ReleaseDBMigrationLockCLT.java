@@ -143,7 +143,7 @@ public class ReleaseDBMigrationLockCLT extends AbstractMBeanCLI<Boolean> {
         if (invoke instanceof Boolean) {
             lockReleased = (Boolean)invoke;
         } else {
-            System.out.println("Unexpected result from calling 'releaseDBMigrationLock'. Neither 'true' nor 'false' received from release lock call.");
+            System.out.println("Unexpected result from calling '" + getName() + "'. Neither 'true' nor 'false' received from the call.");
         }
         return lockReleased;
     }

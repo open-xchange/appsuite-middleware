@@ -49,6 +49,7 @@
 
 package com.openexchange.database.migration.mbean;
 
+import java.util.List;
 import javax.management.MBeanException;
 
 
@@ -67,18 +68,20 @@ public interface DBMigrationMBean {
     public static final String VALUE = "Database migration";
 
     /**
-     * Force running update tasks.
+     * Force running update tasks for the given file name.
      *
+     * @param fileName - file name with changesets to force update for
+     * @return true - if update was successful, otherwise false
      * @throws MBeanException
      */
-    public void forceDBMigration() throws MBeanException;
+    public boolean forceDBMigration(String fileName) throws MBeanException;
 
     /**
      * Rollback to the given tag of a changeset within the file
      *
-     * @param fileName
+     * @param fileName - file name with changesets to rollback
      * @param changeSetTag
-     * @return
+     * @return true - if rollback was successful, otherwise false
      * @throws MBeanException
      */
     public boolean rollbackDBMigration(String fileName, String changeSetTag) throws MBeanException;
@@ -86,14 +89,17 @@ public interface DBMigrationMBean {
     /**
      * Releases the database migration lock table. Use this in case no lock can be acquired by liquibase.
      *
+     * @return true - if releasing lock was successful, otherwise false
      * @throws MBeanException
      */
     public boolean releaseDBMigrationLock() throws MBeanException;
 
     /**
-     * List the current status of database migration tasks.
+     * List of the currently not executed ChangeSets for the given file.
      *
+     * @param fileName - file name with changesets to rollback
+     * @return List<String> with the currently not executed ChangeSets for the given file
      * @throws MBeanException
      */
-    public void listDBMigrationStatus() throws MBeanException;
+    public List<String> listUnexecutedChangeSets(String fileName) throws MBeanException;
 }

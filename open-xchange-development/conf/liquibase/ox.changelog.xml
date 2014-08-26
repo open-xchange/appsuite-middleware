@@ -9,11 +9,11 @@
 	<!-- ************** Release 7.6.1 starts here ************** -->
 	<!-- ******************************************************* -->
 
-	<changeSet id="7.6.1-milestone" author="martin.schneider" logicalFilePath="release-7.6.1-milestone" context="configdb">
+	<changeSet id="7.6.1-milestone" author="martin.schneider" logicalFilePath="release-7.6.1-milestone">
 		<tagDatabase tag="7.6.1-milestone" />
 	</changeSet>
 
-	<changeSet id="7.6.1:login2context:login_info" author="martin.schneider" logicalFilePath="release-7.6.1/1.login_info.changelog.xml" context="configdb">
+	<changeSet id="7.6.1:login2context:login_info" author="martin.schneider" logicalFilePath="release-7.6.1/1.login_info.changelog.xml">
 		<preConditions>
 			<changeSetExecuted changeLogFile="release-7.6.1-milestone" author="martin.schneider" id="7.6.1-milestone"/>
 		</preConditions>

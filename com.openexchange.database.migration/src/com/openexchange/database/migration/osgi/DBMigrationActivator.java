@@ -96,16 +96,16 @@ public class DBMigrationActivator extends HousekeepingActivator {
         // Important: At first load classes used for liquibase
         ServiceLocator.setInstance(new CustomResolverServiceLocator(resolver));
 
-        final DatabaseService dbService = getService(DatabaseService.class);
-        Validate.notNull(dbService, "Not able to execute database migration! DatabaseService is absent.");
+        final DatabaseService databaseService = getService(DatabaseService.class);
+        Validate.notNull(databaseService, "Not able to execute database migration! DatabaseService is absent.");
 
         final ConfigurationService configurationService = getService(ConfigurationService.class);
         Validate.notNull(configurationService, "Cannot read migration files because ConfigurationService is absent.");
 
-        DBMigrationExecutorService dbMigrationExecutorService = new DBMigrationExecutorServiceImpl(dbService, configurationService);
+        DBMigrationExecutorService dbMigrationExecutorService = new DBMigrationExecutorServiceImpl(databaseService, configurationService);
         registerService(DBMigrationExecutorService.class, dbMigrationExecutorService);
 
-        track(ManagementService.class, new ManagementServiceTracker(context, dbMigrationExecutorService, dbService));
+        track(ManagementService.class, new ManagementServiceTracker(context, dbMigrationExecutorService, databaseService));
         openTrackers();
     }
 

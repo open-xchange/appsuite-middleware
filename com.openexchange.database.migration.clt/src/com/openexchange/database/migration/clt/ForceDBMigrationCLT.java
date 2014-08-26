@@ -63,10 +63,16 @@ import com.openexchange.database.migration.mbean.DBMigrationMBean;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.1
  */
-public class ForceDBMigrationCLT extends AbstractMBeanCLI<Void> {
+public class ForceDBMigrationCLT extends AbstractMBeanCLI<Boolean> {
 
     public static void main(String[] args) {
-        new ForceDBMigrationCLT().execute(args);
+        Boolean forceUpdateSuccessful = new ForceDBMigrationCLT().execute(args);
+
+        if (forceUpdateSuccessful) {
+            System.out.println("ForceUpdate executed successfully!");
+        } else {
+            System.out.println("Unable to perform update! Please have a look at the server logs for more details!");
+        }
     }
 
     // ------------------------------------------------------------------------------------ //
@@ -124,17 +130,31 @@ public class ForceDBMigrationCLT extends AbstractMBeanCLI<Void> {
      */
     @Override
     protected void addOptions(Options options) {
-        // TODO Auto-generated method stub
+        options.addOption("f", "filename", true, "Name of the file the database migration should be forced for");
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        mbsc.invoke(getObjectName(DBMigrationMBean.class.getName(), DBMigrationMBean.DOMAIN), getName(), null, null);
-        // TODO handle appropriate
+    protected Boolean invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
+        boolean forceUpdateSuccessful = false;
 
-        return null;
+        if (!cmd.hasOption('f')) {
+            System.err.println("Missing file name to force update for.");
+            printHelp(option);
+            System.exit(1);
+        }
+        final String fileName = cmd.getOptionValue('f');
+        final String[] signature = new String[] { String.class.getName() };
+        final Object[] params = new Object[] { fileName };
+        Object invoke = mbsc.invoke(getObjectName(DBMigrationMBean.class.getName(), DBMigrationMBean.DOMAIN), getName(), params, signature);
+
+        if (invoke instanceof Boolean) {
+            forceUpdateSuccessful = (Boolean) invoke;
+        } else {
+            System.out.println("Unexpected result from calling '" + getName() + "'. Neither 'true' nor 'false' received from the call.");
+        }
+        return forceUpdateSuccessful;
     }
 }

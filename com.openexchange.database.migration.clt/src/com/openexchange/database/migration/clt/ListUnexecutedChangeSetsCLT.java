@@ -49,6 +49,8 @@
 
 package com.openexchange.database.migration.clt;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
 import org.apache.commons.cli.CommandLine;
@@ -63,10 +65,20 @@ import com.openexchange.database.migration.mbean.DBMigrationMBean;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.1
  */
-public class ListDBMigrationStatusCLT extends AbstractMBeanCLI<Void> {
+public class ListUnexecutedChangeSetsCLT extends AbstractMBeanCLI<List<String>> {
 
     public static void main(String[] args) {
-        new ListDBMigrationStatusCLT().execute(args);
+        List<String> unexcecutedChangeSets = new ListUnexecutedChangeSetsCLT().execute(args);
+
+        if (unexcecutedChangeSets.size() == 0) {
+            System.out.println("All changesets successfully executed!");
+        }
+        else {
+            System.out.println("The following changesets have currently not been executed!");
+            for (String changeSetNotExecuted : unexcecutedChangeSets) {
+                System.out.println(changeSetNotExecuted);
+            }
+        }
     }
 
     // ------------------------------------------------------------------------------------ //
@@ -74,7 +86,7 @@ public class ListDBMigrationStatusCLT extends AbstractMBeanCLI<Void> {
     /**
      * Initializes a new {@link CloseSessionsCLT}.
      */
-    private ListDBMigrationStatusCLT() {
+    private ListUnexecutedChangeSetsCLT() {
         super();
     }
 
@@ -116,7 +128,7 @@ public class ListDBMigrationStatusCLT extends AbstractMBeanCLI<Void> {
      */
     @Override
     protected String getName() {
-        return "listDBMigrationStatus";
+        return "listUnexecutedChangeSets";
     }
 
     /**
@@ -124,17 +136,31 @@ public class ListDBMigrationStatusCLT extends AbstractMBeanCLI<Void> {
      */
     @Override
     protected void addOptions(Options options) {
-        // TODO Auto-generated method stub
+        options.addOption("f", "filename", true, "Name of the file the database migration status should be displayed for");
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        mbsc.invoke(getObjectName(DBMigrationMBean.class.getName(), DBMigrationMBean.DOMAIN), getName(), null, null);
-        // TODO handle appropriate
+    protected List<String> invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
+        if (!cmd.hasOption('f')) {
+            System.err.println("Missing file name for rollback.");
+            printHelp(option);
+            System.exit(1);
+        }
+        final String fileName = cmd.getOptionValue('f');
+        final String[] signature = new String[] { String.class.getName() };
+        final Object[] params = new Object[] { fileName };
+        Object invoke = mbsc.invoke(getObjectName(DBMigrationMBean.class.getName(), DBMigrationMBean.DOMAIN), getName(), params, signature);
 
-        return null;
+        List<String> unexecutedChangeSets = new ArrayList<String>();
+
+        if (invoke instanceof List<?>) {
+            unexecutedChangeSets = (List<String>) invoke;
+        } else {
+            System.out.println("Unexpected result from calling '" + getName() + "'. Neither 'true' nor 'false' received from the call.");
+        }
+        return unexecutedChangeSets;
     }
 }

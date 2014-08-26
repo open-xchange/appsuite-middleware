@@ -52,9 +52,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import liquibase.Liquibase;
+import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.jvm.JdbcConnection;
@@ -80,7 +82,7 @@ import com.openexchange.exception.OXException;
  */
 public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorService {
 
-    private static final String LIQUIBASE_CONTEXT_CONFIGDB = "configdb";
+    private static final String LIQUIBASE_NO_DEFINED_CONTEXT = "";
 
     private DatabaseService databaseService;
 
@@ -121,7 +123,7 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
 
             liquibase = prepareLiquibase(writable, databaseChangeLog.getPhysicalFilePath());
 
-            liquibase.update(LIQUIBASE_CONTEXT_CONFIGDB);
+            liquibase.update(LIQUIBASE_NO_DEFINED_CONTEXT);
         } catch (Exception exception) {
             handleExceptions(exception);
         } finally {
@@ -233,12 +235,12 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @throws OXException
      */
     @Override
-    public boolean rollback(String fileName, int numberOfChangeSets) throws OXException {
-        return rollbackChangeSets(fileName, numberOfChangeSets);
+    public void rollback(String fileName, int numberOfChangeSets) throws OXException {
+        rollbackChangeSets(fileName, numberOfChangeSets);
     }
 
     /**
@@ -247,8 +249,8 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
      * @throws OXException
      */
     @Override
-    public boolean rollback(String fileName, String changeSetTag) throws OXException {
-        return rollbackChangeSets(fileName, changeSetTag);
+    public void rollback(String fileName, String changeSetTag) throws OXException {
+        rollbackChangeSets(fileName, changeSetTag);
     }
 
     /**
@@ -260,9 +262,7 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
      * @return
      * @throws OXException
      */
-    private boolean rollbackChangeSets(String fileName, Object target) throws OXException {
-        boolean rollbackSuccessful = false;
-
+    private void rollbackChangeSets(String fileName, Object target) throws OXException {
         File xmlConfigFile = getChangeLogFile(fileName);
 
         Connection writable = null;
@@ -274,19 +274,42 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
 
             if (target instanceof Integer) {
                 int numberOfChangeSetsToRollback = (Integer) target;
-                liquibase.rollback(numberOfChangeSetsToRollback, LIQUIBASE_CONTEXT_CONFIGDB);
+                liquibase.rollback(numberOfChangeSetsToRollback, LIQUIBASE_NO_DEFINED_CONTEXT);
             } else if (target instanceof String) {
                 String changeSetTag = (String) target;
-                liquibase.rollback(changeSetTag, LIQUIBASE_CONTEXT_CONFIGDB);
+                liquibase.rollback(changeSetTag, LIQUIBASE_NO_DEFINED_CONTEXT);
             } else {
                 throw DBMigrationExceptionCodes.WRONG_TYPE_OF_DATA_ROLLBACK_ERROR.create();
             }
-            rollbackSuccessful = true;
         } catch (Exception exception) {
             handleExceptions(exception);
         } finally {
             cleanUpLiquibase(writable, liquibase);
         }
-        return rollbackSuccessful;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<ChangeSet> listUnexecutedChangeSets(String fileName) throws OXException {
+        List<ChangeSet> unexecutedChangeSets = new ArrayList<ChangeSet>();
+
+        File xmlConfigFile = getChangeLogFile(fileName);
+
+        Connection writable = null;
+        Liquibase liquibase = null;
+        try {
+            writable = databaseService.getWritable();
+
+            liquibase = prepareLiquibase(writable, xmlConfigFile.getAbsolutePath());
+
+            unexecutedChangeSets = liquibase.listUnrunChangeSets(LIQUIBASE_NO_DEFINED_CONTEXT);
+        } catch (Exception exception) {
+            handleExceptions(exception);
+        } finally {
+            cleanUpLiquibase(writable, liquibase);
+        }
+        return unexecutedChangeSets;
     }
 }

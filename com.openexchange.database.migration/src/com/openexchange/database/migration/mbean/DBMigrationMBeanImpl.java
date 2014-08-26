@@ -52,9 +52,12 @@ package com.openexchange.database.migration.mbean;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.util.ArrayList;
+import java.util.List;
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
+import liquibase.changelog.ChangeSet;
 import org.apache.commons.lang.Validate;
 import org.slf4j.Logger;
 import com.openexchange.database.DatabaseService;
@@ -94,12 +97,19 @@ public class DBMigrationMBeanImpl extends StandardMBean implements DBMigrationMB
      * {@inheritDoc}
      */
     @Override
-    public void forceDBMigration() throws MBeanException {
+    public boolean forceDBMigration(String fileName) throws MBeanException {
+
+        if (fileName == null) {
+            throw new MBeanException(new IllegalArgumentException("Param fileName might not be null!"));
+        }
+
         try {
-            dbMigrationExecutorService.execute("ox.changelog.xml");
+            dbMigrationExecutorService.execute(fileName);
         } catch (OXException e) {
             throw new MBeanException(e, e.getMessage());
         }
+
+        return true;
     }
 
     /**
@@ -133,52 +143,24 @@ public class DBMigrationMBeanImpl extends StandardMBean implements DBMigrationMB
      * {@inheritDoc}
      */
     @Override
-    public void listDBMigrationStatus() throws MBeanException {
+    public List<String> listUnexecutedChangeSets(String fileName) throws MBeanException {
+        if (fileName == null) {
+            throw new MBeanException(new IllegalArgumentException("Param fileName might not be null!"));
+        }
+        List<String> unexecutedChangeSets = new ArrayList<String>();
 
-        // TODO
-        // Connection writable = null;
-        // Liquibase liquibase = null;
-        // JdbcConnection jdbcConnection = null;
-        // try {
-        // writable = databaseService.getWritable();
-        //
-        // jdbcConnection = new JdbcConnection(writable);
-        // jdbcConnection.setAutoCommit(true);
-        //
-        // MySQLDatabase databaseConnection = new MySQLDatabase();
-        // databaseConnection.setConnection(jdbcConnection);
-        // databaseConnection.setAutoCommit(true);
-        //
-        // List<ResourceAccessor> accessors = new CopyOnWriteArrayList<ResourceAccessor>();
-        // accessors.add(new ClassLoaderResourceAccessor());
-        // accessors.add(new FileSystemResourceAccessor());
-        //
-        // liquibase = new Liquibase("ox.changelog.xml", null, databaseConnection);
-        // DatabaseChangeLogLock[] listLocks = liquibase.listLocks();
-        // List<ChangeSet> listUnrunChangeSets = liquibase.listUnrunChangeSets("configdb");
-        // Collection<RanChangeSet> listUnexpectedChangeSets = liquibase.listUnexpectedChangeSets("configdb");
-        // System.out.println(listLocks.length + listUnrunChangeSets.size() + listUnexpectedChangeSets.size());
-        // } catch (ValidationFailedException validationFailedException) {
-        // LOG.error("Validation of DatabaseChangeLog failed with the following exception: " +
-        // validationFailedException.getLocalizedMessage(), validationFailedException);
-        // } catch (LiquibaseException liquibaseException) {
-        // LOG.error("Error using/executing liquibase: " + liquibaseException.getLocalizedMessage(), liquibaseException);
-        // } catch (OXException oxException) {
-        // LOG.error("Unable to retrieve database write connection: " + oxException.getLocalizedMessage(), oxException);
-        // } catch (Exception exception) {
-        // LOG.error("An unexpected error occurred while executing database migration: " + exception.getLocalizedMessage(), exception);
-        // } finally {
-        // if (liquibase != null) {
-        // try {
-        // liquibase.forceReleaseLocks();
-        // } catch (LiquibaseException liquibaseException) {
-        // LOG.error("Unable to release liquibase locks: " + liquibaseException.getLocalizedMessage(), liquibaseException);
-        // }
-        // }
-        // if (writable != null) {
-        // databaseService.backWritable(writable);
-        // }
-        // }
+        try {
+            List<ChangeSet> listUnexecutedChangeSets = dbMigrationExecutorService.listUnexecutedChangeSets(fileName);
+
+            for (ChangeSet changeSet : listUnexecutedChangeSets) {
+                unexecutedChangeSets.add("Filename: " + fileName + "; ChangeSet: " + changeSet.toString(true));
+            }
+
+        } catch (OXException e) {
+            throw new MBeanException(e, e.getMessage());
+        }
+
+        return unexecutedChangeSets;
     }
 
     /**
@@ -186,10 +168,16 @@ public class DBMigrationMBeanImpl extends StandardMBean implements DBMigrationMB
      */
     @Override
     public boolean rollbackDBMigration(String fileName, String changeSetTag) throws MBeanException {
+        if (fileName == null) {
+            throw new MBeanException(new IllegalArgumentException("Param fileName might not be null!"));
+        }
+
         try {
-            return dbMigrationExecutorService.rollback(fileName, changeSetTag);
+            dbMigrationExecutorService.rollback(fileName, changeSetTag);
         } catch (OXException e) {
             throw new MBeanException(e, e.getMessage());
         }
+
+        return true;
     }
 }

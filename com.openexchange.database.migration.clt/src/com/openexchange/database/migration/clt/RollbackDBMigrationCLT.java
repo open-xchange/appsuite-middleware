@@ -141,7 +141,7 @@ public class RollbackDBMigrationCLT extends AbstractMBeanCLI<Boolean> {
 
         boolean rollbackSuccessful = false;
         if (!cmd.hasOption('i')) {
-            System.err.println("Missing changeset identifier for rollback.");
+            System.err.println("Missing changeset identifier (tag) for rollback to identify rollback goal.");
             printHelp(option);
             System.exit(1);
             return rollbackSuccessful;
@@ -163,7 +163,7 @@ public class RollbackDBMigrationCLT extends AbstractMBeanCLI<Boolean> {
         if (invoke instanceof Boolean) {
             rollbackSuccessful = (Boolean) invoke;
         } else {
-            System.out.println("Unexpected result from calling 'rollbackDBMigration'. Neither 'true' nor 'false' received from perform rollback call.");
+            System.out.println("Unexpected result from calling '" + getName() + "'. Neither 'true' nor 'false' received from the call.");
         }
         return rollbackSuccessful;
     }
