@@ -219,8 +219,8 @@ public class GoogleSubscribeCalendarTest extends AbstractGoogleSubscribeTest {
 
         // List of participants
         Map<String, Part> participants = new HashMap<String, Part>();
-        participants.put("ewaldbartkowiak@gmail.com", new Part("Ewald Bartkowiak", "ewaldbartkowiak@gmail.com", Participant.EXTERNAL_USER, ConfirmStatus.ACCEPT));
-        participants.put("dimitribronkowitsch@googlemail.com", new Part(null, "dimitribronkowitsch@googlemail.com", Participant.EXTERNAL_USER, ConfirmStatus.NONE));
+        participants.put("ewaldbartkowiak@gmail.com", new Part("ewaldbartkowiak@gmail.com", Participant.EXTERNAL_USER, ConfirmStatus.ACCEPT));
+        participants.put("dimitribronkowitsch@googlemail.com", new Part("dimitribronkowitsch@googlemail.com", Participant.EXTERNAL_USER, ConfirmStatus.NONE));
         
         assertNotNull(appointment.getConfirmations());
         for (ConfirmableParticipant cp : appointment.getConfirmations()) {
@@ -246,24 +246,17 @@ public class GoogleSubscribeCalendarTest extends AbstractGoogleSubscribeTest {
 
     private class Part {
 
-        private String displayName;
-
         private String emailAddress;
 
         private int participantType;
 
         private ConfirmStatus confirmStatus;
 
-        public Part(String displayName, String emailAddress, int participantType, ConfirmStatus confirmStatus) {
+        public Part(String emailAddress, int participantType, ConfirmStatus confirmStatus) {
             super();
-            this.displayName = displayName;
             this.emailAddress = emailAddress;
             this.participantType = participantType;
             this.confirmStatus = confirmStatus;
-        }
-
-        public String getDisplayName() {
-            return displayName;
         }
 
         public String getEmailAddress() {

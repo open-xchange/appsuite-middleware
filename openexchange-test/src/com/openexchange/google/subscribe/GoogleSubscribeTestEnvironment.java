@@ -66,7 +66,6 @@ import com.openexchange.ajax.subscribe.actions.NewSubscriptionResponse;
 import com.openexchange.ajax.subscribe.actions.RefreshSubscriptionRequest;
 import com.openexchange.ajax.subscribe.source.action.GetSourceRequest;
 import com.openexchange.ajax.subscribe.source.action.GetSourceResponse;
-import com.openexchange.configuration.GoogleConfig;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
@@ -119,7 +118,6 @@ public class GoogleSubscribeTestEnvironment {
      */
     public void init() {
         try {
-            GoogleConfig.init();
             initAJAXClient();
             initOAuthAccount();
             initManagers();
