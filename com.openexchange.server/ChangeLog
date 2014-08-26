@@ -1,3 +1,7 @@
+* 2014-08-26 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 34147: Supply OneCharSequence with proper toString() implementation
+
 * 2014-08-25 - marc.arens@open-xchange.com
 
  - Fix for bug 33952: Implement GroupDispatcher#dispose to completely reinitialize itself in case of severe errors

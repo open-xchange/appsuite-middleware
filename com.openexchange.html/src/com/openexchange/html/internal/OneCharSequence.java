@@ -92,4 +92,8 @@ public class OneCharSequence implements CharSequence {
         return String.valueOf(ch).subSequence(start, end);
     }
 
+    @Override
+    public String toString() {
+        return String.valueOf(ch);
+    }
 }
