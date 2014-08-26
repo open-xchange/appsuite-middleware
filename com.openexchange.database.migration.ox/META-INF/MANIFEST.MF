@@ -19,6 +19,7 @@ Import-Package: com.openexchange.database.migration,
  liquibase.statement.core,
  liquibase.structure.core,
  liquibase.util,
+ org.apache.commons.lang,
  org.osgi.framework,
  org.slf4j
 Bundle-Vendor: Open-Xchange Inc.

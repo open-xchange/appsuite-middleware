@@ -52,6 +52,7 @@ package com.openexchange.database.migration.ox.osgi;
 import java.util.ArrayList;
 import java.util.List;
 import liquibase.resource.ResourceAccessor;
+import org.apache.commons.lang.Validate;
 import org.osgi.framework.BundleContext;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.database.migration.ox.DBMigrationOXExcecutorService;
@@ -92,11 +93,7 @@ public class OXMigrationActivator extends HousekeepingActivator {
         Services.setServiceLookup(this);
 
         DBMigrationExecutorService dbMigrationExecutorService = Services.getService(DBMigrationExecutorService.class);
-
-        if (dbMigrationExecutorService == null) {
-            LOG.error("Required service null");
-            return;
-        }
+        Validate.notNull(dbMigrationExecutorService, "Required service DBMigrationExecutorService is absent. Not able to perform Open-Xchange database migration statements.");
 
         List<ResourceAccessor> accessors = new ArrayList<ResourceAccessor>();
         accessors.add(new ClassLoaderResourceAccessor());
