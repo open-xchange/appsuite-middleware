@@ -3,6 +3,7 @@ package com.openexchange.realtime.events.osgi;
 import org.osgi.framework.ServiceReference;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
+import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.events.RTEventEmitterService;
 import com.openexchange.realtime.events.RTEventManagerService;
@@ -40,6 +41,7 @@ public class EventsActivator extends HousekeepingActivator {
         openTrackers();
         
         registerService(RTEventManagerService.class, manager);
+        registerService(RealtimeJanitor.class, manager);
     }
 
 

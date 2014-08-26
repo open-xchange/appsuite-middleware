@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,37 +47,42 @@
  *
  */
 
-package com.openexchange.realtime.cleanup;
+package com.openexchange.messaging.facebook.utility;
 
-import java.util.Dictionary;
-import com.openexchange.realtime.packet.ID;
+import java.util.concurrent.TimeUnit;
+import org.scribe.model.Request;
+import org.scribe.model.RequestTuner;
 
 /**
- * {@link RealtimeJanitor} - A service that can be instructed to execute different housekeeping and cleanup tasks. The service should be
- * implemented by realtime components that keep a local state so that a node-wide cleanup an be initiated by the
- * {@link LocalRealtimeCleanup} service that just collects all {@link RealtimeJanitor}s from the service registry (see OSGI whiteboard
- * pattern). Janitors can indicate a priority via {@link Constant.SERVICE_RANKING}
- * 
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * {@link FacebookRequestTuner}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.6.1
  */
-public interface RealtimeJanitor {
+public final class FacebookRequestTuner extends RequestTuner {
 
-    static final int RANKING_SYNTHETIC_CHANNEL = 500;
-
-    /**
-     * Clean up states that were kept for the given id.
-     * 
-     * @param id
-     */
-    void cleanupForId(ID id);
+    private static final FacebookRequestTuner INSTANCE = new FacebookRequestTuner();
 
     /**
-     * Get the properties used when registering the service. The SERVICE_RANKING property is used to determine the order when instructing
-     * all the RealtimeJanitors to execute a cleanup task. The first entry is the service with the highest ranking and the lowest service
-     * id.
-     * 
-     * @return the properties used when registering the service
+     * Gets the instance
+     *
+     * @return The instance
      */
-    Dictionary<String, Object> getServiceProperties();
+    public static FacebookRequestTuner getInstance() {
+        return INSTANCE;
+    }
+
+    /**
+     * Initializes a new {@link FacebookRequestTuner}.
+     */
+    private FacebookRequestTuner() {
+        super();
+    }
+
+    @Override
+    public void tune(Request request) {
+        request.setConnectTimeout(5, TimeUnit.SECONDS);
+        request.setReadTimeout(30, TimeUnit.SECONDS);
+    }
 
 }

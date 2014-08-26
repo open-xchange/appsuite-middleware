@@ -119,7 +119,7 @@ public class FacebookConnectionTest  extends TestCase {
         System.out.println("Now we're going to access a protected resource...");
         final OAuthRequest request = new OAuthRequest(Verb.GET, PROTECTED_RESOURCE_URL);
         service.signRequest(accessToken, request);
-        final Response response = request.send();
+        final Response response = request.send(FacebookRequestTuner.getInstance());
         System.out.println("Got it! Lets see what we found...");
         System.out.println();
         System.out.println(response.getCode());
@@ -140,7 +140,7 @@ public class FacebookConnectionTest  extends TestCase {
 
         final OAuthRequest request2 = new OAuthRequest(Verb.GET, "https://graph.facebook.com/me");
         service.signRequest(accessToken, request2);
-        final Response response2 = request2.send();
+        final Response response2 = request2.send(FacebookRequestTuner.getInstance());
         System.out.println("Got it! Lets see what we found...");
         System.out.println();
         System.out.println(response2.getCode());
@@ -159,7 +159,7 @@ public class FacebookConnectionTest  extends TestCase {
 
         final OAuthRequest request3 = new OAuthRequest(Verb.GET, "https://api.facebook.com/method/fql.query?query=SELECT%20name,first_name,last_name,email,birthday_date,pic_big,hometown_location%20from%20user%20where%20uid%20in%20%28SELECT%20uid2%20from%20friend%20where%20uid1="+myuid+"%29&format=JSON");
         service.signRequest(accessToken, request3);
-        final Response response3 = request3.send();
+        final Response response3 = request3.send(FacebookRequestTuner.getInstance());
         System.out.println("Got it! Lets see what we found...");
         System.out.println();
         System.out.println(response3.getCode());
@@ -236,7 +236,7 @@ public class FacebookConnectionTest  extends TestCase {
         final OAuthRequest request = new OAuthRequest(Verb.GET, PROTECTED_RESOURCE_URL);
 
         service.signRequest(accessToken, request);
-        final Response response = request.send();
+        final Response response = request.send(FacebookRequestTuner.getInstance());
         System.out.println("Got it! Lets see what we found...");
         System.out.println();
         System.out.println(response.getCode());
@@ -260,7 +260,7 @@ public class FacebookConnectionTest  extends TestCase {
         //find out the uid of the user
         final OAuthRequest request2 = new OAuthRequest(Verb.GET, "https://graph.facebook.com/me");
         service.signRequest(accessToken, request2);
-        final Response response2 = request2.send();
+        final Response response2 = request2.send(FacebookRequestTuner.getInstance());
         System.out.println("Got it! Lets see what we found...");
         System.out.println();
         System.out.println(response2.getCode());
@@ -280,7 +280,7 @@ public class FacebookConnectionTest  extends TestCase {
         final OAuthRequest request = new OAuthRequest(Verb.GET, "https://graph.facebook.com/"+myuid+"/feed");
 
         service.signRequest(accessToken, request);
-        final Response response = request.send();
+        final Response response = request.send(FacebookRequestTuner.getInstance());
         System.out.println("This is what we get back");
         System.out.println(response.getBody());
     }
@@ -307,7 +307,7 @@ public class FacebookConnectionTest  extends TestCase {
         //find out the uid of the user
         final OAuthRequest request2 = new OAuthRequest(Verb.GET, "https://graph.facebook.com/me");
         service.signRequest(accessToken, request2);
-        final Response response2 = request2.send();
+        final Response response2 = request2.send(FacebookRequestTuner.getInstance());
         System.out.println("Got it! Lets see what we found...");
         System.out.println();
         System.out.println(response2.getCode());
@@ -328,7 +328,7 @@ public class FacebookConnectionTest  extends TestCase {
         final OAuthRequest request = new OAuthRequest(Verb.POST, "https://graph.facebook.com/"+myuid+"/feed"+"?message="+URLEncoder.encode(message));
 
         service.signRequest(accessToken, request);
-        final Response response = request.send();
+        final Response response = request.send(FacebookRequestTuner.getInstance());
         System.out.println("This is what we get back");
         System.out.println(response.getBody());
     }
@@ -348,7 +348,7 @@ public class FacebookConnectionTest  extends TestCase {
         //find out the uid of the user
         final OAuthRequest request2 = new OAuthRequest(Verb.GET, "https://graph.facebook.com/me");
         service.signRequest(accessToken, request2);
-        final Response response2 = request2.send();
+        final Response response2 = request2.send(FacebookRequestTuner.getInstance());
         System.out.println("Got it! Lets see what we found...");
         System.out.println();
         System.out.println(response2.getCode());
@@ -367,7 +367,7 @@ public class FacebookConnectionTest  extends TestCase {
         System.out.println("Now we're going to execute a FQL query");
         final OAuthRequest request = new OAuthRequest(Verb.GET, "https://api.facebook.com/method/fql.query?format=XML&query=" + URLEncoder.encode(("SELECT wall_count FROM user WHERE uid = " + myuid)));
         service.signRequest(accessToken, request);
-        final Response response = request.send();
+        final Response response = request.send(FacebookRequestTuner.getInstance());
         System.out.println("This is what we get back");
         System.out.println(response.getBody());
     }

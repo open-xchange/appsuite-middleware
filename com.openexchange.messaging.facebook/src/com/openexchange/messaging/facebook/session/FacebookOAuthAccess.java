@@ -73,6 +73,7 @@ import com.openexchange.messaging.facebook.FacebookMessagingExceptionCodes;
 import com.openexchange.messaging.facebook.FacebookMessagingResource;
 import com.openexchange.messaging.facebook.services.Services;
 import com.openexchange.messaging.facebook.utility.FacebookMessagingUtility;
+import com.openexchange.messaging.facebook.utility.FacebookRequestTuner;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
@@ -175,7 +176,7 @@ public final class FacebookOAuthAccess {
              */
             final OAuthRequest request = new OAuthRequest(Verb.GET, "https://graph.facebook.com/me");
             facebookOAuthService.signRequest(facebookAccessToken, request);
-            final Response response = request.send();
+            final Response response = request.send(FacebookRequestTuner.getInstance());
             final JSONObject object = FacebookMessagingUtility.extractJson(response);
             checkForErrors(object);
             facebookUserId = object.getString("id");
@@ -278,7 +279,7 @@ public final class FacebookOAuthAccess {
         try {
             final OAuthRequest request = new OAuthRequest(Verb.GET, url);
             facebookOAuthService.signRequest(facebookAccessToken, request);
-            return request.send().getBody();
+            return request.send(FacebookRequestTuner.getInstance()).getBody();
         } catch (final org.scribe.exceptions.OAuthException e) {
             throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
@@ -298,7 +299,7 @@ public final class FacebookOAuthAccess {
         try {
             final OAuthRequest request = new OAuthRequest(Verb.GET, url.toString());
             facebookOAuthService.signRequest(facebookAccessToken, request);
-            reader = new InputStreamReader(request.send().getStream(), Charsets.UTF_8);
+            reader = new InputStreamReader(request.send(FacebookRequestTuner.getInstance()).getStream(), Charsets.UTF_8);
             return JSONObject.parse(reader);
         } catch (final org.scribe.exceptions.OAuthException e) {
             throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());

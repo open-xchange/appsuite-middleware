@@ -156,6 +156,7 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
         cleanerRegistrationId = directory.addResourceMappingEntryListener(distributedGroupManager.getCleaner(), true);
 
         registerService(DistributedGroupManager.class, distributedGroupManager);
+        registerService(RealtimeJanitor.class, distributedGroupManager);
         managementHouseKeeper.addManagementObject(distributedGroupManager.getManagementObject());
 
         directory.addChannel(globalDispatcher.getChannel());

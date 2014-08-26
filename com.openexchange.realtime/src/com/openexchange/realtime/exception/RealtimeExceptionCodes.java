@@ -49,6 +49,7 @@
 
 package com.openexchange.realtime.exception;
 
+import static com.openexchange.realtime.exception.RealtimeExceptionMessages.*;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
@@ -121,7 +122,8 @@ public enum RealtimeExceptionCodes implements DisplayableOXExceptionCode {
 
     STANZA_POLICY_VIOLATION("", CATEGORY_SERVICE_DOWN, 13, null),
 
-    STANZA_RECIPIENT_UNAVAILABLE("", CATEGORY_SERVICE_DOWN, 14, null),
+    /** The recipient you tried to reach is currently unavailable: %1$s */
+    STANZA_RECIPIENT_UNAVAILABLE(STANZA_RECIPIENT_UNAVAILABLE_MSG, CATEGORY_TRY_AGAIN, 14, STANZA_RECIPIENT_UNAVAILABLE_MSG),
 
     STANZA_REDIRECT("", CATEGORY_SERVICE_DOWN, 15, null),
 

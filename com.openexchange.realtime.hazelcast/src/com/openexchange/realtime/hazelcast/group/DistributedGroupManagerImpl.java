@@ -58,6 +58,7 @@ import com.hazelcast.core.MultiMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementAware;
 import com.openexchange.management.ManagementObject;
+import com.openexchange.realtime.cleanup.AbstractRealtimeJanitor;
 import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.group.DistributedGroupManager;
@@ -86,7 +87,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.0
  */
-public class DistributedGroupManagerImpl implements ManagementAware<DistributedGroupManagerMBean>, DistributedGroupManager, RealtimeJanitor {
+public class DistributedGroupManagerImpl extends AbstractRealtimeJanitor implements ManagementAware<DistributedGroupManagerMBean>, DistributedGroupManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(DistributedGroupManagerImpl.class);
     private final MessageDispatcher messageDispatcher;

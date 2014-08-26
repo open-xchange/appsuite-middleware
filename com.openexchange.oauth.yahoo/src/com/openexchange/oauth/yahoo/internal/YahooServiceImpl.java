@@ -133,7 +133,7 @@ public class YahooServiceImpl implements YahooService {
         {
             final OAuthRequest guidRequest = new OAuthRequest(Verb.GET, "https://social.yahooapis.com/v1/me/guid?format=xml");
             service.signRequest(accessToken, guidRequest);
-            final Response guidResponse = guidRequest.send();
+            final Response guidResponse = guidRequest.send(YahooRequestTuner.getInstance());
             final String contentType = guidResponse.getHeader("Content-Type");
             if (null == contentType || false == contentType.toLowerCase().contains("application/xml")) {
                 throw OAuthExceptionCodes.NOT_A_VALID_RESPONSE.create();
@@ -145,7 +145,7 @@ public class YahooServiceImpl implements YahooService {
         // Now get the ids of all the users contacts
         OAuthRequest request = new OAuthRequest(Verb.GET, ALL_CONTACT_IDS_URL.replace("GUID", guid));
         service.signRequest(accessToken, request);
-        final Response response = request.send();
+        final Response response = request.send(YahooRequestTuner.getInstance());
         final String contentType = response.getHeader("Content-Type");
         if (null == contentType || false == contentType.toLowerCase().contains("application/json")) {
             throw OAuthExceptionCodes.NOT_A_VALID_RESPONSE.create();
@@ -179,7 +179,7 @@ public class YahooServiceImpl implements YahooService {
                             // Request
                             final OAuthRequest singleContactRequest = new OAuthRequest(Verb.GET, singleContactUrl);
                             service.signRequest(accessToken, singleContactRequest);
-                            final Response singleContactResponse = singleContactRequest.send();
+                            final Response singleContactResponse = singleContactRequest.send(YahooRequestTuner.getInstance());
                             contactMap.put(Integer.valueOf(index), parseSingleContact(extractJson(singleContactResponse)));
                             return null;
                         }

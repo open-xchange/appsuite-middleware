@@ -80,7 +80,9 @@ import com.openexchange.realtime.json.payload.converter.RealtimeExceptionToJSONC
 import com.openexchange.realtime.json.payload.converter.StackTraceElementToJSONConverter;
 import com.openexchange.realtime.json.payload.converter.ThrowableToJSONConverter;
 import com.openexchange.realtime.json.payload.converter.primitive.ByteToJSONConverter;
+import com.openexchange.realtime.json.payload.converter.primitive.IntegerToJSONConverter;
 import com.openexchange.realtime.json.payload.converter.primitive.JSONToByteConverter;
+import com.openexchange.realtime.json.payload.converter.primitive.JSONToIntegerConverter;
 import com.openexchange.realtime.json.payload.converter.primitive.JSONToStringConverter;
 import com.openexchange.realtime.json.payload.converter.primitive.StringToJSONConverter;
 import com.openexchange.realtime.json.presence.converter.JSONToPresenceStateConverter;
@@ -138,6 +140,8 @@ public class RTJSONActivator extends AJAXModuleActivator {
         registerService(SimplePayloadConverter.class, new RealtimeExceptionToJSONConverter());
         registerService(SimplePayloadConverter.class, new JSONToIDConverter());
         registerService(SimplePayloadConverter.class, new IDToJSONConverter());
+        registerService(SimplePayloadConverter.class, new JSONToIntegerConverter());
+        registerService(SimplePayloadConverter.class, new IntegerToJSONConverter());
 
         // Add Transformers using Converters
         PayloadTreeConverter converter = getService(PayloadTreeConverter.class);
@@ -159,7 +163,7 @@ public class RTJSONActivator extends AJAXModuleActivator {
          * Register all RealtimeJanitor services contained in this bundle
          */
         for(RealtimeJanitor realtimeJanitor : RealtimeJanitors.getInstance().getJanitors()) {
-            registerService(RealtimeJanitor.class, realtimeJanitor);
+            registerService(RealtimeJanitor.class, realtimeJanitor, realtimeJanitor.getServiceProperties());
         }
     }
 

@@ -47,37 +47,60 @@
  *
  */
 
-package com.openexchange.realtime.cleanup;
+package com.openexchange.groupware.settings.tree.modules.mail;
 
-import java.util.Dictionary;
-import com.openexchange.realtime.packet.ID;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.mail.config.MailProperties;
+import com.openexchange.session.Session;
 
 /**
- * {@link RealtimeJanitor} - A service that can be instructed to execute different housekeeping and cleanup tasks. The service should be
- * implemented by realtime components that keep a local state so that a node-wide cleanup an be initiated by the
- * {@link LocalRealtimeCleanup} service that just collects all {@link RealtimeJanitor}s from the service registry (see OSGI whiteboard
- * pattern). Janitors can indicate a priority via {@link Constant.SERVICE_RANKING}
- * 
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * {@link EnforceSecureConnection} - Checks if <tt>"com.openexchange.mail.enforceSecureConnection"</tt> option is enabled.
+ * <p>
+ * Path in config tree:<br>
+ * <code>modules -&gt; mail -&gt; enforcesecureconnection</code>
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface RealtimeJanitor {
-
-    static final int RANKING_SYNTHETIC_CHANNEL = 500;
+public class EnforceSecureConnection implements PreferencesItemService {
 
     /**
-     * Clean up states that were kept for the given id.
-     * 
-     * @param id
+     * Default constructor.
      */
-    void cleanupForId(ID id);
+    public EnforceSecureConnection() {
+        super();
+    }
 
     /**
-     * Get the properties used when registering the service. The SERVICE_RANKING property is used to determine the order when instructing
-     * all the RealtimeJanitors to execute a cleanup task. The first entry is the service with the highest ranking and the lowest service
-     * id.
-     * 
-     * @return the properties used when registering the service
+     * {@inheritDoc}
      */
-    Dictionary<String, Object> getServiceProperties();
+    @Override
+    public String[] getPath() {
+        return new String[] { "modules", "mail", "enforcesecureconnection" };
+    }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public IValueHandler getSharedValue() {
+        return new ReadOnlyValue() {
+            @Override
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return userConfig.hasWebMail();
+            }
+
+            @Override
+            public void getValue(Session session, Context ctx, User user,
+                    UserConfiguration userConfig, Setting setting) throws OXException {
+                setting.setSingleValue(Boolean.valueOf(MailProperties.getInstance().isEnforceSecureConnection()));
+            }
+        };
+    }
 }

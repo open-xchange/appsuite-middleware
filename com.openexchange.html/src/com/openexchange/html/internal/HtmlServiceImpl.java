@@ -553,47 +553,69 @@ public final class HtmlServiceImpl implements HtmlService {
         }
         try {
             String html = htmlContent;
+
             // Normalize the string
-            html = Normalizer.normalize(html, Form.NFKC);
+            {
+                int length = html.length();
+                StringBuilder tmp = new StringBuilder(length);
+                OneCharSequence helper = null;
+                for (int i = 0; i < length; i++) {
+                    char c = html.charAt(i);
+                    if (c < 128) {
+                        tmp.append(c);
+                    } else {
+                        if (null == helper) {
+                            helper = new OneCharSequence(c);
+                        } else {
+                            helper.setCharacter(c);
+                        }
+                        tmp.append(Normalizer.normalize(helper, Form.NFKC));
+                    }
+                }
+                html = tmp.toString();
+            }
+
             // Perform one-shot sanitizing
             html = replacePercentTags(html);
             html = replaceHexEntities(html);
             html = processDownlevelRevealedConditionalComments(html);
             html = dropDoubleAccents(html);
             html = dropSlashedTags(html);
+
             // CSS- and tag-wise sanitizing
             try {
-                // Determine the definition to use
-                final String definition;
-                {
-                    String confName = optConfigName;
-                    if (null != confName && !confName.endsWith(".properties")) {
-                        confName += ".properties";
-                    }
-                    definition = null == confName ? null : getConfiguration().getText(confName);
+                // Initialize the handler
+                FilterJerichoHandler handler;
+                if (null == optConfigName) {
+                    handler = new FilterJerichoHandler(html.length(), this);
+                } else {
+                    String definition = getConfiguration().getText(optConfigName.endsWith(".properties") ? optConfigName : optConfigName + ".properties");
+                    handler = null == definition ? new FilterJerichoHandler(html.length(), this) : new FilterJerichoHandler(html.length(), definition, this);
                 }
-                // Handle HTML content
-                final FilterJerichoHandler handler = null == definition ? new FilterJerichoHandler(html.length(), this) : new FilterJerichoHandler(html.length(), definition, this);
-                JerichoParser.getInstance().parse(html, handler.setDropExternalImages(dropExternalImages).setCssPrefix(cssPrefix).setMaxContentSize(maxContentSize));
+                handler.setDropExternalImages(dropExternalImages).setCssPrefix(cssPrefix).setMaxContentSize(maxContentSize);
+
+                // Parse the HTML content
+                JerichoParser.getInstance().parse(html, handler);
                 if (dropExternalImages && null != modified) {
                     modified[0] |= handler.isImageURLFound();
                 }
-                htmlSanitizeResult.setContent(handler.getHTML());
+                html = handler.getHTML();
                 htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
             } catch (final ParsingDeniedException e) {
                 LOG.warn("HTML content will be returned un-white-listed.", e);
             }
-            String content = htmlSanitizeResult.getContent();
+
             // Repetitive sanitizing until no further replacement/changes performed
             final boolean[] sanitized = new boolean[] { true };
             while (sanitized[0]) {
                 sanitized[0] = false;
                 // Start sanitizing round
-                content = SaneScriptTags.saneScriptTags(content, sanitized);
+                html = SaneScriptTags.saneScriptTags(html, sanitized);
             }
+
             // Replace HTML entities
-            content = keepUnicodeForEntities(content);
-            htmlSanitizeResult.setContent(content);
+            html = keepUnicodeForEntities(html);
+            htmlSanitizeResult.setContent(html);
             return htmlSanitizeResult;
         } catch (final RuntimeException e) {
             LOG.warn("HTML content will be returned un-sanitized.", e);
