@@ -583,7 +583,9 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
         // Start sync process
         POP3Store pop3Store = null;
         try {
-            final POP3StoreResult result = POP3StoreConnector.getPOP3Store(pop3Access.getPOP3Config(), pop3Access.getMailProperties(), false, session, !expunge, pop3AccountId > 0 && MailProperties.getInstance().isEnforceSecureConnection());
+            POP3Config pop3Config = pop3Access.getPOP3Config();
+            boolean forceSecure = pop3AccountId > 0 && (pop3Config.isRequireTls() || MailProperties.getInstance().isEnforceSecureConnection());
+            final POP3StoreResult result = POP3StoreConnector.getPOP3Store(pop3Config, pop3Access.getMailProperties(), false, session, !expunge, forceSecure);
             pop3Store = result.getPop3Store();
             boolean uidlNotSupported = false;
             if (result.containsWarnings()) {
@@ -686,7 +688,6 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
                         inbox.close(doExpunge);
                     }
                 } catch (final Exception e) {
-                    final POP3Config pop3Config = pop3Access.getPOP3Config();
                     LOG.warn("POP3 mailbox {} could not be expunged/closed for login {}", pop3Config.getServer(), pop3Config.getLogin(), e);
                 }
                 // Trashed UIDLs not needed anymore

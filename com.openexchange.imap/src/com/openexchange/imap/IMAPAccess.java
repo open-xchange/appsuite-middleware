@@ -563,7 +563,11 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Get parameterized IMAP session
              */
-            final javax.mail.Session imapSession = setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps, JavaIMAPStore.class, MailProperties.getInstance().isEnforceSecureConnection());
+            javax.mail.Session imapSession;
+            {
+                boolean forceSecure = imapConfig.isRequireTls() || MailProperties.getInstance().isEnforceSecureConnection();
+                imapSession = setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps, JavaIMAPStore.class, forceSecure);
+            }
             /*
              * Check if debug should be enabled
              */
@@ -692,7 +696,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              */
             {
                 final Class<? extends IMAPStore> clazz = useIMAPStoreCache() ? IMAPStoreCache.getInstance().getStoreClass() : JavaIMAPStore.class;
-                imapSession = setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps, clazz, accountId > 0 && MailProperties.getInstance().isEnforceSecureConnection());
+                boolean forceSecure = accountId > 0 && (imapConfig.isRequireTls() || MailProperties.getInstance().isEnforceSecureConnection());
+                imapSession = setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps, clazz, forceSecure);
             }
             /*
              * Check if debug should be enabled
