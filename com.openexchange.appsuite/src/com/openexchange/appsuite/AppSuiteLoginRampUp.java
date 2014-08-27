@@ -222,7 +222,7 @@ public class AppSuiteLoginRampUp implements LoginRampUpService {
             @Override
             public Void call() throws Exception {
                 try {
-                    rampUp.put("accounts", ox.perform(request().module("account").action("all").format("json").params("columns", com.openexchange.mailaccount.Attribute.getAttributesCsv()).build(), null, session).getResultObject());
+                    rampUp.put("accounts", ox.perform(request().module("account").action("all").format("json").params("columns", "1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1011,1012,1013,1014,1015,1016,1017,1018,1019,1020,1021,1022,1023,1024,1025,1026,1027,1028,1029,1030,1031,1032,1033,1034,1035,1036,1037,1038,1039,1040,1043").build(), null, session).getResultObject());
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
                 }
