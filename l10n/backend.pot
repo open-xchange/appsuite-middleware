@@ -756,8 +756,11 @@ msgid "The appointment was rescheduled. Original date: %1$s. New date: %2$s"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:269
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:271
 msgid "Reschedule the event. Original date: %1$s. New date: %2$s"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:271
+msgid "Reschedule the event. Original date/time: %1$s. New date/time: %2$s"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:275
