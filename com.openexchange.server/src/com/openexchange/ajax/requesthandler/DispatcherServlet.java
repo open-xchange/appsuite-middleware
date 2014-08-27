@@ -71,9 +71,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.SessionUtility;
-import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult.ResultType;
-import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.annotation.Nullable;
 import com.openexchange.exception.LogLevel;
@@ -81,6 +79,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.UserImpl;
+import com.openexchange.java.Streams;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.LogProperties.Name;
 import com.openexchange.mail.MailExceptionCode;
@@ -413,7 +412,12 @@ public class DispatcherServlet extends SessionServlet {
             sendResponse(requestData, result, httpRequest, httpResponse);
         } catch (final OXException e) {
             if (AjaxExceptionCodes.BAD_REQUEST.equals(e) || AjaxExceptionCodes.MISSING_PARAMETER.equals(e)) {
+                Throwable cause = e.getCause();
+                if (cause instanceof IOException) {
+                    throw (IOException) cause;
+                }
                 httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+                flushSafe(httpResponse);
                 logException(e, LogLevel.DEBUG, HttpServletResponse.SC_BAD_REQUEST);
                 return;
             }
@@ -422,6 +426,7 @@ public class DispatcherServlet extends SessionServlet {
                 final Object statusMsg = logArgs.length > 1 ? logArgs[1] : null;
                 final int sc = ((Integer) logArgs[0]).intValue();
                 httpResponse.sendError(sc, null == statusMsg ? null : statusMsg.toString());
+                flushSafe(httpResponse);
                 logException(e, LogLevel.DEBUG, sc);
                 return;
             }
@@ -436,13 +441,10 @@ public class DispatcherServlet extends SessionServlet {
                     logException(e);
                 }
             }
-            final String action = httpRequest.getParameter(PARAMETER_ACTION);
-            APIResponseRenderer.writeResponse(new Response().setException(e), null == action ? toUpperCase(httpRequest.getMethod()) : action, httpRequest, httpResponse);
+            handleOXException(e, httpRequest, httpResponse);
         } catch (final RuntimeException e) {
             logException(e);
-            final OXException exception = AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            final String action = httpRequest.getParameter(PARAMETER_ACTION);
-            APIResponseRenderer.writeResponse(new Response().setException(exception), null == action ? toUpperCase(httpRequest.getMethod()) : action, httpRequest, httpResponse);
+            handleOXException(AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage()), httpRequest, httpResponse);
         } finally {
             if (null != state) {
                 dispatcher.end(state);
@@ -535,19 +537,20 @@ public class DispatcherServlet extends SessionServlet {
         throw new IllegalStateException("No appropriate " + ResponseRenderer.class.getSimpleName() + " for request data/result pair.");
     }
 
-    /** ASCII-wise to upper-case */
-    private String toUpperCase(CharSequence chars) {
-        if (null == chars) {
-            return null;
+    private void flushSafe(HttpServletResponse httpResponse) {
+        try {
+            try {
+                Streams.flush(httpResponse.getWriter());
+            } catch (IllegalStateException e) {
+                // getOutputStream has already been called
+                Streams.flush(httpResponse.getOutputStream());
+            }
+        } catch (Exception e) {
+            // Ignore
         }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
-        }
-        return builder.toString();
     }
+
+    // ---------------------------------------------------------------------------------------------------------------------- //
 
     /**
      * Helper class.

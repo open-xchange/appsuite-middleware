@@ -66,10 +66,9 @@ public abstract class PermissionServlet extends SessionServlet {
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         Tools.disableCaching(resp);
-        ServerSession session = null;
         try {
             initializeSession(req, resp);
-            session = getSessionObject(req);
+            ServerSession session = getSessionObject(req);
             if (null != session && !hasModulePermission(session)) {
                 LOG.info("Status code 403 (FORBIDDEN): No permission to access module.");
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN, "No Permission");
@@ -77,7 +76,7 @@ public abstract class PermissionServlet extends SessionServlet {
             }
             super.service(req, resp);
         } catch (final OXException e) {
-            handleOXException(e, req, resp, session);
+            handleOXException(e, req, resp);
         }
     }
 
