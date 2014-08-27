@@ -49,8 +49,9 @@
 
 package com.openexchange.importexport.formats.csv;
 
+import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
+import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.groupware.contact.helpers.ContactField;
 
 
@@ -61,25 +62,50 @@ import com.openexchange.groupware.contact.helpers.ContactField;
  */
 public class PropertyDrivenMapper extends AbstractOutlookMapper {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PropertyDrivenMapper.class);
+
     private String encoding;
+    private final String name;
 
-	public PropertyDrivenMapper(Properties props){
-        Set<Object> keys = props.keySet();
+    /**
+     * Initializes a new {@link PropertyDrivenMapper}.
+     *
+     * @param props The properties holding the mappings
+     * @param name The mapper's name
+     */
+	public PropertyDrivenMapper(Properties props, String name) {
+	    super();
+	    this.name = name;
         this.encoding = "UTF-8";
-        for(Object key: keys){
-        	if (key.equals("encoding")) {
-        		this.encoding = (String) props.get(key);
-        		continue;
-        	}
-            ContactField field = ContactField.getByAjaxName((String) key);
-            store(field, (String) props.get(key));
+        for (Map.Entry<Object, Object>  entry : props.entrySet()) {
+            String key = String.valueOf(entry.getKey());
+            String value = String.valueOf(entry.getValue());
+            if ("encoding".equals(key)) {
+                LOG.debug("Using encoding: " + value);
+                this.encoding = value;
+            } else {
+                ContactField mappedField = ContactMapper.getInstance().getMappedField(key);
+                if (null == mappedField) {
+                    LOG.debug("No contact field found for: \"" + key + "\"");
+                } else {
+                    store(mappedField, value);
+                }
+            }
         }
-
     }
 
 	@Override
 	public String getEncoding() {
 		return encoding;
 	}
+
+	public String getName() {
+	    return name;
+	}
+
+    @Override
+    public String toString() {
+        return "PropertyDrivenMapper [encoding=" + encoding + ", name=" + name + "]";
+    }
 
 }

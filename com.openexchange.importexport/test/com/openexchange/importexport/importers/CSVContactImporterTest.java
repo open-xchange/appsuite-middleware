@@ -205,7 +205,7 @@ public class CSVContactImporterTest {
 
         properties.load(new StringReader(propertiesString));
 
-        MockUtils.injectValueIntoPrivateField(csvContactImporter, "currentMapper", new PropertyDrivenMapper(properties));
+        MockUtils.injectValueIntoPrivateField(csvContactImporter, "currentMapper", new PropertyDrivenMapper(properties, "test.properties"));
     }
 
     @Test
