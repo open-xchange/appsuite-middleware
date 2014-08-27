@@ -99,7 +99,7 @@ public class ZipFolderAction extends AbstractFileAction {
             synchronized (ZipFolderAction.class) {
                 tmp = threshold;
                 if (null == tmp) {
-                    long defaultThreshold = 104857600L;
+                    long defaultThreshold = 1073741824;
                     ConfigurationService service = Services.getConfigurationService();
                     if (null == service) {
                         return defaultThreshold;
@@ -148,7 +148,11 @@ public class ZipFolderAction extends AbstractFileAction {
     }
 
     private void createZipArchive(String folderId, IDBasedFileAccess fileAccess, IDBasedFolderAccess idBasedFolderAccess, OutputStream out) throws OXException {
-        final ZipArchiveOutputStream zipOutput = new ZipArchiveOutputStream(new CountingOutputStream(out, threshold()));
+        ZipArchiveOutputStream zipOutput;
+        {
+            long threshold = threshold();
+            zipOutput = threshold <= 0 ? /*unlimited*/ new ZipArchiveOutputStream(out) : new ZipArchiveOutputStream(new CountingOutputStream(out, threshold));
+        }
         zipOutput.setEncoding("UTF-8");
         zipOutput.setUseLanguageEncodingFlag(true);
 
