@@ -1,3 +1,7 @@
+* 2014-08-27 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32994: Map "Job Title" to field "position" for import of Outlook-style .csv-files
+
 * 2014-08-26 - thorben.betten@open-xchange.com
 
  - Fix for bug 33535: Respect info store quota when "publish attachment on exceeded quota" is enabled
