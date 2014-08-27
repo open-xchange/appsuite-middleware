@@ -49,7 +49,6 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
-import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -62,6 +61,7 @@ import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -90,6 +90,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 @Action(method = RequestMethod.PUT, name = "zipfolder", description = "Gets a ZIP archive for a folder's infoitems", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "folder_id", description = "A folder identifier."), @Parameter(name = "recursive", description = "true or false") }, responseDescription = "The ZIP archive binary data")
+@DispatcherNotes(defaultFormat = "file")
 public class ZipFolderAction extends AbstractFileAction {
 
     private static volatile Long threshold;
@@ -148,22 +149,56 @@ public class ZipFolderAction extends AbstractFileAction {
     }
 
     private void createZipArchive(String folderId, IDBasedFileAccess fileAccess, IDBasedFolderAccess idBasedFolderAccess, OutputStream out) throws OXException {
-        ZipArchiveOutputStream zipOutput;
+        // Check against threshold
         {
             long threshold = threshold();
-            zipOutput = threshold <= 0 ? /*unlimited*/ new ZipArchiveOutputStream(out) : new ZipArchiveOutputStream(new CountingOutputStream(out, threshold));
+            if (threshold > 0) {
+                examineFolder4Archive(folderId, fileAccess, idBasedFolderAccess, 0L, threshold);
+            }
         }
+
+        ZipArchiveOutputStream zipOutput = new ZipArchiveOutputStream(out);
         zipOutput.setEncoding("UTF-8");
         zipOutput.setUseLanguageEncodingFlag(true);
-
         try {
+            // The buffer to use
             int buflen = 65536;
             byte[] buf = new byte[buflen];
 
+            // Add to ZIP archive
             addFolder2Archive(folderId, fileAccess, idBasedFolderAccess, zipOutput, "", buflen, buf);
         } finally {
             // Complete the ZIP file
             Streams.close(zipOutput);
+        }
+    }
+
+    private void examineFolder4Archive(String folderId, IDBasedFileAccess fileAccess, IDBasedFolderAccess idBasedFolderAccess, long totalSize, long threshold) throws OXException {
+        List<Field> columns = Arrays.<File.Field> asList(File.Field.ID, File.Field.FILE_SIZE);
+        SearchIterator<File> it = fileAccess.getDocuments(folderId, columns).results();
+        try {
+            long total = totalSize;
+            while (it.hasNext()) {
+                File file = it.next();
+                long fileSize = file.getFileSize();
+                if (fileSize > 0) {
+                    total += fileSize;
+                    if (total > threshold) {
+                        throw AjaxExceptionCodes.HTTP_ERROR.create(HttpServletResponse.SC_FORBIDDEN, "ZIP archive exceeds max. allowed size of " + UploadUtility.getSize(threshold, 2, false, true));
+                    }
+                }
+            }
+
+            SearchIterators.close(it);
+            it = null;
+
+            if (null != idBasedFolderAccess) {
+                for (FileStorageFolder f : idBasedFolderAccess.getSubfolders(folderId, false)) {
+                    examineFolder4Archive(f.getId(), fileAccess, idBasedFolderAccess, total, threshold);
+                }
+            }
+        } finally {
+            SearchIterators.close(it);
         }
     }
 
@@ -216,7 +251,7 @@ public class ZipFolderAction extends AbstractFileAction {
                 }
             }
         } catch (IOException e) {
-            throw AjaxExceptionCodes.BAD_REQUEST.create(e, new Object[0]);
+            throw AjaxExceptionCodes.HTTP_ERROR.create(e, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal Server Error");
         } finally {
             SearchIterators.close(it);
         }
@@ -265,8 +300,6 @@ public class ZipFolderAction extends AbstractFileAction {
 
             // Complete the entry
             zipOutput.closeArchiveEntry();
-        } catch (SizeExceededIOException e) {
-            throw AjaxExceptionCodes.HTTP_ERROR.create(e, HttpServletResponse.SC_FORBIDDEN, "Forbidden");
         } catch (IOException e) {
             throw AjaxExceptionCodes.HTTP_ERROR.create(e, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal Server Error");
         } finally {
@@ -274,52 +307,5 @@ public class ZipFolderAction extends AbstractFileAction {
         }
     }
 
-    // --------------------------------------------------------------------------------------------------------------- //
-
-    private static class CountingOutputStream extends FilterOutputStream {
-
-        private long count;
-        private final long threshold;
-
-        CountingOutputStream(OutputStream out, long threshold) {
-            super(out);
-            this.threshold = threshold;
-        }
-
-        private void checkCount() throws IOException {
-            if (count > threshold) {
-                throw new SizeExceededIOException("ZIP archive exceeds max. size of " + UploadUtility.getSize(threshold, 2, false, true));
-            }
-        }
-
-        @Override
-        public void write(byte[] b, int off, int len) throws IOException {
-            count += len;
-            checkCount();
-            out.write(b, off, len);
-        }
-
-        @Override
-        public void write(int b) throws IOException {
-            count++;
-            checkCount();
-            out.write(b);
-        }
-
-        @Override
-        public void close() throws IOException {
-            out.close();
-        }
-    }
-
-    private static class SizeExceededIOException extends IOException {
-
-        private static final long serialVersionUID = 6196967660620478868L;
-
-        SizeExceededIOException(String message) {
-            super(message);
-        }
-
-    }
 
 }
