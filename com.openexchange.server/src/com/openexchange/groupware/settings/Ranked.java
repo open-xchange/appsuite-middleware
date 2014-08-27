@@ -51,7 +51,7 @@ package com.openexchange.groupware.settings;
 
 
 /**
- * {@link Ranked}
+ * {@link Ranked} - An object that signals a certain ranking.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.1
