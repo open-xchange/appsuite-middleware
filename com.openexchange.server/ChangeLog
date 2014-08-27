@@ -1,3 +1,7 @@
+* 2014-08-27 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 33158: Changed date/time label in notification mails.
+
 * 2014-08-27 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 32994: Map "Job Title" to field "position" for import of Outlook-style .csv-files
