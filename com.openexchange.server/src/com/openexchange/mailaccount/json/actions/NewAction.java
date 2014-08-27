@@ -127,6 +127,13 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
             availableAttributes.add(Attribute.TRANSPORT_AUTH_LITERAL);
         }
 
+        if (TransportAuth.MAIL.equals(accountDescription.getTransportAuth()) || TransportAuth.NONE.equals(accountDescription.getTransportAuth())) {
+            availableAttributes.remove(Attribute.TRANSPORT_LOGIN_LITERAL);
+            availableAttributes.remove(Attribute.TRANSPORT_PASSWORD_LITERAL);
+            accountDescription.setTransportLogin(null);
+            accountDescription.setTransportPassword(null);
+        }
+
         checkNeededFields(accountDescription);
 
         // Check if account denotes a Unified Mail account
