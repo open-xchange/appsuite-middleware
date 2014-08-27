@@ -58,6 +58,7 @@ import com.openexchange.ajax.framework.Header;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
+import com.openexchange.mailaccount.TransportAuth;
 import com.openexchange.mailaccount.json.writer.MailAccountWriter;
 
 /**
@@ -227,6 +228,11 @@ public class MailAccountValidateRequest implements AJAXRequest<MailAccountValida
                 } catch (final OXException e) {
                     throw new IllegalStateException(e);
                 }
+            }
+
+            @Override
+            public TransportAuth getTransportAuth() {
+                return acc.getTransportAuth();
             }
 
             @Override

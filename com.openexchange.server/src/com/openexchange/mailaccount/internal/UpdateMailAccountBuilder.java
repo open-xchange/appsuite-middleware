@@ -72,7 +72,8 @@ public class UpdateMailAccountBuilder implements AttributeSwitch {
         Attribute.POP3_EXPUNGE_ON_QUIT_LITERAL,
         Attribute.POP3_PATH_LITERAL,
         Attribute.POP3_REFRESH_RATE_LITERAL,
-        Attribute.POP3_STORAGE_LITERAL);
+        Attribute.POP3_STORAGE_LITERAL,
+        Attribute.TRANSPORT_AUTH_LITERAL);
 
     public static boolean needsUpdate(final Set<Attribute> attributes) {
         for (final Attribute attribute : attributes) {
@@ -327,4 +328,10 @@ public class UpdateMailAccountBuilder implements AttributeSwitch {
     public Object addresses() {
         return null;
     }
+
+    @Override
+    public Object transportAuth() {
+        return null;
+    }
+
 }

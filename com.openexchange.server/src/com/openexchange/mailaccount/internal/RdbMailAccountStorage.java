@@ -110,6 +110,7 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.TransportAuth;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.json.fields.GetSwitch;
 import com.openexchange.mailaccount.json.fields.MailAccountGetSwitch;
@@ -142,56 +143,6 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
      * The constant in the Java programming language, sometimes referred to as a type code, that identifies the generic SQL type VARCHAR.
      */
     private static final int TYPE_VARCHAR = Types.VARCHAR;
-
-    private static final String SELECT_MAIL_ACCOUNT =
-        "SELECT name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler, unified_inbox, trash_fullname, sent_fullname, drafts_fullname, spam_fullname, confirmed_spam_fullname, confirmed_ham_fullname, personal, replyTo, archive, archive_fullname FROM user_mail_account WHERE cid = ? AND id = ? AND user = ?";
-
-    private static final String SELECT_TRANSPORT_ACCOUNT =
-        "SELECT name, url, login, password, send_addr, default_flag, personal, replyTo FROM user_transport_account WHERE cid = ? AND id = ? AND user = ?";
-
-    private static final String SELECT_MAIL_ACCOUNTS = "SELECT id, url FROM user_mail_account WHERE cid = ? AND user = ? ORDER BY id";
-
-    private static final String SELECT_BY_LOGIN = "SELECT id, user FROM user_mail_account WHERE cid = ? AND login = ?";
-
-    private static final String SELECT_BY_PRIMARY_ADDR = "SELECT id, user FROM user_mail_account WHERE cid = ? AND primary_addr = ?";
-
-    private static final String SELECT_ACCOUNT_BY_PRIMARY_ADDR =
-        "SELECT id FROM user_mail_account WHERE cid = ? AND primary_addr = ? AND user = ?";
-
-    private static final String DELETE_MAIL_ACCOUNT = "DELETE FROM user_mail_account WHERE cid = ? AND id = ? AND user = ?";
-
-    private static final String DELETE_TRANSPORT_ACCOUNT = "DELETE FROM user_transport_account WHERE cid = ? AND id = ? AND user = ?";
-
-    private static final String UPDATE_MAIL_ACCOUNT =
-        "UPDATE user_mail_account SET name = ?, url = ?, login = ?, password = ?, primary_addr = ?, spam_handler = ?, trash = ?, sent = ?, drafts = ?, spam = ?, confirmed_spam = ?, confirmed_ham = ?, unified_inbox = ?, trash_fullname = ?, sent_fullname = ?, drafts_fullname = ?, spam_fullname = ?, confirmed_spam_fullname = ?, confirmed_ham_fullname = ?, personal = ?, replyTo = ? WHERE cid = ? AND id = ? AND user = ?";
-
-    private static final String INSERT_MAIL_ACCOUNT =
-        "INSERT INTO user_mail_account (cid, id, user, name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler, unified_inbox, trash_fullname, sent_fullname, drafts_fullname, spam_fullname, confirmed_spam_fullname, confirmed_ham_fullname, personal, replyTo, archive, archive_fullname) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-    private static final String UPDATE_TRANSPORT_ACCOUNT =
-        "UPDATE user_transport_account SET name = ?, url = ?, login = ?, password = ?, send_addr = ?, personal = ?, replyTo = ? WHERE cid = ? AND id = ? AND user = ?";
-
-    private static final String INSERT_TRANSPORT_ACCOUNT =
-        "INSERT INTO user_transport_account (cid, id, user, name, url, login, password, send_addr, default_flag, personal, replyTo) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
-
-    private static final String UPDATE_UNIFIED_INBOX_FLAG =
-        "UPDATE user_mail_account SET unified_inbox = ? WHERE cid = ? AND id = ? AND user = ?";
-
-    private static final String UPDATE_PERSONAL1 = "UPDATE user_mail_account SET personal = ? WHERE cid = ? AND id = ? AND user = ?";
-
-    private static final String UPDATE_PERSONAL2 = "UPDATE user_transport_account SET personal = ? WHERE cid = ? AND id = ? AND user = ?";
-
-    private static final String SELECT_EXISTS_FOR_USER1 = "SELECT 1 FROM user_mail_account WHERE cid = ? AND user = ? AND id > 0 LIMIT 1";
-
-    private static final String SELECT_EXISTS_FOR_USER2 = "SELECT 1 FROM user_transport_account WHERE cid = ? AND user = ? AND id > 0 LIMIT 1";
-
-    private static final String SELECT_PASSWORD1 = "SELECT id, password, login, url FROM user_mail_account WHERE cid = ? AND user = ?";
-
-    private static final String SELECT_PASSWORD2 = "SELECT id, password, login, url FROM user_transport_account WHERE cid = ? AND user = ?";
-
-    private static final String UPDATE_PASSWORD1 = "UPDATE user_mail_account SET password = ?  WHERE cid = ? AND id = ? AND user = ?";
-
-    private static final String UPDATE_PASSWORD2 = "UPDATE user_transport_account SET password = ?  WHERE cid = ? AND id = ? AND user = ?";
 
     private static final String PARAM_POP3_STORAGE_FOLDERS = "com.openexchange.mailaccount.pop3Folders";
 
@@ -302,7 +253,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement(SELECT_MAIL_ACCOUNT);
+            stmt = con.prepareStatement("SELECT name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler, unified_inbox, trash_fullname, sent_fullname, drafts_fullname, spam_fullname, confirmed_spam_fullname, confirmed_ham_fullname, personal, replyTo, archive, archive_fullname FROM user_mail_account WHERE cid = ? AND id = ? AND user = ?");
             stmt.setLong(1, cid);
             stmt.setLong(2, id);
             stmt.setLong(3, user);
@@ -407,7 +358,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement(SELECT_TRANSPORT_ACCOUNT);
+            stmt = con.prepareStatement("SELECT name, url, login, password, send_addr, default_flag, personal, replyTo FROM user_transport_account WHERE cid = ? AND id = ? AND user = ?");
             stmt.setLong(1, cid);
             stmt.setLong(2, id);
             stmt.setLong(3, user);
@@ -484,7 +435,13 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     properties.put("addresses", getAliases(user, cid, mailAccount));
                 }
                 if (transportProps) {
-                    mailAccount.setTransportProperties(properties);
+                    String sTransAuth = properties.remove("transport.auth");
+                    if (null != sTransAuth) {
+                        mailAccount.setTransportAuth(TransportAuth.transportAuthFor(sTransAuth));
+                    }
+                    if (!properties.isEmpty()) {
+                        mailAccount.setTransportProperties(properties);
+                    }
                 } else {
                     mailAccount.setProperties(properties);
                 }
@@ -692,13 +649,13 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             deleteProperties(cid, user, id, false, con);
             deleteProperties(cid, user, id, true, con);
             // Then delete account data
-            stmt = con.prepareStatement(DELETE_MAIL_ACCOUNT);
+            stmt = con.prepareStatement("DELETE FROM user_mail_account WHERE cid = ? AND id = ? AND user = ?");
             stmt.setLong(1, cid);
             stmt.setLong(2, id);
             stmt.setLong(3, user);
             stmt.executeUpdate();
             closeSQLStuff(stmt);
-            stmt = con.prepareStatement(DELETE_TRANSPORT_ACCOUNT);
+            stmt = con.prepareStatement("DELETE FROM user_transport_account WHERE cid = ? AND id = ? AND user = ?");
             stmt.setLong(1, cid);
             stmt.setLong(2, id);
             stmt.setLong(3, user);
@@ -886,7 +843,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         if (null == con) {
             return getMailAccount(id, user, cid);
         }
-        final AbstractMailAccount retval = MailAccount.DEFAULT_ID == id ? new DefaultMailAccount() : new CustomMailAccount();
+        AbstractMailAccount retval = MailAccount.DEFAULT_ID == id ? new DefaultMailAccount() : new CustomMailAccount();
         fillMailAccount(retval, id, user, cid, con);
         fillTransportAccount(retval, id, user, cid, con);
         return retval;
@@ -938,7 +895,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement(SELECT_MAIL_ACCOUNTS);
+            stmt = con.prepareStatement("SELECT id, url FROM user_mail_account WHERE cid = ? AND user = ? ORDER BY id");
             stmt.setLong(1, cid);
             stmt.setLong(2, user);
             result = stmt.executeQuery();
@@ -981,7 +938,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             final SmartIntArray idsArr = new SmartIntArray(8);
             final SmartIntArray usersArr = new SmartIntArray(8);
             try {
-                stmt = con.prepareStatement(SELECT_BY_LOGIN);
+                stmt = con.prepareStatement("SELECT id, user FROM user_mail_account WHERE cid = ? AND login = ?");
                 stmt.setLong(1, cid);
                 stmt.setString(2, login);
                 result = stmt.executeQuery();
@@ -1042,7 +999,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             final SmartIntArray idsArr = new SmartIntArray(8);
             final SmartIntArray usersArr = new SmartIntArray(8);
             try {
-                stmt = con.prepareStatement(SELECT_BY_PRIMARY_ADDR);
+                stmt = con.prepareStatement("SELECT id, user FROM user_mail_account WHERE cid = ? AND primary_addr = ?");
                 stmt.setLong(1, cid);
                 stmt.setString(2, primaryAddress);
                 result = stmt.executeQuery();
@@ -1485,7 +1442,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                                 encryptedTransportPassword = encrypt(mailAccount.getTransportPassword(), session);
                             }
                             // cid, id, user, name, url, login, password, send_addr, default_flag
-                            stmt = con.prepareStatement(INSERT_TRANSPORT_ACCOUNT);
+                            stmt = con.prepareStatement("INSERT INTO user_transport_account (cid, id, user, name, url, login, password, send_addr, default_flag, personal, replyTo) VALUES (?,?,?,?,?,?,?,?,?,?,?)");
                             pos = 1;
                             stmt.setLong(pos++, cid);
                             stmt.setLong(pos++, mailAccount.getId());
@@ -1540,6 +1497,10 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 if (attributes.contains(Attribute.POP3_PATH_LITERAL)) {
                     updateProperty(cid, user, mailAccount.getId(), "pop3.path", properties.get("pop3.path"), false, con);
                 }
+                if (attributes.contains(Attribute.TRANSPORT_AUTH_LITERAL)) {
+                    TransportAuth transportAuth = mailAccount.getTransportAuth();
+                    updateProperty(cid, user, mailAccount.getId(), "transport.auth", null == transportAuth ? null : transportAuth.getId(), true, con);
+                }
             } catch (final SQLException e) {
                 if (null != stmt) {
                     final String sql = stmt.toString();
@@ -1564,7 +1525,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     private void updateUnifiedINBOXEnabled(final boolean unifiedINBOXEnabled, final int id, final int user, final int cid, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement(UPDATE_UNIFIED_INBOX_FLAG);
+            stmt = con.prepareStatement("UPDATE user_mail_account SET unified_inbox = ? WHERE cid = ? AND id = ? AND user = ?");
             int pos = 1;
             stmt.setInt(pos++, unifiedINBOXEnabled ? 1 : 0);
             stmt.setInt(pos++, cid);
@@ -1585,7 +1546,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     private void updatePersonal(final String personal, final int id, final int user, final int cid, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement(UPDATE_PERSONAL1);
+            stmt = con.prepareStatement("UPDATE user_mail_account SET personal = ? WHERE cid = ? AND id = ? AND user = ?");
             int pos = 1;
             if (null == personal) {
                 stmt.setNull(pos++, TYPE_VARCHAR);
@@ -1598,7 +1559,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             stmt.executeUpdate();
             closeSQLStuff(stmt);
             // Transport table, too
-            stmt = con.prepareStatement(UPDATE_PERSONAL2);
+            stmt = con.prepareStatement("UPDATE user_transport_account SET personal = ? WHERE cid = ? AND id = ? AND user = ?");
             pos = 1;
             if (null == personal) {
                 stmt.setNull(pos++, TYPE_VARCHAR);
@@ -1801,7 +1762,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             rollback = true;
             {
                 final String encryptedPassword = encrypt(mailAccount.getPassword(), session);
-                stmt = con.prepareStatement(UPDATE_MAIL_ACCOUNT);
+                stmt = con.prepareStatement("UPDATE user_mail_account SET name = ?, url = ?, login = ?, password = ?, primary_addr = ?, spam_handler = ?, trash = ?, sent = ?, drafts = ?, spam = ?, confirmed_spam = ?, confirmed_ham = ?, unified_inbox = ?, trash_fullname = ?, sent_fullname = ?, drafts_fullname = ?, spam_fullname = ?, confirmed_spam_fullname = ?, confirmed_ham_fullname = ?, personal = ?, replyTo = ? WHERE cid = ? AND id = ? AND user = ?");
                 int pos = 1;
                 stmt.setString(pos++, name);
                 stmt.setString(pos++, mailAccount.generateMailServerURL());
@@ -1848,7 +1809,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             if (null != transportURL) {
                 final String encryptedTransportPassword = encrypt(mailAccount.getTransportPassword(), session);
                 stmt.close();
-                stmt = con.prepareStatement(UPDATE_TRANSPORT_ACCOUNT);
+                stmt = con.prepareStatement("UPDATE user_transport_account SET name = ?, url = ?, login = ?, password = ?, send_addr = ?, personal = ?, replyTo = ? WHERE cid = ? AND id = ? AND user = ?");
                 int pos = 1;
                 stmt.setString(pos++, name);
                 stmt.setString(pos++, transportURL);
@@ -1888,6 +1849,10 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             }
             if (properties.containsKey("pop3.path")) {
                 updateProperty(cid, user, accountId, "pop3.path", properties.get("pop3.path"), false, con);
+            }
+            TransportAuth transportAuth = mailAccount.getTransportAuth();
+            if (null != transportAuth) {
+                updateProperty(cid, user, mailAccount.getId(), "transport.auth", transportAuth.getId(), true, con);
             }
 
             final MailAccount retval = getMailAccount(accountId, user, cid, con);
@@ -1966,7 +1931,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         PreparedStatement stmt = null;
         try {
             {
-                stmt = con.prepareStatement(INSERT_MAIL_ACCOUNT);
+                stmt = con.prepareStatement("INSERT INTO user_mail_account (cid, id, user, name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler, unified_inbox, trash_fullname, sent_fullname, drafts_fullname, spam_fullname, confirmed_spam_fullname, confirmed_ham_fullname, personal, replyTo, archive, archive_fullname) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 final String encryptedPassword;
                 if (session == null) {
                     encryptedPassword = null;
@@ -2053,7 +2018,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     encryptedTransportPassword = encrypt(mailAccount.getTransportPassword(), session);
                 }
                 // cid, id, user, name, url, login, password, send_addr, default_flag
-                stmt = con.prepareStatement(INSERT_TRANSPORT_ACCOUNT);
+                stmt = con.prepareStatement("INSERT INTO user_transport_account (cid, id, user, name, url, login, password, send_addr, default_flag, personal, replyTo) VALUES (?,?,?,?,?,?,?,?,?,?,?)");
                 int pos = 1;
                 stmt.setLong(pos++, cid);
                 stmt.setLong(pos++, id);
@@ -2104,6 +2069,10 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 if (properties.containsKey("pop3.path")) {
                     updateProperty(cid, user, id, "pop3.path", properties.get("pop3.path"), false, con);
                 }
+            }
+            TransportAuth transportAuth = mailAccount.getTransportAuth();
+            if (null != transportAuth) {
+                updateProperty(cid, user, id, "transport.auth", transportAuth.getId(), true, con);
             }
         } catch (final SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -2230,7 +2199,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement(SELECT_ACCOUNT_BY_PRIMARY_ADDR);
+            stmt = con.prepareStatement("SELECT id FROM user_mail_account WHERE cid = ? AND primary_addr = ? AND user = ?");
             stmt.setLong(1, cid);
             stmt.setString(2, primaryAddress);
             stmt.setLong(3, user);
@@ -2413,7 +2382,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         final int user = session.getUserId();
         try {
             con = Database.get(cid, false);
-            stmt = con.prepareStatement(SELECT_EXISTS_FOR_USER1);
+            stmt = con.prepareStatement("SELECT 1 FROM user_mail_account WHERE cid = ? AND user = ? AND id > 0 LIMIT 1");
             stmt.setInt(1, cid);
             stmt.setInt(2, user);
             rs = stmt.executeQuery();
@@ -2422,7 +2391,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             }
             DBUtils.closeSQLStuff(rs, stmt);
 
-            stmt = con.prepareStatement(SELECT_EXISTS_FOR_USER2);
+            stmt = con.prepareStatement("SELECT 1 FROM user_transport_account WHERE cid = ? AND user = ? AND id > 0 LIMIT 1");
             stmt.setInt(1, cid);
             stmt.setInt(2, user);
             rs = stmt.executeQuery();
@@ -2456,7 +2425,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             /*
              * Perform SELECT query
              */
-            selectStmt = con.prepareStatement(SELECT_PASSWORD1);
+            selectStmt = con.prepareStatement("SELECT id, password, login, url FROM user_mail_account WHERE cid = ? AND user = ?");
             selectStmt.setInt(1, cid);
             selectStmt.setInt(2, user);
             rs = selectStmt.executeQuery();
@@ -2488,7 +2457,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                             final String transcribed = encryptionService.encrypt(session, decrypted);
                             // Add to batch update
                             if (null == updateStmt) {
-                                updateStmt = con.prepareStatement(UPDATE_PASSWORD1);
+                                updateStmt = con.prepareStatement("UPDATE user_mail_account SET password = ?  WHERE cid = ? AND id = ? AND user = ?");
                                 updateStmt.setInt(2, cid);
                                 updateStmt.setInt(4, user);
                             }
@@ -2511,7 +2480,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             /*
              * Perform other SELECT query
              */
-            selectStmt = con.prepareStatement(SELECT_PASSWORD2);
+            selectStmt = con.prepareStatement("SELECT id, password, login, url FROM user_transport_account WHERE cid = ? AND user = ?");
             selectStmt.setInt(1, cid);
             selectStmt.setInt(2, user);
             rs = selectStmt.executeQuery();
@@ -2537,7 +2506,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                             final String transcribed = encryptionService.encrypt(session, decrypted);
                             // Add to batch update
                             if (null == updateStmt) {
-                                updateStmt = con.prepareStatement(UPDATE_PASSWORD2);
+                                updateStmt = con.prepareStatement("UPDATE user_transport_account SET password = ?  WHERE cid = ? AND id = ? AND user = ?");
                                 updateStmt.setInt(2, cid);
                                 updateStmt.setInt(4, user);
                             }
@@ -2592,7 +2561,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             /*
              * Perform SELECT query
              */
-            selectStmt = con.prepareStatement(SELECT_PASSWORD1);
+            selectStmt = con.prepareStatement("SELECT id, password, login, url FROM user_mail_account WHERE cid = ? AND user = ?");
             selectStmt.setInt(1, cid);
             selectStmt.setInt(2, user);
             rs = selectStmt.executeQuery();
@@ -2607,7 +2576,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                         } catch (final GeneralSecurityException x) {
                             // We couldn't decrypt
                             if (null == updateStmt) {
-                                updateStmt = con.prepareStatement(UPDATE_PASSWORD1);
+                                updateStmt = con.prepareStatement("UPDATE user_mail_account SET password = ?  WHERE cid = ? AND id = ? AND user = ?");
                                 updateStmt.setInt(2, cid);
                                 updateStmt.setInt(4, user);
                             }
@@ -2631,7 +2600,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             /*
              * Perform other SELECT query
              */
-            selectStmt = con.prepareStatement(SELECT_PASSWORD2);
+            selectStmt = con.prepareStatement("SELECT id, password, login, url FROM user_transport_account WHERE cid = ? AND user = ?");
             selectStmt.setInt(1, cid);
             selectStmt.setInt(2, user);
             rs = selectStmt.executeQuery();
@@ -2648,7 +2617,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     } catch (final GeneralSecurityException x) {
                         // We couldn't decrypt
                         if (null == updateStmt) {
-                            updateStmt = con.prepareStatement(UPDATE_PASSWORD2);
+                            updateStmt = con.prepareStatement("UPDATE user_transport_account SET password = ?  WHERE cid = ? AND id = ? AND user = ?");
                             updateStmt.setInt(2, cid);
                             updateStmt.setInt(4, user);
                         }
@@ -2706,7 +2675,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             /*
              * Perform SELECT query
              */
-            selectStmt = con.prepareStatement(SELECT_PASSWORD1);
+            selectStmt = con.prepareStatement("SELECT id, password, login, url FROM user_mail_account WHERE cid = ? AND user = ?");
             selectStmt.setInt(1, cid);
             selectStmt.setInt(2, user);
             rs = selectStmt.executeQuery();
@@ -2721,7 +2690,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                         } catch (final GeneralSecurityException x) {
                             // We couldn't decrypt
                             if (null == updateStmt) {
-                                updateStmt = con.prepareStatement(DELETE_MAIL_ACCOUNT);
+                                updateStmt = con.prepareStatement("DELETE FROM user_mail_account WHERE cid = ? AND id = ? AND user = ?");
                                 updateStmt.setInt(1, cid);
                                 updateStmt.setInt(3, user);
                             }
@@ -2743,7 +2712,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             /*
              * Perform other SELECT query
              */
-            selectStmt = con.prepareStatement(SELECT_PASSWORD2);
+            selectStmt = con.prepareStatement("SELECT id, password, login, url FROM user_transport_account WHERE cid = ? AND user = ?");
             selectStmt.setInt(1, cid);
             selectStmt.setInt(2, user);
             rs = selectStmt.executeQuery();
@@ -2760,7 +2729,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     } catch (final GeneralSecurityException x) {
                         // We couldn't decrypt
                         if (null == updateStmt) {
-                            updateStmt = con.prepareStatement(DELETE_TRANSPORT_ACCOUNT);
+                            updateStmt = con.prepareStatement("DELETE FROM user_transport_account WHERE cid = ? AND id = ? AND user = ?");
                             updateStmt.setInt(1, cid);
                             updateStmt.setInt(3, user);
                         }

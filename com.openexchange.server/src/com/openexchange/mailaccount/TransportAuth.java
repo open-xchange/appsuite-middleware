@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,58 +49,59 @@
 
 package com.openexchange.mailaccount;
 
-import com.openexchange.exception.OXException;
-
-
 /**
- * {@link AttributeSwitch}
+ * {@link TransportAuth}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.6.1
  */
-public interface AttributeSwitch {
+public enum TransportAuth {
 
-    public Object id();
-    public Object login();
-    public Object password();
-    public Object mailURL() throws OXException;
-    public Object transportURL() throws OXException;
-    public Object name();
-    public Object primaryAddress();
-    public Object personal();
-    public Object spamHandler();
-    public Object trash();
-    public Object archive();
-    public Object sent();
-    public Object drafts();
-    public Object spam();
-    public Object confirmedSpam();
-    public Object confirmedHam();
-    public Object mailServer();
-    public Object mailPort();
-    public Object mailProtocol();
-    public Object mailSecure();
-    public Object transportServer();
-    public Object transportPort();
-    public Object transportProtocol();
-    public Object transportSecure();
-    public Object transportLogin();
-    public Object transportPassword();
-    public Object unifiedINBOXEnabled();
-    public Object trashFullname();
-    public Object archiveFullname();
-    public Object sentFullname();
-    public Object draftsFullname();
-    public Object spamFullname();
-    public Object confirmedSpamFullname();
-    public Object confirmedHamFullname();
-    public Object pop3RefreshRate();
-    public Object pop3ExpungeOnQuit();
-    public Object pop3DeleteWriteThrough();
-    public Object pop3Storage();
-    public Object pop3Path();
-    public Object addresses();
-    public Object replyTo();
-    public Object transportAuth();
+    /**
+     * The transport server credentials are supposed to be taken from the mail settings.
+     */
+    MAIL("mail"),
+    /**
+     * Custom transport server credentials.
+     */
+    CUSTOM("custom"),
+    /**
+     * No transport server credentials.
+     */
+    NONE("none"), ;
+
+    private final String id;
+
+    private TransportAuth(String id) {
+        this.id = id;
+    }
+
+    /**
+     * Gets the identifier
+     *
+     * @return The identifier
+     */
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * Gets the transport authentication mode for given identifier.
+     *
+     * @param id The identifier
+     * @return The transport authentication mode or <code>null</code>
+     */
+    public static TransportAuth transportAuthFor(String id) {
+        if (null == id) {
+            return null;
+        }
+
+        for (TransportAuth ta : TransportAuth.values()) {
+            if (ta.id.equalsIgnoreCase(id)) {
+                return ta;
+            }
+        }
+        return null;
+    }
 
 }

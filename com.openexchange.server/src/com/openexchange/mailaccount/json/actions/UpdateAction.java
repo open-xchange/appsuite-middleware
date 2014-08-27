@@ -121,11 +121,11 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
 
     @Override
     protected AJAXRequestResult innerPerform(final AJAXRequestData requestData, final ServerSession session, final JSONValue jData) throws OXException, JSONException {
-        final MailAccountDescription accountDescription = new MailAccountDescription();
-        final List<OXException> warnings = new LinkedList<OXException>();
-        final Set<Attribute> fieldsToUpdate = MailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings);
+        MailAccountDescription accountDescription = new MailAccountDescription();
+        List<OXException> warnings = new LinkedList<OXException>();
+        Set<Attribute> fieldsToUpdate = MailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings);
 
-        final int id = accountDescription.getId();
+        int id = accountDescription.getId();
         if (-1 == id) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(MailAccountFields.ID);
         }
@@ -290,7 +290,7 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
 
     /**
      * Fills the provided {@link MailAccountDescription} with already existing data if they are not existing in fieldsToUpdate
-     * 
+     *
      * @param accountDescription
      * @param fieldsToUpdate
      * @param toUpdate

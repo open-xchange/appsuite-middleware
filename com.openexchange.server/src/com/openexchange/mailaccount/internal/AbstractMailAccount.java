@@ -60,6 +60,7 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
+import com.openexchange.mailaccount.TransportAuth;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
 import com.openexchange.tools.net.URITools;
@@ -84,6 +85,7 @@ public abstract class AbstractMailAccount implements MailAccount {
     protected int mailPort;
     protected String mailProtocol;
     protected boolean mailSecure;
+    protected TransportAuth transportAuth;
     protected String transportServer;
     protected int transportPort;
     protected String transportProtocol;
@@ -120,6 +122,7 @@ public abstract class AbstractMailAccount implements MailAccount {
     protected AbstractMailAccount() {
         super();
         properties = new HashMap<String, String>(4);
+        transportAuth = TransportAuth.MAIL;
         transportProperties = new HashMap<String, String>(4);
         transportPort = 25;
         mailPort = 143;
@@ -185,6 +188,11 @@ public abstract class AbstractMailAccount implements MailAccount {
             return properties.get("replyto");
         }
         return replyTo;
+    }
+
+    @Override
+    public TransportAuth getTransportAuth() {
+        return transportAuth;
     }
 
     @Override
@@ -439,6 +447,15 @@ public abstract class AbstractMailAccount implements MailAccount {
     public void setMailSecure(final boolean mailSecure) {
         mailServerUrl = null;
         this.mailSecure = mailSecure;
+    }
+
+    /**
+     * Sets the transport authentication information
+     *
+     * @param transportAuth The transport authentication information to set
+     */
+    public void setTransportAuth(TransportAuth transportAuth) {
+        this.transportAuth = transportAuth;
     }
 
     /**
