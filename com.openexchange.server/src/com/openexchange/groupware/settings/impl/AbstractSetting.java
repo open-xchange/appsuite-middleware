@@ -51,11 +51,14 @@ package com.openexchange.groupware.settings.impl;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.Ranked;
 import com.openexchange.groupware.settings.Setting;
 
 /**
@@ -92,7 +95,12 @@ public abstract class AbstractSetting<T extends AbstractSetting<? extends T>> im
     /**
      * Stores the sub elements.
      */
-    private Map<String, T> elements;
+    private Map<String, PriorityQueue<T>> elements;
+
+    /**
+     * The ranking
+     */
+    private final int ranking;
 
     /**
      * Constructor for initializing especially shared values.
@@ -105,6 +113,12 @@ public abstract class AbstractSetting<T extends AbstractSetting<? extends T>> im
         this.name = name;
         this.shared = shared;
         this.id = id;
+        ranking = (shared instanceof Ranked) ? ((Ranked) shared).getRanking() : 0;
+    }
+
+    @Override
+    public int getRanking() {
+        return ranking;
     }
 
     /**
@@ -123,9 +137,12 @@ public abstract class AbstractSetting<T extends AbstractSetting<? extends T>> im
     @Override
     public T getElement(final String subName) {
         T element = null;
-        if (null != elements) {
-            element = elements.get(subName);
+
+        PriorityQueue<T> queue = optQueue(subName);
+        if (null != queue) {
+            element = queue.peek();
         }
+
         return element;
     }
 
@@ -145,24 +162,79 @@ public abstract class AbstractSetting<T extends AbstractSetting<? extends T>> im
         return null == elements || 0 == elements.size();
     }
 
+    PriorityQueue<T> getQueue(String name) {
+        if (null == elements) {
+            elements = new HashMap<String, PriorityQueue<T>>();
+            PriorityQueue<T> newQueue = new PriorityQueue<T>(4, new Comparator<T>() {
+
+                @Override
+                public int compare(T o1, T o2) {
+                    int r1 = o1.getRanking();
+                    int r2 = o2.getRanking();
+                    // Higher ranking first...
+                    return r1 < r2 ? 1 : (r1 == r2 ? 0 : -1);
+                }
+            });
+            elements.put(name, newQueue);
+            return newQueue;
+        }
+
+        PriorityQueue<T> q = elements.get(name);
+        if (null == q) {
+            q = new PriorityQueue<T>(4, new Comparator<T>() {
+
+                @Override
+                public int compare(T o1, T o2) {
+                    int r1 = o1.getRanking();
+                    int r2 = o2.getRanking();
+                    // Higher ranking first...
+                    return r1 < r2 ? 1 : (r1 == r2 ? 0 : -1);
+                }
+            });
+            elements.put(name, q);
+        }
+        return q;
+    }
+
+    PriorityQueue<T> optQueue(String name) {
+        if (null == elements) {
+            return null;
+        }
+
+        return elements.get(name);
+    }
+
+    boolean checkElement(T child) {
+        PriorityQueue<T> q = optQueue(child.getName());
+        if (null == q) {
+            return true;
+        }
+
+        for (T t : q) {
+            if (t.getRanking() == child.getRanking()) {
+                // There is already a setting associated with that name having the same ranking
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
      * Adds a sub element to this element.
      * @param child sub element to add.
      */
-    void addElement(final T child) {
-        if (null == elements) {
-            elements = new HashMap<String, T>();
-        }
-        elements.put(child.getName(), child);
+    void addElement(T child) {
+        getQueue(child.getName()).offer(child);
     }
 
     /**
      * Removes the sub element from this element.
      * @param child sub element to remove.
      */
-    protected void removeElementInternal(final T child) {
-        if (null != elements) {
-            elements.remove(child.getName());
+    protected void removeElementInternal(T child) {
+        PriorityQueue<T> q = optQueue(child.getName());
+        if (null != q) {
+            q.remove(child);
         }
     }
 
@@ -172,11 +244,13 @@ public abstract class AbstractSetting<T extends AbstractSetting<? extends T>> im
         out.append(name);
         if (null != elements) {
             out.append('(');
-            final Iterator<T> iter = elements.values().iterator();
-            while (iter.hasNext()) {
-                out.append(iter.next().toString());
-                if (iter.hasNext()) {
-                    out.append(',');
+            for (PriorityQueue<T> q : elements.values()) {
+                Iterator<T> iter = q.iterator();
+                while (iter.hasNext()) {
+                    out.append(iter.next().toString());
+                    if (iter.hasNext()) {
+                        out.append(',');
+                    }
                 }
             }
             out.append(')');
@@ -191,7 +265,9 @@ public abstract class AbstractSetting<T extends AbstractSetting<? extends T>> im
     public T[] getElements() {
         final List<T> tmp = new ArrayList<T>();
         if (null != elements) {
-            tmp.addAll(elements.values());
+            for (PriorityQueue<T> q : elements.values()) {
+                tmp.add(q.peek());
+            }
         }
         @SuppressWarnings("unchecked")
         T[] retval = (T[]) Array.newInstance(this.getClass(), tmp.size());

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,97 +49,22 @@
 
 package com.openexchange.groupware.settings;
 
-import com.openexchange.exception.OXException;
 
 /**
- * This class represents a single setting.
+ * {@link Ranked}
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.6.1
  */
-public interface Setting extends Ranked {
+public interface Ranked {
 
     /**
-     * @return the multi value.
+     * Gets the ranking.
+     * <p>
+     * Default is <code>0</code> (zero)
+     *
+     * @return The ranking
      */
-    Object[] getMultiValue();
-
-    boolean isEmptyMultivalue();
-
-    /**
-     * @return the single value.
-     */
-    Object getSingleValue();
-
-    /**
-     * @param value The value to set.
-     * @throws OXException if setting the value is not allowed on this element.
-     */
-    void setSingleValue(final Object value) throws OXException;
-
-    /**
-     * @param value Value to add.
-     * @throws OXException if setting the value is not allowed on this element.
-     */
-    void addMultiValue(final Object value) throws OXException;
-
-    /**
-     * @throws OXException if setting the value is not allowed on this element.
-     */
-    void setEmptyMultiValue() throws OXException;
-
-    /**
-     * @return Returns the name.
-     */
-    String getName();
-
-    /**
-     * Returns the sub setting that has the given name.
-     * @param elementName Name of the sub setting.
-     * @return the sub setting or <code>null</code> if it doesn't exist.
-     */
-    Setting getElement(final String elementName);
-
-    /**
-     * @return Returns the id.
-     */
-    int getId();
-
-    /**
-     * @return Returns the leaf.
-     */
-    boolean isLeaf();
-
-    /**
-     * Removes the sub element from this element.
-     * @param child sub element to remove.
-     * @throws OXException if removing the child is not allowed on this element.
-     */
-    void removeElement(final Setting child) throws OXException;
-
-    /**
-     * @return the sub elements of this element.
-     */
-    Setting[] getElements();
-
-    /**
-     * @return <code>true</code> if this setting is used in server and gui and
-     * <code>false</code> if the setting is only used in gui.
-     */
-    boolean isShared();
-
-    /**
-     * @return the path for this setting.
-     */
-    String getPath();
-
-    /**
-     * @return the parent
-     */
-    Setting getParent();
-
-    /**
-     * @return the shared
-     */
-    IValueHandler getShared();
+    int getRanking();
 
 }

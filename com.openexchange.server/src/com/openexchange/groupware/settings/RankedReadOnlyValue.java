@@ -49,97 +49,57 @@
 
 package com.openexchange.groupware.settings;
 
-import com.openexchange.exception.OXException;
 
 /**
- * This class represents a single setting.
+ * Helper class that extends {@link ReadOnlyValue} by a ranking.
+ * <p>
+ * Useful to replace existing settings in case a higher ranking is specified through overwriting {@link #getRanking()} method.<br>
+ * Example:
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * <pre>
+ * public class OverwritingPreferenceItemService implements PreferencesItemService {
+ *
+ *     &#064;Override
+ *     public String[] getPath() {
+ *         return new String[] { &quot;repacing&quot;, &quot;path&quot; };
+ *     }
+ *
+ *     &#064;Override
+ *     public IValueHandler getSharedValue() {
+ *         return new RankedReadOnlyValue() {
+ *
+ *             &#064;Override
+ *             public int getRanking() {
+ *                 // A higher ranking than zero
+ *                 return 10;
+ *             }
+ *
+ *             &#064;Override
+ *             public boolean isAvailable(UserConfiguration userConfig) {
+ *                 return true;
+ *             }
+ *
+ *             &#064;Override
+ *             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
+ *                 // Overwrite value here...
+ *             }
+ *         };
+ *     }
+ * }
+ * </pre>
  */
-public interface Setting extends Ranked {
+public abstract class RankedReadOnlyValue extends ReadOnlyValue implements Ranked {
 
     /**
-     * @return the multi value.
+     * Initializes a new {@link RankedReadOnlyValue}.
      */
-    Object[] getMultiValue();
+    protected RankedReadOnlyValue() {
+        super();
+    }
 
-    boolean isEmptyMultivalue();
-
-    /**
-     * @return the single value.
-     */
-    Object getSingleValue();
-
-    /**
-     * @param value The value to set.
-     * @throws OXException if setting the value is not allowed on this element.
-     */
-    void setSingleValue(final Object value) throws OXException;
-
-    /**
-     * @param value Value to add.
-     * @throws OXException if setting the value is not allowed on this element.
-     */
-    void addMultiValue(final Object value) throws OXException;
-
-    /**
-     * @throws OXException if setting the value is not allowed on this element.
-     */
-    void setEmptyMultiValue() throws OXException;
-
-    /**
-     * @return Returns the name.
-     */
-    String getName();
-
-    /**
-     * Returns the sub setting that has the given name.
-     * @param elementName Name of the sub setting.
-     * @return the sub setting or <code>null</code> if it doesn't exist.
-     */
-    Setting getElement(final String elementName);
-
-    /**
-     * @return Returns the id.
-     */
-    int getId();
-
-    /**
-     * @return Returns the leaf.
-     */
-    boolean isLeaf();
-
-    /**
-     * Removes the sub element from this element.
-     * @param child sub element to remove.
-     * @throws OXException if removing the child is not allowed on this element.
-     */
-    void removeElement(final Setting child) throws OXException;
-
-    /**
-     * @return the sub elements of this element.
-     */
-    Setting[] getElements();
-
-    /**
-     * @return <code>true</code> if this setting is used in server and gui and
-     * <code>false</code> if the setting is only used in gui.
-     */
-    boolean isShared();
-
-    /**
-     * @return the path for this setting.
-     */
-    String getPath();
-
-    /**
-     * @return the parent
-     */
-    Setting getParent();
-
-    /**
-     * @return the shared
-     */
-    IValueHandler getShared();
+    @Override
+    public int getRanking() {
+        return 0;
+    }
 
 }
