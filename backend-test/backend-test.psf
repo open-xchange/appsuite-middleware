@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.google.api.client"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.google.gdata"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.admin.diff"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.admin.plugin.hosting"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.apps.manifests.json"/>
@@ -28,7 +26,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.file.storage.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.freebusy"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.global"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.google.api.client"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.groupware.tools"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.html"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.http.deferrer"/>
@@ -63,7 +60,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe.crawler"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe.json"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe.google"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe.microformats"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.templating"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.test"/>
