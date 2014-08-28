@@ -1475,7 +1475,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
     public void replaceDatesWithFirstOccurence(final Appointment appointment) throws OXException {
         final RecurringResultsInterface results = calculateFirstRecurring(appointment);
         if (0 == results.size()) {
-            throw OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_FIRST_RECURRING.create();
+            throw OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_FIRST_RECURRING.create(appointment.getObjectID());
         }
         final RecurringResultInterface result = results.getRecurringResult(0);
         appointment.setStartDate(new Date(result.getStart()));

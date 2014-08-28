@@ -1,3 +1,15 @@
+* 2014-08-08 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 30599: Ical export stumbles over bad reccurring appointment.
+
+* 2014-08-06 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 33914: Corrected parameter index when dropping the +/- variants of user capabilities
+
+* 2014-08-06 - steffen.templin@open-xchange.com
+
+ - Fix for bug 33918: Translate display names of subscription sources only if necessary
+
 * 2014-08-04 - marcus.klein@open-xchange.com
 
  - Fix for bug 33891: Removed superfluous line throwing always an exception.
@@ -7,6 +19,10 @@
  - Fix for bug 33715: Accept new parameter "attach_src" for action=get request to let the client signal RFC822 source is supposed to be
                       attached to generated JSON mail representation
  - Fix for bug 33850: Keep "Message-Id" header on message transport
+
+* 2014-07-31 - thorben.betten@open-xchange.com
+
+ - Fix for bug 33839: Escape site information when generating the publication site from selected template
 
 * 2014-07-29 - tobias.friedrich@open-xchange.com
 
