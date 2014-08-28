@@ -77,6 +77,7 @@ import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.tools.file.external.FileStorageCodes;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -218,7 +219,14 @@ public class ZipFolderAction extends AbstractFileAction {
         try {
             while (it.hasNext()) {
                 File file = it.next();
-                addFile2Archive(file, fileAccess.getDocument(file.getId(), FileStorageFileAccess.CURRENT_VERSION), zipOutput, pathPrefix, buflen, buf);
+                try {
+                    addFile2Archive(file, fileAccess.getDocument(file.getId(), FileStorageFileAccess.CURRENT_VERSION), zipOutput, pathPrefix, buflen, buf);
+                } catch (OXException e) {
+                    if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
+                        throw e;
+                    }
+                    // Ignore
+                }
             }
 
             SearchIterators.close(it);
@@ -341,12 +349,23 @@ public class ZipFolderAction extends AbstractFileAction {
                     prev = '_';
                     sb.append(prev);
                 }
+            } else if (',' == c) {
+                if (prev != '_') {
+                    prev = '_';
+                    sb.append(prev);
+                }
+            } else if ('.' == c) {
+                if (prev != '_') {
+                    prev = '_';
+                    sb.append(prev);
+                }
             } else {
                 prev = '\0';
                 sb.append(c);
             }
         }
-        return sb.toString();
+        String sanitized = sb.toString();
+        return Strings.isEmpty(sanitized) ? "archive" : sanitized;
     }
 
 }
