@@ -50,6 +50,7 @@
 package com.openexchange.ajax;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.servlet.ServletException;
@@ -233,10 +234,8 @@ public abstract class SessionServlet extends AJAXServlet {
             } else {
                 // No JSON response
                 String desc = e.getMessage();
-                resp.setContentType("text/html; charset=UTF-8");
-                resp.setStatus(HttpServletResponse.SC_FORBIDDEN);;
-                resp.getWriter().write(getErrorPage(HttpServletResponse.SC_FORBIDDEN, null, desc));
-                resp.getWriter().flush();
+                resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                writeErrorPage(HttpServletResponse.SC_FORBIDDEN, desc, resp);
             }
         } else {
             e.log(LOG);
@@ -249,12 +248,25 @@ public abstract class SessionServlet extends AJAXServlet {
             } else {
                 // No JSON response
                 String desc = null == reasonPhrase ? "An error occurred inside the server which prevented it from fulfilling the request." : reasonPhrase;
-                resp.setContentType("text/html; charset=UTF-8");
                 resp.setStatus(statusCode);
-                resp.getWriter().write(getErrorPage(statusCode, null, desc));
-                resp.getWriter().flush();
+                writeErrorPage(statusCode, desc, resp);
             }
         }
+    }
+
+    /**
+     * Attempts to write an error page to HTTP response.
+     *
+     * @param statusCode The HTTP status code
+     * @param desc The error description
+     * @param resp The HTTP response
+     * @throws IOException If an I/O error occurs
+     */
+    protected void writeErrorPage(int statusCode, String desc, HttpServletResponse resp) throws IOException {
+        resp.setContentType("text/html; charset=UTF-8");
+        PrintWriter writer = resp.getWriter();
+        writer.write(getErrorPage(statusCode, null, desc));
+        writer.flush();
     }
 
     /**

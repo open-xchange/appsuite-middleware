@@ -417,7 +417,13 @@ public class DispatcherServlet extends SessionServlet {
                     throw (IOException) cause;
                 }
                 httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-                flushSafe(httpResponse);
+                // Try to write error page
+                try {
+                    writeErrorPage(HttpServletResponse.SC_BAD_REQUEST, e.getMessage(), httpResponse);
+                } catch (Exception x) {
+                    // Ignore
+                    flushSafe(httpResponse);
+                }
                 logException(e, LogLevel.DEBUG, HttpServletResponse.SC_BAD_REQUEST);
                 return;
             }
@@ -426,7 +432,13 @@ public class DispatcherServlet extends SessionServlet {
                 final Object statusMsg = logArgs.length > 1 ? logArgs[1] : null;
                 final int sc = ((Integer) logArgs[0]).intValue();
                 httpResponse.sendError(sc, null == statusMsg ? null : statusMsg.toString());
-                flushSafe(httpResponse);
+                // Try to write error page
+                try {
+                    writeErrorPage(sc, null == statusMsg ? null : statusMsg.toString(), httpResponse);
+                } catch (Exception x) {
+                    // Ignore
+                    flushSafe(httpResponse);
+                }
                 logException(e, LogLevel.DEBUG, sc);
                 return;
             }
