@@ -47,71 +47,58 @@
  *
  */
 
-package com.openexchange.admin.diff;
+package com.openexchange.google.subscribe.actions;
 
-import java.io.File;
-import java.util.HashSet;
-import java.util.Set;
-import com.openexchange.admin.diff.file.handler.FileHandler;
-import com.openexchange.admin.diff.file.handler.IConfFileHandler;
-import com.openexchange.admin.diff.file.provider.ConfFolderFileProvider;
-import com.openexchange.admin.diff.file.provider.JarFileProvider;
-import com.openexchange.admin.diff.file.provider.RecursiveFileProvider;
-import com.openexchange.admin.diff.result.DiffResult;
-
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * Main class that is invoked to execute the configuration diffs.
+ * {@link DeleteOAuthAccountRequest}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.6.1
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class ConfigDiff {
+public class DeleteOAuthAccountRequest extends AbstractOAuthRequest<InitOAuthAccountResponse> {
 
-    /**
-     * Default folder for original configuration files
-     */
-    protected String originalFolder = "/opt/open-xchange/bundles";
+    private final int accountId;
 
-    /**
-     * Default folder for installed configuration files
-     */
-    protected String installationFolder = "/opt/open-xchange/etc";
-
-    /**
-     * Handles processing with files
-     */
-    private FileHandler fileHandler = new FileHandler();
-
-    /**
-     * Handlers that are registered for diff processing
-     */
-    private static Set<IConfFileHandler> handlers = new HashSet<IConfFileHandler>();
-
-    public static void register(IConfFileHandler handler) {
-        handlers.add(handler);
+    public DeleteOAuthAccountRequest(final int accountId) {
+        this.accountId = accountId;
     }
 
-    public DiffResult run() {
-        DiffResult diffResult = new DiffResult();
-
-        this.fileHandler.readConfFiles(diffResult, new File(this.originalFolder), true, new JarFileProvider(), new ConfFolderFileProvider());
-        this.fileHandler.readConfFiles(diffResult, new File(this.installationFolder), false, new RecursiveFileProvider());
-
-        return getDiffs(diffResult);
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return Method.GET;
     }
 
-    /**
-     * Calls all registered handles to get the diffs
-     *
-     * @param diffResult - object to add the DiffResults to
-     * @return - DiffResult object with all diffs
-     */
-    protected DiffResult getDiffs(DiffResult diffResult) {
-
-        for (IConfFileHandler handler : handlers) {
-            handler.getDiff(diffResult);
-        }
-        return diffResult;
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        final List<Parameter> parameterList = new ArrayList<Parameter>();
+        parameterList.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "delete"));
+        parameterList.add(new Parameter("accountId", accountId));
+        return parameterList.toArray(new Parameter[parameterList.size()]);
     }
+
+    @Override
+    public AbstractAJAXParser<? extends InitOAuthAccountResponse> getParser() {
+        return new AbstractAJAXParser<InitOAuthAccountResponse>(true) {
+
+            @Override
+            protected InitOAuthAccountResponse createResponse(Response response) throws JSONException {
+                return new InitOAuthAccountResponse(response);
+            }
+
+        };
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

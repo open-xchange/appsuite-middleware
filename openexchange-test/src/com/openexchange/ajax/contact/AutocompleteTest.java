@@ -47,71 +47,56 @@
  *
  */
 
-package com.openexchange.admin.diff;
+package com.openexchange.ajax.contact;
 
-import java.io.File;
-import java.util.HashSet;
-import java.util.Set;
-import com.openexchange.admin.diff.file.handler.FileHandler;
-import com.openexchange.admin.diff.file.handler.IConfFileHandler;
-import com.openexchange.admin.diff.file.provider.ConfFolderFileProvider;
-import com.openexchange.admin.diff.file.provider.JarFileProvider;
-import com.openexchange.admin.diff.file.provider.RecursiveFileProvider;
-import com.openexchange.admin.diff.result.DiffResult;
-
+import java.util.List;
+import org.json.JSONArray;
+import com.openexchange.ajax.contact.action.AutocompleteRequest;
+import com.openexchange.ajax.framework.CommonSearchResponse;
+import com.openexchange.groupware.container.Contact;
 
 /**
- * Main class that is invoked to execute the configuration diffs.
+ * {@link AutocompleteTest}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.6.1
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ConfigDiff {
+public class AutocompleteTest extends AbstractManagedContactTest {
 
     /**
-     * Default folder for original configuration files
-     */
-    protected String originalFolder = "/opt/open-xchange/bundles";
-
-    /**
-     * Default folder for installed configuration files
-     */
-    protected String installationFolder = "/opt/open-xchange/etc";
-
-    /**
-     * Handles processing with files
-     */
-    private FileHandler fileHandler = new FileHandler();
-
-    /**
-     * Handlers that are registered for diff processing
-     */
-    private static Set<IConfFileHandler> handlers = new HashSet<IConfFileHandler>();
-
-    public static void register(IConfFileHandler handler) {
-        handlers.add(handler);
-    }
-
-    public DiffResult run() {
-        DiffResult diffResult = new DiffResult();
-
-        this.fileHandler.readConfFiles(diffResult, new File(this.originalFolder), true, new JarFileProvider(), new ConfFolderFileProvider());
-        this.fileHandler.readConfFiles(diffResult, new File(this.installationFolder), false, new RecursiveFileProvider());
-
-        return getDiffs(diffResult);
-    }
-
-    /**
-     * Calls all registered handles to get the diffs
+     * Initializes a new {@link AutocompleteTest}.
      *
-     * @param diffResult - object to add the DiffResults to
-     * @return - DiffResult object with all diffs
+     * @param name The test name
      */
-    protected DiffResult getDiffs(DiffResult diffResult) {
-
-        for (IConfFileHandler handler : handlers) {
-            handler.getDiff(diffResult);
-        }
-        return diffResult;
+    public AutocompleteTest(String name) {
+        super(name);
     }
+
+	@Override
+	public void setUp() throws Exception {
+	    super.setUp();
+	}
+
+    public void testAutocompleteFirstAndLastname() throws Exception {
+    	/*
+    	 * create contact
+    	 */
+        Contact contact = super.generateContact("Otto");
+        contact.setGivenName("Heinz");
+        contact.setDisplayName("Otto, Heinz");
+        contact = manager.newAction(contact);
+        /*
+         * check different queries
+         */
+        String parentFolderID = String.valueOf(contact.getParentFolderID());
+        String[] queries = new String[] { "Otto", "Heinz", "Heinz Otto", "\"Otto, Heinz\"" };
+        for (String query : queries) {
+            AutocompleteRequest request = new AutocompleteRequest(query, false, parentFolderID, Contact.ALL_COLUMNS, true);
+            CommonSearchResponse response = client.execute(request);
+            List<Contact> contacts = manager.transform((JSONArray) response.getResponse().getData(), Contact.ALL_COLUMNS);
+            assertNotNull(contacts);
+            assertEquals("wrong number of results", 1, contacts.size());
+            assertEquals(contact.getDisplayName(), contacts.get(0).getDisplayName());
+        }
+    }
+
 }

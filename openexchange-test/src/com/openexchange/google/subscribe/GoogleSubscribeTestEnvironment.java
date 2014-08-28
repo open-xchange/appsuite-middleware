@@ -50,7 +50,6 @@
 package com.openexchange.google.subscribe;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -62,19 +61,16 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.oauth.actions.AllOAuthAccountRequest;
 import com.openexchange.ajax.oauth.actions.AllOAuthAccountResponse;
-import com.openexchange.ajax.oauth.actions.InitOAuthAccountRequest;
-import com.openexchange.ajax.oauth.actions.InitOAuthAccountResponse;
 import com.openexchange.ajax.subscribe.actions.NewSubscriptionRequest;
 import com.openexchange.ajax.subscribe.actions.NewSubscriptionResponse;
 import com.openexchange.ajax.subscribe.actions.RefreshSubscriptionRequest;
 import com.openexchange.ajax.subscribe.source.action.GetSourceRequest;
 import com.openexchange.ajax.subscribe.source.action.GetSourceResponse;
-import com.openexchange.configuration.GoogleConfig;
-import com.openexchange.configuration.GoogleConfig.Property;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Appointment;
+import com.openexchange.google.subscribe.actions.DeleteOAuthAccountRequest;
+import com.openexchange.google.subscribe.actions.InitOAuthAccountRequest;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
@@ -96,15 +92,13 @@ public class GoogleSubscribeTestEnvironment {
 
     private static final String SERVICE_ID = "com.openexchange.oauth.google";
 
-    private static final String ACCOUNT_NAME = "My Google account";
-
     private AJAXClient ajaxClient;
 
-    private GoogleOAuthClient oauthClient;
-
     private FolderTestManager folderMgr;
-    
+
     protected static final Map<String, Integer> testFolders = new HashMap<String, Integer>();
+
+    private int accountId;
 
     /**
      * Get the instance of the environment
@@ -124,11 +118,9 @@ public class GoogleSubscribeTestEnvironment {
      */
     public void init() {
         try {
-            GoogleConfig.init();
             initAJAXClient();
+            initOAuthAccount();
             initManagers();
-            // initGoogleOAuthClient();
-            // initGoogleOAuthAccount();
             createGoogleSubscription();
             // wait for the async subscribe to finish
             Thread.sleep(15000);
@@ -148,6 +140,7 @@ public class GoogleSubscribeTestEnvironment {
         if (folderMgr != null) {
             folderMgr.cleanUp();
         }
+        deleteOAuthAccount();
         logout();
     }
 
@@ -167,30 +160,25 @@ public class GoogleSubscribeTestEnvironment {
     }
 
     /**
-     * Initialize the google oauth client and perform a login
+     * Create a test oauth account
      * 
      * @throws Exception
      */
-    private void initGoogleOAuthClient() throws Exception {
-        oauthClient = new GoogleOAuthClient();
-        oauthClient.login(GoogleConfig.getProperty(Property.EMAIL), GoogleConfig.getProperty(Property.PASSWORD));
+    private void initOAuthAccount() throws Exception {
+        InitOAuthAccountRequest req = new InitOAuthAccountRequest();
+        ajaxClient.execute(req);
     }
 
     /**
-     * Initialize the google oauth account
+     * Delete the test oauth account
      * 
-     * @throws Exception
+     * @throws JSONException
+     * @throws IOException
+     * @throws OXException
      */
-    private void initGoogleOAuthAccount() throws Exception {
-        final InitOAuthAccountRequest req = new InitOAuthAccountRequest(SERVICE_ID, ACCOUNT_NAME, true);
-        final InitOAuthAccountResponse response = ajaxClient.execute(req);
-        final Object data = response.getData();
-        if (data instanceof JSONObject) {
-            final JSONObject j = (JSONObject) data;
-            oauthClient.requestCallback(j.getString("authUrl"));
-        } else {
-            throw new Exception("Invalid response body: " + data);
-        }
+    private void deleteOAuthAccount() throws OXException, IOException, JSONException {
+        DeleteOAuthAccountRequest req = new DeleteOAuthAccountRequest(accountId);
+        ajaxClient.execute(req);
     }
 
     /**
@@ -201,8 +189,7 @@ public class GoogleSubscribeTestEnvironment {
      * @throws OXException
      */
     private void createGoogleSubscription() throws Exception {
-        // Get account id
-        final int accountId = getAccountId();
+        accountId = getAccountId();
 
         if (accountId <= 0) {
             throw new Exception("No account found");

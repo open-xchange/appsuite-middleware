@@ -17,6 +17,9 @@
 
 package com.openexchange.osgi;
 
+import java.util.LinkedList;
+import java.util.List;
+
 
 /**
  * Utilities for handling <tt>Throwable</tt>s and <tt>Exception</tt>s.
@@ -47,4 +50,55 @@ public class ExceptionUtils {
         final String marker = " ---=== /!\\ ===--- ";
         return new StringBuilder(message.length() + 40).append(marker).append(message).append(marker).toString();
     }
+
+    /**
+     * Truncates given {@link Throwable}'s stack trace.
+     *
+     * @param t The {@code Throwable} instance
+     * @return The truncated {@code Throwable} instance
+     */
+    public static Throwable truncateThrowable(Throwable t) {
+        if (null == t) {
+            return t;
+        }
+
+        StackTraceElement[] stackTrace = t.getStackTrace();
+        int threshold = 20;
+        int length = stackTrace.length;
+        if (length <= threshold) {
+            return t;
+        }
+
+        List<StackTraceElement> truncatedStackTrace = new LinkedList<StackTraceElement>();
+        for (int i = 0; i < length; i++) {
+            if (i <= threshold) {
+                truncatedStackTrace.add(stackTrace[i]);
+            } else {
+                String prefix = "com.openexchange.http.grizzly.service.http";
+                String className = stackTrace[i].getClassName();
+                if (!className.startsWith(prefix)) {
+                    truncatedStackTrace.add(stackTrace[i]);
+                }
+            }
+        }
+
+        FastThrowable ft = new FastThrowable(t.getMessage(), t.getCause());
+        ft.setStackTrace(truncatedStackTrace.toArray(new StackTraceElement[truncatedStackTrace.size()]));
+        return ft;
+    }
+
+    // ----------------------------------------------------------------------------- //
+
+    static final class FastThrowable extends Throwable {
+
+        FastThrowable(String message, Throwable cause) {
+            super(null == message ? "<unknkown>" : message);
+        }
+
+        @Override
+        public synchronized Throwable fillInStackTrace() {
+            return this;
+        }
+    }
+
 }

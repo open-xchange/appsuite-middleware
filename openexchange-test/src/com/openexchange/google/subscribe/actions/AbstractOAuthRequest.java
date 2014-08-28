@@ -47,73 +47,39 @@
  *
  */
 
-package com.openexchange.configuration;
+package com.openexchange.google.subscribe.actions;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.conf.AbstractConfig;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Header;
 
 /**
- * {@link GoogleConfig}
+ * {@link AbstractOAuthRequest}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class GoogleConfig extends AbstractConfig {
-
-    private static volatile GoogleConfig singleton;
-    
-    private static final TestConfig.Property KEY = TestConfig.Property.GOOGLE_PROPS;
-
-    public static enum Property {
-        EMAIL("com.openexchange.subscribe.google.email"),
-        PASSWORD("com.openexchange.subscribe.google.password"),
-        CLIENT_ID("com.openexchange.subscribe.google.clientId"),
-        CLIENT_SECRET("com.openexchange.subscribe.google.clientSecret"),
-        REDIRECT_URI("com.openexchange.subscribe.google.redirectUri"),
-        SCOPES("com.openexchange.subscribe.google.scopes"),
-        PRODUCT_NAME("com.openexchange.subscribe.google.productName");
-
-        private String propertyName;
-
-        private Property(final String propName) {
-            this.propertyName = propName;
-        }
-
-        public String getPropertyName() {
-            return propertyName;
-        }
-
-    };
+abstract class AbstractOAuthRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
 
     /**
-     * Reads the configuration.
-     * 
-     * @throws OXException if reading configuration fails.
+     * URL of the test AJAX interface.
      */
-    public static void init() throws OXException {
-        TestConfig.init();
-        if (null == singleton) {
-            synchronized (AJAXConfig.class) {
-                if (null == singleton) {
-                    singleton = new GoogleConfig();
-                    singleton.loadPropertiesInternal();
-                }
-            }
-        }
+    static final String URL = "/ajax/googleTest";
+
+    /**
+     * Default constructor.
+     */
+    protected AbstractOAuthRequest() {
+        super();
     }
 
-    public static String getProperty(final Property key) {
-        return singleton.getPropertyInternal(key.getPropertyName());
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.tools.conf.AbstractConfig#getPropertyFileName()
-     */
     @Override
-    protected String getPropertyFileName() throws OXException {
-        final String fileName = TestConfig.getProperty(KEY);
-        if (null == fileName) {
-            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(KEY.getPropertyName());
-        }
-        return fileName;
+    public String getServletPath() {
+        return URL;
     }
+
+    @Override
+    public Header[] getHeaders() {
+        return NO_HEADER;
+    }
+
 }

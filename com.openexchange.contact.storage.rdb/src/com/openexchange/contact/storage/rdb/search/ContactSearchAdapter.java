@@ -49,14 +49,11 @@
 
 package com.openexchange.contact.storage.rdb.search;
 
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import com.openexchange.contact.storage.rdb.internal.Tools;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
-import com.openexchange.contact.storage.rdb.sql.Table;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -74,14 +71,6 @@ import com.openexchange.tools.StringCollection;
  */
 public class ContactSearchAdapter extends DefaultSearchAdapter {
 
-    /** To make MySQL use the correct indices for UNIONs created from contact search object */
-    private static final boolean IGNORE_INDEX_CID_FOR_UNIONS = true;
-
-    /** Fields that have an alternative index */
-    private static final EnumSet<ContactField> ALTERNATIVE_INDEXED_FIELDS = EnumSet.of(ContactField.EMAIL1, ContactField.EMAIL2,
-        ContactField.EMAIL3, ContactField.GIVEN_NAME, ContactField.SUR_NAME, ContactField.DISPLAY_NAME);
-
-	private static String eMailAutomCompleteClause = null;
 	private static ContactField startLetterField = null;
 
 	private final StringBuilder stringBuilder;
@@ -278,23 +267,6 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 		return comparisons;
 	}
 
-	private static String getSelectClause(ContactField[] fields) throws OXException {
-		return "SELECT " + Mappers.CONTACT.getColumns(fields) + " FROM " + Table.CONTACTS;
-	}
-
-	private static String getContextIDClause(int contextID) throws OXException {
-		return Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel() + "=" + contextID;
-	}
-
-	private static String getFolderIDsClause(int[] folderIDs) throws OXException {
-		String columnlabel = Mappers.CONTACT.get(ContactField.FOLDER_ID).getColumnLabel();
-		if (1 == folderIDs.length) {
-			return columnlabel + "=" + folderIDs[0];
-		} else {
-			return columnlabel + " IN (" + Tools.toCSV(folderIDs) + ")";
-		}
-	}
-
 	private void appendComparison(ContactField field, Object value) throws OXException {
 		DbMapping<? extends Object, Contact> dbMapping = Mappers.CONTACT.get(field);
 		if (isTextColumn(dbMapping)) {
@@ -316,20 +288,6 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 			stringBuilder.append(dbMapping.getColumnLabel()).append("=?");
 			parameters.add(value);
 		}
-	}
-
-	private static String getEMailAutoCompleteClause() throws OXException {
-		if (null == eMailAutomCompleteClause) {
-		    StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder
-				.append(Mappers.CONTACT.get(ContactField.EMAIL1).getColumnLabel()).append("<>'' OR ")
-				.append(Mappers.CONTACT.get(ContactField.EMAIL2).getColumnLabel()).append("<>'' OR ")
-				.append(Mappers.CONTACT.get(ContactField.EMAIL3).getColumnLabel()).append("<>'' OR ")
-				.append(Mappers.CONTACT.get(ContactField.NUMBER_OF_DISTRIBUTIONLIST).getColumnLabel()).append(">0")
-			;
-			eMailAutomCompleteClause = stringBuilder.toString();
-		}
-		return eMailAutomCompleteClause;
 	}
 
 	private static ContactField getStartLetterField() throws OXException {

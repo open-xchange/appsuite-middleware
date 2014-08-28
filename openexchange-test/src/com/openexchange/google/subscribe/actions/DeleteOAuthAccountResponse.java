@@ -47,71 +47,25 @@
  *
  */
 
-package com.openexchange.admin.diff;
+package com.openexchange.google.subscribe.actions;
 
-import java.io.File;
-import java.util.HashSet;
-import java.util.Set;
-import com.openexchange.admin.diff.file.handler.FileHandler;
-import com.openexchange.admin.diff.file.handler.IConfFileHandler;
-import com.openexchange.admin.diff.file.provider.ConfFolderFileProvider;
-import com.openexchange.admin.diff.file.provider.JarFileProvider;
-import com.openexchange.admin.diff.file.provider.RecursiveFileProvider;
-import com.openexchange.admin.diff.result.DiffResult;
-
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * Main class that is invoked to execute the configuration diffs.
+ * {@link DeleteOAuthAccountResponse}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.6.1
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class ConfigDiff {
+public class DeleteOAuthAccountResponse extends AbstractAJAXResponse {
 
     /**
-     * Default folder for original configuration files
+     * Initializes a new {@link DeleteOAuthAccountResponse}.
+     * 
+     * @param response
      */
-    protected String originalFolder = "/opt/open-xchange/bundles";
-
-    /**
-     * Default folder for installed configuration files
-     */
-    protected String installationFolder = "/opt/open-xchange/etc";
-
-    /**
-     * Handles processing with files
-     */
-    private FileHandler fileHandler = new FileHandler();
-
-    /**
-     * Handlers that are registered for diff processing
-     */
-    private static Set<IConfFileHandler> handlers = new HashSet<IConfFileHandler>();
-
-    public static void register(IConfFileHandler handler) {
-        handlers.add(handler);
+    protected DeleteOAuthAccountResponse(Response response) {
+        super(response);
     }
 
-    public DiffResult run() {
-        DiffResult diffResult = new DiffResult();
-
-        this.fileHandler.readConfFiles(diffResult, new File(this.originalFolder), true, new JarFileProvider(), new ConfFolderFileProvider());
-        this.fileHandler.readConfFiles(diffResult, new File(this.installationFolder), false, new RecursiveFileProvider());
-
-        return getDiffs(diffResult);
-    }
-
-    /**
-     * Calls all registered handles to get the diffs
-     *
-     * @param diffResult - object to add the DiffResults to
-     * @return - DiffResult object with all diffs
-     */
-    protected DiffResult getDiffs(DiffResult diffResult) {
-
-        for (IConfFileHandler handler : handlers) {
-            handler.getDiff(diffResult);
-        }
-        return diffResult;
-    }
 }
