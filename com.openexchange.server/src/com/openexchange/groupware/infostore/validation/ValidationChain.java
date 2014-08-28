@@ -81,6 +81,13 @@ public class ValidationChain {
         for (final InfostoreValidator validator : validators) {
             final DocumentMetadataValidation validation = validator.validate(metadata);
             if (!validation.isValid()) {
+                {
+                    OXException fatalException = validation.getFatalException();
+                    if (null != fatalException) {
+                        throw fatalException;
+                    }
+                }
+
                 failed = true;
                 if (null == exception) {
                     exception = validation.getException();

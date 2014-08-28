@@ -82,6 +82,7 @@ import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.Tools;
+import com.openexchange.mailaccount.TransportAuth;
 import com.openexchange.mailaccount.json.fields.MailAccountFields;
 import com.openexchange.mailaccount.json.parser.MailAccountParser;
 import com.openexchange.mailaccount.json.writer.MailAccountWriter;
@@ -117,9 +118,21 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
                 Integer.valueOf(session.getContextId()));
         }
 
-        final MailAccountDescription accountDescription = new MailAccountDescription();
-        final List<OXException> warnings = new LinkedList<OXException>();
-        final Set<Attribute> fieldsToUpdate = MailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings, true);
+        MailAccountDescription accountDescription = new MailAccountDescription();
+        List<OXException> warnings = new LinkedList<OXException>();
+        Set<Attribute> availableAttributes = MailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings);
+
+        if (!availableAttributes.contains(Attribute.TRANSPORT_AUTH_LITERAL)) {
+            accountDescription.setTransportAuth(TransportAuth.MAIL);
+            availableAttributes.add(Attribute.TRANSPORT_AUTH_LITERAL);
+        }
+
+        if (TransportAuth.MAIL.equals(accountDescription.getTransportAuth()) || TransportAuth.NONE.equals(accountDescription.getTransportAuth())) {
+            availableAttributes.remove(Attribute.TRANSPORT_LOGIN_LITERAL);
+            availableAttributes.remove(Attribute.TRANSPORT_PASSWORD_LITERAL);
+            accountDescription.setTransportLogin(null);
+            accountDescription.setTransportPassword(null);
+        }
 
         checkNeededFields(accountDescription);
 
@@ -160,7 +173,7 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
             try {
                 mailAccess = getMailAccess(accountDescription, session, warnings);
                 mailAccess.connect(false);
-                Tools.checkNames(accountDescription, fieldsToUpdate, mailAccess.getFolderStorage().getFolder("INBOX").getSeparator());
+                Tools.checkNames(accountDescription, availableAttributes, mailAccess.getFolderStorage().getFolder("INBOX").getSeparator());
             } finally {
                 if (null != mailAccess) {
                     mailAccess.close(false);

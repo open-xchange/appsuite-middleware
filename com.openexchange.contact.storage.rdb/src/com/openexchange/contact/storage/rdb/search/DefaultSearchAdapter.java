@@ -53,10 +53,12 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.regex.Pattern;
-
+import com.openexchange.contact.storage.rdb.internal.Tools;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
+import com.openexchange.contact.storage.rdb.sql.Table;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
@@ -69,10 +71,19 @@ import com.openexchange.groupware.tools.mappings.database.DbMapping;
  */
 public abstract class DefaultSearchAdapter implements SearchAdapter {
 
+    /** To make MySQL use the correct indices for UNIONs created from contact search object */
+    protected static final boolean IGNORE_INDEX_CID_FOR_UNIONS = true;
+
+    /** Fields that have an alternative index */
+    protected static final EnumSet<ContactField> ALTERNATIVE_INDEXED_FIELDS = EnumSet.of(ContactField.EMAIL1, ContactField.EMAIL2,
+        ContactField.EMAIL3, ContactField.GIVEN_NAME, ContactField.SUR_NAME, ContactField.DISPLAY_NAME);
+
 	/**
 	 * Pattern to check whether a string contains SQL wildcards or not
 	 */
 	private static final Pattern WILDCARD_PATTERN = Pattern.compile("((^|[^\\\\])%)|((^|[^\\\\])_)");
+
+	private static String eMailAutomCompleteClause = null;
 
 	protected List<Object> parameters;
 	protected String charset;
@@ -111,4 +122,49 @@ public abstract class DefaultSearchAdapter implements SearchAdapter {
 	protected boolean isTextColumn(DbMapping<? extends Object, Contact> mapping) {
 		return Types.VARCHAR == mapping.getSqlType();
 	}
+
+    protected static String getSelectClause(ContactField[] fields) throws OXException {
+        return "SELECT " + Mappers.CONTACT.getColumns(fields) + " FROM " + Table.CONTACTS;
+    }
+
+    protected static String getSelectClause(String tableAlias, ContactField[] fields) throws OXException {
+        StringBuilder stringBuilder = new StringBuilder(10 * fields.length);
+        if (null != fields && 0 < fields.length) {
+            stringBuilder.append("SELECT ");
+            stringBuilder.append(tableAlias).append('.').append(Mappers.CONTACT.get(fields[0]).getColumnLabel());
+            for (int i = 1; i < fields.length; i++) {
+                stringBuilder.append(',').append(tableAlias).append('.').append(Mappers.CONTACT.get(fields[i]).getColumnLabel());
+            }
+            stringBuilder.append(" FROM ").append(Table.CONTACTS);
+        }
+        return stringBuilder.toString();
+    }
+
+	protected static String getContextIDClause(int contextID) throws OXException {
+        return Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel() + "=" + contextID;
+    }
+
+	protected static String getFolderIDsClause(int[] folderIDs) throws OXException {
+        String columnlabel = Mappers.CONTACT.get(ContactField.FOLDER_ID).getColumnLabel();
+        if (1 == folderIDs.length) {
+            return columnlabel + "=" + folderIDs[0];
+        } else {
+            return columnlabel + " IN (" + Tools.toCSV(folderIDs) + ")";
+        }
+    }
+
+	protected static String getEMailAutoCompleteClause() throws OXException {
+        if (null == eMailAutomCompleteClause) {
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder
+                .append(Mappers.CONTACT.get(ContactField.EMAIL1).getColumnLabel()).append("<>'' OR ")
+                .append(Mappers.CONTACT.get(ContactField.EMAIL2).getColumnLabel()).append("<>'' OR ")
+                .append(Mappers.CONTACT.get(ContactField.EMAIL3).getColumnLabel()).append("<>'' OR ")
+                .append(Mappers.CONTACT.get(ContactField.NUMBER_OF_DISTRIBUTIONLIST).getColumnLabel()).append(">0")
+            ;
+            eMailAutomCompleteClause = stringBuilder.toString();
+        }
+        return eMailAutomCompleteClause;
+    }
+
 }

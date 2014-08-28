@@ -108,10 +108,12 @@ public enum Attribute {
     // Addresses
     ADDRESSES(MailAccountFields.ADDRESSES, 1039),
     /** (Virtual attribute) Meta */
-    META(MailAccountFields.META, 1040),
+    META(MailAccountFields.META, 1040, false),
     // Archive
     ARCHIVE_LITERAL(MailAccountFields.ARCHIVE, 1041),
     ARCHIVE_FULLNAME_LITERAL(MailAccountFields.ARCHIVE_FULLNAME, 1042),
+    // Transport auth information
+    TRANSPORT_AUTH_LITERAL(MailAccountFields.TRANSPORT_AUTH, 1043),
 
     ;
 
@@ -155,13 +157,18 @@ public enum Attribute {
         Attribute.SPAM_FULLNAME_LITERAL,
         Attribute.TRASH_FULLNAME_LITERAL);
 
-    private int id;
+    private final int id;
+    private final String attrName;
+    private final boolean inCsv;
 
-    private String attrName;
+    private Attribute(String name, int id) {
+        this(name, id, true);
+    }
 
-    private Attribute(final String name, final int id) {
+    private Attribute(String name, int id, boolean inCsv) {
         attrName = name;
         this.id = id;
+        this.inCsv = inCsv;
     }
 
     public Object doSwitch(final AttributeSwitch switcher) throws OXException {
@@ -242,6 +249,8 @@ public enum Attribute {
             return switcher.pop3Storage();
         case POP3_PATH_LITERAL:
             return switcher.pop3Path();
+        case TRANSPORT_AUTH_LITERAL:
+            return switcher.transportAuth();
         case ADDRESSES:
             return switcher.addresses();
         case ARCHIVE_FULLNAME_LITERAL:
@@ -290,6 +299,24 @@ public enum Attribute {
      */
     public static Attribute getById(final int col) {
         return byId.get(col);
+    }
+
+    /**
+     * Gets the mail account attributes as a comma-separated string
+     *
+     * @return The comma-separated string
+     */
+    public static String getAttributesCsv() {
+        StringBuilder sb = new StringBuilder(1024);
+        Attribute[] attrs = Attribute.values();
+        sb.append(attrs[0].id);
+        for (int i = 1; i < attrs.length; i++) {
+            Attribute attr = attrs[i];
+            if (attr.inCsv) {
+                sb.append(',').append(attr.id);
+            }
+        }
+        return sb.toString();
     }
 
 }

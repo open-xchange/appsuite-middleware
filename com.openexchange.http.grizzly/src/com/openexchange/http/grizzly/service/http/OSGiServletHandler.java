@@ -467,7 +467,12 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
                         handleThrowable(e, request, response);
                     }
                 }
-            } catch (final Throwable throwable) {
+            } catch (IOException ioe) {
+                if (response instanceof HttpServletResponse) {
+                    // 500 - Internal Server Error
+                    ((HttpServletResponse) response).setStatus(500);
+                }
+            } catch (Throwable throwable) {
                 handleThrowable(throwable, request, response);
             }
 
@@ -496,7 +501,7 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
         private void handleThrowable(Throwable throwable, ServletRequest request, ServletResponse response) {
             ExceptionUtils.handleThrowable(throwable);
 
-            StringBuilder logBuilder = new StringBuilder(128).append("Error processing request:\n");
+            StringBuilder logBuilder = new StringBuilder(128).append("Error processing request:").append(System.getProperty("line.separator"));
             logBuilder.append(LogProperties.getAndPrettyPrint(LogProperties.Name.SESSION_SESSION));
 
             if (request instanceof HttpServletRequest && response instanceof HttpServletResponse) {

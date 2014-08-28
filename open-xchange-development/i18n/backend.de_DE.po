@@ -9933,7 +9933,7 @@ msgid ""
 "of %2$s"
 msgstr ""
 "Anfrage abgelehnt. Die Größe (%1$s) übersteigt die maximal zulässige Größe "
-"von %2$d"
+"von %2$s"
 
 #. Unknown module: %1$d
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:88

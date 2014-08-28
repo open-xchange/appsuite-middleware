@@ -58,6 +58,7 @@ import com.openexchange.ajax.framework.Header;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
+import com.openexchange.mailaccount.TransportAuth;
 import com.openexchange.mailaccount.json.writer.MailAccountWriter;
 
 /**
@@ -238,6 +239,11 @@ public class MailAccountInsertRequest implements AJAXRequest<MailAccountInsertRe
             @Override
             public boolean isTransportSecure() {
                 return acc.isTransportSecure();
+            }
+
+            @Override
+            public TransportAuth getTransportAuth() {
+                return acc.getTransportAuth();
             }
 
             @Override

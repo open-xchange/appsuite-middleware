@@ -721,6 +721,7 @@ public abstract class MailConfig {
     protected Session session;
     protected String login;
     protected String password;
+    protected boolean requireTls;
     protected final String[] standardNames;
     protected final String[] standardFullNames;
 
@@ -729,6 +730,7 @@ public abstract class MailConfig {
      */
     protected MailConfig() {
         super();
+        requireTls = false;
         authProps = null;
         authType = AuthType.LOGIN;
         standardFullNames = new String[LENGTH];
@@ -844,63 +846,6 @@ public abstract class MailConfig {
         return true;
     }
 
-    /**
-     * Gets the account ID.
-     *
-     * @return The account ID
-     */
-    public int getAccountId() {
-        return accountId;
-    }
-
-    /**
-     * Gets the session.
-     *
-     * @return The session
-     */
-    public Session getSession() {
-        return session;
-    }
-
-    /**
-     * Gets the mail system's capabilities
-     *
-     * @return The mail system's capabilities
-     */
-    public abstract MailCapabilities getCapabilities();
-
-    /**
-     * Gets the login.
-     *
-     * @return the login
-     */
-    public final String getLogin() {
-        return login;
-    }
-
-    /**
-     * Gets the password.
-     *
-     * @return the password
-     */
-    public final String getPassword() {
-        return password;
-    }
-
-    /**
-     * Gets the optional port of the server.
-     *
-     * @return The optional port of the server obtained via {@link #getServer()} or <code>-1</code> if no port needed.
-     */
-    public abstract int getPort();
-
-    /**
-     * Gets the host name or IP address of the server.
-     *
-     * @return The host name or IP address of the server.
-     */
-    public abstract String getServer();
-
     @Override
     public String toString() {
         final StringBuilder builder = new StringBuilder();
@@ -932,11 +877,58 @@ public abstract class MailConfig {
     }
 
     /**
-     * Checks if a secure connection shall be established.
+     * CHecks if TLS is required in case {@link #isSecure()} returns <code>false</code>
      *
-     * @return <code>true</code> if a secure connection shall be established; otherwise <code>false</code>
+     * @return <code>true</code> if TLS is required; otherwise <code>false</code>
      */
-    public abstract boolean isSecure();
+    public boolean isRequireTls() {
+        return requireTls;
+    }
+
+    /**
+     * Sets whether TLS is required in case {@link #isSecure()} returns <code>false</code>
+     *
+     * @param requireTls <code>true</code> if TLS is required; otherwise <code>false</code>
+     */
+    public void setRequireTls(boolean requireTls) {
+        this.requireTls = requireTls;
+    }
+
+    /**
+     * Gets the account ID.
+     *
+     * @return The account ID
+     */
+    public int getAccountId() {
+        return accountId;
+    }
+
+    /**
+     * Gets the session.
+     *
+     * @return The session
+     */
+    public Session getSession() {
+        return session;
+    }
+
+    /**
+     * Gets the login.
+     *
+     * @return the login
+     */
+    public final String getLogin() {
+        return login;
+    }
+
+    /**
+     * Gets the password.
+     *
+     * @return the password
+     */
+    public final String getPassword() {
+        return password;
+    }
 
     /**
      * Sets the account ID (externally).
@@ -987,6 +979,34 @@ public abstract class MailConfig {
     protected boolean doCustomParsing(final MailAccount account, final Session session) throws OXException {
         return false;
     }
+
+    /**
+     * Gets the mail system's capabilities
+     *
+     * @return The mail system's capabilities
+     */
+    public abstract MailCapabilities getCapabilities();
+
+    /**
+     * Gets the optional port of the server.
+     *
+     * @return The optional port of the server obtained via {@link #getServer()} or <code>-1</code> if no port needed.
+     */
+    public abstract int getPort();
+
+    /**
+     * Gets the host name or IP address of the server.
+     *
+     * @return The host name or IP address of the server.
+     */
+    public abstract String getServer();
+
+    /**
+     * Checks if a secure connection shall be established.
+     *
+     * @return <code>true</code> if a secure connection shall be established; otherwise <code>false</code>
+     */
+    public abstract boolean isSecure();
 
     /**
      * Sets the port (externally).

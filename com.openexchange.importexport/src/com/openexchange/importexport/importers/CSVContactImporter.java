@@ -59,6 +59,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -353,7 +354,7 @@ public class CSVContactImporter extends AbstractImporter {
     /**
      * Validates if the given value can be parsed and a date object can be created. Based on regular expressions only dates will be
      * evaluated
-     * 
+     *
      * @param currEntry - string to be validated
      * @return true if the value can be used for processing, false if the given string is not valid
      */
@@ -434,8 +435,14 @@ public class CSVContactImporter extends AbstractImporter {
 
         List<List<String>> retval = null;
 
+        Map<String, String> csvByEncodings = new HashMap<String, String>();
         for (ContactFieldMapper mapper : getMappers()) {
-            String csvStr = transformInputStreamToString(input, mapper.getEncoding(), false);
+            String encoding = mapper.getEncoding();
+            String csvStr = csvByEncodings.get(encoding);
+            if (null == csvStr) {
+                csvStr = transformInputStreamToString(input, encoding, false);
+                csvByEncodings.put(encoding, csvStr);
+            }
             final CSVParser csvParser = getCSVParser();
             List<List<String>>  csv = csvParser.parse(csvStr);
             int mappedFields = 0;

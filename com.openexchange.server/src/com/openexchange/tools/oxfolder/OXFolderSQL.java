@@ -1110,6 +1110,49 @@ public final class OXFolderSQL {
         return subfolderIDs;
     }
 
+    /**
+     * Gets the identifiers of all parent folders in the tree down to the root folder.
+     *
+     * @param folderId The ID of the folder to get the path for
+     * @param readConnection A connection with read capability, or <code>null</code> to fetch from pool dynamically
+     * @param context The context
+     * @return The IDs of all parent folders on the path in (hierarchical) descending order; the supplied folder ID itself is not included
+     */
+    public static List<Integer> getPathToRoot(int folderId, Connection readConnection, Context context) throws OXException, SQLException {
+        List<Integer> subfolderIDs = new ArrayList<Integer>();
+        boolean closeReadConnection = false;
+        try {
+            /*
+             * acquire local read connection if not supplied
+             */
+            if (null == readConnection) {
+                readConnection = DBPool.pickup(context);
+                closeReadConnection = true;
+            }
+            /*
+             * get parent folders recursively
+             */
+            int currentID = folderId;
+            while (FolderObject.SYSTEM_ROOT_FOLDER_ID != currentID) {
+                PreparedStatement stmt = null;
+                ResultSet rs = null;
+                try {
+                    stmt = readConnection.prepareStatement("SELECT parent FROM oxfolder_tree WHERE cid=? AND fuid=?;");
+                    stmt.setInt(1, context.getContextId());
+                    stmt.setInt(2, currentID);
+                    rs = executeQuery(stmt);
+                    currentID = rs.next() ? Integer.valueOf(rs.getInt(1)) : 0;
+                } finally {
+                    closeSQLStuff(rs, stmt);
+                }
+                subfolderIDs.add(Integer.valueOf(currentID));
+            }
+        } finally {
+            closeResources(null, null, closeReadConnection ? readConnection : null, true, context);
+        }
+        return subfolderIDs;
+    }
+
     private static final String SQL_UDTSUBFLDFLG = "UPDATE oxfolder_tree SET subfolder_flag = ?, changing_date = ? WHERE cid = ? AND fuid = ?";
 
     /**

@@ -339,10 +339,11 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
     }
 
     private javax.mail.Session getSMTPSession() throws OXException {
-        return getSMTPSession(accountId > 0 && MailProperties.getInstance().isEnforceSecureConnection());
+        SMTPConfig smtpConfig = getTransportConfig0();
+        return getSMTPSession(smtpConfig, accountId > 0 && (smtpConfig.isRequireTls() || MailProperties.getInstance().isEnforceSecureConnection()));
     }
 
-    private javax.mail.Session getSMTPSession(final boolean forceSecure) throws OXException {
+    private javax.mail.Session getSMTPSession(SMTPConfig smtpConfig, boolean forceSecure) throws OXException {
         if (null == smtpSession) {
             synchronized (this) {
                 if (null == smtpSession) {
@@ -351,7 +352,6 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
                     smtpProps.put("com.openexchange.mail.maxMailSize", Long.toString(getMaxMailSize()));
 
 
-                    final SMTPConfig smtpConfig = getTransportConfig0();
                     /*
                      * Set properties
                      */
@@ -1187,7 +1187,8 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
         // Connect to SMTP server
         final Transport transport;
         try {
-            transport = getSMTPSession(MailProperties.getInstance().isEnforceSecureConnection()).getTransport(SMTP);
+            SMTPConfig smtpConfig = getTransportConfig0();
+            transport = getSMTPSession(smtpConfig, smtpConfig.isRequireTls() || MailProperties.getInstance().isEnforceSecureConnection()).getTransport(SMTP);
         } catch (final NoSuchProviderException e) {
             throw MimeMailException.handleMessagingException(e);
         }

@@ -57,6 +57,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.contacts.json.actions.AdvancedSearchAction;
 import com.openexchange.contacts.json.actions.AllAction;
 import com.openexchange.contacts.json.actions.AnniversariesAction;
+import com.openexchange.contacts.json.actions.AutocompleteAction;
 import com.openexchange.contacts.json.actions.BirthdaysAction;
 import com.openexchange.contacts.json.actions.ContactAction;
 import com.openexchange.contacts.json.actions.CopyAction;
@@ -87,7 +88,7 @@ public class ContactActionFactory implements AJAXActionServiceFactory {
 
     public ContactActionFactory(final ServiceLookup serviceLookup) {
         super();
-        actions = new ConcurrentHashMap<String, ContactAction>(14);
+        actions = new ConcurrentHashMap<String, ContactAction>(15);
         actions.put("get", new GetAction(serviceLookup));
         actions.put("all", new AllAction(serviceLookup));
         actions.put("list", new ListAction(serviceLookup));
@@ -102,6 +103,7 @@ public class ContactActionFactory implements AJAXActionServiceFactory {
         actions.put("advancedSearch", new AdvancedSearchAction(serviceLookup));
         actions.put("birthdays", new BirthdaysAction(serviceLookup));
         actions.put("anniversaries", new AnniversariesAction(serviceLookup));
+        actions.put("autocomplete", new AutocompleteAction(serviceLookup));
     }
 
     @Override

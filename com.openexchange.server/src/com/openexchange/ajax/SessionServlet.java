@@ -58,13 +58,13 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.httpclient.HttpStatus;
-import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.Dispatchers;
-import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -119,10 +119,9 @@ public abstract class SessionServlet extends AJAXServlet {
         AtomicInteger counter = null;
         final SessionThreadCounter threadCounter = SessionThreadCounter.REFERENCE.get();
         String sessionId = null;
-        ServerSession session = null;
         try {
             initializeSession(req, resp);
-            session = SessionUtility.getSessionObject(req, true);
+            ServerSession session = SessionUtility.getSessionObject(req, true);
             if (null != session) {
                 /*
                  * Track DB schema
@@ -157,7 +156,7 @@ public abstract class SessionServlet extends AJAXServlet {
             resp.setContentType("text/plain; charset=UTF-8");
             resp.sendError(429, "Too Many Requests - Your request is being rate limited.");
         } catch (final OXException e) {
-            handleOXException(e, req, resp, session);
+            handleOXException(e, req, resp);
         } finally {
             if (null != sessionId && null != threadCounter) {
                 threadCounter.decrement(sessionId);
@@ -206,10 +205,23 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param e The {@code OXException} instance
      * @param req The associated HTTP request
      * @param resp The associated HTTP response
-     * @param optSession The optional session; likely <code>null</code>
      * @throws IOException If an I/O error occurs
      */
-    protected void handleOXException(OXException e, HttpServletRequest req, HttpServletResponse resp, ServerSession optSession) throws IOException {
+    protected void handleOXException(OXException e, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        handleOXException(e, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "An error occurred inside the server which prevented it from fulfilling the request.", req, resp);
+    }
+
+    /**
+     * Handles passed {@link OXException} instance.
+     *
+     * @param e The {@code OXException} instance
+     * @param statusCode The HTTP status code
+     * @param reasonPhrase The HTTP reason phrase
+     * @param req The associated HTTP request
+     * @param resp The associated HTTP response
+     * @throws IOException If an I/O error occurs
+     */
+    protected void handleOXException(OXException e, int statusCode, String reasonPhrase, HttpServletRequest req, HttpServletResponse resp) throws IOException {
         if (SessionExceptionCodes.getErrorPrefix().equals(e.getPrefix())) {
             LOG.debug("", e);
             handleSessiondException(e, req, resp);
@@ -217,24 +229,13 @@ public abstract class SessionServlet extends AJAXServlet {
             // Check expected output format
             if (Dispatchers.isJsonOutputExpectedFor(req)) {
                 // JSON response
-                final Response response = new Response();
-                response.setException(e);
-                resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-                final PrintWriter writer = resp.getWriter();
-                try {
-                    ResponseWriter.write(response, writer, localeFrom(optSession));
-                    writer.flush();
-                } catch (final JSONException e1) {
-                    log(RESPONSE_ERROR, e1);
-                    sendError(resp);
-                }
+                String action = req.getParameter(PARAMETER_ACTION);
+                APIResponseRenderer.writeResponse(new Response().setException(e), null == action ? Strings.toUpperCase(req.getMethod()) : action, req, resp);
             } else {
                 // No JSON response
                 String desc = e.getMessage();
-                resp.setContentType("text/html; charset=UTF-8");
-                resp.setStatus(HttpServletResponse.SC_FORBIDDEN);;
-                resp.getWriter().write(getErrorPage(HttpServletResponse.SC_FORBIDDEN, null, desc));
-                resp.getWriter().flush();
+                resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                writeErrorPage(HttpServletResponse.SC_FORBIDDEN, desc, resp);
             }
         } else {
             e.log(LOG);
@@ -242,26 +243,31 @@ public abstract class SessionServlet extends AJAXServlet {
             // Check expected output format
             if (Dispatchers.isJsonOutputExpectedFor(req)) {
                 // JSON response
-                final Response response = new Response();
-                response.setException(e);
-                resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-                final PrintWriter writer = resp.getWriter();
-                try {
-                    ResponseWriter.write(response, writer, localeFrom(optSession));
-                    writer.flush();
-                } catch (final JSONException e1) {
-                    log(RESPONSE_ERROR, e1);
-                    sendError(resp);
-                }
+                String action = req.getParameter(PARAMETER_ACTION);
+                APIResponseRenderer.writeResponse(new Response().setException(e), null == action ? Strings.toUpperCase(req.getMethod()) : action, req, resp);
             } else {
                 // No JSON response
-                String desc = "An error occurred inside the server which prevented it from fulfilling the request.";
-                resp.setContentType("text/html; charset=UTF-8");
-                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);;
-                resp.getWriter().write(getErrorPage(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, null, desc));
-                resp.getWriter().flush();
+                String desc = null == reasonPhrase ? "An error occurred inside the server which prevented it from fulfilling the request." : reasonPhrase;
+                resp.setStatus(statusCode);
+                writeErrorPage(statusCode, desc, resp);
             }
         }
+    }
+
+    /**
+     * Attempts to write an error page to HTTP response.
+     *
+     * @param statusCode The HTTP status code
+     * @param desc The error description
+     * @param resp The HTTP response
+     * @throws IOException If an I/O error occurs
+     */
+    protected void writeErrorPage(int statusCode, String desc, HttpServletResponse resp) throws IOException {
+        resp.setContentType("text/html; charset=UTF-8");
+        resp.setHeader("Content-Disposition", "inline");
+        PrintWriter writer = resp.getWriter();
+        writer.write(getErrorPage(statusCode, null, desc));
+        writer.flush();
     }
 
     /**

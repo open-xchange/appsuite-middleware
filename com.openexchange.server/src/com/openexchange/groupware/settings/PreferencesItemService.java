@@ -64,4 +64,5 @@ public interface PreferencesItemService {
      * @return the sharedvalue object.
      */
     IValueHandler getSharedValue();
+
 }

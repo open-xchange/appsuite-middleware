@@ -4,6 +4,12 @@ open-xchange-manage-group-resource (7.6.1-0) unstable; urgency=medium
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 26 Jun 2014 11:39:51 +0200
 
+open-xchange-manage-group-resource (7.6.0-16) stable; urgency=low
+
+  * Build for patch 2014-08-25
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 21 Aug 2014 09:08:52 +0200
+
 open-xchange-manage-group-resource (7.6.0-15) stable; urgency=low
 
   * Build for patch 2014-08-25
@@ -99,6 +105,12 @@ open-xchange-manage-group-resource (7.6.0-0) unstable; urgency=low
   * prepare for 7.6.0
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 12 Feb 2014 09:36:08 +0100
+
+open-xchange-manage-group-resource (7.4.2-33) stable; urgency=low
+
+  * Build for patch 2014-08-25
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 20 Aug 2014 11:48:04 +0200
 
 open-xchange-manage-group-resource (7.4.2-32) stable; urgency=low
 

@@ -53,6 +53,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.rdiff.RdiffService;
@@ -89,6 +90,11 @@ public class Services {
     public static IDBasedFileAccessFactory getFileAccessFactory() {
         final ServiceLookup lookup = LOOKUP_REF.get();
         return null == lookup ? null : lookup.getService(IDBasedFileAccessFactory.class);
+    }
+
+    public static IDBasedFolderAccessFactory getFolderAccessFactory() {
+        final ServiceLookup lookup = LOOKUP_REF.get();
+        return null == lookup ? null : lookup.getService(IDBasedFolderAccessFactory.class);
     }
 
     public static AttachmentBase getAttachmentBase() {

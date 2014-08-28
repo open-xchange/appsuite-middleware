@@ -53,7 +53,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.CalendarTestManager;
 import com.openexchange.test.ContactTestManager;
 import com.openexchange.test.FolderTestManager;
@@ -151,7 +150,7 @@ public abstract class AbstractGoogleSubscribeTest extends AbstractAJAXSession {
     }
 
     private int getTestFolderID(final String id) {
-        return GoogleSubscribeTestEnvironment.testFolders.get(id);
+        return GoogleSubscribeTestEnvironment.getInstance().testFolders.get(id);
     }
 
     protected int getCalendarTestFolderID() {
