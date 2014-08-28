@@ -64,6 +64,7 @@ public class SubscriptionSource {
 
     private String id;
     private String displayName;
+    private boolean localizableDisplayName = false;
     private String icon;
     private DynamicFormDescription formDescription;
     private SubscribeService subscribeService;
@@ -85,12 +86,35 @@ public class SubscriptionSource {
         this.id = id;
     }
 
+    /**
+     * Gets the display name. If {@link SubscriptionSource#isLocalizableDisplayName()} returns true,
+     * it should be translated before returning it to the client.
+     */
     public String getDisplayName() {
         return displayName;
     }
 
+    /**
+     * Sets the display name. If it is localizable you also need to call {@link SubscriptionSource#setLocalizableDisplayName()}.
+     *
+     * @param displayName The display name
+     */
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    /**
+     * @return whether the display name should be translated before returning it to the client.
+     */
+    public boolean isLocalizableDisplayName() {
+        return localizableDisplayName;
+    }
+
+    /**
+     * If called, the display name will be translated before returning it to the client.
+     */
+    public void setLocalizableDisplayName() {
+        localizableDisplayName = true;
     }
 
     public String getIcon() {

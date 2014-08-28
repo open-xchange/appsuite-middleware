@@ -61,8 +61,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
@@ -95,45 +97,34 @@ public class MicroformatServlet extends OnlinePublicationServlet {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MicroformatServlet.class);
 
-    private static final String MODULE = "module";
+    private static final String MODULE = OXMFConstants.MODULE;
 
-    private static final String SITE = "site";
+    private static final String SITE = OXMFConstants.SITE;
 
-    private static final String CONTEXTID = "ctx";
+    private static final String CONTEXTID = OXMFConstants.CONTEXTID;
+
+    private static final String SITE_NAME = OXMFConstants.SITE_NAME;
 
     /**
      * Property to get the configured name of the hoster to be displayed in disclaimer of the default template
      */
     private static final String PROPERTY_LEGAL_HOSTER_NAME = "com.openexchange.publish.legalHosterName";
 
-    private static PublicationDataLoaderService dataLoader = null;
-
-    private static Map<String, Map<String, Object>> additionalTemplateVariables = new HashMap<String, Map<String, Object>>();
-
-    private static volatile UserService userService;
-
-    private static volatile StringTranslator translator;
-
-    private static volatile ConfigurationService configService;
-
-    private static volatile ContactService contacts;
-
-    public static volatile HtmlService htmlService;
-
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+    private static final DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd H:m:s.S z");
     static {
         DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
-    }
-
-    private static final DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd H:m:s.S z");
-
-    static {
         TIME_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
-    public MicroformatServlet() {
-        super();
-    }
+    private static final Map<String, Map<String, Object>> ADDITONAL_TEMPLATE_VARIABLES = new ConcurrentHashMap<String, Map<String, Object>>();
+
+    private static volatile PublicationDataLoaderService dataLoader = null;
+    private static volatile UserService userService;
+    private static volatile StringTranslator translator;
+    private static volatile ConfigurationService configService;
+    private static volatile ContactService contacts;
+    public static volatile HtmlService htmlService;
 
     public static void setPublicationDataLoaderService(final PublicationDataLoaderService service) {
         dataLoader = service;
@@ -153,7 +144,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
 
     public static void registerType(final String module, final OXMFPublicationService publisher, final Map<String, Object> additionalVars) {
         publishers.put(module, publisher);
-        additionalTemplateVariables.put(module, additionalVars);
+        ADDITONAL_TEMPLATE_VARIABLES.put(module, additionalVars);
     }
 
     public static void setContactService(final ContactService service) {
@@ -162,6 +153,15 @@ public class MicroformatServlet extends OnlinePublicationServlet {
 
     public static void setHtmlService(final HtmlService htmlService2) {
         htmlService = htmlService2;
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------- //
+
+    /**
+     * Initializes a new {@link MicroformatServlet}.
+     */
+    public MicroformatServlet() {
+        super();
     }
 
     @Override
@@ -202,28 +202,32 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             final User user = getUser(publication);
             final Contact userContact = getContact(new PublicationSession(publication), publication.getContext());
 
+            // Sanitize publication
+            sanitizePublication(publication);
+
+            // Compose variables for template processing
             variables.put(getCollectionName(module), loaded);
             variables.put("publication", publication);
             variables.put("request", req);
             variables.put("dateFormat", DATE_FORMAT);
             variables.put("timeFormat", TIME_FORMAT);
-            String admin = configService.getProperty("PUBLISH_REVOKE");
-            if (admin == null || admin.equals("")) {
-                admin = userService.getUser(ctx.getMailadmin(), ctx).getMail();
+            {
+                String admin = configService.getProperty("PUBLISH_REVOKE");
+                if (admin == null || admin.equals("")) {
+                    admin = userService.getUser(ctx.getMailadmin(), ctx).getMail();
+                }
+                String legalHosterName = configService.getProperty(MicroformatServlet.PROPERTY_LEGAL_HOSTER_NAME);
+                if (legalHosterName == null || legalHosterName.equals("")) {
+                    legalHosterName = MicroformatStrings.DISCLAIMER_ALTERNATIV_HOSTER_NAME_WORDING;
+                }
+                String privacyText = formatPrivacyText(getPrivacyText(user), legalHosterName, admin, user, new Date(publication.getCreated()));
+                variables.put("privacy", privacyText); // TODO Use lastmodified once someone implements this.
             }
-
-            String legalHosterName = configService.getProperty(MicroformatServlet.PROPERTY_LEGAL_HOSTER_NAME);
-            if (legalHosterName == null || legalHosterName.equals("")) {
-                legalHosterName = MicroformatStrings.DISCLAIMER_ALTERNATIV_HOSTER_NAME_WORDING;
-            }
-
-            final String privacyText = formatPrivacyText(getPrivacyText(user), legalHosterName, admin, user, new Date(publication.getCreated()));
-            variables.put("privacy", privacyText); // TODO Use lastmodified once someone implements this.
             variables.put("userContact", userContact);
             variables.put("htmlService", new HTMLUtils(htmlService));
 
-            if (additionalTemplateVariables.containsKey(module)) {
-                variables.putAll(additionalTemplateVariables.get(module));
+            if (ADDITONAL_TEMPLATE_VARIABLES.containsKey(module)) {
+                variables.putAll(ADDITONAL_TEMPLATE_VARIABLES.get(module));
             }
 
             final OXTemplate template = publisher.loadTemplate(publication);
@@ -248,6 +252,14 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             final PrintWriter writer = resp.getWriter();
             writer.println("Publishing failed. Please try again later.");
             writer.flush();
+        }
+    }
+
+    private void sanitizePublication(final Publication publication) {
+        Map<String, Object> configuration = publication.getConfiguration();
+        Object siteObj = configuration.get(SITE_NAME);
+        if (null != siteObj) {
+            configuration.put(SITE_NAME, saneSiteName(siteObj.toString()));
         }
     }
 
@@ -292,6 +304,13 @@ public class MicroformatServlet extends OnlinePublicationServlet {
 
     private String getPrivacyText(final User user) {
         return translator.translate(user.getLocale(), MicroformatStrings.DISCLAIMER_PRIVACY);
+    }
+
+    private String saneSiteName(final String site) {
+        if (Strings.isEmpty(site)) {
+            return site;
+        }
+        return AJAXUtility.encodeUrl(site, true, false);
     }
 
 }

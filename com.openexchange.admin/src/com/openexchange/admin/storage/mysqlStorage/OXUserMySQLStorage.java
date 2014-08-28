@@ -529,11 +529,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmtupdateattribute.setInt(3, userId);
 
                 stmtinsertattribute = con.prepareStatement("INSERT INTO user_attribute (value, cid, id, name, uuid) VALUES (?, ?, ?, ?, ?)");
-                UUID uuid = UUID.randomUUID();
-                byte[] uuidBinary = UUIDs.toByteArray(uuid);
                 stmtinsertattribute.setInt(2, contextId);
                 stmtinsertattribute.setInt(3, userId);
-                stmtinsertattribute.setBytes(5, uuidBinary);
 
                 stmtdelattribute = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=? AND name=?");
                 stmtdelattribute.setInt(1, contextId);
@@ -552,6 +549,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             if(changedRows == 0) {
                                 stmtinsertattribute.setString(1, value);
                                 stmtinsertattribute.setString(4, name);
+                                byte[] uuidBinary = UUIDs.toByteArray(UUID.randomUUID());
+                                stmtinsertattribute.setBytes(5, uuidBinary);
                                 stmtinsertattribute.executeUpdate();
                             }
                         } else {

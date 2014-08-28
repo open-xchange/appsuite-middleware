@@ -1,3 +1,11 @@
+* 2014-08-08 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 33818: Added update task to check foreign keys and drop them if necessary
+
+* 2014-08-06 - steffen.templin@open-xchange.com
+
+ - Fix for bug 33918: Translate display names of subscription sources only if necessary
+
 * 2014-08-04 - marcus.klein@open-xchange.com
 
  - Fix for bug 33891: Removed superfluous line throwing always an exception.
@@ -5,11 +13,15 @@
 * 2014-08-04 - marc.arens@open-xchange.com
 
  - Fix for bug 33697: Respect destination folder for folder owners
- 
+
 * 2014-08-01 - thorben.betten@open-xchange.com
 
  - Fix for bug 33715: Accept new parameter "attach_src" for action=get request to let the client signal RFC822 source is supposed to be
                       attached to generated JSON mail representation
+                      
+* 2014-07-31 - thorben.betten@open-xchange.com
+
+ - Fix for bug 33839: Escape site information when generating the publication site from selected template
 
 * 2014-07-29 - tobias.friedrich@open-xchange.com
 
@@ -104,6 +116,10 @@
 
  - Fix for bug 32226: Fixed regex used for look-up of referenced inline images
 
+* 2014-05-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31962: Properly detect EAS ping request in case of base64-encoded binary data in request's query string
+
 * 2014-05-19 - thorben.betten@open-xchange.com
 
  - Fix for bug 32481: Ignore requests to LinkedIn JSON API if no LinkedIn OAuth account is available for associated user
@@ -124,6 +140,10 @@
 * 2014-05-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 32017: Keep subfolder information intact for "Public files" (15) folder
+
+* 2014-05-08 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 32396 - Introduced a new servlet parameter 'disable-address-updates' which prevents the webservices' URL manipulation
 
 * 2014-05-07 - martin.schneider@open-xchange.com
 
