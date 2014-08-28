@@ -1,7 +1,11 @@
 * 2014-08-28 - marc.arens@open-xchange.com
 
  - Fix for bug 33476: Silent fallback to LocalRealtimeCleanup, GlobalCleanup is done anyway via new CleanupMembershipListener
- 
+
+* 2014-08-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 34206: Use proper detection for a thumbnail request
+
 * 2014-08-28 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 34183: Make infostore driver available once "com.openexchange.infostore" is the only account for the user
