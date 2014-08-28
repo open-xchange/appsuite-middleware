@@ -606,6 +606,37 @@ public final class Tools {
         }
     }
 
+    /**
+     * Constructs a search object using the supplied parameters.
+     *
+     * @param session The session
+     * @param pattern The search pattern
+     * @param requireEmail <code>true</code> if the returned contacts should have at least one e-mail address, <code>false</code>,
+     *                     otherwise
+     * @param folderIDs A list of folder IDs to restrict the search for, or <code>null</code> to search in folders available for
+     *                  auto-complete
+     * @return The prepared search object
+     * @throws OXException
+     */
+    public static ContactSearchObject prepareAutocomplete(Session session, String pattern, boolean requireEmail, List<String> folderIDs) throws OXException {
+//        pattern = addWildcards(pattern, false, true);
+        ContactSearchObject searchObject = new ContactSearchObject();
+        searchObject.setOrSearch(true);
+        searchObject.setEmailAutoComplete(requireEmail);
+        searchObject.setDisplayName(pattern);
+        searchObject.setSurname(pattern);
+        searchObject.setGivenName(pattern);
+        searchObject.setEmail1(pattern);
+        searchObject.setEmail2(pattern);
+        searchObject.setEmail3(pattern);
+        if (null != folderIDs) {
+            searchObject.setFolders(parse(folderIDs));
+        } else {
+            Tools.getSearchFolders(session.getContextId(), session.getUserId(), true);
+        }
+        return searchObject;
+    }
+
     private static ContactSearchObject prepareSearchContacts(ContactSearchObject contactSearch) {
         ContactSearchObject preparedSearchObject = new ContactSearchObject();
         preparedSearchObject.setFolders(contactSearch.getFolders());

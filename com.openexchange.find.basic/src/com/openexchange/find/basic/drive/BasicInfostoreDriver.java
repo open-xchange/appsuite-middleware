@@ -132,18 +132,14 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         if (null == registry) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(FileStorageServiceRegistry.class.getName());
         }
-        List<FileStorageService> services = registry.getAllServices();
-        for (FileStorageService service : services) {
-            List<FileStorageAccount> accounts = service.getAccountManager().getAccounts(session);
-            if (accounts.size() == 0 || accounts.size() > 1) {
-                return false;
-            }
-            if (!"com.openexchange.infostore".equals(service.getId())) {
-                return false;
-            }
-            return true;
+        /*
+         * only available, if "com.openexchange.infostore" is the only account for the user
+         */
+        List<FileStorageAccount> allAccounts = new ArrayList<FileStorageAccount>();
+        for (FileStorageService service : registry.getAllServices()) {
+            allAccounts.addAll(service.getAccountManager().getAccounts(session));
         }
-        return false;
+        return 1 == allAccounts.size() && "com.openexchange.infostore".equals(allAccounts.get(0).getFileStorageService().getId());
     }
 
     @Override

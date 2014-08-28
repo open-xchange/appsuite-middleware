@@ -5,9 +5,9 @@ opt/open-xchange/etc/crawlers/Sun Tasks.yml
 opt/open-xchange/etc/crawlers/t-online.de.yml
 opt/open-xchange/etc/crawlers/web.de.yml
 opt/open-xchange/etc/crawlers/yahoo.com.yml
-opt/open-xchange/etc/crawlers/xing.yml
 opt/open-xchange/etc/crawler.properties
 opt/open-xchange/etc/facebooksubscribe.properties
+opt/open-xchange/etc/googlesubscribe.properties
 opt/open-xchange/etc/linkedinsubscribe.properties
 opt/open-xchange/etc/microformatSubscription.properties
 opt/open-xchange/etc/msnsubscribe.properties

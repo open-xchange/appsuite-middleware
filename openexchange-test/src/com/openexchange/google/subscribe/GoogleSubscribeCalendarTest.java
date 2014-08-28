@@ -51,8 +51,8 @@ package com.openexchange.google.subscribe;
 
 import java.io.IOException;
 import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TimeZone;
 import org.json.JSONException;
 import com.openexchange.exception.OXException;
@@ -218,24 +218,18 @@ public class GoogleSubscribeCalendarTest extends AbstractGoogleSubscribeTest {
         assertEquals("occurrence", 0, appointment.getOccurrence());
 
         // List of participants
-        List<Part> participants = new LinkedList<Part>();
-        participants.add(new Part("Ewald Bartkowiak", "ewaldbartkowiak@googlemail.com", Participant.EXTERNAL_USER, ConfirmStatus.ACCEPT));
-        participants.add(new Part("Dimitri Bronkowitsch", "dimitribronkowitsch@googlemail.com", Participant.USER, ConfirmStatus.NONE));
-        participants.add(new Part("jan.finsel@premium", "jan.finsel@premium", Participant.USER, ConfirmStatus.NONE));
+        Map<String, Part> participants = new HashMap<String, Part>();
+        participants.put("ewaldbartkowiak@gmail.com", new Part("ewaldbartkowiak@gmail.com", Participant.EXTERNAL_USER, ConfirmStatus.ACCEPT));
+        participants.put("dimitribronkowitsch@googlemail.com", new Part("dimitribronkowitsch@googlemail.com", Participant.EXTERNAL_USER, ConfirmStatus.NONE));
         
         assertNotNull(appointment.getConfirmations());
         for (ConfirmableParticipant cp : appointment.getConfirmations()) {
-            int countParts = 0;
-            for (Part p : participants) {
-                if (cp.getEmailAddress().equals(p.getEmailAddress())) {
-                    assertNotNullAndEquals("particiant display name", p.getDisplayName(), cp.getDisplayName());
-                    assertFieldNotNull("participant status", p.getConfirmStatus(), cp.getStatus());
-                    assertNotNullAndEquals("particiant status id", p.getConfirmStatus().getId(), cp.getStatus().getId());
-                    assertNotNullAndEquals("participant type", p.getParticipantType(), cp.getType());
-                    ++countParts;
-                }
-            }
-            assertTrue("Should have found three participants but only got: " + countParts, countParts == 3);
+            Part p = participants.get(cp.getEmailAddress());
+            assertNotNull("No participant found with email address " + cp.getEmailAddress(), p);
+            assertNotNullAndEquals("particiant email address", p.getEmailAddress(), cp.getEmailAddress());
+            assertFieldNotNull("participant status", p.getConfirmStatus(), cp.getStatus());
+            assertNotNullAndEquals("particiant status id", p.getConfirmStatus().getId(), cp.getStatus().getId());
+            assertNotNullAndEquals("participant type", p.getParticipantType(), cp.getType());
         }
     }
     
@@ -252,24 +246,17 @@ public class GoogleSubscribeCalendarTest extends AbstractGoogleSubscribeTest {
 
     private class Part {
 
-        private String displayName;
-
         private String emailAddress;
 
         private int participantType;
 
         private ConfirmStatus confirmStatus;
 
-        public Part(String displayName, String emailAddress, int participantType, ConfirmStatus confirmStatus) {
+        public Part(String emailAddress, int participantType, ConfirmStatus confirmStatus) {
             super();
-            this.displayName = displayName;
             this.emailAddress = emailAddress;
             this.participantType = participantType;
             this.confirmStatus = confirmStatus;
-        }
-
-        public String getDisplayName() {
-            return displayName;
         }
 
         public String getEmailAddress() {

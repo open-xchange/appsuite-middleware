@@ -62,6 +62,7 @@ import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementAware;
 import com.openexchange.management.ManagementObject;
+import com.openexchange.realtime.cleanup.AbstractRealtimeJanitor;
 import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
@@ -78,7 +79,7 @@ import com.openexchange.realtime.packet.Stanza;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequenceGateMBean>, RealtimeJanitor {
+public abstract class StanzaSequenceGate extends AbstractRealtimeJanitor implements ManagementAware<StanzaSequenceGateMBean> {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(StanzaSequenceGate.class);
 

@@ -484,7 +484,11 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     CalendarCache.getInstance().invalidateGroup(ctx.getContextId());
                 }
                 try {
-                    new EventClient(session).create(folderObj);
+                    if (FolderObject.INFOSTORE == folderObj.getModule()) {
+                        new EventClient(session).create(folderObj, parentFolder, getFolderPath(folderObj, folderObj, wc));
+                    } else {
+                        new EventClient(session).create(folderObj, parentFolder);
+                    }
                 } catch (final OXException e) {
                     LOG.warn("Create event could not be enqueued", e);
                 }
@@ -640,7 +644,11 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 if (FolderObject.SYSTEM_MODULE != fo.getModule()) {
                     try {
                         FolderObject newParentFolder = FolderObject.loadFolderObjectFromDB(fo.getParentFolderID(), ctx, wc, true, false);
-                        new EventClient(session).modify(originalFolder, fo, newParentFolder);
+                        if (FolderObject.INFOSTORE == fo.getModule()) {
+                            new EventClient(session).modify(originalFolder, fo, newParentFolder, getFolderPath(fo, newParentFolder, wc));
+                        } else {
+                            new EventClient(session).modify(originalFolder, fo, newParentFolder);
+                        }
                     } catch (final OXException e) {
                         LOG.warn("Update event could not be enqueued", e);
                     }
@@ -1931,7 +1939,12 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     "del_oxfolder_tree",
                     "del_oxfolder_permissions");
                 try {
-                    new EventClient(session).delete(fo);
+                    if (FolderObject.INFOSTORE == fo.getModule()) {
+                        FolderObject parentFolder = FolderObject.loadFolderObjectFromDB(fo.getParentFolderID(), ctx, wc, true, false);
+                        new EventClient(session).delete(fo, parentFolder, getFolderPath(fo, parentFolder, wc));
+                    } else {
+                        new EventClient(session).delete(fo);
+                    }
                 } catch (final OXException e) {
                     LOG.warn("Delete event could not be enqueued", e);
                 }
@@ -2136,6 +2149,40 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             gatherDeleteableSubfoldersRecursively(subfolders.get(i), userId, userPerms, permissionIDs, subMap, initParent, specials);
         }
         deleteableIDs.put(folderID, subMap);
+    }
+
+    /**
+     * Gets a folder's path down to the root folder, ready to be used in events.
+     *
+     * @param folder The folder to get the path for
+     * @param parentFolder The parent folder if known, or <code>null</code> if not
+     * @param connection A connection to use
+     * @return The folder path
+     * @throws OXException
+     */
+    private String[] getFolderPath(FolderObject folder, FolderObject parentFolder, Connection connection) throws OXException {
+        List<String> folderPath = new ArrayList<String>();
+        folderPath.add(String.valueOf(folder.getObjectID()));
+        int startID;
+        if (null == parentFolder) {
+            startID = folder.getParentFolderID();
+            folderPath.add(String.valueOf(startID));
+        } else {
+            folderPath.add(String.valueOf(parentFolder.getObjectID()));
+            startID = parentFolder.getParentFolderID();
+            folderPath.add(String.valueOf(startID));
+        }
+        if (FolderObject.SYSTEM_ROOT_FOLDER_ID != startID) {
+            try {
+                List<Integer> pathToRoot = OXFolderSQL.getPathToRoot(startID, connection, ctx);
+                for (Integer id : pathToRoot) {
+                    folderPath.add(String.valueOf(id));
+                }
+            } catch (SQLException e) {
+                throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+            }
+        }
+        return folderPath.toArray(new String[folderPath.size()]);
     }
 
     /**

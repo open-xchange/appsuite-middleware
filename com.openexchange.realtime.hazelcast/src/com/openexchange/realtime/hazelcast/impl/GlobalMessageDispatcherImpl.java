@@ -70,7 +70,7 @@ import com.hazelcast.core.Member;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.realtime.cleanup.RealtimeJanitor;
+import com.openexchange.realtime.cleanup.AbstractRealtimeJanitor;
 import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.directory.RoutingInfo;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
@@ -91,7 +91,7 @@ import com.openexchange.threadpool.ThreadPools;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJanitor {
+public class GlobalMessageDispatcherImpl extends AbstractRealtimeJanitor implements MessageDispatcher {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GlobalMessageDispatcherImpl.class);
 

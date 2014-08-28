@@ -509,16 +509,14 @@ public final class CacheFolderStorage implements FolderStorage {
                 final CacheKey cacheKey = newCacheKey(folder.getParentID(), tid);
                 cache.removeFromGroup(cacheKey, sContextId);
                 // Cleanse parent from caches, too
-                folderMapManagement.dropFor(folder.getParentID(), treeId, userId, contextId, session);
-                folderMapManagement.dropFor(folder.getParentID(), realTreeId, userId, contextId, session);
+                folderMapManagement.dropFor(folder.getParentID(), tid, userId, contextId, session);
             }
-            if (null != createdFolder) {
+            if (null != createdFolder && false == createdFolder.getParentID().equals(folder.getParentID())) {
                 for (final String tid : new String[] { treeId, realTreeId }) {
                     final CacheKey cacheKey = newCacheKey(createdFolder.getParentID(), tid);
                     cache.removeFromGroup(cacheKey, sContextId);
                     // Cleanse parent from caches, too
-                    folderMapManagement.dropFor(folder.getParentID(), treeId, userId, contextId, session);
-                    folderMapManagement.dropFor(folder.getParentID(), realTreeId, userId, contextId, session);
+                    folderMapManagement.dropFor(folder.getParentID(), tid, userId, contextId, session);
                 }
             }
             /*
@@ -528,7 +526,7 @@ public final class CacheFolderStorage implements FolderStorage {
             if (parentFolder.isCacheable()) {
                 putFolder(parentFolder, realTreeId, storageParameters, true);
             }
-            if (null != createdFolder) {
+            if (null != createdFolder && false == createdFolder.getParentID().equals(folder.getParentID())) {
                 parentFolder = loadFolder(realTreeId, createdFolder.getParentID(), StorageType.WORKING, true, storageParameters);
                 if (parentFolder.isCacheable()) {
                     putFolder(parentFolder, realTreeId, storageParameters, true);

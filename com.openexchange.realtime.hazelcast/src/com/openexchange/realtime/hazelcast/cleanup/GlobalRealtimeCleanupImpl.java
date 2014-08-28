@@ -98,14 +98,6 @@ public class GlobalRealtimeCleanupImpl implements GlobalRealtimeCleanup, Managem
     @Override
     public void cleanForId(ID id) {
         LOG.debug("Starting global realtime cleanup for ID: {}", id);
-        try {
-            Collection<ID> removeFromResourceDirectory = removeFromResourceDirectory(id);
-            if(removeFromResourceDirectory.isEmpty()) {
-                LOG.debug("Unable to remove {} from ResourceDirectory.", id);
-            }
-        } catch (OXException oxe) {
-            LOG.error("Unable to remove {} from ResourceDirectory.", id, oxe);
-        }
 
         // Do the local cleanup via a simple service call
         LocalRealtimeCleanup localRealtimeCleanup = Services.optService(LocalRealtimeCleanup.class);
@@ -115,6 +107,16 @@ public class GlobalRealtimeCleanupImpl implements GlobalRealtimeCleanup, Managem
                 RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(LocalRealtimeCleanup.class));
         } else {
             localRealtimeCleanup.cleanForId(id);
+        }
+
+        //Remove from directory after the RealtimeJanitors ran so we don't end up with an unreachable directory entry
+        try {
+            Collection<ID> removeFromResourceDirectory = removeFromResourceDirectory(id);
+            if(removeFromResourceDirectory.isEmpty()) {
+                LOG.debug("Unable to remove {} from ResourceDirectory.", id);
+            }
+        } catch (OXException oxe) {
+            LOG.error("Unable to remove {} from ResourceDirectory.", id, oxe);
         }
 
         //Remote cleanup via distributed MultiTask to remaining members of the cluster

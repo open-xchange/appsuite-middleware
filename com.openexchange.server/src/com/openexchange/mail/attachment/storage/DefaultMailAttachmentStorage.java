@@ -255,6 +255,7 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
         file.setFileName(name);
         file.setFileMIMEType(attachment.getContentType().getBaseType());
         file.setTitle(name);
+        file.setFileSize(attachment.getSize());
         if (null != storeProps) {
             String description = (String) storeProps.get("description");
             if (null != description) {

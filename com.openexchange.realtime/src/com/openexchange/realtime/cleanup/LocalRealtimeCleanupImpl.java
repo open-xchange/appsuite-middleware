@@ -72,7 +72,8 @@ public class LocalRealtimeCleanupImpl extends ServiceTracker<RealtimeJanitor, Re
     }
 
     /**
-     * Get all currently tracked {@link RealtimeJanitor}s
+     * Get all currently tracked {@link RealtimeJanitor}s sorted in reverse natural order. The first entry is the service with the highest
+     * ranking and the lowest service id.
      * 
      * @return all currently tracked {@link RealtimeJanitor}s
      */

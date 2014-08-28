@@ -66,6 +66,8 @@ public class SimMailAccount implements MailAccount {
 
     private boolean mailSecure;
 
+    private TransportAuth transportAuth;
+
     private String transportServer;
 
     private String transportProtocol;
@@ -117,6 +119,10 @@ public class SimMailAccount implements MailAccount {
 
     public void setTransportServer(final String transportServer) {
         this.transportServer = transportServer;
+    }
+
+    public void setTransportAuth(TransportAuth transportAuth) {
+        this.transportAuth = transportAuth;
     }
 
     public void setTransportProtocol(final String transportProtocol) {
@@ -322,6 +328,11 @@ public class SimMailAccount implements MailAccount {
     @Override
     public String getTransportServer() {
         return transportServer;
+    }
+
+    @Override
+    public TransportAuth getTransportAuth() {
+        return transportAuth;
     }
 
     @Override

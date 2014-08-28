@@ -63,13 +63,12 @@ import com.openexchange.admin.diff.file.type.ConfFileHandlerTest;
 
 /**
  * Unit tests for c.o.admin.diff module.
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.1
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-    ConfigDiffTest.class,
     FileHandlerTest.class,
     ConfFileHandlerTest.class,
     AbstractFileHandlerTest.class,

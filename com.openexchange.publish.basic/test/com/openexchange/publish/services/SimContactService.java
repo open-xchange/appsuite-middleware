@@ -428,4 +428,16 @@ public class SimContactService implements ContactService {
         return false;
     }
 
+    @Override
+    public SearchIterator<Contact> autocompleteContacts(Session session, List<String> folderIDs, String query, boolean requireEmail, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public SearchIterator<Contact> autocompleteContacts(Session session, String query, boolean requireEmail, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

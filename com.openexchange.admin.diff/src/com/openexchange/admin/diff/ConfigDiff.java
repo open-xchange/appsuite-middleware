@@ -52,7 +52,6 @@ package com.openexchange.admin.diff;
 import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
-import org.apache.commons.lang.StringUtils;
 import com.openexchange.admin.diff.file.handler.FileHandler;
 import com.openexchange.admin.diff.file.handler.IConfFileHandler;
 import com.openexchange.admin.diff.file.provider.ConfFolderFileProvider;
@@ -63,7 +62,7 @@ import com.openexchange.admin.diff.result.DiffResult;
 
 /**
  * Main class that is invoked to execute the configuration diffs.
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.1
  */
@@ -93,15 +92,6 @@ public class ConfigDiff {
         handlers.add(handler);
     }
 
-    public ConfigDiff(String originalFolder, String installationFolder) {
-        if (StringUtils.isNotBlank(originalFolder)) {
-            this.originalFolder = originalFolder;
-        }
-        if (StringUtils.isNotBlank(installationFolder)) {
-            this.installationFolder = installationFolder;
-        }
-    }
-
     public DiffResult run() {
         DiffResult diffResult = new DiffResult();
 
@@ -113,7 +103,7 @@ public class ConfigDiff {
 
     /**
      * Calls all registered handles to get the diffs
-     * 
+     *
      * @param diffResult - object to add the DiffResults to
      * @return - DiffResult object with all diffs
      */

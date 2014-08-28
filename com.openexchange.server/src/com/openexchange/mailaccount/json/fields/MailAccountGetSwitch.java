@@ -251,6 +251,11 @@ public class MailAccountGetSwitch implements AttributeSwitch {
     }
 
     @Override
+    public Object transportAuth() {
+        return account.getTransportAuth();
+    }
+
+    @Override
     public Object pop3DeleteWriteThrough() {
         return account.getProperties().get("pop3.deletewt");
     }

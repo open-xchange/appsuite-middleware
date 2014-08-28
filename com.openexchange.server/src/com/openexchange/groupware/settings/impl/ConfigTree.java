@@ -222,9 +222,10 @@ public final class ConfigTree {
     }
 
     private static void addElementWithoutOverwriting(final TreeSetting actual, final TreeSetting subSetting) throws OXException {
-        if (actual.getElement(subSetting.getName()) != null) {
+        if (false == actual.checkElement(subSetting)) {
             throw SettingExceptionCodes.DUPLICATE_PATH.create(actual.getPath() + "/" + subSetting.getName());
         }
+
         actual.addElement(subSetting);
         subSetting.setParent(actual);
     }
@@ -343,6 +344,7 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.mail.LineWrap.class,
             com.openexchange.groupware.settings.tree.modules.mail.Module.class,
             com.openexchange.groupware.settings.tree.modules.mail.MsgFormat.class,
+            com.openexchange.groupware.settings.tree.modules.mail.EnforceSecureConnection.class,
             com.openexchange.groupware.settings.tree.modules.mail.PhishingHeaders.class,
             com.openexchange.groupware.settings.tree.modules.mail.MailProtocols.class,
             com.openexchange.groupware.settings.tree.modules.mail.ReplyAllCc.class,

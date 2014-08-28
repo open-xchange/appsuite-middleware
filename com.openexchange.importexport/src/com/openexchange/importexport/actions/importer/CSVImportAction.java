@@ -113,7 +113,7 @@ public class CSVImportAction extends AbstractImportAction implements AJAXActionS
                 } finally {
                     Streams.close(in);
                 }
-                final PropertyDrivenMapper mapper = new PropertyDrivenMapper(props);
+                final PropertyDrivenMapper mapper = new PropertyDrivenMapper(props, file.getName());
                 imp.addFieldMapper(mapper);
                 mapperAmount++;
             }

@@ -4,7 +4,6 @@
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-cli-1.2.jar" sourcepath="/com.openexchange.bundles/source/commons-cli-1.2-sources.jar"/>
-	<classpathentry kind="lib" path="lib/diffutils-1.2.1.jar" sourcepath="lib/source/diffutils-1.2.1-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.io_2.0.1.v201105210651.jar" sourcepath="/com.openexchange.bundles/source/org.apache.commons.io.source_2.0.1.v201105210651.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.lang_2.6.0.v201205030909.jar" sourcepath="/com.openexchange.bundles/source/org.apache.commons.lang.source_2.6.0.v201205030909.jar"/>
 	<classpathentry kind="lib" path="lib/xmlunit-1.5.jar"/>

@@ -191,6 +191,11 @@ public abstract class DefaultContactService implements ContactService {
         return searchContactsWithAnniversary(session, null, from, until, fields, sortOptions);
     }
 
+    @Override
+    public SearchIterator<Contact> autocompleteContacts(Session session, String query, boolean requireEmail, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        return autocompleteContacts(session, null, query, requireEmail, fields, sortOptions);
+    }
+
 	/*
 	 * -----------------------------------------------------------------------------------------------------------------------------------
 	 */
@@ -412,6 +417,13 @@ public abstract class DefaultContactService implements ContactService {
     }
 
     @Override
+    public SearchIterator<Contact> autocompleteContacts(Session session, List<String> folderIDs, String query, boolean requireEmail, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        Check.argNotNull(session, "session");
+        Check.argNotNull(query, "pattern");
+        return doAutocompleteContacts(session, folderIDs, query, requireEmail, fields, sortOptions);
+    }
+
+    @Override
     public boolean isFolderEmpty(Session session, String folderID) throws OXException {
         Check.argNotNull(session, "session");
         Check.argNotNull(folderID, "folderID");
@@ -469,6 +481,9 @@ public abstract class DefaultContactService implements ContactService {
 
     protected abstract SearchIterator<Contact> doSearchContactsWithAnniversary(Session session, Date from, Date until, List<String> folderIDs,
         ContactField[] fields, SortOptions sortOptions) throws OXException;
+
+    protected abstract SearchIterator<Contact> doAutocompleteContacts(Session session, List<String> folderIDs, String query,
+        boolean requireEmail, ContactField[] fields, SortOptions sortOptions) throws OXException;
 
     protected abstract SearchIterator<Contact> doGetContacts(Session session, List<String> folderIDs, ContactField[] fields,
         SortOptions sortOptions) throws OXException;

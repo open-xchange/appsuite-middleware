@@ -91,7 +91,7 @@ public class TestCSVContactImporter extends CSVContactImporter {
             } finally {
                 Streams.close(in);
             }
-            final PropertyDrivenMapper mapper = new PropertyDrivenMapper(props);
+            final PropertyDrivenMapper mapper = new PropertyDrivenMapper(props, file.getName());
             addFieldMapper(mapper);
         }
     }

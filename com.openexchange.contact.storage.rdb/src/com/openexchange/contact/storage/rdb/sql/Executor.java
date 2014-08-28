@@ -71,6 +71,7 @@ import com.openexchange.contact.storage.rdb.fields.Fields;
 import com.openexchange.contact.storage.rdb.internal.DistListMember;
 import com.openexchange.contact.storage.rdb.internal.Tools;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
+import com.openexchange.contact.storage.rdb.search.AutocompleteAdapter;
 import com.openexchange.contact.storage.rdb.search.ContactSearchAdapter;
 import com.openexchange.contact.storage.rdb.search.SearchAdapter;
 import com.openexchange.contact.storage.rdb.search.SearchTermAdapter;
@@ -387,6 +388,55 @@ public class Executor {
             stmt.setInt(parameterIndex++, contextID);
             stmt.setTimestamp(parameterIndex++, new Timestamp(from.getTime()));
             stmt.setTimestamp(parameterIndex++, new Timestamp(until.getTime()));
+            /*
+             * execute and read out results
+             */
+            resultSet = logExecuteQuery(stmt);
+            return new ContactReader(contextID, connection, resultSet).readContacts(fields);
+        } finally {
+            closeSQLStuff(resultSet, stmt);
+        }
+    }
+
+    /**
+     * Select contacts by the supplied auto-complete query.
+     *
+     * @param connection The connection to use
+     * @param contextID The context ID
+     * @param folderIDs The folder IDs, or <code>null</code> if there's no restriction on folders
+     * @param query The query, as supplied by the client
+     * @param requireEmail <code>true</code> if the returned contacts should have at least one e-mail address, <code>false</code>,
+     *                     otherwise
+     * @param fields The contact fields to select
+     * @param sortOptions The sort options to apply
+     * @return The found contacts
+     * @throws SQLException
+     * @throws OXException
+     */
+    public List<Contact> selectByAutoComplete(Connection connection, int contextID, int[] folderIDs, String query, boolean requireEmail,
+        ContactField[] fields, SortOptions sortOptions) throws SQLException, OXException {
+        /*
+         * construct query string
+         */
+        SearchAdapter adapter = new AutocompleteAdapter(query, requireEmail, folderIDs,contextID, fields, getCharset(sortOptions));
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(adapter.getClause());
+        if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
+            stringBuilder.append(' ').append(Tools.getOrderClause(sortOptions));
+            if (0 < sortOptions.getLimit()) {
+                stringBuilder.append(' ').append(Tools.getLimitClause(sortOptions));
+            }
+        }
+        stringBuilder.append(';');
+        /*
+         * prepare statement
+         */
+        PreparedStatement stmt = null;
+        int parameterIndex = 1;
+        ResultSet resultSet = null;
+        try {
+            stmt = connection.prepareStatement(stringBuilder.toString());
+            adapter.setParameters(stmt, parameterIndex);
             /*
              * execute and read out results
              */

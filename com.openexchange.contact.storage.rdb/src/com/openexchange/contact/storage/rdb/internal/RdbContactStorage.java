@@ -622,6 +622,57 @@ public class RdbContactStorage extends DefaultContactStorage {
         return searchByAnnualDate(session, folderIDs, from, until, fields, sortOptions, ContactField.ANNIVERSARY);
     }
 
+    @Override
+    public SearchIterator<Contact> autoComplete(Session session, List<String> folderIDs, String query, boolean requireEmail, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        /*
+         * prepare select
+         */
+        int contextID = session.getContextId();
+        ConnectionHelper connectionHelper = new ConnectionHelper(session);
+        Connection connection = connectionHelper.getReadOnly();
+        int[] parentFolderIDs = null != folderIDs ? parse(folderIDs.toArray(new String[folderIDs.size()])) : null;
+        try {
+            /*
+             * check fields
+             */
+            QueryFields queryFields = new QueryFields(fields, ContactField.OBJECT_ID, ContactField.INTERNAL_USERID);
+            if (false == queryFields.hasContactData()) {
+                return null; // nothing to do
+            }
+            /*
+             * get contact data
+             */
+            List<Contact> contacts = executor.selectByAutoComplete(connection, contextID, parentFolderIDs, query, requireEmail,
+                queryFields.getContactDataFields(), sortOptions);
+            if (null != contacts && 0 < contacts.size()) {
+                /*
+                 * merge image data if needed
+                 */
+                if (queryFields.hasImageData()) {
+                    contacts = mergeImageData(connection, Table.IMAGES, contextID, contacts, queryFields.getImageDataFields());
+                }
+                /*
+                 * merge distribution list data if needed
+                 */
+                if (queryFields.hasDistListData()) {
+                    contacts = mergeDistListData(connection, Table.DISTLIST, contextID, contacts);
+                }
+                /*
+                 * merge attachment information in advance if needed
+                 */
+                //TODO: at this stage, we break the storage separation, since we assume that attachments are stored in the same database
+                if (PREFETCH_ATTACHMENT_INFO && queryFields.hasAttachmentData()) {
+                    contacts = mergeAttachmentData(connection, contextID, contacts);
+                }
+            }
+            return getSearchIterator(contacts);
+        } catch (SQLException e) {
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+        } finally {
+            connectionHelper.backReadOnly();
+        }
+    }
+
     private SearchIterator<Contact> searchByAnnualDate(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions, ContactField dateField) throws OXException {
         /*
          * prepare select

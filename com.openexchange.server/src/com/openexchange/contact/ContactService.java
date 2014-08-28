@@ -439,6 +439,36 @@ public interface ContactService {
     SearchIterator<Contact> searchContactsWithAnniversary(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException;
 
     /**
+     * Performs an "auto-complete" lookup for contacts.
+     *
+     * @param session The session
+     * @param folderIDs A list of folder IDs to restrict the search to
+     * @param query The search query as supplied by the client
+     * @param requireEmail <code>true</code> if the returned contacts should have at least one e-mail address, <code>false</code>,
+     *                     otherwise
+     * @param fields The contact fields that should be retrieved
+     * @param sortOptions The options to sort the results
+     * @return The contacts found with the search
+     * @throws OXException
+     */
+    SearchIterator<Contact> autocompleteContacts(Session session, List<String> folderIDs, String query, boolean requireEmail, ContactField[] fields, SortOptions sortOptions) throws OXException;
+
+    /**
+     * Performs an "auto-complete" lookup for contacts. Depending <code>com.openexchange.contacts.allFoldersForAutoComplete</code>, either
+     * all folders visible to the user, or a reduced set of specific folders is used for the search.
+     *
+     * @param session The session
+     * @param query The search query as supplied by the client
+     * @param requireEmail <code>true</code> if the returned contacts should have at least one e-mail address, <code>false</code>,
+     *                     otherwise
+     * @param fields The contact fields that should be retrieved
+     * @param sortOptions The options to sort the results
+     * @return The contacts found with the search
+     * @throws OXException
+     */
+    SearchIterator<Contact> autocompleteContacts(Session session, String query, boolean requireEmail, ContactField[] fields, SortOptions sortOptions) throws OXException;
+
+    /**
      * Creates a new contact in a folder.
      *
      * @param session the session

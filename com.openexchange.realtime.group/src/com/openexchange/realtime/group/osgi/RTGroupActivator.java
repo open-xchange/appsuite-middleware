@@ -87,7 +87,7 @@ public class RTGroupActivator extends HousekeepingActivator implements BundleAct
         treeConverter.declarePreferredFormat(new ElementPath("com.openexchange.realtime.client","inactivity"), Duration.class.getName());
         treeConverter.declarePreferredFormat(new ElementPath("com.openexchange.realtime","client"), ID.class.getName());
         for(RealtimeJanitor realtimeJanitor : RealtimeJanitors.getInstance().getJanitors()) {
-            registerService(RealtimeJanitor.class, realtimeJanitor);
+            registerService(RealtimeJanitor.class, realtimeJanitor, realtimeJanitor.getServiceProperties());
         }
 
     }

@@ -64,6 +64,7 @@ public class DocumentMetadataValidation {
     private final Map<Metadata, String> errors;
     private final List<Metadata> errorFields;
     private OXException exception;
+    private OXException fatalException;
 
     /**
      * Initializes a new {@link DocumentMetadataValidation}.
@@ -75,7 +76,7 @@ public class DocumentMetadataValidation {
     }
 
     public boolean isValid() {
-        return errors.isEmpty();
+        return errors.isEmpty() && null == fatalException;
     }
 
     public boolean hasErrors(final Metadata field) {
@@ -93,6 +94,24 @@ public class DocumentMetadataValidation {
 
     public List<Metadata> getInvalidFields() {
         return errorFields;
+    }
+
+    /**
+     * Gets the fatal exception
+     *
+     * @return The fatal exception
+     */
+    public OXException getFatalException() {
+        return fatalException;
+    }
+
+    /**
+     * Sets the fatal exception
+     *
+     * @param fatalException The fatal exception to set
+     */
+    public void setFatalException(OXException fatalException) {
+        this.fatalException = fatalException;
     }
 
     /**

@@ -1011,11 +1011,11 @@ if ! grep vnd.openxmlformats-officedocument.spreadsheetml.template $pfile > /dev
    ptmp=${pfile}.$$
    cp $pfile $ptmp
    cat<<EOF >> $ptmp
-application/vnd.openxmlformats-officedocument.spreadsheetml.template xltx 
-application/vnd.openxmlformats-officedocument.presentationml.slideshow ppsx 
-application/vnd.openxmlformats-officedocument.presentationml.presentation pptx 
-application/vnd.openxmlformats-officedocument.presentationml.slide sldx 
-application/vnd.ms-excel.addin.macroEnabled.12 xlam 
+application/vnd.openxmlformats-officedocument.spreadsheetml.template xltx
+application/vnd.openxmlformats-officedocument.presentationml.slideshow ppsx
+application/vnd.openxmlformats-officedocument.presentationml.presentation pptx
+application/vnd.openxmlformats-officedocument.presentationml.slide sldx
+application/vnd.ms-excel.addin.macroEnabled.12 xlam
 application/vnd.ms-excel.sheet.binary.macroEnabled.12 xlsb
 EOF
    if [ -s $ptmp ]; then
@@ -1063,6 +1063,10 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Thu Aug 21 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-08-25
+* Wed Aug 20 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-08-25
 * Mon Aug 18 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-08-25
 * Wed Aug 13 2014 Marcus Klein <marcus.klein@open-xchange.com>

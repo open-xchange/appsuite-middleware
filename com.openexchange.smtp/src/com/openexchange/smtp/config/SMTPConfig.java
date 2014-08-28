@@ -58,6 +58,7 @@ import com.openexchange.mail.transport.config.ITransportProperties;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.TransportAuth;
 import com.openexchange.session.Session;
 import com.openexchange.smtp.SMTPExceptionCode;
 import com.openexchange.tools.net.URIDefaults;
@@ -169,36 +170,27 @@ public final class SMTPConfig extends TransportConfig {
     @Override
     protected boolean doCustomParsing(final MailAccount account, final Session session) throws OXException {
         if (!account.isDefaultAccount()) {
-            login = account.getTransportLogin();
-
-            if (seemsNotSet(login)) {
-                // Fallback to mail account credentials
+            TransportAuth transportAuth = account.getTransportAuth();
+            switch (transportAuth) {
+            case CUSTOM:
+                login = account.getTransportLogin();
+                password = MailPasswordUtil.decrypt(account.getTransportPassword(), session, account.getId(), login, account.getTransportServer());
+                break;
+            case NONE:
+                login = null;
+                password = null;
+                break;
+            case MAIL:
+                /* fall-through */
+            default:
                 login = account.getLogin();
                 password = MailPasswordUtil.decrypt(account.getPassword(), session, account.getId(), login, account.getMailServer());
-            } else {
-                String tpwd = account.getTransportPassword();
-                if (com.openexchange.java.Strings.isEmpty(tpwd)) {
-                    password = MailPasswordUtil.decrypt(account.getPassword(), session, account.getId(), login, account.getMailServer());
-                } else {
-                    password = MailPasswordUtil.decrypt(tpwd, session, account.getId(), login, account.getTransportServer());
-                    if (seemsNotSet(password)) {
-                        password = MailPasswordUtil.decrypt(account.getPassword(), session, account.getId(), login, account.getMailServer());
-                    }
-                }
+                break;
             }
 
             return true;
         }
         return false;
-    }
-
-    private static boolean seemsNotSet(final String str) {
-        if (com.openexchange.java.Strings.isEmpty(str)) {
-            return true;
-        }
-
-        final String lc = com.openexchange.java.Strings.toLowerCase(str);
-        return "null".equals(lc) || "nil".equals(lc);
     }
 
 }

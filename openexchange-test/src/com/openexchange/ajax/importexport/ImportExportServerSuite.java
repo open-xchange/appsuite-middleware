@@ -72,6 +72,8 @@ public final class ImportExportServerSuite {
         tests.addTestSuite(Bug18482Test_ByteOrderMarkOnUtf8.class);
         tests.addTestSuite(Bug20516Test.class);
         tests.addTestSuite(Bug32200Test.class);
+        tests.addTestSuite(Bug33748Test.class);
+        tests.addTestSuite(Bug32994Test.class);
 
         // Overall bug tests.
         tests.addTestSuite(Bug9209Test.class);
