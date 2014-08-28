@@ -158,7 +158,6 @@ public class ZipFolderAction extends AbstractFileAction {
         // Create ZIP archive
         createZipArchive(folderId, fileAccess, folderAccess, fileHolder.asOutputStream());
         ajaxRequestData.setFormat("file");
-
         return new AJAXRequestResult(fileHolder, "file");
     }
 
