@@ -145,7 +145,7 @@ public class ListUnexecutedChangeSetsCLT extends AbstractMBeanCLI<List<String>> 
     @Override
     protected List<String> invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
         if (!cmd.hasOption('f')) {
-            System.err.println("Missing file name for rollback.");
+            System.err.println("Missing file name the unexecuted changesets should be listed for.");
             printHelp(option);
             System.exit(1);
         }
