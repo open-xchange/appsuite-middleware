@@ -150,7 +150,7 @@ public abstract class AbstractGoogleSubscribeTest extends AbstractAJAXSession {
     }
 
     private int getTestFolderID(final String id) {
-        return GoogleSubscribeTestEnvironment.testFolders.get(id);
+        return GoogleSubscribeTestEnvironment.getInstance().testFolders.get(id);
     }
 
     protected int getCalendarTestFolderID() {

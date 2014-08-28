@@ -96,7 +96,7 @@ public class GoogleSubscribeTestEnvironment {
 
     private FolderTestManager folderMgr;
 
-    protected static final Map<String, Integer> testFolders = new HashMap<String, Integer>();
+    protected final Map<String, Integer> testFolders = new HashMap<String, Integer>();
 
     private int accountId;
 
