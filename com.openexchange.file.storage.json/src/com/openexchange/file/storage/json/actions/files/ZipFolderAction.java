@@ -51,7 +51,6 @@ package com.openexchange.file.storage.json.actions.files;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
@@ -78,6 +77,7 @@ import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.tools.file.external.FileStorageCodes;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -138,23 +138,14 @@ public class ZipFolderAction extends AbstractFileAction {
 
         AJAXRequestData ajaxRequestData = request.getRequestData();
         if (ajaxRequestData.setResponseHeader("Content-Type", "application/zip")) {
-            try {
-                final StringBuilder sb = new StringBuilder(512);
-                sb.append("attachment");
-                DownloadUtility.appendFilenameParameter(folderName + ".zip", "application/zip", ajaxRequestData.getUserAgent(), sb);
-                ajaxRequestData.setResponseHeader("Content-Disposition", sb.toString());
-                createZipArchive(folderId, fileAccess, recursive ? folderAccess : null, ajaxRequestData.optOutputStream());
-                // Streamed
-                return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
-            } catch (final IOException e) {
-                throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
-            }
+            createZipArchive(folderId, folderName, fileAccess, recursive ? folderAccess : null, ajaxRequestData);
+            return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
         }
 
         throw AjaxExceptionCodes.BAD_REQUEST.create();
     }
 
-    private void createZipArchive(String folderId, IDBasedFileAccess fileAccess, IDBasedFolderAccess idBasedFolderAccess, OutputStream out) throws OXException {
+    private void createZipArchive(String folderId, String saneFolderName, IDBasedFileAccess fileAccess, IDBasedFolderAccess idBasedFolderAccess, AJAXRequestData ajaxRequestData) throws OXException {
         // Check against threshold
         {
             long threshold = threshold();
@@ -163,16 +154,29 @@ public class ZipFolderAction extends AbstractFileAction {
             }
         }
 
-        ZipArchiveOutputStream zipOutput = new ZipArchiveOutputStream(out);
-        zipOutput.setEncoding("UTF-8");
-        zipOutput.setUseLanguageEncodingFlag(true);
+        // Set HTTP response headers
+        {
+            final StringBuilder sb = new StringBuilder(512);
+            sb.append("attachment");
+            DownloadUtility.appendFilenameParameter(saneFolderName + ".zip", "application/zip", ajaxRequestData.getUserAgent(), sb);
+            ajaxRequestData.setResponseHeader("Content-Disposition", sb.toString());
+        }
+
+        ZipArchiveOutputStream zipOutput = null;
         try {
+            // Initialize ZIP output stream
+            zipOutput = new ZipArchiveOutputStream(ajaxRequestData.optOutputStream());
+            zipOutput.setEncoding("UTF-8");
+            zipOutput.setUseLanguageEncodingFlag(true);
+
             // The buffer to use
             int buflen = 65536;
             byte[] buf = new byte[buflen];
 
             // Add to ZIP archive
             addFolder2Archive(folderId, fileAccess, idBasedFolderAccess, zipOutput, "", buflen, buf);
+        } catch (final IOException e) {
+            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             // Complete the ZIP file
             Streams.close(zipOutput);
@@ -190,7 +194,8 @@ public class ZipFolderAction extends AbstractFileAction {
                 if (fileSize > 0) {
                     total += fileSize;
                     if (total > threshold) {
-                        throw AjaxExceptionCodes.HTTP_ERROR.create(HttpServletResponse.SC_FORBIDDEN, "ZIP archive exceeds max. allowed size of " + UploadUtility.getSize(threshold, 2, false, true));
+                        String msg = "ZIP archive exceeds max. allowed size of " + UploadUtility.getSize(threshold, 2, false, true);
+                        throw AjaxExceptionCodes.HTTP_ERROR.create(HttpServletResponse.SC_FORBIDDEN, msg);
                     }
                 }
             }
@@ -214,7 +219,14 @@ public class ZipFolderAction extends AbstractFileAction {
         try {
             while (it.hasNext()) {
                 File file = it.next();
-                addFile2Archive(file, fileAccess.getDocument(file.getId(), FileStorageFileAccess.CURRENT_VERSION), zipOutput, pathPrefix, buflen, buf);
+                try {
+                    addFile2Archive(file, fileAccess.getDocument(file.getId(), FileStorageFileAccess.CURRENT_VERSION), zipOutput, pathPrefix, buflen, buf);
+                } catch (OXException e) {
+                    if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
+                        throw e;
+                    }
+                    // Ignore
+                }
             }
 
             SearchIterators.close(it);
@@ -337,12 +349,23 @@ public class ZipFolderAction extends AbstractFileAction {
                     prev = '_';
                     sb.append(prev);
                 }
+            } else if (',' == c) {
+                if (prev != '_') {
+                    prev = '_';
+                    sb.append(prev);
+                }
+            } else if ('.' == c) {
+                if (prev != '_') {
+                    prev = '_';
+                    sb.append(prev);
+                }
             } else {
                 prev = '\0';
                 sb.append(c);
             }
         }
-        return sb.toString();
+        String sanitized = sb.toString();
+        return Strings.isEmpty(sanitized) ? "archive" : sanitized;
     }
 
 }

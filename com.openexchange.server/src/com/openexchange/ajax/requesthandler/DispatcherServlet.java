@@ -411,19 +411,14 @@ public class DispatcherServlet extends SessionServlet {
              */
             sendResponse(requestData, result, httpRequest, httpResponse);
         } catch (final OXException e) {
-            if (AjaxExceptionCodes.BAD_REQUEST.equals(e) || AjaxExceptionCodes.MISSING_PARAMETER.equals(e)) {
-                Throwable cause = e.getCause();
-                if (cause instanceof IOException) {
-                    throw (IOException) cause;
-                }
+            if (AjaxExceptionCodes.MISSING_PARAMETER.equals(e)) {
                 httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-                // Try to write error page
-                try {
-                    writeErrorPage(HttpServletResponse.SC_BAD_REQUEST, e.getMessage(), httpResponse);
-                } catch (Exception x) {
-                    // Ignore
-                    flushSafe(httpResponse);
-                }
+                flushSafe(httpResponse);
+                logException(e, LogLevel.DEBUG, HttpServletResponse.SC_BAD_REQUEST);
+                return;
+            }
+            if (AjaxExceptionCodes.BAD_REQUEST.equals(e)) {
+                sendErrorAndPage(HttpServletResponse.SC_BAD_REQUEST, e.getMessage(), httpResponse);
                 logException(e, LogLevel.DEBUG, HttpServletResponse.SC_BAD_REQUEST);
                 return;
             }
@@ -431,14 +426,7 @@ public class DispatcherServlet extends SessionServlet {
                 final Object[] logArgs = e.getLogArgs();
                 final Object statusMsg = logArgs.length > 1 ? logArgs[1] : null;
                 final int sc = ((Integer) logArgs[0]).intValue();
-                httpResponse.sendError(sc, null == statusMsg ? null : statusMsg.toString());
-                // Try to write error page
-                try {
-                    writeErrorPage(sc, null == statusMsg ? null : statusMsg.toString(), httpResponse);
-                } catch (Exception x) {
-                    // Ignore
-                    flushSafe(httpResponse);
-                }
+                sendErrorAndPage(sc, null == statusMsg ? null : statusMsg.toString(), httpResponse);
                 logException(e, LogLevel.DEBUG, sc);
                 return;
             }
@@ -461,6 +449,18 @@ public class DispatcherServlet extends SessionServlet {
             if (null != state) {
                 dispatcher.end(state);
             }
+        }
+    }
+
+    private void sendErrorAndPage(int statusCode, String statusMsg, HttpServletResponse httpResponse) throws IOException {
+        // Try to write error page
+        try {
+            httpResponse.setStatus(statusCode);
+            writeErrorPage(statusCode, statusMsg, httpResponse);
+        } catch (Exception x) {
+            // Ignore
+            httpResponse.sendError(statusCode, null == statusMsg ? null : statusMsg.toString());
+            flushSafe(httpResponse);
         }
     }
 
