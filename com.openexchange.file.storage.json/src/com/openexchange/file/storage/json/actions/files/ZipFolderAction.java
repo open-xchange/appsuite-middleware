@@ -51,7 +51,6 @@ package com.openexchange.file.storage.json.actions.files;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
@@ -101,6 +100,7 @@ public class ZipFolderAction extends AbstractFileAction {
                 tmp = threshold;
                 if (null == tmp) {
                     long defaultThreshold = 1073741824;
+                    defaultThreshold = 1024;
                     ConfigurationService service = Services.getConfigurationService();
                     if (null == service) {
                         return defaultThreshold;
@@ -138,23 +138,19 @@ public class ZipFolderAction extends AbstractFileAction {
 
         AJAXRequestData ajaxRequestData = request.getRequestData();
         if (ajaxRequestData.setResponseHeader("Content-Type", "application/zip")) {
-            try {
-                final StringBuilder sb = new StringBuilder(512);
-                sb.append("attachment");
-                DownloadUtility.appendFilenameParameter(folderName + ".zip", "application/zip", ajaxRequestData.getUserAgent(), sb);
-                ajaxRequestData.setResponseHeader("Content-Disposition", sb.toString());
-                createZipArchive(folderId, fileAccess, recursive ? folderAccess : null, ajaxRequestData.optOutputStream());
-                // Streamed
-                return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
-            } catch (final IOException e) {
-                throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
-            }
+            final StringBuilder sb = new StringBuilder(512);
+            sb.append("attachment");
+            DownloadUtility.appendFilenameParameter(folderName + ".zip", "application/zip", ajaxRequestData.getUserAgent(), sb);
+            ajaxRequestData.setResponseHeader("Content-Disposition", sb.toString());
+            createZipArchive(folderId, fileAccess, recursive ? folderAccess : null, ajaxRequestData);
+            // Streamed
+            return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
         }
 
         throw AjaxExceptionCodes.BAD_REQUEST.create();
     }
 
-    private void createZipArchive(String folderId, IDBasedFileAccess fileAccess, IDBasedFolderAccess idBasedFolderAccess, OutputStream out) throws OXException {
+    private void createZipArchive(String folderId, IDBasedFileAccess fileAccess, IDBasedFolderAccess idBasedFolderAccess, AJAXRequestData ajaxRequestData) throws OXException {
         // Check against threshold
         {
             long threshold = threshold();
@@ -163,16 +159,21 @@ public class ZipFolderAction extends AbstractFileAction {
             }
         }
 
-        ZipArchiveOutputStream zipOutput = new ZipArchiveOutputStream(out);
-        zipOutput.setEncoding("UTF-8");
-        zipOutput.setUseLanguageEncodingFlag(true);
+        ZipArchiveOutputStream zipOutput = null;
         try {
+            // Initialize ZIP output stream
+            zipOutput = new ZipArchiveOutputStream(ajaxRequestData.optOutputStream());
+            zipOutput.setEncoding("UTF-8");
+            zipOutput.setUseLanguageEncodingFlag(true);
+
             // The buffer to use
             int buflen = 65536;
             byte[] buf = new byte[buflen];
 
             // Add to ZIP archive
             addFolder2Archive(folderId, fileAccess, idBasedFolderAccess, zipOutput, "", buflen, buf);
+        } catch (final IOException e) {
+            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             // Complete the ZIP file
             Streams.close(zipOutput);
