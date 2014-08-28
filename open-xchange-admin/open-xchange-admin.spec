@@ -133,7 +133,7 @@ if [ ${1:-0} -eq 2 ]; then
     ##
     ## end update from < 6.21
     ##
-    
+
     # SoftwareChange_Request-1846
     # -----------------------------------------------------------------------
     pfile=/opt/open-xchange/etc/AdminUser.properties
@@ -143,21 +143,21 @@ if [ ${1:-0} -eq 2 ]; then
     ox_add_property SPAM_MAILFOLDER_EN_GB Spam $pfile
     ox_add_property CONFIRMED_SPAM_MAILFOLDER_EN_GB confirmed-spam $pfile
     ox_add_property CONFIRMED_HAM_MAILFOLDER_EN_GB confirmed-ham $pfile
-    
+
     # SoftwareChange_Request-1831
     # -----------------------------------------------------------------------
     pfile=/opt/open-xchange/etc/ModuleAccessDefinitions.properties
-    
+
 	if grep -E "projects" $pfile > /dev/null; then
 	   ptmp=${pfile}.$$
-	   
+
 	   sed -e 's;projects *,;;g' -e 's;, *projects;;g' $pfile > $ptmp
-	
+
 	   if [ -s $ptmp ]; then
 	      cp $ptmp $pfile
 	   fi
 	   rm -f $ptmp
-	fi 
+	fi
 
     # SoftwareChange_Request-2074
     # -----------------------------------------------------------------------
@@ -165,14 +165,14 @@ if [ ${1:-0} -eq 2 ]; then
     for key in rssbookmarks rssportal forum pinboardwrite; do
         if grep -E $key $pfile > /dev/null; then
             ptmp=${pfile}.$$
-        
+
             sed -e "s;$key *,;;g" -e "s;, *$key;;g" $pfile > $ptmp
-        
+
             if [ -s $ptmp ]; then
                 cp $ptmp $pfile
             fi
             rm -f $ptmp
-        fi 
+        fi
     done
 
     ox_update_permissions "/opt/open-xchange/etc/mpasswd" root:open-xchange 640
@@ -202,6 +202,8 @@ fi
 
 %changelog
 * Thu Aug 21 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-08-25
+* Wed Aug 20 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-08-25
 * Mon Aug 18 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-08-25

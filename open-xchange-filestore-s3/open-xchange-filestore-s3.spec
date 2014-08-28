@@ -64,6 +64,8 @@ fi
 %changelog
 * Thu Aug 21 2014 Markus Wagner <markus.wagner@open-xchange.com>
 Build for patch 2014-08-25
+* Wed Aug 20 2014 Markus Wagner <markus.wagner@open-xchange.com>
+Build for patch 2014-08-25
 * Mon Aug 18 2014 Markus Wagner <markus.wagner@open-xchange.com>
 Build for patch 2014-08-25
 * Wed Aug 13 2014 Markus Wagner <markus.wagner@open-xchange.com>

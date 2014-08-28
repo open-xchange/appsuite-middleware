@@ -14,7 +14,7 @@ Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
-URL:           http://www.open-xchange.com/ 
+URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Open-Xchange backend subscribe extension
 Autoreqprov:   no
@@ -27,7 +27,7 @@ Provides:      open-xchange-subscribe-facebook = %{version}
 Obsoletes:     open-xchange-subscribe-facebook < %{version}
 Provides:      open-xchange-subscribe-json = %{version}
 Obsoletes:     open-xchange-subscribe-json < %{version}
-Provides:      open-xchange-subscribe-linkedin = %{version} 
+Provides:      open-xchange-subscribe-linkedin = %{version}
 Obsoletes:     open-xchange-subscribe-linkedin < %{version}
 Provides:      open-xchange-subscribe-microformats = %{version}
 Obsoletes:     open-xchange-subscribe-microformats < %{version}
@@ -85,7 +85,7 @@ if [ ${1:-0} -eq 2 ]; then
     pfile=/opt/open-xchange/etc/crawler.properties
     if grep -E '^com.openexchange.subscribe.crawler.path.*/' $pfile >/dev/null; then
         ox_set_property com.openexchange.subscribe.crawler.path crawlers $pfile
-    fi    
+    fi
 
     #SoftwareChange_Request-1099
     # obsoleted by SoftwareChange_Request-1710
@@ -167,6 +167,8 @@ fi
 
 %changelog
 * Thu Aug 21 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-08-25
+* Wed Aug 20 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-08-25
 * Mon Aug 18 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-08-25
