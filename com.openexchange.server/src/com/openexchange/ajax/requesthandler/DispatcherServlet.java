@@ -456,7 +456,7 @@ public class DispatcherServlet extends SessionServlet {
         httpResponse.sendError(sc, null == statusMsg ? null : statusMsg.toString());
         // Try to write error page
         try {
-            writeErrorPage(sc, null == statusMsg ? null : statusMsg.toString(), httpResponse);
+            writeErrorPage(sc, statusMsg, httpResponse);
         } catch (Exception x) {
             // Ignore
             flushSafe(httpResponse);
