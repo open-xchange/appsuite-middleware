@@ -452,13 +452,14 @@ public class DispatcherServlet extends SessionServlet {
         }
     }
 
-    private void sendErrorAndPage(int sc, String statusMsg, HttpServletResponse httpResponse) throws IOException {
-        httpResponse.sendError(sc, null == statusMsg ? null : statusMsg.toString());
+    private void sendErrorAndPage(int statusCode, String statusMsg, HttpServletResponse httpResponse) throws IOException {
         // Try to write error page
         try {
-            writeErrorPage(sc, statusMsg, httpResponse);
+            httpResponse.setStatus(statusCode);
+            writeErrorPage(statusCode, statusMsg, httpResponse);
         } catch (Exception x) {
             // Ignore
+            httpResponse.sendError(statusCode, null == statusMsg ? null : statusMsg.toString());
             flushSafe(httpResponse);
         }
     }
