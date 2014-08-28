@@ -21,6 +21,7 @@ Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
 Requires:      open-xchange-oauth >= @OXVERSION@
 Requires:      open-xchange-xerces
+Requires:      open-xchange-osgi >= @OXVERSION@
 Provides:      open-xchange-subscribe-crawler = %{version}
 Obsoletes:     open-xchange-subscribe-crawler < %{version}
 Provides:      open-xchange-subscribe-facebook = %{version}
@@ -148,6 +149,15 @@ if [ ${1:-0} -eq 2 ]; then
         ox_update_permissions "$i" open-xchange:root 644
     done
     ox_update_permissions "/opt/open-xchange/etc/crawlers" open-xchange:root 755
+
+    #SoftwareChange_Request-2145
+    pfile=/opt/open-xchange/etc/crawler.properties
+    for prop in com.openexchange.subscribe.crawler.googlemail com.openexchange.subscribe.crawler.google.calendar com.openexchange.subscribe.crawler.googlemail.autorunInterval com.openexchange.subscribe.crawler.google.calendar.autorunInterval; do
+        if ox_exists_property $prop $pfile; then
+            ox_remove_property $prop $pfile
+        fi
+    done
+
 fi
 
 %clean
@@ -163,6 +173,7 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 %dir %attr(755,open-xchange,root) /opt/open-xchange/etc/crawlers/
 %config(noreplace) %attr(644,open-xchange,root) /opt/open-xchange/etc/crawlers/*
+%config(noreplace) %attr(644,open-xchange,root) /opt/open-xchange/etc/googlesubscribe.properties
 %doc docs/
 
 %changelog
