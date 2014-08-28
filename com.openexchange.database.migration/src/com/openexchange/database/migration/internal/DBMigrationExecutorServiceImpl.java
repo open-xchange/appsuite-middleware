@@ -72,6 +72,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.migration.DBMigrationExceptionCodes;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.exception.OXException;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * Implementation of {@link DBMigrationExecutorService} to execute database migration statements provided by the given file.
@@ -81,6 +82,8 @@ import com.openexchange.exception.OXException;
  * @since 7.6.1
  */
 public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorService {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DBMigrationExecutorServiceImpl.class);
 
     private static final String LIQUIBASE_NO_DEFINED_CONTEXT = "";
 
@@ -115,6 +118,7 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
      */
     @Override
     public void execute(DatabaseChangeLog databaseChangeLog) throws OXException {
+        LOG.info("Start executing database migration for ChangeLog {}", databaseChangeLog.getPhysicalFilePath());
 
         Connection writable = null;
         Liquibase liquibase = null;
@@ -129,6 +133,7 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
         } finally {
             cleanUpLiquibase(writable, liquibase);
         }
+        LOG.info("Finished executing database migration for ChangeLog {}", databaseChangeLog.getPhysicalFilePath());
     }
 
     /**
@@ -180,6 +185,7 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
      * @param writable
      * @param liquibase
      * @throws OXException
+     * @throws SQLException
      */
     private void cleanUpLiquibase(Connection writable, Liquibase liquibase) throws OXException {
         if (liquibase != null) {
@@ -190,6 +196,7 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
             }
         }
         if (writable != null) {
+            DBUtils.autocommit(writable);
             databaseService.backWritable(writable);
         }
     }
@@ -263,6 +270,8 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
      * @throws OXException
      */
     private void rollbackChangeSets(String fileName, Object target) throws OXException {
+        LOG.info("Start rollback database migrations for file {}", fileName);
+
         File xmlConfigFile = getChangeLogFile(fileName);
 
         Connection writable = null;
@@ -274,9 +283,11 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
 
             if (target instanceof Integer) {
                 int numberOfChangeSetsToRollback = (Integer) target;
+                LOG.info("Rollback {} numbers of changesets", numberOfChangeSetsToRollback);
                 liquibase.rollback(numberOfChangeSetsToRollback, LIQUIBASE_NO_DEFINED_CONTEXT);
             } else if (target instanceof String) {
                 String changeSetTag = (String) target;
+                LOG.info("Rollback to changeset {}", changeSetTag);
                 liquibase.rollback(changeSetTag, LIQUIBASE_NO_DEFINED_CONTEXT);
             } else {
                 throw DBMigrationExceptionCodes.WRONG_TYPE_OF_DATA_ROLLBACK_ERROR.create();
@@ -286,6 +297,7 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
         } finally {
             cleanUpLiquibase(writable, liquibase);
         }
+        LOG.info("Finished rollback of database migrations for file {}", fileName);
     }
 
     /**

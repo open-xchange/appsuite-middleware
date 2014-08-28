@@ -9,7 +9,9 @@
 	<!-- ************** Release 7.6.1 starts here ************** -->
 	<!-- ******************************************************* -->
 
+	<!-- Upcoming milestones should have the latest changeSet from the previous release as their precondition! -->
 	<changeSet id="7.6.1-milestone" author="martin.schneider" logicalFilePath="release-7.6.1-milestone">
+		<!-- <preConditions></preConditions> -->
 		<tagDatabase tag="7.6.1-milestone" />
 	</changeSet>
 
