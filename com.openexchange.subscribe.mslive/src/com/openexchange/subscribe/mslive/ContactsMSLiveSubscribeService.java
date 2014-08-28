@@ -49,14 +49,25 @@
 
 package com.openexchange.subscribe.mslive;
 
+import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.Collection;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.cookie.CookiePolicy;
+import org.apache.commons.httpclient.methods.GetMethod;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
+import com.openexchange.subscribe.mslive.internal.ContactParser;
 
 /**
  * {@link ContactsMSLiveSubscribeService}
@@ -64,6 +75,8 @@ import com.openexchange.subscribe.SubscriptionSource;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class ContactsMSLiveSubscribeService extends AbstractMSLiveSubscribeService implements SubscribeService {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactsMSLiveSubscribeService.class);
 
     private final SubscriptionSource source;
 
@@ -94,8 +107,39 @@ public class ContactsMSLiveSubscribeService extends AbstractMSLiveSubscribeServi
      */
     @Override
     public Collection<?> getContent(Subscription subscription) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        final Session session = subscription.getSession();
+        final OAuthAccount oauthAccount = MSLiveApiClient.getDefaultOAuthAccount(session);
+        final String accessToken = MSLiveApiClient.getAccessToken(oauthAccount, session);
+        final JSONObject contacts = fetchData(accessToken);
+        final ContactParser parser = new ContactParser();
+        return parser.parse(contacts);
     }
 
+    /**
+     * @param accessToken
+     * @return
+     */
+    private JSONObject fetchData(final String accessToken) {
+        JSONObject wholeResponse = new JSONObject();
+        try {
+            final String protectedUrl = "https://apis.live.net/v5.0/me/contacts?access_token=" + URLEncoder.encode(accessToken, "UTF-8");
+            final GetMethod getMethod = new GetMethod(protectedUrl);
+
+            final HttpClient client = new HttpClient();
+            client.getParams().setParameter("http.protocol.content-charset", "UTF-8");
+            client.getParams().setParameter("http.protocol.single-cookie-header", Boolean.TRUE);
+            client.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
+            client.executeMethod(getMethod);
+            String response = getMethod.getResponseBodyAsString();
+            wholeResponse = new JSONObject(response);
+
+        } catch (final HttpException e) {
+            LOG.error("", e);
+        } catch (final IOException e) {
+            LOG.error("", e);
+        } catch (final JSONException e) {
+            LOG.error("", e);
+        }
+        return wholeResponse;
+    }
 }

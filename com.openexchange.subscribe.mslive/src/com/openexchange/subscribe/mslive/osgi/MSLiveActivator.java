@@ -49,6 +49,8 @@
 
 package com.openexchange.subscribe.mslive.osgi;
 
+import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -64,17 +66,14 @@ public class MSLiveActivator extends HousekeepingActivator {
      */
     @Override
     protected Class<?>[] getNeededServices() {
-        // TODO Auto-generated method stub
-        return null;
+        return new Class<?>[] { OAuthService.class };
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
-     */
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
+        track(OAuthServiceMetaData.class, new OAuthServiceMetaDataRegisterer(this, context));
+        openTrackers();
     }
 
 }
