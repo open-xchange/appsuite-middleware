@@ -94,6 +94,7 @@ public final class MailAccountDescription implements Serializable {
     private int mailPort;
     private String mailProtocol;
     private boolean mailSecure;
+    private TransportAuth transportAuth;
     private String transportServer;
     private int transportPort;
     private String transportProtocol;
@@ -118,6 +119,7 @@ public final class MailAccountDescription implements Serializable {
         super();
         properties = new HashMap<String, String>(4);
         transportProperties = new HashMap<String, String>(4);
+        transportAuth = TransportAuth.MAIL;
         transportPort = 25;
         mailPort = 143;
         transportProtocol = "smtp";
@@ -298,6 +300,15 @@ public final class MailAccountDescription implements Serializable {
     }
 
     /**
+     * Gets the transport authentication information
+     *
+     * @return The transport authentication information
+     */
+    public TransportAuth getTransportAuth() {
+        return transportAuth;
+    }
+
+    /**
      * Gets the transport server name.
      * <p>
      * The transport server name can either be a machine name, such as "<code>java.sun.com</code>", or a textual representation of its IP
@@ -334,6 +345,15 @@ public final class MailAccountDescription implements Serializable {
      */
     public boolean isTransportSecure() {
         return transportSecure;
+    }
+
+    /**
+     * Sets the transport authentication information
+     *
+     * @param transportAuth The transport authentication information to set
+     */
+    public void setTransportAuth(TransportAuth transportAuth) {
+        this.transportAuth = transportAuth;
     }
 
     /**

@@ -1,3 +1,25 @@
+* 2014-08-28 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 34183: Make infostore driver available once "com.openexchange.infostore" is the only account for the user
+
+* 2014-08-27 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 34133: Removed XING relevant properties from the crawler.properties as well as the definition of the crawler itself (xing.yml) 
+
+* 2014-08-27 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 33158: Changed date/time label in notification mails.
+
+* 2014-08-27 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32994: Map "Job Title" to field "position" for import of Outlook-style .csv-files
+ - Fix for bug 33931: Adjust the "created by" and "modified by" properties of contacts in shared folders to the ID of the context 
+                      administrator in case the user who created those contacts is deleted.
+
+* 2014-08-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 33535: Respect info store quota when "publish attachment on exceeded quota" is enabled
+
 * 2014-08-26 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 34147: Supply OneCharSequence with proper toString() implementation

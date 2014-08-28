@@ -66,6 +66,7 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.TransportAuth;
 import com.openexchange.mailaccount.json.actions.AbstractMailAccountAction;
 import com.openexchange.mailaccount.json.fields.MailAccountFields;
 import com.openexchange.mailaccount.json.fields.MailAccountGetSwitch;
@@ -101,7 +102,8 @@ public final class MailAccountWriter implements MailAccountFields {
         Attribute.TRANSPORT_PROTOCOL_LITERAL,
         Attribute.TRANSPORT_SECURE_LITERAL,
         Attribute.TRANSPORT_SERVER_LITERAL,
-        Attribute.TRANSPORT_URL_LITERAL);
+        Attribute.TRANSPORT_URL_LITERAL,
+        Attribute.TRANSPORT_AUTH_LITERAL);
 
     private static volatile Boolean hideDetailsForDefaultAccount;
     private static boolean hideDetailsForDefaultAccount() {
@@ -203,6 +205,12 @@ public final class MailAccountWriter implements MailAccountFields {
             json.put(MAIL_SERVER, account.getMailServer());
             json.put(MAIL_URL, account.generateMailServerURL());
 
+            {
+                TransportAuth transportAuth = account.getTransportAuth();
+                if (null != transportAuth) {
+                    json.put(TRANSPORT_AUTH, transportAuth.getId());
+                }
+            }
             json.put(TRANSPORT_PORT, account.getTransportPort());
             json.put(TRANSPORT_PROTOCOL, account.getTransportProtocol());
             json.put(TRANSPORT_SECURE, account.isTransportSecure());

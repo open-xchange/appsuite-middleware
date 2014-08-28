@@ -248,6 +248,11 @@ public class GetSwitch implements AttributeSwitch {
     }
 
     @Override
+    public Object transportAuth() {
+        return desc.getTransportAuth();
+    }
+
+    @Override
     public Object pop3DeleteWriteThrough() {
         return Boolean.valueOf(desc.getProperties().get("pop3.deletewt"));
     }

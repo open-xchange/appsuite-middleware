@@ -131,6 +131,13 @@ public interface MailAccount extends Serializable {
     public boolean isMailSecure();
 
     /**
+     * Gets the transport authentication information
+     *
+     * @return The transport authentication information
+     */
+    public TransportAuth getTransportAuth();
+
+    /**
      * Gets the transport server name.
      * <p>
      * The transport server name can either be a machine name, such as "<code>java.sun.com</code>", or a textual representation of its IP

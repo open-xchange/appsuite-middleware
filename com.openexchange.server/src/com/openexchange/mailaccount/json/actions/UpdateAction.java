@@ -88,6 +88,7 @@ import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.Tools;
+import com.openexchange.mailaccount.TransportAuth;
 import com.openexchange.mailaccount.json.fields.MailAccountFields;
 import com.openexchange.mailaccount.json.parser.MailAccountParser;
 import com.openexchange.mailaccount.json.writer.MailAccountWriter;
@@ -121,11 +122,21 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
 
     @Override
     protected AJAXRequestResult innerPerform(final AJAXRequestData requestData, final ServerSession session, final JSONValue jData) throws OXException, JSONException {
-        final MailAccountDescription accountDescription = new MailAccountDescription();
-        final List<OXException> warnings = new LinkedList<OXException>();
-        final Set<Attribute> fieldsToUpdate = MailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings);
+        MailAccountDescription accountDescription = new MailAccountDescription();
+        List<OXException> warnings = new LinkedList<OXException>();
+        Set<Attribute> fieldsToUpdate = MailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings);
 
-        final int id = accountDescription.getId();
+        if (fieldsToUpdate.contains(Attribute.TRANSPORT_AUTH_LITERAL)) {
+            TransportAuth transportAuth = accountDescription.getTransportAuth();
+            if (TransportAuth.MAIL.equals(transportAuth) || TransportAuth.NONE.equals(transportAuth)) {
+                fieldsToUpdate.add(Attribute.TRANSPORT_LOGIN_LITERAL);
+                fieldsToUpdate.add(Attribute.TRANSPORT_PASSWORD_LITERAL);
+                accountDescription.setTransportLogin(null);
+                accountDescription.setTransportPassword(null);
+            }
+        }
+
+        int id = accountDescription.getId();
         if (-1 == id) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(MailAccountFields.ID);
         }
@@ -290,7 +301,7 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
 
     /**
      * Fills the provided {@link MailAccountDescription} with already existing data if they are not existing in fieldsToUpdate
-     * 
+     *
      * @param accountDescription
      * @param fieldsToUpdate
      * @param toUpdate

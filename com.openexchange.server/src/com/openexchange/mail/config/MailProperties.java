@@ -711,9 +711,7 @@ public final class MailProperties implements IMailProperties {
             properties.load(in);
             return properties;
         } catch (final IOException e) {
-            throw MailConfigException.create(
-                new StringBuilder(256).append("I/O error: ").append(e.getMessage()).toString(),
-                e);
+            throw MailConfigException.create(new StringBuilder(256).append("I/O error: ").append(e.getMessage()).toString(), e);
         } finally {
             Streams.close(in);
         }

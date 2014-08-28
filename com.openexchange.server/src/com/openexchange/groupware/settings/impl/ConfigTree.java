@@ -222,9 +222,10 @@ public final class ConfigTree {
     }
 
     private static void addElementWithoutOverwriting(final TreeSetting actual, final TreeSetting subSetting) throws OXException {
-        if (actual.getElement(subSetting.getName()) != null) {
+        if (false == actual.checkElement(subSetting)) {
             throw SettingExceptionCodes.DUPLICATE_PATH.create(actual.getPath() + "/" + subSetting.getName());
         }
+
         actual.addElement(subSetting);
         subSetting.setParent(actual);
     }

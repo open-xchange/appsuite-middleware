@@ -101,7 +101,7 @@
                 clear: both;
                 padding: 5px;
             }
-            .button a{
+            .template-button{
                 display: inline-block;
                 background: #333;
                 padding: 6px 12px;
@@ -112,18 +112,28 @@
                 border-radius: 4px;
                 text-decoration: none;
             }
-            .button a:hover {
+            .template-button:hover {
                 background: #666;
                 color: #fff;
                 text-decoration: none;
             }
-            .carousel-caption {
-                padding-bottom: 0;
+            .download-button {
+            	float: right;
             }
-            .carousel-caption h3 {
-                padding-bottom: 0;
-                font-size: 20px;
-                text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
+            .carousel-caption {
+                background-color: rgba(0,0,0,0.3);
+                padding-bottom: 5px;
+                padding-top: 5px;
+                right: 10px;
+                left: 10px;
+                bottom: 10px;
+            }
+            .carousel-caption .title {
+                font-size: 16px;
+                font-weight: bold;
+            }
+            .carousel-caption .description {
+                font-size: 13px;
             }
             @media (max-width: 1024px),(max-device-width: 1024px) {
                 .thumbnail-image {
@@ -147,6 +157,7 @@
                     <#--Check for the correct file type-->
                     <#if (item.fileName!?last_index_of('.') >= 0) && (item.fileName!?substring(item.fileName!?last_index_of('.') + 1)?lower_case)?matches('(gif|bmp|tiff|jpe?g|png)')>
                         {url: '${utils.getScheme(request)!"http"}${request.serverName}${utils.getFileURL(publication, item)!?html}',
+                        description: '${htmlService.htmlFormat(item.description!"")}',
                         name: '${item.fileName!?substring(0, item.fileName!?last_index_of('.'))}'}<#if item_has_next>,</#if>
                     </#if>
                 </#if>
@@ -180,11 +191,20 @@
                  * @param {integer} The index of the middle image to load.
                  */
                 function ensureImages(index) {
+
                     ensureImage(index);
 
                     ensureImage(index + 1);
 
                     ensureImage(index - 1);
+
+                    var correctedIndex = index;
+                    if(index < 0) {
+                        correctedIndex += list.length;
+                    } else if(index >= list.length) {
+                        correctedIndex -= list.length;
+                    }
+                    carouselContainer.find('.download-button').attr({href: list[correctedIndex].url + '&delivery=download'});
                 }
 
                 /**
@@ -203,9 +223,10 @@
                         $(child).append(
                             $('<img>').attr({src: getURL(index)}).addClass('display-image'),
                             $('<div>').addClass('carousel-caption').append(
-                                $('<h3>').text(list[index].name)
+                                $('<div class="title">').text(list[index].name),
+                                $('<div class="description">').text(list[index].description)
                             )
-                        )
+                        );
                     }
                 }
 
@@ -254,6 +275,16 @@
                 function initCarousel() {
                     itemContainer = $('<div>').addClass('carousel-inner');
 
+                    carouselContainer = $('<div>').addClass('carousel-container').append(
+                        $('<div>').addClass('back-container').append(
+                            $('<a class="template-button">').attr({href: '#'}).text('Back')
+                                .click(function () {
+                                    closePopup();
+                                }),
+                            $('<a class="template-button download-button">').text('Download')
+                        )
+                    );
+
                     carousel = $('<div>').attr({
                         id: 'carousel-display',
                         'class': 'carousel slide'
@@ -280,21 +311,12 @@
                             })
                             .on('swipeleft', function () {
                                 carousel.carousel('next');
-
                                 var index = carousel.find('.active').data('index');
                                 ensureImages(index + 1);
                             })
                     );
 
-                    carouselContainer = $('<div>').addClass('carousel-container').append(
-                        carousel,
-                        $('<div>').addClass('back-container button').append(
-                            $('<a>').attr({href: '#'}).text('Back')
-                                .click(function () {
-                                    closePopup();
-                                })
-                        )
-                    );
+                    carouselContainer.append(carousel);
 
                     carousel.carousel({interval: false});
 
