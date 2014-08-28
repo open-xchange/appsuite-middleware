@@ -102,7 +102,7 @@ public class LiquibaseTest extends AbstractAJAXSession {
 
                         // further tests
                         int parseInt = Integer.parseInt(tableSizeString);
-                        Assert.assertEquals(255, parseInt);
+                        Assert.assertEquals("Parsed column size of login_info does not match with required 255", parseInt);
                         break;
                     }
                 }
@@ -110,7 +110,7 @@ public class LiquibaseTest extends AbstractAJAXSession {
         } catch (final Exception x) {
             System.out.println(x.getLocalizedMessage());
         }
-        Assert.assertTrue(loginInfoCorrectType);
+        Assert.assertTrue("Did not found column size 255 for 'login_info' within 'SHOW CREATE TABLE login2context'", loginInfoCorrectType);
     }
 
     private void setAuth(HttpClient client) {
