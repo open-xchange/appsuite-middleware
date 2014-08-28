@@ -49,22 +49,12 @@
 
 package com.openexchange.subscribe.mslive;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.cookie.CookiePolicy;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.RequestEntity;
-import org.apache.commons.httpclient.methods.StringRequestEntity;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.scribe.builder.ServiceBuilder;
+import org.scribe.builder.api.MsLiveConnectApi;
+import org.scribe.model.Token;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.session.Session;
 import com.openexchange.subscribe.mslive.osgi.Services;
@@ -92,40 +82,11 @@ public class MSLiveApiClient {
      * @throws OXException
      */
     public static String getAccessToken(OAuthAccount account, Session session) throws OXException {
-        String callback = null;
-        try {
-            JSONObject metadata = new JSONObject(account.getSecret());
-            callback = metadata.getString("callback");
-        } catch (JSONException x) {
-            throw OAuthExceptionCodes.INVALID_ACCOUNT.create(account.getDisplayName(), account.getId());
-        }
-        String accessToken = "";
-
-        try {
-            final HttpClient client = new HttpClient();
-            client.getParams().setParameter("http.protocol.single-cookie-header", Boolean.TRUE);
-            client.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
-            final PostMethod postMethod = new PostMethod(
-                "https://login.live.com/oauth20_token.srf?client_id=" + account.getMetaData().getAPIKey(session) + "&redirect_uri=" + URLEncoder.encode(
-                    callback,
-                    "UTF-8") + "&client_secret=" + URLEncoder.encode(account.getMetaData().getAPISecret(session), "UTF-8") + "&refresh_token=" + account.getToken() + "&grant_type=refresh_token");
-
-            RequestEntity requestEntity;
-            requestEntity = new StringRequestEntity(postMethod.getQueryString(), "application/x-www-form-urlencoded", "UTF-8");
-            postMethod.setRequestEntity(requestEntity);
-            client.executeMethod(postMethod);
-            final String response = URLDecoder.decode(postMethod.getResponseBodyAsString(), "UTF-8");
-            return new JSONObject(response).getString("access_token");
-        } catch (final UnsupportedEncodingException e) {
-            //LOG.error("", e);
-        } catch (final HttpException e) {
-            //LOG.error("", e);
-        } catch (final IOException e) {
-            //LOG.error("", e);
-        } catch (JSONException e) {
-            //LOG.error("", e);
-        }
-        return accessToken;
+        final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(MsLiveConnectApi.class);
+        serviceBuilder.apiKey(account.getMetaData().getAPIKey(session)).apiSecret(account.getMetaData().getAPISecret(session));
+        org.scribe.oauth.OAuthService service = serviceBuilder.build();
+        Token accessToken = service.getAccessToken(new Token(account.getToken(), account.getSecret()), null);
+        return accessToken.getToken();
     }
 
 }
