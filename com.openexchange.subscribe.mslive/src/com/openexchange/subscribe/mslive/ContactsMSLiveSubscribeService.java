@@ -51,48 +51,45 @@ package com.openexchange.subscribe.mslive;
 
 import java.util.Collection;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.subscribe.AbstractSubscribeService;
+import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
 
 /**
- * {@link MSLiveSubscribeService}
+ * {@link ContactsMSLiveSubscribeService}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class MSLiveSubscribeService extends AbstractSubscribeService {
+public class ContactsMSLiveSubscribeService extends AbstractMSLiveSubscribeService implements SubscribeService {
+
+    private final SubscriptionSource source;
 
     /**
-     * Initializes a new {@link MSLiveSubscribeService}.
+     * Initializes a new {@link ContactsMSLiveSubscribeService}.
+     * 
      * @param oAuthServiceMetaData
      * @param services
      */
-    public MSLiveSubscribeService(OAuthServiceMetaData oAuthServiceMetaData, ServiceLookup services) {
-        super();
-        
+    public ContactsMSLiveSubscribeService(OAuthServiceMetaData oAuthServiceMetaData, ServiceLookup services) {
+        super(oAuthServiceMetaData, services);
+        source = initSS(FolderObject.CONTACT, "contact");
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.subscribe.SubscribeService#getSubscriptionSource()
-     */
     @Override
     public SubscriptionSource getSubscriptionSource() {
-        // TODO Auto-generated method stub
-        return null;
+        return source;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.subscribe.SubscribeService#handles(int)
-     */
     @Override
     public boolean handles(int folderModule) {
-        // TODO Auto-generated method stub
-        return false;
+        return FolderObject.CONTACT == folderModule;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.subscribe.SubscribeService#getContent(com.openexchange.subscribe.Subscription)
      */
     @Override

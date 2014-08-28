@@ -58,7 +58,7 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.SubscribeService;
-import com.openexchange.subscribe.mslive.MSLiveSubscribeService;
+import com.openexchange.subscribe.mslive.ContactsMSLiveSubscribeService;
 
 /**
  * {@link OAuthServiceMetaDataRegisterer}
@@ -73,7 +73,7 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
 
     private final BundleContext context;
 
-    private volatile ServiceRegistration<SubscribeService> registration;
+    private volatile ServiceRegistration<SubscribeService> contactsRegistration;
 
     /**
      * Initializes a new {@link OAuthServiceMetaDataRegisterer}.
@@ -94,8 +94,8 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
         final OAuthServiceMetaData oAuthServiceMetaData = context.getService(ref);
         if (oauthIdentifier.equals(oAuthServiceMetaData.getId())) {
             logger.info("Registering MS Live subscription services.");
-            final SubscribeService msliveSubService = new MSLiveSubscribeService(oAuthServiceMetaData, services);
-            registration = context.registerService(SubscribeService.class, msliveSubService, null);
+            final SubscribeService msliveSubService = new ContactsMSLiveSubscribeService(oAuthServiceMetaData, services);
+            contactsRegistration = context.registerService(SubscribeService.class, msliveSubService, null);
         }
         return oAuthServiceMetaData;
     }
@@ -111,10 +111,10 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
         if (service.getId().equals(oauthIdentifier)) {
             logger.info("Unregistering MS Live subscription services.");
 
-            ServiceRegistration<SubscribeService> registration = this.registration;
+            ServiceRegistration<SubscribeService> registration = this.contactsRegistration;
             if (null != registration) {
                 registration.unregister();
-                this.registration = null;
+                this.contactsRegistration = null;
             }
         }
         context.ungetService(ref);

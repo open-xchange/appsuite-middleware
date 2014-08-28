@@ -5,9 +5,12 @@ Bundle-SymbolicName: com.openexchange.subscribe.mslive
 Bundle-Version: 7.6.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.exception,
+Import-Package: com.openexchange.datatypes.genericonf,
+ com.openexchange.exception,
  com.openexchange.groupware,
+ com.openexchange.groupware.container,
  com.openexchange.groupware.ldap,
+ com.openexchange.i18n,
  com.openexchange.oauth,
  com.openexchange.osgi,
  com.openexchange.server,
