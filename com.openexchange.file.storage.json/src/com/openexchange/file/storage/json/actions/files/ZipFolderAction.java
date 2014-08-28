@@ -51,11 +51,13 @@ package com.openexchange.file.storage.json.actions.files;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
@@ -142,17 +144,27 @@ public class ZipFolderAction extends AbstractFileAction {
             return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
         }
 
-        throw AjaxExceptionCodes.BAD_REQUEST.create();
+        // No direct response possible
+        // Check against threshold
+        checkThreshold(folderId, fileAccess, folderAccess);
+
+        // Create archive
+        ThresholdFileHolder fileHolder = new ThresholdFileHolder();
+        fileHolder.setDisposition("attachment");
+        fileHolder.setName(folderName + ".zip");
+        fileHolder.setContentType("application/zip");
+        fileHolder.setDelivery("download");
+
+        // Create ZIP archive
+        createZipArchive(folderId, fileAccess, folderAccess, fileHolder.asOutputStream());
+        ajaxRequestData.setFormat("file");
+
+        return new AJAXRequestResult(fileHolder, "file");
     }
 
-    private void createZipArchive(String folderId, String saneFolderName, IDBasedFileAccess fileAccess, IDBasedFolderAccess idBasedFolderAccess, AJAXRequestData ajaxRequestData) throws OXException {
+    private void createZipArchive(String folderId, String saneFolderName, IDBasedFileAccess fileAccess, IDBasedFolderAccess folderAccess, AJAXRequestData ajaxRequestData) throws OXException {
         // Check against threshold
-        {
-            long threshold = threshold();
-            if (threshold > 0) {
-                examineFolder4Archive(folderId, fileAccess, idBasedFolderAccess, 0L, threshold);
-            }
-        }
+        checkThreshold(folderId, fileAccess, folderAccess);
 
         // Set HTTP response headers
         {
@@ -162,10 +174,26 @@ public class ZipFolderAction extends AbstractFileAction {
             ajaxRequestData.setResponseHeader("Content-Disposition", sb.toString());
         }
 
+        // Create ZIP archive
+        try {
+            createZipArchive(folderId, fileAccess, folderAccess, ajaxRequestData.optOutputStream());
+        } catch (IOException e) {
+            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private void checkThreshold(String folderId, IDBasedFileAccess fileAccess, IDBasedFolderAccess folderAccess) throws OXException {
+        long threshold = threshold();
+        if (threshold > 0) {
+            examineFolder4Archive(folderId, fileAccess, folderAccess, 0L, threshold);
+        }
+    }
+
+    private void createZipArchive(String folderId, IDBasedFileAccess fileAccess, IDBasedFolderAccess folderAccess, OutputStream out) throws OXException {
         ZipArchiveOutputStream zipOutput = null;
         try {
             // Initialize ZIP output stream
-            zipOutput = new ZipArchiveOutputStream(ajaxRequestData.optOutputStream());
+            zipOutput = new ZipArchiveOutputStream(out);
             zipOutput.setEncoding("UTF-8");
             zipOutput.setUseLanguageEncodingFlag(true);
 
@@ -174,16 +202,14 @@ public class ZipFolderAction extends AbstractFileAction {
             byte[] buf = new byte[buflen];
 
             // Add to ZIP archive
-            addFolder2Archive(folderId, fileAccess, idBasedFolderAccess, zipOutput, "", buflen, buf);
-        } catch (final IOException e) {
-            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            addFolder2Archive(folderId, fileAccess, folderAccess, zipOutput, "", buflen, buf);
         } finally {
             // Complete the ZIP file
             Streams.close(zipOutput);
         }
     }
 
-    private void examineFolder4Archive(String folderId, IDBasedFileAccess fileAccess, IDBasedFolderAccess idBasedFolderAccess, long totalSize, long threshold) throws OXException {
+    private void examineFolder4Archive(String folderId, IDBasedFileAccess fileAccess, IDBasedFolderAccess folderAccess, long totalSize, long threshold) throws OXException {
         List<Field> columns = Arrays.<File.Field> asList(File.Field.ID, File.Field.FILE_SIZE);
         SearchIterator<File> it = fileAccess.getDocuments(folderId, columns).results();
         try {
@@ -203,9 +229,9 @@ public class ZipFolderAction extends AbstractFileAction {
             SearchIterators.close(it);
             it = null;
 
-            if (null != idBasedFolderAccess) {
-                for (FileStorageFolder f : idBasedFolderAccess.getSubfolders(folderId, false)) {
-                    examineFolder4Archive(f.getId(), fileAccess, idBasedFolderAccess, total, threshold);
+            if (null != folderAccess) {
+                for (FileStorageFolder f : folderAccess.getSubfolders(folderId, false)) {
+                    examineFolder4Archive(f.getId(), fileAccess, folderAccess, total, threshold);
                 }
             }
         } finally {
