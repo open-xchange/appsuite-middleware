@@ -138,25 +138,28 @@ public class ZipFolderAction extends AbstractFileAction {
 
         AJAXRequestData ajaxRequestData = request.getRequestData();
         if (ajaxRequestData.setResponseHeader("Content-Type", "application/zip")) {
-            final StringBuilder sb = new StringBuilder(512);
-            sb.append("attachment");
-            DownloadUtility.appendFilenameParameter(folderName + ".zip", "application/zip", ajaxRequestData.getUserAgent(), sb);
-            ajaxRequestData.setResponseHeader("Content-Disposition", sb.toString());
-            createZipArchive(folderId, fileAccess, recursive ? folderAccess : null, ajaxRequestData);
-            // Streamed
+            createZipArchive(folderId, folderName, fileAccess, recursive ? folderAccess : null, ajaxRequestData);
             return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
         }
 
         throw AjaxExceptionCodes.BAD_REQUEST.create();
     }
 
-    private void createZipArchive(String folderId, IDBasedFileAccess fileAccess, IDBasedFolderAccess idBasedFolderAccess, AJAXRequestData ajaxRequestData) throws OXException {
+    private void createZipArchive(String folderId, String saneFolderName, IDBasedFileAccess fileAccess, IDBasedFolderAccess idBasedFolderAccess, AJAXRequestData ajaxRequestData) throws OXException {
         // Check against threshold
         {
             long threshold = threshold();
             if (threshold > 0) {
                 examineFolder4Archive(folderId, fileAccess, idBasedFolderAccess, 0L, threshold);
             }
+        }
+
+        // Set HTTP response headers
+        {
+            final StringBuilder sb = new StringBuilder(512);
+            sb.append("attachment");
+            DownloadUtility.appendFilenameParameter(saneFolderName + ".zip", "application/zip", ajaxRequestData.getUserAgent(), sb);
+            ajaxRequestData.setResponseHeader("Content-Disposition", sb.toString());
         }
 
         ZipArchiveOutputStream zipOutput = null;
@@ -191,8 +194,8 @@ public class ZipFolderAction extends AbstractFileAction {
                 if (fileSize > 0) {
                     total += fileSize;
                     if (total > threshold) {
-                        String string = "ZIP archive exceeds max. allowed size of " + UploadUtility.getSize(threshold, 2, false, true);
-                        throw AjaxExceptionCodes.HTTP_ERROR.create(HttpServletResponse.SC_FORBIDDEN, string);
+                        String msg = "ZIP archive exceeds max. allowed size of " + UploadUtility.getSize(threshold, 2, false, true);
+                        throw AjaxExceptionCodes.HTTP_ERROR.create(HttpServletResponse.SC_FORBIDDEN, msg);
                     }
                 }
             }
