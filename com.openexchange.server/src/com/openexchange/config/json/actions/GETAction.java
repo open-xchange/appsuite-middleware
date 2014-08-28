@@ -86,7 +86,7 @@ public final class GETAction extends AbstractConfigAction {
 
     @Override
     protected AJAXRequestResult perform(final ConfigAJAXRequest req) throws OXException, JSONException {
-        String path = req.getRequest().getSerlvetRequestURI(); 
+        String path = req.getRequest().getSerlvetRequestURI();
         if (path.length() > 0 && path.charAt(0) == '/') {
             path = path.substring(1);
         }
@@ -147,7 +147,9 @@ public final class GETAction extends AbstractConfigAction {
             final Setting[] elements = setting.getElements();
             final JSONObject json = new JSONObject(elements.length);
             for (final Setting subSetting : elements) {
-                json.put(subSetting.getName(), convert2JS(subSetting));
+                if (null != subSetting) {
+                    json.put(subSetting.getName(), convert2JS(subSetting));
+                }
             }
             retval = json;
         }
