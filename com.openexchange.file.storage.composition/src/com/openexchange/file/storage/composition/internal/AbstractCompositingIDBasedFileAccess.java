@@ -790,32 +790,26 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
                     return;
                 }
             }
-            if (null != sourceFileID.getFolderId() && false == sourceFileID.getFolderId().equals(targetFolderID.getFolderId())) {
+            FileStorageFileAccess fileAccess = getFileAccess(sourceFileID.getService(), sourceFileID.getAccountId());
+            final IDTuple sourceIDTuple = new IDTuple(sourceFileID.getFolderId(), sourceFileID.getFileId());
+            ensureFolderIDs(fileAccess, Collections.singletonList(sourceIDTuple));
+            if (null != sourceIDTuple.getFolder() && false == sourceIDTuple.getFolder().equals(targetFolderID.getFolderId())) {
                 /*
                  * special handling for move to different folder
                  */
-                final FolderID sourceFolderID = new FolderID(
-                    sourceFileID.getService(),
-                    sourceFileID.getAccountId(),
-                    sourceFileID.getFolderId());
-                final IDTuple sourceID = new IDTuple(sourceFileID.getFolderId(), sourceFileID.getFileId());
-                document.setFolderId(sourceID.getFolder());
-                document.setId(sourceID.getId());
-
+                FolderID sourceFolderID = new FolderID(sourceFileID.getService(), sourceFileID.getAccountId(), sourceIDTuple.getFolder());
+                document.setFolderId(sourceIDTuple.getFolder());
+                document.setId(sourceIDTuple.getId());
                 final TransactionAwareFileAccessDelegation<IDTuple> moveDelegation = new TransactionAwareFileAccessDelegation<IDTuple>() {
 
                     @Override
                     protected IDTuple callInTransaction(final FileStorageFileAccess access) throws OXException {
-                        return access.move(sourceID, targetFolderID.getFolderId(), sequenceNumber, document, modifiedColumns);
+                        return access.move(sourceIDTuple, targetFolderID.getFolderId(), sequenceNumber, document, modifiedColumns);
                     }
                 };
-                final IDTuple newID = moveDelegation.call(getFileAccess(sourceFileID.getService(), sourceFileID.getAccountId()));
+                IDTuple newID = moveDelegation.call(fileAccess);
 
-                final FileID newFileID = new FileID(
-                    sourceFileID.getService(),
-                    sourceFileID.getAccountId(),
-                    newID.getFolder(),
-                    newID.getId());
+                FileID newFileID = new FileID(sourceFileID.getService(), sourceFileID.getAccountId(), newID.getFolder(), newID.getId());
                 postEvent(FileStorageEventHelper.buildDeleteEvent(
                     session,
                     sourceFileID.getService(),

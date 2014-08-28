@@ -1,6 +1,7 @@
 * 2014-08-28 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 34183: Make infostore driver available once "com.openexchange.infostore" is the only account for the user
+ - Fix for bug 34092: Ensure source folder ID is known for event processing when moving files within infostore file storage
 
 * 2014-08-27 - ioannis.chouklis@open-xchange.com
 
