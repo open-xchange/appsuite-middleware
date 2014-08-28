@@ -100,7 +100,6 @@ public class ZipFolderAction extends AbstractFileAction {
                 tmp = threshold;
                 if (null == tmp) {
                     long defaultThreshold = 1073741824;
-                    defaultThreshold = 1024;
                     ConfigurationService service = Services.getConfigurationService();
                     if (null == service) {
                         return defaultThreshold;
