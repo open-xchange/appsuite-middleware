@@ -116,8 +116,8 @@ public class ZipFolderAction extends AbstractFileAction {
 
     @Override
     public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
-
         IDBasedFileAccess fileAccess = request.getFileAccess();
+        IDBasedFolderAccess folderAccess = request.getFolderAccess();
 
         String folderId = request.getFolderId();
         if (Strings.isEmpty(folderId)) {
@@ -130,14 +130,20 @@ public class ZipFolderAction extends AbstractFileAction {
             recursive = AJAXRequestDataTools.parseBoolParameter(tmp);
         }
 
+        String folderName;
+        {
+            folderName = folderAccess.getFolder(folderId).getName();
+            folderName = saneForFileName(folderName);
+        }
+
         AJAXRequestData ajaxRequestData = request.getRequestData();
         if (ajaxRequestData.setResponseHeader("Content-Type", "application/zip")) {
             try {
                 final StringBuilder sb = new StringBuilder(512);
                 sb.append("attachment");
-                DownloadUtility.appendFilenameParameter("archive.zip", "application/zip", ajaxRequestData.getUserAgent(), sb);
+                DownloadUtility.appendFilenameParameter(folderName + ".zip", "application/zip", ajaxRequestData.getUserAgent(), sb);
                 ajaxRequestData.setResponseHeader("Content-Disposition", sb.toString());
-                createZipArchive(folderId, fileAccess, recursive ? request.getFolderAccess() : null, ajaxRequestData.optOutputStream());
+                createZipArchive(folderId, fileAccess, recursive ? folderAccess : null, ajaxRequestData.optOutputStream());
                 // Streamed
                 return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
             } catch (final IOException e) {
@@ -307,5 +313,36 @@ public class ZipFolderAction extends AbstractFileAction {
         }
     }
 
+    private static String saneForFileName(final String fileName) {
+        if (Strings.isEmpty(fileName)) {
+            return "archive";
+        }
+        final int len = fileName.length();
+        final StringBuilder sb = new StringBuilder(len);
+        char prev = '\0';
+        for (int i = 0; i < len; i++) {
+            final char c = fileName.charAt(i);
+            if (Strings.isWhitespace(c)) {
+                if (prev != '_') {
+                    prev = '_';
+                    sb.append(prev);
+                }
+            } else if ('/' == c) {
+                if (prev != '_') {
+                    prev = '_';
+                    sb.append(prev);
+                }
+            } else if ('\\' == c) {
+                if (prev != '_') {
+                    prev = '_';
+                    sb.append(prev);
+                }
+            } else {
+                prev = '\0';
+                sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
 
 }
