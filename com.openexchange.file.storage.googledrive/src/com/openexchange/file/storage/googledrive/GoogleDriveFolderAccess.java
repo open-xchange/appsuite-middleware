@@ -174,7 +174,7 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
                 folders.add(parseGoogleDriveFolder(drive.files().get(childReference.getId()).execute(), drive));
             }
 
-            String nextPageToken = list.getPageToken();
+            String nextPageToken = childList.getNextPageToken();
             while (!isEmpty(nextPageToken)) {
                 list.setPageToken(nextPageToken);
                 childList = list.execute();
@@ -184,7 +184,7 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
                     }
                 }
 
-                nextPageToken = list.getPageToken();
+                nextPageToken = childList.getNextPageToken();
             }
 
             return folders.toArray(new FileStorageFolder[0]);
@@ -357,7 +357,7 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
                         drive.files().delete(child.getId()).execute();
                     }
 
-                    String nextPageToken = list.getPageToken();
+                    String nextPageToken = childList.getNextPageToken();
                     while (!isEmpty(nextPageToken)) {
                         list.setPageToken(nextPageToken);
                         childList = list.execute();
@@ -366,7 +366,7 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
                                 drive.files().delete(child.getId()).execute();
                             }
                         }
-                        nextPageToken = list.getPageToken();
+                        nextPageToken = childList.getNextPageToken();
                     }
                 }
             } else {
@@ -378,7 +378,7 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
                         drive.files().trash(child.getId()).execute();
                     }
 
-                    String nextPageToken = list.getPageToken();
+                    String nextPageToken = childList.getNextPageToken();
                     while (!isEmpty(nextPageToken)) {
                         list.setPageToken(nextPageToken);
                         childList = list.execute();
@@ -387,7 +387,7 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
                                 drive.files().trash(child.getId()).execute();
                             }
                         }
-                        nextPageToken = list.getPageToken();
+                        nextPageToken = childList.getNextPageToken();
                     }
                 }
             }

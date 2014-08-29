@@ -441,7 +441,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                     }
                 }
 
-                String nextPageToken = list.getPageToken();
+                String nextPageToken = childList.getNextPageToken();
                 while (!isEmpty(nextPageToken)) {
                     list.setPageToken(nextPageToken);
                     childList = list.execute();
@@ -455,7 +455,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                         }
                     }
 
-                    nextPageToken = list.getPageToken();
+                    nextPageToken = childList.getNextPageToken();
                 }
             }
         } catch (final HttpResponseException e) {
@@ -566,7 +566,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                     files.add(new GoogleDriveFile(folderId, fileId, userId, rootFolderId).parseGoogleDriveFile(drive.files().get(fileId).execute()));
                 }
 
-                String nextPageToken = list.getPageToken();
+                String nextPageToken = childList.getNextPageToken();
                 while (!isEmpty(nextPageToken)) {
                     list.setPageToken(nextPageToken);
                     childList = list.execute();
@@ -577,7 +577,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                         }
                     }
 
-                    nextPageToken = list.getPageToken();
+                    nextPageToken = childList.getNextPageToken();
                 }
             }
 
@@ -607,7 +607,8 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             Drive.Children.List list = drive.children().list(fid);
             list.setQ(QUERY_STRING_FILES_ONLY_EXCLUDING_TRASH);
 
-            List<ChildReference> items = list.execute().getItems();
+            ChildList childList = list.execute();
+            List<ChildReference> items = childList.getItems();
             List<File> files = new LinkedList<File>();
             if (!items.isEmpty()) {
                 for (ChildReference child : items) {
@@ -615,10 +616,11 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                     files.add(new GoogleDriveFile(folderId, fileId, userId, rootFolderId).parseGoogleDriveFile(drive.files().get(fileId).execute()));
                 }
 
-                String nextPageToken = list.getPageToken();
+                String nextPageToken = childList.getNextPageToken();
                 while (!isEmpty(nextPageToken)) {
                     list.setPageToken(nextPageToken);
-                    items = list.execute().getItems();
+                    childList = list.execute();
+                    items = childList.getItems();
                     if (!items.isEmpty()) {
                         for (ChildReference child : items) {
                             String fileId = child.getId();
@@ -626,7 +628,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                         }
                     }
 
-                    nextPageToken = list.getPageToken();
+                    nextPageToken = childList.getNextPageToken();
                 }
             }
 
@@ -858,7 +860,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                             files.add(new GoogleDriveFile(folderId, file.getId(), userId, rootFolderId).parseGoogleDriveFile(file));
                         }
 
-                        String nextPageToken = list.getPageToken();
+                        String nextPageToken = fileList.getNextPageToken();
                         while (!isEmpty(nextPageToken)) {
                             list.setPageToken(nextPageToken);
                             fileList = list.execute();
@@ -868,7 +870,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                                 }
                             }
 
-                            nextPageToken = list.getPageToken();
+                            nextPageToken = fileList.getNextPageToken();
                         }
                     }
                 }
@@ -896,7 +898,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                         files.add(new GoogleDriveFile(folderId, fileId, userId, rootFolderId).parseGoogleDriveFile(drive.files().get(fileId).execute()));
                     }
 
-                    String nextPageToken = list.getPageToken();
+                    String nextPageToken = fileList.getNextPageToken();
                     while (!isEmpty(nextPageToken)) {
                         list.setPageToken(nextPageToken);
                         fileList = list.execute();
@@ -907,7 +909,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                             }
                         }
 
-                        nextPageToken = list.getPageToken();
+                        nextPageToken = fileList.getNextPageToken();
                     }
                 }
             }
