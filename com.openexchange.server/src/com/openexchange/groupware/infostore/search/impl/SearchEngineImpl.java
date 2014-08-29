@@ -149,7 +149,6 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             return SearchIteratorAdapter.emptyIterator();
         }
 
-        LOG.debug("Searching in folders -- ALL: {}, OWN: {}", all, own);
         ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(I2i(all.toArray(new Integer[all.size()])),
             I2i(own.toArray(new Integer[own.size()])),
             ctx.getContextId(),
@@ -216,7 +215,6 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             }
         }
 
-        LOG.debug("Searching in folders -- ALL: {}, OWN: {}", all, own);
         if (Strings.isEmpty(query) || "*".equals(query)) {
             int maxResults;
             if (NOT_SET != start && NOT_SET != end && end >= start) {
