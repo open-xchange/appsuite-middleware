@@ -142,7 +142,7 @@ public abstract class AbstractSubscribeTestEnvironment {
     protected abstract void createSubscriptions() throws Exception;
 
     /**
-     * Create a google subscription
+     * Create a subscription
      * 
      * @param accountId
      * @param sourceId
@@ -152,7 +152,7 @@ public abstract class AbstractSubscribeTestEnvironment {
      * @throws Exception
      */
     protected void createSubscription(final int accountId, final String sourceId, final int module, final int parent, final int userId) throws Exception {
-        // Get subscription source for calendar
+        // Get subscription source
         FolderObject folder = createSubscriptionFolder(sourceId, module, parent, userId);
         final DynamicFormDescription formDescription = createDynamicFormDescription(sourceId);
         final Subscription subscription = createSubscription(formDescription, sourceId, accountId, folder.getObjectID());
@@ -167,7 +167,7 @@ public abstract class AbstractSubscribeTestEnvironment {
     }
 
     /**
-     * Returns the accound identifier that is bound to the specified service identifier
+     * Returns the account identifier that is bound to the specified service identifier
      * 
      * @param serviceID
      * @return
@@ -192,6 +192,7 @@ public abstract class AbstractSubscribeTestEnvironment {
                 }
             }
         }
+        
         return accountId;
     }
 

@@ -54,7 +54,6 @@ import org.json.JSONException;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.subscribe.google.GoogleSubscribeTestEnvironment;
 import com.openexchange.test.ContactTestManager;
 import com.openexchange.test.FolderTestManager;
 
@@ -68,7 +67,7 @@ public class SubscribeMSLiveContactsTest extends AbstractAJAXSession {
     protected static final String CONTACT_SOURCE_ID = "com.openexchange.subscribe.mslive.contact";
 
     private FolderTestManager folderMgr;
-    
+
     private ContactTestManager contactMgr;
 
     /**
@@ -92,27 +91,31 @@ public class SubscribeMSLiveContactsTest extends AbstractAJAXSession {
         }
         super.tearDown();
     }
-    
+
     private int getContactTestFolderID() {
         return getTestFolderID(MSLiveSubscribeTestEnvironment.CONTACT_SOURCE_ID);
     }
-    
+
     private int getTestFolderID(final String id) {
-        return GoogleSubscribeTestEnvironment.getInstance().getTestFolders().get(id);
+        return MSLiveSubscribeTestEnvironment.getInstance().getTestFolders().get(id);
     }
 
     public void testSubscribe() throws OXException, IOException, JSONException, Exception {
         Contact[] contacts = contactMgr.allAction(getContactTestFolderID(), Contact.ALL_COLUMNS);
-        
+
         // represents a full supported contact mapping
         final String testAccount1 = "Dr. Test Testerson";
-        
+
         for (Contact c : contacts) {
-            if (c.getDisplayName() != null)
+            if (c.getDisplayName() != null) {
                 if (c.getDisplayName().equals(testAccount1)) {
-                    assertNotNull("given name", c.getGivenName());
                     assertEquals("given name", "Test", c.getGivenName());
+                    assertEquals("sur_name", "Testerson", c.getSurName());
+                    assertEquals("email1", "invalid@home-private.com", c.getEmail1());
+                    assertEquals("email1", "custom@custom.invalid", c.getEmail2());
+                    assertEquals("email1", "test@invalid.org", c.getEmail3());
                 }
+            }
         }
     }
 }
