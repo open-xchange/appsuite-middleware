@@ -47,34 +47,46 @@
  *
  */
 
-package com.openexchange.subscribe.mslive.osgi;
+package com.openexchange.subscribe.mslive.groupware;
 
+import java.sql.Connection;
+import java.util.Map;
 import com.openexchange.context.ContextService;
-import com.openexchange.oauth.OAuthService;
-import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.oauth.OAuthAccountDeleteListener;
+import com.openexchange.subscribe.mslive.ContactsMSLiveSubscribeService;
+
 
 /**
- * {@link MSLiveActivator}
+ * {@link MSLiveSubscriptionsOAuthAccountDeleteListener}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class MSLiveActivator extends HousekeepingActivator {
+public class MSLiveSubscriptionsOAuthAccountDeleteListener implements OAuthAccountDeleteListener {
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
-     */
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { OAuthService.class, ContextService.class };
+    private final ContactsMSLiveSubscribeService contactSubsrcibeService;
+    private final ContextService contexts;
+
+    public MSLiveSubscriptionsOAuthAccountDeleteListener(final ContactsMSLiveSubscribeService contactService, final ContextService contexts) {
+        super();
+        this.contactSubsrcibeService = contactService;
+        this.contexts = contexts;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-        track(OAuthServiceMetaData.class, new OAuthServiceMetaDataRegisterer(this, context));
-        openTrackers();
+    public void onAfterOAuthAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
+        contactSubsrcibeService.deleteAllUsingOAuthAccount(getContext(cid), id);
+    }
+
+    private Context getContext(final int cid) throws OXException {
+        return contexts.getContext(cid);
+    }
+
+    @Override
+    public void onBeforeOAuthAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
+        // Nothing to do
+
     }
 
 }
