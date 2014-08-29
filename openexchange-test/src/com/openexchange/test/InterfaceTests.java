@@ -94,6 +94,7 @@ public final class InterfaceTests {
         tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.user.UserAJAXSuite.class));
         tests.addTest(com.openexchange.ajax.xing.XINGTestSuite.suite());
         tests.addTest(com.openexchange.subscribe.google.GoogleTestSuite.suite());
+        tests.addTest(com.openexchange.subscribe.mslive.MSLiveTestSuite.suite());
 
         tests.addTest(com.openexchange.dav.caldav.tests.CalDAVTestSuite.suite());
         tests.addTest(com.openexchange.dav.caldav.bugs.CalDAVBugSuite.suite());
