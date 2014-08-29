@@ -195,6 +195,7 @@ public class ZipFolderAction extends AbstractFileAction {
             zipOutput = new ZipArchiveOutputStream(out);
             zipOutput.setEncoding("UTF-8");
             zipOutput.setUseLanguageEncodingFlag(true);
+            zipOutput.setLevel(getZipDocumentsCompressionLevel());
 
             // The buffer to use
             int buflen = 65536;
