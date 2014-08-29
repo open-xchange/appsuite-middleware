@@ -71,6 +71,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.htmlparser.jericho.Attribute;
+import net.htmlparser.jericho.Attributes;
 import net.htmlparser.jericho.CharacterReference;
 import net.htmlparser.jericho.EndTag;
 import net.htmlparser.jericho.HTMLElementName;
@@ -597,28 +598,31 @@ public final class FilterJerichoHandler implements JerichoHandler {
     private void addStartTag(final StartTag startTag, final boolean simple, final Map<String, Set<String>> allowedAttributes) {
         attrBuilder.setLength(0);
         String tagName = startTag.getName();
-        Map<String, String> attrMap = createMapFrom(startTag.getAttributes());
 
-        if (simple && HTMLElementName.META.equals(tagName) && attrMap.containsKey("http-equiv") && allowedAttributes.containsKey("http-equiv")) {
-            /*
-             * Special handling for allowed meta tag which provides an allowed HTTP header indicated through 'http-equiv' attribute
-             */
-            for (Map.Entry<String, String> attribute : attrMap.entrySet()) {
-                final String val = attribute.getValue();
-                if (isNonJavaScriptURL(val, "url=")) {
-                    attrBuilder.append(' ').append(attribute.getKey()).append("=\"").append(htmlService.encodeForHTMLAttribute(IMMUNE_HTMLATTR, val)).append('"');
-                } else {
-                    attrBuilder.setLength(0);
-                    break;
+        if (simple && HTMLElementName.META.equals(tagName) && allowedAttributes.containsKey("http-equiv")) {
+            Attributes attributes = startTag.getAttributes();
+            if (null != attributes.get("http-equiv")) {
+                /*
+                 * Special handling for allowed meta tag which provides an allowed HTTP header indicated through 'http-equiv' attribute
+                 */
+                for (final Attribute attribute : attributes) {
+                    final String val = attribute.getValue();
+                    if (isNonJavaScriptURL(val, "url=")) {
+                        attrBuilder.append(' ').append(attribute.getName()).append("=\"").append(htmlService.encodeForHTMLAttribute(IMMUNE_HTMLATTR, val)).append('"');
+                    } else {
+                        attrBuilder.setLength(0);
+                        break;
+                    }
                 }
+                if (attrBuilder.length() > 0) {
+                    htmlBuilder.append('<').append(tagName).append(attrBuilder.toString()).append('>');
+                }
+                return;
             }
-            if (attrBuilder.length() > 0) {
-                htmlBuilder.append('<').append(tagName).append(attrBuilder.toString()).append('>');
-            }
-            return;
         }
 
         // Handle start tag
+        Map<String, String> attrMap = createMapFrom(startTag.getAttributes());
         if (HTMLElementName.TABLE.equals(tagName)) {
             // Has attribute "bgcolor"
             String bgcolor = attrMap.get("bgcolor");
