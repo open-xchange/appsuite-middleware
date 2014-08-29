@@ -194,7 +194,7 @@ public class AppSuiteLoginRampUp implements LoginRampUpService {
             public Void call() throws Exception {
                 try {
                     JSONObject folderlist = new JSONObject();
-                    folderlist.put("0", ox.perform(request().module("folders").action("list").params("parent", "1", "tree", "1", "altNames", "true", "timezone", "UTC", "columns", "1,2,3,4,5,6,20,23,300,301,302,304,305,306,307,308,309,310,311,312,313,314,315,316,317,3010,3020,3030").format("json").build(), null, session).getResultObject());
+                    folderlist.put("1", ox.perform(request().module("folders").action("list").params("parent", "1", "tree", "0", "altNames", "true", "timezone", "UTC", "columns", "1,2,3,4,5,6,20,23,300,301,302,304,305,306,307,308,309,310,311,312,313,314,315,316,317,3010,3020,3030").format("json").build(), null, session).getResultObject());
                     rampUp.put("folderlist", folderlist);
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
