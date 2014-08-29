@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.find.basic;
+package com.openexchange.java;
 
 import java.util.List;
 import org.junit.Assert;
