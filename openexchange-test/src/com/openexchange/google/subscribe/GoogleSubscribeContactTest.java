@@ -137,10 +137,10 @@ public class GoogleSubscribeContactTest extends AbstractGoogleSubscribeTest {
 
                     assertNotNullAndEquals("instant messenger", "dyksenexample458@example.com (SKYPE)", c.getInstantMessenger1());
 
-                    final String expectedImage = Arrays.toString(getBytesOfPaulsImage());
-                    final String actualImage = Arrays.toString(c.getImage1());
-
-                    assertEquals("Image does not equals", expectedImage, actualImage);
+                    final byte[] expectedImage = getBytesOfPaulsImage();
+                    final byte[] actualImage = c.getImage1();
+                    
+                    assertTrue("Image does not equals", Arrays.equals(expectedImage, actualImage));
 
                     testAccount1Success = true;
                 } else if (c.getDisplayName().equals(testAccount2)) {
