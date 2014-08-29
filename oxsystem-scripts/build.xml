@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="open-xchange-system overrides" basedir=".">
+
+    <description>
+    </description>
+
+    <!-- Customizable values -->
+    <!-- This values must be changed for defining other installation places -->
+
+    <import file="build-project.xml"/>
+
+    <target name="postInstall">
+        <property name="libInstallDir" value="${destDir}/${prefix}/${libDir}"/>
+        <copy todir="${libInstallDir}" overwrite="true">
+            <fileset dir="${libDir}"/>
+        </copy>
+    </target>
+
+</project>

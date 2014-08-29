@@ -145,6 +145,7 @@ ox_is_running() {
 
 ox_stop_daemon() {
     local name="$1"
+    local nonox="$2"
     test -z "$name" && die "ox_stop_daemon: missing name argument (arg 1)"
     ox_system_type
     local type=$?
@@ -154,7 +155,9 @@ ox_stop_daemon() {
     fi
     read PID < /var/run/${name}.pid
     test -z "$PID" && { echo "No process in pidfile '/var/run/${name}.pid' found running; none killed."; return 1; }
-    ps $PID > /dev/null && /opt/open-xchange/sbin/shutdown -w > /dev/null 2>&1
+    if [ -z "$nonox" ]; then
+        ps $PID > /dev/null && /opt/open-xchange/sbin/shutdown -w > /dev/null 2>&1
+    fi
     ps $PID > /dev/null && kill -QUIT $PID
     ps $PID > /dev/null && kill -TERM $PID
     rm -f /var/run/${name}.pid
