@@ -47,42 +47,50 @@
  *
  */
 
-package com.openexchange.subscribe.google.osgi;
+package com.openexchange.subscribe.google.groupware;
 
-import com.openexchange.config.ConfigurationService;
+import java.sql.Connection;
+import java.util.Map;
 import com.openexchange.context.ContextService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.generic.FolderUpdaterRegistry;
-import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.user.UserService;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.oauth.OAuthAccountDeleteListener;
+import com.openexchange.subscribe.google.GoogleCalendarSubscribeService;
+import com.openexchange.subscribe.google.GoogleContactSubscribeService;
+
 
 /**
- * {@link GoogleSubscribeActivator}
+ * {@link GoogleSubscriptionsOAuthAccountDeleteListener}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class GoogleSubscribeActivator extends HousekeepingActivator {
+public class GoogleSubscriptionsOAuthAccountDeleteListener implements OAuthAccountDeleteListener {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] {
-            SessiondService.class, UserService.class, DatabaseService.class, ThreadPoolService.class, ConfigurationService.class,
-            FolderUpdaterRegistry.class, ContextService.class };
+    private final GoogleCalendarSubscribeService googleCalendarSubscribeService;
+    private final GoogleContactSubscribeService googleContactSubscribeService;
+    private final ContextService contexts;
+
+    public GoogleSubscriptionsOAuthAccountDeleteListener(final GoogleCalendarSubscribeService calService, final GoogleContactSubscribeService contactService, final ContextService contexts) {
+        super();
+        this.googleCalendarSubscribeService = calService;
+        this.googleContactSubscribeService = contactService;
+        this.contexts = contexts;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        Services.setServices(this);
-        track(OAuthServiceMetaData.class, new OAuthServiceMetaDataRegisterer(this, context));
-        openTrackers();
+    public void onAfterOAuthAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
+        googleCalendarSubscribeService.deleteAllUsingOAuthAccount(getContext(cid), id);
+        googleContactSubscribeService.deleteAllUsingOAuthAccount(getContext(cid), id);
+    }
+
+    private Context getContext(final int cid) throws OXException {
+        return contexts.getContext(cid);
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        Services.setServices(null);
+    public void onBeforeOAuthAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
+        // Nothing to do
+
     }
+
 }
