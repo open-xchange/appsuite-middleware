@@ -222,15 +222,20 @@ public class GoogleSubscribeCalendarTest extends AbstractGoogleSubscribeTest {
         participants.put("ewaldbartkowiak@gmail.com", new Part("ewaldbartkowiak@gmail.com", Participant.EXTERNAL_USER, ConfirmStatus.ACCEPT));
         participants.put("dimitribronkowitsch@googlemail.com", new Part("dimitribronkowitsch@googlemail.com", Participant.EXTERNAL_USER, ConfirmStatus.NONE));
         
+        int externals = 0;
         assertNotNull(appointment.getConfirmations());
         for (ConfirmableParticipant cp : appointment.getConfirmations()) {
             Part p = participants.get(cp.getEmailAddress());
-            assertNotNull("No participant found with email address " + cp.getEmailAddress(), p);
-            assertNotNullAndEquals("particiant email address", p.getEmailAddress(), cp.getEmailAddress());
-            assertFieldNotNull("participant status", p.getConfirmStatus(), cp.getStatus());
-            assertNotNullAndEquals("particiant status id", p.getConfirmStatus().getId(), cp.getStatus().getId());
-            assertNotNullAndEquals("participant type", p.getParticipantType(), cp.getType());
+            if (p.getEmailAddress().equals(cp.getEmailAddress())) {
+                assertNotNull("No participant found with email address " + cp.getEmailAddress(), p);
+                assertNotNullAndEquals("particiant email address", p.getEmailAddress(), cp.getEmailAddress());
+                assertFieldNotNull("participant status", p.getConfirmStatus(), cp.getStatus());
+                assertNotNullAndEquals("particiant status id", p.getConfirmStatus().getId(), cp.getStatus().getId());
+                assertNotNullAndEquals("participant type", p.getParticipantType(), cp.getType());
+                externals++;
+            }
         }
+        assertEquals("External participants are not equal", 2, externals);
     }
     
     private Appointment fetchAppointment(final Date startDate, final Date endDate, final String title, final boolean reccurence) {
