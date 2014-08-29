@@ -53,7 +53,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.SortOrder;
 import com.openexchange.exception.OXException;
@@ -65,7 +64,6 @@ import com.openexchange.groupware.contact.helpers.ContactSimilarity;
 import com.openexchange.groupware.contact.helpers.UseCountComparator;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.resource.Resource;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -84,11 +82,12 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
     /**
      * The requested contact fields of the autocomplete search results.
      */
-    protected static final ContactField[] CONTACT_FIELDS = new ContactField[] {
+    protected static final ContactField[] CONTACT_FIELDS = {
         ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.PRIVATE_FLAG, ContactField.DISPLAY_NAME, ContactField.GIVEN_NAME,
         ContactField.SUR_NAME, ContactField.TITLE, ContactField.POSITION, ContactField.INTERNAL_USERID, ContactField.EMAIL1,
-        ContactField.EMAIL2, ContactField.EMAIL3, ContactField.COMPANY, ContactField.DISTRIBUTIONLIST,
-        ContactField.MARK_AS_DISTRIBUTIONLIST, ContactField.IMAGE1_URL, ContactField.CELLULAR_TELEPHONE1, ContactField.CELLULAR_TELEPHONE2, ContactField.IMAGE1 };
+        ContactField.EMAIL2, ContactField.EMAIL3, ContactField.COMPANY, ContactField.DISTRIBUTIONLIST, ContactField.NUMBER_OF_IMAGES,
+        ContactField.MARK_AS_DISTRIBUTIONLIST, ContactField.CELLULAR_TELEPHONE1, ContactField.CELLULAR_TELEPHONE2
+    };
 
     /**
      * The default sort order used to get pre-sorted results when retrieving contacts for auto-completion.
@@ -118,13 +117,7 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
      * @throws OXException If auto-complete search fails for any reason
      */
     protected List<Contact> autocompleteContacts(ServerSession session, AutocompleteRequest autocompleteRequest) throws OXException {
-        return searchContacts(
-            session,
-            autocompleteRequest.getPrefix(),
-            true,
-            null,
-            autocompleteRequest.getLimit(),
-            autocompleteRequest.getOptions().includeContextAdmin());
+        return autocompleteContacts(session, autocompleteRequest, true);
     }
 
     /**
@@ -240,32 +233,30 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
     private List<Contact> searchContacts(ServerSession session, String prefix, boolean requireEmail, List<String> folderIDs, int limit, boolean includeAdmin) throws OXException {
         SortOptions sortOptions = new SortOptions(SORT_ORDER);
         sortOptions.setLimit(0 < limit ? limit : DEFAULT_LIMIT);
+        SearchIterator<Contact> searchIterator = null;
         int excludedAdminID = !includeAdmin ? session.getContext().getMailadmin() : -1;
-        List<Contact> contacts = null;
-        {
-            SearchIterator<Contact> searchIterator = null;
-            try {
-                searchIterator = Services.getContactService().searchContacts(session, getSearchObject(prefix, requireEmail, folderIDs), CONTACT_FIELDS, sortOptions);
-                if (0 < excludedAdminID) {
-                    contacts = new ArrayList<Contact>();
-                    while (searchIterator.hasNext()) {
-                        Contact contact = searchIterator.next();
-                        if (excludedAdminID != contact.getInternalUserId()) {
-                            contacts.add(contact);
-                        }
+        List<Contact> contacts;
+        try {
+            searchIterator = Services.getContactService().autocompleteContacts(
+                session, folderIDs, prefix, requireEmail, CONTACT_FIELDS, sortOptions);
+            if (0 < excludedAdminID) {
+                contacts = new ArrayList<Contact>();
+                while (searchIterator.hasNext()) {
+                    Contact contact = searchIterator.next();
+                    if (excludedAdminID != contact.getInternalUserId()) {
+                        contacts.add(contact);
                     }
-                } else {
-                    contacts = SearchIteratorAdapter.toList(searchIterator);
                 }
-            } catch (OXException e) {
-                if (ContactExceptionCodes.TOO_FEW_SEARCH_CHARS.equals(e)) {
-                    return Collections.emptyList();
-                }
-
-                throw e;
-            } finally {
-                SearchIterators.close(searchIterator);
+            } else {
+                contacts = SearchIteratorAdapter.toList(searchIterator);
             }
+        } catch (OXException e) {
+            if (ContactExceptionCodes.TOO_FEW_SEARCH_CHARS.equals(e)) {
+                return Collections.emptyList();
+            }
+            throw e;
+        } finally {
+            SearchIterators.close(searchIterator);
         }
         if (null == contacts) {
             return Collections.emptyList();
@@ -277,44 +268,6 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
             }
         }
         return contacts;
-    }
-
-    /**
-     * Constructs a search object using the supplied parameters.
-     *
-     * @param prefix The prefix for the search
-     * @param requireEmail <code>true</code> if the returned contacts should have at least one e-mail address, <code>false</code>,
-     *                     otherwise
-     * @param folderIDs A list of folder IDs to restrict the search for, or <code>null</code> to search in all visible folders
-     * @return The prepared search object
-     * @throws OXException
-     */
-    private static ContactSearchObject getSearchObject(String prefix, boolean requireEmail, List<String> folderIDs) throws OXException {
-        ConfigurationService config = Services.getConfigurationService();
-        int minSearchCharacters = config.getIntProperty("com.openexchange.MinimumSearchCharacters", 0);
-        ContactSearchObject searchObject = new ContactSearchObject();
-        searchObject.setOrSearch(true);
-        searchObject.setEmailAutoComplete(requireEmail);
-        if (prefix.length() >= minSearchCharacters) {
-            searchObject.setDisplayName(prefix);
-            searchObject.setSurname(prefix);
-            searchObject.setGivenName(prefix);
-            searchObject.setEmail1(prefix);
-            searchObject.setEmail2(prefix);
-            searchObject.setEmail3(prefix);
-        }
-
-        if (null != folderIDs) {
-            for (String folderID : folderIDs) {
-                try {
-                    searchObject.addFolder(Integer.valueOf(folderID));
-                } catch (NumberFormatException e) {
-                    //TODO: FindExceptionCode.INTERNAL_ERROR ?
-                    throw OXException.general("Non-numerical folder IDs are not supported", e);
-                }
-            }
-        }
-        return searchObject;
     }
 
     /**
