@@ -47,51 +47,49 @@
  *
  */
 
-package com.openexchange.google.subscribe.actions;
+package com.openexchange.subscribe.mslive;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.subscribe.AbstractSubscribeTestEnvironment;
 
 /**
- * {@link InitOAuthAccountRequest}
+ * {@link MSLiveSubscribeTestEnvironment}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class InitOAuthAccountRequest extends AbstractOAuthRequest<InitOAuthAccountResponse> {
+public class MSLiveSubscribeTestEnvironment extends AbstractSubscribeTestEnvironment {
 
-    @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-        return Method.GET;
+    protected static final String CONTACT_SOURCE_ID = "com.openexchange.subscribe.mslive.contact";
+
+    private static final MSLiveSubscribeTestEnvironment INSTANCE = new MSLiveSubscribeTestEnvironment();
+
+    /**
+     * Initializes a new {@link MSLiveSubscribeTestEnvironment}.
+     * 
+     * @param serviceId
+     */
+    public MSLiveSubscribeTestEnvironment() {
+        super("com.openexchange.oauth.msliveconnect");
+    }
+
+    /**
+     * Get the instance of the environment
+     * 
+     * @return the instance
+     */
+    public static final MSLiveSubscribeTestEnvironment getInstance() {
+        return INSTANCE;
     }
 
     @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-        final List<Parameter> parameterList = new ArrayList<Parameter>();
-        parameterList.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "init"));
-        return parameterList.toArray(new Parameter[parameterList.size()]);
+    protected void initEnvironment() throws Exception {
+        // nothing yet, prolly create the oauth account
     }
 
     @Override
-    public AbstractAJAXParser<? extends InitOAuthAccountResponse> getParser() {
-        return new AbstractAJAXParser<InitOAuthAccountResponse>(true) {
-
-            @Override
-            protected InitOAuthAccountResponse createResponse(Response response) throws JSONException {
-                return new InitOAuthAccountResponse(response);
-            }
-
-        };
+    protected void createSubscriptions() throws Exception {
+        int userId = ajaxClient.getValues().getUserId();
+        final int privateContactFolder = ajaxClient.getValues().getPrivateContactFolder();
+        createSubscription(getAccountId(), CONTACT_SOURCE_ID, FolderObject.CONTACT, privateContactFolder, userId);
     }
-
-    @Override
-    public Object getBody() throws IOException, JSONException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
 }

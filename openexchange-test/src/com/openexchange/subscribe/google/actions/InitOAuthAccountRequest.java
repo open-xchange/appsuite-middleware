@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.google.subscribe.actions;
+package com.openexchange.subscribe.google.actions;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -58,17 +58,11 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * {@link DeleteOAuthAccountRequest}
+ * {@link InitOAuthAccountRequest}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DeleteOAuthAccountRequest extends AbstractOAuthRequest<InitOAuthAccountResponse> {
-
-    private final int accountId;
-
-    public DeleteOAuthAccountRequest(final int accountId) {
-        this.accountId = accountId;
-    }
+public class InitOAuthAccountRequest extends AbstractOAuthRequest<InitOAuthAccountResponse> {
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
@@ -78,8 +72,7 @@ public class DeleteOAuthAccountRequest extends AbstractOAuthRequest<InitOAuthAcc
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
         final List<Parameter> parameterList = new ArrayList<Parameter>();
-        parameterList.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "delete"));
-        parameterList.add(new Parameter("accountId", accountId));
+        parameterList.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "init"));
         return parameterList.toArray(new Parameter[parameterList.size()]);
     }
 

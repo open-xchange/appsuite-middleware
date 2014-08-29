@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.google.subscribe;
+package com.openexchange.subscribe;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -69,47 +69,36 @@ import com.openexchange.ajax.subscribe.source.action.GetSourceResponse;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
-import com.openexchange.google.subscribe.actions.DeleteOAuthAccountRequest;
-import com.openexchange.google.subscribe.actions.InitOAuthAccountRequest;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.SubscriptionSource;
+import com.openexchange.subscribe.google.actions.DeleteOAuthAccountRequest;
 import com.openexchange.test.FolderTestManager;
 import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
- * {@link GoogleSubscribeTestEnvironment}
+ * {@link AbstractSubscribeTestEnvironment}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class GoogleSubscribeTestEnvironment {
+public abstract class AbstractSubscribeTestEnvironment {
 
-    protected static final String CONTACT_SOURCE_ID = "com.openexchange.subscribe.google.contact";
+    protected AJAXClient ajaxClient;
 
-    protected static final String CALENDAR_SOURCE_ID = "com.openexchange.subscribe.google.calendar";
+    protected FolderTestManager folderMgr;
 
-    private static final GoogleSubscribeTestEnvironment INSTANCE = new GoogleSubscribeTestEnvironment();
+    private final Map<String, Integer> testFolders = new HashMap<String, Integer>();
 
-    private static final String SERVICE_ID = "com.openexchange.oauth.google";
-
-    private AJAXClient ajaxClient;
-
-    private FolderTestManager folderMgr;
-
-    protected final Map<String, Integer> testFolders = new HashMap<String, Integer>();
+    private final String serviceId;
 
     private int accountId;
 
     /**
-     * Get the instance of the environment
+     * Initializes a new {@link AbstractSubscribeTestEnvironment}.
      * 
-     * @return the instance
+     * @param serviceId The service identifier
      */
-    public static final GoogleSubscribeTestEnvironment getInstance() {
-        return INSTANCE;
+    protected AbstractSubscribeTestEnvironment(final String serviceId) {
+        this.serviceId = serviceId;
     }
-
-    // -------------------------------------------------------------------------------------------------- //
 
     /**
      * Initialize the test environment
@@ -119,29 +108,12 @@ public class GoogleSubscribeTestEnvironment {
     public void init() {
         try {
             initAJAXClient();
-            initOAuthAccount();
             initManagers();
-            createGoogleSubscription();
-            // wait for the async subscribe to finish
-            Thread.sleep(15000);
+            initEnvironment();
+            createSubscriptions();
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    /**
-     * Clean up
-     * 
-     * @throws OXException
-     * @throws IOException
-     * @throws JSONException
-     */
-    public void cleanup() throws OXException, IOException, JSONException {
-        if (folderMgr != null) {
-            folderMgr.cleanUp();
-        }
-        deleteOAuthAccount();
-        logout();
     }
 
     /**
@@ -160,55 +132,14 @@ public class GoogleSubscribeTestEnvironment {
     }
 
     /**
-     * Create a test oauth account
-     * 
-     * @throws Exception
+     * If you need any extra initialization, implement this method
      */
-    private void initOAuthAccount() throws Exception {
-        InitOAuthAccountRequest req = new InitOAuthAccountRequest();
-        ajaxClient.execute(req);
-    }
+    protected abstract void initEnvironment() throws Exception;
 
     /**
-     * Delete the test oauth account
-     * 
-     * @throws JSONException
-     * @throws IOException
-     * @throws OXException
+     * Create the subscriptions
      */
-    private void deleteOAuthAccount() throws OXException, IOException, JSONException {
-        DeleteOAuthAccountRequest req = new DeleteOAuthAccountRequest(accountId);
-        ajaxClient.execute(req);
-    }
-
-    /**
-     * Create a google subscription for the current user
-     * 
-     * @throws JSONException
-     * @throws IOException
-     * @throws OXException
-     */
-    private void createGoogleSubscription() throws Exception {
-        accountId = getAccountId();
-
-        if (accountId <= 0) {
-            throw new Exception("No account found");
-        }
-
-        int userId = ajaxClient.getValues().getUserId();
-        createGoogleSubscription(
-            accountId,
-            CALENDAR_SOURCE_ID,
-            FolderObject.CALENDAR,
-            ajaxClient.getValues().getPrivateAppointmentFolder(),
-            userId);
-        createGoogleSubscription(
-            accountId,
-            CONTACT_SOURCE_ID,
-            FolderObject.CONTACT,
-            ajaxClient.getValues().getPrivateContactFolder(),
-            userId);
-    }
+    protected abstract void createSubscriptions() throws Exception;
 
     /**
      * Create a google subscription
@@ -220,13 +151,13 @@ public class GoogleSubscribeTestEnvironment {
      * @param userId
      * @throws Exception
      */
-    private void createGoogleSubscription(final int accountId, final String sourceId, final int module, final int parent, final int userId) throws Exception {
+    protected void createSubscription(final int accountId, final String sourceId, final int module, final int parent, final int userId) throws Exception {
         // Get subscription source for calendar
         FolderObject folder = createSubscriptionFolder(sourceId, module, parent, userId);
         final DynamicFormDescription formDescription = createDynamicFormDescription(sourceId);
-        final Subscription calendarSubscription = createSubscription(formDescription, sourceId, accountId, folder.getObjectID());
+        final Subscription subscription = createSubscription(formDescription, sourceId, accountId, folder.getObjectID());
 
-        final NewSubscriptionRequest subReq = new NewSubscriptionRequest(calendarSubscription, formDescription);
+        final NewSubscriptionRequest subReq = new NewSubscriptionRequest(subscription, formDescription);
         NewSubscriptionResponse subResp = ajaxClient.execute(subReq);
         int subId = (Integer) subResp.getData();
 
@@ -235,22 +166,33 @@ public class GoogleSubscribeTestEnvironment {
         testFolders.put(sourceId, folder.getObjectID());
     }
 
+    /**
+     * Returns the accound identifier that is bound to the specified service identifier
+     * 
+     * @param serviceID
+     * @return
+     * @throws OXException
+     * @throws IOException
+     * @throws JSONException
+     */
     @SuppressWarnings("unchecked")
-    private int getAccountId() throws OXException, IOException, JSONException {
-        AllOAuthAccountRequest oauthReq = new AllOAuthAccountRequest();
-        AllOAuthAccountResponse oauthResp = ajaxClient.execute(oauthReq);
-        Object data = oauthResp.getData();
+    protected int getAccountId() throws OXException, IOException, JSONException {
+        if (accountId < 0) {
+            AllOAuthAccountRequest oauthReq = new AllOAuthAccountRequest();
+            AllOAuthAccountResponse oauthResp = ajaxClient.execute(oauthReq);
+            Object data = oauthResp.getData();
 
-        if (data instanceof JSONArray) {
-            final JSONArray array = (JSONArray) data;
-            for (Object o : array.asList()) {
-                LinkedHashMap<String, Object> json = (LinkedHashMap<String, Object>) o;
-                if (json.get("serviceId").equals(SERVICE_ID)) {
-                    return (Integer) json.get("id");
+            if (data instanceof JSONArray) {
+                final JSONArray array = (JSONArray) data;
+                for (Object o : array.asList()) {
+                    LinkedHashMap<String, Object> json = (LinkedHashMap<String, Object>) o;
+                    if (json.get("serviceId").equals(serviceId)) {
+                        accountId = (Integer) json.get("id");
+                    }
                 }
             }
         }
-        return 0;
+        return accountId;
     }
 
     /**
@@ -330,9 +272,41 @@ public class GoogleSubscribeTestEnvironment {
      * @throws IOException
      * @throws JSONException
      */
-    private void logout() throws OXException, IOException, JSONException {
+    protected void logout() throws OXException, IOException, JSONException {
         if (ajaxClient != null) {
             ajaxClient.logout();
         }
     }
+
+    public Map<String, Integer> getTestFolders() {
+        return testFolders;
+    }
+
+    /**
+     * Clean up
+     * 
+     * @throws OXException
+     * @throws IOException
+     * @throws JSONException
+     */
+    public void cleanup() throws OXException, IOException, JSONException {
+        if (folderMgr != null) {
+            folderMgr.cleanUp();
+        }
+        deleteOAuthAccount();
+        logout();
+    }
+
+    /**
+     * Delete the test oauth account
+     * 
+     * @throws JSONException
+     * @throws IOException
+     * @throws OXException
+     */
+    private void deleteOAuthAccount() throws OXException, IOException, JSONException {
+        DeleteOAuthAccountRequest req = new DeleteOAuthAccountRequest(accountId);
+        ajaxClient.execute(req);
+    }
+
 }

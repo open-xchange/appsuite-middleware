@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.google.subscribe;
+package com.openexchange.subscribe.google;
 
 import java.util.Arrays;
 import java.util.Calendar;

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.google.subscribe;
+package com.openexchange.subscribe.google;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -150,7 +150,7 @@ public abstract class AbstractGoogleSubscribeTest extends AbstractAJAXSession {
     }
 
     private int getTestFolderID(final String id) {
-        return GoogleSubscribeTestEnvironment.getInstance().testFolders.get(id);
+        return GoogleSubscribeTestEnvironment.getInstance().getTestFolders().get(id);
     }
 
     protected int getCalendarTestFolderID() {

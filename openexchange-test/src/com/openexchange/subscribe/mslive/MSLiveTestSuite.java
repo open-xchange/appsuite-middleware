@@ -47,39 +47,40 @@
  *
  */
 
-package com.openexchange.google.subscribe.actions;
+package com.openexchange.subscribe.mslive;
 
-import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.ajax.framework.Header;
+import junit.extensions.TestSetup;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
- * {@link AbstractOAuthRequest}
+ * {@link MSLiveTestSuite}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-abstract class AbstractOAuthRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
+public class MSLiveTestSuite extends TestSuite {
 
-    /**
-     * URL of the test AJAX interface.
-     */
-    static final String URL = "/ajax/googleTest";
-
-    /**
-     * Default constructor.
-     */
-    protected AbstractOAuthRequest() {
+    private MSLiveTestSuite() {
         super();
     }
 
-    @Override
-    public String getServletPath() {
-        return URL;
-    }
+    public static Test suite() {
+        final TestSuite suite = new TestSuite("com.openexchange.subscribe.mslive.MSLiveTestSuite");
+        suite.addTestSuite(SubscribeMSLiveContactsTest.class);
 
-    @Override
-    public Header[] getHeaders() {
-        return NO_HEADER;
-    }
+        TestSetup setup = new TestSetup(suite) {
 
+            @Override
+            protected void setUp() {
+                MSLiveSubscribeTestEnvironment.getInstance().init();
+            }
+
+            @Override
+            protected void tearDown() throws Exception {
+                MSLiveSubscribeTestEnvironment.getInstance().cleanup();
+            }
+        };
+
+        return setup;
+    }
 }

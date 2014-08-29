@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.google.subscribe.actions;
+package com.openexchange.subscribe.google.actions;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;

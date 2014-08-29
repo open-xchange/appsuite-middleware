@@ -47,39 +47,39 @@
  *
  */
 
-package com.openexchange.google.subscribe;
+package com.openexchange.subscribe.google.actions;
 
-import junit.extensions.TestSetup;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Header;
 
 /**
- * {@link GoogleTestSuite}
+ * {@link AbstractOAuthRequest}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class GoogleTestSuite extends TestSuite {
+abstract class AbstractOAuthRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
 
-    private GoogleTestSuite() {
+    /**
+     * URL of the test AJAX interface.
+     */
+    static final String URL = "/ajax/googleTest";
+
+    /**
+     * Default constructor.
+     */
+    protected AbstractOAuthRequest() {
         super();
     }
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite("com.openexchange.subscribe.google.GoogleTestSuite");
-        suite.addTestSuite(GoogleSubscribeCalendarTest.class);
-        suite.addTestSuite(GoogleSubscribeContactTest.class);
-        
-        TestSetup setup = new TestSetup(suite) {
-            @Override
-            protected void setUp() {
-                GoogleSubscribeTestEnvironment.getInstance().init();
-            }
-            @Override
-            protected void tearDown() throws Exception {
-                GoogleSubscribeTestEnvironment.getInstance().cleanup();
-            }
-        };
-
-        return setup;
+    @Override
+    public String getServletPath() {
+        return URL;
     }
+
+    @Override
+    public Header[] getHeaders() {
+        return NO_HEADER;
+    }
+
 }

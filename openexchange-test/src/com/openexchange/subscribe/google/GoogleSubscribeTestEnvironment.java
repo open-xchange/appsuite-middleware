@@ -47,25 +47,68 @@
  *
  */
 
-package com.openexchange.google.subscribe.actions;
+package com.openexchange.subscribe.google;
 
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.subscribe.AbstractSubscribeTestEnvironment;
+import com.openexchange.subscribe.google.actions.InitOAuthAccountRequest;
 
 /**
- * {@link DeleteOAuthAccountResponse}
+ * {@link GoogleSubscribeTestEnvironment}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DeleteOAuthAccountResponse extends AbstractAJAXResponse {
+public class GoogleSubscribeTestEnvironment extends AbstractSubscribeTestEnvironment {
+
+    protected static final String CONTACT_SOURCE_ID = "com.openexchange.subscribe.google.contact";
+
+    protected static final String CALENDAR_SOURCE_ID = "com.openexchange.subscribe.google.calendar";
+
+    private static final GoogleSubscribeTestEnvironment INSTANCE = new GoogleSubscribeTestEnvironment();
 
     /**
-     * Initializes a new {@link DeleteOAuthAccountResponse}.
+     * Get the instance of the environment
      * 
-     * @param response
+     * @return the instance
      */
-    protected DeleteOAuthAccountResponse(Response response) {
-        super(response);
+    public static final GoogleSubscribeTestEnvironment getInstance() {
+        return INSTANCE;
     }
 
+    // -------------------------------------------------------------------------------------------------- //
+    
+    
+    /**
+     * Initializes a new {@link GoogleSubscribeTestEnvironment}.
+     * @param serviceId
+     */
+    protected GoogleSubscribeTestEnvironment() {
+        super("com.openexchange.oauth.google");
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.subscribe.AbstractSubscribeTestEnvironment#initEnvironment()
+     */
+    @Override
+    protected void initEnvironment() throws Exception {
+        InitOAuthAccountRequest req = new InitOAuthAccountRequest();
+        ajaxClient.execute(req);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.subscribe.AbstractSubscribeTestEnvironment#createSubscriptions()
+     */
+    @Override
+    protected void createSubscriptions() throws Exception {
+        int userId = ajaxClient.getValues().getUserId();
+        final int privateAppointmentFolder = ajaxClient.getValues().getPrivateAppointmentFolder();
+        final int privateContactFolder = ajaxClient.getValues().getPrivateContactFolder();
+        createSubscription(getAccountId(), CALENDAR_SOURCE_ID, FolderObject.CALENDAR, privateAppointmentFolder, userId);
+        createSubscription(getAccountId(), CONTACT_SOURCE_ID, FolderObject.CONTACT, privateContactFolder, userId);
+        
+        // Give the asynchronous tasks a few seconds to finish
+        Thread.sleep(5000);
+    }
 }
