@@ -555,29 +555,35 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             // Determine folder identifier
             String fid = toGoogleDriveFolderId(folderId);
 
-            Drive.Children.List list = drive.children().list(fid);
-            list.setQ(QUERY_STRING_FILES_ONLY_EXCLUDING_TRASH);
-            ChildList childList = list.execute();
+            Drive.Files.List list = drive.files().list();
+            list.setQ(QUERY_STRING_FILES_ONLY_EXCLUDING_TRASH + " and '" + fid + "' in parents");
+            {
+                StringBuilder googleDriveFields = new StringBuilder(512);
+                googleDriveFields.append("kind,nextPageToken,items(");
+                googleDriveFields.append(GoogleDriveConstants.FIELDS_DEFAULT).append(')');
+                list.setFields(googleDriveFields.toString());
+            }
 
+            FileList fileList = list.execute();
             List<File> files = new LinkedList<File>();
-            if (!childList.getItems().isEmpty()) {
-                for (ChildReference child : childList.getItems()) {
+            if (!fileList.getItems().isEmpty()) {
+                for (com.google.api.services.drive.model.File child : fileList.getItems()) {
                     String fileId = child.getId();
-                    files.add(new GoogleDriveFile(folderId, fileId, userId, rootFolderId).parseGoogleDriveFile(drive.files().get(fileId).execute()));
+                    files.add(new GoogleDriveFile(folderId, fileId, userId, rootFolderId).parseGoogleDriveFile(child));
                 }
 
-                String nextPageToken = childList.getNextPageToken();
+                String nextPageToken = fileList.getNextPageToken();
                 while (!isEmpty(nextPageToken)) {
                     list.setPageToken(nextPageToken);
-                    childList = list.execute();
-                    if (!childList.getItems().isEmpty()) {
-                        for (ChildReference child : childList.getItems()) {
+                    fileList = list.execute();
+                    if (!fileList.getItems().isEmpty()) {
+                        for (com.google.api.services.drive.model.File child : fileList.getItems()) {
                             String fileId = child.getId();
-                            files.add(new GoogleDriveFile(folderId, fileId, userId, rootFolderId).parseGoogleDriveFile(drive.files().get(fileId).execute()));
+                            files.add(new GoogleDriveFile(folderId, fileId, userId, rootFolderId).parseGoogleDriveFile(child));
                         }
                     }
 
-                    nextPageToken = childList.getNextPageToken();
+                    nextPageToken = fileList.getNextPageToken();
                 }
             }
 
