@@ -103,16 +103,18 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
         HttpRequestBase request = null;
         try {
             List<NameValuePair> qparams = initiateQueryString();
+            qparams.add(new BasicNameValuePair("filter", FILTER_FOLDERS));
             HttpGet method = new HttpGet(buildUri(oneDriveFolderId+"/files", qparams));
             request = method;
 
-            JSONObject jResponse = handleHttpResponse(execute(method, httpClient), JSONObject.class);
-            JSONArray jData = jResponse.getJSONArray("data");
+            JSONArray jData = handleHttpResponse(execute(method, httpClient), JSONObject.class).getJSONArray("data");
             int length = jData.length();
-            for (int i = 0; i < length; i++) {
-                JSONObject jItem = jData.getJSONObject(i);
-                if (isFolder(jItem)) {
-                    return true;
+            if (length > 0) {
+                for (int i = 0; i < length; i++) {
+                    JSONObject jItem = jData.getJSONObject(i);
+                    if (isFolder(jItem)) {
+                        return true;
+                    }
                 }
             }
             return false;
