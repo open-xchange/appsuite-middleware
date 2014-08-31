@@ -103,6 +103,9 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  */
 public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implements ThumbnailAware {
 
+    private static final String QUERY_PARAM_LIMIT = OneDriveConstants.QUERY_PARAM_LIMIT;
+    private static final String QUERY_PARAM_OFFSET = OneDriveConstants.QUERY_PARAM_OFFSET;
+
     private final OneDriveAccountAccess accountAccess;
     final int userId;
 
@@ -479,8 +482,8 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
                     do {
                         List<NameValuePair> qparams = initiateQueryString();
-                        qparams.add(new BasicNameValuePair("offset", Integer.toString(offset)));
-                        qparams.add(new BasicNameValuePair("limit", Integer.toString(limit)));
+                        qparams.add(new BasicNameValuePair(QUERY_PARAM_OFFSET, Integer.toString(offset)));
+                        qparams.add(new BasicNameValuePair(QUERY_PARAM_LIMIT, Integer.toString(limit)));
                         HttpGet method = new HttpGet(buildUri(fid+"/files", qparams));
                         request = method;
 
@@ -611,8 +614,8 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
                     do {
                         List<NameValuePair> qparams = initiateQueryString();
-                        qparams.add(new BasicNameValuePair("offset", Integer.toString(offset)));
-                        qparams.add(new BasicNameValuePair("limit", Integer.toString(limit)));
+                        qparams.add(new BasicNameValuePair(QUERY_PARAM_OFFSET, Integer.toString(offset)));
+                        qparams.add(new BasicNameValuePair(QUERY_PARAM_LIMIT, Integer.toString(limit)));
                         HttpGet method = new HttpGet(buildUri(fid+"/files", qparams));
                         request = method;
 
@@ -662,8 +665,8 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
                     do {
                         List<NameValuePair> qparams = initiateQueryString();
-                        qparams.add(new BasicNameValuePair("offset", Integer.toString(offset)));
-                        qparams.add(new BasicNameValuePair("limit", Integer.toString(limit)));
+                        qparams.add(new BasicNameValuePair(QUERY_PARAM_OFFSET, Integer.toString(offset)));
+                        qparams.add(new BasicNameValuePair(QUERY_PARAM_LIMIT, Integer.toString(limit)));
                         HttpGet method = new HttpGet(buildUri(fid+"/files", qparams));
                         request = method;
 
@@ -811,8 +814,8 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                         if (null != pattern) {
                             qparams.add(new BasicNameValuePair("q", pattern));
                         }
-                        qparams.add(new BasicNameValuePair("offset", Integer.toString(offset)));
-                        qparams.add(new BasicNameValuePair("limit", Integer.toString(limit)));
+                        qparams.add(new BasicNameValuePair(QUERY_PARAM_OFFSET, Integer.toString(offset)));
+                        qparams.add(new BasicNameValuePair(QUERY_PARAM_LIMIT, Integer.toString(limit)));
                         HttpGet method = new HttpGet(buildUri("me/skydrive/search", qparams));
                         request = method;
 

@@ -84,6 +84,8 @@ import com.openexchange.session.Session;
 public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess implements FileStorageFolderAccess {
 
     private static final String FILTER_FOLDERS = OneDriveConstants.FILTER_FOLDERS;
+    private static final String QUERY_PARAM_LIMIT = OneDriveConstants.QUERY_PARAM_LIMIT;
+    private static final String QUERY_PARAM_OFFSET = OneDriveConstants.QUERY_PARAM_OFFSET;
 
     private final OneDriveAccountAccess accountAccess;
     private final int userId;
@@ -213,8 +215,8 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
                     do {
                         List<NameValuePair> qparams = initiateQueryString();
-                        qparams.add(new BasicNameValuePair("offset", Integer.toString(offset)));
-                        qparams.add(new BasicNameValuePair("limit", Integer.toString(limit)));
+                        qparams.add(new BasicNameValuePair(QUERY_PARAM_OFFSET, Integer.toString(offset)));
+                        qparams.add(new BasicNameValuePair(QUERY_PARAM_LIMIT, Integer.toString(limit)));
                         qparams.add(new BasicNameValuePair("filter", FILTER_FOLDERS));
                         HttpGet method = new HttpGet(buildUri(fid+"/files", qparams));
                         request = method;
@@ -405,8 +407,8 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
                     do {
                         List<NameValuePair> qparams = initiateQueryString();
-                        qparams.add(new BasicNameValuePair("offset", Integer.toString(offset)));
-                        qparams.add(new BasicNameValuePair("limit", Integer.toString(limit)));
+                        qparams.add(new BasicNameValuePair(QUERY_PARAM_OFFSET, Integer.toString(offset)));
+                        qparams.add(new BasicNameValuePair(QUERY_PARAM_LIMIT, Integer.toString(limit)));
                         HttpGet method = new HttpGet(buildUri(fid+"/files", qparams));
                         request = method;
 
