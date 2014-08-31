@@ -87,4 +87,11 @@ public final class OneDriveConstants implements FileStorageConstants {
      */
     public static final String TYPE_ALBUM = "album";
 
+    // ----------------------------------------------------------------------------------------------------------- //
+
+    /**
+     * The <code>"filter"</code> expression to only retrieve folders/albums.
+     */
+    public static final String FILTER_FOLDERS = "folders,albums";
+
 }
