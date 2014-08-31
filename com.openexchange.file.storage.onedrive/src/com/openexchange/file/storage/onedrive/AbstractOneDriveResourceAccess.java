@@ -297,13 +297,13 @@ public abstract class AbstractOneDriveResourceAccess {
      * @throws IOException If an I/O error occurs
      */
     protected HttpResponse execute(HttpRequestBase method, DefaultHttpClient httpClient) throws ClientProtocolException, IOException {
-        long st = System.currentTimeMillis();
+        //long st = System.currentTimeMillis();
         HttpResponse httpResponse = httpClient.execute(method);
-        long dur = System.currentTimeMillis() - st;
-        System.out.println("----------------------------------------------");
-        System.out.println("Executing " + method.getMethod() + " for " + method.getURI().getPath() + " took " + dur + "msec");
-        new Throwable().printStackTrace(System.out);
-        System.out.println("----------------------------------------------");
+        //long dur = System.currentTimeMillis() - st;
+        //System.out.println("----------------------------------------------");
+        //System.out.println("Executing " + method.getMethod() + " for " + method.getURI().getPath() + " took " + dur + "msec");
+        //new Throwable().printStackTrace(System.out);
+        //System.out.println("----------------------------------------------");
         return httpResponse;
     }
 
