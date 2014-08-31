@@ -86,6 +86,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
     private static final String FILTER_FOLDERS = OneDriveConstants.FILTER_FOLDERS;
     private static final String QUERY_PARAM_LIMIT = OneDriveConstants.QUERY_PARAM_LIMIT;
     private static final String QUERY_PARAM_OFFSET = OneDriveConstants.QUERY_PARAM_OFFSET;
+    private static final String QUERY_PARAM_FILTER = OneDriveConstants.QUERY_PARAM_FILTER;
 
     private final OneDriveAccountAccess accountAccess;
     private final int userId;
@@ -105,7 +106,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
         HttpRequestBase request = null;
         try {
             List<NameValuePair> qparams = initiateQueryString();
-            qparams.add(new BasicNameValuePair("filter", FILTER_FOLDERS));
+            //qparams.add(new BasicNameValuePair(QUERY_PARAM_FILTER, FILTER_FOLDERS));
             HttpGet method = new HttpGet(buildUri(oneDriveFolderId+"/files", qparams));
             request = method;
 
@@ -205,6 +206,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
             @Override
             protected FileStorageFolder[] doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
                 HttpRequestBase request = null;
+                HttpResponse httpResponse = null;
                 try {
                     String fid = toOneDriveFolderId(parentIdentifier);
                     List<FileStorageFolder> folders = new LinkedList<FileStorageFolder>();
@@ -217,12 +219,13 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
                         List<NameValuePair> qparams = initiateQueryString();
                         qparams.add(new BasicNameValuePair(QUERY_PARAM_OFFSET, Integer.toString(offset)));
                         qparams.add(new BasicNameValuePair(QUERY_PARAM_LIMIT, Integer.toString(limit)));
-                        qparams.add(new BasicNameValuePair("filter", FILTER_FOLDERS));
+                        //qparams.add(new BasicNameValuePair(QUERY_PARAM_FILTER, FILTER_FOLDERS));
                         HttpGet method = new HttpGet(buildUri(fid+"/files", qparams));
                         request = method;
 
-                        JSONObject jResponse = handleHttpResponse(execute(method, httpClient), JSONObject.class);
-                        JSONArray jData = jResponse.getJSONArray("data");
+                        httpResponse = execute(method, httpClient);
+                        JSONArray jData = handleHttpResponse(httpResponse, JSONObject.class).getJSONArray("data");
+                        httpResponse = null;
                         int length = jData.length();
                         resultsFound = length;
                         for (int i = 0; i < length; i++) {

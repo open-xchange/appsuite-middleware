@@ -150,24 +150,32 @@ public abstract class AbstractOneDriveResourceAccess {
         /**
          * Examines given status line
          *
-         * @param statusLine The status line
+         * @param httpResponse The HTTP response
          * @throws OXException If an Open-Xchange error is yielded from status
          * @throws HttpResponseException If status is interpreted as an error
          */
-        void handleStatusCode(StatusLine statusLine) throws OXException, HttpResponseException;
+        void handleStatusCode(HttpResponse httpResponse) throws OXException, HttpResponseException;
     }
 
     /** The default status code policy; accepting greater than/equal to <code>200</code> and lower than <code>300</code> */
     public static final StatusCodePolicy STATUS_CODE_POLICY_DEFAULT = new StatusCodePolicy() {
 
         @Override
-        public void handleStatusCode(StatusLine statusLine) throws OXException, HttpResponseException {
+        public void handleStatusCode(HttpResponse httpResponse) throws OXException, HttpResponseException {
+            StatusLine statusLine = httpResponse.getStatusLine();
             int statusCode = statusLine.getStatusCode();
             if (statusCode < 200 || statusCode >= 300) {
                 if (404 == statusCode) {
                     throw OneDriveExceptionCodes.NOT_FOUND_SIMPLE.create();
                 }
-                throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
+                String reason;
+                try {
+                    JSONObject jsonObject = new JSONObject(new InputStreamReader(httpResponse.getEntity().getContent(), Charsets.UTF_8));
+                    reason = jsonObject.getJSONObject("error").getString("message");
+                } catch (Exception e) {
+                    reason = statusLine.getReasonPhrase();
+                }
+                throw new HttpResponseException(statusCode, reason);
             }
         }
     };
@@ -176,10 +184,18 @@ public abstract class AbstractOneDriveResourceAccess {
     public static final StatusCodePolicy STATUS_CODE_POLICY_IGNORE_NOT_FOUND = new StatusCodePolicy() {
 
         @Override
-        public void handleStatusCode(StatusLine statusLine) throws HttpResponseException {
+        public void handleStatusCode(HttpResponse httpResponse) throws HttpResponseException {
+            StatusLine statusLine = httpResponse.getStatusLine();
             int statusCode = statusLine.getStatusCode();
             if ((statusCode < 200 || statusCode >= 300) && statusCode != 404) {
-                throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
+                String reason;
+                try {
+                    JSONObject jsonObject = new JSONObject(new InputStreamReader(httpResponse.getEntity().getContent(), Charsets.UTF_8));
+                    reason = jsonObject.getJSONObject("error").getString("message");
+                } catch (Exception e) {
+                    reason = statusLine.getReasonPhrase();
+                }
+                throw new HttpResponseException(statusCode, reason);
             }
         }
     };
@@ -284,7 +300,10 @@ public abstract class AbstractOneDriveResourceAccess {
         //long st = System.currentTimeMillis();
         HttpResponse httpResponse = httpClient.execute(method);
         //long dur = System.currentTimeMillis() - st;
-        //System.out.println("Executing " + method.getMethod() + " took " + dur + "msec");
+        //System.out.println("----------------------------------------------");
+        //System.out.println("Executing " + method.getMethod() + " for " + method.getURI().getPath() + " took " + dur + "msec");
+        //new Throwable().printStackTrace(System.out);
+        //System.out.println("----------------------------------------------");
         return httpResponse;
     }
 
@@ -379,7 +398,7 @@ public abstract class AbstractOneDriveResourceAccess {
      * @throws IllegalStateException If content stream cannot be created
      */
     protected <R> R handleHttpResponse(HttpResponse httpResponse, StatusCodePolicy policy, Class<R> clazz) throws OXException, ClientProtocolException, IOException {
-        policy.handleStatusCode(httpResponse.getStatusLine());
+        policy.handleStatusCode(httpResponse);
 
         // OK, continue
         if (Void.class.equals(clazz)) {
