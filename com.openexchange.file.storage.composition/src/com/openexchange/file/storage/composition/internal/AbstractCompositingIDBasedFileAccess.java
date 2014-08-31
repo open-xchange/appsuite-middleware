@@ -484,9 +484,13 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
     public TimedResult<File> getDocuments(final List<String> ids, final List<Field> columns) throws OXException {
         final List<File> files = new ArrayList<File>(ids.size());
         for (final String id : ids) {
-            if (exists(id, FileStorageFileAccess.CURRENT_VERSION)) {
-                final File fileMetadata = getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
-                files.add(fileMetadata);
+            try {
+                files.add(getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION));
+            } catch (OXException e) {
+                if (exists(id, FileStorageFileAccess.CURRENT_VERSION)) {
+                    throw e;
+                }
+                // Ignore non-existing item
             }
         }
 
