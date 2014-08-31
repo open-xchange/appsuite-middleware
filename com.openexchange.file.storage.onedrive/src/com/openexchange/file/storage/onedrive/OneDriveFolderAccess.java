@@ -64,6 +64,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -73,6 +74,7 @@ import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.onedrive.access.OneDriveAccess;
 import com.openexchange.file.storage.onedrive.http.client.methods.HttpMove;
+import com.openexchange.file.storage.onedrive.osgi.Services;
 import com.openexchange.file.storage.onedrive.rest.folder.RestFolder;
 import com.openexchange.session.Session;
 
@@ -82,6 +84,26 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess implements FileStorageFolderAccess {
+
+    private static volatile Boolean optimisticSubfolderCheck;
+    private static boolean optimisticSubfolderCheck() {
+        Boolean tmp = optimisticSubfolderCheck;
+        if (null == tmp) {
+            synchronized (OneDriveFolderAccess.class) {
+                tmp = optimisticSubfolderCheck;
+                if (null == tmp) {
+                    boolean defaultValue = true;
+                    ConfigurationService service = Services.getOptionalService(ConfigurationService.class);
+                    if (null == service) {
+                        return defaultValue;
+                    }
+                    tmp = Boolean.valueOf(service.getBoolProperty("com.openexchange.file.storage.onedrive.optimisticSubfolderCheck", defaultValue));
+                    optimisticSubfolderCheck = tmp;
+                }
+            }
+        }
+        return tmp.booleanValue();
+    }
 
     private static final String FILTER_FOLDERS = OneDriveConstants.FILTER_FOLDERS;
     private static final String QUERY_PARAM_LIMIT = OneDriveConstants.QUERY_PARAM_LIMIT;
@@ -103,6 +125,9 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
     }
 
     private boolean hasSubfolders(String oneDriveFolderId, DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+        if (optimisticSubfolderCheck()) {
+            return true;
+        }
         HttpRequestBase request = null;
         try {
             List<NameValuePair> qparams = initiateQueryString();
@@ -231,7 +256,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
                         for (int i = 0; i < length; i++) {
                             JSONObject jItem = jData.getJSONObject(i);
                             if (isFolder(jItem)) {
-                                folders.add(parseFolder(fid, jItem, httpClient));
+                                folders.add(parseFolder(jItem.getString("id"), jItem, httpClient));
                             }
                         }
                         reset(request);
@@ -250,7 +275,14 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
     @Override
     public FileStorageFolder getRootFolder() throws OXException {
-        return getFolder(FileStorageFolder.ROOT_FULLNAME);
+        OneDriveFolder rootFolder = new OneDriveFolder(userId);
+        rootFolder.setRootFolder(true);
+        rootFolder.setId(FileStorageFolder.ROOT_FULLNAME);
+        rootFolder.setParentId(null);
+        rootFolder.setName(accountDisplayName);
+        rootFolder.setSubfolders(true);
+        rootFolder.setSubscribedSubfolders(true);
+        return rootFolder;
     }
 
     @Override
