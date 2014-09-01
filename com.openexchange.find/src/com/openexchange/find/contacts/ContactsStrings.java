@@ -64,11 +64,6 @@ public class ContactsStrings implements LocalizableStrings {
     public static final String FACET_TYPE_CONTACT = "Contact";
 
     // Context: Searching in contacts.
-    // Displayed as: [Search for] 'user input' in contacts.
-    // The 'user input' part is always prepended, please heed this in translations.
-    public static final String FACET_GLOBAL = "in contacts";
-
-    // Context: Searching in contacts.
     // Displayed as: [Search for] 'user input' in names.
     // The 'user input' part is always prepended, please heed this in translations.
     public static final String FACET_NAME = "in names";
