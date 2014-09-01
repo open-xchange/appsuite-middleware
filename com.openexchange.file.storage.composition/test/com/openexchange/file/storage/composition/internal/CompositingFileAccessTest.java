@@ -232,12 +232,8 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         defaultFile.setId(fileId.getFileId());
         defaultFile.setFolderId(fileId.getFolderId());
 
-        fileAccess.expectCall("exists", fileId.getFolderId(), fileId.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(
-            true);
         fileAccess.expectCall("getFileMetadata", fileId.getFolderId(), fileId.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(
             defaultFile);
-        fileAccess.expectCall("exists", fileId2.getFolderId(), fileId2.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(
-            true);
         fileAccess.expectCall("getFileMetadata", fileId2.getFolderId(), fileId2.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(
             defaultFile);
 
