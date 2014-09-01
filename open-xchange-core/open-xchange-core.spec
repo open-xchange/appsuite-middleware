@@ -18,6 +18,7 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The essential core of an Open-Xchange backend
 Autoreqprov:   no
+Requires:      open-xchange-system
 Requires:      open-xchange-osgi >= @OXVERSION@
 Requires:      open-xchange-xerces
 Provides:      open-xchange-cache = %{version}
@@ -1055,7 +1056,6 @@ exit 0
 %dir /opt/open-xchange/importCSV/
 %dir /opt/open-xchange/lib/
 /opt/open-xchange/lib/*
-/opt/open-xchange/lib/oxfunctions.sh
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 /opt/open-xchange/osgi/config.ini.template

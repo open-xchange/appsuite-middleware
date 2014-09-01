@@ -1,0 +1,52 @@
+
+Name:          open-xchange-system
+BuildArch:     noarch
+#!BuildIgnore: post-build-checks
+BuildRequires: ant
+BuildRequires: ant-nodeps
+BuildRequires: java-devel >= 1.6.0
+Version:       @OXVERSION@
+%define        ox_release 0
+Release:       %{ox_release}_<CI_CNT>.<B_CNT>
+Group:         Applications/Productivity
+License:       GPL-2.0
+BuildRoot:     %{_tmppath}/%{name}-%{version}-build
+URL:           http://www.open-xchange.com/
+Source:        %{name}_%{version}.orig.tar.bz2
+Summary:       system integration specific infrastructure
+Autoreqprov:   no
+PreReq:        /usr/sbin/useradd
+
+%description
+system integration specific infrastructure
+
+Authors:
+--------
+    Open-Xchange
+
+%prep
+%setup -q
+
+%build
+
+%install
+export NO_BRP_CHECK_BYTECODE_VERSION=true
+mkdir -p %{buildroot}/opt/open-xchange/lib
+
+ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
+
+%post
+
+%clean
+%{__rm} -rf %{buildroot}
+
+%pre
+/usr/sbin/groupadd -r open-xchange 2> /dev/null || :
+/usr/sbin/useradd -r -g open-xchange -r -s /bin/false -c "open-xchange system user" -d /opt/open-xchange open-xchange 2> /dev/null || :
+
+%files
+%defattr(-,root,root)
+/opt/open-xchange/lib/oxfunctions.sh
+
+%changelog
+

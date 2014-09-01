@@ -91,5 +91,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-upsell-multiple"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-xing-json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-system"/>
 </provider>
 </psf>
