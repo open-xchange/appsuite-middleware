@@ -101,7 +101,7 @@ public class CalendarStrings implements LocalizableStrings {
     public static final String STATUS_NONE = "None";
 
     // Relative date
-    public static final String RELATIVE_DATE_COMING = "Coming";
+    public static final String RELATIVE_DATE_FUTURE = "Future";
 
     public static final String RELATIVE_DATE_PAST = "Past";
 

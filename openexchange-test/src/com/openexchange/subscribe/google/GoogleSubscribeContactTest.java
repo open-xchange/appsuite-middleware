@@ -49,14 +49,19 @@
 
 package com.openexchange.subscribe.google;
 
+import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Calendar;
+import javax.imageio.ImageIO;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.util.TimeZones;
 
 /**
  * {@link GoogleSubscribeContactTest}
- * 
+ *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.6.1
@@ -65,7 +70,7 @@ public class GoogleSubscribeContactTest extends AbstractGoogleSubscribeTest {
 
     /**
      * Initializes a new {@link GoogleSubscribeContactTest}.
-     * 
+     *
      * @param name
      */
     public GoogleSubscribeContactTest(String name) {
@@ -138,10 +143,17 @@ public class GoogleSubscribeContactTest extends AbstractGoogleSubscribeTest {
                     assertNotNullAndEquals("instant messenger", "dyksenexample458@example.com (SKYPE)", c.getInstantMessenger1());
 
                     final byte[] expectedImage = getBytesOfPaulsImage();
-                    final byte[] actualImage = c.getImage1();
-                    
-                    assertTrue("Image does not equals", Arrays.equals(expectedImage, actualImage));
+                    final byte[] currentImage = c.getImage1();
 
+                    BufferedImage biExpected = getBufferedImage(expectedImage);
+                    BufferedImage biCurrent = getBufferedImage(currentImage);
+
+                    float meanExpected = meanHistogramRGBValue(biExpected);
+                    float meanCurrent = meanHistogramRGBValue(biCurrent);
+
+                    assertValueInRange(meanCurrent, meanExpected - 0.5f, meanExpected + 0.5f);
+                    System.out.println("Mean Expected:" + meanExpected);
+                    System.out.println("Mean Current:" + meanCurrent);
                     testAccount1Success = true;
                 } else if (c.getDisplayName().equals(testAccount2)) {
                     assertNotNullAndEquals("given name", "Maria", c.getGivenName());
@@ -240,6 +252,59 @@ public class GoogleSubscribeContactTest extends AbstractGoogleSubscribeTest {
         assertTrue("Could not find: " + testAccount1, testAccount1Success);
         assertTrue("Could not find: " + testAccount2, testAccount2Success);
         assertTrue("Could not find: " + testAccount3, testAccount3Success);
+    }
+
+    private BufferedImage getBufferedImage(byte[] inc){
+        ByteArrayInputStream bais = new ByteArrayInputStream(inc);
+        try {
+            return ImageIO.read(bais);
+        } catch (IOException e) {
+            assertFalse("An IOException occured " + e.getMessage(), true);
+            return null;
+        }
+    }
+    /**
+     * Asserts that a value is in range between rangeMin and rangeMax
+     *
+     * @param value the value to be tested
+     * @param rangeMin the absolute minimum range
+     * @param rangeMax the absolute maximum range
+     */
+    private void assertValueInRange(float value, float rangeMin, float rangeMax) {
+        boolean inRange = (rangeMin <= value && value <= rangeMax);
+        assertTrue("Range differs too much. Expect values between: " + rangeMin + " and " + rangeMax + "--> Got: " + value, inRange);
+    }
+
+    /**
+     * Returns the mean value of the RGB histogram of an image
+     *
+     * @param image the image
+     * @return rounded average to second decimal place of RGB histogram
+     */
+    private float meanHistogramRGBValue(BufferedImage image) {
+        int[] hValue = new int[256];
+        // fill zero matrix
+        for (int i = 0; i < hValue.length; i++) {
+            hValue[i] = 0;
+        }
+        // get colors from image
+        for (int i = 0; i < image.getWidth(); i++) {
+            for (int j = 0; j < image.getHeight(); j++) {
+                int red = new Color(image.getRGB(i, j)).getRed();
+                int green = new Color(image.getRGB(i, j)).getGreen();
+                int blue = new Color(image.getRGB(i, j)).getBlue();
+                hValue[red]++;
+                hValue[green]++;
+                hValue[blue]++;
+            }
+        }
+        // aggregate frequency of values per color and calculates the average value
+        float average = 0;
+        for (int colorPos = 0; colorPos < hValue.length; colorPos++) {
+            average += (hValue[colorPos] * colorPos) / 3.0f;
+        }
+        average = average / (image.getWidth() * image.getHeight());
+        return Math.round(average * 100.0f) / 100.0f;
     }
 
     private byte[] getBytesOfPaulsImage() {

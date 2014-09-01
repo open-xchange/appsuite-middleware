@@ -358,6 +358,15 @@ public class AJAXRequestData {
     }
 
     /**
+     * Gets the optional {@link HttpServletResponse} instance associated with this request data
+     *
+     * @return The {@link HttpServletResponse} instance or <code>null</code>
+     */
+    public HttpServletResponse optHttpServletResponse() {
+        return httpServletResponse;
+    }
+
+    /**
      * Returns a {@link OutputStream} suitable for writing binary data in the response. The servlet container does not encode the
      * binary data.
      * <p>
