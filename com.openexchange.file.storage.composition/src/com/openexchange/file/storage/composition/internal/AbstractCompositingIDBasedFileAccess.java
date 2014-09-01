@@ -797,7 +797,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
             FileStorageFileAccess fileAccess = getFileAccess(sourceFileID.getService(), sourceFileID.getAccountId());
             final IDTuple sourceIDTuple = new IDTuple(sourceFileID.getFolderId(), sourceFileID.getFileId());
             ensureFolderIDs(fileAccess, Collections.singletonList(sourceIDTuple));
-            if (null != sourceIDTuple.getFolder() && false == sourceIDTuple.getFolder().equals(targetFolderID.getFolderId())) {
+            if (null != document.getFolderId() && false == sourceIDTuple.getFolder().equals(targetFolderID.getFolderId())) {
                 /*
                  * special handling for move to different folder
                  */
