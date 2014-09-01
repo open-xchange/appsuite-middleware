@@ -67,7 +67,7 @@ import com.openexchange.test.FolderTestManager;
 
 /**
  * {@link Bug26350Test}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Bug26350Test extends AbstractAJAXSession {
@@ -76,9 +76,9 @@ public class Bug26350Test extends AbstractAJAXSession {
 
     private CalendarTestManager ctm1;
 
-    private int cycles = 3;
+    private final int cycles = 3;
 
-    private int chunkSize = 20;
+    private final int chunkSize = 20;
 
     private List<List<Integer>> ids;
 
@@ -131,7 +131,7 @@ public class Bug26350Test extends AbstractAJAXSession {
                 requests[j] = new DeleteRequest(chunkIds.get(j), folder.getObjectID(), new Date(Long.MAX_VALUE));
             }
 
-            MultipleResponse<CommonDeleteResponse> response = (MultipleResponse<CommonDeleteResponse>) client1.execute(MultipleRequest.create(requests));
+            MultipleResponse<CommonDeleteResponse> response = client1.execute(MultipleRequest.create(requests));
             for (CommonDeleteResponse deleteResponse : response) {
                 assertFalse("Delete Response should not have an error.", deleteResponse.hasError());
             }
@@ -141,6 +141,7 @@ public class Bug26350Test extends AbstractAJAXSession {
 
     @Override
     public void tearDown() throws Exception {
+        ctm1.cleanUp();
         ftm.cleanUp();
         client1.logout();
         super.tearDown();
