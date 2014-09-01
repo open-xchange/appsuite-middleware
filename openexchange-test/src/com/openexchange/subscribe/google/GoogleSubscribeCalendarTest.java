@@ -226,7 +226,7 @@ public class GoogleSubscribeCalendarTest extends AbstractGoogleSubscribeTest {
         assertNotNull(appointment.getConfirmations());
         for (ConfirmableParticipant cp : appointment.getConfirmations()) {
             Part p = participants.get(cp.getEmailAddress());
-            if (p.getEmailAddress().equals(cp.getEmailAddress())) {
+            if (p != null && p.getEmailAddress().equals(cp.getEmailAddress())) {
                 assertNotNull("No participant found with email address " + cp.getEmailAddress(), p);
                 assertNotNullAndEquals("particiant email address", p.getEmailAddress(), cp.getEmailAddress());
                 assertFieldNotNull("participant status", p.getConfirmStatus(), cp.getStatus());
