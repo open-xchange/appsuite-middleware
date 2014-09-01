@@ -51,6 +51,7 @@ package com.openexchange.imap.storecache;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.mail.MessagingException;
+import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPStore;
 
 /**
@@ -67,8 +68,8 @@ public class NonCachingIMAPStoreContainer extends AbstractIMAPStoreContainer {
     /**
      * Initializes a new {@link NonCachingIMAPStoreContainer}.
      */
-    public NonCachingIMAPStoreContainer(final String server, final int port) {
-        super();
+    public NonCachingIMAPStoreContainer(final String server, final int port, boolean propagateClientIp) {
+        super(propagateClientIp);
         this.port = port;
         this.server = server;
         inUseCount = new AtomicInteger();
@@ -80,9 +81,9 @@ public class NonCachingIMAPStoreContainer extends AbstractIMAPStoreContainer {
     }
 
     @Override
-    public IMAPStore getStore(final javax.mail.Session imapSession, final String login, final String pw) throws MessagingException, InterruptedException {
+    public IMAPStore getStore(javax.mail.Session imapSession, String login, String pw, Session session) throws MessagingException, InterruptedException {
         inUseCount.incrementAndGet();
-        return newStore(server, port, login, pw, imapSession);
+        return newStore(server, port, login, pw, imapSession, session);
     }
 
     @Override
