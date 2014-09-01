@@ -102,7 +102,7 @@ public class QueryTest extends CalendarFindTest {
         facets.add(createActiveFieldFacet(SUBJECT, "subject", randomSubstring(appointment.getTitle())));
         facets.add(createActiveFieldFacet(LOCATION, "location", randomSubstring(appointment.getLocation())));
         facets.add(createActiveFieldFacet(DESCRIPTION, "description", randomSubstring(appointment.getNote())));
-        facets.add(createActiveFacet(RELATIVE_DATE, "coming", "date", "coming"));
+        facets.add(createActiveFacet(RELATIVE_DATE, "future", "date", "future"));
         facets.add(createActiveFacet(STATUS, "accepted", "status", "accepted"));
         facets.add(createActiveFacet(RECURRING_TYPE, "single", "type", "single"));
         facets.add(createActiveFacet(PARTICIPANT, String.valueOf(client.getValues().getUserId()), "users", String.valueOf(client.getValues().getUserId())));
@@ -158,7 +158,7 @@ public class QueryTest extends CalendarFindTest {
         pastAppointment.setEndDate(TimeTools.D("yesterday at noon"));
         pastAppointment = manager.insert(pastAppointment);
 
-        List<PropDocument> comingDocuments = query(Collections.singletonList(createActiveFacet(RELATIVE_DATE, "coming", "date", "coming")));
+        List<PropDocument> comingDocuments = query(Collections.singletonList(createActiveFacet(RELATIVE_DATE, "future", "date", "future")));
         assertTrue("no appointments found", 0 < comingDocuments.size());
         assertNotNull("coming appointment not found", findByProperty(comingDocuments, "title", comingAppointment.getTitle()));
         assertNull("past appointment found", findByProperty(comingDocuments, "title", pastAppointment.getTitle()));

@@ -210,7 +210,7 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
     private static Facet getRelativeDateFacet() {
         List<String> fields = Collections.singletonList(CalendarFacetType.RELATIVE_DATE.getId());
         return newExclusiveBuilder(CalendarFacetType.RELATIVE_DATE)
-            .addValue(buildRelativeDateFacetValue(CalendarFacetValues.RELATIVE_DATE_COMING, CalendarStrings.RELATIVE_DATE_COMING, fields))
+            .addValue(buildRelativeDateFacetValue(CalendarFacetValues.RELATIVE_DATE_FUTURE, CalendarStrings.RELATIVE_DATE_FUTURE, fields))
             .addValue(buildRelativeDateFacetValue(CalendarFacetValues.RELATIVE_DATE_PAST, CalendarStrings.RELATIVE_DATE_PAST, fields))
             .build();
     }
