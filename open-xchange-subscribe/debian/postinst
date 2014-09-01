@@ -44,9 +44,12 @@ dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/yahoosubscri
 dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/crawlers/XING.yml /opt/open-xchange/etc/crawlers/xing.yml 7.4.2~ -- "$@"
 
 #SoftwareChange_Request-2145
-#not in postfix() as dpkg-maintscript-helper needs $@ which isn't satisfied by postfix() 
+#not in postfix() as dpkg-maintscript-helper needs $@ which isn't satisfied by postfix()
 dpkg-maintscript-helper rm_conffile /opt/open-xchange/etc/crawlers/GoogleCalendar.yml 7.6.1~ -- "$@"
 dpkg-maintscript-helper rm_conffile /opt/open-xchange/etc/crawlers/GoogleMail.yml 7.6.1~ -- "$@"
+
+# SoftwareChange_Request-2147
+dpkg-maintscript-helper rm_conffile /opt/open-xchange/etc/crawlers/xing.yml 7.6.1~ -- "$@"
 
 . /opt/open-xchange/lib/oxfunctions.sh
 
@@ -131,7 +134,7 @@ postFix() {
         fi
     done
 
-    #SoftwareChange_Request-2145 
+    #SoftwareChange_Request-2145
     pfile=/opt/open-xchange/etc/crawler.properties
     for prop in com.openexchange.subscribe.crawler.googlemail com.openexchange.subscribe.crawler.google.calendar com.openexchange.subscribe.crawler.googlemail.autorunInterval com.openexchange.subscribe.crawler.google.calendar.autorunInterval; do
         if ox_exists_property $prop $pfile; then
@@ -139,6 +142,13 @@ postFix() {
         fi
     done
 
+    # SoftwareChange_Request-2147
+    pfile=/opt/open-xchange/etc/crawler.properties
+    for prop in com.openexchange.subscribe.xing com.openexchange.subscribe.xing.autorunInterval; do
+        if ox_exists_property $prop $pfile; then
+            ox_remove_property $prop $pfile
+        fi
+    done
 }
 
 setConfigFilePermissions() {

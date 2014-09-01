@@ -2,11 +2,8 @@
 Name:          open-xchange-subscribe
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks
-BuildRequires: ant
 BuildRequires: ant-nodeps
-BuildRequires: open-xchange-core
 BuildRequires: open-xchange-oauth
-BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
 %define        ox_release 0
@@ -18,10 +15,7 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Open-Xchange backend subscribe extension
 Autoreqprov:   no
-Requires:      open-xchange-core >= @OXVERSION@
 Requires:      open-xchange-oauth >= @OXVERSION@
-Requires:      open-xchange-xerces
-Requires:      open-xchange-osgi >= @OXVERSION@
 Provides:      open-xchange-subscribe-crawler = %{version}
 Obsoletes:     open-xchange-subscribe-crawler < %{version}
 Provides:      open-xchange-subscribe-facebook = %{version}
@@ -158,6 +152,13 @@ if [ ${1:-0} -eq 2 ]; then
         fi
     done
 
+    # SoftwareChange_Request-2147
+    pfile=/opt/open-xchange/etc/crawler.properties
+    for prop in com.openexchange.subscribe.xing com.openexchange.subscribe.xing.autorunInterval; do
+        if ox_exists_property $prop $pfile; then
+            ox_remove_property $prop $pfile
+        fi
+    done
 fi
 
 %clean
