@@ -1,3 +1,7 @@
+* 2014-09-01 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32695: Try to lookup existing stored session during form login if auto-login is enabled
+
 * 2014-08-29 - thorben.betten@open-xchange.com
 
  - Fix for bug 34211: Properly request next page token using Google API
