@@ -60,8 +60,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.MockitoAnnotations;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
@@ -81,12 +86,16 @@ import com.openexchange.session.Session;
 import com.openexchange.session.SimSession;
 import com.openexchange.sim.Block;
 import com.openexchange.sim.SimBuilder;
+import com.openexchange.threadpool.SimThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link CompositingFileAccessTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ ThreadPools.class })
 public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAccess implements FileStorageService, FileStorageAccountAccess, FileStorageAccountManager {
 
     private static final InputStream EMPTY_INPUT_STREAM = new ByteArrayInputStream(new byte[0]);
@@ -400,6 +409,12 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
 
     @Test
     public void testSearchInAllFolders() throws OXException {
+        MockitoAnnotations.initMocks(this);
+        PowerMockito.mockStatic(ThreadPools.class);
+
+        SimThreadPoolService testThreadPool = new SimThreadPoolService();
+        PowerMockito.when(ThreadPools.getThreadPool()).thenReturn(testThreadPool);
+
         fileAccess.expectCall("getAccountAccess").andReturn(this);
         fileAccess.expectCall("getAccountAccess").andReturn(this);
 
