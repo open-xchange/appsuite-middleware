@@ -49,7 +49,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 
 %post
 . /opt/open-xchange/lib/oxfunctions.sh
-CONFFILES="deferrer.properties oauth.properties facebookoauth.properties linkedinoauth.properties msnoauth.properties twitteroauth.properties yahoooauth.properties"
+CONFFILES="deferrer.properties oauth.properties facebookoauth.properties linkedinoauth.properties twitteroauth.properties yahoooauth.properties"
 for FILE in ${CONFFILES}; do
     ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc $FILE
 done
@@ -60,20 +60,12 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
-    PROTECT="facebookoauth.properties linkedinoauth.properties msnoauth.properties yahoooauth.properties xingoauth.properties settings/flickroauth.properties settings/tumblroauth.properties"
+    PROTECT="facebookoauth.properties linkedinoauth.properties yahoooauth.properties xingoauth.properties settings/flickroauth.properties settings/tumblroauth.properties"
     for FILE in $PROTECT; do
         ox_update_permissions "/opt/open-xchange/etc/$FILE" root:open-xchange 640
     done
 
     # SoftwareChange_Request-1494
-    pfile=/opt/open-xchange/etc/msnoauth.properties
-    if ! ox_exists_property com.openexchange.oauth.msn $pfile; then
-       if grep -E '^com.openexchange.*REPLACE_THIS_WITH_VALUE_OBTAINED_FROM' $pfile > /dev/null; then
-           ox_set_property com.openexchange.oauth.msn false $pfile
-       else
-           ox_set_property com.openexchange.oauth.msn true $pfile
-       fi
-    fi
     pfile=/opt/open-xchange/etc/yahoooauth.properties
     if ! ox_exists_property com.openexchange.oauth.yahoo $pfile; then
        if grep -E '^com.openexchange.*REPLACE_THIS_WITH_VALUE_OBTAINED_FROM' $pfile > /dev/null; then
@@ -125,13 +117,12 @@ fi
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/googleoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/linkedinoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/msliveconnectoauth.properties
-%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/msnoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/yahoooauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/xingoauth.properties
-%config(noreplace) /opt/open-xchange/etc/*
-%dir /opt/open-xchange/etc/settings/
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/settings/flickroauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/settings/tumblroauth.properties
+%config(noreplace) /opt/open-xchange/etc/*
+%dir /opt/open-xchange/etc/settings/
 %config(noreplace) /opt/open-xchange/etc/settings/*
 
 %changelog
