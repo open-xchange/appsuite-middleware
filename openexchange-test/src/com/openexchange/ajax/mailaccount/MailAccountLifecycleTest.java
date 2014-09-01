@@ -176,7 +176,7 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
         final GetSwitch actualSwitch = new GetSwitch(actualAcc);
 
         for (final Attribute attribute : Attribute.values()) {
-            if (attribute == Attribute.PASSWORD_LITERAL || attribute == Attribute.TRANSPORT_PASSWORD_LITERAL || attribute == Attribute.ARCHIVE_LITERAL) {
+            if (attribute == Attribute.PASSWORD_LITERAL || attribute == Attribute.TRANSPORT_PASSWORD_LITERAL || attribute == Attribute.ARCHIVE_LITERAL || attribute == Attribute.TRANSPORT_LOGIN_LITERAL) {
                 continue;
             } else if (attribute == Attribute.CONFIRMED_HAM_FULLNAME_LITERAL) {
                 compareByEnding(expectedSwitch, actualSwitch, attribute, Attribute.CONFIRMED_HAM_LITERAL);

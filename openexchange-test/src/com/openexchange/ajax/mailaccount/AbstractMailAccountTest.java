@@ -83,7 +83,7 @@ public class AbstractMailAccountTest extends AbstractAJAXSession {
         mailAccountDescription.parseMailServerURL("imap://mail.test.invalid");
         mailAccountDescription.setName("Test Mail Account");
         mailAccountDescription.setPassword("Password");
-        mailAccountDescription.setPrimaryAddress("bob@test.invalid");
+        mailAccountDescription.setPrimaryAddress("bob"+System.currentTimeMillis()+"@test.invalid");
         mailAccountDescription.setSent("sent");
         mailAccountDescription.setSpam("Spam");
         mailAccountDescription.setSpamHandler("spamHandler");
@@ -106,7 +106,7 @@ public class AbstractMailAccountTest extends AbstractAJAXSession {
     protected void updateMailAccountDescription(final MailAccountDescription mailAccountDescription, String user) {
         mailAccountDescription.setMailServer(MailConfig.getProperty(MailConfig.Property.SERVER));
         mailAccountDescription.setMailPort(Integer.parseInt(MailConfig.getProperty(MailConfig.Property.PORT)));
-        
+
         mailAccountDescription.setMailProtocol("imap");
         mailAccountDescription.setMailSecure(false);
         mailAccountDescription.setLogin(user);
