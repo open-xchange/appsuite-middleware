@@ -61,6 +61,15 @@ postFix() {
            ox_set_property com.openexchange.oauth.facebook true $pfile
        fi
     fi
+
+    # SoftwareChange_Request-2146
+    PFILE=/opt/open-xchange/etc/xingoauth.properties
+    ox_add_property com.openexchange.oauth.xing.consumerKey REPLACE_THIS_WITH_YOUR_XING_PRODUCTIVE_CONSUMER_KEY $PFILE
+    ox_add_property com.openexchange.oauth.xing.consumerSecret REPLACE_THIS_WITH_YOUR_XING_PRODUCTIVE_CONSUMER_SECRET $PFILE
+    VALUE=$(ox_read_property com.openexchange.oauth.xing $PFILE)
+    if [ "$VALUE" = "false" ]; then
+        ox_set_property com.openexchange.oauth.xing true $PFILE
+    fi
 }
 
 setConfigFilePermissions() {

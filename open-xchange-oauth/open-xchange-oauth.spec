@@ -2,7 +2,6 @@
 Name:          open-xchange-oauth
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks
-BuildRequires: ant
 BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
@@ -31,7 +30,6 @@ Provides:      open-xchange-oauth-twitter = %{version}
 Obsoletes:     open-xchange-oauth-twitter < %{version}
 Provides:      open-xchange-oauth-yahoo = %{version}
 Obsoletes:     open-xchange-oauth-yahoo < %{version}
-
 
 %description
 The Open-Xchange OAuth implementation.
@@ -99,6 +97,15 @@ if [ ${1:-0} -eq 2 ]; then
        else
            ox_set_property com.openexchange.oauth.facebook true $pfile
        fi
+    fi
+
+    # SoftwareChange_Request-2146
+    PFILE=/opt/open-xchange/etc/xingoauth.properties
+    ox_add_property com.openexchange.oauth.xing.consumerKey REPLACE_THIS_WITH_YOUR_XING_PRODUCTIVE_CONSUMER_KEY /opt/open-xchange/etc/xingoauth.properties
+    ox_add_property com.openexchange.oauth.xing.consumerSecret REPLACE_THIS_WITH_YOUR_XING_PRODUCTIVE_CONSUMER_SECRET /opt/open-xchange/etc/xingoauth.properties
+    VALUE=$(ox_read_property com.openexchange.oauth.xing $PFILE)
+    if [ "$VALUE" = "false" ]; then
+        ox_set_property com.openexchange.oauth.xing true $PFILE
     fi
 fi
 
