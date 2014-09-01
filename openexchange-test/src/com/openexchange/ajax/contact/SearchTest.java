@@ -132,14 +132,22 @@ public class SearchTest extends AbstractContactTest {
     public void testAutoCompleteWithContactCollectFolderAndGlobalAddressbook() throws Exception {
         int[] contactIds = new int[]{};
         try {
+            int collectFolderId = -1;
             final GetResponse getResponse = client.execute(new GetRequest(Tree.ContactCollectFolder));
-            final int collectFolderId = getResponse.getInteger();
+            if (getResponse.hasInteger()) {
+                collectFolderId = getResponse.getInteger();
 
-            if (-1 == collectFolderId) {
-                // Obviously contact collector folder is not present for test user
-                return;
+                if (-1 == collectFolderId) {
+                    // Obviously contact collector folder is not present for test user
+                    return;
+                }
+            } else {
+                if (getResponse.hasString()) {
+                    fail(getResponse.getString());
+                } else {
+                    fail("Response is in wrong format:" + getResponse);
+                }
             }
-
             contactIds = insertSearchableContacts(collectFolderId);
 
             final ContactSearchObject searchObject = new ContactSearchObject();
