@@ -58,7 +58,9 @@ public enum ComparisonType {
 
     LESS_THAN(javax.mail.search.ComparisonTerm.LT),
     EQUALS(javax.mail.search.ComparisonTerm.EQ),
-    GREATER_THAN(javax.mail.search.ComparisonTerm.GT);
+    GREATER_THAN(javax.mail.search.ComparisonTerm.GT),
+    LESS_EQUALS(javax.mail.search.ComparisonTerm.LE),
+    GREATER_EQUALS(javax.mail.search.ComparisonTerm.GE);
 
     private final int ct;
 

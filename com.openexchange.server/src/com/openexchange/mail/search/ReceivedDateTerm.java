@@ -53,7 +53,6 @@ import java.util.Collection;
 import java.util.Date;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -114,14 +113,19 @@ public final class ReceivedDateTerm extends SearchTerm<ComparablePattern<java.ut
         }
         final ComparablePattern<java.util.Date> pattern = getPattern();
         final ComparisonType comparisonType = pattern.getComparisonType();
-        if (ComparisonType.EQUALS == comparisonType) {
-            return pattern.getPattern().getTime() == receivedDate.getTime();
-        } else if (ComparisonType.LESS_THAN == comparisonType) {
-            return pattern.getPattern().getTime() > receivedDate.getTime();
-        } else if (ComparisonType.GREATER_THAN == comparisonType) {
-            return pattern.getPattern().getTime() < receivedDate.getTime();
-        } else {
-            return pattern.getPattern().getTime() == receivedDate.getTime();
+        switch (comparisonType) {
+            case EQUALS:
+                return pattern.getPattern().getTime() == receivedDate.getTime();
+            case LESS_THAN:
+                return pattern.getPattern().getTime() > receivedDate.getTime();
+            case LESS_EQUALS:
+                return pattern.getPattern().getTime() >= receivedDate.getTime();
+            case GREATER_THAN:
+                return pattern.getPattern().getTime() < receivedDate.getTime();
+            case GREATER_EQUALS:
+                return pattern.getPattern().getTime() <= receivedDate.getTime();
+            default:
+                return pattern.getPattern().getTime() == receivedDate.getTime();
         }
     }
 
@@ -139,14 +143,19 @@ public final class ReceivedDateTerm extends SearchTerm<ComparablePattern<java.ut
         }
         final ComparablePattern<java.util.Date> pattern = getPattern();
         final ComparisonType comparisonType = pattern.getComparisonType();
-        if (ComparisonType.EQUALS == comparisonType) {
-            return pattern.getPattern().getTime() == receivedDate.getTime();
-        } else if (ComparisonType.LESS_THAN == comparisonType) {
-            return pattern.getPattern().getTime() > receivedDate.getTime();
-        } else if (ComparisonType.GREATER_THAN == comparisonType) {
-            return pattern.getPattern().getTime() < receivedDate.getTime();
-        } else {
-            return pattern.getPattern().getTime() == receivedDate.getTime();
+        switch (comparisonType) {
+            case EQUALS:
+                return pattern.getPattern().getTime() == receivedDate.getTime();
+            case LESS_THAN:
+                return pattern.getPattern().getTime() > receivedDate.getTime();
+            case LESS_EQUALS:
+                return pattern.getPattern().getTime() >= receivedDate.getTime();
+            case GREATER_THAN:
+                return pattern.getPattern().getTime() < receivedDate.getTime();
+            case GREATER_EQUALS:
+                return pattern.getPattern().getTime() <= receivedDate.getTime();
+            default:
+                return pattern.getPattern().getTime() == receivedDate.getTime();
         }
     }
 
