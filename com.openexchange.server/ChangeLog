@@ -1,3 +1,7 @@
+* 2014-09-01 - marcus.klein@open-xchange.com
+
+ - Fix for bug 34236: Marked xingsubscribe.properties in open-xchange-subscribe package as a configuration file.
+
 * 2014-09-01 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 32695: Try to lookup existing stored session during form login if auto-login is enabled
