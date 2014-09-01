@@ -58,7 +58,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.contact.SortOptions;
-import com.openexchange.contact.SortOrder;
 import com.openexchange.contact.storage.DefaultContactStorage;
 import com.openexchange.contact.storage.rdb.fields.DistListMemberField;
 import com.openexchange.contact.storage.rdb.fields.Fields;
@@ -635,7 +634,9 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * check fields
              */
-            QueryFields queryFields = new QueryFields(fields, ContactField.OBJECT_ID, ContactField.INTERNAL_USERID);
+            ContactField[] mandatoryFields = com.openexchange.tools.arrays.Arrays.add(
+                Tools.getRequiredFields(sortOptions), ContactField.OBJECT_ID, ContactField.INTERNAL_USERID);
+            QueryFields queryFields = new QueryFields(fields, mandatoryFields);
             if (false == queryFields.hasContactData()) {
                 return null; // nothing to do
             }
@@ -823,20 +824,9 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * check fields
              */
-            QueryFields queryFields;
-            if (null == contactSearch.getPattern() && null != sortOptions
-                && null != sortOptions.getOrder() && 0 < sortOptions.getOrder().length) {
-                // add sort field(s) to queried fields as this leads to UNION selects
-                List<ContactField> mandatoryFields = new ArrayList<ContactField>();
-                mandatoryFields.add(ContactField.OBJECT_ID);
-                mandatoryFields.add(ContactField.INTERNAL_USERID);
-                for (SortOrder order : sortOptions.getOrder()) {
-                    mandatoryFields.add(order.getBy());
-                }
-                queryFields = new QueryFields(fields, mandatoryFields.toArray(new ContactField[mandatoryFields.size()]));
-            } else {
-                queryFields = new QueryFields(fields, ContactField.OBJECT_ID, ContactField.INTERNAL_USERID);
-            }
+            ContactField[] mandatoryFields = com.openexchange.tools.arrays.Arrays.add(
+                Tools.getRequiredFields(sortOptions), ContactField.OBJECT_ID, ContactField.INTERNAL_USERID);
+            QueryFields queryFields = new QueryFields(fields, mandatoryFields);
             if (false == queryFields.hasContactData()) {
                 return null; // nothing to do
             }

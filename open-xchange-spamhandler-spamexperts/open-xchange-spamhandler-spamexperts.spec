@@ -38,7 +38,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 
 %post
 . /opt/open-xchange/lib/oxfunctions.sh
-ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc spamexperts.properties 
+ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc spamexperts.properties
 ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc settings/spamexperts-ui.properties
 
 # SoftwareChange_Request-1844
@@ -65,6 +65,8 @@ ox_add_property com.openexchange.custom.spamexperts.trainhamfolder "Not Spam" /o
 
 %changelog
 * Thu Aug 21 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-08-25
+* Wed Aug 20 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-08-25
 * Mon Aug 18 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-08-25

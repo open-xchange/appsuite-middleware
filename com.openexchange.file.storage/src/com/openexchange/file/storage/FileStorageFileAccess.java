@@ -142,6 +142,11 @@ public interface FileStorageFileAccess extends TransactionAware {
             return true;
         }
 
+        @Override
+        public String toString() {
+            return "IDTuple [folder=" + folder + ", id=" + id + "]";
+        }
+
     }
 
     /**

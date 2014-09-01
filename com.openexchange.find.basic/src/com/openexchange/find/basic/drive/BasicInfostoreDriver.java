@@ -49,9 +49,9 @@
 
 package com.openexchange.find.basic.drive;
 
-import static com.openexchange.find.basic.SimpleTokenizer.tokenize;
 import static com.openexchange.find.basic.drive.Utils.prepareSearchTerm;
 import static com.openexchange.find.facet.Facets.newSimpleBuilder;
+import static com.openexchange.java.SimpleTokenizer.tokenize;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;

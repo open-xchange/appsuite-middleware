@@ -14,20 +14,21 @@ Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
-URL:           http://www.open-xchange.com/ 
+URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Open-Xchange backend subscribe extension
 Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
 Requires:      open-xchange-oauth >= @OXVERSION@
 Requires:      open-xchange-xerces
+Requires:      open-xchange-osgi >= @OXVERSION@
 Provides:      open-xchange-subscribe-crawler = %{version}
 Obsoletes:     open-xchange-subscribe-crawler < %{version}
 Provides:      open-xchange-subscribe-facebook = %{version}
 Obsoletes:     open-xchange-subscribe-facebook < %{version}
 Provides:      open-xchange-subscribe-json = %{version}
 Obsoletes:     open-xchange-subscribe-json < %{version}
-Provides:      open-xchange-subscribe-linkedin = %{version} 
+Provides:      open-xchange-subscribe-linkedin = %{version}
 Obsoletes:     open-xchange-subscribe-linkedin < %{version}
 Provides:      open-xchange-subscribe-microformats = %{version}
 Obsoletes:     open-xchange-subscribe-microformats < %{version}
@@ -85,7 +86,7 @@ if [ ${1:-0} -eq 2 ]; then
     pfile=/opt/open-xchange/etc/crawler.properties
     if grep -E '^com.openexchange.subscribe.crawler.path.*/' $pfile >/dev/null; then
         ox_set_property com.openexchange.subscribe.crawler.path crawlers $pfile
-    fi    
+    fi
 
     #SoftwareChange_Request-1099
     # obsoleted by SoftwareChange_Request-1710
@@ -148,6 +149,15 @@ if [ ${1:-0} -eq 2 ]; then
         ox_update_permissions "$i" open-xchange:root 644
     done
     ox_update_permissions "/opt/open-xchange/etc/crawlers" open-xchange:root 755
+
+    #SoftwareChange_Request-2145
+    pfile=/opt/open-xchange/etc/crawler.properties
+    for prop in com.openexchange.subscribe.crawler.googlemail com.openexchange.subscribe.crawler.google.calendar com.openexchange.subscribe.crawler.googlemail.autorunInterval com.openexchange.subscribe.crawler.google.calendar.autorunInterval; do
+        if ox_exists_property $prop $pfile; then
+            ox_remove_property $prop $pfile
+        fi
+    done
+
 fi
 
 %clean
@@ -163,10 +173,13 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 %dir %attr(755,open-xchange,root) /opt/open-xchange/etc/crawlers/
 %config(noreplace) %attr(644,open-xchange,root) /opt/open-xchange/etc/crawlers/*
+%config(noreplace) %attr(644,open-xchange,root) /opt/open-xchange/etc/googlesubscribe.properties
 %doc docs/
 
 %changelog
 * Thu Aug 21 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-08-25
+* Wed Aug 20 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-08-25
 * Mon Aug 18 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-08-25

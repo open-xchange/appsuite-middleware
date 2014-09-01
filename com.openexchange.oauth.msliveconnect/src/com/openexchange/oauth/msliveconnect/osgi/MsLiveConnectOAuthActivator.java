@@ -55,11 +55,15 @@ import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.msliveconnect.MsLiveConnectOAuthServiceMetaData;
+import com.openexchange.oauth.msliveconnect.groupware.RemoveOAuthAccountsTask;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -79,12 +83,13 @@ public final class MsLiveConnectOAuthActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, DeferringURLService.class, CapabilityService.class, DispatcherPrefixService.class };
+        return new Class<?>[] { ConfigurationService.class, DeferringURLService.class, CapabilityService.class, DispatcherPrefixService.class, DatabaseService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MsLiveConnectOAuthActivator.class);
+        Services.setServiceLookup(this);
         try {
             final MsLiveConnectOAuthServiceMetaData boxcomService = new MsLiveConnectOAuthServiceMetaData(this);
             registerService(OAuthServiceMetaData.class, boxcomService);
@@ -109,6 +114,10 @@ public final class MsLiveConnectOAuthActivator extends HousekeepingActivator {
             }, properties);
 
             getService(CapabilityService.class).declareCapability("msliveconnect");
+            
+            // Register the update task
+            final DefaultUpdateTaskProviderService providerService = new DefaultUpdateTaskProviderService(new RemoveOAuthAccountsTask());
+            registerService(UpdateTaskProviderService.class.getName(), providerService);
 
             log.info("Successfully initialized MS Live Connect OAuth service");
         } catch (final Exception e) {

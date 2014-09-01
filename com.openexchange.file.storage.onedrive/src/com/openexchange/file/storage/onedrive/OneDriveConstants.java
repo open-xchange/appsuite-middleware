@@ -87,4 +87,32 @@ public final class OneDriveConstants implements FileStorageConstants {
      */
     public static final String TYPE_ALBUM = "album";
 
+    // ----------------------------------------------------------------------------------------------------------- //
+
+    /**
+     * The "offset" query parameter<br>
+     * See <a href="http://msdn.microsoft.com/en-us/library/dn631842.aspx">http://msdn.microsoft.com/en-us/library/dn631842.aspx</a>
+     */
+    public static final String QUERY_PARAM_OFFSET = "offset";
+
+    /**
+     * The "limit" query parameter<br>
+     * See <a href="http://msdn.microsoft.com/en-us/library/dn631842.aspx">http://msdn.microsoft.com/en-us/library/dn631842.aspx</a>
+     */
+    public static final String QUERY_PARAM_LIMIT = "limit";
+
+    /**
+     * The <a href="http://msdn.microsoft.com/en-us/library/dn631835.aspx">"filter" query parameter</a><br>
+     * See <a href="http://msdn.microsoft.com/en-us/library/dn631842.aspx">http://msdn.microsoft.com/en-us/library/dn631842.aspx</a>
+     */
+    public static final String QUERY_PARAM_FILTER = "filter";
+
+    // ----------------------------------------------------------------------------------------------------------- //
+
+    /**
+     * The <code>"filter"</code> expression to only retrieve folders/albums. <br>
+     * See <a href="http://msdn.microsoft.com/en-us/library/dn631835.aspx">http://msdn.microsoft.com/en-us/library/dn631835.aspx</a>
+     */
+    public static final String FILTER_FOLDERS = "folders,albums";
+
 }

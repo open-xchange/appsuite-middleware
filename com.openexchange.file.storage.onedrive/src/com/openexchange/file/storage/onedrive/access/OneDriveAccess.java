@@ -51,6 +51,8 @@ package com.openexchange.file.storage.onedrive.access;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.scribe.builder.ServiceBuilder;
@@ -69,7 +71,6 @@ import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.session.Session;
-
 
 /**
  * {@link OneDriveAccess}
@@ -122,11 +123,17 @@ public class OneDriveAccess {
     /** The HTTP client */
     private final DefaultHttpClient httpClient;
 
+    /** The cache for known identifiers */
+    private final ConcurrentMap<String, Object> knownIds;
+
     /**
      * Initializes a new {@link OneDriveAccess}.
      */
     private OneDriveAccess(FileStorageAccount fsAccount, Session session, int userId, int contextId) throws OXException {
         super();
+
+        // Initialize map
+        knownIds = new ConcurrentHashMap<String, Object>(256);
 
         // Get OAuth account identifier from messaging account's configuration
         int oauthAccountId;
@@ -242,6 +249,15 @@ public class OneDriveAccess {
                 lastAccessed = System.nanoTime();
             }
         }
+    }
+
+    /**
+     * Gets the cache for known identifiers.
+     *
+     * @return The cache for known identifiers
+     */
+    public ConcurrentMap<String, Object> getKnownIds() {
+        return knownIds;
     }
 
     /**

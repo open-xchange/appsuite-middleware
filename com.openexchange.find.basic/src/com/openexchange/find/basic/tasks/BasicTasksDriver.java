@@ -49,12 +49,12 @@
 
 package com.openexchange.find.basic.tasks;
 
-import static com.openexchange.find.basic.SimpleTokenizer.tokenize;
 import static com.openexchange.find.basic.tasks.Constants.FIELD_STATUS;
 import static com.openexchange.find.basic.tasks.Constants.FIELD_TYPE;
 import static com.openexchange.find.facet.Facets.newDefaultBuilder;
 import static com.openexchange.find.facet.Facets.newExclusiveBuilder;
 import static com.openexchange.find.facet.Facets.newSimpleBuilder;
+import static com.openexchange.java.SimpleTokenizer.tokenize;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

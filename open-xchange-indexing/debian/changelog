@@ -106,6 +106,12 @@ open-xchange-indexing (7.6.0-0) unstable; urgency=low
 
  -- Steffen Templin <steffen.templin@open-xchange.com>  Wed, 12 Feb 2014 09:36:04 +0100
 
+open-xchange-indexing (7.4.2-33) stable; urgency=low
+
+  * Build for patch 2014-08-25
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Wed, 20 Aug 2014 11:47:58 +0200
+
 open-xchange-indexing (7.4.2-32) stable; urgency=low
 
   * Build for patch 2014-08-15

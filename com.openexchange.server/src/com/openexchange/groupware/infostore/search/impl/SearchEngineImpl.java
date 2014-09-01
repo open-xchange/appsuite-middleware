@@ -129,7 +129,6 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
 
     @Override
     public SearchIterator<DocumentMetadata> search(final int[] folderIds, final SearchTerm<?> searchTerm, final Metadata[] cols, final Metadata sortedBy, final int dir, final int start, final int end, final Context ctx, final User user, final UserPermissionBits userPermissions) throws OXException {
-        LOG.debug("Searching in folders -- Input FOLDERIDS: {}, SEARCHTERM: {}, COLS: {}, SORTBY: {}, DIR: {}, START: {}, END: {}, CTX: {}, USER: {}, USERPERMISSIONBITS: {} ", folderIds, searchTerm, cols, sortedBy, dir, start, end, ctx, user, userPermissions);
         Connection con = getReadConnection(ctx);
         List<Integer> all = new ArrayList<Integer>();
         List<Integer> own = new ArrayList<Integer>();
@@ -150,7 +149,6 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             return SearchIteratorAdapter.emptyIterator();
         }
 
-        LOG.debug("Searching in folders -- ALL: {}, OWN: {}", all, own);
         ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(I2i(all.toArray(new Integer[all.size()])),
             I2i(own.toArray(new Integer[own.size()])),
             ctx.getContextId(),
@@ -187,7 +185,6 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
     @Override
     public SearchIterator<DocumentMetadata> search(final String query, final Metadata[] cols, final int folderId, final Metadata sortedBy, final int dir, final int start, final int end, final Context ctx, final User user, final UserPermissionBits userPermissions) throws OXException {
 
-        LOG.debug("Searching in folders -- Input QUERY: {}, COLS: {}, FOLDERID: {}, SORTBY: {}, DIR: {}, START: {}, END: {}, CTX: {}, USER: {}, USERPERMISSIONBITS: {} ", query, cols, folderId, sortedBy, dir, start, end, ctx, user, userPermissions);
         List<Integer> all = new ArrayList<Integer>();
         List<Integer> own = new ArrayList<Integer>();
 
@@ -218,7 +215,6 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             }
         }
 
-        LOG.debug("Searching in folders -- ALL: {}, OWN: {}", all, own);
         if (Strings.isEmpty(query) || "*".equals(query)) {
             int maxResults;
             if (NOT_SET != start && NOT_SET != end && end >= start) {

@@ -283,12 +283,14 @@ public class SyntheticChannel extends AbstractRealtimeJanitor implements Channel
 
     public void shutdown() {
         shuttingDown.set(true);
-        RealtimeCleanup realtimeCleanup = getRealtimeCleanup();
-        for (ID id : handles.keySet()) {
-            try {
-                realtimeCleanup.cleanForId(id);
-            } catch (Exception e) {
-                LOG.error("Failed to cleanup for ID {}", id, e);
+        if (!handles.keySet().isEmpty()) {
+            RealtimeCleanup realtimeCleanup = getRealtimeCleanup();
+            for (ID id : handles.keySet()) {
+                try {
+                    realtimeCleanup.cleanForId(id);
+                } catch (Exception e) {
+                    LOG.error("Failed to cleanup for ID {}", id, e);
+                }
             }
         }
     }
@@ -349,7 +351,7 @@ public class SyntheticChannel extends AbstractRealtimeJanitor implements Channel
     private RealtimeCleanup getRealtimeCleanup() {
         RealtimeCleanup realtimeCleanup = GLOBAL_CLEANUP_REF.get();
         if (realtimeCleanup == null) {
-            LOG.error("Unable to issue cluster wide cleanup due to missing GlobalRealtimeCleanup. Falling back to node wide cleanup");
+            LOG.debug("Unable to issue cluster wide cleanup due to missing GlobalRealtimeCleanup. Falling back to node wide cleanup");
             realtimeCleanup = localRealtimeCleanup;
         }
         return realtimeCleanup;

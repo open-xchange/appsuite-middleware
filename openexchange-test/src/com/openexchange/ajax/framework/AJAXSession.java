@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.framework;
 
-import java.util.UUID;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.client.params.CookiePolicy;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -58,7 +57,6 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import com.meterware.httpunit.HttpUnitOptions;
 import com.meterware.httpunit.WebConversation;
-import com.openexchange.java.util.UUIDs;
 
 /**
  * This class stores the HTTP client instance and the session identifier for an AJAX session. Additionally the fallback web conversation is
@@ -76,8 +74,6 @@ public class AJAXSession {
     private final WebConversation conversation;
 
     private final DefaultHttpClient httpClient;
-
-    private final String trackingId = UUIDs.getUnformattedString(UUID.randomUUID());
 
     private String id;
 
@@ -110,10 +106,6 @@ public class AJAXSession {
 
     public void setId(final String id) {
         this.id = id;
-    }
-
-    public String getTrackingId() {
-        return trackingId;
     }
 
     /**

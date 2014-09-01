@@ -77,7 +77,7 @@ public final class GoogleDriveConstants implements FileStorageConstants {
      */
     public static final String MIME_TYPE_DIRECTORY = "application/vnd.google-apps.folder";
 
-    // -------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------------ //
 
     /**
      * The query string for selecting only files: <code>"mimeType != 'application/vnd.google-apps.folder'"</code>
@@ -98,5 +98,12 @@ public final class GoogleDriveConstants implements FileStorageConstants {
      * The query string for selecting only directories: <code>"mimeType = 'application/vnd.google-apps.folder' and trashed=false"</code>
      */
     public static final String QUERY_STRING_DIRECTORIES_ONLY_EXCLUDING_TRASH = "mimeType = '" + MIME_TYPE_DIRECTORY + "' and trashed=false";
+
+    // ------------------------------------------------------------------------------------------------------------------------------- //
+
+    /**
+     * The default fields to query.
+     */
+    public static final String FIELDS_DEFAULT = "id,title,createdDate,modifiedDate,mimeType,fileSize,downloadUrl,description,version";
 
 }

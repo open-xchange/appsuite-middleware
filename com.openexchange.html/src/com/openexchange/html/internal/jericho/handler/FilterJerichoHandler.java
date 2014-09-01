@@ -54,6 +54,7 @@ import static com.openexchange.html.internal.HtmlServiceImpl.PATTERN_URL;
 import static com.openexchange.html.internal.HtmlServiceImpl.PATTERN_URL_SOLE;
 import static com.openexchange.html.internal.css.CSSMatcher.checkCSS;
 import static com.openexchange.html.internal.css.CSSMatcher.containsCSSElement;
+import static com.openexchange.java.Strings.toLowerCase;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -61,8 +62,11 @@ import java.net.MalformedURLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -93,6 +97,19 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FilterJerichoHandler implements JerichoHandler {
+
+    private static final CellPadding CELLPADDING_EMPTY = new CellPadding(null);
+
+    private static class CellPadding {
+        final String cellPadding;
+
+        CellPadding(String cellPadding) {
+            super();
+            this.cellPadding = cellPadding;
+        }
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------------- //
 
     private final static char[] IMMUNE_HTMLATTR = { ',', '.', '-', '_', '/', ';', '=', ' ' };
 
@@ -207,6 +224,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
     private boolean imageURLFound;
     private boolean replaceUrls = true;
     private String cssPrefix;
+    private final Queue<CellPadding> tablePaddings;
 
     private final boolean changed = false;
 
@@ -215,6 +233,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
      */
     public FilterJerichoHandler(final int capacity, final HtmlServiceImpl htmlService) {
         super();
+        tablePaddings = new LinkedList<FilterJerichoHandler.CellPadding>();
         this.htmlService = htmlService;
         this.maxContentSize = -1;
         this.maxContentSizeExceeded = false;
@@ -234,6 +253,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
      */
     public FilterJerichoHandler(final int capacity, final String mapStr, final HtmlServiceImpl htmlService) {
         super();
+        tablePaddings = new LinkedList<FilterJerichoHandler.CellPadding>();
         this.htmlService = htmlService;
         this.maxContentSize = -1;
         this.maxContentSizeExceeded = false;
@@ -262,7 +282,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
 
     /**
      * Sets the max. content size. <= 0 means unlimited, <10000 will be set to 10000.
-     * 
+     *
      * @param maxContentSize The max. content size to set
      * @return This handler with new behavior applied
      */
@@ -290,7 +310,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
 
     /**
      * Returns if maxContentSize is exceeded
-     * 
+     *
      * @return true, if exceeded, otherwise false
      */
     public boolean isMaxContentSizeExceeded() {
@@ -474,6 +494,8 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 body = false;
             } else if (isCss && HTMLElementName.STYLE == name) {
                 isCss = false;
+            } else if (HTMLElementName.TABLE == name) {
+                tablePaddings.poll();
             }
             if (depth == 0) {
                 htmlBuilder.append("</").append(name).append('>');
@@ -575,32 +597,66 @@ public final class FilterJerichoHandler implements JerichoHandler {
      */
     private void addStartTag(final StartTag startTag, final boolean simple, final Map<String, Set<String>> allowedAttributes) {
         attrBuilder.setLength(0);
-        final String tagName = startTag.getName();
-        final Attributes attributes = startTag.getAttributes();
-        if (simple && HTMLElementName.META.equals(tagName) && null != attributes.get("http-equiv") && allowedAttributes.containsKey("http-equiv")) {
-            /*
-             * Special handling for allowed meta tag which provides an allowed HTTP header indicated through 'http-equiv' attribute
-             */
-            for (final Attribute attribute : attributes) {
-                final String val = attribute.getValue();
-                if (isNonJavaScriptURL(val, "url=")) {
-                    attrBuilder.append(' ').append(attribute.getName()).append("=\"").append(htmlService.encodeForHTMLAttribute(IMMUNE_HTMLATTR, val)).append('"');
-                } else {
-                    attrBuilder.setLength(0);
-                    break;
+        String tagName = startTag.getName();
+
+        if (simple && HTMLElementName.META.equals(tagName) && allowedAttributes.containsKey("http-equiv")) {
+            Attributes attributes = startTag.getAttributes();
+            if (null != attributes.get("http-equiv")) {
+                /*
+                 * Special handling for allowed meta tag which provides an allowed HTTP header indicated through 'http-equiv' attribute
+                 */
+                for (final Attribute attribute : attributes) {
+                    final String val = attribute.getValue();
+                    if (isNonJavaScriptURL(val, "url=")) {
+                        attrBuilder.append(' ').append(attribute.getName()).append("=\"").append(htmlService.encodeForHTMLAttribute(IMMUNE_HTMLATTR, val)).append('"');
+                    } else {
+                        attrBuilder.setLength(0);
+                        break;
+                    }
+                }
+                if (attrBuilder.length() > 0) {
+                    htmlBuilder.append('<').append(tagName).append(attrBuilder.toString()).append('>');
+                }
+                return;
+            }
+        }
+
+        // Handle start tag
+        Map<String, String> attrMap = createMapFrom(startTag.getAttributes());
+        if (HTMLElementName.TABLE.equals(tagName)) {
+            // Has attribute "bgcolor"
+            String bgcolor = attrMap.get("bgcolor");
+            if (null != bgcolor) {
+                prependToStyle("background-color: " + bgcolor + ';', attrMap);
+            }
+
+            // Has attribute "cellpadding"?
+            String cellpadding = attrMap.get("cellpadding");
+            if (null == cellpadding) {
+                tablePaddings.offer(CELLPADDING_EMPTY);
+            } else {
+                if ("0".equals(attrMap.get("cellspacing"))) {
+                    prependToStyle("border-collapse: collapse;", attrMap);
+                    attrMap.remove("cellspacing");
+                }
+
+                // Table has cell padding -> Remember it for all child elements
+                tablePaddings.offer(new CellPadding(cellpadding));
+                attrMap.remove("cellpadding");
+            }
+        } else if (HTMLElementName.TD.equals(tagName) || HTMLElementName.TH.equals(tagName)) {
+            CellPadding cellPadding = tablePaddings.peek();
+            if (CELLPADDING_EMPTY != cellPadding) {
+                String style = attrMap.get("style");
+                if (null == style || style.indexOf("padding") < 0) {
+                    prependToStyle("padding: " + cellPadding.cellPadding + ';', attrMap);
                 }
             }
-            if (attrBuilder.length() > 0) {
-                htmlBuilder.append('<').append(tagName).append(attrBuilder.toString()).append('>');
-            }
-            return;
         }
-        /*
-         * Non-simple start tag
-         */
-        final List<Attribute> uriAttributes = startTag.getURIAttributes();
-        for (final Attribute attribute : attributes) {
-            final String attr = attribute.getKey();
+
+        List<Attribute> uriAttributes = startTag.getURIAttributes();
+        for (Map.Entry<String, String> attribute : attrMap.entrySet()) {
+            String attr = attribute.getKey();
             if ("style".equals(attr)) {
                 /*
                  * Handle style attribute
@@ -686,11 +742,30 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 } // End of else
             }
         }
+
         htmlBuilder.append('<').append(tagName).append(attrBuilder.toString());
         if (startTag.isSyntacticalEmptyElementTag()) {
             htmlBuilder.append('/');
         }
         htmlBuilder.append('>');
+    }
+
+    private void prependToStyle(String stylePrefix, Map<String, String> attrMap) {
+        String style = attrMap.get("style");
+        if (null == style) {
+            style = stylePrefix;
+        } else {
+            style = stylePrefix + " " + style;
+        }
+        attrMap.put("style", style);
+    }
+
+    private Map<String, String> createMapFrom(List<Attribute> attributes) {
+        Map<String, String> map = new LinkedHashMap<String, String>(attributes.size());
+        for (Attribute attribute : attributes) {
+            map.put(attribute.getKey(), attribute.getValue());
+        }
+        return map;
     }
 
     // --------------------------------- Image check --------------------------------------- //
@@ -1236,20 +1311,6 @@ public final class FilterJerichoHandler implements JerichoHandler {
             staticHTMLMap = null;
             staticStyleMap = null;
         }
-    }
-
-    /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
     }
 
 }

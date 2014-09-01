@@ -1,0 +1,35 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange MS Live Subscribe Bundle
+Bundle-SymbolicName: com.openexchange.subscribe.mslive
+Bundle-Version: 7.6.1
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.context,
+ com.openexchange.datatypes.genericonf,
+ com.openexchange.exception,
+ com.openexchange.groupware,
+ com.openexchange.groupware.container,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.generic,
+ com.openexchange.groupware.ldap,
+ com.openexchange.i18n,
+ com.openexchange.java,
+ com.openexchange.oauth,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.subscribe,
+ org.apache.commons.httpclient,
+ org.apache.commons.httpclient.cookie,
+ org.apache.commons.httpclient.methods,
+ org.apache.commons.httpclient.params,
+ org.json,
+ org.osgi.framework,
+ org.osgi.util.tracker,
+ org.scribe.builder,
+ org.scribe.builder.api,
+ org.scribe.model,
+ org.scribe.oauth,
+ org.slf4j
+Bundle-Activator: com.openexchange.subscribe.mslive.osgi.MSLiveActivator
