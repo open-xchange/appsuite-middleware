@@ -78,7 +78,7 @@ public final class SignalStartedServiceActivator implements BundleActivator {
         Logger logger = org.slf4j.LoggerFactory.getLogger(SignalStartedServiceActivator.class);
         try {
             registration = context.registerService(SignalStartedService.class, new SignalStartedServiceImpl(), null);
-            logger.info("Open-Xchange Server successfully initialized. The server is now up and running...");
+            logger.info("Open-Xchange Server initialized. The server should be up and running...");
         } catch (final Exception e) {
             logger.error("Error while starting bundle com.openexchange.startup.impl", e);
             throw e;
