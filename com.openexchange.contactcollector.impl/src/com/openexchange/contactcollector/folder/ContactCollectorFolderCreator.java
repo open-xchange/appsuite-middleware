@@ -66,6 +66,7 @@ import com.openexchange.login.LoginResult;
 import com.openexchange.login.NonTransient;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
@@ -127,7 +128,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
      * @return
      */
     private boolean necessary() {
-        ContactCollectorService ccs = CCServiceRegistry.getInstance().getService(ContactCollectorService.class);
+        ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
         if (ContactCollectorServiceImpl.class.isInstance(ccs)) {
             return true;
         }
