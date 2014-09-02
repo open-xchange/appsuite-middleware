@@ -63,6 +63,7 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.PackageAdmin;
+import com.openexchange.groupware.update.Updater;
 import com.openexchange.version.Version;
 
 /**
@@ -330,6 +331,10 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
         } catch (final Exception e) {
             return Integer.valueOf(-1);
         }
+    }
+
+    private boolean updateTasksInProgess() {
+        return !Updater.getInstance().getLocallyScheduledTasks().isEmpty();
     }
 
     private static String resolvState(final int state) {

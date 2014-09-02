@@ -7,6 +7,7 @@ Bundle-Activator: com.openexchange.control.osgi.ControlActivator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.exception,
  com.openexchange.groupware,
+ com.openexchange.groupware.update,
  com.openexchange.java,
  com.openexchange.log,
  com.openexchange.management,

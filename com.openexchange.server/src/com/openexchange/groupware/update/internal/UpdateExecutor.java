@@ -52,6 +52,8 @@ package com.openexchange.groupware.update.internal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -73,6 +75,8 @@ import com.openexchange.groupware.update.UpdateTaskV2;
 public final class UpdateExecutor {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateExecutor.class);
+
+    private static final ConcurrentMap<String, SchemaUpdateState> LOCKED_SCHEMAS = new ConcurrentHashMap<String, SchemaUpdateState>();
 
     private static final SchemaStore store = SchemaStore.getInstance();
 
@@ -196,10 +200,12 @@ public final class UpdateExecutor {
 
     private final void lockSchema(final boolean blocking) throws OXException {
         store.lockSchema(state, contextId, !blocking);
+        LocalUpdateTaskMonitor.getInstance().addState(state);
     }
 
     private final void unlockSchema(final boolean blocking) throws OXException {
         store.unlockSchema(state, contextId, !blocking);
+        LocalUpdateTaskMonitor.getInstance().removeState(state);
     }
 
     private final void addExecutedTask(final String taskName, final boolean success, final int poolId, final String schema) throws OXException {

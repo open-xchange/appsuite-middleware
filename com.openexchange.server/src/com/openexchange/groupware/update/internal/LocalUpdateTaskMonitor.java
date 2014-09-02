@@ -47,66 +47,69 @@
  *
  */
 
-package com.openexchange.groupware.update;
+package com.openexchange.groupware.update.internal;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.update.internal.UpdaterImpl;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import com.openexchange.groupware.update.SchemaUpdateState;
+
 
 /**
- * Interface for the updater.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link LocalUpdateTaskMonitor}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.6.1
  */
-public abstract class Updater {
+public class LocalUpdateTaskMonitor {
 
-    /**
-     * Default constructor.
-     */
-    protected Updater() {
+    private static final LocalUpdateTaskMonitor INSTANCE = new LocalUpdateTaskMonitor();
+
+    private final ConcurrentMap<SchemaUpdateState, Thread> statesBySchema = new ConcurrentHashMap<SchemaUpdateState, Thread>();
+
+    private LocalUpdateTaskMonitor() {
         super();
     }
 
-    /**
-     * Factory method to get an updater.
-     * @return the updater.
-     * @throws OXException if instantiating the implementation fails.
-     */
-    public static Updater getInstance() {
-        return new UpdaterImpl();
-    }
-
-    public final UpdateStatus getStatus(final Context ctx) throws OXException {
-        return getStatus(ctx.getContextId());
-    }
-
-    public abstract UpdateStatus getStatus(int contextId) throws OXException;
-
-    public abstract UpdateStatus getStatus(String schema, int writePoolId) throws OXException;
-
-    /**
-     * Starts the update process on a schema.
-     * @param contextId Context inside the schema.
-     * @throws OXException if an exception occurs.
-     */
-    public final void startUpdate(final Context ctx) throws OXException {
-        startUpdate(ctx.getContextId());
+    public static LocalUpdateTaskMonitor getInstance() {
+        return INSTANCE;
     }
 
     /**
-     * Starts the update process on a schema.
-     * @param contextId Identifier of a context inside the schema.
-     * @throws OXException if an exception occurs.
-     */
-    public abstract void startUpdate(int contextId) throws OXException;
-
-    public abstract UpdateTask[] getAvailableUpdateTasks();
-
-    /**
-     * Gets a list of {@link SchemaUpdateState}s that have been scheduled for execution
-     * or are currently running on this node.
+     * Adds a {@link SchemaUpdateState} to this monitor. This
+     * indicates that one or more update tasks for this schema have been
+     * scheduled and are going to be executed by the same thread that
+     * performs this call.
      *
-     * @return The list of states
+     * @param state The state
+     * @return Whether the state was added or not. If the same thread already added
+     * a state, <code>false</code> is returned and the state is not added.
      */
-    public abstract Collection<SchemaUpdateState> getLocallyScheduledTasks();
+    public boolean addState(SchemaUpdateState state) {
+        return statesBySchema.putIfAbsent(state, Thread.currentThread()) == null;
+    }
+
+    /**
+     * Removes the given {@link SchemaUpdateState} if it has been added
+     * by this thread.
+     *
+     * @param state The state
+     * @return Whether a state has been removed or not (i.e. wasn't added before).
+     */
+    public boolean removeState(SchemaUpdateState state) {
+        return statesBySchema.remove(state, Thread.currentThread());
+    }
+
+    /**
+     * Returns a list {@link SchemaUpdateState}s. Every item
+     * indicates that one or more update tasks for this schema have been
+     * scheduled and are going to be executed or are currently running.
+     *
+     * @return A list of states
+     */
+    public Collection<SchemaUpdateState> getScheduledStates() {
+        return new ArrayList<SchemaUpdateState>(statesBySchema.keySet());
+    }
+
 }
