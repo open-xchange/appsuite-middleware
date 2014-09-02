@@ -50,15 +50,16 @@
 package com.openexchange.osgi;
 
 import java.util.Dictionary;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.google.common.collect.HashMultimap;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -169,8 +170,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
     }
 
     private final List<ServiceTracker<?, ?>> serviceTrackers;
-    
-    private final HashMultimap<Object,ServiceRegistration<?>> serviceRegistrations;
+    private final Map<Object, ServiceRegistration<?>> serviceRegistrations;
 
     /**
      * Initializes a new {@link HousekeepingActivator}.
@@ -178,7 +178,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
     protected HousekeepingActivator() {
         super();
         serviceTrackers = new LinkedList<ServiceTracker<?, ?>>();
-        serviceRegistrations = HashMultimap.create(6,2);
+        serviceRegistrations = new LinkedHashMap<Object, ServiceRegistration<?>>(6);
     }
 
     @Override
@@ -224,7 +224,6 @@ public abstract class HousekeepingActivator extends DeferredActivator {
      * @param properties The service's properties
      */
     protected <S> void registerService(final Class<S> clazz, final S service, final Dictionary<String, ?> properties) {
-        LOG.debug("Registering service {} with class {}", service, clazz);
         serviceRegistrations.put(service, context.registerService(clazz, service, properties));
     }
 
@@ -434,7 +433,6 @@ public abstract class HousekeepingActivator extends DeferredActivator {
      */
     protected void unregisterServices() {
         for (final ServiceRegistration<?> registration : serviceRegistrations.values()) {
-            LOG.debug("Unregistering {}", registration);
             registration.unregister();
         }
         serviceRegistrations.clear();
@@ -446,8 +444,8 @@ public abstract class HousekeepingActivator extends DeferredActivator {
      * @param service The service to unregister
      */
     protected <S> void unregisterService(final S service) {
-        for(ServiceRegistration<?> registration : serviceRegistrations.removeAll(service)) {
-            LOG.debug("Unregistering {}", registration);
+        final ServiceRegistration<?> registration = serviceRegistrations.remove(service);
+        if (null != registration) {
             registration.unregister();
         }
     }
