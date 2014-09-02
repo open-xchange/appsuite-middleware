@@ -102,7 +102,7 @@ public class GoogleSubscribeContactTest extends AbstractGoogleSubscribeTest {
                     assertNotNullAndEquals("title", "Herr", c.getTitle());
                     assertNotNullAndEquals("suffix", "Ende", c.getSuffix());
                     assertNotNullAndEquals("yomi firstname", "PhoneticPaul", c.getYomiFirstName());
-                    assertNotNullAndEquals("yomi lastname", "PhoneticMüller", c.getYomiLastName());
+                    assertNotNullAndEquals("yomi lastname", "PhoneticM\u00fcller", c.getYomiLastName());
 
                     // email
                     assertNotNullAndEquals("email1", "privat@example.com", c.getEmail1());
