@@ -1,3 +1,7 @@
+* 2014-09-02 - marcus.klein@open-xchange.com
+
+ - Fix for bug 31612: Using a new connection to config database to determine if a just created schema needs to be deleted again on context creation failure.
+
 * 2014-09-02 - thorben.betten@open-xchange.com
 
  - Fix for bug 33956: Perform safe flush on socket output stream to not prevent reading returned SMTP return code if SMPT server closes
