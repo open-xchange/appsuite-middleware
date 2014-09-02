@@ -1,6 +1,9 @@
 * 2014-09-02 - marcus.klein@open-xchange.com
 
- - Fix for bug 31612: Using a new connection to config database to determine if a just created schema needs to be deleted again on context creation failure.
+ - Fix for bug 31612: Using a new connection to config database to determine if a just created schema needs to be deleted again on context
+                      creation failure.
+ - Fix for bug 33401: Do not use representative context identifier for listing filestores with usage anymore because context could have been
+                      deleted in the meantime. Try all context identifier of the given filestore context block.
 
 * 2014-09-02 - thorben.betten@open-xchange.com
 
