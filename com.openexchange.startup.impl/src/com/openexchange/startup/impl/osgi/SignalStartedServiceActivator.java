@@ -74,12 +74,11 @@ public final class SignalStartedServiceActivator implements BundleActivator {
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
-        final Logger logger = org.slf4j.LoggerFactory.getLogger(SignalStartedServiceActivator.class);
-        logger.info("Starting bundle: com.openexchange.startup.impl");
+    public void start(BundleContext context) throws Exception {
+        Logger logger = org.slf4j.LoggerFactory.getLogger(SignalStartedServiceActivator.class);
         try {
             registration = context.registerService(SignalStartedService.class, new SignalStartedServiceImpl(), null);
-            logger.info("Bundle com.openexchange.startup.impl successfully started");
+            logger.info("Open-Xchange Server successfully initialized. The server is now up and running...");
         } catch (final Exception e) {
             logger.error("Error while starting bundle com.openexchange.startup.impl", e);
             throw e;
@@ -87,16 +86,15 @@ public final class SignalStartedServiceActivator implements BundleActivator {
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
-        final Logger logger = org.slf4j.LoggerFactory.getLogger(SignalStartedServiceActivator.class);
-        logger.info("Stopping bundle: com.openexchange.startup.impl");
+    public void stop(BundleContext context) throws Exception {
+        Logger logger = org.slf4j.LoggerFactory.getLogger(SignalStartedServiceActivator.class);
         try {
-            final ServiceRegistration<SignalStartedService> registration = this.registration;
+            ServiceRegistration<SignalStartedService> registration = this.registration;
             if (null != registration) {
+                logger.info("Stopping Open-Xchange Server...");
                 registration.unregister();
                 this.registration = null;
             }
-            logger.info("Bundle com.openexchange.startup.impl successfully stopped");
         } catch (final Exception e) {
             logger.error("Error while stopping bundle com.openexchange.startup.impl", e);
             throw e;
