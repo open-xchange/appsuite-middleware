@@ -44,6 +44,8 @@ public abstract class AJAXTest {
         }
 
     }
+    
+    private enum CurrentDate {date, time, weekday};
 
     public static final String PROTOCOL = "http://";
 
@@ -90,6 +92,7 @@ public abstract class AJAXTest {
             final String test = "{\"active\":true,\"position\":0,\"flags\":[],\"actioncmds\":[{\"into\":\"default.INBOX/Spam\",\"id\":\"move\"},{\"id\":\"stop\"}],\"id\":0,\"test\":{\"tests\":[{\"headers\":[\"from\"],\"values\":[\"zitate.at\"],\"comparison\":\"user\",\"id\":\"address\"},{\"headers\":[\"subject\"],\"values\":[\"Zitat des Tages\"],\"comparison\":\"contains\",\"id\":\"header\"}],\"id\":\"allof\"},\"rulename\":\"\"}";
             final String newid = mailfilternew(login, getHostname(), getUsername(), test, null);
             System.out.println("Rule created with newid: " + newid);
+            mailfilterdelete(login, getHostname(), getUsername(), Integer.parseInt(newid));
         } finally {
             logout(login);
         }
@@ -366,6 +369,7 @@ public abstract class AJAXTest {
             final String test = "{\"rulename\":\"sizerule\",\"test\":{\"id\":\"size\",\"comparison\":\"over\",\"size\":88},\"actioncmds\":[{\"id\":\"keep\"}],\"flags\":[],\"active\":true}";
             final String newid = mailfilternew(login, getHostname(), getUsername(), test, null);
             System.out.println("Rule created with newid: " + newid);
+            mailfilterdelete(login, getHostname(), getUsername(), Integer.parseInt(newid));
         } finally {
             logout(login);
         }
@@ -388,9 +392,9 @@ public abstract class AJAXTest {
             base.append("flags", "vacation");
             final JSONObject test = new JSONObject();
             test.put("id", "allof");
-            test.append("tests", currentdate(1183759200000L, "ge"));
-            test.append("tests", currentdate(1183759200000L, "le"));
-            test.append("tests", currentdate(1183759200000L, "is"));
+            test.append("tests", currentdate(1183759200000L, "ge", CurrentDate.date));
+            test.append("tests", currentdate(1183759200000L, "le", CurrentDate.date));
+            test.append("tests", currentdate(1183759200000L, "is", CurrentDate.date));
             base.put("test", test);
             final JSONObject action = new JSONObject();
 //            action.put("id", "keep");
@@ -402,35 +406,28 @@ public abstract class AJAXTest {
 
             final String newid = mailfilternew(login, getHostname(), getUsername(), base.toString(), null);
             System.out.println("Rule created with newid: " + newid);
+            mailfilterdelete(login, getHostname(), getUsername(), Integer.parseInt(newid));
         } finally {
             logout(login);
         }
     }
 
-    private JSONObject currentdate(long date, String comparison) throws JSONException {
+    private JSONObject currentdate(long date, String comparison, CurrentDate cd) throws JSONException {
         final JSONObject currentdate2 = new JSONObject();
         currentdate2.put("id", "currentdate");
         currentdate2.put("comparison", comparison);
         currentdate2.append("datevalue", date);
-        currentdate2.put("datepart", "date");
+        currentdate2.put("datepart", cd.toString());
         return currentdate2;
     }
     
-    private JSONObject weekday(int date, String comparison) throws JSONException {
-        final JSONObject currentdate2 = new JSONObject();
-        currentdate2.put("id", "currentdate");
-        currentdate2.put("comparison", comparison);
-        currentdate2.append("datevalue", date);
-        currentdate2.put("datepart", "weekday");
-        return currentdate2;
-    }
-
     @Test
     public void MailfilternewTestMissingHeaders() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebconversationAndSessionID login = login();
         try {
             final String test = "{\"active\":true,\"position\":0,\"flags\":[],\"actioncmds\":[{\"into\":\"INBOX/Spam\",\"id\":\"move\"},{\"id\":\"stop\"}],\"id\":0,\"test\":{\"tests\":[{\"values\":[\"zitate.at\"],\"comparison\":\"user\",\"id\":\"address\"},{\"headers\":[\"subject\"],\"values\":[\"Zitat des Tages\"],\"comparison\":\"contains\",\"id\":\"header\"}],\"id\":\"allof\"},\"rulename\":\"\"}";
-            mailfilternew(login, getHostname(), getUsername(), test, "Exception while parsing JSON: \"Error while reading TestCommand address: JSONObject[\"headers\"] not found.\".");
+            final String newid = mailfilternew(login, getHostname(), getUsername(), test, "Exception while parsing JSON: \"Error while reading TestCommand address: JSONObject[\"headers\"] not found.\".");
+            mailfilterdelete(login, getHostname(), getUsername(), Integer.parseInt(newid));
         } finally {
             logout(login);
         }
@@ -441,7 +438,9 @@ public abstract class AJAXTest {
         final WebconversationAndSessionID login = login();
         try {
             final String test = "{\"active\":true,\"flags\":[],\"actioncmds\":[{\"into\":\"INBOX/Spam\",\"id\":\"move\"},{\"id\":\"stop\"}],\"id\":0,\"test\":{\"tests\":[{\"headers\":[\"from\"],\"values\":[\"zitate.at\"],\"comparison\":\"user\",\"id\":\"address\"},{\"headers\":[\"subject\"],\"values\":[\"Zitat des Tages\"],\"comparison\":\"contains\",\"id\":\"header\"}],\"id\":\"allof\"},\"rulename\":\"\"}";
-            mailfilternew(login, getHostname(), getUsername(), test, null);
+            final String newid = mailfilternew(login, getHostname(), getUsername(), test, null);
+            mailfilterupdate(login, getHostname(), getUsername(), test);
+            mailfilterdelete(login, getHostname(), getUsername(), Integer.parseInt(newid));
         } finally {
             logout(login);
         }
@@ -730,7 +729,7 @@ public abstract class AJAXTest {
             rule.append("flags", "vacation");
             final JSONObject test = new JSONObject();
             test.put("id", "allof");
-            test.append("tests", weekday(3, "is"));
+            test.append("tests", currentdate(3, "is", CurrentDate.weekday));
             rule.put("test", test);
             final JSONObject action = new JSONObject();
             action.put("id", "vacation");
@@ -741,7 +740,34 @@ public abstract class AJAXTest {
 
             final String newid = mailfilternew(login, getHostname(), getUsername(), rule.toString(), null);
             System.out.println("Rule created with newid: " + newid);
-            //mailfilterdelete(login, getHostname(), getUsername(), Integer.parseInt(newid));
+            mailfilterdelete(login, getHostname(), getUsername(), Integer.parseInt(newid));
+        } finally {
+            logout(login);
+        }
+    }
+    
+    @Test
+    public void testDateField() throws MalformedURLException, IOException, SAXException, JSONException {
+        final WebconversationAndSessionID login = login();
+        try {
+            final JSONObject rule = new JSONObject();
+            rule.put("rulename", "time rule");
+            rule.put("active", Boolean.TRUE);
+            rule.append("flags", "vacation");
+            final JSONObject test = new JSONObject();
+            test.put("id", "allof");
+            test.append("tests", currentdate(3627279000000L, "is", CurrentDate.time));
+            rule.put("test", test);
+            final JSONObject action = new JSONObject();
+            action.put("id", "vacation");
+            action.put("days", 7);
+            action.append("addresses", "foo@invalid.tld");
+            action.put("text", "I'm out of office");
+            rule.append("actioncmds", action);
+
+            final String newid = mailfilternew(login, getHostname(), getUsername(), rule.toString(), null);
+            System.out.println("Rule created with newid: " + newid);
+            mailfilterdelete(login, getHostname(), getUsername(), Integer.parseInt(newid));
         } finally {
             logout(login);
         }
