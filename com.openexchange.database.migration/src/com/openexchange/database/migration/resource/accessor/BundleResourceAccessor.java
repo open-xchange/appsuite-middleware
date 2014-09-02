@@ -47,51 +47,53 @@
  *
  */
 
-package com.openexchange.database.migration.ox.internal.accessor;
+package com.openexchange.database.migration.resource.accessor;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.List;
-import liquibase.change.custom.CustomSqlChange;
 import liquibase.resource.ResourceAccessor;
-import liquibase.util.StringUtils;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.wiring.BundleWiring;
 
 /**
- * Class loader that is required to get access to custom java class migration files (implementations like {@link CustomSqlChange}
+ * {@link ResourceAccessor} to access the resource migration files from provided bundle.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.1
  */
-public class ClassLoaderResourceAccessor implements ResourceAccessor {
+public class BundleResourceAccessor implements ResourceAccessor {
 
-    private ClassLoader classLoader;
+    /**
+     * ClassLoader of the bundle to search for migration files within
+     */
+    private ClassLoader bundleClassLoader;
 
-    public ClassLoaderResourceAccessor() {
-        classLoader = getClass().getClassLoader();
-    }
-
-    public ClassLoaderResourceAccessor(final ClassLoader classLoader) {
-        this.classLoader = classLoader;
+    /**
+     * Initializes a new {@link BundleResourceAccessor} for classloader bundle wiring.
+     *
+     * @param bundle - the {@link Bundle} that should be wired.
+     */
+    public BundleResourceAccessor(final Bundle bundle) {
+        BundleWiring bundleWiring = bundle.adapt(BundleWiring.class);
+        this.bundleClassLoader = bundleWiring.getClassLoader();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public InputStream getResourceAsStream(final String file) throws IOException {
-        return classLoader.getResourceAsStream(file);
+    public InputStream getResourceAsStream(String file) {
+        return this.bundleClassLoader.getResourceAsStream(file);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Enumeration<URL> getResources(final String packageName) throws IOException {
-        return classLoader.getResources(packageName);
+    public Enumeration<URL> getResources(String packageName) throws IOException {
+        return this.bundleClassLoader.getResources(packageName);
     }
 
     /**
@@ -99,24 +101,6 @@ public class ClassLoaderResourceAccessor implements ResourceAccessor {
      */
     @Override
     public ClassLoader toClassLoader() {
-        return classLoader;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String toString() {
-        String description;
-        if (classLoader instanceof URLClassLoader) {
-            List<String> urls = new ArrayList<String>();
-            for (URL url : ((URLClassLoader) classLoader).getURLs()) {
-                urls.add(url.toExternalForm());
-            }
-            description = StringUtils.join(urls, ",");
-        } else {
-            description = classLoader.getClass().getName();
-        }
-        return getClass().getName() + "(" + description + ")";
+        return this.bundleClassLoader;
     }
 }

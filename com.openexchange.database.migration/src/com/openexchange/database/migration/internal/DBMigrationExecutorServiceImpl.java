@@ -48,8 +48,6 @@
  */
 package com.openexchange.database.migration.internal;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -57,21 +55,19 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import liquibase.Liquibase;
 import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.ValidationFailedException;
-import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import org.apache.commons.lang.Validate;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.migration.DBMigrationExceptionCodes;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.exception.OXException;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -89,51 +85,24 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
 
     private DatabaseService databaseService;
 
-    private ConfigurationService configurationService;
-
     private List<ResourceAccessor> accessors = new CopyOnWriteArrayList<ResourceAccessor>();
+
+    private ThreadPoolService threadPoolService;
 
     /**
      * Initializes a new {@link DBMigrationExecutorServiceImpl}.
      *
      * @param databaseService - {@link DatabaseService} to be able to execute migration files
-     * @param configurationService - {@link ConfigurationService} to be able to retrieve the configuration files
+     * @param threadPoolService - {@link ThreadPoolService} to add new threads for processing
      */
-    public DBMigrationExecutorServiceImpl(DatabaseService databaseService, ConfigurationService configurationService) {
+    public DBMigrationExecutorServiceImpl(DatabaseService databaseService, ThreadPoolService threadPoolService) {
         super();
 
         Validate.notNull(databaseService, "DatabaseService mustn't be null!");
-        Validate.notNull(configurationService, "ConfigurationService mustn't be null!");
+        Validate.notNull(threadPoolService, "ThreadPoolService mustn't be null!");
+
         this.databaseService = databaseService;
-        this.configurationService = configurationService;
-
-        accessors.add(new ClassLoaderResourceAccessor());
-        accessors.add(new FileSystemResourceAccessor());
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @throws OXException
-     */
-    @Override
-    public void execute(DatabaseChangeLog databaseChangeLog) throws OXException {
-        LOG.info("Start executing database migration for ChangeLog {}", databaseChangeLog.getPhysicalFilePath());
-
-        Connection writable = null;
-        Liquibase liquibase = null;
-        try {
-            writable = databaseService.getWritable();
-
-            liquibase = prepareLiquibase(writable, databaseChangeLog.getPhysicalFilePath());
-
-            liquibase.update(LIQUIBASE_NO_DEFINED_CONTEXT);
-        } catch (Exception exception) {
-            handleExceptions(exception);
-        } finally {
-            cleanUpLiquibase(writable, liquibase);
-        }
-        LOG.info("Finished executing database migration for ChangeLog {}", databaseChangeLog.getPhysicalFilePath());
+        this.threadPoolService = threadPoolService;
     }
 
     /**
@@ -142,16 +111,21 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
      * @param exception
      * @throws OXException
      */
-    private void handleExceptions(Exception exception) throws OXException {
+    protected void handleExceptions(Exception exception) throws OXException {
         if (exception instanceof OXException) {
-            throw DBMigrationExceptionCodes.DBMIGARTION_ERROR.create(exception);
+            LOG.error(DBMigrationExceptionCodes.DB_MIGRATION_ERROR_MSG, exception);
+            throw DBMigrationExceptionCodes.DB_MIGRATION_ERROR.create(exception);
         } else if (exception instanceof ValidationFailedException) {
+            LOG.error(DBMigrationExceptionCodes.VALIDATION_FAILED_ERROR_MSG, exception);
             throw DBMigrationExceptionCodes.VALIDATION_FAILED_ERROR.create(exception);
         } else if (exception instanceof LiquibaseException) {
+            LOG.error(DBMigrationExceptionCodes.LIQUIBASE_ERROR_MSG, exception);
             throw DBMigrationExceptionCodes.LIQUIBASE_ERROR.create(exception);
         } else if (exception instanceof SQLException) {
+            LOG.error(DBMigrationExceptionCodes.SQL_ERROR_MSG, exception);
             throw DBMigrationExceptionCodes.SQL_ERROR.create(exception);
         } else {
+            LOG.error(DBMigrationExceptionCodes.UNEXPECTED_ERROR_MSG, exception);
             throw DBMigrationExceptionCodes.UNEXPECTED_ERROR.create(exception);
         }
     }
@@ -160,12 +134,12 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
      * Prepares liquibase to be able to execute statements
      *
      * @param writable
-     * @param databaseChangeLog
+     * @param filePath
      * @return
      * @throws LiquibaseException
      * @throws SQLException
      */
-    private Liquibase prepareLiquibase(Connection writable, String filePath) throws LiquibaseException, SQLException {
+    protected Liquibase prepareLiquibase(Connection writable, String filePath) throws LiquibaseException, SQLException {
         JdbcConnection jdbcConnection = null;
 
         writable.setAutoCommit(true);
@@ -187,7 +161,7 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
      * @throws OXException
      * @throws SQLException
      */
-    private void cleanUpLiquibase(Connection writable, Liquibase liquibase) throws OXException {
+    protected void cleanUpLiquibase(Connection writable, Liquibase liquibase) throws OXException {
         if (liquibase != null) {
             try {
                 liquibase.forceReleaseLocks();
@@ -205,39 +179,46 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
      * {@inheritDoc}
      */
     @Override
-    public void execute(String fileName) throws OXException {
-        File xmlConfigFile = getChangeLogFile(fileName);
-
-        execute(new DatabaseChangeLog(xmlConfigFile.getAbsolutePath()));
-    }
-
-    /**
-     * @param fileName
-     * @return
-     * @throws OXException
-     */
-    private File getChangeLogFile(String fileName) throws OXException {
-        File xmlConfigFile = configurationService.getFileByName(fileName);
-        if (null == xmlConfigFile) {
-            throw DBMigrationExceptionCodes.CHANGELOG_FILE_NOT_FOUND_ERROR.create(new FileNotFoundException(fileName), fileName);
-        }
-        return xmlConfigFile;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void execute(String fileName, List<ResourceAccessor> additionalAccessors) throws OXException {
+    public void execute(String fileLocation, List<ResourceAccessor> additionalAccessors) throws OXException {
         if (additionalAccessors == null) {
-            execute(fileName);
+            execute(fileLocation);
             return;
         }
 
         for (ResourceAccessor accessor : additionalAccessors) {
             accessors.add(accessor);
         }
-        execute(fileName);
+        execute(fileLocation);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void execute(final String fileLocation) throws OXException {
+        LOG.info("Start asynchronously executing database migration for ChangeLog {}", fileLocation);
+
+        threadPoolService.submit(new AbstractTask<Void>() {
+
+            @Override
+            public Void call() throws OXException {
+                Connection writable = null;
+                Liquibase liquibase = null;
+                try {
+                    writable = databaseService.getWritable();
+
+                    liquibase = prepareLiquibase(writable, fileLocation);
+
+                    liquibase.update(LIQUIBASE_NO_DEFINED_CONTEXT);
+                } catch (Exception exception) {
+                    handleExceptions(exception);
+                } finally {
+                    cleanUpLiquibase(writable, liquibase);
+                }
+                LOG.info("Finished executing database migration for ChangeLog {}", fileLocation);
+                return null;
+            }
+        });
     }
 
     /**
@@ -246,8 +227,8 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
      * @throws OXException
      */
     @Override
-    public void rollback(String fileName, int numberOfChangeSets) throws OXException {
-        rollbackChangeSets(fileName, numberOfChangeSets);
+    public void rollback(String fileLocation, int numberOfChangeSets) throws OXException {
+        rollbackChangeSets(fileLocation, numberOfChangeSets);
     }
 
     /**
@@ -256,30 +237,28 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
      * @throws OXException
      */
     @Override
-    public void rollback(String fileName, String changeSetTag) throws OXException {
-        rollbackChangeSets(fileName, changeSetTag);
+    public void rollback(String fileLocation, String changeSetTag) throws OXException {
+        rollbackChangeSets(fileLocation, changeSetTag);
     }
 
     /**
      * General method for a rollback. Provide an Integer as <code>target</code> param for number of changesets to rollback or provide a
      * String as <code>target</code> param for a tag name to rollback.
      *
-     * @param fileName
+     * @param fileLocation
      * @param target
      * @return
      * @throws OXException
      */
-    private void rollbackChangeSets(String fileName, Object target) throws OXException {
-        LOG.info("Start rollback database migrations for file {}", fileName);
-
-        File xmlConfigFile = getChangeLogFile(fileName);
+    private void rollbackChangeSets(String fileLocation, Object target) throws OXException {
+        LOG.info("Start rollback database migrations for file {}", fileLocation);
 
         Connection writable = null;
         Liquibase liquibase = null;
         try {
             writable = databaseService.getWritable();
 
-            liquibase = prepareLiquibase(writable, xmlConfigFile.getAbsolutePath());
+            liquibase = prepareLiquibase(writable, fileLocation);
 
             if (target instanceof Integer) {
                 int numberOfChangeSetsToRollback = (Integer) target;
@@ -297,24 +276,22 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
         } finally {
             cleanUpLiquibase(writable, liquibase);
         }
-        LOG.info("Finished rollback of database migrations for file {}", fileName);
+        LOG.info("Finished rollback of database migrations for file {}", fileLocation);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public List<ChangeSet> listUnexecutedChangeSets(String fileName) throws OXException {
+    public List<ChangeSet> listUnexecutedChangeSets(String fileLocation) throws OXException {
         List<ChangeSet> unexecutedChangeSets = new ArrayList<ChangeSet>();
-
-        File xmlConfigFile = getChangeLogFile(fileName);
 
         Connection writable = null;
         Liquibase liquibase = null;
         try {
             writable = databaseService.getWritable();
 
-            liquibase = prepareLiquibase(writable, xmlConfigFile.getAbsolutePath());
+            liquibase = prepareLiquibase(writable, fileLocation);
 
             unexecutedChangeSets = liquibase.listUnrunChangeSets(LIQUIBASE_NO_DEFINED_CONTEXT);
         } catch (Exception exception) {

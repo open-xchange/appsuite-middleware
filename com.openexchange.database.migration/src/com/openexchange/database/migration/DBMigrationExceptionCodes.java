@@ -63,13 +63,13 @@ import com.openexchange.exception.OXExceptionFactory;
 public enum DBMigrationExceptionCodes implements OXExceptionCode {
 
     /**
-     * An error occurred: %1$s
+     * An unexpected error occurred.
      */
-    UNEXPECTED_ERROR("An error occurred: %1$s", Category.CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR(DBMigrationExceptionCodes.UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 1),
     /**
      * An error occurred while database migration: %1$s
      */
-    DBMIGARTION_ERROR(DBMigrationExceptionCodes.DB_MIGRATION_ERROR_MSG, Category.CATEGORY_ERROR, 2),
+    DB_MIGRATION_ERROR(DBMigrationExceptionCodes.DB_MIGRATION_ERROR_MSG, Category.CATEGORY_ERROR, 2),
     /**
      * Validation of DatabaseChangeLog failed.
      */
@@ -93,17 +93,19 @@ public enum DBMigrationExceptionCodes implements OXExceptionCode {
 
     ;
 
-    private static final String DB_MIGRATION_ERROR_MSG = "An error occurred while database migration: %1$s";
+    public static final String UNEXPECTED_ERROR_MSG = "An unexpected error occurred.";
 
-    private static final String VALIDATION_FAILED_ERROR_MSG = "Validation of DatabaseChangeLog failed.";
+    public static final String DB_MIGRATION_ERROR_MSG = "An error occurred while database migration.";
 
-    private static final String LIQUIBASE_ERROR_MSG = "Error while using/executing liquibase.";
+    public static final String VALIDATION_FAILED_ERROR_MSG = "Validation of DatabaseChangeLog failed.";
 
-    private static final String CHANGELOG_FILE_NOT_FOUND_ERROR_MSG = "No changelog file for database migration with name %1$s found! Execution for that file will be skipped.";
+    public static final String LIQUIBASE_ERROR_MSG = "Error while using/executing liquibase.";
 
-    private static final String SQL_ERROR_MSG = "Error while reading/writing data from/to the database.";
+    public static final String CHANGELOG_FILE_NOT_FOUND_ERROR_MSG = "No changelog file for database migration with name %1$s found! Execution for that file will be skipped.";
 
-    private static final String WRONG_TYPE_OF_DATA_ROLLBACK_ERROR_MSG = "Wrong type of data provided for rollback. Only Integer and String are supported.";
+    public static final String SQL_ERROR_MSG = "Error while reading/writing data from/to the database.";
+
+    public static final String WRONG_TYPE_OF_DATA_ROLLBACK_ERROR_MSG = "Wrong type of data provided for rollback. Only Integer and String are supported.";
 
     /**
      * The error code prefix for database migration module.

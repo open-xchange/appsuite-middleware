@@ -51,13 +51,12 @@ package com.openexchange.database.migration.internal;
 import java.util.Collection;
 import java.util.Set;
 import liquibase.servicelocator.DefaultPackageScanClassResolver;
-import liquibase.servicelocator.PackageScanClassResolver;
 import liquibase.servicelocator.PackageScanFilter;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleWiring;
 
 /**
- * OSGi specific {@link PackageScanClassResolver}
+ * OSGi specific {@link DefaultPackageScanClassResolver}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.1

@@ -58,7 +58,7 @@ import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.database.migration.ox.DBMigrationOXExcecutorService;
 import com.openexchange.database.migration.ox.internal.DBMigrationOXExcecutorServiceImpl;
 import com.openexchange.database.migration.ox.internal.Services;
-import com.openexchange.database.migration.ox.internal.accessor.ClassLoaderResourceAccessor;
+import com.openexchange.database.migration.resource.accessor.BundleResourceAccessor;
 import com.openexchange.osgi.HousekeepingActivator;
 
 
@@ -74,7 +74,7 @@ public class OXMigrationActivator extends HousekeepingActivator {
 
     private static final Class<?>[] NEEDED_SERVICES = { DBMigrationExecutorService.class };
 
-    private static final String OX_CHANGELOG_NAME = "ox.changelog.xml";
+    private static final String OX_CHANGELOG_PATH = "/liquibase/ox.changelog.xml";
 
     /**
      * {@inheritDoc}
@@ -96,9 +96,9 @@ public class OXMigrationActivator extends HousekeepingActivator {
         Validate.notNull(dbMigrationExecutorService, "Required service DBMigrationExecutorService is absent. Not able to perform Open-Xchange database migration statements.");
 
         List<ResourceAccessor> accessors = new ArrayList<ResourceAccessor>();
-        accessors.add(new ClassLoaderResourceAccessor());
+        accessors.add(new BundleResourceAccessor(context.getBundle()));
 
-        dbMigrationExecutorService.execute(OX_CHANGELOG_NAME, accessors);
+        dbMigrationExecutorService.execute(OX_CHANGELOG_PATH, accessors);
 
         registerService(DBMigrationOXExcecutorService.class, new DBMigrationOXExcecutorServiceImpl());
     }

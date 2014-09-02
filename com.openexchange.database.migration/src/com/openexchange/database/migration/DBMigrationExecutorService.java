@@ -53,7 +53,6 @@ import java.util.List;
 import liquibase.change.custom.CustomSqlChange;
 import liquibase.change.custom.CustomTaskChange;
 import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
 import liquibase.resource.ResourceAccessor;
 import com.openexchange.exception.OXException;
 
@@ -66,57 +65,50 @@ import com.openexchange.exception.OXException;
 public interface DBMigrationExecutorService {
 
     /**
-     * Execute database migration based on the given {@link DatabaseChangeLog} file
-     *
-     * @param databaseChangeLog - file to execute
-     * @throws OXException
-     */
-    public void execute(DatabaseChangeLog databaseChangeLog) throws OXException;
-
-    /**
      * Execute database migration based on the given file name
      *
-     * @param fileName - String with the name of the file to execute
+     * @param fileLocation - location of the file in the providing bundle, e.g. /liquibase/changelog.xml
      * @throws OXException
      */
-    public void execute(String fileName) throws OXException;
+    public void execute(String fileLocation) throws OXException;
 
     /**
      * Execute database migration based on the given filename. If {@link CustomSqlChange} or {@link CustomTaskChange} are desired to be used
      * add additional {@link ResourceAccessor} via parameter 'additionalAccessors' so that this classes can be found. Provide
      * <code>null</code> in case you are using xml files no additional accessor is required.
      *
-     * @param fileName - String with the name of the file to execute
+     * @param fileLocation - location of the file in the providing bundle, e.g. /liquibase/changelog.xml
      * @param additionalAccessors - additional {@link ResourceAccessor}s to be able to read custom classes
      * @throws OXException
      */
-    public void execute(String fileName, List<ResourceAccessor> additionalAccessors) throws OXException;
+    public void execute(String fileLocation, List<ResourceAccessor> additionalAccessors) throws OXException;
 
     /**
      * Executes a rollback for the given number of ChangeSets
      *
-     * @param fileName - String with the name of the file where to find the rollback tag
+     * @param fileLocation - location of the file in the providing bundle, e.g. /liquibase/changelog.xml
      * @param numberOfChangeSets - number of ChangeSets to roll back to
      * @return boolean - true if rollback was successful. Otherwise false
      * @throws OXException
      */
-    public void rollback(String fileName, int numberOfChangeSets) throws OXException;
+    public void rollback(String fileLocation, int numberOfChangeSets) throws OXException;
 
     /**
-     * Executes a rollback to the given tag
+     * Specifying a tag to rollback to will roll back all change-sets that were executed against the target database after the given tag was
+     * applied.
      *
-     * @param fileName - String with the name of the file where to find the rollback tag
+     * @param fileLocation - location of the file in the providing bundle, e.g. /liquibase/changelog.xml
      * @param changeSetTag - changeset tag to roll back to
      * @return boolean - true if rollback was successful. Otherwise false
      * @throws OXException
      */
-    public void rollback(String fileName, String changeSetTag) throws OXException;
+    public void rollback(String fileLocation, String changeSetTag) throws OXException;
 
     /**
      * Returns a list of the currently not executed ChangeSets
      *
-     * @param fileName - String with the name of the file to get the current database migration status for
+     * @param fileLocation - location of the file in the providing bundle, e.g. /liquibase/changelog.xml
      * @return List<ChangeSet> with the currently not executed liquibase changesets
      */
-    public List<ChangeSet> listUnexecutedChangeSets(String fileName) throws OXException;
+    public List<ChangeSet> listUnexecutedChangeSets(String fileLocation) throws OXException;
 }

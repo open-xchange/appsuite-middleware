@@ -50,10 +50,8 @@
 package com.openexchange.database.migration.osgi;
 
 import liquibase.servicelocator.CustomResolverServiceLocator;
-import liquibase.servicelocator.PackageScanClassResolver;
 import liquibase.servicelocator.ServiceLocator;
 import org.apache.commons.lang.Validate;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.database.migration.internal.BundlePackageScanClassResolver;
@@ -63,6 +61,7 @@ import com.openexchange.database.migration.osgi.tracker.ManagementServiceTracker
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.startup.SignalStartedService;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * Activator for the main migration bundle
@@ -72,7 +71,7 @@ import com.openexchange.startup.SignalStartedService;
  */
 public class DBMigrationActivator extends HousekeepingActivator {
 
-    private static final Class<?>[] NEEDED_SERVICES = { DatabaseService.class, ConfigurationService.class, SignalStartedService.class };
+    private static final Class<?>[] NEEDED_SERVICES = { DatabaseService.class, SignalStartedService.class, ThreadPoolService.class };
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DBMigrationActivator.class);
 
@@ -92,17 +91,16 @@ public class DBMigrationActivator extends HousekeepingActivator {
         LOG.info("Starting bundle: " + this.context.getBundle().getSymbolicName());
 
         Services.setServiceLookup(this);
-        PackageScanClassResolver resolver = new BundlePackageScanClassResolver(this.context.getBundle());
-        // Important: At first load classes used for liquibase
-        ServiceLocator.setInstance(new CustomResolverServiceLocator(resolver));
+        // Important: Enable liquibase to load required classes (e.g. liquibase.logging.Logger implementation) from this bundle
+        ServiceLocator.setInstance(new CustomResolverServiceLocator(new BundlePackageScanClassResolver(this.context.getBundle())));
 
         final DatabaseService databaseService = getService(DatabaseService.class);
         Validate.notNull(databaseService, "Not able to execute database migration! DatabaseService is absent.");
 
-        final ConfigurationService configurationService = getService(ConfigurationService.class);
-        Validate.notNull(configurationService, "Cannot read migration files because ConfigurationService is absent.");
+        final ThreadPoolService threadPoolService = Services.getService(ThreadPoolService.class);
+        Validate.notNull(threadPoolService, "Cannot add databse migration tasks to thread pool because ThreadPoolService is absent.");
 
-        DBMigrationExecutorService dbMigrationExecutorService = new DBMigrationExecutorServiceImpl(databaseService, configurationService);
+        DBMigrationExecutorService dbMigrationExecutorService = new DBMigrationExecutorServiceImpl(databaseService, threadPoolService);
         registerService(DBMigrationExecutorService.class, dbMigrationExecutorService);
 
         track(ManagementService.class, new ManagementServiceTracker(context, dbMigrationExecutorService, databaseService));

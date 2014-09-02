@@ -13,6 +13,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.startup,
+ com.openexchange.threadpool,
  com.openexchange.tools.sql,
  javax.management,
  liquibase,
@@ -80,5 +81,6 @@ Import-Package: com.openexchange.config,
  org.osgi.util.tracker,
  org.slf4j
 Export-Package: com.openexchange.database.migration,
- com.openexchange.database.migration.mbean
+ com.openexchange.database.migration.mbean,
+ com.openexchange.database.migration.resource.accessor
 Bundle-Vendor: Open-Xchange Inc.

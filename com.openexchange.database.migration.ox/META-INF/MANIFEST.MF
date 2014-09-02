@@ -7,6 +7,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Activator: com.openexchange.database.migration.ox.osgi.OXMigrationActivator
 Bundle-ClassPath: .
 Import-Package: com.openexchange.database.migration,
+ com.openexchange.database.migration.resource.accessor,
  com.openexchange.exception,
  com.openexchange.osgi,
  com.openexchange.server,
