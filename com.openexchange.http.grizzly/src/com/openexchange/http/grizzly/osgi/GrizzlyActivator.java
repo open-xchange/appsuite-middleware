@@ -65,6 +65,7 @@ import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.http.grizzly.GrizzlyExceptionCode;
@@ -89,8 +90,6 @@ import com.openexchange.timer.TimerService;
  */
 public class GrizzlyActivator extends HousekeepingActivator {
 
-    private volatile ServiceTracker<Filter, FilterProxy> filterTracker;
-
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[] { ConfigurationService.class, RequestWatcherService.class, ThreadPoolService.class, TimerService.class };
@@ -101,6 +100,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(GrizzlyActivator.class);
         try {
             Services.setServiceLookup(this);
+            trackService(DispatcherPrefixService.class);
 
             log.info("Starting Grizzly server.");
             context.addFrameworkListener(new FrameworkListener() {
@@ -121,8 +121,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
             ServletFilterRegistration.initInstance();
             {
                 ServiceTracker<Filter, FilterProxy> tracker = new ServiceTracker<Filter, FilterProxy>(context, Filter.class, new ServletFilterTracker(context));
-                this.filterTracker = tracker;
-                tracker.open();
+                rememberTracker(tracker);
             }
 
             final GrizzlyConfig grizzlyConfig = GrizzlyConfig.getInstance();
@@ -210,19 +209,11 @@ public class GrizzlyActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(GrizzlyActivator.class);
-
-        ServiceTracker<Filter, FilterProxy> tracker = this.filterTracker;
-        if (null != tracker) {
-            tracker.close();
-            this.filterTracker = null;
-        }
+        org.slf4j.LoggerFactory.getLogger(GrizzlyActivator.class).info("Unregistering services.");
+        super.stopBundle();
 
         Services.setServiceLookup(null);
         ServletFilterRegistration.dropInstance();
-
-        log.info("Unregistering services.");
-        super.stopBundle();
     }
 
     /**

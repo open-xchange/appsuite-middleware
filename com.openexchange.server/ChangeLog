@@ -2,6 +2,7 @@
 
  - Fix for bug 33956: Perform safe flush on socket output stream to not prevent reading returned SMTP return code if SMPT server closes
                       associated connection on its own immediately
+ - Fix for bug 33967: Avoid 102 Processing interim responses for requests executed by USM component
 
 * 2014-09-01 - marcus.klein@open-xchange.com
 
