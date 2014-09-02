@@ -50,6 +50,7 @@
 package com.openexchange.find.spi;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.find.AbstractFindRequest;
 import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.AutocompleteResult;
 import com.openexchange.find.Module;
@@ -79,6 +80,15 @@ public interface ModuleSearchDriver {
      * @return <code>true</code> if valid; otherwise <code>false</code>
      */
     boolean isValidFor(ServerSession session) throws OXException;
+
+    /**
+     * Checks if this driver applies to a given {@link ServerSession} and concrete find request.
+     *
+     * @param session The associated session
+     * @param findRequest The current find request
+     * @return <code>true</code> if valid; otherwise <code>false</code>
+     */
+    boolean isValidFor(ServerSession session, AbstractFindRequest findRequest) throws OXException;
 
     /**
      * Gets the driver-specific {@link SearchConfiguration}. May be individual for the

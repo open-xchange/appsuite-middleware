@@ -53,6 +53,7 @@ import static com.openexchange.ajax.requesthandler.Dispatcher.PREFIX;
 import static com.openexchange.tools.servlet.http.Tools.isMultipartContent;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -64,6 +65,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -335,6 +337,8 @@ public class DispatcherServlet extends SessionServlet {
         return false;
     }
 
+    private static final Pattern PATTERN_SINGLE_QUOTE = Pattern.compile("(^|[^\\\\])'");
+
     /**
      * Handles given HTTP request and generates an appropriate result using referred {@link AJAXActionService}.
      *
@@ -423,12 +427,35 @@ public class DispatcherServlet extends SessionServlet {
                 return;
             }
             if (AjaxExceptionCodes.HTTP_ERROR.equals(e)) {
-                final Object[] logArgs = e.getLogArgs();
-                final Object statusMsg = logArgs.length > 1 ? logArgs[1] : null;
-                final int sc = ((Integer) logArgs[0]).intValue();
+                Object[] logArgs = e.getLogArgs();
+                Object statusMsg = logArgs.length > 1 ? logArgs[1] : null;
+                int sc = ((Integer) logArgs[0]).intValue();
                 sendErrorAndPage(sc, null == statusMsg ? null : statusMsg.toString(), httpResponse);
                 logException(e, LogLevel.DEBUG, sc);
                 return;
+            }
+            if (AjaxExceptionCodes.HTTP_ERROR_YELL_CALLBACK.equals(e)) {
+                Object[] logArgs = e.getLogArgs();
+                String yellCb = logArgs.length > 0 ? logArgs[0].toString() : null;
+                if (null != yellCb) {
+                    httpResponse.setStatus(HttpServletResponse.SC_OK);
+                    httpResponse.setContentType("text/html; charset=UTF-8");
+                    httpResponse.setHeader("Content-Disposition", "inline");
+                    if (yellCb.indexOf('"') >= 0) {
+                        yellCb = PATTERN_SINGLE_QUOTE.matcher(yellCb).replaceAll("$1\\\\'");
+                    }
+                    PrintWriter writer = httpResponse.getWriter();
+
+                    StringBuilder sb = new StringBuilder(512).append("<!DOCTYPE html>");
+                    sb.append("<head><META http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><script type=\"text/javascript\">");
+                    sb.append("(window.parent || window.opener).require(['io.ox/core/yell'], function (yell) { yell('error', '");
+                    sb.append(yellCb).append("'); });");
+                    sb.append("</script></head></html>");
+
+                    writer.write(sb.toString());
+                    writer.flush();
+                    return;
+                }
             }
             // Handle other OXExceptions
             if (AjaxExceptionCodes.UNEXPECTED_ERROR.equals(e)) {

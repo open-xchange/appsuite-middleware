@@ -33,9 +33,6 @@ dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/linkedinsubs
 dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/microformatSubscription.properties \
     /opt/open-xchange/etc/microformatSubscription.properties 6.20.99 open-xchange-subscribe-microformats -- $1 \
     $(dpkg-query -W -f='${Config-Version}' open-xchange-subscribe-microformats)
-dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/msnsubscribe.properties \
-    /opt/open-xchange/etc/msnsubscribe.properties 6.20.99 open-xchange-subscribe-msn -- $1 \
-    $(dpkg-query -W -f='${Config-Version}' open-xchange-subscribe-msn)
 dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/yahoosubscribe.properties \
     /opt/open-xchange/etc/yahoosubscribe.properties 6.20.99 open-xchange-subscribe-yahoo -- $1 \
     $(dpkg-query -W -f='${Config-Version}' open-xchange-subscribe-yahoo)
@@ -44,9 +41,15 @@ dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/yahoosubscri
 dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/crawlers/XING.yml /opt/open-xchange/etc/crawlers/xing.yml 7.4.2~ -- "$@"
 
 #SoftwareChange_Request-2145
-#not in postfix() as dpkg-maintscript-helper needs $@ which isn't satisfied by postfix() 
+#not in postfix() as dpkg-maintscript-helper needs $@ which isn't satisfied by postfix()
 dpkg-maintscript-helper rm_conffile /opt/open-xchange/etc/crawlers/GoogleCalendar.yml 7.6.1~ -- "$@"
 dpkg-maintscript-helper rm_conffile /opt/open-xchange/etc/crawlers/GoogleMail.yml 7.6.1~ -- "$@"
+
+# SoftwareChange_Request-2147
+dpkg-maintscript-helper rm_conffile /opt/open-xchange/etc/crawlers/xing.yml 7.6.1~ -- "$@"
+
+# SoftwareChange_Request-2154
+dpkg-maintscript-helper rm_conffile /opt/open-xchange/etc/msnsubscribe.properties 7.6.1~ -- "$@"
 
 . /opt/open-xchange/lib/oxfunctions.sh
 
@@ -86,8 +89,8 @@ postFix() {
 
     # SoftwareChange_Request-1501
     # updated by SoftwareChange_Request-1710
-    FILES=( crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties facebooksubscribe.properties linkedinsubscribe.properties microformatSubscription.properties microformatSubscription.properties msnsubscribe.properties yahoosubscribe.properties )
-    NEWPROPS=( com.openexchange.subscribe.crawler.googlemail.autorunInterval com.openexchange.subscribe.xing.autorunInterval com.openexchange.subscribe.crawler.webde.autorunInterval com.openexchange.subscribe.crawler.google.calendar.autorunInterval com.openexchange.subscribe.crawler.t-online.de.autorunInterval com.openexchange.subscribe.crawler.gmx.de.autorunInterval com.openexchange.subscribe.crawler.msn.de.autorunInterval com.openexchange.subscribe.crawler.suncontacts.autorunInterval com.openexchange.subscribe.crawler.suncalendar.autorunInterval com.openexchange.subscribe.crawler.suntasks.autorunInterval com.openexchange.subscribe.socialplugin.facebook.autorunInterval com.openexchange.subscribe.socialplugin.linkedin.autorunInterval com.openexchange.subscribe.microformats.contacts.http.autorunInterval com.openexchange.subscribe.microformats.infostore.http.autorunInterval com.openexchange.subscribe.socialplugin.msn.autorunInterval com.openexchange.subscribe.socialplugin.yahoo.autorunInterval )
+    FILES=( crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties facebooksubscribe.properties linkedinsubscribe.properties microformatSubscription.properties microformatSubscription.properties yahoosubscribe.properties )
+    NEWPROPS=( com.openexchange.subscribe.crawler.googlemail.autorunInterval com.openexchange.subscribe.xing.autorunInterval com.openexchange.subscribe.crawler.webde.autorunInterval com.openexchange.subscribe.crawler.google.calendar.autorunInterval com.openexchange.subscribe.crawler.t-online.de.autorunInterval com.openexchange.subscribe.crawler.gmx.de.autorunInterval com.openexchange.subscribe.crawler.msn.de.autorunInterval com.openexchange.subscribe.crawler.suncontacts.autorunInterval com.openexchange.subscribe.crawler.suncalendar.autorunInterval com.openexchange.subscribe.crawler.suntasks.autorunInterval com.openexchange.subscribe.socialplugin.facebook.autorunInterval com.openexchange.subscribe.socialplugin.linkedin.autorunInterval com.openexchange.subscribe.microformats.contacts.http.autorunInterval com.openexchange.subscribe.microformats.infostore.http.autorunInterval com.openexchange.subscribe.socialplugin.yahoo.autorunInterval )
     for I in $(seq 1 ${#NEWPROPS[@]}); do
         NEWPROP=${NEWPROPS[$I-1]}
         PFILE=/opt/open-xchange/etc/${FILES[$I-1]}
@@ -131,7 +134,7 @@ postFix() {
         fi
     done
 
-    #SoftwareChange_Request-2145 
+    #SoftwareChange_Request-2145
     pfile=/opt/open-xchange/etc/crawler.properties
     for prop in com.openexchange.subscribe.crawler.googlemail com.openexchange.subscribe.crawler.google.calendar com.openexchange.subscribe.crawler.googlemail.autorunInterval com.openexchange.subscribe.crawler.google.calendar.autorunInterval; do
         if ox_exists_property $prop $pfile; then
@@ -139,6 +142,13 @@ postFix() {
         fi
     done
 
+    # SoftwareChange_Request-2147
+    pfile=/opt/open-xchange/etc/crawler.properties
+    for prop in com.openexchange.subscribe.xing com.openexchange.subscribe.xing.autorunInterval; do
+        if ox_exists_property $prop $pfile; then
+            ox_remove_property $prop $pfile
+        fi
+    done
 }
 
 setConfigFilePermissions() {

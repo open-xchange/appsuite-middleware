@@ -54,6 +54,7 @@ import java.util.List;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.update.UpdateStatus;
 import com.openexchange.groupware.update.Updater;
 import com.openexchange.groupware.update.internal.SchemaExceptionCodes;
@@ -167,8 +168,8 @@ public class CachingContextStorage extends ContextStorage {
         final Cache cache = cacheService.getCache(REGION_NAME);
         try {
             final Object object = cache.get(I(contextId));
-            if (object instanceof ContextExtended) {
-                for (final String loginInfo : ((ContextExtended) object).getLoginInfo()) {
+            if (object instanceof Context) {
+                for (final String loginInfo : ((Context) object).getLoginInfo()) {
                     cache.remove(loginInfo);
                 }
             }

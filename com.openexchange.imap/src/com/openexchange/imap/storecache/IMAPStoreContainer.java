@@ -51,6 +51,7 @@ package com.openexchange.imap.storecache;
 
 import javax.mail.MessagingException;
 import com.openexchange.imap.IMAPProvider;
+import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPStore;
 
 
@@ -72,11 +73,12 @@ public interface IMAPStoreContainer {
      * @param imapSession The IMAP session
      * @param login The login
      * @param pw The password
+     * @param session The Groupware session
      * @return The connected IMAP store or <code>null</code> if currently impossible to do so
      * @throws MessagingException If returning a connected IMAP store fails
      * @throws InterruptedException If thread is interrupted when possibly waiting for free resources
      */
-    IMAPStore getStore(javax.mail.Session imapSession, String login, String pw) throws MessagingException, InterruptedException;
+    IMAPStore getStore(javax.mail.Session imapSession, String login, String pw, Session session) throws MessagingException, InterruptedException;
 
     /**
      * Returns specified IMAP store to container.
@@ -104,11 +106,11 @@ public interface IMAPStoreContainer {
      * @return The number of stores currently in-use
      */
     int getInUseCount();
-    
+
     /**
      * Determines whether the IMAPStoreContainer has elapsed
-     * 
-     * @param millis 
+     *
+     * @param millis
      * @return true if elapsed; false otherwise
      */
     boolean hasElapsed(long millis);

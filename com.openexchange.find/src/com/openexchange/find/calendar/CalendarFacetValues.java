@@ -62,7 +62,7 @@ public class CalendarFacetValues {
     public static final String RECURRING_TYPE_SERIES = "series";
 
     //Relative Date
-    public static final String RELATIVE_DATE_COMING = "coming";
+    public static final String RELATIVE_DATE_FUTURE = "future";
 
     public static final String RELATIVE_DATE_PAST = "past";
 

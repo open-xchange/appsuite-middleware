@@ -249,4 +249,27 @@ public final class SortOptions {
 		this.limit = limit;
 	}
 
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        if (false == SortOptions.EMPTY.equals(this)) {
+            if (null != sortOrders && 0 < sortOrders.length) {
+                stringBuilder.append("ORDER BY ").append(sortOrders[0].getBy()).append(' ').append((Order.NO_ORDER.equals(
+                    sortOrders[0].getOrder()) ? "" : (Order.ASCENDING.equals(sortOrders[0].getOrder()) ? "ASC" : "DESC")));
+                for (int i = 1; i < sortOrders.length; i++) {
+                    stringBuilder.append(", ").append(sortOrders[i].getBy()).append(' ').append((Order.NO_ORDER.equals(
+                        sortOrders[i].getOrder()) ? "" : (Order.ASCENDING.equals(sortOrders[i].getOrder()) ? "ASC" : "DESC")));
+                }
+            }
+            if (0 < limit) {
+                stringBuilder.append(" LIMIT ");
+                if (0 < rangeStart) {
+                    stringBuilder.append(rangeStart).append(", ");
+                }
+                stringBuilder.append(limit);
+            }
+        }
+        return stringBuilder.toString();
+    }
+
 }

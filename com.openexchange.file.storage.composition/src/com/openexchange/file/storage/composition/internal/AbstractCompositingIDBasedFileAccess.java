@@ -484,9 +484,13 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
     public TimedResult<File> getDocuments(final List<String> ids, final List<Field> columns) throws OXException {
         final List<File> files = new ArrayList<File>(ids.size());
         for (final String id : ids) {
-            if (exists(id, FileStorageFileAccess.CURRENT_VERSION)) {
-                final File fileMetadata = getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
-                files.add(fileMetadata);
+            try {
+                files.add(getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION));
+            } catch (OXException e) {
+                if (exists(id, FileStorageFileAccess.CURRENT_VERSION)) {
+                    throw e;
+                }
+                // Ignore non-existing item
             }
         }
 
@@ -793,7 +797,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
             FileStorageFileAccess fileAccess = getFileAccess(sourceFileID.getService(), sourceFileID.getAccountId());
             final IDTuple sourceIDTuple = new IDTuple(sourceFileID.getFolderId(), sourceFileID.getFileId());
             ensureFolderIDs(fileAccess, Collections.singletonList(sourceIDTuple));
-            if (null != sourceIDTuple.getFolder() && false == sourceIDTuple.getFolder().equals(targetFolderID.getFolderId())) {
+            if (null != document.getFolderId() && false == sourceIDTuple.getFolder().equals(targetFolderID.getFolderId())) {
                 /*
                  * special handling for move to different folder
                  */

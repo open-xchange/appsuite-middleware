@@ -61,11 +61,6 @@ public class TasksStrings implements LocalizableStrings {
     // ------------------------- i18n strings for facet types -------------------------------------- //
 
     // Context: Searching in tasks.
-    // Displayed as: [Search for] 'user input' in tasks.
-    // The 'user input' part is always prepended, please heed this in translations.
-    public static final String FACET_GLOBAL = "in tasks";
-
-    // Context: Searching in tasks.
     // Displayed as: [Search for] 'user input' in title.
     // The 'user input' part is always prepended, please heed this in translations.
     public static final String FACET_TASK_TITLE = "in title";

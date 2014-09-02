@@ -93,7 +93,9 @@ public final class InterfaceTests {
         tests.addTest(com.openexchange.ajax.subscribe.SubscribeTestSuite.suite());
         tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.user.UserAJAXSuite.class));
         tests.addTest(com.openexchange.ajax.xing.XINGTestSuite.suite());
-        tests.addTest(com.openexchange.google.subscribe.GoogleTestSuite.suite());
+        tests.addTest(com.openexchange.subscribe.google.GoogleTestSuite.suite());
+        // TODO: enable when MSLiveOAuthClient is implemented
+        // tests.addTest(com.openexchange.subscribe.mslive.MSLiveTestSuite.suite());
 
         tests.addTest(com.openexchange.dav.caldav.tests.CalDAVTestSuite.suite());
         tests.addTest(com.openexchange.dav.caldav.bugs.CalDAVBugSuite.suite());
@@ -111,8 +113,10 @@ public final class InterfaceTests {
 
         tests.addTest(com.openexchange.ajax.roundtrip.pubsub.PubSubSuite.suite());
         tests.addTestSuite(com.openexchange.webdav.xml.GroupUserTest.class);
-        /* TODO Enable the following test again. But this requires fixing the server. Currently the request fails.
-        tests.addTestSuite(com.openexchange.webdav.client.NaughtyClientTest.class); */
+        /*
+         * TODO Enable the following test again. But this requires fixing the server. Currently the request fails.
+         * tests.addTestSuite(com.openexchange.webdav.client.NaughtyClientTest.class);
+         */
         tests.addTestSuite(com.openexchange.ajax.FunambolTests.class);
         tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.AppointmentParticipantsShouldBecomeUsersIfPossible.class);
         tests.addTestSuite(com.openexchange.ajax.task.TaskExternalUsersBecomeInternalUsers.class);

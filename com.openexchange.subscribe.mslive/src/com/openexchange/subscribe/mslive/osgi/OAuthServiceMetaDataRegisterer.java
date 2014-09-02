@@ -55,10 +55,13 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.context.ContextService;
+import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.mslive.ContactsMSLiveSubscribeService;
+import com.openexchange.subscribe.mslive.groupware.MSLiveSubscriptionsOAuthAccountDeleteListener;
 
 /**
  * {@link OAuthServiceMetaDataRegisterer}
@@ -94,8 +97,18 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
         final OAuthServiceMetaData oAuthServiceMetaData = context.getService(ref);
         if (oauthIdentifier.equals(oAuthServiceMetaData.getId())) {
             logger.info("Registering MS Live subscription services.");
-            final SubscribeService msliveSubService = new ContactsMSLiveSubscribeService(oAuthServiceMetaData, services);
+            final ContactsMSLiveSubscribeService msliveSubService = new ContactsMSLiveSubscribeService(oAuthServiceMetaData, services);
             contactsRegistration = context.registerService(SubscribeService.class, msliveSubService, null);
+
+            ContextService contextService = services.getService(ContextService.class);
+
+            try {
+                context.registerService(OAuthAccountDeleteListener.class, new MSLiveSubscriptionsOAuthAccountDeleteListener(
+                    msliveSubService,
+                    contextService), null);
+            } catch (final Throwable t) {
+                logger.error("", t);
+            }
         }
         return oAuthServiceMetaData;
     }

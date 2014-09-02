@@ -68,6 +68,7 @@ public class UnitTests {
         final TestSuite tests = new TestSuite();
         tests.addTest(new JUnit4TestAdapter(AutoboxingTest.class));
         tests.addTest(new JUnit4TestAdapter(com.openexchange.java.HTMLDetectorTest.class));
+        tests.addTest(new JUnit4TestAdapter(com.openexchange.java.SimpleTokenizerTest.class));
         return tests;
     }
 

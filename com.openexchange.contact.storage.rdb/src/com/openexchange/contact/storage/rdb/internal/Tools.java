@@ -331,6 +331,26 @@ public final class Tools {
         return stringBuilder.toString();
     }
 
+    /**
+     * Gets all fields required to apply the sort options, i.e. all fields that will appear in an <code>ORDER BY</code>-clause afterwards.
+     *
+     * @param sortOptions The sort options to check
+     * @return The required fields, or an empty array if none are required
+     */
+    public static ContactField[] getRequiredFields(SortOptions sortOptions) {
+        if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
+            SortOrder[] sortOrders = sortOptions.getOrder();
+            if (null != sortOrders && 0 < sortOrders.length) {
+                ContactField[] sortFields = new ContactField[sortOrders.length];
+                for (int i = 0; i < sortOrders.length; i++) {
+                    sortFields[i] = sortOrders[i].getBy();
+                }
+                return sortFields;
+            }
+        }
+        return new ContactField[0];
+    }
+
     private static String getOrderClause(final SortOrder order, final SuperCollator collator) throws OXException {
         final StringBuilder stringBuilder = new StringBuilder();
         if (null == collator || SuperCollator.DEFAULT.equals(collator)) {

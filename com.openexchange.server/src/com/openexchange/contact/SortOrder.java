@@ -89,5 +89,9 @@ public final class SortOrder {
 		return by;
 	}
 
+    @Override
+    public String toString() {
+        return "ORDER BY " + by + ' ' + (Order.NO_ORDER.equals(order) ? "" : (Order.ASCENDING.equals(order) ? "ASC" : "DESC"));
+    }
 
 }

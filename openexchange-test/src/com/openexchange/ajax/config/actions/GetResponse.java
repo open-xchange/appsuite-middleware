@@ -90,6 +90,16 @@ public class GetResponse extends AbstractAJAXResponse {
     }
 
     /**
+     * Checks if obtained value is of the type <code>Number</code>
+     *
+     * @return <code>true</code> if obtained value is not <code>null</code> and of type <code>Number</code>; otherwise <code>false</code>
+     */
+    public boolean hasInteger() {
+        fetchValue();
+        return null != value ? value instanceof Number : false;
+    }
+
+    /**
      * Gets the <code>int</code> value or <code>-1</code> if not present.
      *
      * @return The <code>int</code> value or <code>-1</code> if not present
@@ -100,6 +110,16 @@ public class GetResponse extends AbstractAJAXResponse {
     }
 
     /**
+     * Checks if obtained value is of the type <code>String</code>
+     *
+     * @return <code>true</code> if obtained value is not <code>null</code> and of type <code>String</code>; otherwise <code>false</code>
+     */
+    public boolean hasString() {
+        fetchValue();
+        return null != value ? value instanceof String : false;
+    }
+
+    /**
      * Gets the <code>java.lang.String</code> value or <code>null</code> if not present.
      *
      * @return The <code>java.lang.String</code> value or <code>null</code> if not present
@@ -107,6 +127,17 @@ public class GetResponse extends AbstractAJAXResponse {
     public String getString() {
         fetchValue();
         return null == value ? null : (String) value;
+    }
+
+
+    /**
+     * Checks if obtained value is of the type <code>Long</code>
+     *
+     * @return <code>true</code> if obtained value is not <code>null</code> and of type <code>Long</code>; otherwise <code>false</code>
+     */
+    public boolean hasLong() {
+        fetchValue();
+        return null != value ? value instanceof Long : false;
     }
 
     /**

@@ -49,7 +49,6 @@
 
 package com.openexchange.find.basic.mail;
 
-import static com.openexchange.find.basic.SimpleTokenizer.tokenize;
 import static com.openexchange.find.basic.mail.Constants.FIELD_BODY;
 import static com.openexchange.find.basic.mail.Constants.FIELD_CC;
 import static com.openexchange.find.basic.mail.Constants.FIELD_FROM;
@@ -76,6 +75,7 @@ import static com.openexchange.find.mail.MailStrings.FACET_FROM_AND_TO;
 import static com.openexchange.find.mail.MailStrings.FACET_MAIL_TEXT;
 import static com.openexchange.find.mail.MailStrings.FACET_SUBJECT;
 import static com.openexchange.find.mail.MailStrings.FACET_TO;
+import static com.openexchange.java.SimpleTokenizer.tokenize;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -608,40 +608,47 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
     }
 
     private static SearchTerm<?> buildTimeTerm(Comparison comparison, long timestamp, boolean isOutgoingFolder) {
-        SearchTerm<?> term = null;
+        Date date = new Date(timestamp);
+        ComparisonType type;
         switch (comparison) {
             case EQUALS:
             {
-                term = dateTermFor(ComparisonType.EQUALS, new Date(timestamp), isOutgoingFolder);
+                type = ComparisonType.EQUALS;
                 break;
             }
 
             case GREATER_THAN:
             {
-                term = dateTermFor(ComparisonType.GREATER_THAN, new Date(timestamp), isOutgoingFolder);
+                type = ComparisonType.GREATER_THAN;
                 break;
             }
 
             case LOWER_THAN:
             {
-                term = dateTermFor(ComparisonType.LESS_THAN, new Date(timestamp), isOutgoingFolder);
+                type = ComparisonType.LESS_THAN;
                 break;
             }
 
             case GREATER_EQUALS:
             {
-                term = dateTermFor(ComparisonType.GREATER_THAN, new Date(timestamp - 1), isOutgoingFolder);
+                type = ComparisonType.GREATER_EQUALS;
                 break;
             }
 
             case LOWER_EQUALS:
             {
-                term = dateTermFor(ComparisonType.LESS_THAN, new Date(timestamp + 1), isOutgoingFolder);
+                type = ComparisonType.LESS_EQUALS;
+                break;
+            }
+
+            default:
+            {
+                type = ComparisonType.EQUALS;
                 break;
             }
         }
 
-        return term;
+        return dateTermFor(type, date, isOutgoingFolder);
     }
 
     private static SearchTerm<ComparablePattern<java.util.Date>> dateTermFor(ComparisonType comparisonType, Date date, boolean isOutgoingFolder) {

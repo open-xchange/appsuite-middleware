@@ -1033,21 +1033,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 return retval;
             } catch (SQLException e) {
                 rollback(configCon);
-                try {
-                    cache.getPool().lock(configCon);
-                } catch (PoolException e1) {
-                    LOG.error(e1.getMessage(), e1);
-                }
-                OXContextMySQLStorageCommon.deleteEmptySchema(configCon, i(db.getId()), db.getScheme());
+                OXContextMySQLStorageCommon.deleteEmptySchema(i(db.getId()), db.getScheme());
                 throw new StorageException(e.getMessage(), e);
             } catch (StorageException e) {
                 rollback(configCon);
-                try {
-                    cache.getPool().lock(configCon);
-                } catch (PoolException e1) {
-                    LOG.error(e1.getMessage(), e1);
-                }
-                OXContextMySQLStorageCommon.deleteEmptySchema(configCon, i(db.getId()), db.getScheme());
+                OXContextMySQLStorageCommon.deleteEmptySchema(i(db.getId()), db.getScheme());
                 throw e;
             } finally {
                 autocommit(configCon);

@@ -53,20 +53,44 @@ package com.openexchange.tools.images;
  * {@link ScaleType}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 public enum ScaleType {
-    COVER("cover"), CONTAIN("contain"), AUTO("auto");
 
-    private String keyword;
+    /**
+     * The "cover" scale type
+     */
+    COVER("cover"),
+    /**
+     * The "contain" scale type
+     */
+    CONTAIN("contain"),
+    /**
+     * The "auto" scale type
+     */
+    AUTO("auto");
+
+    private final String keyword;
 
     private ScaleType(String keyword) {
         this.keyword = keyword;
     }
 
+    /**
+     * Gets the keyword
+     *
+     * @return The keyword
+     */
     public String getKeyword() {
         return keyword;
     }
 
+    /**
+     * Gets the scale type for given keyword.
+     *
+     * @param keyword The keyword
+     * @return The associated scale type or <code>null</code>
+     */
     public static ScaleType getType(String keyword) {
         if (keyword == null) {
             return AUTO;

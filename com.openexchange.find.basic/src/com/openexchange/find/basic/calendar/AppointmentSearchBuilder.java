@@ -51,7 +51,7 @@ package com.openexchange.find.basic.calendar;
 
 import static com.openexchange.find.calendar.CalendarFacetValues.RECURRING_TYPE_SERIES;
 import static com.openexchange.find.calendar.CalendarFacetValues.RECURRING_TYPE_SINGLE;
-import static com.openexchange.find.calendar.CalendarFacetValues.RELATIVE_DATE_COMING;
+import static com.openexchange.find.calendar.CalendarFacetValues.RELATIVE_DATE_FUTURE;
 import static com.openexchange.find.calendar.CalendarFacetValues.RELATIVE_DATE_PAST;
 import static com.openexchange.find.calendar.CalendarFacetValues.STATUS_ACCEPTED;
 import static com.openexchange.find.calendar.CalendarFacetValues.STATUS_DECLINED;
@@ -281,7 +281,7 @@ public class AppointmentSearchBuilder {
 
     private void applyRelativeDate(List<String> queries) throws OXException {
         for (String query : queries) {
-            if (RELATIVE_DATE_COMING.equals(query)) {
+            if (RELATIVE_DATE_FUTURE.equals(query)) {
                 appointmentSearch.setMinimumEndDate(new Date());
             } else if (RELATIVE_DATE_PAST.equals(query)) {
                 appointmentSearch.setMaximumStartDate(new Date());

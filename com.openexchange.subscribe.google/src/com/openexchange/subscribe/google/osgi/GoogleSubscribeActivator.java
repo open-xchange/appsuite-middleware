@@ -50,6 +50,7 @@
 package com.openexchange.subscribe.google.osgi;
 
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.oauth.OAuthServiceMetaData;
@@ -70,7 +71,7 @@ public class GoogleSubscribeActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class[] {
             SessiondService.class, UserService.class, DatabaseService.class, ThreadPoolService.class, ConfigurationService.class,
-            FolderUpdaterRegistry.class };
+            FolderUpdaterRegistry.class, ContextService.class };
     }
 
     @Override

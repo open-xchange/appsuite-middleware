@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import com.google.api.client.util.DateTime;
 import com.google.api.services.drive.model.File;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
@@ -125,10 +126,16 @@ public final class GoogleDriveFile extends DefaultFile {
                 final Set<Field> set = null == fields || fields.isEmpty() ? EnumSet.allOf(Field.class) : EnumSet.copyOf(fields);
 
                 if (set.contains(Field.CREATED)) {
-                    setCreated(new Date(file.getCreatedDate().getValue()));
+                    DateTime createdDate = file.getCreatedDate();
+                    if (null != createdDate) {
+                        setCreated(new Date(createdDate.getValue()));
+                    }
                 }
                 if (set.contains(Field.LAST_MODIFIED) || set.contains(Field.LAST_MODIFIED_UTC)) {
-                    setLastModified(new Date(file.getModifiedDate().getValue()));
+                    DateTime modifiedDate = file.getModifiedDate();
+                    if (null != modifiedDate) {
+                        setLastModified(new Date(modifiedDate.getValue()));
+                    }
                 }
                 if (set.contains(Field.FILE_MIMETYPE)) {
                     String contentType = file.getMimeType();
