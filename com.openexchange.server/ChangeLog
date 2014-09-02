@@ -1,3 +1,7 @@
+* 2014-09-02 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 34249: Delete empty folders from file system
+
 * 2014-09-02 - marcus.klein@open-xchange.com
 
  - Fix for bug 31612: Using a new connection to config database to determine if a just created schema needs to be deleted again on context

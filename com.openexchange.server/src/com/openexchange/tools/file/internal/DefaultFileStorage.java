@@ -74,6 +74,7 @@ import com.openexchange.tools.file.external.FileStorageCodes;
 public abstract class DefaultFileStorage implements FileStorage {
 
     private static final String READ = "r";
+
     private static final String READ_WRITE = "rw";
 
     /** The storage's root file */
@@ -148,7 +149,21 @@ public abstract class DefaultFileStorage implements FileStorage {
 
     @Override
     public boolean deleteFile(String identifier) throws OXException {
-        return file(identifier).delete();
+        try {
+            File file = file(identifier);
+            boolean deleted = file.delete();
+            if (deleted) {
+                File parent = file.getParentFile();
+                while (!parent.equals(storage) && parent.list().length == 0 && deleted) {
+                    File newParent = parent.getParentFile();
+                    deleted = parent.delete();
+                    parent = newParent;
+                }
+            }
+            return deleted;
+        } catch (Exception e) {
+            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
+        }
     }
 
     @Override
@@ -224,8 +239,7 @@ public abstract class DefaultFileStorage implements FileStorage {
                 try {
                     eraf.close();
                 } catch (IOException e) {
-                    LoggerFactory.getLogger(DefaultFileStorage.class)
-                        .warn("error closing random access file", e);
+                    LoggerFactory.getLogger(DefaultFileStorage.class).warn("error closing random access file", e);
                 }
             }
         }
