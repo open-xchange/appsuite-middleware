@@ -46,11 +46,9 @@ import java.util.*;
 import java.util.logging.Level;
 import java.lang.reflect.*;
 import javax.net.ssl.SSLSocket;
-
 import javax.mail.*;
 import javax.mail.event.*;
 import javax.mail.internet.*;
-
 import com.sun.mail.util.*;
 import com.sun.mail.auth.*;
 
@@ -2254,7 +2252,7 @@ public class SMTPTransport extends Transport {
         try {
 	    serverOutput.write(cmdBytes);
 	    serverOutput.write(CRLF);
-	    serverOutput.flush();
+	    flush(serverOutput);
 	} catch (IOException ex) {
 	    throw new MessagingException("Can't send command to SMTP host", ex);
 	}
@@ -2482,4 +2480,22 @@ public class SMTPTransport extends Transport {
      */
     private void sendMessageStart(String subject) { }
     private void sendMessageEnd() { }
+
+    // ---------------------------------------------------------------------------------------- //
+
+    /**
+     * Safely flushes specified {@link Flushable} instance.
+     *
+     * @param toFlush The {@link Flushable} instance
+     */
+    private static void flush(final Flushable toFlush) {
+        if (null != toFlush) {
+            try {
+                toFlush.flush();
+            } catch (final Exception e) {
+                // Ignore
+            }
+        }
+    }
+
 }

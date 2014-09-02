@@ -1,3 +1,8 @@
+* 2014-09-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 33956: Perform safe flush on socket output stream to not prevent reading returned SMTP return code if SMPT server closes
+                      associated connection on its own immediately
+
 * 2014-09-01 - marcus.klein@open-xchange.com
 
  - Fix for bug 34236: Marked xingsubscribe.properties in open-xchange-subscribe package as a configuration file.
