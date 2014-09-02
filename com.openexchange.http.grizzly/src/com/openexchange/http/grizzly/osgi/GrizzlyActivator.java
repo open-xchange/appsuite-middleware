@@ -63,6 +63,7 @@ import org.osgi.framework.FrameworkListener;
 import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.http.grizzly.GrizzlyExceptionCode;
@@ -95,6 +96,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(GrizzlyActivator.class);
         try {
             Services.setServiceLookup(this);
+            trackService(DispatcherPrefixService.class);
 
             log.info("Starting Grizzly server.");
             context.addFrameworkListener(new FrameworkListener() {
@@ -197,12 +199,10 @@ public class GrizzlyActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(GrizzlyActivator.class);
+        org.slf4j.LoggerFactory.getLogger(GrizzlyActivator.class).info("Unregistering services.");
+        super.stopBundle();
 
         Services.setServiceLookup(null);
-
-        log.info("Unregistering services.");
-        super.stopBundle();
     }
 
     /**
