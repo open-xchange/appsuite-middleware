@@ -535,17 +535,19 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                         throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Currentdate rule: The comparison \"" + comparison + "\" is not a valid comparison");
                     }
                     final String datepart = getString(jobj, CurrentDateTestFields.DATEPART, id);
-                    final String pattern;
                     if ("date".equals(datepart)) {
                         argList.add(getArrayFromString(datepart));
-                        pattern = dateFormatPattern;
+                        argList.add(JSONDateArrayToStringList(getJSONArray(jobj, CurrentDateTestFields.DATEVALUE, id), dateFormatPattern));
                     } else if ("time".equals(datepart)) {
                         argList.add(getArrayFromString(datepart));
-                        pattern = timeFormatPattern;
+                        argList.add(JSONDateArrayToStringList(getJSONArray(jobj, CurrentDateTestFields.DATEVALUE, id), timeFormatPattern));
+                    } else if ("weekday".equals(datepart)) {
+                        argList.add(getArrayFromString(datepart));
+                        argList.add(JSONArrayToStringList(getJSONArray(jobj, CurrentDateTestFields.DATEVALUE, id)));
                     } else {
                         throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Currentdate rule: The datepart \"" + datepart + "\" is not a valid datepart");
                     }
-                    argList.add(JSONDateArrayToStringList(getJSONArray(jobj, CurrentDateTestFields.DATEVALUE, id), pattern));
+                    
                     return new TestCommand(TestCommand.Commands.CURRENTDATE, argList, new ArrayList<TestCommand>());
                 } else if (TestCommand.Commands.ALLOF.getCommandname().equals(id)) {
                     return createAllofOrAnyofTestCommand(jobj, id, TestCommand.Commands.ALLOF);
