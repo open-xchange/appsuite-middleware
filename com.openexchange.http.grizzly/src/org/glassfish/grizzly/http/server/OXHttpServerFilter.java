@@ -125,6 +125,7 @@ import org.glassfish.grizzly.monitoring.jmx.JmxObject;
 import org.glassfish.grizzly.utils.DelayedExecutor;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.http.grizzly.osgi.Services;
+import com.openexchange.http.grizzly.util.RequestTools;
 import com.openexchange.java.Charsets;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
@@ -258,10 +259,6 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
     private final int pingDelay;
     private final int maxPingCount;
     private volatile Ping ping;
-    private final String USM_URI;
-    private final String EAS_URI;
-    private final static String EAS_URI_DEFAULT = "/Microsoft-Server-ActiveSync";
-    private final static String USM_URI_DEFAULT = "/usm-json";
 
     // ------------------------------------------------------------ Constructors
 
@@ -274,8 +271,6 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
             pingDelay = null == service ? 90000 : service.getIntProperty("com.openexchange.http.grizzly.pingDelay", 90000);
             maxPingCount = null == service ? 9 : service.getIntProperty("com.openexchange.http.grizzly.maxPingCount", 9);
             ping = null == service ? Ping.PROCESSING : Ping.pingFor(service.getProperty("com.openexchange.http.grizzly.ping", "PROCESSING").trim());
-            USM_URI = null == service ? USM_URI_DEFAULT : service.getProperty("com.openexchange.usm.json.alias", USM_URI_DEFAULT).trim();
-            EAS_URI = null == service ? EAS_URI_DEFAULT : service.getProperty("com.openexchange.usm.eas.alias", EAS_URI_DEFAULT).trim();
         }
         // Rest
         suspendedResponseQueue = Response.createDelayQueue(delayedExecutor);
@@ -344,7 +339,7 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
                         final HttpHandler httpHandlerLocal = httpHandler;
                         if (httpHandlerLocal != null) {
                             // Initiate ping
-                            if(!isLongRunning(handlerRequest)) {
+                            if (allowsPing(handlerRequest) && !isLongRunning(handlerRequest)) {
                                 pingInitiated = initiatePing(handlerResponse, ctx);
                             }
                             // Handle HTTP message
@@ -421,7 +416,13 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
     }
 
     private boolean isLongRunning(final Request request) {
-        return  USM_URI.equals(request.getRequestURI()) || EAS_URI.equals(request.getRequestURI());
+        return RequestTools.isUsmJsonOrEasRequest(request);
+    }
+
+    private static final String USM_USER_AGENT = "Open-Xchange USM HTTP Client";
+
+    private boolean allowsPing(Request request) {
+        return !USM_USER_AGENT.equals(request.getHeader("User-Agent"));
     }
 
     private boolean initiatePing(final Response handlerResponse, final FilterChainContext ctx) {

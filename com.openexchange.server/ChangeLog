@@ -5,6 +5,10 @@
 * 2014-09-08 - thorben.betten@open-xchange.com
 
  - Fix for bug 33036: Introduced convenience methods to optionally resolve a setting and to ignore any load/save-back operations if such a setting is non-existent
+ 
+* 2014-09-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 33967: Avoid 102 Processing interim responses for requests executed by USM component
 
 * 2014-09-01 - jan.bauerdick@open-xchange.com
 
