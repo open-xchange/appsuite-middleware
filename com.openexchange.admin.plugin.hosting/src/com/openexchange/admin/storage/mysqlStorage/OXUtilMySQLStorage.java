@@ -1509,19 +1509,19 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         }
         Connection con = null;
         int representativeContextID = Integer.MIN_VALUE;
-        PoolException rememberE = null;
         for (Integer cid : block.filestores.keySet()) {
+            // Try to get a database connection with all context identifier from the FilestoreContextBlock.
             try {
                 con = cache.getConnectionForContext(i(cid));
                 representativeContextID = i(cid);
                 break;
             } catch (final PoolException e) {
                 LOG.error(e.getMessage(), e);
-                rememberE = e;
             }
         }
         if (null == con) {
-            throw new StorageException(rememberE.getMessage(), rememberE);
+            // If none is available anymore, we can not add any usage data and we should just return.
+            return;
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
