@@ -876,13 +876,17 @@ public class IMAPStore extends Store
 	{
 	    Map<String, String> clientParams = clientParameters;
         if (null != clientParams || guid != null) {
-            if (null == clientParams) {
-                clientParams = new LinkedHashMap<String, String>(2);
-            }
-            if (null != guid) {
+            if (guid == null) {
+                if (p.hasCapability("ID")) {
+                    p.id(clientParams);
+                }
+            } else {
+                if (null == clientParams) {
+                    clientParams = new LinkedHashMap<String, String>(2);
+                }
                 clientParams.put("GUID", guid);
+                p.id(clientParams);
             }
-            p.id(clientParams);
         }
 	}
 
