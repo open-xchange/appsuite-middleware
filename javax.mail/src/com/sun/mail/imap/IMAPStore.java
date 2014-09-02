@@ -947,9 +947,12 @@ public class IMAPStore extends Store
 	/*
      * Propagate client IP address if non-null
      */
-    if (null != propagateClientIpAddress) {
-        p.noop(propagateClientIpAddress);
-    }
+	{
+        String propagateClientIpAddress = this.propagateClientIpAddress;
+        if (null != propagateClientIpAddress) {
+            p.noop(propagateClientIpAddress);
+        }
+	}
 
 	/*
 	 * If marker is still there, capabilities haven't been refreshed,
