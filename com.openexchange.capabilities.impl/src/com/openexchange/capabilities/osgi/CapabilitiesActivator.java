@@ -110,7 +110,7 @@ public class CapabilitiesActivator extends HousekeepingActivator {
 
             @Override
             public void added(ServiceReference<Capability> ref, Capability capability) {
-                getCapability(capability.getId()).learnFrom(capability);
+                getCapability(capability.getId());
             }
 
             @Override
