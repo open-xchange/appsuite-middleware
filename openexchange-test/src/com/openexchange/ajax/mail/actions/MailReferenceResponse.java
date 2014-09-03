@@ -47,73 +47,71 @@
  *
  */
 
-package com.openexchange.mail.dataobjects.compose;
+package com.openexchange.ajax.mail.actions;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * {@link ComposeType} - The compose type of a message
+ * {@link MailReferenceResponse}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public enum ComposeType {
+public class MailReferenceResponse extends AbstractAJAXResponse {
+
+    private static final Pattern MAIL_REF_PATTERN = Pattern.compile("^default([0-9]+)(.).*");
+
+    private String separator;
+
+    private int accountID;
+
+    private String folder;
+
+    private String mailID;
+
+    private String reference;
 
     /**
-     * New
-     */
-    NEW(0),
-    /**
-     * Forward
-     */
-    FORWARD(2),
-    /**
-     * Reply
-     */
-    REPLY(1),
-    /**
-     * Draft-Edit
-     */
-    DRAFT_EDIT(3),
-    /**
-     * Draft
-     */
-    DRAFT(4),
-    /**
-     * New SMS (special handling for contained text; e.g. no html-to-text conversion)
-     */
-    NEW_SMS(5),
-    /**
-     * Draft with <code>deleteDraftOnTransport</code> enabled.
-     */
-    DRAFT_DELETE_ON_TRANSPORT(6),
-    /**
-     * Draft with <code>deleteDraftOnTransport</code> explicitly disabled.
-     */
-    DRAFT_NO_DELETE_ON_TRANSPORT(7),
-
-    ;
-
-    private final int type;
-
-    private ComposeType(final int type) {
-        this.type = type;
-    }
-
-    public int getType() {
-        return type;
-    }
-
-    /**
-     * Gets the corresponding {@link ComposeType}
+     * Initializes a new {@link MailReferenceResponse}.
      *
-     * @param type The send type as <code>int</code>
-     * @return The corresponding {@link ComposeType} or <code>null</code>
+     * @param response
      */
-    public static final ComposeType getType(final int type) {
-        final ComposeType[] types = ComposeType.values();
-        for (final ComposeType composeType : types) {
-            if (composeType.type == type) {
-                return composeType;
-            }
+    protected MailReferenceResponse(Response response) {
+        super(response);
+
+        reference = (String) response.getData();
+        Matcher matcher = MAIL_REF_PATTERN.matcher(reference);
+        if (matcher.matches()) {
+            accountID = Integer.parseInt(matcher.group(1));
+            separator = matcher.group(2);
+            int firstSeparatorIndex = reference.indexOf(separator);
+            int lastSeparatorIndex = reference.lastIndexOf(separator);
+            String folderName = reference.substring(firstSeparatorIndex + 1, lastSeparatorIndex);
+            mailID = reference.substring(lastSeparatorIndex + 1);
+            folder = "default" + accountID + separator + folderName;
         }
-        return null;
     }
+
+    public String getSeparator() {
+        return separator;
+    }
+
+    public int getAccountID() {
+        return accountID;
+    }
+
+    public String getFolder() {
+        return folder;
+    }
+
+    public String getMailID() {
+        return mailID;
+    }
+
+    public String getMailReference() {
+        return reference;
+    }
+
 }

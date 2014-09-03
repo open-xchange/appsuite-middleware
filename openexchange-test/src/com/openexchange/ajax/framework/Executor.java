@@ -62,7 +62,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
-import org.junit.Assert;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -84,6 +83,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.cookie.BasicClientCookie2;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
+import org.junit.Assert;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
@@ -454,6 +454,8 @@ public class Executor extends Assert {
                       ((FileParameter) param).getInputStream(),
                       ((FileParameter) param).getMimeType(),
                       ((FileParameter) param).getFileName()));
+            } else if (param instanceof FieldParameter) {
+                entity.addPart(((FieldParameter)param).getFieldName(), new StringBody(((FieldParameter)param).getFieldContent(), Charset.forName("UTF-8")));
             }
         }
 

@@ -47,73 +47,73 @@
  *
  */
 
-package com.openexchange.mail.dataobjects.compose;
+package com.openexchange.ajax.mail.actions;
+
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.Mail;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.Header;
+import com.openexchange.ajax.framework.Header.SimpleHeader;
+
 
 /**
- * {@link ComposeType} - The compose type of a message
+ * {@link NewMailRequestWithUploads}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public enum ComposeType {
+public class NewMailRequestWithUploads extends AbstractMailRequest<MailReferenceResponse> {
 
-    /**
-     * New
-     */
-    NEW(0),
-    /**
-     * Forward
-     */
-    FORWARD(2),
-    /**
-     * Reply
-     */
-    REPLY(1),
-    /**
-     * Draft-Edit
-     */
-    DRAFT_EDIT(3),
-    /**
-     * Draft
-     */
-    DRAFT(4),
-    /**
-     * New SMS (special handling for contained text; e.g. no html-to-text conversion)
-     */
-    NEW_SMS(5),
-    /**
-     * Draft with <code>deleteDraftOnTransport</code> enabled.
-     */
-    DRAFT_DELETE_ON_TRANSPORT(6),
-    /**
-     * Draft with <code>deleteDraftOnTransport</code> explicitly disabled.
-     */
-    DRAFT_NO_DELETE_ON_TRANSPORT(7),
+    private boolean failOnError;
 
-    ;
+    private JSONObject mail;
 
-    private final int type;
-
-    private ComposeType(final int type) {
-        this.type = type;
+    public NewMailRequestWithUploads(JSONObject mail) {
+        this(mail, true);
     }
 
-    public int getType() {
-        return type;
+    public NewMailRequestWithUploads(JSONObject mail, boolean failOnError) {
+        super();
+        this.mail = mail;
+        this.failOnError = failOnError;
     }
 
-    /**
-     * Gets the corresponding {@link ComposeType}
-     *
-     * @param type The send type as <code>int</code>
-     * @return The corresponding {@link ComposeType} or <code>null</code>
-     */
-    public static final ComposeType getType(final int type) {
-        final ComposeType[] types = ComposeType.values();
-        for (final ComposeType composeType : types) {
-            if (composeType.type == type) {
-                return composeType;
-            }
-        }
+    @Override
+    public Method getMethod() {
+        return Method.POST;
+    }
+
+    @Override
+    public Parameter[] getParameters() throws IOException, JSONException {
+        List<Parameter> list = new LinkedList<Parameter>();
+        list.add(new URLParameter(Mail.PARAMETER_ACTION, Mail.ACTION_NEW));
+        list.add(new FieldParameter(AJAXServlet.UPLOAD_FORMFIELD_MAIL, mail.toString()));
+        return list.toArray(new Parameter[list.size()]);
+    }
+
+    @Override
+    public Header[] getHeaders() {
+        return new Header[] { new SimpleHeader("Content-Type", "multipart/form-data") };
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
         return null;
     }
+
+    @Override
+    public AbstractAJAXParser<MailReferenceResponse> getParser() {
+        return new AbstractAJAXParser<MailReferenceResponse>(failOnError) {
+            @Override
+            protected MailReferenceResponse createResponse(final Response response) throws JSONException {
+                return new MailReferenceResponse(response);
+            }
+        };
+    }
+
 }
