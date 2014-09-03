@@ -186,6 +186,10 @@ public enum MailFilterExceptionCode implements DisplayableOXExceptionCode {
                                                                                                                                   // same
                                                                                                                                   // error
                                                                                                                                   // code
+    /**
+     * Invalid credentials
+     */
+    INVALID_FILTER_TYPE_FLAG("Invalid filter type flag: %1$s", CATEGORY_ERROR, 26)
     ;
 
     private final String message;
