@@ -50,14 +50,11 @@
 package com.openexchange.caching.events.ms.internal;
 
 import java.io.IOException;
-import java.io.Serializable;
-import java.util.concurrent.atomic.AtomicReference;
-import com.hazelcast.nio.ObjectDataInput;
-import com.hazelcast.nio.ObjectDataOutput;
+import com.hazelcast.nio.serialization.ClassDefinition;
+import com.hazelcast.nio.serialization.ClassDefinitionBuilder;
+import com.hazelcast.nio.serialization.Portable;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
-import com.openexchange.caching.CacheKey;
-import com.openexchange.caching.CacheKeyService;
 import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheOperation;
 import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
@@ -69,22 +66,53 @@ import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
  */
 public class PortableCacheEvent extends AbstractCustomPortable {
 
-    private static final AtomicReference<CacheKeyService> CKS_REFERENCE = new AtomicReference<CacheKeyService>();
-
-    /**
-     * Sets the specified {@link CacheKeyService}.
-     *
-     * @param service The {@link CacheKeyService}
-     */
-    public static void setCacheKeyService(CacheKeyService service) {
-        CKS_REFERENCE.set(service);
-    }
-
     /** The unique portable class ID of the {@link PortableCacheEvent} */
     public static final int CLASS_ID = 4;
 
-    private Serializable key;
-    private CacheOperation operation;
+    /** The class definition for PortableCacheEvent */
+    public static ClassDefinition CLASS_DEFINITION = new ClassDefinitionBuilder(FACTORY_ID, CLASS_ID)
+        .addUTFField("r")
+        .addUTFField("g")
+        .addUTFField("o")
+        .addBooleanField("hk")
+        .addPortableArrayField("k", PortableCacheKey.CLASS_DEFINITION)
+    .build();
+
+    /**
+     * Wraps the supplied cache event into a portable cache event.
+     *
+     * @param cacheEvent The cache event to wrap
+     * @return The portable cache event
+     */
+    public static PortableCacheEvent wrap(CacheEvent cacheEvent) {
+        if (null == cacheEvent) {
+            return null;
+        }
+        PortableCacheEvent portableEvent = new PortableCacheEvent();
+        portableEvent.region = cacheEvent.getRegion();
+        portableEvent.groupName = cacheEvent.getGroupName();
+        portableEvent.operationId = cacheEvent.getOperation().getId();
+        portableEvent.hasKeys = null != cacheEvent.getKeys();
+        if (portableEvent.hasKeys) {
+            portableEvent.keys = PortableCacheKey.wrap(cacheEvent.getKeys());
+        }
+        return portableEvent;
+    }
+
+    /**
+     * Unwraps the cache event from the supplied portable cache event.
+     *
+     * @param portableEvent The portable cache event
+     * @return The cache event
+     */
+    public static CacheEvent unwrap(PortableCacheEvent portableEvent) {
+        return new CacheEvent(CacheOperation.cacheOperationFor(portableEvent.operationId), portableEvent.region,
+            PortableCacheKey.unwrap(portableEvent.keys), portableEvent.groupName);
+    }
+
+    private PortableCacheKey[] keys;
+    private boolean hasKeys;
+    private String operationId;
     private String groupName;
     private String region;
 
@@ -104,30 +132,10 @@ public class PortableCacheEvent extends AbstractCustomPortable {
     public void writePortable(PortableWriter writer) throws IOException {
         writer.writeUTF("r", region);
         writer.writeUTF("g", groupName);
-        writer.writeUTF("o", operation.getId());
-        if (null == key) {
-            writer.writeInt("k", 0);
-            writer.writeInt("c", -1);
-            writer.writeInt("s", -1);
-        } else if (CacheKey.class.isInstance(key)) {
-            writer.writeInt("k", 1);
-            CacheKey cacheKey = (CacheKey)key;
-            writer.writeInt("c", cacheKey.getContextId());
-            String[] keys = cacheKey.getKeys();
-            if (null == keys) {
-                writer.writeInt("s", -1);
-            } else {
-                writer.writeInt("s", keys.length);
-                ObjectDataOutput out = writer.getRawDataOutput();
-                for (int i = 0; i < keys.length; i++) {
-                    out.writeUTF(keys[i]);
-                }
-            }
-        } else {
-            writer.writeInt("k", 2);
-            writer.writeInt("c", -1);
-            writer.writeInt("s", -1);
-            writer.getRawDataOutput().writeObject(key);
+        writer.writeUTF("o", operationId);
+        writer.writeBoolean("hk", hasKeys);
+        if (hasKeys) {
+            writer.writePortableArray("k", keys);
         }
     }
 
@@ -135,44 +143,15 @@ public class PortableCacheEvent extends AbstractCustomPortable {
     public void readPortable(PortableReader reader) throws IOException {
         region = reader.readUTF("r");
         groupName = reader.readUTF("g");
-        String operationID = reader.readUTF("o");
-        if (null != operationID) {
-            operation = CacheOperation.cacheOperationFor(operationID);
-        }
-        int keyType = reader.readInt("k");
-        if (1 == keyType) {
-            int contextID = reader.readInt("c");
-            String[] keys;
-            int keySize = reader.readInt("s");
-            if (0 <= keySize) {
-                keys = new String[keySize];
-                ObjectDataInput in = reader.getRawDataInput();
-                for (int i = 0; i < keySize; i++) {
-                    keys[i] = in.readUTF();
-                }
-            } else {
-                keys = null;
+        operationId = reader.readUTF("o");
+        hasKeys = reader.readBoolean("hk");
+        if (hasKeys) {
+            Portable[] portableKeys = reader.readPortableArray("k");
+            keys = new PortableCacheKey[portableKeys.length];
+            for (int i = 0; i < portableKeys.length; i++) {
+                keys[i] = (PortableCacheKey)portableKeys[i];
             }
-            key = CKS_REFERENCE.get().newCacheKey(contextID, keys);
-        } else if (2 == keyType) {
-            key = reader.getRawDataInput().readObject();
         }
-    }
-
-    public static PortableCacheEvent wrap(CacheEvent cacheEvent) {
-        if (null == cacheEvent) {
-            return null;
-        }
-        PortableCacheEvent portableEvent = new PortableCacheEvent();
-        portableEvent.region = cacheEvent.getRegion();
-        portableEvent.groupName = cacheEvent.getGroupName();
-        portableEvent.operation = cacheEvent.getOperation();
-        portableEvent.key = cacheEvent.getKey();
-        return portableEvent;
-    }
-
-    public static CacheEvent unwrap(PortableCacheEvent portableEvent) {
-        return new CacheEvent(portableEvent.operation, portableEvent.region, portableEvent.key, portableEvent.groupName);
     }
 
     @Override
@@ -180,8 +159,8 @@ public class PortableCacheEvent extends AbstractCustomPortable {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((groupName == null) ? 0 : groupName.hashCode());
-        result = prime * result + ((key == null) ? 0 : key.hashCode());
-        result = prime * result + ((operation == null) ? 0 : operation.hashCode());
+        result = prime * result + ((keys == null) ? 0 : keys.hashCode());
+        result = prime * result + ((operationId == null) ? 0 : operationId.hashCode());
         result = prime * result + ((region == null) ? 0 : region.hashCode());
         return result;
     }
@@ -205,14 +184,14 @@ public class PortableCacheEvent extends AbstractCustomPortable {
         } else if (!groupName.equals(other.groupName)) {
             return false;
         }
-        if (key == null) {
-            if (other.key != null) {
+        if (keys == null) {
+            if (other.keys != null) {
                 return false;
             }
-        } else if (!key.equals(other.key)) {
+        } else if (!keys.equals(other.keys)) {
             return false;
         }
-        if (operation != other.operation) {
+        if (operationId != other.operationId) {
             return false;
         }
         if (region == null) {

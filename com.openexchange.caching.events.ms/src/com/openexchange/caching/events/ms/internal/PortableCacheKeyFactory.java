@@ -54,25 +54,25 @@ import com.hazelcast.nio.serialization.Portable;
 import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
 
 /**
- * {@link PortableCacheEventFactory}
+ * {@link PortableCacheKeyFactory}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class PortableCacheEventFactory extends AbstractCustomPortableFactory {
+public class PortableCacheKeyFactory extends AbstractCustomPortableFactory {
 
     @Override
     public Portable create() {
-        return new PortableCacheEvent();
+        return new PortableCacheKey();
     }
 
     @Override
     public int getClassId() {
-        return PortableCacheEvent.CLASS_ID;
+        return PortableCacheKey.CLASS_ID;
     }
 
     @Override
     public ClassDefinition getClassDefinition() {
-        return PortableCacheEvent.CLASS_DEFINITION;
+        return PortableCacheKey.CLASS_DEFINITION;
     }
 
 }

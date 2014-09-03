@@ -1,3 +1,7 @@
+* 2014-09-02 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 34248: Batch-invalidate all contexts in a schema during blocking update tasks
+
 * 2014-09-02 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 34249: Delete empty folders from file system
