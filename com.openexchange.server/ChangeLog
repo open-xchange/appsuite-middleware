@@ -1,3 +1,7 @@
+* 2014-09-03 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 33935: Print database name if id is unset
+
 * 2014-09-02 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 34248: Batch-invalidate all contexts in a schema during blocking update tasks
