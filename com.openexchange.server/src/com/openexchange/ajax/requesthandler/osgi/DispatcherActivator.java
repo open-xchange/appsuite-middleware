@@ -268,6 +268,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
                     unregisterServlet(prefix + module);
                     servlets.remove(module);
                 }
+                dispatcher.remove(module, service);
             }
 
         });

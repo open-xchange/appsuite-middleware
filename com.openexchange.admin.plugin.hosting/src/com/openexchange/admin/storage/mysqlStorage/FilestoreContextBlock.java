@@ -61,13 +61,12 @@ import java.util.Map;
  */
 class FilestoreContextBlock {
 
-    public final int representativeContextID, writeDBPoolID, filestoreID;
+    public final int writeDBPoolID, filestoreID;
 
     public final Map<Integer, FilestoreInfo> filestores = new HashMap<Integer, FilestoreInfo>();
 
-    public FilestoreContextBlock(final int representativeContextID, final int writeDBPoolID, final int filestoreID) {
+    public FilestoreContextBlock(int writeDBPoolID, int filestoreID) {
         super();
-        this.representativeContextID = representativeContextID;
         this.writeDBPoolID = writeDBPoolID;
         this.filestoreID = filestoreID;
     }

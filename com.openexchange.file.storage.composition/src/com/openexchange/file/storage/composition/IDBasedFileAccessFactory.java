@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.composition;
 
+import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
 
 
@@ -57,6 +58,15 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+@SingletonService
 public interface IDBasedFileAccessFactory {
-    public IDBasedFileAccess createAccess(Session session);
+
+    /**
+     * Creates the file access instance for given session.
+     *
+     * @param session The session
+     * @return The appropriate file access instance
+     */
+    IDBasedFileAccess createAccess(Session session);
+
 }

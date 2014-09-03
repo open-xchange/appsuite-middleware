@@ -49,8 +49,12 @@
 
 package com.openexchange.imap.storecache;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
+import com.openexchange.session.Session;
+import com.openexchange.version.Version;
 import com.sun.mail.imap.IMAPStore;
 
 
@@ -64,12 +68,14 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractIMAPStoreContainer.class);
 
     protected final String name;
+    protected final boolean propagateClientIp;
 
     /**
      * Initializes a new {@link AbstractIMAPStoreContainer}.
      */
-    protected AbstractIMAPStoreContainer() {
+    protected AbstractIMAPStoreContainer(boolean propagateClientIp) {
         super();
+        this.propagateClientIp = propagateClientIp;
         name = PROTOCOL_NAME;
     }
 
@@ -81,14 +87,26 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
      * @param login The login
      * @param pw The password
      * @param imapSession The IMAP session
+     * @param session The Groupware session
      * @return The newly created & connected {@link IMAPStore} instance
      * @throws MessagingException If operation fails
      */
-    protected IMAPStore newStore(final String server, final int port, final String login, final String pw, final javax.mail.Session imapSession) throws MessagingException {
+    protected IMAPStore newStore(String server, int port, String login, String pw, javax.mail.Session imapSession, Session session) throws MessagingException {
         /*
          * Get new store...
          */
         IMAPStore imapStore = (IMAPStore) imapSession.getStore(name);
+        if (propagateClientIp) {
+            imapStore.setPropagateClientIpAddress(session.getLocalIp());
+        }
+        {
+            Map<String, String> clientParams = new LinkedHashMap<String, String>(6);
+            clientParams.put("x-originating-ip", session.getLocalIp());
+            clientParams.put("x-session-id", session.getSessionID() + "-" + imapStore.hashCode());
+            clientParams.put("name", "Open-Xchange");
+            clientParams.put("xversion", Version.getInstance().getVersionString());
+            imapStore.setClientParameters(clientParams);
+        }
         /*
          * ... and connect it
          */

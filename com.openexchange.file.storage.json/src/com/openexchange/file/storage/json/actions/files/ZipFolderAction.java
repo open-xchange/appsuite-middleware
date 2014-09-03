@@ -221,7 +221,7 @@ public class ZipFolderAction extends AbstractFileAction {
                     total += fileSize;
                     if (total > threshold) {
                         String msg = "ZIP archive exceeds max. allowed size of " + UploadUtility.getSize(threshold, 2, false, true);
-                        throw AjaxExceptionCodes.HTTP_ERROR.create(HttpServletResponse.SC_FORBIDDEN, msg);
+                        throw AjaxExceptionCodes.HTTP_ERROR_YELL_CALLBACK.create(msg);
                     }
                 }
             }

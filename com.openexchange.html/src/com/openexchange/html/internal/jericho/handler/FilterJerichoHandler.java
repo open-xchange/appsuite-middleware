@@ -629,8 +629,6 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 String height = attrMap.get("height");
                 if (null != height) {
                     prependToStyle("width: " + width + "px; height: " + height + "px;", attrMap);
-                    attrMap.remove("width");
-                    attrMap.remove("height");
                 }
             }
         } else if (HTMLElementName.TABLE == tagName) {
@@ -647,19 +645,17 @@ public final class FilterJerichoHandler implements JerichoHandler {
             } else {
                 if ("0".equals(attrMap.get("cellspacing"))) {
                     prependToStyle("border-collapse: collapse;", attrMap);
-                    attrMap.remove("cellspacing");
                 }
 
                 // Table has cell padding -> Remember it for all child elements
                 tablePaddings.offer(new CellPadding(cellpadding));
-                attrMap.remove("cellpadding");
             }
         } else if (HTMLElementName.TD == tagName || HTMLElementName.TH == tagName) {
             CellPadding cellPadding = tablePaddings.peek();
             if (CELLPADDING_EMPTY != cellPadding) {
                 String style = attrMap.get("style");
                 if (null == style || style.indexOf("padding") < 0) {
-                    prependToStyle("padding: " + cellPadding.cellPadding + ';', attrMap);
+                    prependToStyle("padding: " + cellPadding.cellPadding + "px;", attrMap);
                 }
             }
         }

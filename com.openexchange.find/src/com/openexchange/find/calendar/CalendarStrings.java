@@ -59,11 +59,6 @@ import com.openexchange.i18n.LocalizableStrings;
 public class CalendarStrings implements LocalizableStrings {
 
     // Context: Searching in appointments.
-    // Displayed as: [Search for] 'user input' in appointments.
-    // The 'user input' part is always prepended, please heed this in translations.
-    public static final String GLOBAL = "in appointments";
-
-    // Context: Searching in appointments.
     // Displayed as: [Search for] 'user input' in subject.
     // The 'user input' part is always prepended, please heed this in translations.
     public static final String SUBJECT = "in subject";

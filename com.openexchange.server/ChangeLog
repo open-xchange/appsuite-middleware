@@ -1,3 +1,20 @@
+* 2014-09-02 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 34249: Delete empty folders from file system
+
+* 2014-09-02 - marcus.klein@open-xchange.com
+
+ - Fix for bug 31612: Using a new connection to config database to determine if a just created schema needs to be deleted again on context
+                      creation failure.
+ - Fix for bug 33401: Do not use representative context identifier for listing filestores with usage anymore because context could have been
+                      deleted in the meantime. Try all context identifier of the given filestore context block.
+
+* 2014-09-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 33956: Perform safe flush on socket output stream to not prevent reading returned SMTP return code if SMPT server closes
+                      associated connection on its own immediately
+ - Fix for bug 33967: Avoid 102 Processing interim responses for requests executed by USM component
+
 * 2014-09-01 - marcus.klein@open-xchange.com
 
  - Fix for bug 34236: Marked xingsubscribe.properties in open-xchange-subscribe package as a configuration file.

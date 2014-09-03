@@ -59,11 +59,6 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class DriveStrings implements LocalizableStrings {
 
-    // Context: Searching in drive.
-    // Displayed as: [Search for] 'user input' in drive.
-    // The 'user input' part is always prepended, please heed this in translations.
-    public static final String FACET_GLOBAL = "in drive";
-
     // Search in file name.
     public static final String FACET_FILE_NAME = "File name";
 

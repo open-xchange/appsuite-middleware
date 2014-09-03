@@ -1477,7 +1477,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 final MultiKey key = new MultiKey(I(temp.writeDBPoolID), temp.dbSchema, I(temp.filestoreID));
                 FilestoreContextBlock block = blocks.get(key);
                 if (null == block) {
-                    block = new FilestoreContextBlock(temp.contextID, temp.writeDBPoolID, temp.filestoreID);
+                    block = new FilestoreContextBlock(temp.writeDBPoolID, temp.filestoreID);
                     blocks.put(key, block);
                 }
                 block.add(temp);
@@ -1507,11 +1507,21 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         if (block.size() == 0) {
             return;
         }
-        final Connection con;
-        try {
-            con = cache.getConnectionForContext(block.representativeContextID);
-        } catch (final PoolException e) {
-            throw new StorageException(e);
+        Connection con = null;
+        int representativeContextID = Integer.MIN_VALUE;
+        for (Integer cid : block.filestores.keySet()) {
+            // Try to get a database connection with all context identifier from the FilestoreContextBlock.
+            try {
+                con = cache.getConnectionForContext(i(cid));
+                representativeContextID = i(cid);
+                break;
+            } catch (final PoolException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+        if (null == con) {
+            // If none is available anymore, we can not add any usage data and we should just return.
+            return;
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -1528,7 +1538,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         } finally {
             closeSQLStuff(result, stmt);
             try {
-                cache.pushConnectionForContext(block.representativeContextID, con);
+                cache.pushConnectionForContext(representativeContextID, con);
             } catch (final PoolException e) {
                 throw new StorageException(e);
             }

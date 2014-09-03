@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,25 +47,19 @@
  *
  */
 
-package com.openexchange.oauth.msn;
+package com.openexchange.osgi.annotation;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 
 /**
- * {@link UnitTests}
+ * {@link SingletonService} - Annotates a service to be a singletone one.
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.6.1
  */
-public final class UnitTests {
-
-    public UnitTests() {
-        super();
-    }
-
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        //tests.addTestSuite(MSNConnectionTest.class); Removed. Doesn't test anything, but breaks due to service lookups.
-        return tests;
-    }
+@Retention(RetentionPolicy.CLASS)
+public @interface SingletonService {
+    // marker annotation with no members
 }

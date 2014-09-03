@@ -49,9 +49,13 @@
 
 package com.openexchange.tools.file.internal;
 
+import java.io.File;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.SortedSet;
 import com.openexchange.exception.OXException;
@@ -111,6 +115,49 @@ public class HashingFileStorageTest extends AbstractHashingFileStorageTest {
 
         String[] list = tmpFile.list();
         assertTrue(list == null || list.length == 0);
+    }
+
+    public void testBug34249() throws Exception {
+        List<String> files = new ArrayList<String>(100);
+
+        //fill file storage with files
+        for (int i = 1; i <= 100; i++) {
+            String content = "Content of file " + i;
+            files.add(fs.saveNewFile(IS(content)));
+        }
+
+        //Remove all from storage
+        for (String identifier : files) {
+            fs.deleteFile(identifier);
+        }
+
+        String[] folders = fs.storage.list();
+        assertTrue("Empty folders were not deleted", folders.length == 0);
+    }
+
+    public void testBug34249WithNonemptyFolders() throws Exception {
+        List<String> files = new ArrayList<String>(100);
+
+        //fill file storage with files
+        for (int i = 1; i <= 100; i++) {
+            String content = "Content of file " + i;
+            files.add(fs.saveNewFile(IS(content)));
+        }
+
+        //Create file in random folder
+        int rnd = new Random(System.currentTimeMillis()).nextInt(99);
+        String fileId = files.get(rnd);
+        File parent = new File(fs.storage.getAbsolutePath() + File.separatorChar + fileId);
+        boolean tmpFile = new File(parent.getParent() + System.currentTimeMillis()).createNewFile();
+        assertTrue("Could not create file", tmpFile);
+
+        //Remove all from storage
+        for (String identifier : files) {
+            fs.deleteFile(identifier);
+        }
+
+        String[] folders = fs.storage.list();
+        assertTrue("Nonempty folders were deleted", folders.length == 1);
     }
 
     // Error Cases

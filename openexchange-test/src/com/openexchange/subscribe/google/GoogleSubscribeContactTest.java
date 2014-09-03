@@ -101,6 +101,8 @@ public class GoogleSubscribeContactTest extends AbstractGoogleSubscribeTest {
                     assertNotNullAndEquals("surname", "Van Dyk", c.getSurName());
                     assertNotNullAndEquals("title", "Herr", c.getTitle());
                     assertNotNullAndEquals("suffix", "Ende", c.getSuffix());
+                    assertNotNullAndEquals("yomi firstname", "PhoneticPaul", c.getYomiFirstName());
+                    assertNotNullAndEquals("yomi lastname", "PhoneticM\u00fcller", c.getYomiLastName());
 
                     // email
                     assertNotNullAndEquals("email1", "privat@example.com", c.getEmail1());
@@ -110,6 +112,9 @@ public class GoogleSubscribeContactTest extends AbstractGoogleSubscribeTest {
                     // organisation
                     assertNotNullAndEquals("company", "OX", c.getCompany());
                     assertNotNullAndEquals("job title", "DJ", c.getPosition());
+
+                    assertNotNullAndEquals("note", "Do not edit. Account for testing.", c.getNote());
+                    assertNotNullAndEquals("nickname", "MeisterPauli", c.getNickname());
 
                     assertNotNullAndEquals("telephone business 1", "+4913371337133709", c.getTelephoneBusiness1());
                     assertNotNullAndEquals("telephone home 1", "+4913371337133702", c.getTelephoneHome1());
@@ -161,6 +166,8 @@ public class GoogleSubscribeContactTest extends AbstractGoogleSubscribeTest {
                     assertFieldIsNull("title", c.getTitle());
                     assertFieldIsNull("middle name", c.getMiddleName());
                     assertFieldIsNull("suffix", c.getSuffix());
+                    assertFieldIsNull("yomi firstname", c.getYomiFirstName());
+                    assertFieldIsNull("yomi lastname", c.getYomiLastName());
 
                     // email
                     assertNotNullAndEquals("email1", "mariameier@example.com", c.getEmail1());
@@ -168,7 +175,7 @@ public class GoogleSubscribeContactTest extends AbstractGoogleSubscribeTest {
                     assertFieldIsNull("email3", c.getEmail3());
 
                     // organisation
-                    assertFieldIsNull("company", c.getCompany());
+                    assertNotNullAndEquals("note", "Test account. Do not change.", c.getNote());
                     assertFieldIsNull("job title", c.getPosition());
 
                     assertFieldIsNull("telephone business 1", c.getTelephoneBusiness1());
@@ -205,6 +212,8 @@ public class GoogleSubscribeContactTest extends AbstractGoogleSubscribeTest {
                     assertFieldIsNull("title", c.getTitle());
                     assertFieldIsNull("middle name", c.getMiddleName());
                     assertNotNullAndEquals("suffix", "Mail", c.getSuffix());
+                    assertFieldIsNull("yomi firstname", c.getYomiFirstName());
+                    assertFieldIsNull("yomi lastname", c.getYomiLastName());
 
                     // email
                     assertNotNullAndEquals("email1", "noprimarybuthomeaddress@example.com", c.getEmail1());
@@ -214,6 +223,9 @@ public class GoogleSubscribeContactTest extends AbstractGoogleSubscribeTest {
                     // organisation
                     assertFieldIsNull("company", c.getCompany());
                     assertFieldIsNull("job title", c.getPosition());
+
+                    assertFieldIsNull("note", c.getNote());
+                    assertFieldIsNull("nickname", c.getNickname());
 
                     assertFieldIsNull("telephone business 1", c.getTelephoneBusiness1());
                     assertFieldIsNull("cellular telephone 1", c.getTelephoneHome1());

@@ -52,12 +52,14 @@ package com.openexchange.caching;
 import java.io.InputStream;
 import java.util.Properties;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link CacheService} - The cache service.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SingletonService
 public interface CacheService extends CacheKeyService {
 
     /**
