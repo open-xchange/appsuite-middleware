@@ -50,7 +50,7 @@
 package com.openexchange.find.basic.drive;
 
 import static com.openexchange.find.basic.drive.Constants.QUERY_FIELDS;
-import static com.openexchange.find.common.CommonConstants.FIELD_TIME;
+import static com.openexchange.find.common.CommonConstants.FIELD_DATE;
 import static com.openexchange.java.Strings.isEmpty;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -115,15 +115,15 @@ public final class Utils {
 
     public static SearchTerm<?> prepareSearchTerm(final SearchRequest searchRequest) throws OXException {
         final List<SearchTerm<?>> facetTerms = new LinkedList<SearchTerm<?>>();
-        ActiveFacet customTimeFacet = null;
+        ActiveFacet customDateFacet = null;
         for (DriveFacetType type : DriveFacetType.values()) {
             final List<ActiveFacet> facets = searchRequest.getActiveFacets(type);
             if (facets != null && !facets.isEmpty()) {
                 final Pair<OP, OP> ops = operationsFor(type);
                 final List<Filter> filters = new LinkedList<Filter>();
                 for (final ActiveFacet facet : facets) {
-                    if (facet.getType() == CommonFacetType.TIME && facet.getFilter() == Filter.NO_FILTER) {
-                        customTimeFacet = facet;
+                    if (facet.getType() == CommonFacetType.DATE && facet.getFilter() == Filter.NO_FILTER) {
+                        customDateFacet = facet;
                         continue;
                     }
 
@@ -137,11 +137,11 @@ public final class Utils {
             }
         }
 
-        if (customTimeFacet != null) {
-            String timeFramePattern = customTimeFacet.getValueId();
+        if (customDateFacet != null) {
+            String timeFramePattern = customDateFacet.getValueId();
             TimeFrame timeFrame = TimeFrame.valueOf(timeFramePattern);
             if (timeFrame == null) {
-                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(timeFramePattern, FIELD_TIME);
+                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(timeFramePattern, FIELD_DATE);
             }
 
             Comparison fromComparison;
@@ -157,11 +157,11 @@ public final class Utils {
             long from = timeFrame.getFrom();
             long to = timeFrame.getTo();
             if (to < 0L) {
-                facetTerms.add(buildTimeTerm(fromComparison, from));
+                facetTerms.add(buildDateTerm(fromComparison, from));
             }
 
-            SearchTerm<?> fromTerm = buildTimeTerm(fromComparison, from);
-            SearchTerm<?> toTerm = buildTimeTerm(toComparison, to);
+            SearchTerm<?> fromTerm = buildDateTerm(fromComparison, from);
+            SearchTerm<?> toTerm = buildDateTerm(toComparison, to);
             facetTerms.add(new AndTerm(Arrays.<SearchTerm<?>> asList(fromTerm, toTerm)));
         }
 
@@ -284,9 +284,9 @@ public final class Utils {
 
             };
             return new FileSizeTerm(pattern);
-        } else if (Constants.FIELD_TIME.equals(field)) {
-            final Pair<Comparison, Long> pair = parseTimeQuery(query);
-            return buildTimeTerm(pair.getFirst(), pair.getSecond().longValue());
+        } else if (Constants.FIELD_DATE.equals(field)) {
+            final Pair<Comparison, Long> pair = parseDateQuery(query);
+            return buildDateTerm(pair.getFirst(), pair.getSecond().longValue());
         }
         throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(field);
     }
@@ -708,9 +708,9 @@ public final class Utils {
         throw FindExceptionCode.PARSING_ERROR.create(query);
     }
 
-    private static Pair<Comparison, Long> parseTimeQuery(final String query) throws OXException {
+    private static Pair<Comparison, Long> parseDateQuery(final String query) throws OXException {
         if (Strings.isEmpty(query)) {
-            throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, Constants.FIELD_TIME);
+            throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, Constants.FIELD_DATE);
         }
 
         Comparison comparison;
@@ -735,7 +735,7 @@ public final class Utils {
         return new Pair<Comparison, Long>(comparison, Long.valueOf(timestamp));
     }
 
-    private static SearchTerm<?> buildTimeTerm(final Comparison comparison, final long timestamp) {
+    private static SearchTerm<?> buildDateTerm(final Comparison comparison, final long timestamp) {
         ComparablePattern<Date> pattern = null;
         switch (comparison) {
         case EQUALS:

@@ -163,7 +163,7 @@ public class SearchRequest extends AbstractFindRequest {
             exclude.add(CommonFacetType.GLOBAL);
             exclude.add(CommonFacetType.FOLDER);
             exclude.add(CommonFacetType.FOLDER_TYPE);
-            exclude.add(CommonFacetType.TIME);
+            exclude.add(CommonFacetType.DATE);
             for (Entry<FacetType, List<ActiveFacet>> entry : facetMap.entrySet()) {
                 FacetType type = entry.getKey();
                 if (!exclude.contains(type)) {

@@ -256,19 +256,19 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
 
         // Add static time facet
         {
-            final String fieldTime = Constants.FIELD_TIME;
-            facets.add(Facets.newExclusiveBuilder(CommonFacetType.TIME)
+            final String fieldDate = Constants.FIELD_DATE;
+            facets.add(Facets.newExclusiveBuilder(CommonFacetType.DATE)
                 .addValue(FacetValue.newBuilder(CommonConstants.QUERY_LAST_WEEK)
                     .withLocalizableDisplayItem(CommonStrings.LAST_WEEK)
-                    .withFilter(Filter.of(fieldTime, CommonConstants.QUERY_LAST_WEEK))
+                    .withFilter(Filter.of(fieldDate, CommonConstants.QUERY_LAST_WEEK))
                     .build())
                 .addValue(FacetValue.newBuilder(CommonConstants.QUERY_LAST_MONTH)
                     .withLocalizableDisplayItem(CommonStrings.LAST_MONTH)
-                    .withFilter(Filter.of(fieldTime, CommonConstants.QUERY_LAST_MONTH))
+                    .withFilter(Filter.of(fieldDate, CommonConstants.QUERY_LAST_MONTH))
                     .build())
                 .addValue(FacetValue.newBuilder(CommonConstants.QUERY_LAST_YEAR)
                     .withLocalizableDisplayItem(CommonStrings.LAST_YEAR)
-                    .withFilter(Filter.of(fieldTime, CommonConstants.QUERY_LAST_YEAR))
+                    .withFilter(Filter.of(fieldDate, CommonConstants.QUERY_LAST_YEAR))
                     .build())
                 .build());
         }
