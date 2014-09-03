@@ -485,6 +485,11 @@ public final class MailFilterServiceImpl implements MailFilterService {
                 final List<Rule> clientrules = clientrulesandrequire.getRules();
                 final RuleAndPosition rightRule = getRightRuleForUniqueId(clientrules, uid);
 
+                // no rule found
+                if(rightRule == null) {
+                    return null;
+                }
+
                 return rightRule.rule;
             } catch (UnsupportedEncodingException e) {
                 throw MailFilterExceptionCode.UNSUPPORTED_ENCODING.create(e);
