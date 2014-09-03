@@ -2558,7 +2558,9 @@ msgstr ""
 msgid "My Status"
 msgstr ""
 
+#. Search for items by their creation date
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:83
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:76
 msgid "Date"
 msgstr ""
 
@@ -2607,11 +2609,6 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:73
 msgid "Folder"
-msgstr ""
-
-#. Search items in a given time frame
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:76
-msgid "Time"
 msgstr ""
 
 #. ------------------------- i18n strings for folder types ------------------------------------- //
