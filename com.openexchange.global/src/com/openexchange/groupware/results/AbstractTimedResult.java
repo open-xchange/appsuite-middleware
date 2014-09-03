@@ -150,6 +150,7 @@ public abstract class AbstractTimedResult<T> implements TimedResult<T> {
                     moreValues.add(next());
                 } catch (final OXException e) {
                     this.oxexception = e;
+                    break;
                 }
             }
             final OXException[] warnings = results.getWarnings();
