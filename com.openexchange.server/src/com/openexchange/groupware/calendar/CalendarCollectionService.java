@@ -66,6 +66,7 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIteratorException;
 
@@ -74,6 +75,7 @@ import com.openexchange.tools.iterator.SearchIteratorException;
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  *
  */
+@SingletonService
 public interface CalendarCollectionService {
 
     // Stuff from CalendarCommonCollection

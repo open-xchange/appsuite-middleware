@@ -50,6 +50,7 @@
 package com.openexchange.find;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -59,6 +60,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  * @since 7.6.0
  */
+@SingletonService
 public interface SearchService {
 
     /**

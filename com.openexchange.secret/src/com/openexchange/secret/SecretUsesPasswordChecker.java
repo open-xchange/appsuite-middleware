@@ -49,12 +49,15 @@
 
 package com.openexchange.secret;
 
+import com.openexchange.osgi.annotation.SingletonService;
+
 
 /**
  * {@link SecretUsesPasswordChecker} - Checks if secret service is configured to use password.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SingletonService
 public interface SecretUsesPasswordChecker {
 
     /**

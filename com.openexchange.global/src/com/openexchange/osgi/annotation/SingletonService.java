@@ -59,7 +59,7 @@ import java.lang.annotation.RetentionPolicy;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.1
  */
-@Retention(RetentionPolicy.CLASS)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface SingletonService {
     // marker annotation with no members
 }

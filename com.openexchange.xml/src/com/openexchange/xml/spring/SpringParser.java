@@ -50,10 +50,12 @@
 package com.openexchange.xml.spring;
 
 import org.springframework.beans.factory.BeanFactory;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
+@SingletonService
 public interface SpringParser {
     public BeanFactory parseFile(String path, ClassLoader classLoader);
 }

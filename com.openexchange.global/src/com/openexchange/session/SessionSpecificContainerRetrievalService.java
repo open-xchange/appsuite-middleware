@@ -49,11 +49,14 @@
 
 package com.openexchange.session;
 
+import com.openexchange.osgi.annotation.SingletonService;
+
 /**
  * A {@link SessionSpecificContainerRetrievalService} manages containers bound to a session and its lifecycle.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+@SingletonService
 public interface SessionSpecificContainerRetrievalService {
 
     public static final Lifecycle DEFAULT_LIFECYCLE = Lifecycle.HIBERNATE;

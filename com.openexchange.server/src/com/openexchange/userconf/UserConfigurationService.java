@@ -54,12 +54,14 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link UserConfigurationService} - The user configuration service.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SingletonService
 public interface UserConfigurationService {
 
     /**

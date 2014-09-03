@@ -51,14 +51,24 @@ package com.openexchange.publish;
 
 import java.util.Collection;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 
 
 /**
  * {@link PublicationDataLoaderService}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
+@SingletonService
 public interface PublicationDataLoaderService {
-    public Collection<? extends Object> load(Publication publication) throws OXException;
+
+    /**
+     * Loads the data associated with specified publication
+     *
+     * @param publication The publication
+     * @return The data
+     * @throws OXException If load operation fails
+     */
+    Collection<? extends Object> load(Publication publication) throws OXException;
 }

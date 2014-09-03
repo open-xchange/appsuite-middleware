@@ -52,6 +52,7 @@ package com.openexchange.contact.storage.registry;
 import java.util.List;
 import com.openexchange.contact.storage.ContactStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
 
 
@@ -60,6 +61,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
+@SingletonService
 public interface ContactStorageRegistry {
 
     /**

@@ -52,12 +52,14 @@ package com.openexchange.jslob.registry;
 import java.util.Collection;
 import com.openexchange.exception.OXException;
 import com.openexchange.jslob.JSlobService;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link JSlobServiceRegistry} - A registry for JSlob services.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SingletonService
 public interface JSlobServiceRegistry {
 
     /**

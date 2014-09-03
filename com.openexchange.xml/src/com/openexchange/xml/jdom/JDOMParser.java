@@ -52,10 +52,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import org.jdom2.Document;
 import org.jdom2.JDOMException;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
+@SingletonService
 public interface JDOMParser {
 
     /**

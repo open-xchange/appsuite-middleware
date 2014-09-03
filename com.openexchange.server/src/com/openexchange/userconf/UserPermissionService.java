@@ -53,6 +53,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.osgi.annotation.SingletonService;
 
 
 /**
@@ -60,6 +61,7 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBits;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+@SingletonService
 public interface UserPermissionService {
     /**
      * Determines the instance of <code>UserPermissionBits</code> that corresponds to given user ID.

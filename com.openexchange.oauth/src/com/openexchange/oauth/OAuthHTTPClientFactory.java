@@ -51,16 +51,18 @@ package com.openexchange.oauth;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.http.client.HTTPClient;
+import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.tools.session.ServerSession;
 
 /**
  * Creates an appropriate HTTP client for a given OAuth account.
  */
+@SingletonService
 public interface OAuthHTTPClientFactory {
 
     /**
      * Creates an appropriate HTTP client for given OAuth account.
-     * 
+     *
      * @param account The OAuth account
      * @return The HTTP client
      * @throws OXException If operation fails for any reason

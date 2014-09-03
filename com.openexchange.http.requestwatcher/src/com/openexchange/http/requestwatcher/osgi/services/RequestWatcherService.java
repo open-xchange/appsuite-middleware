@@ -52,6 +52,7 @@ package com.openexchange.http.requestwatcher.osgi.services;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link RequestWatcherService} to keep track of incoming HttpServletRequests. Requests are periodically inspected for the duration of
@@ -59,6 +60,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
+@SingletonService
 public interface RequestWatcherService {
 
     /**

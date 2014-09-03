@@ -52,14 +52,15 @@ package com.openexchange.data.conversion.ical;
 import java.io.InputStream;
 import java.util.List;
 import java.util.TimeZone;
-
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
+@SingletonService
 public interface ICalParser {
 
     List<CalendarDataObject> parseAppointments(String icalText, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;

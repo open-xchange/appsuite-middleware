@@ -53,6 +53,7 @@ import java.util.List;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.osgi.annotation.SingletonService;
 
 
 /**
@@ -60,6 +61,7 @@ import com.openexchange.groupware.contexts.Context;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+@SingletonService
 public interface ITipEmitter {
     public String writeMessage(ITipMessage message,  Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
 }

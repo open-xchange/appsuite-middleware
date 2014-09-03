@@ -51,6 +51,7 @@ package com.openexchange.subscribe;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -58,8 +59,8 @@ import com.openexchange.tools.session.ServerSession;
  * {@link SubscriptionExecutionService}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
+@SingletonService
 public interface SubscriptionExecutionService {
     public int executeSubscription(String sourceId, ServerSession session, int subscriptionId) throws OXException;
     public int executeSubscription(ServerSession session, int subscriptionId) throws OXException;

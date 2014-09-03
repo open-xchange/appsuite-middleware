@@ -51,6 +51,7 @@ package com.openexchange.folder;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.server.impl.EffectivePermission;
 
 /**
@@ -58,6 +59,7 @@ import com.openexchange.server.impl.EffectivePermission;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SingletonService
 public interface FolderService {
 
     /**

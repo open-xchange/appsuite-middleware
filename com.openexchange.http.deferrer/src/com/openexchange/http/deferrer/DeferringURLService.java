@@ -49,12 +49,15 @@
 
 package com.openexchange.http.deferrer;
 
+import com.openexchange.osgi.annotation.SingletonService;
+
 /**
  * {@link DeferringURLService} - The service to create a deferring URL.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SingletonService
 public interface DeferringURLService {
 
     /**
