@@ -22,6 +22,9 @@ case "$1" in
           /usr/sbin/adduser --system --home /opt/open-xchange --disabled-password --ingroup open-xchange open-xchange
       rm -f /tmp/ox_chown_tmp_$$
 
+      if [ -e /opt/open-xchange/lib/oxfunctions.sh ]; then
+	 dpkg-divert --divert /opt/open-xchange/lib/oxfunctions.sh.oldcore --rename /opt/open-xchange/lib/oxfunctions.sh
+      fi
     ;;
     upgrade)
     ;;
