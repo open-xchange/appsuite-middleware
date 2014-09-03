@@ -63,9 +63,11 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.file.storage.search.TitleTerm;
+import com.openexchange.find.AbstractFindRequest;
 import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.AutocompleteResult;
 import com.openexchange.find.Document;
@@ -140,6 +142,19 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
             allAccounts.addAll(service.getAccountManager().getAccounts(session));
         }
         return 1 == allAccounts.size() && "com.openexchange.infostore".equals(allAccounts.get(0).getFileStorageService().getId());
+    }
+
+    @Override
+    public boolean isValidFor(ServerSession session, AbstractFindRequest findRequest) throws OXException {
+        if (false == session.getUserConfiguration().hasInfostore()) {
+            return false;
+        }
+        String folderId = findRequest.getFolderId();
+        if (null == folderId) {
+            return isValidFor(session);
+        } else {
+            return "com.openexchange.infostore".equals(new FolderID(folderId).getService());
+        }
     }
 
     @Override
@@ -241,19 +256,19 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
 
         // Add static time facet
         {
-            final String fieldTime = Constants.FIELD_TIME;
-            facets.add(Facets.newExclusiveBuilder(CommonFacetType.TIME)
+            final String fieldDate = Constants.FIELD_DATE;
+            facets.add(Facets.newExclusiveBuilder(CommonFacetType.DATE)
                 .addValue(FacetValue.newBuilder(CommonConstants.QUERY_LAST_WEEK)
                     .withLocalizableDisplayItem(CommonStrings.LAST_WEEK)
-                    .withFilter(Filter.of(fieldTime, CommonConstants.QUERY_LAST_WEEK))
+                    .withFilter(Filter.of(fieldDate, CommonConstants.QUERY_LAST_WEEK))
                     .build())
                 .addValue(FacetValue.newBuilder(CommonConstants.QUERY_LAST_MONTH)
                     .withLocalizableDisplayItem(CommonStrings.LAST_MONTH)
-                    .withFilter(Filter.of(fieldTime, CommonConstants.QUERY_LAST_MONTH))
+                    .withFilter(Filter.of(fieldDate, CommonConstants.QUERY_LAST_MONTH))
                     .build())
                 .addValue(FacetValue.newBuilder(CommonConstants.QUERY_LAST_YEAR)
                     .withLocalizableDisplayItem(CommonStrings.LAST_YEAR)
-                    .withFilter(Filter.of(fieldTime, CommonConstants.QUERY_LAST_YEAR))
+                    .withFilter(Filter.of(fieldDate, CommonConstants.QUERY_LAST_YEAR))
                     .build())
                 .build());
         }

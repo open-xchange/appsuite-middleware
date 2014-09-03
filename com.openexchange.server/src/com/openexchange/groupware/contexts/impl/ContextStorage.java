@@ -155,6 +155,16 @@ public abstract class ContextStorage {
     }
 
     /**
+     * Invalidates the context objects in cache(s).
+     *
+     * @param contextIDs unique identifiers of the contexts to invalidate
+     * @throws OXException if invalidating the context fails
+     */
+    public void invalidateContexts(final int[] contextIDs) throws OXException {
+        LOG.trace("invalidateContext not implemented in {}", this.getClass().getCanonicalName());
+    }
+
+    /**
      * Invalidates a login information in the cache.
      *
      * @param loginContextInfo login information to invalidate.

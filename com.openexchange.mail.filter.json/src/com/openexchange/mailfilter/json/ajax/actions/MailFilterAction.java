@@ -68,6 +68,7 @@ import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.mailfilter.Credentials;
 import com.openexchange.mailfilter.MailFilterService;
+import com.openexchange.mailfilter.MailFilterService.FilterType;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 import com.openexchange.mailfilter.json.ajax.Parameter;
 import com.openexchange.mailfilter.json.ajax.actions.AbstractRequest.Parameters;
@@ -78,14 +79,11 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
- *
  * @author <a href="mailto:dennis.sieben@open-xchange.org">Dennis Sieben</a>
  */
 public class MailFilterAction extends AbstractAction<Rule, MailFilterRequest> {
 
     private static final ConcurrentMap<Key, MailFilterAction> INSTANCES = new ConcurrentHashMap<Key, MailFilterAction>();
-
-    
 
     /**
      * Gets the {@link MailFilterAction} instance for specified session.
@@ -165,7 +163,17 @@ public class MailFilterAction extends AbstractAction<Rule, MailFilterRequest> {
         final Credentials credentials = request.getCredentials();
         final MailFilterService mailFilterService = Services.getService(MailFilterService.class);
         final String flag = parameters.getParameter(Parameter.FLAG);
-        final List<Rule> rules = mailFilterService.listRules(credentials, flag);
+        FilterType filterType;
+        if (flag != null) {
+            try {
+                filterType = FilterType.valueOf(flag);
+            } catch (IllegalArgumentException e) {
+                throw MailFilterExceptionCode.INVALID_FILTER_TYPE_FLAG.create(flag);
+            }
+        } else {
+            filterType = FilterType.All;
+        }
+        final List<Rule> rules = mailFilterService.listRules(credentials, filterType);
         try {
             return CONVERTER.write(rules.toArray(new Rule[rules.size()]));
         } catch (JSONException e) {
@@ -231,7 +239,7 @@ public class MailFilterAction extends AbstractAction<Rule, MailFilterRequest> {
     protected void actionReorder(final MailFilterRequest request) throws OXException {
         final Credentials credentials = request.getCredentials();
         final MailFilterService mailFilterService = Services.getService(MailFilterService.class);
-        
+
         try {
             final String body = request.getBody();
             final JSONArray json = new JSONArray(body);

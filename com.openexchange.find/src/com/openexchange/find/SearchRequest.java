@@ -55,9 +55,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import com.openexchange.exception.OXException;
 import com.openexchange.find.common.CommonFacetType;
-import com.openexchange.find.common.FolderType;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.Filter;
@@ -165,7 +163,7 @@ public class SearchRequest extends AbstractFindRequest {
             exclude.add(CommonFacetType.GLOBAL);
             exclude.add(CommonFacetType.FOLDER);
             exclude.add(CommonFacetType.FOLDER_TYPE);
-            exclude.add(CommonFacetType.TIME);
+            exclude.add(CommonFacetType.DATE);
             for (Entry<FacetType, List<ActiveFacet>> entry : facetMap.entrySet()) {
                 FacetType type = entry.getKey();
                 if (!exclude.contains(type)) {
@@ -180,38 +178,6 @@ public class SearchRequest extends AbstractFindRequest {
         }
 
         return filters;
-    }
-
-    /**
-     * Gets the folder type set via a present facet of type {@link CommonFacetType#FOLDER_TYPE}.
-     * @return The folder type as specified in {@link FolderType} or <code>null</code>.
-     */
-    public FolderType getFolderType() throws OXException {
-        List<ActiveFacet> facets = facetMap.get(CommonFacetType.FOLDER_TYPE);
-        if (facets == null || facets.isEmpty()) {
-            return null;
-        }
-
-        String identifier = facets.get(0).getValueId();
-        FolderType type = FolderType.getByIdentifier(identifier);
-        if (type == null) {
-            throw FindExceptionCode.INVALID_FOLDER_TYPE.create(identifier == null ? "null" : identifier);
-        }
-
-        return type;
-    }
-
-    /**
-     * Gets the folder id set via a present facet of type {@link CommonFacetType#FOLDER}.
-     * @return The folder id or <code>null</code> if folder facet is not present.
-     */
-    public String getFolderId() {
-        List<ActiveFacet> facets = facetMap.get(CommonFacetType.FOLDER);
-        if (facets == null || facets.isEmpty()) {
-            return null;
-        }
-
-        return facets.get(0).getValueId();
     }
 
     @Override

@@ -52,12 +52,14 @@ package com.openexchange.tools.images;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link ImageTransformationService}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+@SingletonService
 public interface ImageTransformationService {
 
     // ----------------------------------------------------------------------------------------------------------- //

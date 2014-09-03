@@ -55,14 +55,20 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
 import org.slf4j.Logger;
+import com.google.gdata.data.Content;
+import com.google.gdata.data.IContent.Type;
 import com.google.gdata.data.contacts.ContactEntry;
 import com.google.gdata.data.extensions.Email;
+import com.google.gdata.data.extensions.FamilyName;
+import com.google.gdata.data.extensions.GivenName;
 import com.google.gdata.data.extensions.Im;
 import com.google.gdata.data.extensions.Name;
+import com.google.gdata.data.extensions.OrgName;
 import com.google.gdata.data.extensions.Organization;
 import com.google.gdata.data.extensions.PhoneNumber;
 import com.google.gdata.data.extensions.StructuredPostalAddress;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 
@@ -93,13 +99,21 @@ public class ContactEntryParser {
                 contact.setTitle(name.getNamePrefix().getValue());
             }
             if (name.hasGivenName()) {
-                contact.setGivenName(name.getGivenName().getValue());
+                GivenName givenName = name.getGivenName();
+                contact.setGivenName(givenName.getValue());
+                if(false == Strings.isEmpty(givenName.getYomi())) {
+                    contact.setYomiFirstName(givenName.getYomi());
+                }
             }
             if (name.hasAdditionalName()) {
                 contact.setMiddleName(name.getAdditionalName().getValue());
             }
             if (name.hasFamilyName()) {
-                contact.setSurName(name.getFamilyName().getValue());
+                FamilyName surName = name.getFamilyName();
+                contact.setSurName(surName.getValue());
+                if(false == Strings.isEmpty(surName.getYomi())) {
+                    contact.setYomiLastName(surName.getYomi());
+                }
             }
             if (name.hasNameSuffix()) {
                 contact.setSuffix(name.getNameSuffix().getValue());
@@ -109,10 +123,27 @@ public class ContactEntryParser {
         if (entry.hasOrganizations()) {
             for (final Organization o : entry.getOrganizations()) {
                 if (o.hasOrgName()) {
-                    contact.setCompany(o.getOrgName().getValue());
+                    OrgName company = o.getOrgName();
+                    contact.setCompany(company.getValue());
+                    if(false == Strings.isEmpty(company.getYomi())) {
+                        contact.setYomiCompany(company.getYomi());
+                    }
                 }
                 if(o.hasOrgTitle()) {
                     contact.setPosition(o.getOrgTitle().getValue());
+                }
+            }
+        }
+
+        if(entry.hasNickname()) {
+            contact.setNickname(entry.getNickname().getValue());
+        }
+
+        if(entry.getContent() != null) {
+            Content content = entry.getContent();
+            if(content.getType() == Type.TEXT) {
+                if(false == Strings.isEmpty(entry.getPlainTextContent())) {
+                    contact.setNote(entry.getPlainTextContent());
                 }
             }
         }

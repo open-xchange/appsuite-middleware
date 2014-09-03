@@ -50,12 +50,15 @@
 package com.openexchange.crypto;
 
 import com.openexchange.exception.OXException;
-
+import com.openexchange.osgi.annotation.SingletonService;
 
 
 /**
+ * The Open-Xchange crypto service.
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
+@SingletonService
 public interface CryptoService {
 
     /**

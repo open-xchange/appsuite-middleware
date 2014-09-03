@@ -55,10 +55,10 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.caching.CacheKeyService;
 import com.openexchange.caching.events.CacheEventService;
-import com.openexchange.caching.events.ms.internal.CacheEventWrapper;
 import com.openexchange.caching.events.ms.internal.MsCacheEventHandler;
-import com.openexchange.caching.events.ms.internal.PortableCacheEvent;
 import com.openexchange.caching.events.ms.internal.PortableCacheEventFactory;
+import com.openexchange.caching.events.ms.internal.PortableCacheKey;
+import com.openexchange.caching.events.ms.internal.PortableCacheKeyFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.ms.PortableMsService;
@@ -88,6 +88,7 @@ public final class MsCacheEventHandlerActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: {}", context.getBundle().getSymbolicName());
+        registerService(CustomPortableFactory.class, new PortableCacheKeyFactory());
         registerService(CustomPortableFactory.class, new PortableCacheEventFactory());
         final BundleContext context = this.context;
         final CacheEventService cacheEventService = getService(CacheEventService.class);
@@ -130,8 +131,7 @@ public final class MsCacheEventHandlerActivator extends HousekeepingActivator {
             @Override
             public CacheKeyService addingService(ServiceReference<CacheKeyService> reference) {
                 CacheKeyService cacheKeyService = context.getService(reference);
-                PortableCacheEvent.setCacheKeyService(cacheKeyService);
-                CacheEventWrapper.setCacheKeyService(cacheKeyService);
+                PortableCacheKey.setCacheKeyService(cacheKeyService);
                 return cacheKeyService;
             }
 
@@ -142,8 +142,7 @@ public final class MsCacheEventHandlerActivator extends HousekeepingActivator {
 
             @Override
             public void removedService(ServiceReference<CacheKeyService> reference, CacheKeyService service) {
-                PortableCacheEvent.setCacheKeyService(null);
-                CacheEventWrapper.setCacheKeyService(null);
+                PortableCacheKey.setCacheKeyService(null);
             }
         });
         openTrackers();

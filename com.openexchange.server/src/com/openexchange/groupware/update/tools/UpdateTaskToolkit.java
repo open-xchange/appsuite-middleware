@@ -366,9 +366,6 @@ public final class UpdateTaskToolkit {
 
     private static void removeContexts(final int contextId) throws OXException, OXException {
         final int[] contextIds = Database.getContextsInSameSchema(contextId);
-        final ContextStorage contextStorage = ContextStorage.getInstance();
-        for (final int cid : contextIds) {
-            contextStorage.invalidateContext(cid);
-        }
+        ContextStorage.getInstance().invalidateContexts(contextIds);
     }
 }

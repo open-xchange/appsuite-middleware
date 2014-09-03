@@ -61,6 +61,20 @@ import com.openexchange.jsieve.commands.Rule;
  */
 public interface MailFilterService {
 
+    public enum FilterType {
+        antispam("antispam"), autoforward("autoforward"), vacation("vacation"), All("");
+
+        private final String flag;
+
+        private FilterType(final String flag) {
+            this.flag = flag;
+        }
+
+        public String getFlag() {
+            return flag;
+        }
+    };
+
     /**
      * Create a new mail filter rule and return it's UID.
      * 
@@ -116,7 +130,7 @@ public interface MailFilterService {
      * @return a list with all mail filter rules
      * @throws OXException
      */
-    public List<Rule> listRules(final Credentials credentials, final String flag) throws OXException;
+    public List<Rule> listRules(final Credentials credentials, final FilterType flag) throws OXException;
 
     /**
      * Return a list with all mail filters except those specified in the exclusion list
@@ -126,7 +140,7 @@ public interface MailFilterService {
      * @return a list with all mail filter rules except those in the exclusion list
      * @throws OXException
      */
-    public List<Rule> listRules(final Credentials credentials, final List<String> exclusionFlags) throws OXException;
+    public List<Rule> listRules(final Credentials credentials, final List<FilterType> exclusionFlags) throws OXException;
 
     /**
      * Reorder the rules

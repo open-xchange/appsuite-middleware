@@ -599,7 +599,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
         attrBuilder.setLength(0);
         String tagName = startTag.getName();
 
-        if (simple && HTMLElementName.META.equals(tagName) && allowedAttributes.containsKey("http-equiv")) {
+        if (simple && HTMLElementName.META == tagName && allowedAttributes.containsKey("http-equiv")) {
             Attributes attributes = startTag.getAttributes();
             if (null != attributes.get("http-equiv")) {
                 /*
@@ -623,7 +623,15 @@ public final class FilterJerichoHandler implements JerichoHandler {
 
         // Handle start tag
         Map<String, String> attrMap = createMapFrom(startTag.getAttributes());
-        if (HTMLElementName.TABLE.equals(tagName)) {
+        if (HTMLElementName.IMG == tagName) {
+            String width = attrMap.get("width");
+            if (null != width) {
+                String height = attrMap.get("height");
+                if (null != height) {
+                    prependToStyle("width: " + width + "px; height: " + height + "px;", attrMap);
+                }
+            }
+        } else if (HTMLElementName.TABLE == tagName) {
             // Has attribute "bgcolor"
             String bgcolor = attrMap.get("bgcolor");
             if (null != bgcolor) {
@@ -637,19 +645,17 @@ public final class FilterJerichoHandler implements JerichoHandler {
             } else {
                 if ("0".equals(attrMap.get("cellspacing"))) {
                     prependToStyle("border-collapse: collapse;", attrMap);
-                    attrMap.remove("cellspacing");
                 }
 
                 // Table has cell padding -> Remember it for all child elements
                 tablePaddings.offer(new CellPadding(cellpadding));
-                attrMap.remove("cellpadding");
             }
-        } else if (HTMLElementName.TD.equals(tagName) || HTMLElementName.TH.equals(tagName)) {
+        } else if (HTMLElementName.TD == tagName || HTMLElementName.TH == tagName) {
             CellPadding cellPadding = tablePaddings.peek();
             if (CELLPADDING_EMPTY != cellPadding) {
                 String style = attrMap.get("style");
                 if (null == style || style.indexOf("padding") < 0) {
-                    prependToStyle("padding: " + cellPadding.cellPadding + ';', attrMap);
+                    prependToStyle("padding: " + cellPadding.cellPadding + "px;", attrMap);
                 }
             }
         }

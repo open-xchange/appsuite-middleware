@@ -89,7 +89,7 @@ public abstract class AbstractSubscribeTestEnvironment {
 
     private final String serviceId;
 
-    private int accountId;
+    private int accountId = -1;
 
     /**
      * Initializes a new {@link AbstractSubscribeTestEnvironment}.

@@ -51,7 +51,10 @@ package com.openexchange.admin.storage.mysqlStorage;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.tools.sql.DBUtils.startTransaction;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -306,6 +309,43 @@ public class OXContextMySQLStorageCommon {
         }
         group_stmt.executeUpdate();
         group_stmt.close();
+    }
+
+    /**
+     * Checks if there are any context referencing the given schema on the given database. If this is not the case, then the database will
+     * be deleted.
+     * @param poolId should be the pool identifier of the master database server of a database cluster.
+     * @param dbSchema the name of the database schema that should be checked for deletion.
+     * @throws StorageException if somehow the check and delete process fails.
+     */
+    public static void deleteEmptySchema(int poolId, String dbSchema) throws StorageException {
+        final Connection con;
+        try {
+            con = cache.getConnectionForConfigDB();
+        } catch (PoolException e) {
+            throw new StorageException(e.getMessage(), e);
+        }
+        try {
+            startTransaction(con);
+            cache.getPool().lock(con);
+            deleteEmptySchema(con, poolId, dbSchema);
+            con.commit();
+        } catch (SQLException e) {
+            rollback(con);
+            log.error(e.getMessage(), e);
+            throw new StorageException(e.getMessage(), e);
+        } catch (PoolException e) {
+            rollback(con);
+            log.error(e.getMessage(), e);
+            throw new StorageException(e.getMessage(), e);
+        } finally {
+            autocommit(con);
+            try {
+                cache.pushConnectionForConfigDB(con);
+            } catch (final PoolException e) {
+                log.error("Error pushing configdb connection to pool!", e);
+            }
+        }
     }
 
     /**

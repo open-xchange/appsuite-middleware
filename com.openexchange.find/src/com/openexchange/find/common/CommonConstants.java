@@ -56,7 +56,7 @@ package com.openexchange.find.common;
  */
 public class CommonConstants {
 
-    public final static String FIELD_TIME = "time";
+    public final static String FIELD_DATE = "date";
 
     public final static String QUERY_LAST_WEEK = "last_week";
 

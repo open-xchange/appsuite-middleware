@@ -53,7 +53,7 @@ import com.openexchange.find.common.CommonFacetType;
 
 
 /**
- * A {@link TimeFrame} denotes a custom value for facets of type {@link CommonFacetType#TIME}.
+ * A {@link TimeFrame} denotes a custom value for facets of type {@link CommonFacetType#DATE}.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1

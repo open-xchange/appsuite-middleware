@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#     LSB system startup script for service/daemon open-xchange-groupware
+#     LSB system startup script for service/daemon open-xchange
 #     Based on initscript skeleton.compat as shipped with [open]SUSE.
 #          
 #     This library is free software; you can redistribute it and/or modify it
@@ -18,7 +18,7 @@
 #     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307,
 #     USA.
 #
-# /etc/init.d/open-xchange-groupware
+# /etc/init.d/open-xchange
 # LSB compatible service control script; see http://www.linuxbase.org/spec/
 # 
 # Note: This template uses functions rc_XXX defined in /etc/rc.status on
@@ -230,8 +230,7 @@ case "$1" in
 	## Stop daemon with killproc(8) and if this fails
 	## killproc sets the return value according to LSB.
 
-	pidfile=/var/run/open-xchange.pid
-	test -e $pidfile && read pid < $pidfile
+	test -e $PIDFILE && read pid < $PIDFILE
 	ox_stop_daemon $(basename $OX_BIN)
 	while ox_is_running open-xchange "/opt/open-xchange/sbin/open-xchange" $pid; do
 	     sleep 1

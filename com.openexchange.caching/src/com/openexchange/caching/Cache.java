@@ -51,6 +51,7 @@ package com.openexchange.caching;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 
@@ -307,6 +308,14 @@ public interface Cache {
     public void remove(Serializable key) throws OXException;
 
     /**
+     * Removes multiple objects from the cache which are bound to the specified keys.
+     *
+     * @param keys The keys
+     * @throws OXException If remove operation on cache fails
+     */
+    void remove(List<Serializable> keys) throws OXException;
+
+    /**
      * Removes (optional operation) the object from the cache which is bound to specified key without propagating that operation neither
      * laterally nor remotely.
      *
@@ -334,6 +343,14 @@ public interface Cache {
      * @param group The group name.
      */
     public void removeFromGroup(Serializable key, String group);
+
+    /**
+     * Removes multiple objects located in a specified group and bound the given keys.
+     *
+     * @param keys The keys
+     * @param group The group name.
+     */
+    void removeFromGroup(List<Serializable> keys, String group);
 
     /**
      * Removes (optional operation) the object located in specified group and bound to given key without propagating that operation neither

@@ -56,6 +56,7 @@ import java.util.Map;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.Filter;
+import com.openexchange.find.util.TimeFrame;
 import com.openexchange.java.Strings;
 
 /**
@@ -81,7 +82,7 @@ public enum CommonFacetType implements FacetType {
      */
     FOLDER_TYPE(CommonStrings.FACET_TYPE_FOLDER_TYPE),
     /**
-     * The facet type for time frames. A module that supports this facet may provide some
+     * The facet type for dates. A module that supports this facet may provide some
      * default values to indicate that the facet exists (e.g. "last week"). It also has to
      * support client-defined time ranges with a special syntax denoting a frame between two
      * timestamps:
@@ -96,11 +97,11 @@ public enum CommonFacetType implements FacetType {
      * timestamps in milliseconds since midnight, January 1, 1970 UTC. It is also possible to
      * use the asterisk as a wildcard, e.g. <code>[* TO 1407142786432]</code>.
      *
-     * If the filter for an {@link ActiveFacet} of type {@link CommonFacetType#TIME} is {@link Filter#NO_FILTER},
+     * If the filter for an {@link ActiveFacet} of type {@link CommonFacetType#DATE} is {@link Filter#NO_FILTER},
      * its value is expected to be such a custom time range. Modules are advised to use {@link TimeFrame#valueOf(String)}
      * to parse the input string.
      */
-    TIME(CommonStrings.TIME)
+    DATE(CommonStrings.DATE)
     ;
 
     private static final Map<String, CommonFacetType> typesById = new HashMap<String, CommonFacetType>();

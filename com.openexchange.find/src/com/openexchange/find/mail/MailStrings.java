@@ -62,11 +62,6 @@ import com.openexchange.i18n.LocalizableStrings;
 public class MailStrings implements LocalizableStrings {
 
     // Context: Searching in mail.
-    // Displayed as: [Search for] 'user input' in emails.
-    // The 'user input' part is always prepended, please heed this in translations.
-    public static final String FACET_GLOBAL = "in emails";
-
-    // Context: Searching in mail.
     // Displayed as: [Search for] 'user input' in subject.
     // The 'user input' part is always prepended, please heed this in translations.
     public static final String FACET_SUBJECT = "in subject";

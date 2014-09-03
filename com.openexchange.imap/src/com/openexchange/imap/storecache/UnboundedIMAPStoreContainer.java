@@ -60,6 +60,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.mail.MessagingException;
+import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPStore;
 
 /**
@@ -79,8 +80,8 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
     /**
      * Initializes a new {@link UnboundedIMAPStoreContainer}.
      */
-    public UnboundedIMAPStoreContainer(final String server, final int port) {
-        super();
+    public UnboundedIMAPStoreContainer(String server, int port, boolean propagateClientIp) {
+        super(propagateClientIp);
         maxRetryCount = 10;
         availableQueue = new InheritedPriorityBlockingQueue();
         this.port = port;
@@ -103,12 +104,12 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
     }
 
     @Override
-    public IMAPStore getStore(final javax.mail.Session imapSession, final String login, final String pw) throws MessagingException, InterruptedException {
+    public IMAPStore getStore(javax.mail.Session imapSession, String login, String pw, Session session) throws MessagingException, InterruptedException {
         IMAPStore imapStore = null;
 
         final IMAPStoreWrapper imapStoreWrapper = availableQueue.poll();
         if (null == imapStoreWrapper) {
-            imapStore = newStore(server, port, login, pw, imapSession);
+            imapStore = newStore(server, port, login, pw, imapSession, session);
             LOG.debug("UnboundedIMAPStoreContainer.getStore(): Returning newly established IMAPStore instance. {} -- {}", imapStore.toString(), imapStore.hashCode());
         } else {
             imapStore = imapStoreWrapper.imapStore;

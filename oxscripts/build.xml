@@ -37,10 +37,6 @@
     </target>
 
     <target name="patchAndInstallScripts" depends="patchScripts">
-        <property name="libInstallDir" value="${destDir}/${prefix}/${libDir}"/>
-        <copy todir="${libInstallDir}" overwrite="true">
-            <fileset dir="${libDir}"/>
-        </copy>
         <property name="sbinInstallDir" value="${destDir}/${prefix}/${sbinDir}"/>
         <copy todir="${sbinInstallDir}" overwrite="true">
             <fileset dir="${patchSbinDir}"/>

@@ -60,6 +60,7 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.tools.StringHelper;
@@ -95,7 +96,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "id", description = "Object ID of the requested mail."),
     @Parameter(name = "folder", description = "Object ID of the source folder.")
 }, requestBody = "A JSON object containing the id of the destination folder inside the \"folder_id\" field: e.g.: {\"folder_id\": 1376}.",
-responseDescription = "A JSON array containing the ID of the copied mail.")
+responseDescription = "A JSON true response.")
 public final class ArchiveAction extends AbstractMailAction {
 
     /**
@@ -137,7 +138,7 @@ public final class ArchiveAction extends AbstractMailAction {
                 boolean updateAccount = false;
                 if (isEmpty(archiveName)) {
                     final User user = session.getUser();
-                    if (!AJAXRequestDataTools.parseBoolParameter(req.getParameter("useDefaultName"))) {
+                    if (!AJAXRequestDataTools.parseBoolParameter("useDefaultName", req.getRequest(), true)) {
                         final String i18nArchive = StringHelper.valueOf(user.getLocale()).getString(MailStrings.ARCHIVE);
                         throw MailExceptionCode.MISSING_DEFAULT_FOLDER_NAME.create(Category.CATEGORY_USER_INPUT, i18nArchive);
                     }
@@ -183,7 +184,7 @@ public final class ArchiveAction extends AbstractMailAction {
                 }
             }
             if (!mailAccess.getFolderStorage().exists(archiveFullname)) {
-                if (!AJAXRequestDataTools.parseBoolParameter(req.getParameter("createIfAbsent"))) {
+                if (!AJAXRequestDataTools.parseBoolParameter("createIfAbsent", req.getRequest(), true)) {
                     throw MailExceptionCode.FOLDER_NOT_FOUND.create(archiveFullname);
                 }
                 final MailFolderDescription toCreate = new MailFolderDescription();
@@ -203,6 +204,7 @@ public final class ArchiveAction extends AbstractMailAction {
                     toCreate.addPermission(mp);
                 }
                 mailAccess.getFolderStorage().createFolder(toCreate);
+                CacheFolderStorage.getInstance().removeFromCache(parentFullName, "0", true, session);
             }
             // Move to archive folder
             final int length = uids.length();

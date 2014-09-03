@@ -50,6 +50,7 @@
 package com.openexchange.find.internal;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.find.AbstractFindRequest;
 import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.AutocompleteResult;
 import com.openexchange.find.FindExceptionCode;
@@ -82,7 +83,7 @@ public class SearchServiceImpl implements SearchService {
     @Override
     public AutocompleteResult autocomplete(AutocompleteRequest autocompleteRequest, Module module, ServerSession session) throws OXException {
         try {
-            return requireDriver(session, module).autocomplete(autocompleteRequest, session);
+            return requireDriver(session, module, autocompleteRequest).autocomplete(autocompleteRequest, session);
         } catch (final RuntimeException e) {
             throw FindExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -91,14 +92,14 @@ public class SearchServiceImpl implements SearchService {
     @Override
     public SearchResult search(SearchRequest searchRequest, Module module, ServerSession session) throws OXException {
         try {
-            return requireDriver(session, module).search(searchRequest, session);
+            return requireDriver(session, module, searchRequest).search(searchRequest, session);
         } catch (final RuntimeException e) {
             throw FindExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
-    private ModuleSearchDriver requireDriver(ServerSession session, Module module) throws OXException {
-        ModuleSearchDriver determined = driverManager.determineDriver(session, module, true);
+    private ModuleSearchDriver requireDriver(ServerSession session, Module module, AbstractFindRequest findRequest) throws OXException {
+        ModuleSearchDriver determined = driverManager.determineDriver(session, module, findRequest, true);
         if (determined == null) {
             throw FindExceptionCode.MISSING_DRIVER.create(module.getIdentifier(), session.getUserId(), session.getContextId());
         }
