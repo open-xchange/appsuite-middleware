@@ -65,6 +65,7 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.tools.StringHelper;
@@ -242,6 +243,7 @@ public final class ArchiveFolderAction extends AbstractMailAction {
                     toCreate.addPermission(mp);
                 }
                 mailAccess.getFolderStorage().createFolder(toCreate);
+                CacheFolderStorage.getInstance().removeFromCache(parentFullName, "0", true, session);
             }
 
             // Move to archive folder
@@ -292,6 +294,7 @@ public final class ArchiveFolderAction extends AbstractMailAction {
                         toCreate.addPermission(mp);
                     }
                     mailAccess.getFolderStorage().createFolder(toCreate);
+                    CacheFolderStorage.getInstance().removeFromCache(archiveFullname, "0", true, session);
                 }
 
                 List<String> ids = entry.getValue();
