@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,47 +47,19 @@
  *
  */
 
-package com.openexchange.config.cascade;
+package com.openexchange.osgi.annotation;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 
 /**
- * {@link ConfigViewFactory} - The factory to yield {@link ConfigView}s.
+ * {@link SingletonService} - Annotates a service to be a singletone one.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.6.1
  */
-@SingletonService
-public interface ConfigViewFactory {
-
-    /**
-     * Gets a user-specific configuration view in following order:
-     * <ol>
-     * <li>USER; if not available, falls-back to:</li>
-     * <li>CONTEXT; if not available, falls-back to:</li>
-     * <li>SERVER</li>
-     * </ol>
-     *
-     * @param user The user identifier
-     * @param context The context identifier
-     * @return The user-sensitive configuration view
-     * @throws OXException If user-sensitive configuration view cannot be returned
-     */
-    ConfigView getView(int user, int context) throws OXException;
-
-    /**
-     * Gets a server/global configuration view.
-     *
-     * @return The configuration view
-     * @throws OXException If configuration view cannot be returned
-     */
-    ConfigView getView() throws OXException;
-
-    /**
-     * The search path order.
-     *
-     * @return The search path order
-     * @throws OXException If search path cannot be returned
-     */
-    String[] getSearchPath() throws OXException;
+@Retention(RetentionPolicy.CLASS)
+public @interface SingletonService {
+    // marker annotation with no members
 }

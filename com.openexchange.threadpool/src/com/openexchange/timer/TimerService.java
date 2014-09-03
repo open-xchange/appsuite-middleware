@@ -52,12 +52,14 @@ package com.openexchange.timer;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * A {@link TimerService} that can schedule commands to run after a given delay, or to execute periodically.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SingletonService
 public interface TimerService {
 
     /**
