@@ -1040,6 +1040,13 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         if (name.length() > maxMailboxNameLength()) {
             throw MailExceptionCode.INVALID_FOLDER_NAME_TOO_LONG.create(Integer.valueOf(maxMailboxNameLength()));
         }
+        {
+            char sep = toCreate.getSeparator();
+            if (sep <= '\0') {
+                sep = getSeparator(imapStore);
+                toCreate.setSeparator(sep);
+            }
+        }
         try {
             final String parentFullname = toCreate.getParentFullname();
             final String fullName = DEFAULT_FOLDER_ID.equals(parentFullname) ? name : new StringBuilder(parentFullname).append(toCreate.getSeparator()).append(name).toString();
