@@ -114,9 +114,9 @@ public interface DBMigrationExecutorService {
 
     /**
      * TODO
-     * 
+     *
      * @return
      * @throws OXException
      */
-    public boolean migrationsRunning() throws OXException;
+    public boolean migrationsRunning();
 }

@@ -313,7 +313,7 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
      * {@inheritDoc}
      */
     @Override
-    public boolean migrationsRunning() throws OXException {
+    public boolean migrationsRunning() {
         return !DBMigrationMonitor.getInstance().getScheduledFiles().isEmpty();
     }
 }
