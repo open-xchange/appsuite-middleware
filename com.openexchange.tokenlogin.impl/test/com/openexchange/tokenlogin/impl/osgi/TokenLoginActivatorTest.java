@@ -49,10 +49,8 @@
 
 package com.openexchange.tokenlogin.impl.osgi;
 
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -72,6 +70,8 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.osgi.ServiceProvider;
@@ -213,7 +213,7 @@ public class TokenLoginActivatorTest {
 
     @Test
     public void testStopBundle_EverythingFine_AllServicesUnregistered() throws Exception {
-        final Map<Object, ServiceRegistration<?>> serviceRegistrations = new LinkedHashMap<Object, ServiceRegistration<?>>(6);
+        final Multimap<Object, ServiceRegistration<?>> serviceRegistrations = HashMultimap.create(6,2);
         ServiceRegistration<?> serviceRegistration = PowerMockito.mock(ServiceRegistration.class);
         serviceRegistrations.put(TokenLoginService.class, serviceRegistration);
         MockUtils.injectValueIntoPrivateField(this.tokenLoginActivator, InjectionFieldConstants.SERVICE_REGISTRATIONS, serviceRegistrations);
