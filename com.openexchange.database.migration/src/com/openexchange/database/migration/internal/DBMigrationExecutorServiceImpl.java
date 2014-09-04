@@ -173,10 +173,12 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
             } catch (LiquibaseException liquibaseException) {
                 throw DBMigrationExceptionCodes.LIQUIBASE_ERROR.create(liquibaseException);
             }
-        }
-        if (writable != null) {
-            DBUtils.autocommit(writable);
-            databaseService.backWritable(writable);
+            finally {
+                if (writable != null) {
+                    DBUtils.autocommit(writable);
+                    databaseService.backWritable(writable);
+                }
+            }
         }
     }
 
