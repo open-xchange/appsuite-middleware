@@ -233,6 +233,7 @@ public final class ArchiveFolderAction extends AbstractMailAction {
                 toCreate.setExists(false);
                 toCreate.setFullname(archiveFullname);
                 toCreate.setName(archiveName);
+                toCreate.setSeparator(separator);
                 {
                     final DefaultMailPermission mp = new DefaultMailPermission();
                     mp.setEntity(session.getUserId());
@@ -284,6 +285,7 @@ public final class ArchiveFolderAction extends AbstractMailAction {
                     toCreate.setExists(false);
                     toCreate.setFullname(fn);
                     toCreate.setName(sYear);
+                    toCreate.setSeparator(separator);
                     {
                         final DefaultMailPermission mp = new DefaultMailPermission();
                         mp.setEntity(session.getUserId());

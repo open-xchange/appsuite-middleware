@@ -130,6 +130,7 @@ public final class ArchiveAction extends AbstractMailAction {
             mailAccess = MailAccess.getInstance(session, accountId);
             mailAccess.connect();
             // Check archive full name
+            char separator;
             String archiveFullname = mailAccount.getArchiveFullname();
             final String parentFullName;
             String archiveName;
@@ -148,9 +149,11 @@ public final class ArchiveAction extends AbstractMailAction {
                 }
                 final String prefix = mailAccess.getFolderStorage().getDefaultFolderPrefix();
                 if (isEmpty(prefix)) {
+                    separator = mailAccess.getFolderStorage().getFolder("INBOX").getSeparator();
                     archiveFullname = archiveName;
                     parentFullName = MailFolder.DEFAULT_FOLDER_ID;
                 } else {
+                    separator = prefix.charAt(prefix.length() - 1);
                     archiveFullname = new StringBuilder(prefix).append(archiveName).toString();
                     parentFullName = prefix.substring(0, prefix.length() - 1);
                 }
@@ -173,7 +176,7 @@ public final class ArchiveAction extends AbstractMailAction {
                     }
                 }
             } else {
-                final char separator = mailAccess.getFolderStorage().getFolder("INBOX").getSeparator();
+                separator = mailAccess.getFolderStorage().getFolder("INBOX").getSeparator();
                 final int pos = archiveFullname.lastIndexOf(separator);
                 if (pos > 0) {
                     parentFullName = archiveFullname.substring(0, pos);
@@ -194,6 +197,7 @@ public final class ArchiveAction extends AbstractMailAction {
                 toCreate.setExists(false);
                 toCreate.setFullname(archiveFullname);
                 toCreate.setName(archiveName);
+                toCreate.setSeparator(separator);
                 {
                     final DefaultMailPermission mp = new DefaultMailPermission();
                     mp.setEntity(session.getUserId());
