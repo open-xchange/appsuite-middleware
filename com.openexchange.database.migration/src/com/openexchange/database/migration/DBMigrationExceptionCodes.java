@@ -90,6 +90,10 @@ public enum DBMigrationExceptionCodes implements OXExceptionCode {
      * Wrong type of data provided for rollback. Only Integer and String are supported.
      */
     WRONG_TYPE_OF_DATA_ROLLBACK_ERROR(DBMigrationExceptionCodes.WRONG_TYPE_OF_DATA_ROLLBACK_ERROR_MSG, Category.CATEGORY_ERROR, 7),
+    /**
+     * An error occurred while reading database locks.
+     */
+    READING_LOCK_ERROR(DBMigrationExceptionCodes.READING_LOCK_ERROR_MSG, Category.CATEGORY_ERROR, 8),
 
     ;
 
@@ -106,6 +110,8 @@ public enum DBMigrationExceptionCodes implements OXExceptionCode {
     public static final String SQL_ERROR_MSG = "Error while reading/writing data from/to the database.";
 
     public static final String WRONG_TYPE_OF_DATA_ROLLBACK_ERROR_MSG = "Wrong type of data provided for rollback. Only Integer and String are supported.";
+
+    public static final String READING_LOCK_ERROR_MSG = "An error occurred while reading database lock.";
 
     /**
      * The error code prefix for database migration module.

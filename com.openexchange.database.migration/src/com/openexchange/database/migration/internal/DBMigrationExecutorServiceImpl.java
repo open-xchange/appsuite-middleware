@@ -58,6 +58,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
+import liquibase.exception.LockException;
 import liquibase.exception.ValidationFailedException;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.ResourceAccessor;
@@ -65,6 +66,7 @@ import org.apache.commons.lang.Validate;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.migration.DBMigrationExceptionCodes;
 import com.openexchange.database.migration.DBMigrationExecutorService;
+import com.openexchange.database.migration.DBMigrationMonitor;
 import com.openexchange.exception.OXException;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -108,8 +110,8 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
     /**
      * Handles exceptions occurred while preparing and using liquibase.
      *
-     * @param exception
-     * @throws OXException
+     * @param exception - the exception to handle
+     * @throws OXException - the OXException related to the given one.
      */
     protected void handleExceptions(Exception exception) throws OXException {
         if (exception instanceof OXException) {
@@ -124,6 +126,9 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
         } else if (exception instanceof SQLException) {
             LOG.error(DBMigrationExceptionCodes.SQL_ERROR_MSG, exception);
             throw DBMigrationExceptionCodes.SQL_ERROR.create(exception);
+        } else if (exception instanceof LockException) {
+            LOG.error(DBMigrationExceptionCodes.READING_LOCK_ERROR_MSG, exception);
+            throw DBMigrationExceptionCodes.READING_LOCK_ERROR.create(exception);
         } else {
             LOG.error(DBMigrationExceptionCodes.UNEXPECTED_ERROR_MSG, exception);
             throw DBMigrationExceptionCodes.UNEXPECTED_ERROR.create(exception);
@@ -209,11 +214,13 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
 
                     liquibase = prepareLiquibase(writable, fileLocation);
 
+                    DBMigrationMonitor.getInstance().addFile(fileLocation);
                     liquibase.update(LIQUIBASE_NO_DEFINED_CONTEXT);
                 } catch (Exception exception) {
                     handleExceptions(exception);
                 } finally {
                     cleanUpLiquibase(writable, liquibase);
+                    DBMigrationMonitor.getInstance().removeFile(fileLocation);
                 }
                 LOG.info("Finished executing database migration for ChangeLog {}", fileLocation);
                 return null;
@@ -300,5 +307,13 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
             cleanUpLiquibase(writable, liquibase);
         }
         return unexecutedChangeSets;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean migrationsRunning() throws OXException {
+        return !DBMigrationMonitor.getInstance().getScheduledFiles().isEmpty();
     }
 }

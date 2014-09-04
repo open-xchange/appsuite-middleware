@@ -111,4 +111,12 @@ public interface DBMigrationExecutorService {
      * @return List<ChangeSet> with the currently not executed liquibase changesets
      */
     public List<ChangeSet> listUnexecutedChangeSets(String fileLocation) throws OXException;
+
+    /**
+     * TODO
+     * 
+     * @return
+     * @throws OXException
+     */
+    public boolean migrationsRunning() throws OXException;
 }
