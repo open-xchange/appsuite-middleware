@@ -1,3 +1,7 @@
+* 2014-09-04 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 34249: Use EventFiringInfostoreFacade instead of InfostoreFacade, events will trigger deletion of preview images
+
 * 2014-09-03 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 33935: Print database name if id is unset
