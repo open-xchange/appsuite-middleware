@@ -171,7 +171,7 @@ public class MailFilterAction extends AbstractAction<Rule, MailFilterRequest> {
                 throw MailFilterExceptionCode.INVALID_FILTER_TYPE_FLAG.create(flag);
             }
         } else {
-            filterType = FilterType.All;
+            filterType = FilterType.custom;
         }
         final List<Rule> rules = mailFilterService.listRules(credentials, filterType);
         try {
