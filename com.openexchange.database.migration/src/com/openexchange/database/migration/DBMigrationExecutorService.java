@@ -78,10 +78,10 @@ public interface DBMigrationExecutorService {
      * <code>null</code> in case you are using xml files no additional accessor is required.
      *
      * @param fileLocation - location of the file in the providing bundle, e.g. /liquibase/changelog.xml
-     * @param additionalAccessors - additional {@link ResourceAccessor}s to be able to read custom classes
+     * @param accessor - The {@link ResourceAccessor}s to read in the changelog file identified by <code>fileLocation</code>
      * @throws OXException
      */
-    public void execute(String fileLocation, List<ResourceAccessor> additionalAccessors) throws OXException;
+    public void execute(String fileLocation, ResourceAccessor accessor) throws OXException;
 
     /**
      * Executes a rollback for the given number of ChangeSets

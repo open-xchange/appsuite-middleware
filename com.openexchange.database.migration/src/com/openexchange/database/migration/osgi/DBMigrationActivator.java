@@ -51,7 +51,7 @@ package com.openexchange.database.migration.osgi;
 
 import liquibase.servicelocator.CustomResolverServiceLocator;
 import liquibase.servicelocator.ServiceLocator;
-import org.apache.commons.lang.Validate;
+import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.database.migration.internal.BundlePackageScanClassResolver;
@@ -61,6 +61,7 @@ import com.openexchange.database.migration.osgi.tracker.ManagementServiceTracker
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.startup.SignalStartedService;
+import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
@@ -74,6 +75,8 @@ public class DBMigrationActivator extends HousekeepingActivator {
     private static final Class<?>[] NEEDED_SERVICES = { DatabaseService.class, SignalStartedService.class, ThreadPoolService.class };
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DBMigrationActivator.class);
+
+    private ServiceTracker<ManagementService, ManagementService> managementServiceTracker;
 
     /**
      * {@inheritDoc}
@@ -95,16 +98,22 @@ public class DBMigrationActivator extends HousekeepingActivator {
         ServiceLocator.setInstance(new CustomResolverServiceLocator(new BundlePackageScanClassResolver(this.context.getBundle())));
 
         final DatabaseService databaseService = getService(DatabaseService.class);
-        Validate.notNull(databaseService, "Not able to execute database migration! DatabaseService is absent.");
-
         final ThreadPoolService threadPoolService = Services.getService(ThreadPoolService.class);
-        Validate.notNull(threadPoolService, "Cannot add databse migration tasks to thread pool because ThreadPoolService is absent.");
+        threadPoolService.submit(new AbstractTask<Void>() {
+            @Override
+            public Void call() throws Exception {
+                DBMigrationExecutorServiceImpl dbMigrationExecutorService = new DBMigrationExecutorServiceImpl(databaseService);
+                dbMigrationExecutorService.initCoreMigrations();
+                context.registerService(DBMigrationExecutorService.class, dbMigrationExecutorService, null);
 
-        DBMigrationExecutorService dbMigrationExecutorService = new DBMigrationExecutorServiceImpl(databaseService, threadPoolService);
-        registerService(DBMigrationExecutorService.class, dbMigrationExecutorService);
-
-        track(ManagementService.class, new ManagementServiceTracker(context, dbMigrationExecutorService, databaseService));
-        openTrackers();
+                managementServiceTracker = new ServiceTracker<ManagementService, ManagementService>(
+                    context,
+                    ManagementService.class,
+                    new ManagementServiceTracker(context, dbMigrationExecutorService, databaseService));
+                managementServiceTracker.open();
+                return null;
+            }
+        });
     }
 
     /**
@@ -112,11 +121,14 @@ public class DBMigrationActivator extends HousekeepingActivator {
      */
     @Override
     protected void stopBundle() throws Exception {
-        super.stopBundle();
-
         LOG.info("Stopping bundle: " + this.context.getBundle().getSymbolicName());
-        cleanUp();
+        if (managementServiceTracker != null) {
+            managementServiceTracker.close();
+            managementServiceTracker = null;
+        }
+
         Services.setServiceLookup(null);
         ServiceLocator.reset();
+        super.stopBundle();
     }
 }

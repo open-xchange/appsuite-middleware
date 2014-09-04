@@ -3,23 +3,21 @@
 <databaseChangeLog xmlns="urn:liquibase"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="urn:liquibase ./schema/dbchangelog-3.0.xsd"
-	logicalFilePath="ox-release-changelog">
+	logicalFilePath="configdbChangeLog">
 
 	<!-- ******************************************************* -->
 	<!-- ************** Release 7.6.1 starts here ************** -->
 	<!-- ******************************************************* -->
-
-	<!-- Upcoming milestones should have the latest changeSet from the previous release as their precondition! -->
+	
 	<changeSet id="7.6.1-milestone" author="martin.schneider" logicalFilePath="release-7.6.1-milestone">
-		<!-- <preConditions></preConditions> -->
 		<tagDatabase tag="7.6.1-milestone" />
 	</changeSet>
 
-	<changeSet id="7.6.1:login2context:login_info" author="martin.schneider" logicalFilePath="release-7.6.1/1.login_info.changelog.xml">
+	<changeSet id="7.6.1:login2context:login_info" author="martin.schneider">
 		<preConditions>
 			<changeSetExecuted changeLogFile="release-7.6.1-milestone" author="martin.schneider" id="7.6.1-milestone"/>
 		</preConditions>
-		<comment>Bug 33418: enhances the login_info column to 255 characters</comment>
+		<comment>bug 33418: enhances the login_info column to 255 characters</comment>
 		<modifyDataType columnName="login_info" newDataType="varchar(255)"
 			tableName="login2context" />
 		<dropDefaultValue columnDataType="varchar(255)"
@@ -30,4 +28,5 @@
 			<dropDefaultValue columnDataType="varchar(128)" columnName="login_info" tableName="login2context" />
 		</rollback>
 	</changeSet>
+
 </databaseChangeLog>

@@ -60,16 +60,18 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.LockException;
 import liquibase.exception.ValidationFailedException;
+import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
+import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import org.apache.commons.lang.Validate;
+import org.osgi.framework.FrameworkUtil;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.migration.DBMigrationExceptionCodes;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.database.migration.DBMigrationMonitor;
+import com.openexchange.database.migration.resource.accessor.BundleResourceAccessor;
 import com.openexchange.exception.OXException;
-import com.openexchange.threadpool.AbstractTask;
-import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -85,26 +87,25 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
 
     private static final String LIQUIBASE_NO_DEFINED_CONTEXT = "";
 
+    private final DBMigrationExecutor executor;
+
     private DatabaseService databaseService;
 
     private List<ResourceAccessor> accessors = new CopyOnWriteArrayList<ResourceAccessor>();
 
-    private ThreadPoolService threadPoolService;
 
     /**
      * Initializes a new {@link DBMigrationExecutorServiceImpl}.
      *
      * @param databaseService - {@link DatabaseService} to be able to execute migration files
-     * @param threadPoolService - {@link ThreadPoolService} to add new threads for processing
      */
-    public DBMigrationExecutorServiceImpl(DatabaseService databaseService, ThreadPoolService threadPoolService) {
+    public DBMigrationExecutorServiceImpl(DatabaseService databaseService) {
         super();
 
         Validate.notNull(databaseService, "DatabaseService mustn't be null!");
-        Validate.notNull(threadPoolService, "ThreadPoolService mustn't be null!");
 
         this.databaseService = databaseService;
-        this.threadPoolService = threadPoolService;
+        executor = new DBMigrationExecutor(databaseService);
     }
 
     /**
@@ -186,16 +187,8 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
      * {@inheritDoc}
      */
     @Override
-    public void execute(String fileLocation, List<ResourceAccessor> additionalAccessors) throws OXException {
-        if (additionalAccessors == null) {
-            execute(fileLocation);
-            return;
-        }
-
-        for (ResourceAccessor accessor : additionalAccessors) {
-            accessors.add(accessor);
-        }
-        execute(fileLocation);
+    public void execute(String fileLocation, ResourceAccessor accessor) throws OXException {
+        executor.schedule(new ScheduledExecution(fileLocation, accessor));
     }
 
     /**
@@ -203,31 +196,10 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
      */
     @Override
     public void execute(final String fileLocation) throws OXException {
-        LOG.info("Start asynchronously executing database migration for ChangeLog {}", fileLocation);
-
-        threadPoolService.submit(new AbstractTask<Void>() {
-
-            @Override
-            public Void call() throws OXException {
-                Connection writable = null;
-                Liquibase liquibase = null;
-                try {
-                    writable = databaseService.getWritable();
-
-                    liquibase = prepareLiquibase(writable, fileLocation);
-
-                    DBMigrationMonitor.getInstance().addFile(fileLocation);
-                    liquibase.update(LIQUIBASE_NO_DEFINED_CONTEXT);
-                } catch (Exception exception) {
-                    handleExceptions(exception);
-                } finally {
-                    cleanUpLiquibase(writable, liquibase);
-                    DBMigrationMonitor.getInstance().removeFile(fileLocation);
-                }
-                LOG.info("Finished executing database migration for ChangeLog {}", fileLocation);
-                return null;
-            }
-        });
+        CompositeResourceAccessor accessor = new CompositeResourceAccessor(
+            new FileSystemResourceAccessor(),
+            new ClassLoaderResourceAccessor(getClass().getClassLoader()));
+        execute(fileLocation, accessor);
     }
 
     /**
@@ -317,5 +289,13 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
     @Override
     public boolean migrationsRunning() {
         return !DBMigrationMonitor.getInstance().getScheduledFiles().isEmpty();
+    }
+
+    public void initCoreMigrations() throws InterruptedException {
+        ScheduledExecution scheduledExecution = new ScheduledExecution(
+            "/liquibase/configdbChangeLog.xml",
+            new BundleResourceAccessor(FrameworkUtil.getBundle(getClass())));
+        executor.schedule(scheduledExecution);
+        scheduledExecution.waitForExecution();
     }
 }

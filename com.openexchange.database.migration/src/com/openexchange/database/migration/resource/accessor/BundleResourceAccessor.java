@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
+import java.util.List;
 import liquibase.resource.ResourceAccessor;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleWiring;
@@ -69,6 +70,7 @@ public class BundleResourceAccessor implements ResourceAccessor {
      * ClassLoader of the bundle to search for migration files within
      */
     private ClassLoader bundleClassLoader;
+    private BundleWiring bundleWiring;
 
     /**
      * Initializes a new {@link BundleResourceAccessor} for classloader bundle wiring.
@@ -76,7 +78,7 @@ public class BundleResourceAccessor implements ResourceAccessor {
      * @param bundle - the {@link Bundle} that should be wired.
      */
     public BundleResourceAccessor(final Bundle bundle) {
-        BundleWiring bundleWiring = bundle.adapt(BundleWiring.class);
+        bundleWiring = bundle.adapt(BundleWiring.class);
         this.bundleClassLoader = bundleWiring.getClassLoader();
     }
 
@@ -85,7 +87,31 @@ public class BundleResourceAccessor implements ResourceAccessor {
      */
     @Override
     public InputStream getResourceAsStream(String file) {
-        return this.bundleClassLoader.getResourceAsStream(file);
+        if (file == null || file.length() == 0) {
+            return null;
+        }
+
+        String path = "/";
+        String filePattern = file;
+
+        int i = file.lastIndexOf('/');
+        if (i > 0) {
+            path = file.substring(0, i);
+            if (i < file.length() - 1) {
+                filePattern = file.substring(i + 1);
+            }
+        }
+
+        List<URL> entries = bundleWiring.findEntries(path, filePattern, 0);
+        if (entries.isEmpty()) {
+            return null;
+        }
+
+        try {
+            return entries.get(0).openStream();
+        } catch (IOException e) {
+            return null;
+        }
     }
 
     /**
