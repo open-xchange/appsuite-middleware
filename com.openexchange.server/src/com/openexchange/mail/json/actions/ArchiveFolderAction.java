@@ -252,7 +252,7 @@ public final class ArchiveFolderAction extends AbstractMailAction {
             cal.set(Calendar.SECOND, 0);
             cal.set(Calendar.MINUTE, 0);
             cal.set(Calendar.HOUR_OF_DAY, 0);
-            cal.add(Calendar.DATE, Strings.parsePositiveInt(days));
+            cal.add(Calendar.DATE, Strings.parsePositiveInt(days) * -1);
 
             ReceivedDateTerm term = new ReceivedDateTerm(ComparisonType.LESS_THAN, cal.getTime());
             MailMessage[] msgs = mailAccess.getMessageStorage().searchMessages(fa.getFullname(), null, MailSortField.RECEIVED_DATE, OrderDirection.DESC, term, new MailField[] { MailField.ID, MailField.RECEIVED_DATE });
