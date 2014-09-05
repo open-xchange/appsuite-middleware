@@ -95,8 +95,8 @@ public final class TaskObjectCountTest extends AbstractObjectCountTest {
     @Test
     public void testCountInPublicFolder() throws Exception {
         FolderTestManager ftm = new FolderTestManager(client1);
-        FolderObject created = createPublicFolder(client1, FolderObject.TASK, client2.getValues().getUserId());
         try {
+            FolderObject created = createPublicFolder(client1, FolderObject.TASK, client2.getValues().getUserId(), ftm);
             int folderId = created.getObjectID();
             Folder folder = getFolder(client1, folderId, DEFAULT_COLUMNS);
             assertEquals("Wrong object count", 0, folder.getTotal());
@@ -110,15 +110,15 @@ public final class TaskObjectCountTest extends AbstractObjectCountTest {
             folder = getFolder(client1, folderId, DEFAULT_COLUMNS);
             assertEquals("Wrong object count for public folder creator.", numTasks1 + numTasks2, folder.getTotal());
         } finally {
-            ftm.deleteFolderOnServer(created);
+            ftm.cleanUp();
         }
     }
 
     @Test
     public void testCountInSharedFolder() throws Exception {
         FolderTestManager ftm = new FolderTestManager(client1);
-        FolderObject created = createSharedFolder(client1, FolderObject.TASK, client2.getValues().getUserId());
         try {
+            FolderObject created = createSharedFolder(client1, FolderObject.TASK, client2.getValues().getUserId(), ftm);
             int folderId = created.getObjectID();
             Folder folder = getFolder(client1, folderId, DEFAULT_COLUMNS);
             assertEquals("Wrong object count", 0, folder.getTotal());
@@ -132,7 +132,7 @@ public final class TaskObjectCountTest extends AbstractObjectCountTest {
             folder = getFolder(client1, folderId, DEFAULT_COLUMNS);
             assertEquals("Wrong object count for shared folder owner.", numTasks1 + numTasks2, folder.getTotal());
         } finally {
-            ftm.deleteFolderOnServer(created);
+            ftm.cleanUp();
         }
     }
 
