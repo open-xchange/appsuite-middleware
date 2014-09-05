@@ -52,6 +52,7 @@ package com.openexchange.i18n.impl;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
+import java.util.Arrays;
 import java.util.Locale;
 
 /**
@@ -92,6 +93,7 @@ public class FileDiscoverer {
                 return f.endsWith(extension);
             }
         });
+        Arrays.sort(files);
         return files;
     }
 
