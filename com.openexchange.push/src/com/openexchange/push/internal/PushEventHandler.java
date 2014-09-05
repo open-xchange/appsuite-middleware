@@ -53,15 +53,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
-import com.openexchange.exception.OXException;
-import com.openexchange.push.PushListener;
-import com.openexchange.push.PushManagerService;
-import com.openexchange.push.PushUtility;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -104,8 +99,6 @@ public final class PushEventHandler implements EventHandler {
 
     private static final class PushEventHandlerRunnable implements Runnable {
 
-        // private static final String CLIENT_OX_GUI = "com.openexchange.ox.gui.dhtml";
-
         private final Event event;
 
         /**
@@ -123,96 +116,23 @@ public final class PushEventHandler implements EventHandler {
             final String topic = event.getTopic();
             try {
                 if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
-                    final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
-                    /*
-                     * Check session's client identifier
-                     */
-                    if (!PushUtility.allowedClient(session.getClient())) {
-                        /*
-                         * No push listener for the client associated with current session.
-                         */
-                        return;
-                    }
-                    /*
-                     * Iterate push managers
-                     */
-                    final PushManagerRegistry registry = PushManagerRegistry.getInstance();
-                    for (final Iterator<PushManagerService> pushManagersIterator = registry.getPushManagers(); pushManagersIterator.hasNext();) {
-                        try {
-                            final PushManagerService pushManager = pushManagersIterator.next();
-                            // Stop listener for session
-                            final boolean stopped = pushManager.stopListener(session);
-                            if (stopped) {
-                                LOG.debug("Stopped push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), pushManager);
-                            }
-                        } catch (final OXException e) {
-                            LOG.error("Push error while stopping push listener.", e);
-                        } catch (final RuntimeException e) {
-                            LOG.error("Runtime error while stopping push listener.", e);
-                        }
-                    }
+                    Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
+                    PushManagerRegistry registry = PushManagerRegistry.getInstance();
+                    registry.stopListenerFor(session);
                 } else if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
                     @SuppressWarnings("unchecked")
-                    final Map<String, Session> sessionContainer = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
-                    // Iterate push managers
-                    final PushManagerRegistry registry = PushManagerRegistry.getInstance();
-                    if (null != registry) {
-                        for (final Iterator<PushManagerService> pushManagersIterator = registry.getPushManagers(); pushManagersIterator.hasNext();) {
-                            try {
-                                final PushManagerService pushManager = pushManagersIterator.next();
-                                // Stop listener for sessions
-                                final Collection<Session> sessions = sessionContainer.values();
-                                for (final Session session : sessions) {
-                                    /*
-                                     * Check session's client identifier
-                                     */
-                                    if (!PushUtility.allowedClient(session.getClient())) {
-                                        /*
-                                         * No push listener for the client associated with current session.
-                                         */
-                                        return;
-                                    }
-                                    final boolean stopped = pushManager.stopListener(session);
-                                    if (stopped) {
-                                        LOG.debug("Stopped push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), pushManager);
-                                    }
-                                }
-                            } catch (final OXException e) {
-                                LOG.error("Push error while stopping push listener.", e);
-                            } catch (final RuntimeException e) {
-                                LOG.error("Runtime error while stopping push listener.", e);
-                            }
-                        }
+                    Map<String, Session> sessionContainer = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
+                    PushManagerRegistry registry = PushManagerRegistry.getInstance();
+
+                    // Stop listener for sessions
+                    final Collection<Session> sessions = sessionContainer.values();
+                    for (Session session : sessions) {
+                        registry.stopListenerFor(session);
                     }
                 } else if (CONSIDER_ADDED.contains(topic)) {
-                    final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
-                    /*
-                     * Check session's client identifier
-                     */
-                    if (!PushUtility.allowedClient(session.getClient())) {
-                        /*
-                         * No push listener for the client associated with current session.
-                         */
-                        return;
-                    }
-                    /*
-                     * Iterate push managers
-                     */
-                    final PushManagerRegistry registry = PushManagerRegistry.getInstance();
-                    for (final Iterator<PushManagerService> pushManagersIterator = registry.getPushManagers(); pushManagersIterator.hasNext();) {
-                        try {
-                            final PushManagerService pushManager = pushManagersIterator.next();
-                            // Initialize a new push listener for session
-                            final PushListener pl = pushManager.startListener(session);
-                            if (null != pl) {
-                                LOG.debug("Started push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), pushManager);
-                            }
-                        } catch (final OXException e) {
-                            LOG.error("Push error while starting push listener.", e);
-                        } catch (final RuntimeException e) {
-                            LOG.error("Runtime error while starting push listener.", e);
-                        }
-                    }
+                    Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
+                    PushManagerRegistry registry = PushManagerRegistry.getInstance();
+                    registry.startListenerFor(session);
                 }
             } catch (final Exception e) {
                 LOG.error("Error while handling SessionD event \"{}\".", topic, e);

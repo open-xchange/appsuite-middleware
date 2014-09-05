@@ -52,14 +52,22 @@ package com.openexchange.push.internal;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.slf4j.Logger;
+import com.openexchange.exception.OXException;
+import com.openexchange.push.PushListener;
+import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushManagerService;
+import com.openexchange.push.PushUtility;
+import com.openexchange.session.Session;
 
 /**
  * {@link PushManagerRegistry} - The push manager registry.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PushManagerRegistry {
+public final class PushManagerRegistry implements PushListenerService {
+
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(PushManagerRegistry.class);
 
     private static volatile PushManagerRegistry instance;
 
@@ -110,6 +118,69 @@ public final class PushManagerRegistry {
     private PushManagerRegistry() {
         super();
         map = new ConcurrentHashMap<Class<? extends PushManagerService>, PushManagerService>();
+    }
+
+    @Override
+    public PushListener startListenerFor(Session session) {
+        /*
+         * Check session's client identifier
+         */
+        if (!PushUtility.allowedClient(session.getClient())) {
+            /*
+             * No push listener for the client associated with current session.
+             */
+            return null;
+        }
+        /*
+         * Iterate push managers
+         */
+        PushManagerRegistry registry = PushManagerRegistry.getInstance();
+        for (Iterator<PushManagerService> pushManagersIterator = registry.getPushManagers(); pushManagersIterator.hasNext();) {
+            try {
+                PushManagerService pushManager = pushManagersIterator.next();
+                // Initialize a new push listener for session
+                PushListener pl = pushManager.startListener(session);
+                if (null != pl) {
+                    LOG.debug("Started push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), pushManager);
+                    return pl;
+                }
+            } catch (OXException e) {
+                LOG.error("Push error while starting push listener.", e);
+            } catch (RuntimeException e) {
+                LOG.error("Runtime error while starting push listener.", e);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public boolean stopListenerFor(Session session) {
+        if (!PushUtility.allowedClient(session.getClient())) {
+            /*
+             * No push listener for the client associated with current session.
+             */
+            return false;
+        }
+        /*
+         * Iterate push managers
+         */
+        PushManagerRegistry registry = PushManagerRegistry.getInstance();
+        for (Iterator<PushManagerService> pushManagersIterator = registry.getPushManagers(); pushManagersIterator.hasNext();) {
+            try {
+                PushManagerService pushManager = pushManagersIterator.next();
+                // Stop listener for session
+                boolean stopped = pushManager.stopListener(session);
+                if (stopped) {
+                    LOG.debug("Stopped push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), pushManager);
+                    return true;
+                }
+            } catch (OXException e) {
+                LOG.error("Push error while stopping push listener.", e);
+            } catch (RuntimeException e) {
+                LOG.error("Runtime error while stopping push listener.", e);
+            }
+        }
+        return false;
     }
 
     /**

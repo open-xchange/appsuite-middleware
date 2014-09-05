@@ -51,6 +51,7 @@ package com.openexchange.push.mail.notify;
 
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
+import com.openexchange.config.ConfigurationService;
 
 
 /**
@@ -63,7 +64,28 @@ public final class DelayedNotification implements Delayed {
     /**
      * The delay for pooled notifications.
      */
-    private static final long DELAY_MSEC = 5000L;
+    private static volatile Long delayMillis;
+    private static long delayMillis() {
+        Long tmp = delayMillis;
+        if (null == tmp) {
+            synchronized (DelayedNotification.class) {
+                tmp = delayMillis;
+                if (null == tmp) {
+                    long defaultDelayMillis = 5000L;
+                    ConfigurationService service = Services.optService(ConfigurationService.class);
+                    if (null == service) {
+                        return defaultDelayMillis;
+                    }
+
+                    tmp = Long.valueOf(service.getIntProperty("com.openexchange.push.mail.notify.delayMillis", (int) defaultDelayMillis));
+                    delayMillis = tmp;
+                }
+            }
+        }
+        return tmp.longValue();
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------- //
 
     private final long stamp;
     private final boolean immediateDelivery;
@@ -103,7 +125,7 @@ public final class DelayedNotification implements Delayed {
 
     @Override
     public long getDelay(final TimeUnit unit) {
-        return immediateDelivery ? 0L : unit.convert(DELAY_MSEC - (System.currentTimeMillis() - stamp), TimeUnit.MILLISECONDS);
+        return immediateDelivery ? 0L : unit.convert(delayMillis() - (System.currentTimeMillis() - stamp), TimeUnit.MILLISECONDS);
     }
 
     @Override
