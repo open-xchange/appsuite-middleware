@@ -170,6 +170,21 @@ public final class MailFolderStorage implements FolderStorage {
         };
     }
 
+    private String optArchiveFullName(MailAccount mailAccount, MailAccess<?, ?> mailAccess) throws OXException {
+        if (null == mailAccount) {
+            return null;
+        }
+        String fn = mailAccount.getArchiveFullname();
+        if (null == fn) {
+            String name = mailAccount.getArchive();
+            if (null == name) {
+                return null;
+            }
+            fn = mailAccess.getFolderStorage().getDefaultFolderPrefix() + name;
+        }
+        return fn;
+    }
+
     @Override
     public void clearCache(final int userId, final int contextId) {
         /*
@@ -866,7 +881,7 @@ public final class MailFolderStorage implements FolderStorage {
                  */
                 boolean reverse;
                 {
-                    String archiveFullname = mailAccount.getArchiveFullname();
+                    String archiveFullname = optArchiveFullName(mailAccount, mailAccess);
                     reverse = null != archiveFullname && archiveFullname.equals(fullName);
                 }
 
@@ -1132,7 +1147,7 @@ public final class MailFolderStorage implements FolderStorage {
                             {
                                 MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
                                 MailAccount mailAccount = storageService.getMailAccount(accountId, storageParameters.getUserId(), storageParameters.getContextId());
-                                String archiveFullName = mailAccount.getArchiveFullname();
+                                String archiveFullName = optArchiveFullName(mailAccount, mailAccess);
                                 reverse = null != archiveFullName && archiveFullName.equals(fullname);
                             }
 
@@ -1210,7 +1225,7 @@ public final class MailFolderStorage implements FolderStorage {
                 {
                     MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
                     MailAccount mailAccount = storageService.getMailAccount(accountId, storageParameters.getUserId(), storageParameters.getContextId());
-                    String archiveFullName = mailAccount.getArchiveFullname();
+                    String archiveFullName = optArchiveFullName(mailAccount, mailAccess);
                     reverse = null != archiveFullName && archiveFullName.equals(fullname);
                 }
                 Collections.sort(children, new SimpleMailFolderComparator(storageParameters.getUser().getLocale(), reverse));
