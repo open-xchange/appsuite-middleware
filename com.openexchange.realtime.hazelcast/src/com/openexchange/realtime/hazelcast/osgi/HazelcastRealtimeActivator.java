@@ -50,6 +50,7 @@
 package com.openexchange.realtime.hazelcast.osgi;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import com.hazelcast.config.Config;
@@ -89,13 +90,24 @@ import com.openexchange.timer.TimerService;
 public class HazelcastRealtimeActivator extends HousekeepingActivator {
 
     private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastRealtimeActivator.class);
+
+    private final AtomicBoolean isStopped = new AtomicBoolean(true);
+
     private HazelcastResourceDirectory directory;
+
     private String cleanerRegistrationId;
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HazelcastInstance.class, LocalMessageDispatcher.class, ManagementService.class, TimerService.class,
-            LocalRealtimeCleanup.class, ThreadPoolService.class };
+        return new Class<?>[]
+            {
+                HazelcastInstance.class,
+                LocalMessageDispatcher.class,
+                ManagementService.class,
+                TimerService.class,
+                LocalRealtimeCleanup.class,
+                ThreadPoolService.class
+            };
     }
 
     @Override
@@ -166,19 +178,48 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
             LOG.error("Failed to expose ManagementObjects", oxe);
         }
         openTrackers();
+        isStopped.set(false);
     }
 
     @Override
     public void stopBundle() throws Exception {
-        LOG.info("Stopping bundle: {}", getClass().getCanonicalName());
-        try {
-            directory.removeResourceMappingEntryListener(cleanerRegistrationId);
-        } catch (Exception oxe) {
-            LOG.debug("Unable to remove ResourceMappingEntryListener.");
+        if (isStopped.compareAndSet(false, true)) {
+            LOG.info("Stopping bundle: {}", getClass().getCanonicalName());
+            try {
+                directory.removeResourceMappingEntryListener(cleanerRegistrationId);
+            } catch (Exception oxe) {
+                LOG.debug("Unable to remove ResourceMappingEntryListener.");
+            }
+            ManagementHouseKeeper.getInstance().cleanup();
+            Services.setServiceLookup(null);
+            cleanUp();
         }
-        ManagementHouseKeeper.getInstance().cleanup();
-        Services.setServiceLookup(null);
-        super.stopBundle();
+    }
+
+
+    @Override
+    protected void handleAvailability(Class<?> clazz) {
+        if (allAvailable()) {
+            LOG.info("{} regained all needed services {}. Going to restart bundle.", this.getClass().getSimpleName(), clazz.getSimpleName());
+            try {
+                startBundle();
+            } catch (Exception e) {
+                LOG.error("Error while starting bundle.", e);
+            }
+        }
+    }
+
+    @Override
+    protected void handleUnavailability(Class<?> clazz) {
+        LOG.warn(
+            "{} is handling unavailibility of needed service {}. Going to stop bundle.",
+            this.getClass().getSimpleName(),
+            clazz.getSimpleName());
+        try {
+            this.stopBundle();
+        } catch (Exception e) {
+            LOG.error("Error while stopping bundle.", e);
+        }
     }
 
     /**

@@ -49,7 +49,7 @@
 
 package com.openexchange.realtime.json.osgi;
 
-import org.osgi.framework.BundleContext;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
@@ -98,6 +98,7 @@ import com.openexchange.timer.TimerService;
 public class RTJSONActivator extends AJAXModuleActivator {
 
     private static final Logger LOG = LoggerFactory.getLogger(RTJSONActivator.class);
+    private final AtomicBoolean isStopped = new AtomicBoolean(true);
     private RealtimeActions realtimeActions;
     private volatile RTJSONHandler handler;
 
@@ -165,22 +166,49 @@ public class RTJSONActivator extends AJAXModuleActivator {
         for(RealtimeJanitor realtimeJanitor : RealtimeJanitors.getInstance().getJanitors()) {
             registerService(RealtimeJanitor.class, realtimeJanitor, realtimeJanitor.getServiceProperties());
         }
+        isStopped.set(false);
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
-        ManagementHouseKeeper.getInstance().cleanup();
-        RealtimeJanitors.getInstance().cleanup();
-        unregisterService(realtimeActions);
-
-        RTJSONHandler handler = this.handler;
-        if (null != handler) {
-            handler.shutDownCleanupTimer();
-            this.handler = null;
+    public void stopBundle() throws Exception {
+        if (isStopped.compareAndSet(false, true)) {
+            ManagementHouseKeeper.getInstance().cleanup();
+            RealtimeJanitors.getInstance().cleanup();
+            RTJSONHandler handler = this.handler;
+            if (null != handler) {
+                handler.shutDownCleanupTimer();
+                this.handler = null;
+            }
+            JSONServiceRegistry.SERVICES.set(null);
+            super.stopBundle();
         }
+    }
 
-        JSONServiceRegistry.SERVICES.set(null);
-        super.stop(context);
+    @Override
+    protected void handleAvailability(Class<?> clazz) {
+        if (allAvailable()) {
+            LOG.info("{} regained all needed services {}. Going to restart bundle.", this.getClass().getSimpleName(), clazz.getSimpleName());
+            try {
+                startBundle();
+            } catch (Exception e) {
+                LOG.error("Error while starting bundle.", e);
+            }
+        }
+    }
+
+    @Override
+    protected void handleUnavailability(Class<?> clazz) {
+        if (!isStopped.get()) {
+            LOG.warn(
+                "{} is handling unavailibility of needed service {}. Going to stop bundle.",
+                this.getClass().getSimpleName(),
+                clazz.getSimpleName());
+            try {
+                this.stopBundle();
+            } catch (Exception e) {
+                LOG.error("Error while stopping bundle.", e);
+            }
+        }
     }
 
 }

@@ -41,18 +41,24 @@ public class DistributedFileManagementActivator extends HousekeepingActivator {
         if (hazelcastConfig.isEnabled()) {
             track(HazelcastInstance.class, new SimpleRegistryListener<HazelcastInstance>() {
 
+                DistributedFileManagementImpl distributedFileManagement;
+
                 @Override
                 public void added(ServiceReference<HazelcastInstance> ref, HazelcastInstance service) {
                     DistributedFileManagementImpl.setHazelcastInstance(service);
-                    String address = service.getCluster().getLocalMember().getInetSocketAddress().getHostName();
+                    String address = service.getCluster().getLocalMember().getSocketAddress().getHostName();
                     String mapName = discoverMapName(service.getConfig());
                     address = address + ":" + port + prefix;
-                    registerService(DistributedFileManagement.class, new DistributedFileManagementImpl(services, address, mapName));
+                    distributedFileManagement = new DistributedFileManagementImpl(services, address, mapName);
+                    registerService(DistributedFileManagement.class, distributedFileManagement);
                 }
 
                 @Override
                 public void removed(ServiceReference<HazelcastInstance> ref, HazelcastInstance service) {
                     DistributedFileManagementImpl.setHazelcastInstance(null);
+                    if(distributedFileManagement != null) {
+                        unregisterService(distributedFileManagement);
+                    }
                 }
             });
 
