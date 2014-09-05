@@ -77,7 +77,7 @@ public final class DelayedNotification implements Delayed {
                         return defaultDelayMillis;
                     }
 
-                    tmp = Long.valueOf(service.getIntProperty("com.openexchange.push.mail.notify.delayMillis", (int) defaultDelayMillis));
+                    tmp = Long.valueOf(service.getIntProperty("com.openexchange.push.mail.notify.delay_millis", (int) defaultDelayMillis));
                     delayMillis = tmp;
                 }
             }
