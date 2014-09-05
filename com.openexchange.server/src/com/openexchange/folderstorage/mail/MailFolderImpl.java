@@ -694,10 +694,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
     @Override
     public String getLocalizedName(final Locale locale) {
         final String localizedName = this.localizedName;
-        if (null == localizedName) {
-            return name;
-        }
-        return localizedName;
+        return null == localizedName ? name : localizedName;
     }
 
 }
