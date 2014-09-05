@@ -47,56 +47,38 @@
  *
  */
 
-package com.openexchange.database.migration.mbean;
+package com.openexchange.database.migration;
 
-import java.util.List;
-import javax.management.MBeanException;
+import java.util.concurrent.ExecutionException;
 
 
 /**
- * MBean to manage db migration tasks
+ * {@link DBMigrationState}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.6.1
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.6.1
  */
-public interface DBMigrationMBean {
-
-    public static final String DOMAIN = "com.openexchange.database.migration";
-
-    public static final String KEY = "name";
-
-    public static final String VALUE = "Database migration";
+public interface DBMigrationState {
 
     /**
-     * Force running the core configdb changelog
+     * Returns whether this migration was already executed.
      *
-     * @return true - if update was successful, otherwise false
-     * @throws MBeanException
+     * @return <code>true</code> if the task is done.
      */
-    public boolean forceDBMigration() throws MBeanException;
+    public boolean isDone();
 
     /**
-     * Rollback to the given tag of a changeset of the core changelog
+     * Awaits the completion of this migration. If the current thread
+     * is interrupted while its blocked, {@link InterruptedException}
+     * is thrown.
      *
-     * @param changeSetTag
-     * @return true - if rollback was successful, otherwise false
-     * @throws MBeanException
+     * @throws ExecutionException If an error occurred during the
+     *         migrations execution. The original exception can be accessed
+     *         via {@link ExecutionException#getCause()}. The according exception
+     *         has already been logged, you don't need to do that again.
+     * @throws InterruptedException If the current thread
+     *         is interrupted while waiting for completion.
      */
-    public boolean rollbackDBMigration(String changeSetTag) throws MBeanException;
+    public void await() throws ExecutionException, InterruptedException;
 
-    /**
-     * Releases the database migration lock table. Use this in case no lock can be acquired by liquibase.
-     *
-     * @return true - if releasing lock was successful, otherwise false
-     * @throws MBeanException
-     */
-    public boolean releaseDBMigrationLock() throws MBeanException;
-
-    /**
-     * List of the currently not executed changesets for the core changelog
-     *
-     * @return List<String> with the currently not executed ChangeSets for the given file
-     * @throws MBeanException
-     */
-    public List<String> listUnexecutedChangeSets() throws MBeanException;
 }

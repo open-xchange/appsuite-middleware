@@ -49,10 +49,12 @@
 
 package com.openexchange.database.migration.internal;
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import liquibase.resource.ResourceAccessor;
+import com.openexchange.database.migration.DBMigrationState;
 
 
 /**
@@ -61,7 +63,7 @@ import liquibase.resource.ResourceAccessor;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class ScheduledExecution {
+public class ScheduledExecution implements DBMigrationState {
 
     private final Lock lock = new ReentrantLock();
 
@@ -71,6 +73,10 @@ public class ScheduledExecution {
 
     private final ResourceAccessor resourceAccessor;
 
+    private final Object rollbackTarget;
+
+    private ExecutionException exception = null;
+
     private boolean done = false;
 
     /**
@@ -79,34 +85,71 @@ public class ScheduledExecution {
      * @param resourceAccessor
      */
     public ScheduledExecution(String fileLocation, ResourceAccessor resourceAccessor) {
+        this(fileLocation, resourceAccessor, null);
+    }
+
+    /**
+     * Initializes a new {@link ScheduledExecution}.
+     * @param fileLocation
+     * @param resourceAccessor
+     * @param rollbackTarget
+     */
+    public ScheduledExecution(String fileLocation, ResourceAccessor resourceAccessor, Object rollbackTarget) {
         super();
         this.fileLocation = fileLocation;
         this.resourceAccessor = resourceAccessor;
+        this.rollbackTarget = rollbackTarget;
     }
 
-    public String getFileLocation() {
+    String getFileLocation() {
         return fileLocation;
     }
 
-    public ResourceAccessor getResourceAccessor() {
+    ResourceAccessor getResourceAccessor() {
         return resourceAccessor;
     }
 
-    public void setExecuted() {
+    boolean isRollback() {
+        return rollbackTarget != null;
+    }
+
+    Object getRollbackTarget() {
+        return rollbackTarget;
+    }
+
+    void setDone(Throwable t) {
         lock.lock();
         try {
             done = true;
+            if (t != null) {
+                exception = new ExecutionException(t);
+            }
+
             wasExecuted.signalAll();
         } finally {
             lock.unlock();
         }
     }
 
-    public void waitForExecution() throws InterruptedException {
+    @Override
+    public boolean isDone() {
+        lock.lock();
+        try {
+            return done;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @Override
+    public void await() throws ExecutionException, InterruptedException {
         while (!done) {
             lock.lock();
             try {
                 wasExecuted.await();
+                if (exception != null) {
+                    throw exception;
+                }
             } finally {
                 lock.unlock();
             }
@@ -119,6 +162,8 @@ public class ScheduledExecution {
         int result = 1;
         result = prime * result + ((fileLocation == null) ? 0 : fileLocation.hashCode());
         result = prime * result + ((resourceAccessor == null) ? 0 : resourceAccessor.hashCode());
+        result = prime * result + ((rollbackTarget == null) ? 0 : rollbackTarget.hashCode());
+        result = prime * result + ((wasExecuted == null) ? 0 : wasExecuted.hashCode());
         return result;
     }
 
@@ -141,12 +186,22 @@ public class ScheduledExecution {
                 return false;
         } else if (!resourceAccessor.equals(other.resourceAccessor))
             return false;
+        if (rollbackTarget == null) {
+            if (other.rollbackTarget != null)
+                return false;
+        } else if (!rollbackTarget.equals(other.rollbackTarget))
+            return false;
+        if (wasExecuted == null) {
+            if (other.wasExecuted != null)
+                return false;
+        } else if (!wasExecuted.equals(other.wasExecuted))
+            return false;
         return true;
     }
 
     @Override
     public String toString() {
-        return "ScheduledExecution [fileLocation=" + fileLocation + ", resourceAccessor=" + resourceAccessor + "]";
+        return "ScheduledExecution [fileLocation=" + fileLocation + ", resourceAccessor=" + resourceAccessor + ", rollbackTarget=" + rollbackTarget + ", done=" + done + "]";
     }
 
 }

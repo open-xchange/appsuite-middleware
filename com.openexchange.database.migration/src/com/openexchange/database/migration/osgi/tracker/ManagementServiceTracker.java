@@ -56,7 +56,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.database.migration.DBMigrationExecutorService;
+import com.openexchange.database.migration.internal.DBMigrationExecutorServiceImpl;
 import com.openexchange.database.migration.mbean.DBMigrationMBean;
 import com.openexchange.database.migration.mbean.DBMigrationMBeanImpl;
 import com.openexchange.exception.OXException;
@@ -79,7 +79,7 @@ public class ManagementServiceTracker implements ServiceTrackerCustomizer<Manage
 
     private DatabaseService databaseService;
 
-    private DBMigrationExecutorService dbMigrationExecutorService;
+    private DBMigrationExecutorServiceImpl dbMigrationExecutorService;
 
     /**
      * Initializes a new {@link ManagementServiceTracker}.
@@ -87,7 +87,7 @@ public class ManagementServiceTracker implements ServiceTrackerCustomizer<Manage
      * @param context
      * @param databaseService
      */
-    public ManagementServiceTracker(final BundleContext context, DBMigrationExecutorService dbMigrationExecutorService, DatabaseService databaseService) {
+    public ManagementServiceTracker(final BundleContext context, DBMigrationExecutorServiceImpl dbMigrationExecutorService, DatabaseService databaseService) {
         super();
         this.context = context;
         this.dbMigrationExecutorService = dbMigrationExecutorService;

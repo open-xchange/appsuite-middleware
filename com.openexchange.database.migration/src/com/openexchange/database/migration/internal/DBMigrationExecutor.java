@@ -62,6 +62,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
+import com.openexchange.database.migration.DBMigrationExceptionCodes;
 import com.openexchange.exception.OXException;
 
 
@@ -74,6 +75,8 @@ import com.openexchange.exception.OXException;
 public class DBMigrationExecutor implements Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(DBMigrationExecutor.class);
+
+    private static final String LIQUIBASE_NO_DEFINED_CONTEXT = DBMigrationExecutorServiceImpl.LIQUIBASE_NO_DEFINED_CONTEXT;
 
     private final DatabaseService databaseService;
 
@@ -105,41 +108,60 @@ public class DBMigrationExecutor implements Runnable {
                 lock.unlock();
             }
 
+            Exception exception = null;
             if (scheduledExecution != null) {
                 Liquibase liquibase = null;
                 Connection connection = null;
                 try {
-                    connection = databaseService.getWritable(); // TODO: without timeout
+                    connection = databaseService.getForUpdateTask();
                     MySQLDatabase database = new MySQLDatabase();
                     database.setConnection(new JdbcConnection(connection));
+                    String fileLocation = scheduledExecution.getFileLocation();
                     liquibase = new Liquibase(
-                        scheduledExecution.getFileLocation(),
+                        fileLocation,
                         scheduledExecution.getResourceAccessor(),
                         database);
 
-                    liquibase.update("");
+                    if (scheduledExecution.isRollback()) {
+                        Object target = scheduledExecution.getRollbackTarget();
+                        if (target instanceof Integer) {
+                            int numberOfChangeSetsToRollback = (Integer) target;
+                            LOG.info("Rollback {} numbers of changesets of changelog {}", numberOfChangeSetsToRollback, fileLocation);
+                            liquibase.rollback(numberOfChangeSetsToRollback, LIQUIBASE_NO_DEFINED_CONTEXT);
+                        } else if (target instanceof String) {
+                            String changeSetTag = (String) target;
+                            LOG.info("Rollback to changeset {} of changelog {}", changeSetTag, fileLocation);
+                            liquibase.rollback(changeSetTag, LIQUIBASE_NO_DEFINED_CONTEXT);
+                        } else {
+                            throw DBMigrationExceptionCodes.WRONG_TYPE_OF_DATA_ROLLBACK_ERROR.create();
+                        }
+                    } else {
+                        LOG.info("Running migrations of changelog {}", fileLocation);
+                        liquibase.update(LIQUIBASE_NO_DEFINED_CONTEXT);
+                    }
                 } catch (LiquibaseException e) {
-                    // TODO
+                    exception = e;
                     LOG.error("", e);
                 } catch (OXException e) {
+                    exception = e;
                     LOG.error("", e);
                 } catch (Exception e) {
+                    exception = e;
                     LOG.error("", e);
                 } finally {
-                    scheduledExecution.setExecuted();
+                    scheduledExecution.setDone(exception);
 
                     if (liquibase != null) {
                         try {
                             liquibase.forceReleaseLocks();
                         } catch (LiquibaseException e) {
-                            // TODO Auto-generated catch block
                             LOG.error("", e);
                         }
                     }
 
                     if (connection != null) {
                         Databases.autocommit(connection);
-                        databaseService.backWritable(connection);
+                        databaseService.backForUpdateTask(connection);
                     }
                 }
             }

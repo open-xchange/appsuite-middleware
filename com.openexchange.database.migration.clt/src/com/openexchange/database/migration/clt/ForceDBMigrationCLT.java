@@ -51,6 +51,7 @@ package com.openexchange.database.migration.clt;
 
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
+import javax.management.MBeanServerInvocationHandler;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import com.openexchange.auth.mbean.AuthenticatorMBean;
@@ -130,7 +131,6 @@ public class ForceDBMigrationCLT extends AbstractMBeanCLI<Boolean> {
      */
     @Override
     protected void addOptions(Options options) {
-        options.addOption("f", "filename", true, "Name of the file the database migration should be forced for");
     }
 
     /**
@@ -138,23 +138,12 @@ public class ForceDBMigrationCLT extends AbstractMBeanCLI<Boolean> {
      */
     @Override
     protected Boolean invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        boolean forceUpdateSuccessful = false;
+        DBMigrationMBean migrationMBean = MBeanServerInvocationHandler.newProxyInstance(
+            mbsc,
+            getObjectName(DBMigrationMBean.class.getName(), DBMigrationMBean.DOMAIN),
+            DBMigrationMBean.class,
+            false);
 
-        if (!cmd.hasOption('f')) {
-            System.err.println("Missing file name to force update for.");
-            printHelp(option);
-            System.exit(1);
-        }
-        final String fileName = cmd.getOptionValue('f');
-        final String[] signature = new String[] { String.class.getName() };
-        final Object[] params = new Object[] { fileName };
-        Object invoke = mbsc.invoke(getObjectName(DBMigrationMBean.class.getName(), DBMigrationMBean.DOMAIN), getName(), params, signature);
-
-        if (invoke instanceof Boolean) {
-            forceUpdateSuccessful = (Boolean) invoke;
-        } else {
-            System.out.println("Unexpected result from calling '" + getName() + "'. Neither 'true' nor 'false' received from the call.");
-        }
-        return forceUpdateSuccessful;
+        return migrationMBean.forceDBMigration();
     }
 }

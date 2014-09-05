@@ -52,7 +52,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutionException;
 import liquibase.Liquibase;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.core.MySQLDatabase;
@@ -60,16 +60,13 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.LockException;
 import liquibase.exception.ValidationFailedException;
-import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import org.apache.commons.lang.Validate;
 import org.osgi.framework.FrameworkUtil;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.migration.DBMigrationExceptionCodes;
 import com.openexchange.database.migration.DBMigrationExecutorService;
-import com.openexchange.database.migration.DBMigrationMonitor;
+import com.openexchange.database.migration.DBMigrationState;
 import com.openexchange.database.migration.resource.accessor.BundleResourceAccessor;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.sql.DBUtils;
@@ -83,15 +80,18 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorService {
 
+
+    private static final String CONFIGDB_CHANGE_LOG = "/liquibase/configdbChangeLog.xml";
+
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DBMigrationExecutorServiceImpl.class);
 
-    private static final String LIQUIBASE_NO_DEFINED_CONTEXT = "";
+    static final String LIQUIBASE_NO_DEFINED_CONTEXT = "";
 
     private final DBMigrationExecutor executor;
 
     private DatabaseService databaseService;
 
-    private List<ResourceAccessor> accessors = new CopyOnWriteArrayList<ResourceAccessor>();
+    private final BundleResourceAccessor localResourceAccessor = new BundleResourceAccessor(FrameworkUtil.getBundle(getClass()));
 
 
     /**
@@ -156,7 +156,7 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
         databaseConnection.setConnection(jdbcConnection);
         databaseConnection.setAutoCommit(true);
 
-        return new Liquibase(filePath, new CompositeResourceAccessor(accessors), databaseConnection);
+        return new Liquibase(filePath, localResourceAccessor, databaseConnection);
     }
 
     /**
@@ -187,19 +187,10 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
      * {@inheritDoc}
      */
     @Override
-    public void execute(String fileLocation, ResourceAccessor accessor) throws OXException {
-        executor.schedule(new ScheduledExecution(fileLocation, accessor));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void execute(final String fileLocation) throws OXException {
-        CompositeResourceAccessor accessor = new CompositeResourceAccessor(
-            new FileSystemResourceAccessor(),
-            new ClassLoaderResourceAccessor(getClass().getClassLoader()));
-        execute(fileLocation, accessor);
+    public DBMigrationState execute(String fileLocation, ResourceAccessor accessor) {
+        ScheduledExecution scheduledExecution = new ScheduledExecution(fileLocation, accessor);
+        executor.schedule(scheduledExecution);
+        return scheduledExecution;
     }
 
     /**
@@ -208,8 +199,8 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
      * @throws OXException
      */
     @Override
-    public void rollback(String fileLocation, int numberOfChangeSets) throws OXException {
-        rollbackChangeSets(fileLocation, numberOfChangeSets);
+    public DBMigrationState rollback(String fileLocation, int numberOfChangeSets, ResourceAccessor accessor) {
+        return rollbackChangeSets(fileLocation, numberOfChangeSets, accessor);
     }
 
     /**
@@ -218,8 +209,8 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
      * @throws OXException
      */
     @Override
-    public void rollback(String fileLocation, String changeSetTag) throws OXException {
-        rollbackChangeSets(fileLocation, changeSetTag);
+    public DBMigrationState rollback(String fileLocation, String changeSetTag, ResourceAccessor accessor) {
+        return rollbackChangeSets(fileLocation, changeSetTag, accessor);
     }
 
     /**
@@ -228,43 +219,20 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
      *
      * @param fileLocation
      * @param target
-     * @return
+     * @return DBMigrationState
      * @throws OXException
      */
-    private void rollbackChangeSets(String fileLocation, Object target) throws OXException {
-        LOG.info("Start rollback database migrations for file {}", fileLocation);
-
-        Connection writable = null;
-        Liquibase liquibase = null;
-        try {
-            writable = databaseService.getWritable();
-
-            liquibase = prepareLiquibase(writable, fileLocation);
-
-            if (target instanceof Integer) {
-                int numberOfChangeSetsToRollback = (Integer) target;
-                LOG.info("Rollback {} numbers of changesets", numberOfChangeSetsToRollback);
-                liquibase.rollback(numberOfChangeSetsToRollback, LIQUIBASE_NO_DEFINED_CONTEXT);
-            } else if (target instanceof String) {
-                String changeSetTag = (String) target;
-                LOG.info("Rollback to changeset {}", changeSetTag);
-                liquibase.rollback(changeSetTag, LIQUIBASE_NO_DEFINED_CONTEXT);
-            } else {
-                throw DBMigrationExceptionCodes.WRONG_TYPE_OF_DATA_ROLLBACK_ERROR.create();
-            }
-        } catch (Exception exception) {
-            handleExceptions(exception);
-        } finally {
-            cleanUpLiquibase(writable, liquibase);
-        }
-        LOG.info("Finished rollback of database migrations for file {}", fileLocation);
+    private DBMigrationState rollbackChangeSets(String fileLocation, Object target, ResourceAccessor accessor) {
+        ScheduledExecution scheduledExecution = new ScheduledExecution(fileLocation, accessor, target);
+        executor.schedule(scheduledExecution);
+        return scheduledExecution;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public List<ChangeSet> listUnexecutedChangeSets(String fileLocation) throws OXException {
+    public List<ChangeSet> listUnexecutedChangeSets(String fileLocation, ResourceAccessor accessor) throws OXException {
         List<ChangeSet> unexecutedChangeSets = new ArrayList<ChangeSet>();
 
         Connection writable = null;
@@ -291,11 +259,24 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
         return !DBMigrationMonitor.getInstance().getScheduledFiles().isEmpty();
     }
 
-    public void initCoreMigrations() throws InterruptedException {
+    public void runCoreMigrations() throws InterruptedException, ExecutionException {
         ScheduledExecution scheduledExecution = new ScheduledExecution(
-            "/liquibase/configdbChangeLog.xml",
-            new BundleResourceAccessor(FrameworkUtil.getBundle(getClass())));
+            CONFIGDB_CHANGE_LOG,
+            localResourceAccessor);
         executor.schedule(scheduledExecution);
-        scheduledExecution.waitForExecution();
+        scheduledExecution.await();
+    }
+
+    public void rollbackCoreMigrations(String changeSetTag) throws ExecutionException, InterruptedException {
+        ScheduledExecution scheduledExecution = new ScheduledExecution(
+            CONFIGDB_CHANGE_LOG,
+            localResourceAccessor,
+            changeSetTag);
+        executor.schedule(scheduledExecution);
+        scheduledExecution.await();
+    }
+
+    public List<ChangeSet> listUnexecutedCoreMigrations() throws OXException {
+        return listUnexecutedChangeSets(CONFIGDB_CHANGE_LOG, localResourceAccessor);
     }
 }

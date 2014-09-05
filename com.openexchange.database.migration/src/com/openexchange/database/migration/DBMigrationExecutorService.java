@@ -65,33 +65,25 @@ import com.openexchange.exception.OXException;
 public interface DBMigrationExecutorService {
 
     /**
-     * Execute database migration based on the given file name
-     *
-     * @param fileLocation - location of the file in the providing bundle, e.g. /liquibase/changelog.xml
-     * @throws OXException
-     */
-    public void execute(String fileLocation) throws OXException;
-
-    /**
      * Execute database migration based on the given filename. If {@link CustomSqlChange} or {@link CustomTaskChange} are desired to be used
      * add additional {@link ResourceAccessor} via parameter 'additionalAccessors' so that this classes can be found. Provide
      * <code>null</code> in case you are using xml files no additional accessor is required.
      *
      * @param fileLocation - location of the file in the providing bundle, e.g. /liquibase/changelog.xml
      * @param accessor - The {@link ResourceAccessor}s to read in the changelog file identified by <code>fileLocation</code>
-     * @throws OXException
+     * @return A {@link DBMigrationState} instance, that can be used to wait for completion.
      */
-    public void execute(String fileLocation, ResourceAccessor accessor) throws OXException;
+    public DBMigrationState execute(String fileLocation, ResourceAccessor accessor);
 
     /**
      * Executes a rollback for the given number of ChangeSets
      *
      * @param fileLocation - location of the file in the providing bundle, e.g. /liquibase/changelog.xml
      * @param numberOfChangeSets - number of ChangeSets to roll back to
-     * @return boolean - true if rollback was successful. Otherwise false
-     * @throws OXException
+     * @param accessor - The {@link ResourceAccessor}s to read in the changelog file identified by <code>fileLocation</code>
+     * @return A {@link DBMigrationState} instance, that can be used to wait for completion.
      */
-    public void rollback(String fileLocation, int numberOfChangeSets) throws OXException;
+    public DBMigrationState rollback(String fileLocation, int numberOfChangeSets, ResourceAccessor accessor);
 
     /**
      * Specifying a tag to rollback to will roll back all change-sets that were executed against the target database after the given tag was
@@ -99,18 +91,19 @@ public interface DBMigrationExecutorService {
      *
      * @param fileLocation - location of the file in the providing bundle, e.g. /liquibase/changelog.xml
      * @param changeSetTag - changeset tag to roll back to
-     * @return boolean - true if rollback was successful. Otherwise false
-     * @throws OXException
+     * @param accessor - The {@link ResourceAccessor}s to read in the changelog file identified by <code>fileLocation</code>
+     * @return A {@link DBMigrationState} instance, that can be used to wait for completion.
      */
-    public void rollback(String fileLocation, String changeSetTag) throws OXException;
+    public DBMigrationState rollback(String fileLocation, String changeSetTag, ResourceAccessor accessor);
 
     /**
      * Returns a list of the currently not executed ChangeSets
      *
      * @param fileLocation - location of the file in the providing bundle, e.g. /liquibase/changelog.xml
+     * @param accessor - The {@link ResourceAccessor}s to read in the changelog file identified by <code>fileLocation</code>
      * @return List<ChangeSet> with the currently not executed liquibase changesets
      */
-    public List<ChangeSet> listUnexecutedChangeSets(String fileLocation) throws OXException;
+    public List<ChangeSet> listUnexecutedChangeSets(String fileLocation, ResourceAccessor accessor) throws OXException;
 
     /**
      * TODO

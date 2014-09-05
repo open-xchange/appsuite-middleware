@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.database.migration;
+package com.openexchange.database.migration.internal;
 
 import java.util.ArrayList;
 import java.util.Collection;

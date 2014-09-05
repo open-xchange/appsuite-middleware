@@ -54,6 +54,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
@@ -61,7 +62,7 @@ import liquibase.changelog.ChangeSet;
 import org.apache.commons.lang.Validate;
 import org.slf4j.Logger;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.database.migration.DBMigrationExecutorService;
+import com.openexchange.database.migration.internal.DBMigrationExecutorServiceImpl;
 import com.openexchange.exception.OXException;
 
 /**
@@ -72,7 +73,7 @@ import com.openexchange.exception.OXException;
  */
 public class DBMigrationMBeanImpl extends StandardMBean implements DBMigrationMBean {
 
-    private final DBMigrationExecutorService dbMigrationExecutorService;
+    private final DBMigrationExecutorServiceImpl dbMigrationExecutorService;
 
     private final DatabaseService databaseService;
 
@@ -84,7 +85,7 @@ public class DBMigrationMBeanImpl extends StandardMBean implements DBMigrationMB
      * @param mbeanInterface
      * @throws NotCompliantMBeanException
      */
-    public DBMigrationMBeanImpl(Class<? extends DBMigrationMBean> mbeanInterface, DBMigrationExecutorService dbMigrationExecutorService, DatabaseService databaseService) throws NotCompliantMBeanException {
+    public DBMigrationMBeanImpl(Class<? extends DBMigrationMBean> mbeanInterface, DBMigrationExecutorServiceImpl dbMigrationExecutorService, DatabaseService databaseService) throws NotCompliantMBeanException {
         super(mbeanInterface);
         Validate.notNull(dbMigrationExecutorService, "DBMigrationExecuterService must not be null!");
         Validate.notNull(databaseService, "DatabaseService must not be null!");
@@ -97,15 +98,28 @@ public class DBMigrationMBeanImpl extends StandardMBean implements DBMigrationMB
      * {@inheritDoc}
      */
     @Override
-    public boolean forceDBMigration(String fileName) throws MBeanException {
-
-        if (fileName == null) {
-            throw new MBeanException(new IllegalArgumentException("Param fileName might not be null!"));
+    public boolean forceDBMigration() throws MBeanException {
+        try {
+            dbMigrationExecutorService.runCoreMigrations();
+        } catch (InterruptedException e) {
+            throw new MBeanException(e, e.getMessage());
+        } catch (ExecutionException e) {
+            throw new MBeanException(e, e.getMessage());
         }
 
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean rollbackDBMigration(String changeSetTag) throws MBeanException {
         try {
-            dbMigrationExecutorService.execute(fileName);
-        } catch (OXException e) {
+            dbMigrationExecutorService.rollbackCoreMigrations(changeSetTag);
+        } catch (InterruptedException e) {
+            throw new MBeanException(e, e.getMessage());
+        } catch (ExecutionException e) {
             throw new MBeanException(e, e.getMessage());
         }
 
@@ -143,17 +157,14 @@ public class DBMigrationMBeanImpl extends StandardMBean implements DBMigrationMB
      * {@inheritDoc}
      */
     @Override
-    public List<String> listUnexecutedChangeSets(String fileName) throws MBeanException {
-        if (fileName == null) {
-            throw new MBeanException(new IllegalArgumentException("Param fileName might not be null!"));
-        }
+    public List<String> listUnexecutedChangeSets() throws MBeanException {
         List<String> unexecutedChangeSets = new ArrayList<String>();
 
         try {
-            List<ChangeSet> listUnexecutedChangeSets = dbMigrationExecutorService.listUnexecutedChangeSets(fileName);
+            List<ChangeSet> listUnexecutedChangeSets = dbMigrationExecutorService.listUnexecutedCoreMigrations();
 
             for (ChangeSet changeSet : listUnexecutedChangeSets) {
-                unexecutedChangeSets.add("Filename: " + fileName + "; ChangeSet: " + changeSet.toString(true));
+                unexecutedChangeSets.add("ChangeSet: " + changeSet.toString(true));
             }
 
         } catch (OXException e) {
@@ -163,21 +174,4 @@ public class DBMigrationMBeanImpl extends StandardMBean implements DBMigrationMB
         return unexecutedChangeSets;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean rollbackDBMigration(String fileName, String changeSetTag) throws MBeanException {
-        if (fileName == null) {
-            throw new MBeanException(new IllegalArgumentException("Param fileName might not be null!"));
-        }
-
-        try {
-            dbMigrationExecutorService.rollback(fileName, changeSetTag);
-        } catch (OXException e) {
-            throw new MBeanException(e, e.getMessage());
-        }
-
-        return true;
-    }
 }
