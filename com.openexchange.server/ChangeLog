@@ -1,7 +1,11 @@
+* 2014-09-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 33036: Introduced convenience methods to optionally resolve a setting and to ignore any load/save-back operations if such a setting is non-existent
+
 * 2014-09-05 - marc.arens@open-xchange.com
 
  - Fix for bug 34196: Deny access to documentconverterws by default
- 
+
 * 2014-09-05 - thorben.betten@open-xchange.com
 
  - Fix for bug 32634: Distribute received push event remotely to other cluster nodes
