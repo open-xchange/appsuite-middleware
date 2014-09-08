@@ -81,7 +81,7 @@ import com.openexchange.exception.OXException;
  */
 public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorService {
 
-    private static final String CONFIGDB_CHANGE_LOG = "/liquibase/configdbChangeLog.xml";
+    private static final String CONFIGDB_CHANGE_LOG = "/resource/liquibase/configdbChangeLog.xml";
 
     private final DBMigrationExecutor executor;
 
@@ -109,7 +109,7 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
      * {@inheritDoc}
      */
     @Override
-    public DBMigrationState execute(String fileLocation, ResourceAccessor accessor) {
+    public DBMigrationState scheduleMigration(String fileLocation, ResourceAccessor accessor) {
     	return executor.scheduleMigration(fileLocation, accessor);
     }
 
@@ -119,7 +119,7 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
      * @throws OXException
      */
     @Override
-    public DBMigrationState rollback(String fileLocation, int numberOfChangeSets, ResourceAccessor accessor) {
+    public DBMigrationState scheduleRollback(String fileLocation, int numberOfChangeSets, ResourceAccessor accessor) {
         return executor.scheduleRollback(fileLocation, accessor, numberOfChangeSets);
     }
 
@@ -129,7 +129,7 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
      * @throws OXException
      */
     @Override
-    public DBMigrationState rollback(String fileLocation, String changeSetTag, ResourceAccessor accessor) {
+    public DBMigrationState scheduleRollback(String fileLocation, String changeSetTag, ResourceAccessor accessor) {
     	return executor.scheduleRollback(fileLocation, accessor, changeSetTag);
     }
 
@@ -171,12 +171,12 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
 
     public void runCoreMigrations() throws InterruptedException, ExecutionException {
         ScheduledExecution scheduledExecution = executor.scheduleMigration(CONFIGDB_CHANGE_LOG, localResourceAccessor);
-        scheduledExecution.await();
+        scheduledExecution.awaitCompletion();
     }
 
     public void rollbackCoreMigrations(String changeSetTag) throws ExecutionException, InterruptedException {
         ScheduledExecution scheduledExecution = executor.scheduleRollback(CONFIGDB_CHANGE_LOG, localResourceAccessor, changeSetTag);
-        scheduledExecution.await();
+        scheduledExecution.awaitCompletion();
     }
 
     public List<ChangeSet> listUnexecutedCoreMigrations() throws OXException {

@@ -2,7 +2,7 @@
 
 <databaseChangeLog xmlns="urn:liquibase"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="urn:liquibase ./schema/dbchangelog-3.0.xsd"
+	xsi:schemaLocation="urn:liquibase /resource/liquibase/dbchangelog-3.0.xsd"
 	logicalFilePath="configdbChangeLog">
 
 

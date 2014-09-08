@@ -79,6 +79,6 @@ public interface DBMigrationState {
      * @throws InterruptedException If the current thread
      *         is interrupted while waiting for completion.
      */
-    public void await() throws ExecutionException, InterruptedException;
+    public void awaitCompletion() throws ExecutionException, InterruptedException;
 
 }

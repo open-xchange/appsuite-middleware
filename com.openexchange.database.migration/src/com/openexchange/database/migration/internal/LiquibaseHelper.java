@@ -9,14 +9,17 @@ import liquibase.database.core.MySQLDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
+import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 
+import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.database.migration.DBMigrationExceptionCodes;
+import com.openexchange.database.migration.resource.accessor.BundleResourceAccessor;
 import com.openexchange.exception.OXException;
 
 public class LiquibaseHelper {
@@ -43,7 +46,7 @@ public class LiquibaseHelper {
         database.setConnection(new JdbcConnection(connection));
         Liquibase liquibase = new Liquibase(
             fileLocation,
-            accessor,
+            LiquibaseHelper.prepareResourceAccessor(accessor),
             database);
         return liquibase;
     }
@@ -84,6 +87,19 @@ public class LiquibaseHelper {
             	}
             }
         }
+    }
+    
+    /**
+     * Prepares a {@link CompositeResourceAccessor} containing the given {@link ResourceAccessor}
+     * and one for this bundle.
+     * 
+     * @param provided The {@link ResourceAccessor} provided by service users
+     * @return A {@link CompositeResourceAccessor}
+     */
+    public static ResourceAccessor prepareResourceAccessor(ResourceAccessor provided) {
+    	return new CompositeResourceAccessor(
+    			provided,
+    			new BundleResourceAccessor(FrameworkUtil.getBundle(LiquibaseHelper.class)));
     }
 
 }

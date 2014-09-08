@@ -50,14 +50,16 @@
 package com.openexchange.database.migration;
 
 import java.util.List;
-import liquibase.change.custom.CustomSqlChange;
-import liquibase.change.custom.CustomTaskChange;
+
+import liquibase.Liquibase;
 import liquibase.changelog.ChangeSet;
 import liquibase.resource.ResourceAccessor;
+
+import com.openexchange.database.migration.resource.accessor.BundleResourceAccessor;
 import com.openexchange.exception.OXException;
 
 /**
- * Interface that defines the execution of database migration tasks
+ * Interface that defines the execution of database migration tasks based on {@link Liquibase}.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.1
@@ -65,42 +67,45 @@ import com.openexchange.exception.OXException;
 public interface DBMigrationExecutorService {
 
     /**
-     * Execute database migration based on the given filename. If {@link CustomSqlChange} or {@link CustomTaskChange} are desired to be used
-     * add additional {@link ResourceAccessor} via parameter 'additionalAccessors' so that this classes can be found. Provide
-     * <code>null</code> in case you are using xml files no additional accessor is required.
+     * Schedules a database migration based on the given file location and {@link ResourceAccessor}.
+     * The migration file must be resolvable by its location via the accessor.
+     * 
+     * You probably want to use a XML file contained in your bundle-jar. {@link BundleResourceAccessor}
+     * is the right choice then. The files location must then be specified absolute, starting at the
+     * bundle root directory (e.g. "/resources/com.example.ox.extensions/configdbChangeLog.xml").
      *
-     * @param fileLocation - location of the file in the providing bundle, e.g. /liquibase/changelog.xml
-     * @param accessor - The {@link ResourceAccessor}s to read in the changelog file identified by <code>fileLocation</code>
+     * @param fileLocation Location of the changelog file
+     * @param accessor The {@link ResourceAccessor} to read in the changelog file identified by <code>fileLocation</code>
      * @return A {@link DBMigrationState} instance, that can be used to wait for completion.
      */
-    public DBMigrationState execute(String fileLocation, ResourceAccessor accessor);
+    public DBMigrationState scheduleMigration(String fileLocation, ResourceAccessor accessor);
 
     /**
-     * Executes a rollback for the given number of ChangeSets
+     * Schedules a a rollback for the given number of change sets
      *
-     * @param fileLocation - location of the file in the providing bundle, e.g. /liquibase/changelog.xml
-     * @param numberOfChangeSets - number of ChangeSets to roll back to
-     * @param accessor - The {@link ResourceAccessor}s to read in the changelog file identified by <code>fileLocation</code>
+     * @param fileLocation Location of the changelog file
+     * @param numberOfChangeSets Number of change sets to roll back
+     * @param accessor The {@link ResourceAccessor}s to read in the changelog file identified by <code>fileLocation</code>
      * @return A {@link DBMigrationState} instance, that can be used to wait for completion.
      */
-    public DBMigrationState rollback(String fileLocation, int numberOfChangeSets, ResourceAccessor accessor);
+    public DBMigrationState scheduleRollback(String fileLocation, int numberOfChangeSets, ResourceAccessor accessor);
 
     /**
-     * Specifying a tag to rollback to will roll back all change-sets that were executed against the target database after the given tag was
-     * applied.
+     * Schedules a rollback to a given tag. This will roll back all change sets of the given changelog, that were executed
+     * against the target database after the given tag was applied.
      *
-     * @param fileLocation - location of the file in the providing bundle, e.g. /liquibase/changelog.xml
-     * @param changeSetTag - changeset tag to roll back to
-     * @param accessor - The {@link ResourceAccessor}s to read in the changelog file identified by <code>fileLocation</code>
+     * @param fileLocation Location of the changelog file
+     * @param changeSetTag The tag to roll back to
+     * @param accessor The {@link ResourceAccessor} to read in the changelog file identified by <code>fileLocation</code>
      * @return A {@link DBMigrationState} instance, that can be used to wait for completion.
      */
-    public DBMigrationState rollback(String fileLocation, String changeSetTag, ResourceAccessor accessor);
+    public DBMigrationState scheduleRollback(String fileLocation, String changeSetTag, ResourceAccessor accessor);
 
     /**
-     * Returns a list of the currently not executed ChangeSets
+     * Returns a list of the currently not executed change sets
      *
-     * @param fileLocation - location of the file in the providing bundle, e.g. /liquibase/changelog.xml
-     * @param accessor - The {@link ResourceAccessor}s to read in the changelog file identified by <code>fileLocation</code>
+     * @param fileLocation Location of the changelog file
+     * @param accessor The {@link ResourceAccessor} to read in the changelog file identified by <code>fileLocation</code>
      * @return List<ChangeSet> with the currently not executed liquibase changesets
      */
     public List<ChangeSet> listUnexecutedChangeSets(String fileLocation, ResourceAccessor accessor) throws OXException;

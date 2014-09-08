@@ -1062,7 +1062,6 @@ exit 0
 /opt/open-xchange/sbin/*
 %dir /opt/open-xchange/templates/
 /opt/open-xchange/templates/*
-/opt/open-xchange/liquibase/*
 %dir %attr(750, open-xchange, root) /var/log/open-xchange
 %dir %attr(750, open-xchange, root) /var/spool/open-xchange/uploads
 %doc docs/

@@ -142,7 +142,7 @@ public class ScheduledExecution implements DBMigrationState {
     }
 
     @Override
-    public void await() throws ExecutionException, InterruptedException {
+    public void awaitCompletion() throws ExecutionException, InterruptedException {
         while (!done) {
             lock.lock();
             try {

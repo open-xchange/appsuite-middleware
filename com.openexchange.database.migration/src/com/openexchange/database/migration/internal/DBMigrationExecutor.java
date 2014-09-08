@@ -58,6 +58,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
+import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 
 import org.slf4j.Logger;
