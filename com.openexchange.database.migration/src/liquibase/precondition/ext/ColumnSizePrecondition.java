@@ -53,20 +53,20 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.CustomPreconditionErrorException;
 import liquibase.exception.CustomPreconditionFailedException;
 import liquibase.precondition.CustomPrecondition;
+import org.apache.commons.lang.Validate;
 
 /**
- * Verifies the size of the database column.
+ * Verifies the size of the database column by ignoring the type of the column!
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.1
  */
 public class ColumnSizePrecondition implements CustomPrecondition {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ColumnSizePrecondition.class);
 
     private int expectedSize;
 
@@ -75,16 +75,16 @@ public class ColumnSizePrecondition implements CustomPrecondition {
     private String columnName;
 
     /**
-     * Sets the expected size of the column
+     * Sets the expected size of the column (by reflection from liquibase)
      *
-     * @param expectedSize - int with the size
+     * @param expectedSize - String with the size
      */
     public void setExpectedSize(String expectedSize) {
         this.expectedSize = Integer.parseInt(expectedSize);
     }
 
     /**
-     * Sets the tableName
+     * Sets the tableName (by reflection from liquibase)
      *
      * @param tableName The tableName to set
      */
@@ -93,7 +93,7 @@ public class ColumnSizePrecondition implements CustomPrecondition {
     }
 
     /**
-     * Sets the columnName
+     * Sets the columnName (by reflection from liquibase)
      *
      * @param columnName The columnName to set
      */
@@ -105,16 +105,33 @@ public class ColumnSizePrecondition implements CustomPrecondition {
      * {@inheritDoc}
      */
     @Override
-    public void check(Database database) throws CustomPreconditionFailedException, CustomPreconditionErrorException {
-        JdbcConnection connection = (JdbcConnection) database.getConnection();
+    public void check(final Database database) throws CustomPreconditionFailedException, CustomPreconditionErrorException {
+        Validate.notNull(database, "Database provided by Liquibase might not be null!");
 
-        DatabaseMetaData meta;
+        DatabaseConnection databaseConnection = database.getConnection();
+        Validate.notNull(databaseConnection, "DatabaseConnection might not be null!");
+
+        JdbcConnection connection = null;
+        if (databaseConnection instanceof JdbcConnection) {
+            connection = (JdbcConnection)databaseConnection;
+        } else {
+            throw new CustomPreconditionErrorException("Cannot get underlying connection because database connection is not from type JdbcConnection. Type is: " + databaseConnection.getClass().getName());
+        }
+
+        boolean columnFound = false;
+
         try {
-            meta = connection.getUnderlyingConnection().getMetaData();
+            DatabaseMetaData meta = connection.getUnderlyingConnection().getMetaData();
             ResultSet rsColumns = meta.getColumns(null, null, tableName, null);
+            if (!rsColumns.next()) {
+                throw new CustomPreconditionErrorException("No columns for table " + tableName + " found! Aborting database migration execution for the given changeset.");
+            }
+            rsColumns.beforeFirst();
+
             while (rsColumns.next()) {
                 final String lColumnName = rsColumns.getString("COLUMN_NAME");
                 if (columnName.equals(lColumnName)) {
+                    columnFound = true;
                     final int size = rsColumns.getInt("COLUMN_SIZE");
                     if (size == expectedSize) {
                         throw new CustomPreconditionFailedException("Column size is already up to date! Nothing to do.");
@@ -122,7 +139,10 @@ public class ColumnSizePrecondition implements CustomPrecondition {
                 }
             }
         } catch (SQLException sqlException) {
-            LOG.error("Error while evaluating type of column " + columnName + " in table " + tableName + ".", sqlException);
+            throw new CustomPreconditionErrorException("Error while evaluating type of column " + columnName + " in table " + tableName + ".", sqlException);
+        }
+        if (!columnFound) {
+            throw new CustomPreconditionErrorException("Desired column to update not found! Tried update for column " + columnName + " on table " + tableName);
         }
     }
 }
