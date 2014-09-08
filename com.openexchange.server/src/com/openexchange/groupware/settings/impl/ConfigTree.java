@@ -99,6 +99,43 @@ public final class ConfigTree {
     /**
      * Resolves a path to the according setting object.
      * @param path Path to resolve.
+     * @return A setting object or <code>null</code> if non-existent
+     */
+    public Setting optSettingByPath(final String path) {
+        final String[] pathParts = SPLIT.split(path, 0);
+        return new ValueSetting(optSettingByPath(tree, pathParts));
+    }
+
+    /**
+     * This is the recursive method for resolving the path.
+     * @param actual setting object that is already resolved from the path.
+     * @param path the path that must be resolved.
+     * @return A setting object or <code>null</code> if non-existent
+     */
+    public static Setting optSettingByPath(final Setting actual, final String[] path) {
+        Setting retval = actual;
+        if (path.length != 0) {
+            final String[] remainingPath = new String[path.length - 1];
+            System.arraycopy(path, 1, remainingPath, 0, path.length - 1);
+            final Setting child = 0 == path[0].length() ? actual : actual.getElement(path[0]);
+            if (null == child) {
+                final StringBuilder sb = new StringBuilder(path[0]);
+                Setting parent = actual;
+                while (null != parent) {
+                    sb.insert(0, '/');
+                    sb.insert(0, parent.getName());
+                    parent = parent.getParent();
+                }
+                return null;
+            }
+            retval = optSettingByPath(child, remainingPath);
+        }
+        return retval;
+    }
+
+    /**
+     * Resolves a path to the according setting object.
+     * @param path Path to resolve.
      * @return a setting object.
      * @throws OXException if the path cannot be resolved to a setting
      * object.

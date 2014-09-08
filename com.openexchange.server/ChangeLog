@@ -2,6 +2,10 @@
 
  - Fix for bug 34355: Use secured SAXBuilder in the replay WebDAV request 
 
+* 2014-09-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 33036: Introduced convenience methods to optionally resolve a setting and to ignore any load/save-back operations if such a setting is non-existent
+
 * 2014-09-01 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 33354: Added display message for invalid characters in folder name
