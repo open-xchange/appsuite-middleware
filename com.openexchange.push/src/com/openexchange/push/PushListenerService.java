@@ -47,28 +47,33 @@
  *
  */
 
-package com.openexchange.realtime.events.json.osgi;
+package com.openexchange.push;
 
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.realtime.events.RTEventManagerService;
-import com.openexchange.realtime.events.json.EventsActionFactory;
-
+import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.session.Session;
 
 /**
- * {@link RTEventJSONActivator}
+ * {@link PushListenerService} - The singleton push listener service to manually start/stop psuh listeners.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class RTEventJSONActivator extends AJAXModuleActivator {
+@SingletonService
+public interface PushListenerService {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[]{RTEventManagerService.class};
-    }
+    /**
+     * Starts a new listener for specified session.
+     *
+     * @param session The session
+     * @return A newly started listener or <code>null</code> if a listener could not be started
+     */
+    PushListener startListenerFor(Session session);
 
-    @Override
-    protected void startBundle() throws Exception {
-        registerModule(new EventsActionFactory(this), "events");
-    }
+    /**
+     * Stops the listener for specified session.
+     *
+     * @param session The session
+     * @return <code>true</code> if listener has been successfully stopped; otherwise <code>false</code>
+     */
+    boolean stopListenerFor(Session session);
 
 }

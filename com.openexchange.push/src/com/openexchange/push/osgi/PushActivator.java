@@ -58,6 +58,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.event.EventFactoryService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
+import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushManagerService;
 import com.openexchange.push.internal.PushEventHandler;
 import com.openexchange.push.internal.PushManagerRegistry;
@@ -84,28 +85,27 @@ public final class PushActivator extends HousekeepingActivator {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PushActivator.class);
         try {
             log.info("starting bundle: com.openexchange.push");
-            /*
-             * Initialize and open service tracker for push manager services
-             */
+
+            // Initialize and open service tracker for push manager services
             PushManagerRegistry.init();
             track(PushManagerService.class, new PushManagerServiceTracker(context));
             track(ConfigurationService.class, new WhitelistServiceTracker(context));
-            /*
-             * Thread pool service tracker
-             */
+
+            // Thread pool service tracker
             track(ConfigurationService.class, new RegistryServiceTrackerCustomizer<ConfigurationService>(context, ServiceRegistry.getInstance(), ConfigurationService.class));
             track(EventFactoryService.class, new RegistryServiceTrackerCustomizer<EventFactoryService>(context, ServiceRegistry.getInstance(), EventFactoryService.class));
             track(ThreadPoolService.class, new RegistryServiceTrackerCustomizer<ThreadPoolService>(context, ServiceRegistry.getInstance(), ThreadPoolService.class));
             track(EventAdmin.class, new RegistryServiceTrackerCustomizer<EventAdmin>(context, ServiceRegistry.getInstance(), EventAdmin.class));
 
             openTrackers();
-            /*
-             * Register event handler to detect removed sessions
-             */
+
+            registerService(PushListenerService.class, PushManagerRegistry.getInstance());
+
+            // Register event handler to detect removed sessions
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
             registerService(EventHandler.class, new PushEventHandler(), serviceProperties);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error("Failed start-up of bundle com.openexchange.push", e);
             throw e;
         }
@@ -116,16 +116,9 @@ public final class PushActivator extends HousekeepingActivator {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PushActivator.class);
         try {
             log.info("stopping bundle: com.openexchange.push");
-            /*
-             * Unregister event handler
-             */
-            unregisterServices();
-            /*
-             * Drop service tracker
-             */
-            closeTrackers();
+            super.stopBundle();
             PushManagerRegistry.shutdown();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error("Failed shut-down of bundle com.openexchange.push", e);
             throw e;
         }

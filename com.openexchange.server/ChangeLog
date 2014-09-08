@@ -1,3 +1,11 @@
+* 2014-09-05 - marc.arens@open-xchange.com
+
+ - Fix for bug 34196: Deny access to documentconverterws by default
+ 
+* 2014-09-05 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32634: Distribute received push event remotely to other cluster nodes
+
 * 2014-09-04 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 34249: Use EventFiringInfostoreFacade instead of InfostoreFacade, events will trigger deletion of preview images
