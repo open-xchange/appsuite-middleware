@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-osgi >= @OXVERSION@
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 16
+%define        ox_release 17
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -47,6 +47,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Mon Sep 08 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-09-15
 * Thu Aug 21 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-08-25
 * Mon Aug 18 2014 Marcus Klein <marcus.klein@open-xchange.com>
