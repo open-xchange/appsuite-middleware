@@ -1093,7 +1093,7 @@ public final class MailFolderStorage implements FolderStorage {
                         accounts.remove(0);
                     } else {
                         final UnifiedInboxManagement uim = Services.getService(UnifiedInboxManagement.class);
-                        if (null == uim || !uim.isEnabled(session.getUserId(), session.getContextId())) {
+                        if (null == uim || !uim.isEnabled(session)) {
                             accounts.remove(0);
                         }
                     }
