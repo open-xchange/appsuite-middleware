@@ -48,28 +48,29 @@
  */
 package com.openexchange.database.migration.internal;
 
-import java.sql.Connection;
+import static com.openexchange.database.migration.internal.LiquibaseHelper.LIQUIBASE_NO_DEFINED_CONTEXT;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+
 import liquibase.Liquibase;
 import liquibase.changelog.ChangeSet;
-import liquibase.database.core.MySQLDatabase;
-import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.LockException;
 import liquibase.exception.ValidationFailedException;
 import liquibase.resource.ResourceAccessor;
+
 import org.apache.commons.lang.Validate;
 import org.osgi.framework.FrameworkUtil;
+
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.migration.DBMigrationExceptionCodes;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.database.migration.DBMigrationState;
 import com.openexchange.database.migration.resource.accessor.BundleResourceAccessor;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * Implementation of {@link DBMigrationExecutorService} to execute database migration statements provided by the given file.
@@ -80,12 +81,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorService {
 
-
     private static final String CONFIGDB_CHANGE_LOG = "/liquibase/configdbChangeLog.xml";
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DBMigrationExecutorServiceImpl.class);
-
-    static final String LIQUIBASE_NO_DEFINED_CONTEXT = "";
 
     private final DBMigrationExecutor executor;
 
@@ -107,90 +103,14 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
         this.databaseService = databaseService;
         executor = new DBMigrationExecutor(databaseService);
     }
-
-    /**
-     * Handles exceptions occurred while preparing and using liquibase.
-     *
-     * @param exception - the exception to handle
-     * @throws OXException - the OXException related to the given one.
-     */
-    protected void handleExceptions(Exception exception) throws OXException {
-        if (exception instanceof OXException) {
-            LOG.error(DBMigrationExceptionCodes.DB_MIGRATION_ERROR_MSG, exception);
-            throw DBMigrationExceptionCodes.DB_MIGRATION_ERROR.create(exception);
-        } else if (exception instanceof ValidationFailedException) {
-            LOG.error(DBMigrationExceptionCodes.VALIDATION_FAILED_ERROR_MSG, exception);
-            throw DBMigrationExceptionCodes.VALIDATION_FAILED_ERROR.create(exception);
-        } else if (exception instanceof LiquibaseException) {
-            LOG.error(DBMigrationExceptionCodes.LIQUIBASE_ERROR_MSG, exception);
-            throw DBMigrationExceptionCodes.LIQUIBASE_ERROR.create(exception);
-        } else if (exception instanceof SQLException) {
-            LOG.error(DBMigrationExceptionCodes.SQL_ERROR_MSG, exception);
-            throw DBMigrationExceptionCodes.SQL_ERROR.create(exception);
-        } else if (exception instanceof LockException) {
-            LOG.error(DBMigrationExceptionCodes.READING_LOCK_ERROR_MSG, exception);
-            throw DBMigrationExceptionCodes.READING_LOCK_ERROR.create(exception);
-        } else {
-            LOG.error(DBMigrationExceptionCodes.UNEXPECTED_ERROR_MSG, exception);
-            throw DBMigrationExceptionCodes.UNEXPECTED_ERROR.create(exception);
-        }
-    }
-
-    /**
-     * Prepares liquibase to be able to execute statements
-     *
-     * @param writable
-     * @param filePath
-     * @return
-     * @throws LiquibaseException
-     * @throws SQLException
-     */
-    protected Liquibase prepareLiquibase(Connection writable, String filePath) throws LiquibaseException, SQLException {
-        JdbcConnection jdbcConnection = null;
-
-        writable.setAutoCommit(true);
-        jdbcConnection = new JdbcConnection(writable);
-        jdbcConnection.setAutoCommit(true);
-
-        MySQLDatabase databaseConnection = new MySQLDatabase();
-        databaseConnection.setConnection(jdbcConnection);
-        databaseConnection.setAutoCommit(true);
-
-        return new Liquibase(filePath, localResourceAccessor, databaseConnection);
-    }
-
-    /**
-     * Cleans up everything used for executing liquibase changelogs
-     *
-     * @param writable
-     * @param liquibase
-     * @throws OXException
-     * @throws SQLException
-     */
-    protected void cleanUpLiquibase(Connection writable, Liquibase liquibase) throws OXException {
-        if (liquibase != null) {
-            try {
-                liquibase.forceReleaseLocks();
-            } catch (LiquibaseException liquibaseException) {
-                throw DBMigrationExceptionCodes.LIQUIBASE_ERROR.create(liquibaseException);
-            }
-            finally {
-                if (writable != null) {
-                    DBUtils.autocommit(writable);
-                    databaseService.backWritable(writable);
-                }
-            }
-        }
-    }
+    
 
     /**
      * {@inheritDoc}
      */
     @Override
     public DBMigrationState execute(String fileLocation, ResourceAccessor accessor) {
-        ScheduledExecution scheduledExecution = new ScheduledExecution(fileLocation, accessor);
-        executor.schedule(scheduledExecution);
-        return scheduledExecution;
+    	return executor.scheduleMigration(fileLocation, accessor);
     }
 
     /**
@@ -200,7 +120,7 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
      */
     @Override
     public DBMigrationState rollback(String fileLocation, int numberOfChangeSets, ResourceAccessor accessor) {
-        return rollbackChangeSets(fileLocation, numberOfChangeSets, accessor);
+        return executor.scheduleRollback(fileLocation, accessor, numberOfChangeSets);
     }
 
     /**
@@ -210,22 +130,7 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
      */
     @Override
     public DBMigrationState rollback(String fileLocation, String changeSetTag, ResourceAccessor accessor) {
-        return rollbackChangeSets(fileLocation, changeSetTag, accessor);
-    }
-
-    /**
-     * General method for a rollback. Provide an Integer as <code>target</code> param for number of changesets to rollback or provide a
-     * String as <code>target</code> param for a tag name to rollback.
-     *
-     * @param fileLocation
-     * @param target
-     * @return DBMigrationState
-     * @throws OXException
-     */
-    private DBMigrationState rollbackChangeSets(String fileLocation, Object target, ResourceAccessor accessor) {
-        ScheduledExecution scheduledExecution = new ScheduledExecution(fileLocation, accessor, target);
-        executor.schedule(scheduledExecution);
-        return scheduledExecution;
+    	return executor.scheduleRollback(fileLocation, accessor, changeSetTag);
     }
 
     /**
@@ -233,22 +138,27 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
      */
     @Override
     public List<ChangeSet> listUnexecutedChangeSets(String fileLocation, ResourceAccessor accessor) throws OXException {
-        List<ChangeSet> unexecutedChangeSets = new ArrayList<ChangeSet>();
-
-        Connection writable = null;
         Liquibase liquibase = null;
         try {
-            writable = databaseService.getWritable();
-
-            liquibase = prepareLiquibase(writable, fileLocation);
-
-            unexecutedChangeSets = liquibase.listUnrunChangeSets(LIQUIBASE_NO_DEFINED_CONTEXT);
+        	liquibase = LiquibaseHelper.prepareLiquibase(databaseService, fileLocation, accessor);        	
+        	return new ArrayList<ChangeSet>(liquibase.listUnrunChangeSets(LIQUIBASE_NO_DEFINED_CONTEXT));            
         } catch (Exception exception) {
-            handleExceptions(exception);
+            if (exception instanceof OXException) {
+                throw DBMigrationExceptionCodes.DB_MIGRATION_ERROR.create(exception);
+            } else if (exception instanceof ValidationFailedException) {
+                throw DBMigrationExceptionCodes.VALIDATION_FAILED_ERROR.create(exception);
+            } else if (exception instanceof LiquibaseException) {
+                throw DBMigrationExceptionCodes.LIQUIBASE_ERROR.create(exception);
+            } else if (exception instanceof SQLException) {
+                throw DBMigrationExceptionCodes.SQL_ERROR.create(exception);
+            } else if (exception instanceof LockException) {
+                throw DBMigrationExceptionCodes.READING_LOCK_ERROR.create(exception);
+            } else {
+                throw DBMigrationExceptionCodes.UNEXPECTED_ERROR.create(exception);
+            }
         } finally {
-            cleanUpLiquibase(writable, liquibase);
+        	LiquibaseHelper.cleanUpLiquibase(databaseService, liquibase);
         }
-        return unexecutedChangeSets;
     }
 
     /**
@@ -260,19 +170,12 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
     }
 
     public void runCoreMigrations() throws InterruptedException, ExecutionException {
-        ScheduledExecution scheduledExecution = new ScheduledExecution(
-            CONFIGDB_CHANGE_LOG,
-            localResourceAccessor);
-        executor.schedule(scheduledExecution);
+        ScheduledExecution scheduledExecution = executor.scheduleMigration(CONFIGDB_CHANGE_LOG, localResourceAccessor);
         scheduledExecution.await();
     }
 
     public void rollbackCoreMigrations(String changeSetTag) throws ExecutionException, InterruptedException {
-        ScheduledExecution scheduledExecution = new ScheduledExecution(
-            CONFIGDB_CHANGE_LOG,
-            localResourceAccessor,
-            changeSetTag);
-        executor.schedule(scheduledExecution);
+        ScheduledExecution scheduledExecution = executor.scheduleRollback(CONFIGDB_CHANGE_LOG, localResourceAccessor, changeSetTag);
         scheduledExecution.await();
     }
 

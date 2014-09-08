@@ -49,19 +49,21 @@
 
 package com.openexchange.database.migration.internal;
 
-import java.sql.Connection;
+import static com.openexchange.database.migration.internal.LiquibaseHelper.LIQUIBASE_NO_DEFINED_CONTEXT;
+
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
 import liquibase.Liquibase;
-import liquibase.database.core.MySQLDatabase;
-import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
+import liquibase.resource.ResourceAccessor;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.openexchange.database.DatabaseService;
-import com.openexchange.database.Databases;
 import com.openexchange.database.migration.DBMigrationExceptionCodes;
 import com.openexchange.exception.OXException;
 
@@ -75,8 +77,6 @@ import com.openexchange.exception.OXException;
 public class DBMigrationExecutor implements Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(DBMigrationExecutor.class);
-
-    private static final String LIQUIBASE_NO_DEFINED_CONTEXT = DBMigrationExecutorServiceImpl.LIQUIBASE_NO_DEFINED_CONTEXT;
 
     private final DatabaseService databaseService;
 
@@ -110,18 +110,10 @@ public class DBMigrationExecutor implements Runnable {
 
             Exception exception = null;
             if (scheduledExecution != null) {
-                Liquibase liquibase = null;
-                Connection connection = null;
+            	Liquibase liquibase = null;
                 try {
-                    connection = databaseService.getForUpdateTask();
-                    MySQLDatabase database = new MySQLDatabase();
-                    database.setConnection(new JdbcConnection(connection));
-                    String fileLocation = scheduledExecution.getFileLocation();
-                    liquibase = new Liquibase(
-                        fileLocation,
-                        scheduledExecution.getResourceAccessor(),
-                        database);
-
+                	String fileLocation = scheduledExecution.getFileLocation();
+					liquibase = LiquibaseHelper.prepareLiquibase(databaseService, fileLocation, scheduledExecution.getResourceAccessor());
                     if (scheduledExecution.isRollback()) {
                         Object target = scheduledExecution.getRollbackTarget();
                         if (target instanceof Integer) {
@@ -149,26 +141,30 @@ public class DBMigrationExecutor implements Runnable {
                     exception = e;
                     LOG.error("", e);
                 } finally {
-                    scheduledExecution.setDone(exception);
-
-                    if (liquibase != null) {
-                        try {
-                            liquibase.forceReleaseLocks();
-                        } catch (LiquibaseException e) {
-                            LOG.error("", e);
-                        }
-                    }
-
-                    if (connection != null) {
-                        Databases.autocommit(connection);
-                        databaseService.backForUpdateTask(connection);
-                    }
+                    scheduledExecution.setDone(exception);                    
+                    try {
+						LiquibaseHelper.cleanUpLiquibase(databaseService, liquibase);
+					} catch (OXException e) {
+						LOG.error("", e);
+					}
                 }
             }
         }
     }
+    
+    public ScheduledExecution scheduleMigration(String fileLocation, ResourceAccessor resourceAccessor) {
+    	ScheduledExecution scheduledExecution = new ScheduledExecution(fileLocation, resourceAccessor);
+    	schedule(scheduledExecution);
+    	return scheduledExecution;
+    }
+    
+    public ScheduledExecution scheduleRollback(String fileLocation, ResourceAccessor resourceAccessor, Object rollbackTarget) {
+    	ScheduledExecution scheduledExecution = new ScheduledExecution(fileLocation, resourceAccessor, rollbackTarget);
+    	schedule(scheduledExecution);
+    	return scheduledExecution;
+    }
 
-    public void schedule(ScheduledExecution scheduledExecution) {
+    private void schedule(ScheduledExecution scheduledExecution) {
         lock.lock();
         try {
             scheduledExecutions.add(scheduledExecution);
