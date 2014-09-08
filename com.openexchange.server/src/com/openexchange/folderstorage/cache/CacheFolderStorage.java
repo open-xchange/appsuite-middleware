@@ -908,14 +908,6 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
             }
             if (!ROOT_ID.equals(parentId)) {
                 removeFromCache(parentId, treeId, storageParameters.getSession(), newPathPerformer(storageParameters));
-                try {
-                    final Folder parentFolder = loadFolder(realTreeId, parentId, StorageType.WORKING, true, storageParameters);
-                    if (parentFolder.isCacheable()) {
-                        putFolder(parentFolder, realTreeId, storageParameters, true);
-                    }
-                } catch (final Exception e) {
-                    // Ignore
-                }
             }
         } finally {
             lock.unlock();
