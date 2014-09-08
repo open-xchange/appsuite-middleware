@@ -52,6 +52,7 @@ package com.openexchange.ajax.login;
 import static com.openexchange.ajax.ConfigMenu.convert2JS;
 import java.io.IOException;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -150,30 +151,50 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
             }
 
             // Request modules
-            final Future<Object> optModules = getModulesAsync(session, req);
+            Future<Object> optModules = getModulesAsync(session, req);
 
             // Remember User-Agent
             session.setParameter("user-agent", req.getHeader("user-agent"));
+            ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+
+            // Trigger client-specific ramp-up
+            Future<JSONObject> optRampUp = rampUpAsync(serverSession, req);
 
             // Write response
-            final JSONObject json = new JSONObject(8);
+            JSONObject json = new JSONObject(12);
             LoginWriter.write(result, json);
 
             // Handle initial multiple
-            final String multipleRequest = req.getParameter("multiple");
-            ServerSession serverSession = ServerSessionAdapter.valueOf(session);
-            if (multipleRequest != null) {
-                final JSONArray dataArray = new JSONArray(multipleRequest);
-                if (dataArray.length() > 0) {
-                    JSONArray responses = Multiple.perform(dataArray, req, serverSession);
-                    json.put("multiple", responses);
-                } else {
-                    json.put("multiple", new JSONArray(0));
+            {
+                String multipleRequest = req.getParameter("multiple");
+                if (multipleRequest != null) {
+                    final JSONArray dataArray = new JSONArray(multipleRequest);
+                    if (dataArray.length() > 0) {
+                        JSONArray responses = Multiple.perform(dataArray, req, serverSession);
+                        json.put("multiple", responses);
+                    } else {
+                        json.put("multiple", new JSONArray(0));
+                    }
                 }
             }
 
-            // Perform client-specific ramp-up and add to JSON object
-            performRampUp(req, json, serverSession);
+            // Await client-specific ramp-up and add to JSON object
+            if (null != optRampUp) {
+                try {
+                    JSONObject jsonObject = optRampUp.get();
+                    for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
+                        json.put(entry.getKey(), entry.getValue());
+                    }
+                } catch (InterruptedException e) {
+                    // Keep interrupted state
+                    Thread.currentThread().interrupt();
+                    throw LoginExceptionCodes.UNKNOWN.create(e, "Thread interrupted.");
+                } catch (ExecutionException e) {
+                    // Cannot occur
+                    final Throwable cause = e.getCause();
+                    LOG.warn("Ramp-up information could not be added to login JSON response", cause);
+                }
+            }
 
             // Add modules information to JSON object
             if (null != optModules) {
@@ -183,11 +204,11 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                     if (null != oModules) {
                         json.put("modules", oModules);
                     }
-                } catch (final InterruptedException e) {
+                } catch (InterruptedException e) {
                     // Keep interrupted state
                     Thread.currentThread().interrupt();
                     throw LoginExceptionCodes.UNKNOWN.create(e, "Thread interrupted.");
-                } catch (final ExecutionException e) {
+                } catch (ExecutionException e) {
                     // Cannot occur
                     final Throwable cause = e.getCause();
                     LOG.warn("Modules could not be added to login JSON response", cause);
@@ -196,7 +217,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
 
             // Set response
             response.setData(json);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (AjaxExceptionCodes.PREFIX.equals(e.getPrefix())) {
                 throw e;
             }
@@ -344,6 +365,26 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                 return null;
             }
         });
+    }
+
+    /**
+     * Asynchronously triggers ramp-up.
+     *
+     * @param serverSession The associated session
+     * @param req The request
+     * @return The resulting object or <code>null</code>
+     */
+    public Future<JSONObject> rampUpAsync(final ServerSession serverSession, final HttpServletRequest req) {
+        AbstractTask<JSONObject> task = new AbstractTask<JSONObject>() {
+
+            @Override
+            public JSONObject call() throws OXException, IOException {
+                JSONObject json = new JSONObject(8);
+                performRampUp(req, json, serverSession);
+                return json;
+            }
+        };
+        return ThreadPools.getThreadPool().submit(task);
     }
 
 }
