@@ -92,6 +92,7 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.cache.lock.TreeLockManagement;
 import com.openexchange.folderstorage.cache.memory.FolderMap;
 import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
+import com.openexchange.folderstorage.cache.service.FolderCacheInvalidationService;
 import com.openexchange.folderstorage.database.DatabaseFolderType;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
 import com.openexchange.folderstorage.internal.performers.ClearPerformer;
@@ -125,7 +126,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CacheFolderStorage implements FolderStorage {
+public final class CacheFolderStorage implements FolderStorage, FolderCacheInvalidationService {
 
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CacheFolderStorage.class);
 
@@ -562,6 +563,16 @@ public final class CacheFolderStorage implements FolderStorage {
         }
     }
 
+    @Override
+    public void invalidateSingle(String folderId, String treeId, Session session) throws OXException {
+        removeFromCache(folderId, treeId, true, session);
+    }
+
+    @Override
+    public void invalidate(String folderId, String treeId, boolean includeParents, Session session) throws OXException {
+        removeFromCache(folderId, treeId, !includeParents, session);
+    }
+
     /**
      * Removes specified folder and all of its predecessor folders from cache.
      *
@@ -572,8 +583,8 @@ public final class CacheFolderStorage implements FolderStorage {
      * @param session The session providing user information
      * @throws OXException If removal fails
      */
-    public void removeFromCache(final String id, final String treeId, final boolean singleOnly, final Session session) throws OXException {
-        final Lock lock = TreeLockManagement.getInstance().getFor(treeId, session).writeLock();
+    public void removeFromCache(String id, String treeId, boolean singleOnly, Session session) throws OXException {
+        Lock lock = TreeLockManagement.getInstance().getFor(treeId, session).writeLock();
         acquire(lock);
         try {
             if (singleOnly) {
@@ -586,7 +597,7 @@ public final class CacheFolderStorage implements FolderStorage {
         }
     }
 
-    private void removeFromCache(final String id, final String treeId, final Session session, final PathPerformer pathPerformer) throws OXException {
+    private void removeFromCache(String id, String treeId, Session session, PathPerformer pathPerformer) throws OXException {
         if (null == id) {
             return;
         }
