@@ -58,6 +58,8 @@ import liquibase.resource.ResourceAccessor;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.wiring.BundleWiring;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link ResourceAccessor} to access resource migration files from a specific bundle.
@@ -66,6 +68,8 @@ import org.osgi.framework.wiring.BundleWiring;
  * @since 7.6.1
  */
 public class BundleResourceAccessor implements ResourceAccessor {
+
+    private static final Logger LOG = LoggerFactory.getLogger(BundleResourceAccessor.class);
 
     /**
      * ClassLoader of the bundle to search for migration files within
@@ -104,27 +108,32 @@ public class BundleResourceAccessor implements ResourceAccessor {
             return null;
         }
 
-        String path = "/";
         String filePattern = file;
-
         int i = file.lastIndexOf('/');
         if (i > 0) {
-            path = file.substring(0, i);
             if (i < file.length() - 1) {
                 filePattern = file.substring(i + 1);
             }
         }
 
-        List<URL> entries = bundleWiring.findEntries(path, filePattern, 0);
-        if (entries.isEmpty()) {
-            return null;
+        URL fileUrl = null;
+        List<URL> entries = bundleWiring.findEntries("/", filePattern, BundleWiring.FINDENTRIES_RECURSE);
+        for (URL entry : entries) {
+            if (entry.toExternalForm().endsWith(file)) {
+                fileUrl = entry;
+                break;
+            }
         }
 
-        try {
-            return entries.get(0).openStream();
-        } catch (IOException e) {
-            return null;
+        if (fileUrl != null) {
+            try {
+                return fileUrl.openStream();
+            } catch (IOException e) {
+                LOG.error("Could not open ChangeLog file!", e);
+            }
         }
+
+        return null;
     }
 
     /**

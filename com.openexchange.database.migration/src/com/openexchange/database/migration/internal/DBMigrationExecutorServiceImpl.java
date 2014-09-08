@@ -81,7 +81,7 @@ import com.openexchange.exception.OXException;
  */
 public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorService {
 
-    private static final String CONFIGDB_CHANGE_LOG = "/resource/liquibase/configdbChangeLog.xml";
+    private static final String CONFIGDB_CHANGE_LOG = "/liquibase/configdbChangeLog.xml";
 
     private final DBMigrationExecutor executor;
 
