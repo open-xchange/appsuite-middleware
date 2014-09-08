@@ -62,7 +62,6 @@ import com.openexchange.database.migration.mbean.DBMigrationMBeanImpl;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 
-
 /**
  * {@link ServiceTracker} to track occurrence of {@link ManagementService}
  *
@@ -126,7 +125,10 @@ public class ManagementServiceTracker implements ServiceTrackerCustomizer<Manage
         if (objectName == null) {
             try {
                 objectName = getObjectName(DBMigrationMBean.class.getName(), DBMigrationMBean.DOMAIN);
-                management.registerMBean(objectName, new DBMigrationMBeanImpl(DBMigrationMBean.class, dbMigrationExecutorService, databaseService));
+                management.registerMBean(objectName, new DBMigrationMBeanImpl(
+                    DBMigrationMBean.class,
+                    dbMigrationExecutorService,
+                    databaseService));
             } catch (final MalformedObjectNameException e) {
                 LOG.error("", e);
             } catch (final OXException e) {

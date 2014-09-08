@@ -54,9 +54,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.List;
-
 import liquibase.resource.ResourceAccessor;
-
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.wiring.BundleWiring;
@@ -73,15 +71,16 @@ public class BundleResourceAccessor implements ResourceAccessor {
      * ClassLoader of the bundle to search for migration files within
      */
     private ClassLoader bundleClassLoader;
+
     private BundleWiring bundleWiring;
-    
+
     /**
      * Initializes a new {@link BundleResourceAccessor} for classloader bundle wiring.
      *
      * @param context - the {@link BundleContext}.
      */
     public BundleResourceAccessor(final BundleContext context) {
-    	Bundle bundle = context.getBundle();
+        Bundle bundle = context.getBundle();
         bundleWiring = bundle.adapt(BundleWiring.class);
         this.bundleClassLoader = bundleWiring.getClassLoader();
     }

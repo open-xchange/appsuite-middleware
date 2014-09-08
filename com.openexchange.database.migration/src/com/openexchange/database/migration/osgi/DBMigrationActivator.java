@@ -100,6 +100,7 @@ public class DBMigrationActivator extends HousekeepingActivator {
         final DatabaseService databaseService = getService(DatabaseService.class);
         final ThreadPoolService threadPoolService = Services.getService(ThreadPoolService.class);
         threadPoolService.submit(new AbstractTask<Void>() {
+
             @Override
             public Void call() throws Exception {
                 DBMigrationExecutorServiceImpl dbMigrationExecutorService = new DBMigrationExecutorServiceImpl(databaseService);

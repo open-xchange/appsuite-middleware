@@ -51,7 +51,6 @@ package com.openexchange.database.migration;
 
 import java.util.concurrent.ExecutionException;
 
-
 /**
  * {@link DBMigrationState}
  *
@@ -68,16 +67,12 @@ public interface DBMigrationState {
     public boolean isDone();
 
     /**
-     * Awaits the completion of this migration. If the current thread
-     * is interrupted while its blocked, {@link InterruptedException}
-     * is thrown.
+     * Awaits the completion of this migration. If the current thread is interrupted while its blocked, {@link InterruptedException} is
+     * thrown.
      *
-     * @throws ExecutionException If an error occurred during the
-     *         migrations execution. The original exception can be accessed
-     *         via {@link ExecutionException#getCause()}. The according exception
-     *         has already been logged, you don't need to do that again.
-     * @throws InterruptedException If the current thread
-     *         is interrupted while waiting for completion.
+     * @throws ExecutionException If an error occurred during the migrations execution. The original exception can be accessed via
+     *             {@link ExecutionException#getCause()}. The according exception has already been logged, you don't need to do that again.
+     * @throws InterruptedException If the current thread is interrupted while waiting for completion.
      */
     public void awaitCompletion() throws ExecutionException, InterruptedException;
 

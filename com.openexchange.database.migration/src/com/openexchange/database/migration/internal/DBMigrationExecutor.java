@@ -50,25 +50,18 @@
 package com.openexchange.database.migration.internal;
 
 import static com.openexchange.database.migration.internal.LiquibaseHelper.LIQUIBASE_NO_DEFINED_CONTEXT;
-
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
-import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.migration.DBMigrationExceptionCodes;
 import com.openexchange.exception.OXException;
-
 
 /**
  * {@link DBMigrationExecutor}
@@ -112,10 +105,10 @@ public class DBMigrationExecutor implements Runnable {
 
             Exception exception = null;
             if (scheduledExecution != null) {
-            	Liquibase liquibase = null;
+                Liquibase liquibase = null;
                 try {
-                	String fileLocation = scheduledExecution.getFileLocation();
-					liquibase = LiquibaseHelper.prepareLiquibase(databaseService, fileLocation, scheduledExecution.getResourceAccessor());
+                    String fileLocation = scheduledExecution.getFileLocation();
+                    liquibase = LiquibaseHelper.prepareLiquibase(databaseService, fileLocation, scheduledExecution.getResourceAccessor());
                     if (scheduledExecution.isRollback()) {
                         Object target = scheduledExecution.getRollbackTarget();
                         if (target instanceof Integer) {
@@ -143,27 +136,27 @@ public class DBMigrationExecutor implements Runnable {
                     exception = e;
                     LOG.error("", e);
                 } finally {
-                    scheduledExecution.setDone(exception);                    
+                    scheduledExecution.setDone(exception);
                     try {
-						LiquibaseHelper.cleanUpLiquibase(databaseService, liquibase);
-					} catch (OXException e) {
-						LOG.error("", e);
-					}
+                        LiquibaseHelper.cleanUpLiquibase(databaseService, liquibase);
+                    } catch (OXException e) {
+                        LOG.error("", e);
+                    }
                 }
             }
         }
     }
-    
+
     public ScheduledExecution scheduleMigration(String fileLocation, ResourceAccessor resourceAccessor) {
-    	ScheduledExecution scheduledExecution = new ScheduledExecution(fileLocation, resourceAccessor);
-    	schedule(scheduledExecution);
-    	return scheduledExecution;
+        ScheduledExecution scheduledExecution = new ScheduledExecution(fileLocation, resourceAccessor);
+        schedule(scheduledExecution);
+        return scheduledExecution;
     }
-    
+
     public ScheduledExecution scheduleRollback(String fileLocation, ResourceAccessor resourceAccessor, Object rollbackTarget) {
-    	ScheduledExecution scheduledExecution = new ScheduledExecution(fileLocation, resourceAccessor, rollbackTarget);
-    	schedule(scheduledExecution);
-    	return scheduledExecution;
+        ScheduledExecution scheduledExecution = new ScheduledExecution(fileLocation, resourceAccessor, rollbackTarget);
+        schedule(scheduledExecution);
+        return scheduledExecution;
     }
 
     private void schedule(ScheduledExecution scheduledExecution) {
