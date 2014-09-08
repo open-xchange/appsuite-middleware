@@ -1207,29 +1207,26 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
             /*
              * Load the ones from storage
              */
-            final Map<String, Folder> fromStorage;
-            if (toLoad.isEmpty()) {
-                fromStorage = Collections.emptyMap();
-            } else {
-                fromStorage = loadFolders(treeId, Arrays.asList(toLoad.keys(new String[toLoad.size()])), storageType, storageParameters);
-            }
-            /*
-             * Fill return value
-             */
-            for (final Entry<String, Folder> entry : fromStorage.entrySet()) {
-                Folder folder = entry.getValue();
-                final int index = toLoad.get(entry.getKey());
+            if (!toLoad.isEmpty()) {
+                Map<String, Folder> fromStorage = loadFolders(treeId, Arrays.asList(toLoad.keys(new String[toLoad.size()])), storageType, storageParameters);
                 /*
-                 * Put into cache
+                 * Fill return value
                  */
-                if (folder.isCacheable()) {
+                for (final Entry<String, Folder> entry : fromStorage.entrySet()) {
+                    Folder folder = entry.getValue();
+                    final int index = toLoad.get(entry.getKey());
                     /*
-                     * Put to cache and create a cloned version
+                     * Put into cache
                      */
-                    putFolder(folder, treeId, storageParameters, false);
-                    folder = (Folder) folder.clone();
+                    if (folder.isCacheable()) {
+                        /*
+                         * Put to cache and create a cloned version
+                         */
+                        putFolder(folder, treeId, storageParameters, false);
+                        folder = (Folder) folder.clone();
+                    }
+                    ret[index] = folder;
                 }
-                ret[index] = folder;
             }
             /*
              * Return
@@ -1757,13 +1754,10 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
             completionService = new CallerRunsCompletionService<Object>();
             paramsProvider = new InstanceStorageParametersProvider(storageParameters);
         } else {
-            completionService =
-                new ThreadPoolCompletionService<Object>(CacheServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class, true)).setTrackable(true);
+            completionService = new ThreadPoolCompletionService<Object>(CacheServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class, true)).setTrackable(true);
 
             final Session session = storageParameters.getSession();
-            paramsProvider =
-                null == session ? new SessionStorageParametersProvider(storageParameters.getUser(), storageParameters.getContext()) : new SessionStorageParametersProvider(
-                    (ServerSession) storageParameters.getSession());
+            paramsProvider = null == session ? new SessionStorageParametersProvider(storageParameters.getUser(), storageParameters.getContext()) : new SessionStorageParametersProvider((ServerSession) session);
         }
         /*
          * Create destination map
