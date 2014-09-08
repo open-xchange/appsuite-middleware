@@ -7,5 +7,6 @@ Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.exception,
  com.openexchange.i18n,
+ com.openexchange.osgi.annotation,
  com.openexchange.session
 Export-Package: com.openexchange.capabilities

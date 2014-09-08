@@ -72,8 +72,8 @@ public final class CommonStrings implements LocalizableStrings {
 
     public static final String FACET_TYPE_FOLDER = "Folder";
 
-    // Search items in a given time frame
-    public static final String TIME = "Time";
+    // Search for items by their creation date
+    public static final String DATE = "Date";
 
     // ------------------------- i18n strings for folder types ------------------------------------- //
 

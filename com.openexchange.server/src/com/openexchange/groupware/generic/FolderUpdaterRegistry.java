@@ -50,12 +50,14 @@
 package com.openexchange.groupware.generic;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link FolderUpdaterRegistry}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+@SingletonService
 public interface FolderUpdaterRegistry {
 
     /**

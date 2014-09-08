@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry exported="true" kind="lib" path="lib/htmlcleaner-2.8.jar" sourcepath="lib/source/htmlcleaner-2.8-src.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/htmlcleaner-2.9.jar" sourcepath="lib/source/htmlcleaner-2.9-src.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jsoup-1.7.3.jar" sourcepath="lib/source/jsoup-1.7.3-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jdo2-api-2.3-eb.jar" sourcepath="lib/source/jdo2-api-2.3-eb-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/brownies-collections-0.9.6.jar" sourcepath="lib/source/brownies-collections-0.9.6-sources.jar"/>

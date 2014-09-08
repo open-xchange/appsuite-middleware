@@ -6,7 +6,8 @@ Bundle-Version: 7.6.1
 Bundle-Activator: com.openexchange.publish.online.infostore.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.ajax,
+Import-Package: com.google.common.collect,
+ com.openexchange.ajax,
  com.openexchange.api2,
  com.openexchange.context,
  com.openexchange.datatypes.genericonf,

@@ -51,15 +51,19 @@ package com.openexchange.file.storage.json.actions.files;
 
 import java.util.Date;
 import java.util.List;
+import java.util.zip.Deflater;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.json.FileMetadataWriter;
+import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -217,6 +221,24 @@ public abstract class AbstractFileAction implements AJAXActionService {
 
     protected void before(final AJAXInfostoreRequest req) throws OXException {
         // Nothing to do
+    }
+
+    /**
+     * Gets the configured value for "com.openexchange.infostore.zipDocumentsCompressionLevel".
+     *
+     * @return The configured compression level
+     * @throws OXException
+     */
+    protected static int getZipDocumentsCompressionLevel() throws OXException {
+        ConfigurationService configService = Services.getConfigurationService();
+        if (null == configService) {
+            return Deflater.DEFAULT_COMPRESSION;
+        }
+        int level = configService.getIntProperty("com.openexchange.infostore.zipDocumentsCompressionLevel", Deflater.DEFAULT_COMPRESSION);
+        if (level < Deflater.DEFAULT_COMPRESSION || level > Deflater.BEST_COMPRESSION) {
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("com.openexchange.infostore.zipDocumentsCompressionLevel");
+        }
+        return level;
     }
 
 }

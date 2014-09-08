@@ -53,17 +53,37 @@ import java.util.List;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.Rule;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link MailFilterService}
- * 
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
+@SingletonService
 public interface MailFilterService {
+
+    public enum FilterType {
+        antispam("antispam"), autoforward("autoforward"), vacation("vacation"), custom("");
+
+        private final String flag;
+
+        private FilterType(final String flag) {
+            this.flag = flag;
+        }
+
+        public String getFlag() {
+            return flag;
+        }
+    };
+    
+    public enum DayOfWeek {
+        sunday, monday, tuesday, wednesday, thursday, friday, saturday
+    };
 
     /**
      * Create a new mail filter rule and return it's UID.
-     * 
+     *
      * @param credentials user's credentials
      * @param rule the new mail filter rule
      * @return the UID of the new mail filter
@@ -73,7 +93,7 @@ public interface MailFilterService {
 
     /**
      * Updates an already existing mail filter rule.
-     * 
+     *
      * @param credentials user's credentials
      * @param rule the mail filter rule
      * @param uid the rule's UID
@@ -83,7 +103,7 @@ public interface MailFilterService {
 
     /**
      * Delete the specified rule
-     * 
+     *
      * @param credentials user's credentials
      * @param uid UID of the mail filter rule to delete
      * @throws OXException
@@ -92,7 +112,7 @@ public interface MailFilterService {
 
     /**
      * Delete all filters for the specified user
-     * 
+     *
      * @param credentials the user's credentials
      * @throws OXException
      */
@@ -100,7 +120,7 @@ public interface MailFilterService {
 
     /**
      * Get the filter rule uniquely identified by the specified UID
-     * 
+     *
      * @param credentials user's credentials
      * @param uid rule's UID
      * @return the rule or null if none found
@@ -110,27 +130,27 @@ public interface MailFilterService {
 
     /**
      * Return a list with all mail filter rules
-     * 
+     *
      * @param credentials the user's credentials
      * @param flag instructs the method to only rules matching the specified flag (optional, can be null)
      * @return a list with all mail filter rules
      * @throws OXException
      */
-    public List<Rule> listRules(final Credentials credentials, final String flag) throws OXException;
+    public List<Rule> listRules(final Credentials credentials, final FilterType flag) throws OXException;
 
     /**
      * Return a list with all mail filters except those specified in the exclusion list
-     * 
+     *
      * @param credentials the user's credentials
      * @param exclusionFlags a list with exclusion flags
      * @return a list with all mail filter rules except those in the exclusion list
      * @throws OXException
      */
-    public List<Rule> listRules(final Credentials credentials, final List<String> exclusionFlags) throws OXException;
+    public List<Rule> listRules(final Credentials credentials, final List<FilterType> exclusionFlags) throws OXException;
 
     /**
      * Reorder the rules
-     * 
+     *
      * @param credentials user's credentials
      * @param uids An array of UIDs which represents how the rules should be reordered
      * @throws OXException
@@ -139,7 +159,7 @@ public interface MailFilterService {
 
     /**
      * Fetch the entire active script for the specified user
-     * 
+     *
      * @param credentials user's credentials
      * @return the active mail filter script as a string
      * @throws OXException
@@ -148,7 +168,7 @@ public interface MailFilterService {
 
     /**
      * Get a set with capabilities
-     * 
+     *
      * @param credentials the user's credentials
      * @return a Set with capabilities
      * @throws OXException

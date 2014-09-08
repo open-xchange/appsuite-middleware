@@ -49,6 +49,7 @@
 
 package com.openexchange.subscribe.mslive.osgi;
 
+import com.openexchange.context.ContextService;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -66,7 +67,7 @@ public class MSLiveActivator extends HousekeepingActivator {
      */
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { OAuthService.class };
+        return new Class<?>[] { OAuthService.class, ContextService.class };
     }
 
     @Override

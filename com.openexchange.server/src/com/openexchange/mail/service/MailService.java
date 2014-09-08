@@ -54,6 +54,7 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.transport.MailTransport;
+import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
 
 /**
@@ -62,6 +63,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SingletonService
 public interface MailService {
 
     /**

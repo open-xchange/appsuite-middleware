@@ -428,6 +428,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             // Query all files
             Drive.Children.List list = drive.children().list(fid);
             list.setQ(QUERY_STRING_FILES_ONLY_EXCLUDING_TRASH);
+            list.setFields("kind,nextPageToken,items(id)");
 
             boolean hardDelete = isTrashed(fid, drive);
 
@@ -441,7 +442,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                     }
                 }
 
-                String nextPageToken = list.getPageToken();
+                String nextPageToken = childList.getNextPageToken();
                 while (!isEmpty(nextPageToken)) {
                     list.setPageToken(nextPageToken);
                     childList = list.execute();
@@ -455,7 +456,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                         }
                     }
 
-                    nextPageToken = list.getPageToken();
+                    nextPageToken = childList.getNextPageToken();
                 }
             }
         } catch (final HttpResponseException e) {
@@ -555,29 +556,35 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             // Determine folder identifier
             String fid = toGoogleDriveFolderId(folderId);
 
-            Drive.Children.List list = drive.children().list(fid);
-            list.setQ(QUERY_STRING_FILES_ONLY_EXCLUDING_TRASH);
-            ChildList childList = list.execute();
+            Drive.Files.List list = drive.files().list();
+            list.setQ(QUERY_STRING_FILES_ONLY_EXCLUDING_TRASH + " and '" + fid + "' in parents");
+            {
+                StringBuilder googleDriveFields = new StringBuilder(512);
+                googleDriveFields.append("kind,nextPageToken,items(");
+                googleDriveFields.append(GoogleDriveConstants.FIELDS_DEFAULT).append(')');
+                list.setFields(googleDriveFields.toString());
+            }
 
+            FileList fileList = list.execute();
             List<File> files = new LinkedList<File>();
-            if (!childList.getItems().isEmpty()) {
-                for (ChildReference child : childList.getItems()) {
+            if (!fileList.getItems().isEmpty()) {
+                for (com.google.api.services.drive.model.File child : fileList.getItems()) {
                     String fileId = child.getId();
-                    files.add(new GoogleDriveFile(folderId, fileId, userId, rootFolderId).parseGoogleDriveFile(drive.files().get(fileId).execute()));
+                    files.add(new GoogleDriveFile(folderId, fileId, userId, rootFolderId).parseGoogleDriveFile(child));
                 }
 
-                String nextPageToken = list.getPageToken();
+                String nextPageToken = fileList.getNextPageToken();
                 while (!isEmpty(nextPageToken)) {
                     list.setPageToken(nextPageToken);
-                    childList = list.execute();
-                    if (!childList.getItems().isEmpty()) {
-                        for (ChildReference child : childList.getItems()) {
+                    fileList = list.execute();
+                    if (!fileList.getItems().isEmpty()) {
+                        for (com.google.api.services.drive.model.File child : fileList.getItems()) {
                             String fileId = child.getId();
-                            files.add(new GoogleDriveFile(folderId, fileId, userId, rootFolderId).parseGoogleDriveFile(drive.files().get(fileId).execute()));
+                            files.add(new GoogleDriveFile(folderId, fileId, userId, rootFolderId).parseGoogleDriveFile(child));
                         }
                     }
 
-                    nextPageToken = list.getPageToken();
+                    nextPageToken = fileList.getNextPageToken();
                 }
             }
 
@@ -604,29 +611,43 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             // Determine folder identifier
             String fid = toGoogleDriveFolderId(folderId);
 
-            Drive.Children.List list = drive.children().list(fid);
-            list.setQ(QUERY_STRING_FILES_ONLY_EXCLUDING_TRASH);
+            Drive.Files.List list = drive.files().list();
+            list.setQ(QUERY_STRING_FILES_ONLY_EXCLUDING_TRASH + " and '" + fid + "' in parents");
+            {
+                StringBuilder googleDriveFields = new StringBuilder(512);
+                googleDriveFields.append("kind,nextPageToken,items(");
+                for (Field field : fields) {
+                    appendField(field, googleDriveFields);
+                }
+                if (null != sort) {
+                    appendField(sort, googleDriveFields);
+                }
+                googleDriveFields.setCharAt(googleDriveFields.length() - 1, ')');
+                list.setFields(googleDriveFields.toString());
+            }
 
-            List<ChildReference> items = list.execute().getItems();
+            FileList fileList = list.execute();
+            List<com.google.api.services.drive.model.File> items = fileList.getItems();
             List<File> files = new LinkedList<File>();
             if (!items.isEmpty()) {
-                for (ChildReference child : items) {
+                for (com.google.api.services.drive.model.File child : items) {
                     String fileId = child.getId();
-                    files.add(new GoogleDriveFile(folderId, fileId, userId, rootFolderId).parseGoogleDriveFile(drive.files().get(fileId).execute()));
+                    files.add(new GoogleDriveFile(folderId, fileId, userId, rootFolderId).parseGoogleDriveFile(child));
                 }
 
-                String nextPageToken = list.getPageToken();
+                String nextPageToken = fileList.getNextPageToken();
                 while (!isEmpty(nextPageToken)) {
                     list.setPageToken(nextPageToken);
-                    items = list.execute().getItems();
+                    fileList = list.execute();
+                    items = fileList.getItems();
                     if (!items.isEmpty()) {
-                        for (ChildReference child : items) {
+                        for (com.google.api.services.drive.model.File child : items) {
                             String fileId = child.getId();
-                            files.add(new GoogleDriveFile(folderId, fileId, userId, rootFolderId).parseGoogleDriveFile(drive.files().get(fileId).execute()));
+                            files.add(new GoogleDriveFile(folderId, fileId, userId, rootFolderId).parseGoogleDriveFile(child));
                         }
                     }
 
-                    nextPageToken = list.getPageToken();
+                    nextPageToken = fileList.getNextPageToken();
                 }
             }
 
@@ -858,7 +879,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                             files.add(new GoogleDriveFile(folderId, file.getId(), userId, rootFolderId).parseGoogleDriveFile(file));
                         }
 
-                        String nextPageToken = list.getPageToken();
+                        String nextPageToken = fileList.getNextPageToken();
                         while (!isEmpty(nextPageToken)) {
                             list.setPageToken(nextPageToken);
                             fileList = list.execute();
@@ -868,7 +889,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                                 }
                             }
 
-                            nextPageToken = list.getPageToken();
+                            nextPageToken = fileList.getNextPageToken();
                         }
                     }
                 }
@@ -879,35 +900,38 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             // Search by pattern
             List<File> files = new LinkedList<File>();
             {
-                Drive.Children.List list = drive.children().list(fid);
+                Drive.Files.List list = drive.files().list();
+                list.setFields("kind,nextPageToken,items("+GoogleDriveConstants.FIELDS_DEFAULT+")");
 
                 {
-                    StringBuilder qBuilder = new StringBuilder(128).append("title contains '").append(pattern).append("' and ").append(QUERY_STRING_FILES_ONLY);
+                    StringBuilder qBuilder = new StringBuilder(128);
+                    qBuilder.append('\'').append(fid).append("' in parents and ");
+                    qBuilder.append("title contains '").append(pattern).append("' and ").append(QUERY_STRING_FILES_ONLY);
                     if (null != fid) {
                         qBuilder.append(" and '").append(fid).append("' in parents");
                     }
                     list.setQ(qBuilder.toString());
                 }
 
-                ChildList fileList = list.execute();
+                FileList fileList = list.execute();
                 if (!fileList.getItems().isEmpty()) {
-                    for (ChildReference childRef : fileList.getItems()) {
-                        String fileId = childRef.getId();
-                        files.add(new GoogleDriveFile(folderId, fileId, userId, rootFolderId).parseGoogleDriveFile(drive.files().get(fileId).execute()));
+                    for (com.google.api.services.drive.model.File child : fileList.getItems()) {
+                        String fileId = child.getId();
+                        files.add(new GoogleDriveFile(folderId, fileId, userId, rootFolderId).parseGoogleDriveFile(child));
                     }
 
-                    String nextPageToken = list.getPageToken();
+                    String nextPageToken = fileList.getNextPageToken();
                     while (!isEmpty(nextPageToken)) {
                         list.setPageToken(nextPageToken);
                         fileList = list.execute();
                         if (!fileList.getItems().isEmpty()) {
-                            for (ChildReference childRef : fileList.getItems()) {
-                                String fileId = childRef.getId();
-                                files.add(new GoogleDriveFile(folderId, fileId, userId, rootFolderId).parseGoogleDriveFile(drive.files().get(fileId).execute()));
+                            for (com.google.api.services.drive.model.File child : fileList.getItems()) {
+                                String fileId = child.getId();
+                                files.add(new GoogleDriveFile(folderId, fileId, userId, rootFolderId).parseGoogleDriveFile(child));
                             }
                         }
 
-                        nextPageToken = list.getPageToken();
+                        nextPageToken = fileList.getNextPageToken();
                     }
                 }
             }
@@ -937,6 +961,62 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     private static void sort(List<File> files, Field sort, SortDirection order) {
         if (null != sort && 1 < files.size()) {
             Collections.sort(files, order.comparatorBy(sort));
+        }
+    }
+
+    private static void appendField(Field field, StringBuilder sb) {
+        switch (field) {
+        case ID:
+            if (sb.indexOf("id") < 0) {
+                sb.append("id,");
+            }
+            break;
+        case CREATED:
+            if (sb.indexOf("createdDate") < 0) {
+                sb.append("createdDate,");
+            }
+            break;
+        case LAST_MODIFIED:
+            /* fall-through */
+        case LAST_MODIFIED_UTC:
+            if (sb.indexOf("modifiedDate") < 0) {
+                sb.append("modifiedDate,");
+            }
+            break;
+        case TITLE:
+            /* fall-through */
+        case FILENAME:
+            if (sb.indexOf("title") < 0) {
+                sb.append("title,");
+            }
+            break;
+        case FILE_MIMETYPE:
+            if (sb.indexOf("mimeType") < 0) {
+                sb.append("mimeType,");
+            }
+            break;
+        case FILE_SIZE:
+            if (sb.indexOf("fileSize") < 0) {
+                sb.append("fileSize,");
+            }
+            break;
+        case URL:
+            if (sb.indexOf("downloadUrl") < 0) {
+                sb.append("downloadUrl,");
+            }
+            break;
+        case DESCRIPTION:
+            if (sb.indexOf("description") < 0) {
+                sb.append("description,");
+            }
+            break;
+        case VERSION:
+            if (sb.indexOf("version") < 0) {
+                sb.append("version,");
+            }
+            break;
+        default:
+            break;
         }
     }
 

@@ -51,11 +51,13 @@ package com.openexchange.templating;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
+@SingletonService
 public interface TemplateService {
 
     /**

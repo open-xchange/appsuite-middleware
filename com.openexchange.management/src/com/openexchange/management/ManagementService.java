@@ -51,12 +51,14 @@ package com.openexchange.management;
 
 import javax.management.ObjectName;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link ManagementService}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SingletonService
 public interface ManagementService {
 
     /**

@@ -49,9 +49,12 @@
 
 package com.openexchange.subscribe.mslive;
 
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.AbstractSubscribeService;
@@ -154,5 +157,11 @@ public abstract class AbstractMSLiveSubscribeService extends AbstractSubscribeSe
 
         }
         super.modifyOutgoing(subscription);
+    }
+
+    public void deleteAllUsingOAuthAccount(final Context context, final int id) throws OXException {
+        final Map<String, Object> query = new HashMap<String, Object>();
+        query.put("account", String.valueOf(id));
+        removeWhereConfigMatches(context, query);
     }
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.caching.events.ms.internal;
 
+import com.hazelcast.nio.serialization.ClassDefinition;
 import com.hazelcast.nio.serialization.Portable;
 import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
 
@@ -67,6 +68,11 @@ public class PortableCacheEventFactory extends AbstractCustomPortableFactory {
     @Override
     public int getClassId() {
         return PortableCacheEvent.CLASS_ID;
+    }
+
+    @Override
+    public ClassDefinition getClassDefinition() {
+        return PortableCacheEvent.CLASS_DEFINITION;
     }
 
 }

@@ -1846,7 +1846,6 @@ public final class OXFolderIteratorSQL {
     private static SearchIterator<FolderObject> getAllVisibleFoldersIteratorOfType(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int type, final int[] modules, final Integer parent, final Context ctx, final Connection con) throws OXException {
         final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId());
         if (null != treeMap) {
-            LOG.debug("Searching in folders -- getAllVisibleFoldersIteratorOfType -- got treeMap from Cache");
             try {
                 final List<Condition> conditions = new ArrayList<Condition>(3);
                 {
@@ -1886,7 +1885,6 @@ public final class OXFolderIteratorSQL {
                 // Retry from storage...
             }
         }
-        LOG.debug("Searching in folders -- getAllVisibleFoldersIteratorOfType -- querying database");
         /*
          * Query database
          */

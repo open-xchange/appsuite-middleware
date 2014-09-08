@@ -51,12 +51,14 @@ package com.openexchange.textxtraction;
 
 import java.io.InputStream;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link TextXtractService} - The service to extract plain text from various document formats.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SingletonService
 public interface TextXtractService {
 
     /**

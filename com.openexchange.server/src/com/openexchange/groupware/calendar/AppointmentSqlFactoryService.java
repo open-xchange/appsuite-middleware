@@ -50,6 +50,7 @@
 package com.openexchange.groupware.calendar;
 
 import com.openexchange.api2.AppointmentSQLInterface;
+import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
 
 /**
@@ -57,6 +58,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
+@SingletonService
 public interface AppointmentSqlFactoryService {
 
     /**

@@ -51,17 +51,18 @@ package com.openexchange.data.conversion.ical;
 
 import java.io.OutputStream;
 import java.util.List;
-
 import com.openexchange.data.conversion.ical.itip.ITipContainer;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link ICalEmitter}
  *
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
+@SingletonService
 public interface ICalEmitter {
 
     // TODO: What about mixed exports?Tasks and Appointments

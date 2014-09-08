@@ -83,22 +83,24 @@ public class CacheInvalidator implements CacheListener, ServiceTrackerCustomizer
             CacheOperation operation = cacheEvent.getOperation();
             if (operation == CacheOperation.CLEAR) {
                 clear();
-            } else {
-                Serializable key = cacheEvent.getKey();
-                if (CacheKey.class.isInstance(key)) {
-                    CacheKey cacheKey = (CacheKey) key;
-                    int contextId = cacheKey.getContextId();
-                    if (operation == CacheOperation.INVALIDATE) {
-                        if (cacheKey.getKeys().length == 1) {
-                            Serializable zero = cacheKey.getKeys()[0];
-                            if (Integer.class.isInstance(zero)) {
-                                // Beg for this being the userId...
-                                int userId = ((Integer) zero).intValue();
-                                invalidateUser(userId, contextId);
+            } else if (null != cacheEvent.getKeys()) {
+                for (Serializable key : cacheEvent.getKeys()) {
+                    if (CacheKey.class.isInstance(key)) {
+                        CacheKey cacheKey = (CacheKey) key;
+                        if (CacheOperation.INVALIDATE == operation) {
+                            String[] keys = cacheKey.getKeys();
+                            if (null != keys && 0 < keys.length && null != keys[0]) {
+                                try {
+                                    invalidateUser(Integer.valueOf(keys[0]), cacheKey.getContextId());
+                                } catch (NumberFormatException e) {
+                                    org.slf4j.LoggerFactory.getLogger(CacheInvalidator.class).error(
+                                        "Unexpected cache key for region {}: \"{}\", skipping invalidation.",
+                                        cacheEvent.getRegion(), keys[0], e);
+                                }
                             }
+                        } else if (CacheOperation.INVALIDATE_GROUP == operation) {
+                            invalidateContext(cacheKey.getContextId());
                         }
-                    } else if (operation == CacheOperation.INVALIDATE_GROUP) {
-                        invalidateContext(contextId);
                     }
                 }
             }

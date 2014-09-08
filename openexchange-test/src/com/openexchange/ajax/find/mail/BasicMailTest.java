@@ -264,7 +264,7 @@ public class BasicMailTest extends AbstractFindTest {
         assertEquals("Should only find 0 mails", 0, documents.size());
     }
 
-    public void testTimeFilter() throws Exception {
+    public void testDateFilter() throws Exception {
         Calendar calWithinLastWeek = new GregorianCalendar(TimeZones.UTC);
         calWithinLastWeek.add(Calendar.WEEK_OF_YEAR, -1);
         calWithinLastWeek.add(Calendar.DAY_OF_YEAR, 1);
@@ -283,7 +283,7 @@ public class BasicMailTest extends AbstractFindTest {
         String idBeforeLastYear = importMail(defaultAddress, defaultAddress, randomUID(), randomUID(), calBeforeLastYear.getTime())[0][1];
 
         List<ActiveFacet> facets = prepareFacets();
-        facets.add(createActiveFacet(CommonFacetType.TIME, CommonConstants.QUERY_LAST_WEEK, CommonConstants.FIELD_TIME, CommonConstants.QUERY_LAST_WEEK));
+        facets.add(createActiveFacet(CommonFacetType.DATE, CommonConstants.QUERY_LAST_WEEK, CommonConstants.FIELD_DATE, CommonConstants.QUERY_LAST_WEEK));
         List<PropDocument> documents = query(facets);
         assertEquals("Should only find 1 mails", 1, documents.size());
         assertNotNull("Mail not found", findByProperty(documents, "id", idWithinLastWeek));
@@ -293,14 +293,14 @@ public class BasicMailTest extends AbstractFindTest {
          */
         String timeRange = "[" + calWithinLastWeek.getTime().getTime() + " TO " + System.currentTimeMillis() + "]";
         facets = prepareFacets();
-        facets.add(createActiveFacet(CommonFacetType.TIME, timeRange, Filter.NO_FILTER));
+        facets.add(createActiveFacet(CommonFacetType.DATE, timeRange, Filter.NO_FILTER));
         documents = query(facets);
         assertEquals("Should only find 1 mails", 1, documents.size());
         assertNotNull("Mail not found", findByProperty(documents, "id", idWithinLastWeek));
         assertNull("Wrong mail found", findByProperty(documents, "id", idBeforeLastYear));
 
         facets = prepareFacets();
-        facets.add(createActiveFacet(CommonFacetType.TIME, CommonConstants.QUERY_LAST_MONTH, CommonConstants.FIELD_TIME, CommonConstants.QUERY_LAST_MONTH));
+        facets.add(createActiveFacet(CommonFacetType.DATE, CommonConstants.QUERY_LAST_MONTH, CommonConstants.FIELD_DATE, CommonConstants.QUERY_LAST_MONTH));
         documents = query(facets);
         assertEquals("Should only find 2 mails", 2, documents.size());
         assertNotNull("Mail not found", findByProperty(documents, "id", idWithinLastWeek));
@@ -311,7 +311,7 @@ public class BasicMailTest extends AbstractFindTest {
          */
         timeRange = "[" + calWithinLastMonth.getTime().getTime() + " TO *]";
         facets = prepareFacets();
-        facets.add(createActiveFacet(CommonFacetType.TIME, timeRange, Filter.NO_FILTER));
+        facets.add(createActiveFacet(CommonFacetType.DATE, timeRange, Filter.NO_FILTER));
         documents = query(facets);
         assertEquals("Should only find 2 mails", 2, documents.size());
         assertNotNull("Mail not found", findByProperty(documents, "id", idWithinLastWeek));
@@ -319,7 +319,7 @@ public class BasicMailTest extends AbstractFindTest {
         assertNull("Wrong mail found", findByProperty(documents, "id", idBeforeLastYear));
 
         facets = prepareFacets();
-        facets.add(createActiveFacet(CommonFacetType.TIME, CommonConstants.QUERY_LAST_YEAR, CommonConstants.FIELD_TIME, CommonConstants.QUERY_LAST_YEAR));
+        facets.add(createActiveFacet(CommonFacetType.DATE, CommonConstants.QUERY_LAST_YEAR, CommonConstants.FIELD_DATE, CommonConstants.QUERY_LAST_YEAR));
         documents = query(facets);
         assertEquals("Should only find 3 mails", 3, documents.size());
         assertNotNull("Mail not found", findByProperty(documents, "id", idWithinLastWeek));
@@ -331,7 +331,7 @@ public class BasicMailTest extends AbstractFindTest {
          */
         timeRange = "[" + calWithinLastYear.getTime().getTime() + " TO *]";
         facets = prepareFacets();
-        facets.add(createActiveFacet(CommonFacetType.TIME, timeRange, Filter.NO_FILTER));
+        facets.add(createActiveFacet(CommonFacetType.DATE, timeRange, Filter.NO_FILTER));
         documents = query(facets);
         assertEquals("Should only find 3 mails", 3, documents.size());
         assertNotNull("Mail not found", findByProperty(documents, "id", idWithinLastWeek));
@@ -344,7 +344,7 @@ public class BasicMailTest extends AbstractFindTest {
          */
         timeRange = "{* TO *}";
         facets = prepareFacets();
-        facets.add(createActiveFacet(CommonFacetType.TIME, timeRange, Filter.NO_FILTER));
+        facets.add(createActiveFacet(CommonFacetType.DATE, timeRange, Filter.NO_FILTER));
         documents = query(facets);
         assertEquals("Should find 4 mails", 4, documents.size());
         assertNotNull("Mail not found", findByProperty(documents, "id", idWithinLastWeek));

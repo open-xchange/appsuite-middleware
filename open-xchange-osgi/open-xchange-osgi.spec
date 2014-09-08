@@ -15,7 +15,6 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       3rd party OSGi bundles used by the Open-Xchange backend
 Autoreqprov:   no
-PreReq:        /usr/sbin/useradd
 Provides:      open-xchange-common = %{version}
 Obsoletes:     open-xchange-common < %{version}
 Provides:      open-xchange-activation = %{version}
@@ -31,6 +30,7 @@ Requires:      java >= 1.6.0
 # ibm java only on sles11, please
 Conflicts:     java-ibm
 %endif
+Requires:      open-xchange-system
 
 %description
 This package installes 3rd party OSGi bundles for the Open-Xchange backend. This includes the Equinox OSGi framework and the servlet API.
@@ -51,10 +51,6 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 mkdir -m 750 -p %{buildroot}/opt/open-xchange/osgi
 
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
-
-%pre
-/usr/sbin/groupadd -r open-xchange 2> /dev/null || :
-/usr/sbin/useradd -r -g open-xchange -r -s /bin/false -c "open-xchange system user" -d /opt/open-xchange open-xchange 2> /dev/null || :
 
 %clean
 %{__rm} -rf %{buildroot}

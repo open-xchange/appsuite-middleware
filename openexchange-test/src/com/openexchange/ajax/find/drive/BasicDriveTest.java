@@ -143,7 +143,6 @@ public class BasicDriveTest extends AbstractFindTest {
         metadata.setFolderId(testFolder.getObjectID());
         metadata.setMeta(Collections.singletonMap("key", (Object) "value"));
         manager.newAction(metadata, file);
-        System.out.println("BasicDriveTest.setUp() Folder: " + testFolder.getObjectID() + ", File: " + metadata.getId());
     }
 
     @Override
@@ -153,7 +152,6 @@ public class BasicDriveTest extends AbstractFindTest {
     }
 
     public void testSearch() throws Exception {
-        System.out.println("BasicDriveTest.testSearch() Request Tracking ID: " + client.getSession().getTrackingId());
         verifyDocumentExists();
         ActiveFacet fileNameFacet = new ActiveFacet(CommonFacetType.GLOBAL, "global", new Filter(
             Collections.singletonList(Constants.FIELD_FILE_NAME),
@@ -165,7 +163,6 @@ public class BasicDriveTest extends AbstractFindTest {
     }
 
     public void testSizeFacet() throws Exception {
-        System.out.println("BasicDriveTest.testSizeFacet() Request Tracking ID: " + client.getSession().getTrackingId());
         verifyDocumentExists();
         ActiveFacet fileSizeFacet = new ActiveFacet(DriveFacetType.FILE_SIZE, FileSize.MB1.getSize(), new Filter(
             Collections.singletonList(Constants.FIELD_FILE_SIZE),
@@ -193,7 +190,6 @@ public class BasicDriveTest extends AbstractFindTest {
     }
 
     public void testExclusiveFacetValues() throws Exception {
-        System.out.println("BasicDriveTest.testExclusiveFacetValues() Request Tracking ID: " + client.getSession().getTrackingId());
         List<Facet> facets = autocomplete("");
         Facet folderTypeFacet = findByType(CommonFacetType.FOLDER_TYPE, facets);
         assertNotNull("Missing folder type facet", folderTypeFacet);
@@ -205,7 +201,6 @@ public class BasicDriveTest extends AbstractFindTest {
     }
 
     public void testExclusiveFacets() throws Exception {
-        System.out.println("BasicDriveTest.testExclusiveFacets() Request Tracking ID: " + client.getSession().getTrackingId());
         List<Facet> facets = autocomplete("");
         Facet folderTypeFacet = findByType(CommonFacetType.FOLDER_TYPE, facets);
         assertNotNull("Missing folder type facet", folderTypeFacet);
@@ -215,7 +210,6 @@ public class BasicDriveTest extends AbstractFindTest {
     }
 
     public void testConflictsFolderFlag() throws Exception {
-        System.out.println("BasicDriveTest.testConflictsFolderFlag() Request Tracking ID: " + client.getSession().getTrackingId());
         List<Facet> facets = autocomplete("");
         Facet folderTypeFacet = findByType(CommonFacetType.FOLDER_TYPE, facets);
         assertNotNull("Missing folder type facet", folderTypeFacet);
@@ -234,7 +228,6 @@ public class BasicDriveTest extends AbstractFindTest {
     }
 
     public void testDefaultColumnsAreEquivalentToListRequest() throws Exception {
-        System.out.println("BasicDriveTest.testDefaultColumnsAreEquivalentToListRequest() Request Tracking ID: " + client.getSession().getTrackingId());
         // 20,23,1,5,700,702,703,704,707,3 from api.js
         Field[] fields = new Field[] {Field.FOLDER_ID, Field.META, Field.ID, Field.LAST_MODIFIED,
         Field.TITLE, Field.FILENAME, Field.FILE_MIMETYPE, Field.FILE_SIZE,
@@ -243,7 +236,6 @@ public class BasicDriveTest extends AbstractFindTest {
     }
 
     public void testWithExplicitColumns1() throws Exception {
-        System.out.println("BasicDriveTest.testWithExplicitColumns1() Request Tracking ID: " + client.getSession().getTrackingId());
         // 20,23,1,5,700,702,703,704,707,3 from api.js
         Field[] fields = new Field[] {Field.FOLDER_ID, Field.META, Field.ID, Field.LAST_MODIFIED,
         Field.TITLE, Field.FILENAME, Field.FILE_MIMETYPE, Field.FILE_SIZE,
@@ -252,14 +244,12 @@ public class BasicDriveTest extends AbstractFindTest {
     }
 
     public void testWithExplicitColumns2() throws Exception {
-        System.out.println("BasicDriveTest.testWithExplicitColumns2() Request Tracking ID: " + client.getSession().getTrackingId());
         Field[] fields = new Field[] {Field.FOLDER_ID, Field.ID, Field.META, Field.LAST_MODIFIED,
         Field.TITLE, Field.FILENAME };
         testWithFields(fields, true);
     }
 
     private void testWithFields(Field fields[], boolean withColumns) throws Exception {
-        System.out.println("BasicDriveTest.testWithFields() Request Tracking ID: " + client.getSession().getTrackingId());
         int columns[] = new int[fields.length];
         for (int i = 0; i < fields.length; i++) {
             columns[i] = fields[i].getNumber();
@@ -295,7 +285,6 @@ public class BasicDriveTest extends AbstractFindTest {
     }
 
     public void testConflictingFacetsCauseException() throws Exception {
-        System.out.println("BasicDriveTest.testConflictingFacetsCauseException() Request Tracking ID: " + client.getSession().getTrackingId());
         List<ActiveFacet> facets = new LinkedList<ActiveFacet>();
         facets.add(createActiveFacet(CommonFacetType.FOLDER, testFolder.getObjectID(), Filter.NO_FILTER));
         facets.add(createFolderTypeFacet(FolderType.PRIVATE));
@@ -305,7 +294,6 @@ public class BasicDriveTest extends AbstractFindTest {
     }
 
     public void testTokenizedQuery() throws Exception {
-        System.out.println("BasicDriveTest.testTokenizedQuery() Request Tracking ID: " + client.getSession().getTrackingId());
         // description: "Test file for testing new find api"
         SimpleFacet globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(Module.DRIVE, "Test" + " " + "api"));
         List<PropDocument> documents = query(Module.DRIVE, Collections.singletonList(createActiveFacet(globalFacet)));
@@ -323,7 +311,6 @@ public class BasicDriveTest extends AbstractFindTest {
     }
 
     public void testFolderTypeFacet() throws Exception {
-        System.out.println("BasicDriveTest.testFolderTypeFacet() Request Tracking ID: " + client.getSession().getTrackingId());
         AJAXClient client2 = new AJAXClient(User.User2);
         try {
             FolderType[] typesInOrder = new FolderType[] { FolderType.PRIVATE, FolderType.PUBLIC, FolderType.SHARED };
@@ -407,7 +394,6 @@ public class BasicDriveTest extends AbstractFindTest {
     }
 
     public void testDeletedFilesAreIgnored() throws Exception {
-        System.out.println("BasicDriveTest.testDeletedFilesAreIgnored() Request Tracking ID: " + client.getSession().getTrackingId());
         FolderObject deletedFolder = folderManager.insertFolderOnServer(folderManager.generatePrivateFolder(
             randomUID(),
             FolderObject.INFOSTORE,

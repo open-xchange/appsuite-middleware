@@ -103,6 +103,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -186,7 +187,8 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
             } else {
                 HttpHandler httpHandler = OSGiCleanMapper.getHttpHandler(alias);
 
-                ((OSGiHandler) httpHandler).getProcessingLock().lock();
+                ReadLock processingLock = ((OSGiHandler) httpHandler).getProcessingLock();
+                processingLock.lock();
                 try {
                     updateMappingInfo(request, alias, originalAlias);
 
@@ -200,7 +202,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
                     // 500 - Internal Server Error
                     response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR_500);
                 } finally {
-                    ((OSGiHandler) httpHandler).getProcessingLock().unlock();
+                    processingLock.unlock();
                 }
                 invoked = true;
                 if (response.getStatus() != 404) {

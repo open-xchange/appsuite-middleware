@@ -60,6 +60,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tx.TransactionAware;
@@ -70,6 +71,7 @@ import com.openexchange.tx.TransactionAware;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Some JavaDoc
  */
+@SingletonService
 public interface InfostoreFacade extends TransactionAware {
 
     /** Special Version used if you want to retrieve the latest version of an infostore document */

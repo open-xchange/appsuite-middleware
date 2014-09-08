@@ -334,7 +334,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
      * @see com.openexchange.mailfilter.MailFilterService#listRules(com.openexchange.mailfilter.Credentials)
      */
     @Override
-    public List<Rule> listRules(final Credentials credentials, final String flag) throws OXException {
+    public List<Rule> listRules(final Credentials credentials, final FilterType flag) throws OXException {
         synchronized (lock) {
             final SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials);
             try {
@@ -344,7 +344,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
                 LOGGER.debug("The following sieve script will be parsed:\n{}", script);
                 final SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
                 final RuleListAndNextUid rules = sieveTextFilter.readScriptFromString(script);
-                final ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(rules.getRulelist(), flag, rules.isError());
+                final ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(rules.getRulelist(), flag.getFlag(), rules.isError());
                 final List<Rule> clientRules = clientrulesandrequire.getRules();
                 changeOutgoingVacationRule(clientRules);
                 return clientRules;
@@ -373,7 +373,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
     }
 
     @Override
-    public List<Rule> listRules(Credentials credentials, List<String> exclusionFlags) throws OXException {
+    public List<Rule> listRules(Credentials credentials, List<FilterType> exclusionFlags) throws OXException {
         synchronized (lock) {
             final SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials);
             try {
@@ -485,6 +485,11 @@ public final class MailFilterServiceImpl implements MailFilterService {
                 final List<Rule> clientrules = clientrulesandrequire.getRules();
                 final RuleAndPosition rightRule = getRightRuleForUniqueId(clientrules, uid);
 
+                // no rule found
+                if(rightRule == null) {
+                    return null;
+                }
+
                 return rightRule.rule;
             } catch (UnsupportedEncodingException e) {
                 throw MailFilterExceptionCode.UNSUPPORTED_ENCODING.create(e);
@@ -536,9 +541,9 @@ public final class MailFilterServiceImpl implements MailFilterService {
 
     // ----------------------------------------------------------------------------------------------------------------------- //
 
-    private List<Rule> exclude(final Map<String, List<Rule>> flagged, List<String> exclusionFlags) {
+    private List<Rule> exclude(final Map<String, List<Rule>> flagged, List<FilterType> exclusionFlags) {
         final List<Rule> ret = new ArrayList<Rule>();
-        for(String flag : exclusionFlags) {
+        for(FilterType flag : exclusionFlags) {
             flagged.remove(flag);
         }
         for(List<Rule> l : flagged.values()) {

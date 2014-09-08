@@ -63,6 +63,7 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.osgi.console.DeferredActivatorServiceStateLookup;
 import com.openexchange.osgi.console.ServiceStateLookup;
 import com.openexchange.server.ServiceLookup;
@@ -218,7 +219,8 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      * <p>
      * <div style="background-color:#FFDDDD; padding:6px; margin:0px;">
      * <b>Note</b>: Listed services are supposed to be singleton services!<br>
-     * Please do not list such OSGi services that may get registered multiple times by different bundles.
+     * Please do not list such OSGi services that may get registered multiple times by different bundles.<br>
+     * &nbsp;See also: <i><code>com.openexchange.osgi.annotation.SingletonService</code></i> annotation.
      * </div>
      *
      * @return The array of {@link Class} instances of needed services
@@ -261,6 +263,13 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             final int len = classes.length;
             if (len > 0 && new HashSet<Class<?>>(Arrays.asList(classes)).size() != len) {
                 throw new IllegalArgumentException("Duplicate class/interface provided through getNeededServices()");
+            }
+            if (LOG.isDebugEnabled()) {
+                for (Class<?> trackedService : classes) {
+                    if (null == trackedService.getAnnotation(SingletonService.class) && trackedService.getName().startsWith("com.openexchange.")) {
+                        LOG.debug("{} tracks needed service {} that is not annotated as a {}", getClass().getName(), trackedService.getName(), SingletonService.class.getSimpleName());
+                    }
+                }
             }
             services = new ConcurrentHashMap<Class<?>, ServiceProvider<?>>(len);
             neededServiceTrackers = new ServiceTracker[len];

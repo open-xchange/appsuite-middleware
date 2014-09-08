@@ -53,6 +53,7 @@ import java.util.Collection;
 import com.openexchange.documentation.descriptions.ContainerDescription;
 import com.openexchange.documentation.descriptions.ModuleDescription;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link DocumentationRegistry} - Provides access to descriptions for modules and containers.
@@ -62,6 +63,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
+@SingletonService
 public interface DocumentationRegistry {
 
     /**

@@ -52,6 +52,7 @@ package com.openexchange.ajax.requesthandler;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -59,6 +60,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+@SingletonService
 public interface Dispatcher {
 
     /**

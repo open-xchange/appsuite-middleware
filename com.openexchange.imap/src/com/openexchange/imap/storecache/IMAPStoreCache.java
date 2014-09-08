@@ -282,7 +282,7 @@ public final class IMAPStoreCache {
         }
     }
 
-    private IMAPStoreContainer getContainer(final int accountId, final String server, final int port, final String login, final Session session) throws OXException {
+    private IMAPStoreContainer getContainer(final int accountId, final String server, final int port, final String login, final Session session, boolean propagateClientIp) throws OXException {
         /*
          * Check for a cached one
          */
@@ -292,7 +292,7 @@ public final class IMAPStoreCache {
          */
         IMAPStoreContainer container = map.get(key);
         if (null == container) {
-            final IMAPStoreContainer newContainer = newContainer(server, port);
+            final IMAPStoreContainer newContainer = newContainer(server, port, propagateClientIp);
             container = map.putIfAbsent(key, newContainer);
             if (null == container) {
                 container = newContainer;
@@ -312,16 +312,16 @@ public final class IMAPStoreCache {
         return container;
     }
 
-    private IMAPStoreContainer newContainer(final String server, final int port) {
+    private IMAPStoreContainer newContainer(final String server, final int port, boolean propagateClientIp) {
         switch (containerType) {
         case UNBOUNDED:
-            return new UnboundedIMAPStoreContainer(server, port);
+            return new UnboundedIMAPStoreContainer(server, port, propagateClientIp);
         case BOUNDARY_AWARE:
-            return new BoundaryAwareIMAPStoreContainer(server, port);
+            return new BoundaryAwareIMAPStoreContainer(server, port, propagateClientIp);
         case NON_CACHING:
-            return new NonCachingIMAPStoreContainer(server, port);
+            return new NonCachingIMAPStoreContainer(server, port, propagateClientIp);
         default:
-            return new BoundaryAwareIMAPStoreContainer(server, port);
+            return new BoundaryAwareIMAPStoreContainer(server, port, propagateClientIp);
         }
     }
 
@@ -351,16 +351,17 @@ public final class IMAPStoreCache {
      * @param port The port
      * @param login The login/user name
      * @param pw The password
+     * @param propagateClientIp <code>true</code> to signal client IP address; otherwise <code>false</code>
      * @return The connected IMAP store or <code>null</code> if currently impossible to do so
      * @throws MessagingException If connecting IMAP store fails
      * @throws OXException If a mail error occurs
      */
-    public IMAPStore borrowIMAPStore(final int accountId, final javax.mail.Session imapSession, final String server, final int port, final String login, final String pw, final Session session) throws MessagingException, OXException {
+    public IMAPStore borrowIMAPStore(int accountId, javax.mail.Session imapSession, String server, int port, String login, String pw, Session session, boolean propagateClientIp) throws MessagingException, OXException {
         /*
          * Return connected IMAP store
          */
         try {
-            return getContainer(accountId, server, port, login, session).getStore(imapSession, login, pw);
+            return getContainer(accountId, server, port, login, session, propagateClientIp).getStore(imapSession, login, pw, session);
         } catch (final InterruptedException e) {
             // Should not occur
             Thread.currentThread().interrupt();

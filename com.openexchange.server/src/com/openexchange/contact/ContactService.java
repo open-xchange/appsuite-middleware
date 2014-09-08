@@ -55,6 +55,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -65,6 +66,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
+@SingletonService
 public interface ContactService {
 
     /**

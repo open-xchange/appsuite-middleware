@@ -1024,6 +1024,13 @@ EOF
    rm -f $ptmp
 fi
 
+# SoftwareChange_Request-2148
+ox_add_property com.openexchange.mail.enforceSecureConnection false /opt/open-xchange/etc/mail.properties
+
+# SoftwareChange_Request-2079
+ox_add_property com.openexchange.passwordchange.allowedPattern "" /opt/open-xchange/etc/passwordchange.properties
+ox_add_property com.openexchange.passwordchange.allowedPatternHint "" /opt/open-xchange/etc/passwordchange.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
@@ -1048,7 +1055,6 @@ exit 0
 %dir /opt/open-xchange/importCSV/
 %dir /opt/open-xchange/lib/
 /opt/open-xchange/lib/*
-/opt/open-xchange/lib/oxfunctions.sh
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 /opt/open-xchange/osgi/config.ini.template

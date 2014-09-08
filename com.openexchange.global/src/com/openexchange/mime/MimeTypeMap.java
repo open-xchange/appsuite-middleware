@@ -51,6 +51,7 @@ package com.openexchange.mime;
 
 import java.io.File;
 import java.util.List;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link MimeTypeMap} - Maps MIME types to file extensions and vice versa.
@@ -67,6 +68,7 @@ import java.util.List;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SingletonService
 public interface MimeTypeMap {
 
     /**

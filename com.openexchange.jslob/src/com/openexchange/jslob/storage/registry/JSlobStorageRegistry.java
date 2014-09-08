@@ -52,12 +52,14 @@ package com.openexchange.jslob.storage.registry;
 import java.util.Collection;
 import com.openexchange.exception.OXException;
 import com.openexchange.jslob.storage.JSlobStorage;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link JSlobStorageRegistry} - The registry for JSlob storages.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SingletonService
 public interface JSlobStorageRegistry {
 
     /**

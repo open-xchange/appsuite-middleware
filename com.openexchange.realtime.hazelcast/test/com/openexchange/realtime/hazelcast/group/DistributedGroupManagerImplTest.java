@@ -69,6 +69,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import com.hazelcast.config.Config;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
@@ -137,7 +138,7 @@ public class DistributedGroupManagerImplTest {
 
     @Before
     public void setUp() {
-        sentStanzas = HashMultimap.create();
+        sentStanzas = Multimaps.synchronizedMultimap(HashMultimap.<ID, Stanza>create());
         messageDispatcher  = new MessageDispatcherMock(sentStanzas);
         groupManager = new DistributedGroupManagerImpl(messageDispatcher, CLIENT_MAP, GROUP_MAP);
         Services.setServiceLookup(new SimServiceLookup());
@@ -242,9 +243,9 @@ public class DistributedGroupManagerImplTest {
 
     /**
      * Test method for {@link com.openexchange.realtime.hazelcast.group.DistributedGroupManagerImpl#getMembers(com.openexchange.realtime.packet.ID)}.
-     * 
+     *
      * Only tests if the leave command was sent to the GroupDispatcher as no actual Message and GroupDispatchers are used in this test.
-     * 
+     *
      * @throws Exception
      */
     @Test

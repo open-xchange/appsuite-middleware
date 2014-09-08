@@ -53,12 +53,14 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link ManagedFileManagement} - The file management designed to keep large content as a temporary file on disk.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SingletonService
 public interface ManagedFileManagement {
 
     /**

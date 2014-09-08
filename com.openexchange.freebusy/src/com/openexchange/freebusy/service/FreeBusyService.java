@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.freebusy.FreeBusyData;
+import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
 
 /**
@@ -63,6 +64,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
+@SingletonService
 public interface FreeBusyService {
 
     /**

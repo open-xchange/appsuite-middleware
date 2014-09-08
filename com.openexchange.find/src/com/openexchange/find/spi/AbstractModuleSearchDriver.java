@@ -99,6 +99,10 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
      */
     protected static final Set<FolderType> ALL_FOLDER_TYPES = EnumSet.allOf(FolderType.class);
 
+    @Override
+    public boolean isValidFor(ServerSession session, AbstractFindRequest findRequest) throws OXException {
+        return isValidFor(session);
+    }
 
     @Override
     public final AutocompleteResult autocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {

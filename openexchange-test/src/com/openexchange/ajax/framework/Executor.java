@@ -342,15 +342,6 @@ public class Executor extends Assert {
             sb.append('?').append(AJAXServlet.PARAMETER_SESSION).append('=').append(session.getId());
             first = false;
         }
-        if (session.getTrackingId() != null) {
-            if (first) {
-                sb.append('?');
-                first = false;
-            } else {
-                sb.append('&');
-            }
-            sb.append("trackingId").append('=').append(encode(session.getTrackingId()));
-        }
         for (final Parameter param : request.getParameters()) {
             if (!(param instanceof FileParameter)) {
                 if (first) {
@@ -372,9 +363,6 @@ public class Executor extends Assert {
     private static void addURLParameter(final WebRequest req, final AJAXSession session, final AJAXRequest<?> request) throws IOException, JSONException {
         if (null != session.getId()) {
             req.setParameter(AJAXServlet.PARAMETER_SESSION, session.getId());
-        }
-        if (session.getTrackingId() != null) {
-            req.setParameter("trackingId", session.getTrackingId());
         }
         for (final Parameter param : request.getParameters()) {
             if (!(param instanceof FileParameter)) {
@@ -408,10 +396,6 @@ public class Executor extends Assert {
 
         if (session.getId() != null) {
             pairs.add( new BasicNameValuePair(AJAXServlet.PARAMETER_SESSION, session.getId()));
-        }
-
-        if (session.getTrackingId() != null) {
-            pairs.add( new BasicNameValuePair("trackingId", session.getTrackingId()));
         }
 
         for (final Parameter param : ajaxRequest.getParameters()) {
@@ -470,6 +454,8 @@ public class Executor extends Assert {
                       ((FileParameter) param).getInputStream(),
                       ((FileParameter) param).getMimeType(),
                       ((FileParameter) param).getFileName()));
+            } else if (param instanceof FieldParameter) {
+                entity.addPart(((FieldParameter)param).getFieldName(), new StringBody(((FieldParameter)param).getFieldContent(), Charset.forName("UTF-8")));
             }
         }
 
@@ -488,9 +474,6 @@ public class Executor extends Assert {
         final URLParameter parameter = new URLParameter();
         if (null != session.getId()) {
             parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session.getId());
-        }
-        if (session.getTrackingId() != null) {
-            parameter.setParameter("trackingId", session.getTrackingId());
         }
         for (final Parameter param : request.getParameters()) {
             if (!strict && !(param instanceof FileParameter) && !(param instanceof FieldParameter)) {

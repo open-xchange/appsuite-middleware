@@ -194,7 +194,7 @@ public class AppSuiteLoginRampUp implements LoginRampUpService {
             public Void call() throws Exception {
                 try {
                     JSONObject folderlist = new JSONObject();
-                    folderlist.put("0", ox.perform(request().module("folders").action("list").params("parent", "1", "tree", "1", "altNames", "true", "timezone", "UTC", "columns", "1,2,3,4,5,6,20,23,300,301,302,304,305,306,307,308,309,310,311,312,313,314,315,316,317,3010,3020,3030").format("json").build(), null, session).getResultObject());
+                    folderlist.put("1", ox.perform(request().module("folders").action("list").params("parent", "1", "tree", "0", "altNames", "true", "timezone", "UTC", "columns", "1,2,3,4,5,6,20,23,300,301,302,304,305,306,307,308,309,310,311,312,313,314,315,316,317,3010,3020,3030").format("json").build(), null, session).getResultObject());
                     rampUp.put("folderlist", folderlist);
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
@@ -222,7 +222,7 @@ public class AppSuiteLoginRampUp implements LoginRampUpService {
             @Override
             public Void call() throws Exception {
                 try {
-                    rampUp.put("accounts", ox.perform(request().module("account").action("all").format("json").params("columns", "1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1011,1012,1013,1014,1015,1016,1017,1018,1019,1020,1021,1022,1023,1024,1025,1026,1027,1028,1029,1030,1031,1032,1033,1034,1035,1036,1037,1038,1039,1040,1043").build(), null, session).getResultObject());
+                    rampUp.put("accounts", ox.perform(request().module("account").action("all").format("json").params("columns", "1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1011,1012,1013,1014,1015,1016,1017,1018,1019,1020,1021,1022,1023,1024,1025,1026,1027,1028,1029,1030,1031,1032,1033,1034,1035,1036,1037,1038,1039,1040,1041,1042,1043").build(), null, session).getResultObject());
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
                 }

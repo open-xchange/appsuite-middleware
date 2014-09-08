@@ -180,7 +180,8 @@ public final class GetRequest extends AbstractMailRequest<GetResponse> {
 
     public enum View {
         RAW("raw"),
-        TEXT("text");
+        TEXT("text"),
+        HTML("html");
         String value;
         View(String value) {
             this.value = value;

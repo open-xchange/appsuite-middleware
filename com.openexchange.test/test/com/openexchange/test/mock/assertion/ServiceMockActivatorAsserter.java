@@ -50,8 +50,8 @@
 package com.openexchange.test.mock.assertion;
 
 import java.util.List;
-import java.util.Map;
 import org.junit.Assert;
+import com.google.common.collect.Multimap;
 import com.openexchange.test.mock.InjectionFieldConstants;
 import com.openexchange.test.mock.MockUtils;
 
@@ -71,7 +71,7 @@ public class ServiceMockActivatorAsserter {
      */
     @SuppressWarnings("unchecked")
     public static void verifyAllServicesRegistered(Object activator, int expectedNumberOfRegisteredServices) {
-        Map<Object, Object> serviceRegistrations = (Map<Object, Object>) MockUtils.getValueFromField(
+        Multimap<Object, Object> serviceRegistrations = (Multimap<Object, Object>) MockUtils.getValueFromField(
             activator,
             InjectionFieldConstants.SERVICE_REGISTRATIONS);
 
@@ -88,7 +88,7 @@ public class ServiceMockActivatorAsserter {
      */
     @SuppressWarnings("unchecked")
     public static void verifyAllServicesUnregistered(Object activator) {
-        Map<Object, Object> serviceRegistrations = (Map<Object, Object>) MockUtils.getValueFromField(
+        Multimap<Object, Object> serviceRegistrations = (Multimap<Object, Object>) MockUtils.getValueFromField(
             activator,
             InjectionFieldConstants.SERVICE_REGISTRATIONS);
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.secret;
 
+import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
 
 
@@ -57,6 +58,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+@SingletonService
 public interface SecretService {
 
     /**

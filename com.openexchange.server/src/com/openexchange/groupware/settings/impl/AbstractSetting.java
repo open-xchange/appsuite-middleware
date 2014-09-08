@@ -247,7 +247,7 @@ public abstract class AbstractSetting<T extends AbstractSetting<? extends T>> im
             for (PriorityQueue<T> q : elements.values()) {
                 Iterator<T> iter = q.iterator();
                 while (iter.hasNext()) {
-                    out.append(iter.next().toString());
+                    out.append(String.valueOf(iter.next()));
                     if (iter.hasNext()) {
                         out.append(',');
                     }

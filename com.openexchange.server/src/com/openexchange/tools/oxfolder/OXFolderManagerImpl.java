@@ -104,7 +104,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
+import com.openexchange.groupware.infostore.facade.impl.EventFiringInfostoreFacadeImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.modules.Module;
@@ -972,7 +972,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
             return contactService.isFolderEmpty(session, String.valueOf(folderId));
         } else if (module == FolderObject.INFOSTORE) {
-            final InfostoreFacade db = new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
+            final InfostoreFacade db = new EventFiringInfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
             return db.isFolderEmpty(folderId, ctx);
         } else if (module == FolderObject.SYSTEM_MODULE) {
             return true;
@@ -2014,9 +2014,9 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     private void deleteContainedDocuments(final int folderID) throws OXException {
         final InfostoreFacade infostoreFacade;
         if (writeCon == null) {
-            infostoreFacade = new InfostoreFacadeImpl(new DBPoolProvider());
+            infostoreFacade = new EventFiringInfostoreFacadeImpl(new DBPoolProvider());
         } else {
-            infostoreFacade = new InfostoreFacadeImpl(new StaticDBPoolProvider(writeCon));
+            infostoreFacade = new EventFiringInfostoreFacadeImpl(new StaticDBPoolProvider(writeCon));
             infostoreFacade.setCommitsTransaction(false);
         }
         infostoreFacade.setTransactional(true);

@@ -171,6 +171,21 @@ public final class MailFolderStorage implements FolderStorage {
         };
     }
 
+    private String optArchiveFullName(MailAccount mailAccount, MailAccess<?, ?> mailAccess) throws OXException {
+        if (null == mailAccount) {
+            return null;
+        }
+        String fn = mailAccount.getArchiveFullname();
+        if (null == fn) {
+            String name = mailAccount.getArchive();
+            if (null == name) {
+                return null;
+            }
+            fn = mailAccess.getFolderStorage().getDefaultFolderPrefix() + name;
+        }
+        return fn;
+    }
+
     @Override
     public void clearCache(final int userId, final int contextId) {
         /*
@@ -809,10 +824,10 @@ public final class MailFolderStorage implements FolderStorage {
 
     private Folder getFolder(final String treeId, final FullnameArgument argument, final StorageParameters storageParameters, final MailAccess<?, ?> mailAccess, final ServerSession session, final MailAccount mailAccount) throws OXException {
         final int accountId = argument.getAccountId();
-        final String fullname = argument.getFullname();
+        final String fullName = argument.getFullname();
         final Folder retval;
         final boolean hasSubfolders;
-        if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname)) {
+        if (MailFolder.DEFAULT_FOLDER_ID.equals(fullName)) {
             if (MailAccount.DEFAULT_ID == accountId) {
                 mailAccess.connect(false);
                 final MailFolder rootFolder = mailAccess.getRootFolder();
@@ -840,7 +855,7 @@ public final class MailFolderStorage implements FolderStorage {
         } else {
             final Boolean accessFast = storageParameters.getParameter(folderType, paramAccessFast);
             mailAccess.connect(null == accessFast ? true : !accessFast.booleanValue());
-            final MailFolder mailFolder = getMailFolder(treeId, accountId, fullname, true, session, mailAccess);
+            final MailFolder mailFolder = getMailFolder(treeId, accountId, fullName, true, session, mailAccess);
             /*
              * Generate mail folder from loaded one
              */
@@ -856,7 +871,7 @@ public final class MailFolderStorage implements FolderStorage {
             /*
              * Check if denoted parent can hold default folders like Trash, Sent, etc.
              */
-            if ("INBOX".equals(fullname)) {
+            if ("INBOX".equals(fullName)) {
                 /*
                  * This one needs sorting. Just pass null or an empty array.
                  */
@@ -865,6 +880,11 @@ public final class MailFolderStorage implements FolderStorage {
                 /*
                  * Denoted parent is not capable to hold default folders. Therefore output as it is.
                  */
+                boolean reverse;
+                {
+                    String archiveFullname = optArchiveFullName(mailAccount, mailAccess);
+                    reverse = null != archiveFullname && archiveFullname.equals(fullName);
+                }
 
                 boolean doIt = true;
                 {
@@ -872,7 +892,7 @@ public final class MailFolderStorage implements FolderStorage {
                     if (folderStorage instanceof IMailFolderStorageInfoSupport) {
                         final IMailFolderStorageInfoSupport infoSupport = (IMailFolderStorageInfoSupport) folderStorage;
                         if (infoSupport.isInfoSupported()) {
-                            final List<MailFolderInfo> folderInfos = infoSupport.getFolderInfos(fullname, false);
+                            final List<MailFolderInfo> folderInfos = infoSupport.getFolderInfos(fullName, false);
                             /*
                              * Filter against possible POP3 storage folders
                              */
@@ -880,7 +900,7 @@ public final class MailFolderStorage implements FolderStorage {
                                 filterPOP3StorageFolderInfos(folderInfos, session);
                             }
                             final boolean translate = !StorageParametersUtility.getBoolParameter("ignoreTranslation", storageParameters);
-                            Collections.sort(folderInfos, new SimpleMailFolderInfoComparator(storageParameters.getUser().getLocale(), translate));
+                            Collections.sort(folderInfos, new SimpleMailFolderInfoComparator(storageParameters.getUser().getLocale(), translate, reverse));
                             final String[] subfolderIds = new String[folderInfos.size()];
                             int i = 0;
                             for (final MailFolderInfo child : folderInfos) {
@@ -893,14 +913,14 @@ public final class MailFolderStorage implements FolderStorage {
                 }
 
                 if (doIt) {
-                    final List<MailFolder> children = new ArrayList<MailFolder>(Arrays.asList(mailAccess.getFolderStorage().getSubfolders(fullname, true)));
+                    final List<MailFolder> children = new ArrayList<MailFolder>(Arrays.asList(mailAccess.getFolderStorage().getSubfolders(fullName, true)));
                     /*
                      * Filter against possible POP3 storage folders
                      */
                     if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isHidePOP3StorageFolders()) {
                         filterPOP3StorageFolders(children, session);
                     }
-                    Collections.sort(children, new SimpleMailFolderComparator(storageParameters.getUser().getLocale()));
+                    Collections.sort(children, new SimpleMailFolderComparator(storageParameters.getUser().getLocale(), reverse));
                     final String[] subfolderIds = new String[children.size()];
                     int i = 0;
                     for (final MailFolder child : children) {
@@ -1135,7 +1155,15 @@ public final class MailFolderStorage implements FolderStorage {
                             /*
                              * Denoted parent is not capable to hold default folders. Therefore output as it is.
                              */
-                            Collections.sort(folderInfos, new SimpleMailFolderInfoComparator(storageParameters.getUser().getLocale(), translate));
+                            boolean reverse;
+                            {
+                                MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
+                                MailAccount mailAccount = storageService.getMailAccount(accountId, storageParameters.getUserId(), storageParameters.getContextId());
+                                String archiveFullName = optArchiveFullName(mailAccount, mailAccess);
+                                reverse = null != archiveFullName && archiveFullName.equals(fullname);
+                            }
+
+                            Collections.sort(folderInfos, new SimpleMailFolderInfoComparator(storageParameters.getUser().getLocale(), translate, reverse));
                         } else {
                             /*
                              * Ensure default folders are at first positions
@@ -1205,7 +1233,14 @@ public final class MailFolderStorage implements FolderStorage {
                 /*
                  * Denoted parent is not capable to hold default folders. Therefore output as it is.
                  */
-                Collections.sort(children, new SimpleMailFolderComparator(storageParameters.getUser().getLocale()));
+                boolean reverse;
+                {
+                    MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
+                    MailAccount mailAccount = storageService.getMailAccount(accountId, storageParameters.getUserId(), storageParameters.getContextId());
+                    String archiveFullName = optArchiveFullName(mailAccount, mailAccess);
+                    reverse = null != archiveFullName && archiveFullName.equals(fullname);
+                }
+                Collections.sort(children, new SimpleMailFolderComparator(storageParameters.getUser().getLocale(), reverse));
             } else {
                 /*
                  * Ensure default folders are at first positions
@@ -1691,15 +1726,22 @@ public final class MailFolderStorage implements FolderStorage {
     private static final class SimpleMailFolderComparator implements Comparator<MailFolder> {
 
         private final Collator collator;
+        private final boolean reverse;
 
-        public SimpleMailFolderComparator(final Locale locale) {
+        public SimpleMailFolderComparator(Locale locale) {
+            this(locale, false);
+        }
+
+        public SimpleMailFolderComparator(Locale locale, boolean reverse) {
             super();
             collator = Collators.getSecondaryInstance(locale);
+            this.reverse = reverse;
         }
 
         @Override
         public int compare(final MailFolder o1, final MailFolder o2) {
-            return collator.compare(o1.getName(), o2.getName());
+            int result = collator.compare(o1.getName(), o2.getName());
+            return reverse ? -result : result;
         }
     }
 
@@ -1707,16 +1749,23 @@ public final class MailFolderStorage implements FolderStorage {
 
         private final Collator collator;
         private final boolean translate;
+        private final boolean reverse;
 
-        public SimpleMailFolderInfoComparator(final Locale locale, final boolean translate) {
+        public SimpleMailFolderInfoComparator(Locale locale, boolean translate) {
+            this(locale, translate, false);
+        }
+
+        public SimpleMailFolderInfoComparator(Locale locale, boolean translate, boolean reverse) {
             super();
+            this.reverse = reverse;
             this.translate = translate;
             collator = Collators.getSecondaryInstance(locale);
         }
 
         @Override
         public int compare(final MailFolderInfo o1, final MailFolderInfo o2) {
-            return collator.compare(translate ? o1.getDisplayName() : o1.getName(), translate ? o2.getDisplayName() : o2.getName());
+            int result = collator.compare(translate ? o1.getDisplayName() : o1.getName(), translate ? o2.getDisplayName() : o2.getName());
+            return reverse ? -result : result;
         }
     }
 

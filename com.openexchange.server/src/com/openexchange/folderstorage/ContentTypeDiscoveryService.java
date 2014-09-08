@@ -49,6 +49,12 @@
 
 package com.openexchange.folderstorage;
 
+import com.openexchange.osgi.annotation.SingletonService;
+
+/**
+ * {@link ContentTypeDiscoveryService} - Discovery service for folder content types.
+ */
+@SingletonService
 public interface ContentTypeDiscoveryService {
 
     /**

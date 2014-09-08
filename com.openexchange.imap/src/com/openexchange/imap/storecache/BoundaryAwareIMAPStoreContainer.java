@@ -50,7 +50,7 @@
 package com.openexchange.imap.storecache;
 
 import javax.mail.MessagingException;
-import javax.mail.Session;
+import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.util.PropUtil;
 
@@ -67,8 +67,8 @@ public final class BoundaryAwareIMAPStoreContainer extends UnboundedIMAPStoreCon
     /**
      * Initializes a new {@link BoundaryAwareIMAPStoreContainer}.
      */
-    public BoundaryAwareIMAPStoreContainer(final String server, final int port) {
-        super(server, port);
+    public BoundaryAwareIMAPStoreContainer(String server, int port, boolean propagateClientIp) {
+        super(server, port, propagateClientIp);
     }
 
     /**
@@ -91,17 +91,17 @@ public final class BoundaryAwareIMAPStoreContainer extends UnboundedIMAPStoreCon
     }
 
     @Override
-    public IMAPStore getStore(final Session imapSession, final String login, final String pw) throws MessagingException, InterruptedException {
+    public IMAPStore getStore(javax.mail.Session imapSession, String login, String pw, Session session) throws MessagingException, InterruptedException {
         final int maxNumAuthenticated = PropUtil.getIntSessionProperty(imapSession, "mail.imap.maxNumAuthenticated", 0);
         if (maxNumAuthenticated <= 0) {
-            return super.getStore(imapSession, login, pw);
+            return super.getStore(imapSession, login, pw, session);
         }
 
         // Try acquire a permit
         final Limiter limiter = getLimiter(maxNumAuthenticated);
         if (limiter.acquire()) {
             LOG.debug("BoundaryAwareIMAPStoreContainer.getStore(): Acquired -- {}", limiter);
-            return super.getStore(imapSession, login, pw);
+            return super.getStore(imapSession, login, pw, session);
         }
 
         // Await until permit is available
@@ -119,7 +119,7 @@ public final class BoundaryAwareIMAPStoreContainer extends UnboundedIMAPStoreCon
             }
         }
         LOG.debug("BoundaryAwareIMAPStoreContainer.getStore(): Acquired -- {}", limiter);
-        return super.getStore(imapSession, login, pw);
+        return super.getStore(imapSession, login, pw, session);
     }
 
     @Override

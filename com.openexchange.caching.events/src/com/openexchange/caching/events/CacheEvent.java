@@ -50,8 +50,8 @@
 package com.openexchange.caching.events;
 
 import java.io.Serializable;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * {@link CacheEvent}
@@ -69,7 +69,19 @@ public class CacheEvent implements Serializable {
      * @return The cache event
      */
     public static CacheEvent INVALIDATE(String region, String groupName, Serializable key) {
-        return new CacheEvent(CacheOperation.INVALIDATE, region, key, groupName);
+        return INVALIDATE(region, groupName, Collections.singletonList(key));
+    }
+
+    /**
+     * Creates a new {@link CacheOperation#INVALIDATE} event.
+     *
+     * @param region The cache region
+     * @param groupName The cache group name
+     * @param keys The keys of the affected cache entries
+     * @return The cache event
+     */
+    public static CacheEvent INVALIDATE(String region, String groupName, List<Serializable> keys) {
+        return new CacheEvent(CacheOperation.INVALIDATE, region, keys, groupName);
     }
 
     /**
@@ -93,27 +105,12 @@ public class CacheEvent implements Serializable {
         return new CacheEvent(CacheOperation.CLEAR, region, null, null);
     }
 
-    /**
-     * Creates a new cache event from POJO map.
-     *
-     * @param map The POJO map
-     * @return The resulting cache event
-     */
-    public static CacheEvent fromPojo(Map<String, Object> map) {
-        if (null == map) {
-            return null;
-        }
-        final CacheEvent cacheEvent = new CacheEvent();
-        cacheEvent.readPojo(map);
-        return cacheEvent;
-    }
-
     // ----------------------------------------------------------------------------------------------------------- //
 
     private static final long serialVersionUID = 7172029773641345572L;
 
     private CacheOperation operation;
-    private Serializable key;
+    private List<Serializable> keys;
     private String groupName;
     private String region;
 
@@ -123,79 +120,14 @@ public class CacheEvent implements Serializable {
      * @param operation The cache operation
      * @param region The cache region
      * @param groupName The cache group name
-     * @param key The key of the affected cache entry
+     * @param keys The keys of the affected cache entries
      */
-    public CacheEvent(CacheOperation operation, String region, Serializable key, String groupName) {
+    public CacheEvent(CacheOperation operation, String region, List<Serializable> keys, String groupName) {
         super();
         this.operation = operation;
         this.region = region;
-        this.key = key;
+        this.keys = keys;
         this.groupName = groupName;
-    }
-
-    /**
-     * Initializes a new {@link CacheEvent}.
-     *
-     * @param map The POJO map
-     */
-    private CacheEvent() {
-        super();
-    }
-
-    /**
-     * Reads the POJO view for this instance.
-     *
-     * @param pojo The POJO view
-     */
-    public void readPojo(final Map<String, Object> pojo) {
-        if (null == pojo) {
-            return;
-        }
-        {
-            final String operationId = (String) pojo.get("__operation");
-            if (null != operationId) {
-                operation = CacheOperation.cacheOperationFor(operationId);
-            }
-        }
-        {
-            final Serializable key = (Serializable) pojo.get("__key");
-            if (null != key) {
-                this.key = key;
-            }
-        }
-        {
-            final String groupName = (String) pojo.get("__groupName");
-            if (null != groupName) {
-                this.groupName = groupName;
-            }
-        }
-        {
-            final String region = (String) pojo.get("__region");
-            if (null != region) {
-                this.region = region;
-            }
-        }
-    }
-    /**
-     * Generates the POJO view for this instance.
-     *
-     * @return The POJO view
-     */
-    public Map<String, Object> writePojo() {
-        final Map<String, Object> m = new LinkedHashMap<String, Object>(4);
-        if (null != operation) {
-            m.put("__operation", operation.getId());
-        }
-        if (null != key) {
-            m.put("__key", key);
-        }
-        if (null != groupName) {
-            m.put("__groupName", groupName);
-        }
-        if (null != region) {
-            m.put("__region", region);
-        }
-        return m;
     }
 
     /**
@@ -217,21 +149,21 @@ public class CacheEvent implements Serializable {
     }
 
     /**
-     * Gets the key
+     * Gets the keys
      *
-     * @return The key
+     * @return The keys
      */
-    public Serializable getKey() {
-        return key;
+    public List<Serializable> getKeys() {
+        return keys;
     }
 
     /**
-     * Sets the key
+     * Sets the keys
      *
-     * @param key The key to set
+     * @param keys The keys to set
      */
-    public void setKey(Serializable key) {
-        this.key = key;
+    public void setKey(List<Serializable> keys) {
+        this.keys = keys;
     }
 
     /**
@@ -272,7 +204,7 @@ public class CacheEvent implements Serializable {
 
     @Override
     public String toString() {
-        return "CacheEvent [operation=" + operation + ", region=" + region + ", key=" + key + ", groupName=" + groupName + "]";
+        return "CacheEvent [operation=" + operation + ", region=" + region + ", keys=" + keys + ", groupName=" + groupName + "]";
     }
 
 }

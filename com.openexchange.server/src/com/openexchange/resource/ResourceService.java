@@ -53,12 +53,14 @@ import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link ResourceService} - This service defines the API to the resource component.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SingletonService
 public interface ResourceService {
 
     /**

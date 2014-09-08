@@ -97,6 +97,10 @@ public enum ComposeType {
         this.type = type;
     }
 
+    public int getType() {
+        return type;
+    }
+
     /**
      * Gets the corresponding {@link ComposeType}
      *

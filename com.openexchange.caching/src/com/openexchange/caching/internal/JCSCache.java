@@ -395,6 +395,13 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
     }
 
     @Override
+    public void remove(List<Serializable> keys) throws OXException {
+        for (Serializable key : keys) {
+            remove(key);
+        }
+    }
+
+    @Override
     public void localRemove(final Serializable key) throws OXException {
         try {
             cacheControl.localRemove(key);
@@ -419,6 +426,13 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
     public void removeFromGroup(final Serializable key, final String group) {
         cache.remove(key, group);
         postRemove(key, group, false);
+    }
+
+    @Override
+    public void removeFromGroup(List<Serializable> keys, final String group) {
+        for (Serializable key : keys) {
+            removeFromGroup(key, group);
+        }
     }
 
     @Override

@@ -2,11 +2,8 @@
 Name:          open-xchange-subscribe
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks
-BuildRequires: ant
 BuildRequires: ant-nodeps
-BuildRequires: open-xchange-core
 BuildRequires: open-xchange-oauth
-BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
 %define        ox_release 0
@@ -18,10 +15,7 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Open-Xchange backend subscribe extension
 Autoreqprov:   no
-Requires:      open-xchange-core >= @OXVERSION@
 Requires:      open-xchange-oauth >= @OXVERSION@
-Requires:      open-xchange-xerces
-Requires:      open-xchange-osgi >= @OXVERSION@
 Provides:      open-xchange-subscribe-crawler = %{version}
 Obsoletes:     open-xchange-subscribe-crawler < %{version}
 Provides:      open-xchange-subscribe-facebook = %{version}
@@ -62,9 +56,9 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
-    CONFFILES="crawler.properties facebooksubscribe.properties linkedinsubscribe.properties microformatSubscription.properties msnsubscribe.properties yahoosubscribe.properties"
+    CONFFILES="crawler.properties facebooksubscribe.properties linkedinsubscribe.properties microformatSubscription.properties yahoosubscribe.properties"
     for FILE in ${CONFFILES}; do
-	ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc "$FILE"
+        ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc "$FILE"
     done
 
     #SoftwareChange_Request-1318
@@ -97,8 +91,8 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-1501
     # updated by SoftwareChange_Request-1710
-    FILES=( crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties facebooksubscribe.properties linkedinsubscribe.properties microformatSubscription.properties microformatSubscription.properties msnsubscribe.properties yahoosubscribe.properties )
-    NEWPROPS=( com.openexchange.subscribe.crawler.googlemail.autorunInterval com.openexchange.subscribe.xing.autorunInterval com.openexchange.subscribe.crawler.webde.autorunInterval com.openexchange.subscribe.crawler.google.calendar.autorunInterval com.openexchange.subscribe.crawler.t-online.de.autorunInterval com.openexchange.subscribe.crawler.gmx.de.autorunInterval com.openexchange.subscribe.crawler.msn.de.autorunInterval com.openexchange.subscribe.crawler.suncontacts.autorunInterval com.openexchange.subscribe.crawler.suncalendar.autorunInterval com.openexchange.subscribe.crawler.suntasks.autorunInterval com.openexchange.subscribe.socialplugin.facebook.autorunInterval com.openexchange.subscribe.socialplugin.linkedin.autorunInterval com.openexchange.subscribe.microformats.contacts.http.autorunInterval com.openexchange.subscribe.microformats.infostore.http.autorunInterval com.openexchange.subscribe.socialplugin.msn.autorunInterval com.openexchange.subscribe.socialplugin.yahoo.autorunInterval )
+    FILES=( crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties facebooksubscribe.properties linkedinsubscribe.properties microformatSubscription.properties microformatSubscription.properties yahoosubscribe.properties )
+    NEWPROPS=( com.openexchange.subscribe.crawler.googlemail.autorunInterval com.openexchange.subscribe.xing.autorunInterval com.openexchange.subscribe.crawler.webde.autorunInterval com.openexchange.subscribe.crawler.google.calendar.autorunInterval com.openexchange.subscribe.crawler.t-online.de.autorunInterval com.openexchange.subscribe.crawler.gmx.de.autorunInterval com.openexchange.subscribe.crawler.msn.de.autorunInterval com.openexchange.subscribe.crawler.suncontacts.autorunInterval com.openexchange.subscribe.crawler.suncalendar.autorunInterval com.openexchange.subscribe.crawler.suntasks.autorunInterval com.openexchange.subscribe.socialplugin.facebook.autorunInterval com.openexchange.subscribe.socialplugin.linkedin.autorunInterval com.openexchange.subscribe.microformats.contacts.http.autorunInterval com.openexchange.subscribe.microformats.infostore.http.autorunInterval com.openexchange.subscribe.socialplugin.yahoo.autorunInterval )
     for I in $(seq 1 ${#NEWPROPS[@]}); do
         NEWPROP=${NEWPROPS[$I-1]}
         PFILE=/opt/open-xchange/etc/${FILES[$I-1]}
@@ -158,6 +152,13 @@ if [ ${1:-0} -eq 2 ]; then
         fi
     done
 
+    # SoftwareChange_Request-2147
+    pfile=/opt/open-xchange/etc/crawler.properties
+    for prop in com.openexchange.subscribe.xing com.openexchange.subscribe.xing.autorunInterval; do
+        if ox_exists_property $prop $pfile; then
+            ox_remove_property $prop $pfile
+        fi
+    done
 fi
 
 %clean

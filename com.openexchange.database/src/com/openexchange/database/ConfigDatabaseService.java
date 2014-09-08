@@ -51,12 +51,14 @@ package com.openexchange.database;
 
 import java.sql.Connection;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link ConfigDatabaseService}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
+@SingletonService
 public interface ConfigDatabaseService {
 
     /**

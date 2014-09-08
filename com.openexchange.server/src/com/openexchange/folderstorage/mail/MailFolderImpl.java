@@ -72,7 +72,8 @@ import com.openexchange.folderstorage.mail.contentType.SentContentType;
 import com.openexchange.folderstorage.mail.contentType.SpamContentType;
 import com.openexchange.folderstorage.mail.contentType.TrashContentType;
 import com.openexchange.folderstorage.type.MailType;
-import com.openexchange.folderstorage.type.SystemType;
+import com.openexchange.folderstorage.type.PublicType;
+import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
@@ -225,7 +226,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
         for (int i = 0; i < mailPermissions.length; i++) {
             permissions[i] = new MailPermissionImpl(mailPermissions[i]);
         }
-        type = SystemType.getInstance();
+        type = MailType.getInstance();
         final boolean ignoreSubscription = mailConfig.getMailProperties().isIgnoreSubscription();
         subscribed = ignoreSubscription ? true : mailFolder.isSubscribed(); // || mailFolder.hasSubscribedSubfolders();
         subscribedSubfolders = ignoreSubscription ? mailFolder.hasSubfolders() : mailFolder.hasSubscribedSubfolders();
@@ -356,6 +357,15 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
                 mailFolderType = MailFolderType.NONE;
             }
             this.mailFolderType = mailFolderType;
+        }
+        {
+            if (MailFolderType.NONE.equals(this.mailFolderType)) {
+                if (mailFolder.containsShared() && mailFolder.isShared()) {
+                    type = SharedType.getInstance();
+                } else if (mailFolder.containsPublic() && mailFolder.isPublic()) {
+                    type = PublicType.getInstance();
+                }
+            }
         }
         {
             int caps = mailConfig.getCapabilities().getCapabilities();
@@ -661,11 +671,6 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
     }
 
     @Override
-    public Type getType() {
-        return MailType.getInstance();
-    }
-
-    @Override
     public void setContentType(final ContentType contentType) {
         // Nothing to do
     }
@@ -683,10 +688,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
     @Override
     public String getLocalizedName(final Locale locale) {
         final String localizedName = this.localizedName;
-        if (null == localizedName) {
-            return name;
-        }
-        return localizedName;
+        return null == localizedName ? name : localizedName;
     }
 
 }

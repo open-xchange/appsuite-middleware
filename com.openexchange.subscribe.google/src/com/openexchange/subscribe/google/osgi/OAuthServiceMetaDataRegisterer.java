@@ -55,11 +55,14 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.context.ContextService;
+import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.google.GoogleCalendarSubscribeService;
 import com.openexchange.subscribe.google.GoogleContactSubscribeService;
+import com.openexchange.subscribe.google.groupware.GoogleSubscriptionsOAuthAccountDeleteListener;
 
 /**
  * {@link OAuthServiceMetaDataRegisterer}
@@ -69,10 +72,13 @@ import com.openexchange.subscribe.google.GoogleContactSubscribeService;
 public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<OAuthServiceMetaData, OAuthServiceMetaData> {
 
     private final String oauthIdentifier;
+
     private final BundleContext context;
+
     private final ServiceLookup services;
 
     private volatile ServiceRegistration<SubscribeService> calendarRegistration;
+
     private volatile ServiceRegistration<SubscribeService> contactRegistration;
 
     /**
@@ -94,10 +100,21 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
         final OAuthServiceMetaData oAuthServiceMetaData = context.getService(ref);
         if (oauthIdentifier.equals(oAuthServiceMetaData.getId())) {
             logger.info("Registering Google subscription services.");
-            final SubscribeService calendarSubService = new GoogleCalendarSubscribeService(oAuthServiceMetaData, services);
-            final SubscribeService contactSubService = new GoogleContactSubscribeService(oAuthServiceMetaData, services);
+            final GoogleCalendarSubscribeService calendarSubService = new GoogleCalendarSubscribeService(oAuthServiceMetaData, services);
+            final GoogleContactSubscribeService contactSubService = new GoogleContactSubscribeService(oAuthServiceMetaData, services);
             calendarRegistration = context.registerService(SubscribeService.class, calendarSubService, null);
             contactRegistration = context.registerService(SubscribeService.class, contactSubService, null);
+
+            ContextService contextService = services.getService(ContextService.class);
+
+            try {
+                context.registerService(OAuthAccountDeleteListener.class, new GoogleSubscriptionsOAuthAccountDeleteListener(
+                    calendarSubService,
+                    contactSubService,
+                    contextService), null);
+            } catch (final Throwable t) {
+                logger.error("", t);
+            }
         }
         return oAuthServiceMetaData;
     }
