@@ -106,10 +106,9 @@ public interface DBMigrationExecutorService {
     public List<ChangeSet> listUnexecutedChangeSets(String fileLocation, ResourceAccessor accessor) throws OXException;
 
     /**
-     * TODO
+     * Returns if database migrations are currently running.
      *
-     * @return
-     * @throws OXException
+     * @return true, if migrations are running; otherwise false
      */
     public boolean migrationsRunning();
 }

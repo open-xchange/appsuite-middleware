@@ -59,7 +59,7 @@ import liquibase.exception.CustomPreconditionFailedException;
 import liquibase.precondition.CustomPrecondition;
 
 /**
- * Verifies the size of the varchar column.
+ * Verifies the size of the database column.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.1
