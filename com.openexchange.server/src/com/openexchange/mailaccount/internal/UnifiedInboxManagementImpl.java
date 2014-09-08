@@ -232,6 +232,18 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
     }
 
     @Override
+    public boolean isEnabled(Session session) throws OXException {
+        Boolean b = (Boolean) session.getParameter("com.openexchange.mailaccount.unifiedMailEnabled");
+        if (null != b) {
+            return b.booleanValue();
+        }
+
+        b = Boolean.valueOf(isEnabled(session.getUserId(), session.getContextId()));
+        session.setParameter("com.openexchange.mailaccount.unifiedMailEnabled", b);
+        return b.booleanValue();
+    }
+
+    @Override
     public boolean isEnabled(final int userId, final int contextId) throws OXException {
         final Connection con = Database.get(contextId, false);
         try {
