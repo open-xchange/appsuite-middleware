@@ -118,13 +118,6 @@ public final class ConfigTree {
             System.arraycopy(path, 1, remainingPath, 0, path.length - 1);
             final Setting child = 0 == path[0].length() ? actual : actual.getElement(path[0]);
             if (null == child) {
-                final StringBuilder sb = new StringBuilder(path[0]);
-                Setting parent = actual;
-                while (null != parent) {
-                    sb.insert(0, '/');
-                    sb.insert(0, parent.getName());
-                    parent = parent.getParent();
-                }
                 return null;
             }
             retval = optSettingByPath(child, remainingPath);
