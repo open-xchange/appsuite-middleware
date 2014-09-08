@@ -51,21 +51,20 @@ package com.openexchange.appsuite;
 
 import static com.openexchange.ajax.requesthandler.AJAXRequestDataBuilder.request;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Future;
+import java.util.concurrent.ConcurrentMap;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.LoginRampUpService;
+import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.AbstractTask;
-import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.session.ServerSession;
 
@@ -75,6 +74,26 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class AppSuiteLoginRampUp implements LoginRampUpService {
+
+    private static enum RampUpKey {
+
+        SERVER_CONFIG("serverConfig"),
+        JSLOBS("jslobs"),
+        OAUTH("oauth"),
+        FOLDER("folder"),
+        FOLDER_LIST("folderlist"),
+        USER("user"),
+        ACCOUNTS("accounts"),
+
+        ;
+
+        final String key;
+        private RampUpKey(String key) {
+            this.key = key;
+        }
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------------------------------------ //
 
     private final ServiceLookup services;
 
@@ -90,23 +109,30 @@ public class AppSuiteLoginRampUp implements LoginRampUpService {
 
     @Override
     public boolean contributesTo(String client) {
-        return client != null && client.equals("open-xchange-appsuite");
+        return "open-xchange-appsuite".equals(client);
     }
+
+    /** The ramp-up keys. Keep order! */
+    private static final RampUpKey[] KEYS = RampUpKey.values();
 
     @Override
     public JSONObject getContribution(final ServerSession session, final AJAXRequestData loginRequest) throws OXException {
-        final ConcurrentHashMap<String, Object> rampUp = new ConcurrentHashMap<String, Object>();
+        int numberOfKeys = KEYS.length;
+
+        final ConcurrentMap<String, Object> rampUp = new ConcurrentHashMap<String, Object>(numberOfKeys);
         final Dispatcher ox = services.getService(Dispatcher.class);
+
         ThreadPoolService threads = services.getService(ThreadPoolService.class);
-        Collection<Task<Void>> tasks = new LinkedList<Task<Void>>();
+        ThreadPoolCompletionService<Void> completionService = new ThreadPoolCompletionService<Void>(threads);
 
-        tasks.add(new AbstractTask<Void>() {
+        completionService.submit(new AbstractTask<Void>() {
 
             @Override
             public Void call() throws Exception {
-                AJAXRequestData manifestRequest = request().module("apps/manifests").action("config").format("json").hostname(loginRequest.getHostname()).build();
                 try {
-                    rampUp.put("serverConfig", ox.perform(manifestRequest, null, session).getResultObject());
+                    JSONObject folderlist = new JSONObject();
+                    folderlist.put("1", ox.perform(request().module("folders").action("list").params("parent", "1", "tree", "0", "altNames", "true", "timezone", "UTC", "columns", "1,2,3,4,5,6,20,23,300,301,302,304,305,306,307,308,309,310,311,312,313,314,315,316,317,3010,3020,3030").format("json").build(), null, session).getResultObject());
+                    rampUp.put("folderlist", folderlist);
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
                 }
@@ -114,60 +140,7 @@ public class AppSuiteLoginRampUp implements LoginRampUpService {
             }
         });
 
-        tasks.add(new AbstractTask<Void>() {
-
-            @Override
-            public Void call() throws Exception {
-                try {
-                    JSONObject jslobs = new JSONObject();
-                    JSONArray lobs = (JSONArray) ox.perform(request()
-                        .module("jslob")
-                        .action("list")
-                        .data(
-                            new JSONArray(
-                                    Arrays.asList("io.ox/core", "io.ox/core/updates", "io.ox/mail", "io.ox/contacts", "io.ox/calendar", "io.ox/core/settingOptions", "io.ox/caldav", "io.ox/files", "io.ox/tours", "io.ox/mail/emoji", "io.ox/tasks", "io.ox/office")
-                            ), "json"
-                        ).format("json").build(), null, session).getResultObject();
-                    for(int i = 0, size = lobs.length(); i < size; i++) {
-                        JSONObject lob = lobs.getJSONObject(i);
-                        jslobs.put(lob.getString("id"), lob);
-                    }
-                    rampUp.put("jslobs", jslobs);
-                } catch (OXException x) {
-                    // Omit result on error. Let the UI deal with this
-                }
-                return null;
-            }
-        });
-
-
-        tasks.add(new AbstractTask<Void>() {
-
-            @Override
-            public Void call() throws Exception {
-                JSONObject oauth = new JSONObject();
-                rampUp.put("oauth", oauth);
-
-                try {
-                    oauth.put("services", ox.perform(request().module("oauth/services").action("all").format("json").build(), null, session).getResultObject());
-                } catch (OXException x) {
-                    // Omit result on error. Let the UI deal with this
-                }
-                try {
-                    oauth.put("accounts", ox.perform(request().module("oauth/accounts").action("all").format("json").build(), null, session).getResultObject());
-                } catch (OXException x) {
-                }
-
-                try {
-                    rampUp.put("secretCheck", ox.perform(request().module("recovery/secret").action("check").format("json").build(), null, session).getResultObject());
-                } catch (OXException x) {
-                    // Omit result on error. Let the UI deal with this
-                }
-                return null;
-            }
-        });
-
-        tasks.add(new AbstractTask<Void>() {
+        completionService.submit(new AbstractTask<Void>() {
 
             @Override
             public Void call() throws Exception {
@@ -187,15 +160,23 @@ public class AppSuiteLoginRampUp implements LoginRampUpService {
             }
         });
 
-
-        tasks.add(new AbstractTask<Void>() {
+        completionService.submit(new AbstractTask<Void>() {
 
             @Override
             public Void call() throws Exception {
                 try {
-                    JSONObject folderlist = new JSONObject();
-                    folderlist.put("1", ox.perform(request().module("folders").action("list").params("parent", "1", "tree", "0", "altNames", "true", "timezone", "UTC", "columns", "1,2,3,4,5,6,20,23,300,301,302,304,305,306,307,308,309,310,311,312,313,314,315,316,317,3010,3020,3030").format("json").build(), null, session).getResultObject());
-                    rampUp.put("folderlist", folderlist);
+                    JSONObject jslobs = new JSONObject();
+                    JSONArray lobs = (JSONArray) ox.perform(request()
+                        .module("jslob")
+                        .action("list")
+                        .data(new JSONArray(Arrays.asList("io.ox/core", "io.ox/core/updates", "io.ox/mail", "io.ox/contacts", "io.ox/calendar", "io.ox/core/settingOptions", "io.ox/caldav", "io.ox/files", "io.ox/tours", "io.ox/mail/emoji", "io.ox/tasks", "io.ox/office")
+                            ), "json"
+                        ).format("json").build(), null, session).getResultObject();
+                    for(int i = 0, size = lobs.length(); i < size; i++) {
+                        JSONObject lob = lobs.getJSONObject(i);
+                        jslobs.put(lob.getString("id"), lob);
+                    }
+                    rampUp.put("jslobs", jslobs);
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
                 }
@@ -203,8 +184,48 @@ public class AppSuiteLoginRampUp implements LoginRampUpService {
             }
         });
 
+        completionService.submit(new AbstractTask<Void>() {
 
-        tasks.add(new AbstractTask<Void>() {
+            @Override
+            public Void call() throws Exception {
+                AJAXRequestData manifestRequest = request().module("apps/manifests").action("config").format("json").hostname(loginRequest.getHostname()).build();
+                try {
+                    rampUp.put("serverConfig", ox.perform(manifestRequest, null, session).getResultObject());
+                } catch (OXException x) {
+                    // Omit result on error. Let the UI deal with this
+                }
+                return null;
+            }
+        });
+
+        completionService.submit(new AbstractTask<Void>() {
+
+            @Override
+            public Void call() throws Exception {
+                JSONObject oauth = new JSONObject();
+                rampUp.put("oauth", oauth);
+
+                try {
+                    oauth.put("services", ox.perform(request().module("oauth/services").action("all").format("json").build(), null, session).getResultObject());
+                } catch (OXException x) {
+                    // Omit result on error. Let the UI deal with this
+                }
+                try {
+                    oauth.put("accounts", ox.perform(request().module("oauth/accounts").action("all").format("json").build(), null, session).getResultObject());
+                } catch (OXException x) {
+                    // Omit result on error. Let the UI deal with this
+                }
+
+                try {
+                    rampUp.put("secretCheck", ox.perform(request().module("recovery/secret").action("check").format("json").build(), null, session).getResultObject());
+                } catch (OXException x) {
+                    // Omit result on error. Let the UI deal with this
+                }
+                return null;
+            }
+        });
+
+        completionService.submit(new AbstractTask<Void>() {
 
             @Override
             public Void call() throws Exception {
@@ -217,7 +238,7 @@ public class AppSuiteLoginRampUp implements LoginRampUpService {
             }
         });
 
-        tasks.add(new AbstractTask<Void>() {
+        completionService.submit(new AbstractTask<Void>() {
 
             @Override
             public Void call() throws Exception {
@@ -231,17 +252,28 @@ public class AppSuiteLoginRampUp implements LoginRampUpService {
 
         });
 
+        for (int i = numberOfKeys; i-- > 0;) {
+            try {
+                completionService.take();
+            } catch (InterruptedException e) {
+                // Keep interrupted state
+                Thread.currentThread().interrupt();
+                Logger logger = org.slf4j.LoggerFactory.getLogger(AppSuiteLoginRampUp.class);
+                logger.warn("Failed ramp-up", e);
+                return new JSONObject();
+            }
+        }
 
         try {
-            List<Future<Void>> futures = threads.invokeAll(tasks, 10000);
-            for (Future<Void> future : futures) {
-                try {
-                    future.get();
-                } catch (Throwable t) {
-                }
+            JSONObject jo = new JSONObject(numberOfKeys);
+            for (RampUpKey rampUpKey : KEYS) {
+                jo.put(rampUpKey.key, JSONCoercion.coerceToJSON(rampUp.get(rampUpKey.key)));
             }
-            return (JSONObject) JSONCoercion.coerceToJSON(rampUp);
+            return jo;
         } catch (Throwable t) {
+            ExceptionUtils.handleThrowable(t);
+            Logger logger = org.slf4j.LoggerFactory.getLogger(AppSuiteLoginRampUp.class);
+            logger.warn("Failed ramp-up", t);
             return new JSONObject();
         }
     }
