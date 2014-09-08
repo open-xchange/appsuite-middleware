@@ -106,43 +106,51 @@ public class ColumnSizePrecondition implements CustomPrecondition {
      */
     @Override
     public void check(final Database database) throws CustomPreconditionFailedException, CustomPreconditionErrorException {
-        Validate.notNull(database, "Database provided by Liquibase might not be null!");
-
-        DatabaseConnection databaseConnection = database.getConnection();
-        Validate.notNull(databaseConnection, "DatabaseConnection might not be null!");
-
-        JdbcConnection connection = null;
-        if (databaseConnection instanceof JdbcConnection) {
-            connection = (JdbcConnection)databaseConnection;
-        } else {
-            throw new CustomPreconditionErrorException("Cannot get underlying connection because database connection is not from type JdbcConnection. Type is: " + databaseConnection.getClass().getName());
-        }
-
-        boolean columnFound = false;
-
         try {
-            DatabaseMetaData meta = connection.getUnderlyingConnection().getMetaData();
-            ResultSet rsColumns = meta.getColumns(null, null, tableName, null);
-            if (!rsColumns.next()) {
-                throw new CustomPreconditionErrorException("No columns for table " + tableName + " found! Aborting database migration execution for the given changeset.");
+            Validate.notNull(database, "Database provided by Liquibase might not be null!");
+    
+            DatabaseConnection databaseConnection = database.getConnection();
+            Validate.notNull(databaseConnection, "DatabaseConnection might not be null!");
+    
+            JdbcConnection connection = null;
+            if (databaseConnection instanceof JdbcConnection) {
+                connection = (JdbcConnection)databaseConnection;
+            } else {
+                throw new CustomPreconditionErrorException("Cannot get underlying connection because database connection is not from type JdbcConnection. Type is: " + databaseConnection.getClass().getName());
             }
-            rsColumns.beforeFirst();
-
-            while (rsColumns.next()) {
-                final String lColumnName = rsColumns.getString("COLUMN_NAME");
-                if (columnName.equals(lColumnName)) {
-                    columnFound = true;
-                    final int size = rsColumns.getInt("COLUMN_SIZE");
-                    if (size == expectedSize) {
-                        throw new CustomPreconditionFailedException("Column size is already up to date! Nothing to do.");
+    
+            boolean columnFound = false;
+    
+            try {
+                DatabaseMetaData meta = connection.getUnderlyingConnection().getMetaData();
+                ResultSet rsColumns = meta.getColumns(null, null, tableName, null);
+                if (!rsColumns.next()) {
+                    throw new CustomPreconditionErrorException("No columns for table " + tableName + " found! Aborting database migration execution for the given changeset.");
+                }
+                rsColumns.beforeFirst();
+    
+                while (rsColumns.next()) {
+                    final String lColumnName = rsColumns.getString("COLUMN_NAME");
+                    if (columnName.equals(lColumnName)) {
+                        columnFound = true;
+                        final int size = rsColumns.getInt("COLUMN_SIZE");
+                        if (size == expectedSize) {
+                            throw new CustomPreconditionFailedException("Column size is already up to date! Nothing to do.");
+                        }
                     }
                 }
+            } catch (SQLException sqlException) {
+                throw new CustomPreconditionErrorException("Error while evaluating type of column " + columnName + " in table " + tableName + ".", sqlException);
             }
-        } catch (SQLException sqlException) {
-            throw new CustomPreconditionErrorException("Error while evaluating type of column " + columnName + " in table " + tableName + ".", sqlException);
-        }
-        if (!columnFound) {
-            throw new CustomPreconditionErrorException("Desired column to update not found! Tried update for column " + columnName + " on table " + tableName);
+            if (!columnFound) {
+                throw new CustomPreconditionErrorException("Desired column to update not found! Tried update for column " + columnName + " on table " + tableName);
+            }
+        } catch (CustomPreconditionErrorException e) {
+            throw e;
+        } catch (CustomPreconditionFailedException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new CustomPreconditionErrorException("Unexpected error", e);
         }
     }
 }

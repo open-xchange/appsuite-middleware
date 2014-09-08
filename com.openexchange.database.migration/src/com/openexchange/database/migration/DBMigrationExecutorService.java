@@ -72,9 +72,9 @@ public interface DBMigrationExecutorService {
      * 
      * You probably want to use a XML file contained in your bundle-jar. {@link BundleResourceAccessor}
      * is the right choice then. The files location must then be specified absolute, starting at the
-     * bundle root directory (e.g. "/resources/com.example.ox.extensions/configdbChangeLog.xml").
+     * bundles root directory.
      *
-     * @param fileLocation Location of the changelog file
+     * @param fileLocation Location of the changelog file (e.g. "/resources/configdbChangeLog.xml")
      * @param accessor The {@link ResourceAccessor} to read in the changelog file identified by <code>fileLocation</code>
      * @return A {@link DBMigrationState} instance, that can be used to wait for completion.
      */
@@ -83,7 +83,7 @@ public interface DBMigrationExecutorService {
     /**
      * Schedules a a rollback for the given number of change sets
      *
-     * @param fileLocation Location of the changelog file
+     * @param fileLocation Location of the changelog file (e.g. "/resources/configdbChangeLog.xml")
      * @param numberOfChangeSets Number of change sets to roll back
      * @param accessor The {@link ResourceAccessor}s to read in the changelog file identified by <code>fileLocation</code>
      * @return A {@link DBMigrationState} instance, that can be used to wait for completion.
@@ -94,7 +94,7 @@ public interface DBMigrationExecutorService {
      * Schedules a rollback to a given tag. This will roll back all change sets of the given changelog, that were executed
      * against the target database after the given tag was applied.
      *
-     * @param fileLocation Location of the changelog file
+     * @param fileLocation Location of the changelog file (e.g. "/resources/configdbChangeLog.xml")
      * @param changeSetTag The tag to roll back to
      * @param accessor The {@link ResourceAccessor} to read in the changelog file identified by <code>fileLocation</code>
      * @return A {@link DBMigrationState} instance, that can be used to wait for completion.
@@ -104,7 +104,7 @@ public interface DBMigrationExecutorService {
     /**
      * Returns a list of the currently not executed change sets
      *
-     * @param fileLocation Location of the changelog file
+     * @param fileLocation Location of the changelog file (e.g. "/resources/configdbChangeLog.xml")
      * @param accessor The {@link ResourceAccessor} to read in the changelog file identified by <code>fileLocation</code>
      * @return List<ChangeSet> with the currently not executed liquibase changesets
      */
