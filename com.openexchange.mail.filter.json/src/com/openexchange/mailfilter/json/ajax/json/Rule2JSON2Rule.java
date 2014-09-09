@@ -56,6 +56,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.regex.Pattern;
 import org.apache.jsieve.NumberArgument;
 import org.apache.jsieve.SieveException;
 import org.apache.jsieve.TagArgument;
@@ -78,10 +79,12 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  */
 @SuppressWarnings("unchecked")
 public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
-    
+
     private final static String dateFormatPattern = "yyyy-MM-dd";
-    
+
     private final static String timeFormatPattern = "HH:mm";
+
+    private final static Pattern DIGITS = Pattern.compile("^\\-?\\d+$");
 
     private final static String[] RULE_FIELDS_LIST = {
         RuleFields.ID,
@@ -279,7 +282,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
         token.image = fields.getTagname();
         return new TagArgument(token);
     }
-    
+
     public static TagArgument createTagArg(final String string) {
         final Token token = new Token();
         token.image = ":" + string;
@@ -491,10 +494,18 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                     argList.add(JSONArrayToStringList(valuesArray));
                     return new TestCommand(TestCommand.Commands.NOT, argList, new ArrayList<TestCommand>());
                 } else if (TestCommand.Commands.SIZE.getCommandname().equals(id)) {
-                    final List<Object> argList = new ArrayList<Object>();
-                    argList.add(createTagArg(getString(jobj, SizeTestFields.COMPARISON, id)));
-                    argList.add(createNumberArg(getString(jobj, SizeTestFields.SIZE, id)));
-                    return new TestCommand(TestCommand.Commands.SIZE, argList, new ArrayList<TestCommand>());
+                    final String size = getString(jobj, SizeTestFields.SIZE, id);
+                    try {
+                        if(false == DIGITS.matcher(size).matches()) {
+                            throw OXJSONExceptionCodes.CONTAINS_NON_DIGITS.create(size, id);
+                        }
+                        final List<Object> argList = new ArrayList<Object>();
+                        argList.add(createTagArg(getString(jobj, SizeTestFields.COMPARISON, id)));
+                        argList.add(createNumberArg(size));
+                        return new TestCommand(TestCommand.Commands.SIZE, argList, new ArrayList<TestCommand>());
+                    } catch(NumberFormatException e) {
+                        throw OXJSONExceptionCodes.TOO_BIG_NUMBER.create(e, size);
+                    }
                 } else if (TestCommand.Commands.HEADER.getCommandname().equals(id)) {
                     return createAddressEnvelopeOrHeaderTest(jobj, TestCommand.Commands.HEADER);
                 } else if (TestCommand.Commands.BODY.getCommandname().equals(id)) {
@@ -547,7 +558,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                     } else {
                         throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Currentdate rule: The datepart \"" + datepart + "\" is not a valid datepart");
                     }
-                    
+
                     return new TestCommand(TestCommand.Commands.CURRENTDATE, argList, new ArrayList<TestCommand>());
                 } else if (TestCommand.Commands.ALLOF.getCommandname().equals(id)) {
                     return createAllofOrAnyofTestCommand(jobj, id, TestCommand.Commands.ALLOF);
