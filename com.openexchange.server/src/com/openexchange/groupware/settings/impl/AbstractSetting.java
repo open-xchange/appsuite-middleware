@@ -266,7 +266,10 @@ public abstract class AbstractSetting<T extends AbstractSetting<? extends T>> im
         final List<T> tmp = new ArrayList<T>();
         if (null != elements) {
             for (PriorityQueue<T> q : elements.values()) {
-                tmp.add(q.peek());
+                T element = q.peek();
+                if (element != null) {
+                    tmp.add(element);
+                }
             }
         }
         @SuppressWarnings("unchecked")
