@@ -81,7 +81,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
     
     private final static String dateFormatPattern = "yyyy-MM-dd";
     
-    private final static String timeFormatPattern = "HH:mm:ss";
+    private final static String timeFormatPattern = "HH:mm";
 
     private final static String[] RULE_FIELDS_LIST = {
         RuleFields.ID,
