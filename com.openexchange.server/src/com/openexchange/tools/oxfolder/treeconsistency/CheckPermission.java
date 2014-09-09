@@ -65,6 +65,7 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
+import com.openexchange.tools.oxfolder.OXFolderSQL;
 
 /**
  * {@link CheckPermission}
@@ -210,8 +211,10 @@ abstract class CheckPermission {
      * @param folderId The folder identifier
      * @param deleted <code>true</code> if deleted; otherwise changed
      * @param eventAdmin The event admin service reference
+     * @param writeCon2
+     * @throws OXException
      */
-    protected void broadcastEvent(final int folderId, final boolean deleted, final EventAdmin eventAdmin) {
+    protected void broadcastEvent(final int folderId, final boolean deleted, final EventAdmin eventAdmin) throws OXException {
         if (null != eventAdmin) {
             final Dictionary<String, Object> properties = new Hashtable<String, Object>(6);
             properties.put(FolderEventConstants.PROPERTY_CONTEXT, Integer.valueOf(session.getContextId()));
@@ -219,6 +222,11 @@ abstract class CheckPermission {
             properties.put(FolderEventConstants.PROPERTY_SESSION, session);
             properties.put(FolderEventConstants.PROPERTY_FOLDER, String.valueOf(folderId));
             properties.put(FolderEventConstants.PROPERTY_CONTENT_RELATED, Boolean.valueOf(!deleted));
+            if (deleted) {
+              //get path to root and send it this is only needed if folder is changed
+                String[] pathToRootString = OXFolderSQL.getFolderPath(folderId, writeCon, ctx);
+                properties.put(FolderEventConstants.PROPERTY_FOLDER_PATH, pathToRootString);
+            }
             /*
              * Create event with push topic
              */
