@@ -63,6 +63,8 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.PackageAdmin;
+import com.openexchange.database.migration.DBMigrationExecutorService;
+import com.openexchange.groupware.update.Updater;
 import com.openexchange.version.Version;
 
 /**
@@ -289,6 +291,11 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
         return Version.getInstance().getVersionString();
     }
 
+    @Override
+    public boolean updateTasksRunning() {
+        return updateTasksInProgess() || configDBMigrationsRunning();
+    }
+
     private Bundle getBundleByName(final String name, final Bundle[] bundle) {
         for (Bundle element : bundle) {
             if (element.getSymbolicName().equals(name)) {
@@ -332,6 +339,26 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
         }
     }
 
+    private boolean updateTasksInProgess() {
+        return !Updater.getInstance().getLocallyScheduledTasks().isEmpty();
+    }
+
+    private boolean configDBMigrationsRunning() {
+        ServiceReference<DBMigrationExecutorService> ref = bundleContext.getServiceReference(DBMigrationExecutorService.class);
+        if (ref != null) {
+            DBMigrationExecutorService migrationExecutor = bundleContext.getService(ref);
+            if (migrationExecutor != null) {
+                try {
+                    return migrationExecutor.migrationsRunning();
+                } finally {
+                    bundleContext.ungetService(ref);
+                }
+            }
+        }
+
+        return false;
+    }
+
     private static String resolvState(final int state) {
         // TODO: add all states
         switch (state) {
@@ -355,4 +382,5 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
         final PackageAdmin packageAdmin = (PackageAdmin) bundleContext.getService(serviceReference);
         packageAdmin.refreshPackages(null);
     }
+
 }

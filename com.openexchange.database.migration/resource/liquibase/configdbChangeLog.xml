@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog xmlns="urn:liquibase"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="urn:liquibase /liquibase/dbchangelog-3.0.xsd"
+	logicalFilePath="configdbChangeLog">
+
+
+	<!-- ******************************************************* -->
+	<!-- ************** Release 7.6.1 starts here ************** -->
+	<!-- ******************************************************* -->
+
+	<changeSet id="7.6.1-milestone" author="martin.schneider@open-xchange.com">
+		<tagDatabase tag="7.6.1-milestone" />
+	</changeSet>
+
+	<changeSet id="7.6.1:login2context:login_info" author="martin.schneider@open-xchange.com">
+		<preConditions onFail="MARK_RAN">
+			<customPrecondition
+				className="liquibase.precondition.ext.ColumnSizePrecondition">
+				<param name="expectedSize" value="255" />
+				<param name="tableName" value="login2context" />
+				<param name="columnName" value="login_info" />
+			</customPrecondition>
+		</preConditions>
+		<comment>Fix for bug 33418: enhances the login_info column to 255
+			characters</comment>
+		<modifyDataType columnName="login_info" newDataType="varchar(255)"
+			tableName="login2context" />
+		<dropDefaultValue columnDataType="varchar(255)"
+			columnName="login_info" tableName="login2context" />
+		<rollback>
+			<dropDefaultValue tableName="login2context"
+				columnName="login_info" />
+			<modifyDataType tableName="login2context" columnName="login_info"
+				newDataType="varchar(128)" />
+			<dropDefaultValue columnDataType="varchar(128)"
+				columnName="login_info" tableName="login2context" />
+		</rollback>
+	</changeSet>
+
+</databaseChangeLog>

@@ -136,6 +136,11 @@ public final class DatabaseServiceImpl implements DatabaseService {
     }
 
     @Override
+    public Connection getForUpdateTask() throws OXException {
+        return configDatabaseService.getForUpdateTask();
+    }
+
+    @Override
     public void backReadOnly(final Connection con) {
         configDatabaseService.backReadOnly(con);
     }
@@ -143,6 +148,11 @@ public final class DatabaseServiceImpl implements DatabaseService {
     @Override
     public void backWritable(final Connection con) {
         configDatabaseService.backWritable(con);
+    }
+
+    @Override
+    public void backForUpdateTask(Connection con) {
+        configDatabaseService.backForUpdateTask(con);
     }
 
     @Override

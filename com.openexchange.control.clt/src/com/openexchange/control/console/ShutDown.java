@@ -109,9 +109,12 @@ public final class ShutDown extends AbstractConsoleHandler {
         initJMX(jmxHost, jmxPort, jmxLogin, jmxPassword);
     }
 
-    public boolean shutdown(boolean waitForExit) throws InstanceNotFoundException, MBeanException, ReflectionException, IOException {
+    public boolean shutdown(boolean waitForExit) throws InstanceNotFoundException, MBeanException, ReflectionException, IOException, InterruptedException {
         final ObjectName objectName = getObjectName();
         final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
+
+        waitForUpdateTasksToComplete(objectName, mBeanServerConnection);
+
         boolean retval = false;
         try {
             Object result = mBeanServerConnection.invoke(objectName, "shutdown", new Object[] { Boolean.valueOf(waitForExit) }, new String[] { "boolean" });
@@ -128,6 +131,47 @@ public final class ShutDown extends AbstractConsoleHandler {
             }
         }
         return retval;
+    }
+
+    private static void waitForUpdateTasksToComplete(ObjectName objectName, MBeanServerConnection mBeanServerConnection) throws InterruptedException, InstanceNotFoundException, MBeanException, IOException, ReflectionException {
+        try {
+            boolean updateTasksRunning = updateTasksRunning(objectName, mBeanServerConnection);
+            if (updateTasksRunning) {
+                System.out.print("The process is still executing database update tasks. Waiting for completion");
+            }
+
+            while (updateTasksRunning) {
+                Thread.sleep(1000);
+                System.out.print(" .");
+                updateTasksRunning = updateTasksRunning(objectName, mBeanServerConnection);
+                if (!updateTasksRunning) {
+                    System.out.print(" Done!\n");
+                }
+            }
+        } catch (ReflectionException e) {
+            if (e.getCause() instanceof NoSuchMethodException) {
+                // Should only happen if an old (pre-7.6.1) server is stopped with a newer shutdown script.
+                return;
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    private static boolean updateTasksRunning(ObjectName objectName, MBeanServerConnection mBeanServerConnection) throws InstanceNotFoundException, MBeanException, ReflectionException, IOException {
+        try {
+            Object updateTasksRunningRetval = mBeanServerConnection.invoke(objectName, "updateTasksRunning", new Object[0], new String[0]);
+            if (updateTasksRunningRetval instanceof Boolean) {
+                return ((Boolean) updateTasksRunningRetval).booleanValue();
+            }
+        } catch (ReflectionException e) {
+            // NoSuchMethodException should only happen if an old (pre-7.6.1) server is stopped with a newer shutdown script.
+            if (!(e.getCause() instanceof NoSuchMethodException)) {
+                throw e;
+            }
+        }
+
+        return false;
     }
 
     public static void main(final String args[]) {

@@ -82,12 +82,22 @@ public class MockDBService implements DatabaseService {
     }
 
     @Override
+    public Connection getForUpdateTask() throws OXException {
+        return dbProvider.getWriteConnection(null);
+    }
+
+    @Override
     public void backReadOnly(final Connection con) {
         dbProvider.releaseReadConnection(null, con);
     }
 
     @Override
     public void backWritable(final Connection con) {
+        dbProvider.releaseWriteConnection(null, con);
+    }
+
+    @Override
+    public void backForUpdateTask(Connection con) {
         dbProvider.releaseWriteConnection(null, con);
     }
 
@@ -290,4 +300,5 @@ public class MockDBService implements DatabaseService {
     @Override
     public void initPartitions(int writePoolId, String schema, int... partitions) throws OXException {
     }
+
 }

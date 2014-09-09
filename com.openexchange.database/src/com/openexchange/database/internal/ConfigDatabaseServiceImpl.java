@@ -82,8 +82,12 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
     }
 
     private Connection get(final boolean write) throws OXException {
+        return get(write, false);
+    }
+
+    private Connection get(final boolean write, final boolean noTimeout) throws OXException {
         final AssignmentImpl assign = assignmentService.getConfigDBAssignment();
-        return monitor.checkFallback(pools, assign, false, write);
+        return monitor.checkFallback(pools, assign, noTimeout, write);
         // TODO Enable the following if the configuration database gets a table replicationMonitor.
         // return ReplicationMonitor.checkActualAndFallback(pools, assign, false, write);
     }
@@ -125,12 +129,22 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
     }
 
     @Override
+    public Connection getForUpdateTask() throws OXException {
+        return get(true, true);
+    }
+
+    @Override
     public void backReadOnly(final Connection con) {
         back(con);
     }
 
     @Override
     public void backWritable(final Connection con) {
+        back(con);
+    }
+
+    @Override
+    public void backForUpdateTask(Connection con) {
         back(con);
     }
 
@@ -206,4 +220,5 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
     public void lock(Connection con) throws OXException {
         contextAssignment.lock(con);
     }
+
 }
