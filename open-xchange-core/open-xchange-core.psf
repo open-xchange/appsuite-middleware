@@ -148,6 +148,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.1,com.openexchange.version"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.1,com.openexchange.xml"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.1,javax.mail"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.1,liquibase.core"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.1,org.apache.felix.eventadmin.monitoring"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.1,org.apache.tika"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.1,org.ho.jyaml"/>
