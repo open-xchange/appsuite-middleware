@@ -49,60 +49,26 @@
 
 package com.openexchange.admin.diff.file.handler;
 
-import java.io.File;
-import java.io.IOException;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Matchers;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
-import com.openexchange.admin.diff.file.provider.IConfigurationFileProvider;
-import com.openexchange.admin.diff.result.DiffResult;
 
 /**
- * {@link FileHandlerTest}
+ * Exception thrown in case too many items have been found to process.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.1
  */
-public class FileHandlerTest {
+public class TooManyFilesException extends Exception {
 
-    @Spy
-    private FileHandler fileHandler;
+    private static final long serialVersionUID = 2914427894427464743L;
 
-    @Mock
-    private IConfigurationFileProvider configurationFileProvider;
-
-    private final boolean isOriginal = false;
-
-    private File rootFolder;
-
-    @Before
-    public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
-        rootFolder = Mockito.mock(File.class);
+    public TooManyFilesException(String message) {
+        super(message);
     }
 
-    @Test
-    public void testReadConfFiles_noConfigurationFileProvider_doNothing() throws IOException, TooManyFilesException {
-        Mockito.doNothing().when(fileHandler).validateDirectory((File) Matchers.any());
-
-        fileHandler.readConfFiles(new DiffResult(), rootFolder, isOriginal, null);
-
-        Mockito.verify(configurationFileProvider, Mockito.never()).addFilesToDiffQueue(Matchers.<DiffResult> any(), (File) Matchers.any(), Matchers.anyList(), Matchers.anyBoolean());
-        Mockito.verify(configurationFileProvider, Mockito.never()).readConfigurationFiles(Matchers.<DiffResult> any(), (File) Matchers.any(), Matchers.any(String[].class));
-    }
-
-    @Test
-    public void testReadConfFiles_configurationFileProvider_readAndAddFiles() throws IOException, TooManyFilesException {
-        Mockito.doNothing().when(fileHandler).validateDirectory((File) Matchers.any());
-
-        fileHandler.readConfFiles(new DiffResult(), rootFolder, isOriginal, configurationFileProvider);
-
-        Mockito.verify(configurationFileProvider, Mockito.times(1)).addFilesToDiffQueue(Matchers.<DiffResult> any(), (File) Matchers.any(), Matchers.anyList(), Matchers.anyBoolean());
-        Mockito.verify(configurationFileProvider, Mockito.times(1)).readConfigurationFiles(Matchers.<DiffResult> any(), (File) Matchers.any(), Matchers.any(String[].class));
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public synchronized Throwable initCause(Throwable cause) {
+        return this;
     }
 }

@@ -51,6 +51,7 @@ package com.openexchange.admin.diff.file.handler.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import com.openexchange.admin.diff.file.domain.ConfigurationFile;
 import com.openexchange.admin.diff.file.handler.IConfFileHandler;
@@ -68,7 +69,7 @@ public abstract class AbstractFileHandler implements IConfFileHandler {
     /**
      * List of files that will be ignored within the diff process
      */
-    private List<String> ignoredFiles = new ArrayList<String>(Arrays.asList(new String[] {
+    private final List<String> ignoredFiles = new ArrayList<String>(Arrays.asList(new String[] {
         "mpasswd",
         "secrets",
         ""
@@ -77,12 +78,12 @@ public abstract class AbstractFileHandler implements IConfFileHandler {
     /**
      * Registered installed files
      */
-    protected List<ConfigurationFile> installedFiles = new ArrayList<ConfigurationFile>();
+    protected List<ConfigurationFile> installedFiles = Collections.synchronizedList(new ArrayList<ConfigurationFile>());
 
     /**
      * Registered original files
      */
-    protected List<ConfigurationFile> originalFiles = new ArrayList<ConfigurationFile>();
+    protected List<ConfigurationFile> originalFiles = Collections.synchronizedList(new ArrayList<ConfigurationFile>());
 
     /**
      * {@inheritDoc}
@@ -117,14 +118,14 @@ public abstract class AbstractFileHandler implements IConfFileHandler {
      */
     @Override
     public DiffResult getDiff(DiffResult diffResult) {
-        getFileDiffs(diffResult, new ArrayList<ConfigurationFile>(this.originalFiles), new ArrayList<ConfigurationFile>(this.installedFiles));
+        getFileDiffs(diffResult, Collections.synchronizedList(new ArrayList<ConfigurationFile>(this.originalFiles)), Collections.synchronizedList(new ArrayList<ConfigurationFile>(this.installedFiles)));
 
         return getDiff(diffResult, this.originalFiles, this.installedFiles);
     }
 
     /**
      * Returns the diffs that belong to files. This method is called for each configuration file type.
-     * 
+     *
      * @param diff - the diff object to add file diff results
      * @param lOriginalFiles - original files that should be compared
      * @param lInstalledFiles - installed files the original ones should be compared with

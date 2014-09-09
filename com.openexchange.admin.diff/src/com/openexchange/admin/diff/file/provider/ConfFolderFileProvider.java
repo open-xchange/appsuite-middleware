@@ -55,6 +55,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -67,7 +68,7 @@ import com.openexchange.admin.diff.result.DiffResult;
 
 /**
  * Provides configuration files by recursive traversing the given folder and considering file extension.
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.1
  */
@@ -79,19 +80,19 @@ public class ConfFolderFileProvider implements IConfigurationFileProvider {
     @Override
     public List<File> readConfigurationFiles(DiffResult diffResult, File rootFolder, String[] fileExtension) {
 
-        Collection<File> listFiles = new ArrayList<File>();
+        Collection<File> listFiles = Collections.synchronizedList(new ArrayList<File>());
 
         Collection<File> filesInRootFolder = FileUtils.listFiles(rootFolder, fileExtension, true);
         if ((filesInRootFolder != null) && (!filesInRootFolder.isEmpty())) {
             listFiles.addAll(filesInRootFolder);
         }
 
-        List<File> filesWithoutExtension = getFilesWithoutExtension(rootFolder, new ArrayList<File>());
+        List<File> filesWithoutExtension = getFilesWithoutExtension(rootFolder, Collections.synchronizedList(new ArrayList<File>()));
         if ((filesWithoutExtension != null) && (!filesWithoutExtension.isEmpty())) {
             listFiles.addAll(filesWithoutExtension);
         }
 
-        return new ArrayList<File>(listFiles);
+        return Collections.synchronizedList(new ArrayList<File>(listFiles));
     }
 
     /**
@@ -112,9 +113,9 @@ public class ConfFolderFileProvider implements IConfigurationFileProvider {
                     ConfigurationFile configurationFile = new ConfigurationFile(currentFile.getName(), rootDirectory.getAbsolutePath(), FilenameUtils.getFullPath(FileProviderUtil.removeRootFolder(currentFile.getAbsolutePath(), rootDirectory.getAbsolutePath())), fileContent, isOriginal);
                     ConfFileHandler.addConfigurationFile(diffResult, configurationFile);
                 } catch (FileNotFoundException e) {
-                    diffResult.getProcessingErrors().add("Error adding configuration file to queue" + e.getLocalizedMessage() + "\n");
+                    diffResult.getProcessingErrors().add("Error adding configuration file to queue: " + e.getLocalizedMessage() + ". Please run with root.\n");
                 } catch (IOException e) {
-                    diffResult.getProcessingErrors().add("Error adding configuration file to queue" + e.getLocalizedMessage() + "\n");
+                    diffResult.getProcessingErrors().add("Error adding configuration file to queue: " + e.getLocalizedMessage() + ". Please run with root.\n");
                 }
             }
         }
@@ -122,7 +123,7 @@ public class ConfFolderFileProvider implements IConfigurationFileProvider {
 
     /**
      * This method is a hack because FileUtils.listFiles(...) is not able to return files that have no extension.
-     * 
+     *
      * @param dir
      * @param listToFill
      * @return

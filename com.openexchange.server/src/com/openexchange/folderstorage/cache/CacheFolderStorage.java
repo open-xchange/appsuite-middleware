@@ -584,13 +584,33 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
      * @throws OXException If removal fails
      */
     public void removeFromCache(String id, String treeId, boolean singleOnly, Session session) throws OXException {
+        removeFromCache(id, treeId, singleOnly, session, null);
+    }
+
+    /**
+     * Removes specified folder and all of its predecessor folders from cache.
+     *
+     * @param id The folder identifier
+     * @param treeId The tree identifier
+     * @param singleOnly <code>true</code> if only specified folder should be removed; otherwise <code>false</code> for complete folder's
+     *            path to root folder
+     * @param session The session providing user information
+     * @param folderPath The folderPath to <code>rootFolder</code>, if known
+     * @throws OXException If removal fails
+     */
+    public void removeFromCache(final String id, final String treeId, final boolean singleOnly, final Session session, List<String> folderPath) throws OXException {
         Lock lock = TreeLockManagement.getInstance().getFor(treeId, session).writeLock();
         acquire(lock);
         try {
             if (singleOnly) {
                 removeSingleFromCache(id, treeId, session.getUserId(), session, true);
             } else {
-                removeFromCache(id, treeId, session, new PathPerformer(ServerSessionAdapter.valueOf(session), null, registry));
+                if (null != folderPath) {
+                    removeFromCache(id, treeId, session, null, folderPath);
+                } else {
+                    removeFromCache(id, treeId, session, new PathPerformer(ServerSessionAdapter.valueOf(session), null, registry));
+                }
+
             }
         } finally {
             lock.unlock();
@@ -598,31 +618,47 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
     }
 
     private void removeFromCache(String id, String treeId, Session session, PathPerformer pathPerformer) throws OXException {
+        removeFromCache(id, treeId, session, pathPerformer, null);
+    }
+
+    private void removeFromCache(final String id, final String treeId, final Session session, final PathPerformer pathPerformer, List<String> folderPath) throws OXException {
         if (null == id) {
+            return;
+        }
+        // at least one way to get paths should be provided
+        if (null == pathPerformer && null == folderPath) {
+            return;
+        }
+        // but not both
+        if (null != pathPerformer && null != folderPath) {
             return;
         }
         {
             List<String> ids;
-            try {
-                if (existsFolder(treeId, id, StorageType.WORKING, pathPerformer.getStorageParameters())) {
-                    final UserizedFolder[] path = pathPerformer.doPath(treeId, id, true);
-                    ids = new ArrayList<String>(path.length);
-                    for (final UserizedFolder userizedFolder : path) {
-                        ids.add(userizedFolder.getID());
-                    }
-                } else {
-                    ids = Collections.singletonList(id);
-                }
-            } catch (final Exception e) {
-                final org.slf4j.Logger log =
-                    org.slf4j.LoggerFactory.getLogger(CacheFolderStorage.class);
-                log.debug("", e);
+            if (null != pathPerformer) {
                 try {
-                    ids = new ArrayList<String>(Arrays.asList(pathPerformer.doForcePath(treeId, id, true)));
-                } catch (final Exception e1) {
-                    log.debug("", e1);
-                    ids = Collections.singletonList(id);
+                    if (existsFolder(treeId, id, StorageType.WORKING, pathPerformer.getStorageParameters())) {
+                        final UserizedFolder[] path = pathPerformer.doPath(treeId, id, true);
+                        ids = new ArrayList<String>(path.length);
+                        for (final UserizedFolder userizedFolder : path) {
+                            ids.add(userizedFolder.getID());
+                        }
+                    } else {
+                        ids = Collections.singletonList(id);
+                    }
+                } catch (final Exception e) {
+                    final org.slf4j.Logger log =
+                        org.slf4j.LoggerFactory.getLogger(CacheFolderStorage.class);
+                    log.debug("", e);
+                    try {
+                        ids = new ArrayList<String>(Arrays.asList(pathPerformer.doForcePath(treeId, id, true)));
+                    } catch (final Exception e1) {
+                        log.debug("", e1);
+                        ids = Collections.singletonList(id);
+                    }
                 }
+            } else {
+                ids = folderPath;
             }
             final int contextId = session.getContextId();
             final int userId = session.getUserId();

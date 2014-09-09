@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import com.openexchange.admin.diff.ConfigDiff;
@@ -63,7 +64,7 @@ import com.openexchange.admin.diff.util.ConfigurationFileSearch;
 
 /**
  * Handler for .properties configuration files
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.1
  */
@@ -71,7 +72,7 @@ public class PropertyHandler extends AbstractFileHandler {
 
     private volatile static PropertyHandler instance;
 
-    private List<String> criticalProperties = new ArrayList<String>(Arrays.asList(new String[] {
+    private final List<String> criticalProperties = new ArrayList<String>(Arrays.asList(new String[] {
         // Fill in some special property names which do
         // not match '.*consumerKey.*|.*apiKey.*|.*secretKey.*|.*consumerSecret.*|.*apiSecret.*'
         "writeProperty.2", "readProperty.2",
@@ -104,14 +105,14 @@ public class PropertyHandler extends AbstractFileHandler {
      */
     @Override
     public DiffResult getDiff(DiffResult diffResult, List<ConfigurationFile> lOriginalFiles, List<ConfigurationFile> lInstalledFiles) {
-        getPropertyDiffsPerFile(diffResult, new ArrayList<ConfigurationFile>(lOriginalFiles), new ArrayList<ConfigurationFile>(lInstalledFiles));
+        getPropertyDiffsPerFile(diffResult, Collections.synchronizedList(new ArrayList<ConfigurationFile>(lOriginalFiles)), Collections.synchronizedList(new ArrayList<ConfigurationFile>(lInstalledFiles)));
 
         return diffResult;
     }
 
     /**
      * Diff the properties from the given files and adds the differences to the provided DiffResult
-     * 
+     *
      * @param diffResult - the object that will be aerated with the results
      * @param lOriginalFiles - original files to diff
      * @param lInstalledFiles - installed files to diff
@@ -144,7 +145,7 @@ public class PropertyHandler extends AbstractFileHandler {
 
     /**
      * Diffs the given properties of one file and adds the diff to the given DiffResult.
-     * 
+     *
      * @param diffResult - the object that will be aerated with the results
      * @param fileName - name of the file the property is included in
      * @param originalProperties - properties of the original file
@@ -181,7 +182,7 @@ public class PropertyHandler extends AbstractFileHandler {
 
     /**
      * Obscures the given string if it is a key, password or an other critical value.
-     * 
+     *
      * @param key - the key of the property to verify
      * @param propertyValue - the property to obscure
      * @return - the given string if not included in the criticalProperties List or ******** if it is critical

@@ -51,6 +51,7 @@ package com.openexchange.folderstorage.cache.osgi;
 
 import static com.openexchange.folderstorage.cache.CacheServiceRegistry.getServiceRegistry;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
@@ -316,11 +317,17 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                     final Integer userId = ((Integer) event.getProperty(FolderEventConstants.PROPERTY_USER));
                     final String folderId = (String) event.getProperty(FolderEventConstants.PROPERTY_FOLDER);
                     final Boolean contentRelated = (Boolean) event.getProperty(FolderEventConstants.PROPERTY_CONTENT_RELATED);
+                    final String[] folderPath = (String[]) event.getProperty(FolderEventConstants.PROPERTY_FOLDER_PATH);
                     try {
                         if (null == session) {
                             tmp.removeSingleFromCache(sanitizeFolderId(folderId), FolderStorage.REAL_TREE_ID, null == userId ? -1 : userId.intValue(), contextId.intValue(), true, session);
                         } else {
-                            tmp.removeFromCache(sanitizeFolderId(folderId), FolderStorage.REAL_TREE_ID, null != contentRelated && contentRelated.booleanValue(), session);
+                            if (null != folderPath) {
+                                tmp.removeFromCache(sanitizeFolderId(folderId), FolderStorage.REAL_TREE_ID, null != contentRelated && contentRelated.booleanValue(), session, Arrays.asList(folderPath));
+                            } else {
+                                tmp.removeFromCache(sanitizeFolderId(folderId), FolderStorage.REAL_TREE_ID, null != contentRelated && contentRelated.booleanValue(), session);
+                            }
+
                         }
                     } catch (final OXException e) {
                         LOG.error("", e);
@@ -438,8 +445,13 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                     try {
                         final String folderID = (String)event.getProperty(FileStorageEventConstants.FOLDER_ID);
                         final Session session = (Session)event.getProperty(FileStorageEventConstants.SESSION);
+                        final String[] folderPath = (String[]) event.getProperty(FileStorageEventConstants.FOLDER_PATH);
                         tmp.removeFromGlobalCache(folderID, FolderStorage.REAL_TREE_ID, session.getContextId());
-                        tmp.removeFromCache(folderID, FolderStorage.REAL_TREE_ID, false, session);
+                        if (null != folderPath) {
+                            tmp.removeFromCache(folderID, FolderStorage.REAL_TREE_ID, false, session, Arrays.asList(folderPath));
+                        } else {
+                            tmp.removeFromCache(folderID, FolderStorage.REAL_TREE_ID, false, session);
+                        }
                     } catch (final OXException e) {
                         LOG.error("", e);
                     }
