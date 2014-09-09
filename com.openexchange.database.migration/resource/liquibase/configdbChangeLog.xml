@@ -10,8 +10,7 @@
 	<!-- ************** Release 7.6.1 starts here ************** -->
 	<!-- ******************************************************* -->
 
-	<changeSet id="7.6.1-milestone" author="martin.schneider"
-		logicalFilePath="release-7.6.1-milestone">
+	<changeSet id="7.6.1-milestone" author="martin.schneider">
 		<tagDatabase tag="7.6.1-milestone" />
 	</changeSet>
 
