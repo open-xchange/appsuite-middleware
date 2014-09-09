@@ -10,11 +10,11 @@
 	<!-- ************** Release 7.6.1 starts here ************** -->
 	<!-- ******************************************************* -->
 
-	<changeSet id="7.6.1-milestone" author="martin.schneider">
+	<changeSet id="7.6.1-milestone" author="martin.schneider@open-xchange.com">
 		<tagDatabase tag="7.6.1-milestone" />
 	</changeSet>
 
-	<changeSet id="7.6.1:login2context:login_info" author="martin.schneider">
+	<changeSet id="7.6.1:login2context:login_info" author="martin.schneider@open-xchange.com">
 		<preConditions onFail="MARK_RAN">
 			<customPrecondition
 				className="liquibase.precondition.ext.ColumnSizePrecondition">
