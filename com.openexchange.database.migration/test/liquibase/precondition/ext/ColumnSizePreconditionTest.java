@@ -114,12 +114,12 @@ public class ColumnSizePreconditionTest {
         Mockito.when(resultSetMock.next()).thenReturn(true).thenReturn(true).thenReturn(false);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = CustomPreconditionErrorException.class)
     public void testCheck_databaseFromLiquibaseNull_throwException() throws CustomPreconditionFailedException, CustomPreconditionErrorException {
         columnSizePrecondition.check(null);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = CustomPreconditionErrorException.class)
     public void testCheck_underlyingConnectionFromWrongType_throwException() throws CustomPreconditionFailedException, CustomPreconditionErrorException {
         Mockito.when(database.getConnection()).thenReturn(null);
         columnSizePrecondition.check(database);

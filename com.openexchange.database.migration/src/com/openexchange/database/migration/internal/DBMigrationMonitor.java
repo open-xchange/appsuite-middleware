@@ -82,12 +82,10 @@ public class DBMigrationMonitor {
     }
 
     /**
-     * TODO<br>
-     * <br>
-     * Adds a {@link } to this monitor. This indicates that one or more update tasks for this schema have been scheduled and are going to be
-     * executed by the same thread that performs this call.
+     * Adds a new liquibase changelog file name desired to execute to this monitor. This indicates that one or more update tasks for this
+     * schema have been scheduled and are going to be executed by the same thread that performs this call.
      *
-     * @param state The state
+     * @param String - string with the liquibase changelog file name to execute
      * @return Whether the state was added or not. If the same thread already added a state, <code>false</code> is returned and the state is
      *         not added.
      */
@@ -96,11 +94,9 @@ public class DBMigrationMonitor {
     }
 
     /**
-     * TODO<br>
-     * <br>
-     * Removes the given {@link } if it has been added by this thread.
+     * Removes the given executed liquibase changelog filename if it has been added by this thread.
      *
-     * @param state The state
+     * @param String - string with the liquibase changelog filename to remove
      * @return Whether a state has been removed or not (i.e. wasn't added before).
      */
     public boolean removeFile(String fileName) {
@@ -108,8 +104,8 @@ public class DBMigrationMonitor {
     }
 
     /**
-     * Returns a list {@link }s. Every item indicates that one or more update tasks for this schema have been scheduled and are going to be
-     * executed or are currently running.
+     * Returns a list of {@link String}s with the currently scheduled files. Every item indicates that one or more changelog files have been
+     * scheduled and are going to be executed or are currently running.
      *
      * @return A list of states
      */
