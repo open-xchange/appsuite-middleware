@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
@@ -76,7 +77,7 @@ import com.openexchange.admin.diff.result.DiffResult;
  * <br>
  * The JarFileProvider only opens the jar once within addFilesToDiffQueue(...). readConfigurationFiles(...) is responsible for getting all
  * eligible jars.
- * 
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.1
@@ -85,7 +86,7 @@ public class JarFileProvider implements IConfigurationFileProvider {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @throws IOException
      */
     @Override
@@ -93,9 +94,9 @@ public class JarFileProvider implements IConfigurationFileProvider {
         Collection<File> listFiles = FileUtils.listFiles(rootFolder, new AndFileFilter(new PrefixFileFilter("com.openexchange."), new SuffixFileFilter(".jar")), TrueFileFilter.TRUE);
 
         if (listFiles != null) {
-            return new ArrayList<File>(listFiles);
+            return Collections.synchronizedList(new ArrayList<File>(listFiles));
         }
-        return new ArrayList<File>();
+        return Collections.synchronizedList(new ArrayList<File>());
     }
 
     /**
@@ -134,7 +135,7 @@ public class JarFileProvider implements IConfigurationFileProvider {
                     }
                 }
             } catch (IOException e) {
-                diffResult.getProcessingErrors().add("Error adding configuration file to queue" + e.getLocalizedMessage() + "\n");
+                diffResult.getProcessingErrors().add("Error adding configuration file to queue: " + e.getLocalizedMessage() + ". Please run with root.\n");
             }
         }
     }

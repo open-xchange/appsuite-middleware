@@ -57,10 +57,9 @@ import com.openexchange.admin.diff.file.provider.IConfigurationFileProvider;
 import com.openexchange.admin.diff.file.type.ConfigurationFileTypes;
 import com.openexchange.admin.diff.result.DiffResult;
 
-
 /**
  * Executes the given IConfigurationFileProvider to read configuration files and add them to the diff queue.
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.1
  */
@@ -69,13 +68,13 @@ public class FileHandler {
     /**
      * Walk through the given rootDirectory handled by the provided IConfigurationFileProvider. The read files will also be added to diff
      * working queue.
-     * 
+     *
      * @param diffResult - The {@link DiffResult} the processing results of the current handler will be attached.
      * @param rootDirectory - root directory to read from; is a valid directory, which can be read.
      * @param isOriginal - indicates if the provided files will be from original or installed configuration.
      * @param configurationFileProviders - providers that should be executed to gather all files.
      */
-    public void readConfFiles(DiffResult diffResult, File rootDirectory, boolean isOriginal, IConfigurationFileProvider... configurationFileProviders) {
+    public void readConfFiles(DiffResult diffResult, File rootDirectory, boolean isOriginal, IConfigurationFileProvider... configurationFileProviders) throws TooManyFilesException {
         if (configurationFileProviders == null) {
             return;
         }
@@ -83,7 +82,6 @@ public class FileHandler {
         try {
             validateDirectory(rootDirectory);
         } catch (FileNotFoundException e) {
-
             diffResult.getProcessingErrors().add("Error in validating directory " + rootDirectory + "\n" + e.getLocalizedMessage() + "\n");
             return;
         }
@@ -92,13 +90,19 @@ public class FileHandler {
 
         for (IConfigurationFileProvider configurationFileProvider : configurationFileProviders) {
             confFiles = configurationFileProvider.readConfigurationFiles(diffResult, rootDirectory, ConfigurationFileTypes.CONFIGURATION_FILE_TYPE);
+
+            if (confFiles.size() > 10000) {
+                String errorMessage = "Too many configuration files found (allowed <= 10000; found " + confFiles.size() + ") by file provider " + configurationFileProvider + " for further processing. Stop diff execution!!!";
+                diffResult.getProcessingErrors().add(errorMessage);
+                throw new TooManyFilesException(errorMessage);
+            }
             configurationFileProvider.addFilesToDiffQueue(diffResult, rootDirectory, confFiles, isOriginal);
         }
     }
 
     /**
      * Directory is valid if it exists, does not represent a file, and can be read.
-     * 
+     *
      * @param directory - the directory that should be validated.
      */
     protected void validateDirectory(File directory) throws FileNotFoundException {

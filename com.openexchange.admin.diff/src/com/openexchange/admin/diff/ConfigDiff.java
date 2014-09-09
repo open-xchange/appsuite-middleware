@@ -52,13 +52,18 @@ package com.openexchange.admin.diff;
 import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import com.openexchange.admin.diff.file.handler.FileHandler;
 import com.openexchange.admin.diff.file.handler.IConfFileHandler;
+import com.openexchange.admin.diff.file.handler.TooManyFilesException;
 import com.openexchange.admin.diff.file.provider.ConfFolderFileProvider;
 import com.openexchange.admin.diff.file.provider.JarFileProvider;
 import com.openexchange.admin.diff.file.provider.RecursiveFileProvider;
 import com.openexchange.admin.diff.result.DiffResult;
-
 
 /**
  * Main class that is invoked to execute the configuration diffs.
@@ -93,10 +98,41 @@ public class ConfigDiff {
     }
 
     public DiffResult run() {
-        DiffResult diffResult = new DiffResult();
+        final DiffResult diffResult = new DiffResult();
 
-        this.fileHandler.readConfFiles(diffResult, new File(this.originalFolder), true, new JarFileProvider(), new ConfFolderFileProvider());
-        this.fileHandler.readConfFiles(diffResult, new File(this.installationFolder), false, new RecursiveFileProvider());
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        Future<Void> orgFuture = executor.submit(new Callable<Void>() {
+
+            @Override
+            public Void call() throws TooManyFilesException {
+                fileHandler.readConfFiles(diffResult, new File(originalFolder), true, new JarFileProvider(), new ConfFolderFileProvider());
+                return null;
+            }
+        });
+
+        Future<Void> instFuture = executor.submit(new Callable<Void>() {
+
+            @Override
+            public Void call() throws TooManyFilesException {
+                fileHandler.readConfFiles(diffResult, new File(installationFolder), false, new RecursiveFileProvider());
+                return null;
+            }
+        });
+
+        try {
+            orgFuture.get();
+            instFuture.get();
+        } catch (ExecutionException e) {
+            Throwable rootException = e.getCause();
+            if (rootException instanceof TooManyFilesException) {
+                diffResult.reset();
+                return diffResult;
+            }
+        } catch (InterruptedException e) {
+            diffResult.getProcessingErrors().add(e.getLocalizedMessage());
+        } finally {
+            executor.shutdown();
+        }
 
         return getDiffs(diffResult);
     }

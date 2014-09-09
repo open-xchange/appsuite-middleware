@@ -68,42 +68,42 @@ public class DiffResult {
     /**
      * Includes all stacktraces occurred during processing diffs
      */
-    private List<String> processingErrors = new ArrayList<String>();
+    private List<String> processingErrors = Collections.synchronizedList(new ArrayList<String>());
 
     /**
      * Includes configuration files missing in the installation
      */
-    private List<ConfigurationFile> missingFiles = new ArrayList<ConfigurationFile>();
+    private List<ConfigurationFile> missingFiles = Collections.synchronizedList(new ArrayList<ConfigurationFile>());
 
     /**
      * Includes configuration files that are duplicate within the installation
      */
-    private List<ConfigurationFile> duplicateFiles = new ArrayList<ConfigurationFile>();
+    private List<ConfigurationFile> duplicateFiles = Collections.synchronizedList(new ArrayList<ConfigurationFile>());
 
     /**
      * Includes non configuration files within the installation
      */
-    private List<ConfigurationFile> nonConfigurationFiles = new ArrayList<ConfigurationFile>();
+    private List<ConfigurationFile> nonConfigurationFiles = Collections.synchronizedList(new ArrayList<ConfigurationFile>());
 
     /**
      * Includes additional configuration files and its content
      */
-    private List<ConfigurationFile> additionalFiles = new ArrayList<ConfigurationFile>();
+    private List<ConfigurationFile> additionalFiles = Collections.synchronizedList(new ArrayList<ConfigurationFile>());
 
     /**
      * Includes additional properties and its files
      */
-    private List<PropertyDiff> additionalProperties = new ArrayList<PropertyDiff>();
+    private List<PropertyDiff> additionalProperties = Collections.synchronizedList(new ArrayList<PropertyDiff>());
 
     /**
      * Includes properties that are missing in a configuration file
      */
-    private List<PropertyDiff> missingProperties = new ArrayList<PropertyDiff>();
+    private List<PropertyDiff> missingProperties = Collections.synchronizedList(new ArrayList<PropertyDiff>());
 
     /**
      * Includes properties/configurations that have been changed
      */
-    private List<PropertyDiff> changedProperties = new ArrayList<PropertyDiff>();
+    private List<PropertyDiff> changedProperties = Collections.synchronizedList(new ArrayList<PropertyDiff>());
 
     /**
      * Gets the processingErrors
@@ -241,6 +241,19 @@ public class DiffResult {
         }
 
         return builder.toString();
+    }
+
+    /**
+     * Resets all collected diff information except the processing errors
+     */
+    public void reset() {
+        this.additionalFiles.clear();
+        this.additionalProperties.clear();
+        this.changedProperties.clear();
+        this.duplicateFiles.clear();
+        this.missingFiles.clear();
+        this.missingProperties.clear();
+        this.nonConfigurationFiles.clear();
     }
 
     /**
