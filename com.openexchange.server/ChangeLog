@@ -42,6 +42,10 @@
 
  - Fix for bug 34355: Use secured SAXBuilder in the replay WebDAV request
 
+* 2014-09-09 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 34322: Consider the 'OK' keyword in Sieve comments
+
 * 2014-09-02 - thorben.betten@open-xchange.com
 
  - Fix for bug 33967: Avoid 102 Processing interim responses for requests executed by USM component
