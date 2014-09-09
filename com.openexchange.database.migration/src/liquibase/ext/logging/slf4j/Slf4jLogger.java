@@ -109,9 +109,7 @@ public class Slf4jLogger extends AbstractLogger {
      */
     @Override
     public void severe(String message) {
-        if(this.logger.isErrorEnabled()) {
-            this.logger.error(buildMessage(message));
-        }
+        this.logger.error(buildMessage(message));
     }
 
     /**
@@ -122,9 +120,7 @@ public class Slf4jLogger extends AbstractLogger {
      */
     @Override
     public void severe(String message, Throwable throwable) {
-        if(this.logger.isErrorEnabled()) {
-            this.logger.error(buildMessage(message), throwable);
-        }
+        this.logger.error(buildMessage(message), throwable);
     }
 
     /**
@@ -134,9 +130,7 @@ public class Slf4jLogger extends AbstractLogger {
      */
     @Override
     public void warning(String message) {
-        if(this.logger.isWarnEnabled()) {
-            this.logger.warn(buildMessage(message));
-        }
+        this.logger.warn(buildMessage(message));
     }
 
     /**
@@ -147,9 +141,7 @@ public class Slf4jLogger extends AbstractLogger {
      */
     @Override
     public void warning(String message, Throwable throwable) {
-        if(this.logger.isWarnEnabled()) {
-            this.logger.warn(buildMessage(message), throwable);
-        }
+        this.logger.warn(buildMessage(message), throwable);
     }
 
     /**
@@ -159,9 +151,7 @@ public class Slf4jLogger extends AbstractLogger {
      */
     @Override
     public void info(String message) {
-        if(this.logger.isInfoEnabled()) {
-            this.logger.info(buildMessage(message));
-        }
+        this.logger.info(buildMessage(message));
     }
 
     /**
@@ -172,9 +162,7 @@ public class Slf4jLogger extends AbstractLogger {
      */
     @Override
     public void info(String message, Throwable throwable) {
-        if(this.logger.isInfoEnabled()) {
-            this.logger.info(buildMessage(message), throwable);
-        }
+        this.logger.info(buildMessage(message), throwable);
     }
 
     /**
@@ -184,9 +172,7 @@ public class Slf4jLogger extends AbstractLogger {
      */
     @Override
     public void debug(String message) {
-        if(this.logger.isDebugEnabled()) {
-            this.logger.debug(buildMessage(message));
-        }
+        this.logger.debug(buildMessage(message));
     }
 
     /**
@@ -197,9 +183,7 @@ public class Slf4jLogger extends AbstractLogger {
      */
     @Override
     public void debug(String message, Throwable throwable) {
-        if(this.logger.isDebugEnabled()) {
-            this.logger.debug(buildMessage(message), throwable);
-        }
+        this.logger.debug(buildMessage(message), throwable);
     }
 
     /**
