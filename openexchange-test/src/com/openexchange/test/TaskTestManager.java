@@ -308,6 +308,9 @@ public class TaskTestManager implements TestManager{
         case Task.BILLING_INFORMATION:
             retval = value;
             break;
+        case Task.PRIORITY:
+            retval = Integer.valueOf(String.valueOf(value));
+            break;
         default:
             retval = value;
         }
