@@ -2,6 +2,10 @@
 
  - Fix for bug 34325: Don't try to query distributed map statistics if no owners for all configured partition replicas detected
 
+* 2014-09-09 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 34322: Consider the 'OK' keyword in Sieve comments
+ 
 * 2014-09-08 - thorben.betten@open-xchange.com
 
  - Fix for bug 33036: Introduced convenience methods to optionally resolve a setting and to ignore any load/save-back operations if such a setting is non-existent
