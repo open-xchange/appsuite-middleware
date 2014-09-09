@@ -2,7 +2,6 @@
 Name:          open-xchange-push-mailnotify
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks
-BuildRequires: ant
 BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
@@ -35,9 +34,15 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %post
-. /opt/open-xchange/lib/oxfunctions.sh
-ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc push_mailnotify.properties
+if [ ${1:-0} -eq 2 ]; then
+    . /opt/open-xchange/lib/oxfunctions.sh
+    GLOBIGNORE='*'
 
+    PFILE=/opt/open-xchange/etc/push_mailnotify.properties
+
+    # SoftwareChange_Request-2161
+    ox_add_property com.openexchange.push.mail.notify.delay_millis 5000 $PFILE
+fi
 
 %clean
 %{__rm} -rf %{buildroot}
