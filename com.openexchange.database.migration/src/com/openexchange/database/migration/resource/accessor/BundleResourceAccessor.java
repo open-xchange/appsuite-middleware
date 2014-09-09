@@ -62,7 +62,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * {@link ResourceAccessor} to access resource migration files from a specific bundle.
+ * A {@link BundleResourceAccessor} allows to access arbitrary resources of
+ * a specific OSGi bundle.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
@@ -82,21 +83,29 @@ public class BundleResourceAccessor implements ResourceAccessor {
     /**
      * Initializes a new {@link BundleResourceAccessor} for classloader bundle wiring.
      *
-     * @param context - the {@link BundleContext}.
+     * @param context The {@link BundleContext} of the {@link Bundle} whose contents shall be accessed.
      */
     public BundleResourceAccessor(final BundleContext context) {
         Bundle bundle = context.getBundle();
         bundleWiring = bundle.adapt(BundleWiring.class);
+        if (bundleWiring == null) {
+            throw new IllegalArgumentException("The passed contexts bundle cannot be adapted to org.osgi.framework.wiring.BundleWiring!");
+        }
+
         this.bundleClassLoader = bundleWiring.getClassLoader();
     }
 
     /**
      * Initializes a new {@link BundleResourceAccessor} for classloader bundle wiring.
      *
-     * @param bundle - the {@link Bundle} that should be wired.
+     * @param bundle The {@link Bundle} whose contents shall be accessed.
      */
     public BundleResourceAccessor(final Bundle bundle) {
         bundleWiring = bundle.adapt(BundleWiring.class);
+        if (bundleWiring == null) {
+            throw new IllegalArgumentException("The passed bundle cannot be adapted to org.osgi.framework.wiring.BundleWiring!");
+        }
+
         this.bundleClassLoader = bundleWiring.getClassLoader();
     }
 
