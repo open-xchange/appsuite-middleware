@@ -50,68 +50,69 @@
 package com.openexchange.database.migration;
 
 import java.util.List;
-
 import liquibase.Liquibase;
 import liquibase.changelog.ChangeSet;
 import liquibase.resource.ResourceAccessor;
-
 import com.openexchange.database.migration.resource.accessor.BundleResourceAccessor;
 import com.openexchange.exception.OXException;
 
 /**
  * Interface that defines the execution of database migration tasks based on {@link Liquibase}.
+ * With 7.6.1 only the configdb can be modified. This interface might be extended in future releases
+ * to manage migrations of the context databases.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since 7.6.1
  */
 public interface DBMigrationExecutorService {
 
     /**
-     * Schedules a database migration based on the given file location and {@link ResourceAccessor}.
+     * Schedules a configdb migration based on the given file location and {@link ResourceAccessor}.
      * The migration file must be resolvable by its location via the accessor.
-     * 
+     *
      * You probably want to use a XML file contained in your bundle-jar. {@link BundleResourceAccessor}
      * is the right choice then. The files location must then be specified absolute, starting at the
      * bundles root directory.
      *
-     * @param fileLocation Location of the changelog file (e.g. "/resources/configdbChangeLog.xml")
+     * @param fileLocation Location of the changelog file (e.g. "/liquibase/configdbChangeLog.xml")
      * @param accessor The {@link ResourceAccessor} to read in the changelog file identified by <code>fileLocation</code>
      * @return A {@link DBMigrationState} instance, that can be used to wait for completion.
      */
-    public DBMigrationState scheduleMigration(String fileLocation, ResourceAccessor accessor);
+    public DBMigrationState scheduleConfigDBMigration(String fileLocation, ResourceAccessor accessor);
 
     /**
-     * Schedules a a rollback for the given number of change sets
+     * Schedules a rollback of the configdb for the given number of change sets
      *
-     * @param fileLocation Location of the changelog file (e.g. "/resources/configdbChangeLog.xml")
+     * @param fileLocation Location of the changelog file (e.g. "/liquibase/configdbChangeLog.xml")
      * @param numberOfChangeSets Number of change sets to roll back
      * @param accessor The {@link ResourceAccessor}s to read in the changelog file identified by <code>fileLocation</code>
      * @return A {@link DBMigrationState} instance, that can be used to wait for completion.
      */
-    public DBMigrationState scheduleRollback(String fileLocation, int numberOfChangeSets, ResourceAccessor accessor);
+    public DBMigrationState scheduleConfigDBRollback(String fileLocation, int numberOfChangeSets, ResourceAccessor accessor);
 
     /**
-     * Schedules a rollback to a given tag. This will roll back all change sets of the given changelog, that were executed
-     * against the target database after the given tag was applied.
+     * Schedules a rollback of the configdb to a given tag. This will roll back all change sets of the
+     * given changelog, that were executed after the given tag was applied.
      *
-     * @param fileLocation Location of the changelog file (e.g. "/resources/configdbChangeLog.xml")
+     * @param fileLocation Location of the changelog file (e.g. "/liquibase/configdbChangeLog.xml")
      * @param changeSetTag The tag to roll back to
      * @param accessor The {@link ResourceAccessor} to read in the changelog file identified by <code>fileLocation</code>
      * @return A {@link DBMigrationState} instance, that can be used to wait for completion.
      */
-    public DBMigrationState scheduleRollback(String fileLocation, String changeSetTag, ResourceAccessor accessor);
+    public DBMigrationState scheduleConfigDBRollback(String fileLocation, String changeSetTag, ResourceAccessor accessor);
 
     /**
-     * Returns a list of the currently not executed change sets
+     * Returns a list of the currently not executed change sets of the given changelog for the configdb.
      *
-     * @param fileLocation Location of the changelog file (e.g. "/resources/configdbChangeLog.xml")
+     * @param fileLocation Location of the changelog file (e.g. "/liquibase/configdbChangeLog.xml")
      * @param accessor The {@link ResourceAccessor} to read in the changelog file identified by <code>fileLocation</code>
-     * @return List<ChangeSet> with the currently not executed liquibase changesets
+     * @return List<ChangeSet> with the currently not executed liquibase change sets
      */
-    public List<ChangeSet> listUnexecutedChangeSets(String fileLocation, ResourceAccessor accessor) throws OXException;
+    public List<ChangeSet> listUnrunConfigDBChangeSets(String fileLocation, ResourceAccessor accessor) throws OXException;
 
     /**
-     * Returns if database migrations are currently running.
+     * Gets if any database migrations are currently running.
      *
      * @return true, if migrations are running; otherwise false
      */

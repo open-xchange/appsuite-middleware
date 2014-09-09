@@ -65,6 +65,7 @@ import org.slf4j.LoggerFactory;
  * {@link ResourceAccessor} to access resource migration files from a specific bundle.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since 7.6.1
  */
 public class BundleResourceAccessor implements ResourceAccessor {

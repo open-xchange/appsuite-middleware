@@ -64,14 +64,14 @@ import com.openexchange.database.migration.DBMigrationExceptionCodes;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link DBMigrationExecutor}
+ * {@link ConfigDBMigrationExecutor}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class DBMigrationExecutor implements Runnable {
+public class ConfigDBMigrationExecutor implements Runnable {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DBMigrationExecutor.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ConfigDBMigrationExecutor.class);
 
     private final DatabaseService databaseService;
 
@@ -81,7 +81,7 @@ public class DBMigrationExecutor implements Runnable {
 
     private Thread thread;
 
-    public DBMigrationExecutor(DatabaseService databaseService) {
+    public ConfigDBMigrationExecutor(DatabaseService databaseService) {
         super();
         this.databaseService = databaseService;
         scheduledExecutions = new LinkedList<ScheduledExecution>();
@@ -106,9 +106,10 @@ public class DBMigrationExecutor implements Runnable {
             Exception exception = null;
             if (scheduledExecution != null) {
                 Liquibase liquibase = null;
+                String fileLocation = scheduledExecution.getFileLocation();
                 try {
-                    String fileLocation = scheduledExecution.getFileLocation();
                     liquibase = LiquibaseHelper.prepareLiquibase(databaseService, fileLocation, scheduledExecution.getResourceAccessor());
+                    DBMigrationMonitor.getInstance().addFile(fileLocation);
                     if (scheduledExecution.isRollback()) {
                         Object target = scheduledExecution.getRollbackTarget();
                         if (target instanceof Integer) {
@@ -139,9 +140,10 @@ public class DBMigrationExecutor implements Runnable {
                     scheduledExecution.setDone(exception);
                     try {
                         LiquibaseHelper.cleanUpLiquibase(databaseService, liquibase);
-                    } catch (OXException e) {
+                    } catch (Exception e) {
                         LOG.error("", e);
                     }
+                    DBMigrationMonitor.getInstance().removeFile(fileLocation);
                 }
             }
         }

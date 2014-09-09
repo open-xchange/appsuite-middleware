@@ -49,17 +49,17 @@
 
 package com.openexchange.database.migration.mbean;
 
-import java.util.List;
 import javax.management.MBeanException;
 
 
 /**
- * MBean to manage db migration tasks
+ * MBean to manage configdb migration tasks
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since 7.6.1
  */
-public interface DBMigrationMBean {
+public interface ConfigDBMigrationMBean {
 
     public static final String DOMAIN = "com.openexchange.database.migration";
 
@@ -70,33 +70,38 @@ public interface DBMigrationMBean {
     /**
      * Force running the core configdb changelog
      *
-     * @return true - if update was successful, otherwise false
      * @throws MBeanException
      */
-    public boolean forceDBMigration() throws MBeanException;
+    public void forceMigration() throws MBeanException;
 
     /**
      * Rollback to the given tag of a changeset of the core changelog
      *
      * @param changeSetTag
-     * @return true - if rollback was successful, otherwise false
      * @throws MBeanException
      */
-    public boolean rollbackDBMigration(String changeSetTag) throws MBeanException;
+    public void rollbackMigration(String changeSetTag) throws MBeanException;
 
     /**
-     * Releases the database migration lock table. Use this in case no lock can be acquired by liquibase.
+     * Releases all configdb migration locks. Use this in case no lock can be acquired by liquibase.
      *
-     * @return true - if releasing lock was successful, otherwise false
      * @throws MBeanException
      */
-    public boolean releaseDBMigrationLock() throws MBeanException;
+    public void releaseLocks() throws MBeanException;
 
     /**
-     * List of the currently not executed changesets for the core changelog
+     * Gets a human-readable migration status string for the configdb.
      *
-     * @return List<String> with the currently not executed ChangeSets for the given file
+     * @return The status
      * @throws MBeanException
      */
-    public List<String> listUnexecutedChangeSets() throws MBeanException;
+    public String getMigrationStatus() throws MBeanException;
+
+    /**
+     * Gets a human-readable lock status string for the configdb.
+     *
+     * @return The status
+     * @throws MBeanException
+     */
+    public String getLockStatus() throws MBeanException;
 }

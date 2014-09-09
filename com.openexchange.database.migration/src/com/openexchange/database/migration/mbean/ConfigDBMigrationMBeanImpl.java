@@ -52,13 +52,10 @@ package com.openexchange.database.migration.mbean;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
-import liquibase.changelog.ChangeSet;
 import org.apache.commons.lang.Validate;
 import org.slf4j.Logger;
 import com.openexchange.database.DatabaseService;
@@ -66,26 +63,28 @@ import com.openexchange.database.migration.internal.DBMigrationExecutorServiceIm
 import com.openexchange.exception.OXException;
 
 /**
- * Implementation of {@link DBMigrationMBean} to manage everything around database migration based on liquibase.
+ * Implementation of {@link ConfigDBMigrationMBean} to manage everything around
+ * config database migration based on liquibase.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since 7.6.1
  */
-public class DBMigrationMBeanImpl extends StandardMBean implements DBMigrationMBean {
+public class ConfigDBMigrationMBeanImpl extends StandardMBean implements ConfigDBMigrationMBean {
 
     private final DBMigrationExecutorServiceImpl dbMigrationExecutorService;
 
     private final DatabaseService databaseService;
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(DBMigrationMBeanImpl.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigDBMigrationMBeanImpl.class);
 
     /**
-     * Initializes a new {@link DBMigrationMBeanImpl}.
+     * Initializes a new {@link ConfigDBMigrationMBeanImpl}.
      *
      * @param mbeanInterface
      * @throws NotCompliantMBeanException
      */
-    public DBMigrationMBeanImpl(Class<? extends DBMigrationMBean> mbeanInterface, DBMigrationExecutorServiceImpl dbMigrationExecutorService, DatabaseService databaseService) throws NotCompliantMBeanException {
+    public ConfigDBMigrationMBeanImpl(Class<? extends ConfigDBMigrationMBean> mbeanInterface, DBMigrationExecutorServiceImpl dbMigrationExecutorService, DatabaseService databaseService) throws NotCompliantMBeanException {
         super(mbeanInterface);
         Validate.notNull(dbMigrationExecutorService, "DBMigrationExecuterService must not be null!");
         Validate.notNull(databaseService, "DatabaseService must not be null!");
@@ -98,48 +97,41 @@ public class DBMigrationMBeanImpl extends StandardMBean implements DBMigrationMB
      * {@inheritDoc}
      */
     @Override
-    public boolean forceDBMigration() throws MBeanException {
+    public void forceMigration() throws MBeanException {
         try {
-            dbMigrationExecutorService.runCoreMigrations();
+            dbMigrationExecutorService.runConfigDBCoreMigrations();
         } catch (InterruptedException e) {
             throw new MBeanException(e, e.getMessage());
         } catch (ExecutionException e) {
             throw new MBeanException(e, e.getMessage());
         }
-
-        return true;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean rollbackDBMigration(String changeSetTag) throws MBeanException {
+    public void rollbackMigration(String changeSetTag) throws MBeanException {
         try {
-            dbMigrationExecutorService.rollbackCoreMigrations(changeSetTag);
+            dbMigrationExecutorService.rollbackConfigDBCoreMigrations(changeSetTag);
         } catch (InterruptedException e) {
             throw new MBeanException(e, e.getMessage());
         } catch (ExecutionException e) {
             throw new MBeanException(e, e.getMessage());
         }
-
-        return true;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean releaseDBMigrationLock() throws MBeanException {
-        boolean lockReleased = false;
-
+    public void releaseLocks() throws MBeanException {
         Connection writable = null;
         PreparedStatement stmt = null;
         try {
-            writable = databaseService.getWritable();
+            writable = databaseService.getForUpdateTask();
             stmt = writable.prepareStatement("UPDATE DATABASECHANGELOGLOCK SET LOCKED=0, LOCKGRANTED=null, LOCKEDBY=null where ID=1;");
             stmt.execute();
-            lockReleased = true;
         } catch (final Exception e) {
             LOG.error("Not able to release the lock for table DATABASECHANGELOGLOCK", e);
             final String message = e.getMessage();
@@ -147,31 +139,33 @@ public class DBMigrationMBeanImpl extends StandardMBean implements DBMigrationMB
         } finally {
             closeSQLStuff(stmt);
             if (writable != null) {
-                databaseService.backWritable(writable);
+                databaseService.backForUpdateTask(writable);
             }
         }
-        return lockReleased;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public List<String> listUnexecutedChangeSets() throws MBeanException {
-        List<String> unexecutedChangeSets = new ArrayList<String>();
-
+    public String getMigrationStatus() throws MBeanException {
         try {
-            List<ChangeSet> listUnexecutedChangeSets = dbMigrationExecutorService.listUnexecutedCoreMigrations();
-
-            for (ChangeSet changeSet : listUnexecutedChangeSets) {
-                unexecutedChangeSets.add("ChangeSet: " + changeSet.toString(true));
-            }
-
+            return dbMigrationExecutorService.getConfigDBStatus();
         } catch (OXException e) {
             throw new MBeanException(e, e.getMessage());
         }
+    }
 
-        return unexecutedChangeSets;
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getLockStatus() throws MBeanException {
+        try {
+            return dbMigrationExecutorService.listConfigDBLocks();
+        } catch (OXException e) {
+            throw new MBeanException(e, e.getMessage());
+        }
     }
 
 }
