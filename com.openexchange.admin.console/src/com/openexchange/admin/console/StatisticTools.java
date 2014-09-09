@@ -632,7 +632,7 @@ public class StatisticTools extends AbstractJMXTools {
         sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!SessionCache"));
         return sb.toString();
     }
-    
+
     static String showThreadPoolData(final MBeanServerConnection mbc) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException {
         return getStats(mbc, "com.openexchange.threadpool:name=ThreadPoolInformation").toString();
     }
@@ -656,10 +656,12 @@ public class StatisticTools extends AbstractJMXTools {
     }
 
     static String showClusterData(MBeanServerConnection mbc) throws MalformedObjectNameException, NullPointerException, IOException, InstanceNotFoundException, IntrospectionException, ReflectionException, AttributeNotFoundException, MBeanException {
-        // general info
+        /*
+         * query general information
+         */
         StringBuilder sb = new StringBuilder();
         for (String type : new String[] { "HazelcastInstance", "HazelcastInstance.Node",
-            "HazelcastInstance.ClientEngine", "HazelcastInstance.ConnectionManager" }) {
+            "HazelcastInstance.ClientEngine", "HazelcastInstance.ConnectionManager", "HazelcastInstance.PartitionServiceMBean" }) {
             for (ObjectInstance mbean : mbc.queryMBeans(new ObjectName("com.hazelcast:type=" + type + ",*"), null)) {
                 ObjectName objectName = mbean.getObjectName();
                 MBeanInfo beanInfo = mbc.getMBeanInfo(objectName);
@@ -695,7 +697,21 @@ public class StatisticTools extends AbstractJMXTools {
                 }
             }
         }
-        // maps
+        /*
+         * probe if detailed map statistics are available
+         */
+        ObjectName toolkitName = new ObjectName("com.openexchange.hazelcast", "name", "Hazelcast Toolkit");
+        if (null == mbc.invoke(toolkitName, "getPartitionOwner", new Object[] { "probe" }, new String[] { String.class.getName() })) {
+            return sb.append("[No partition owners detected, unable to retrieve map statistics]").append(LINE_SEPARATOR).toString();
+        }
+        Object result = mbc.invoke(toolkitName, "supportsPartitionReplicas", new Object[0], new String[0]);
+        if (null == result || false == Boolean.class.isInstance(result) || Boolean.FALSE.equals(result)) {
+            return sb.append("[No owner for all configured partition replicas detected, unable to retrieve map statistics]")
+               .append(LINE_SEPARATOR).toString();
+        }
+        /*
+         * query map statistics
+         */
         for (String type : new String[] { "IMap", "IMultiMap", "ITopic", "IQueue" }) {
             for (ObjectInstance mbean : mbc.queryMBeans(new ObjectName("com.hazelcast:type=" + type + ",instance=*,name=*"), null)) {
                 ObjectName objectName = mbean.getObjectName();

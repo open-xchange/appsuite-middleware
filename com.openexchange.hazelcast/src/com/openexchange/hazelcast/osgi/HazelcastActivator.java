@@ -61,8 +61,10 @@ import com.hazelcast.config.Config;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
+import com.openexchange.hazelcast.HazelcastMBeanImpl;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.java.Strings;
+import com.openexchange.management.ManagementService;
 
 /**
  * {@link HazelcastActivator} - The activator for Hazelcast bundle (registers a {@link HazelcastInstance} for this JVM)
@@ -86,6 +88,7 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
 
     volatile ServiceTracker<HazelcastConfigurationService, HazelcastConfigurationService> configTracker;
     volatile ServiceTracker<HazelcastInstanceNotActiveException, HazelcastInstanceNotActiveException> inactiveTracker;
+    volatile ServiceTracker<ManagementService, ManagementService> managementTracker;
     volatile ServiceRegistration<HazelcastInstance> serviceRegistration;
     volatile HazelcastInstance hazelcastInstance;
 
@@ -98,6 +101,9 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
 
     @Override
     public void start(final BundleContext context) throws Exception {
+        /*
+         * track HazelcastConfigurationService
+         */
         ServiceTrackerCustomizer<HazelcastConfigurationService, HazelcastConfigurationService> customizer =
             new ServiceTrackerCustomizer<HazelcastConfigurationService, HazelcastConfigurationService>() {
 
@@ -111,6 +117,7 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
                         if (null != hazelcast) {
                             serviceRegistration = context.registerService(HazelcastInstance.class, hazelcast, null);
                             hazelcastInstance = hazelcast;
+                            HazelcastMBeanImpl.setHazelcastInstance(hazelcast);
                         }
                     } else {
                         String lf = Strings.getLineSeparator();
@@ -155,8 +162,11 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
         };
         configTracker = new ServiceTracker<HazelcastConfigurationService, HazelcastConfigurationService>(context, HazelcastConfigurationService.class, customizer);
         configTracker.open();
-
-        ServiceTrackerCustomizer<HazelcastInstanceNotActiveException, HazelcastInstanceNotActiveException> stc = new ServiceTrackerCustomizer<HazelcastInstanceNotActiveException, HazelcastInstanceNotActiveException>() {
+        /*
+         * track HazelcastInstanceNotActiveException
+         */
+        ServiceTrackerCustomizer<HazelcastInstanceNotActiveException, HazelcastInstanceNotActiveException> stc =
+            new ServiceTrackerCustomizer<HazelcastInstanceNotActiveException, HazelcastInstanceNotActiveException>() {
 
             @Override
             public void removedService(ServiceReference<HazelcastInstanceNotActiveException> reference, HazelcastInstanceNotActiveException service) {
@@ -181,6 +191,11 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
         };
         inactiveTracker = new ServiceTracker<HazelcastInstanceNotActiveException, HazelcastInstanceNotActiveException>(context, HazelcastInstanceNotActiveException.class, stc);
         inactiveTracker.open();
+        /*
+         * track ManagementService
+         */
+        managementTracker = new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, new ManagementRegisterer(context));
+        managementTracker.open();
     }
 
     @Override
@@ -190,19 +205,7 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
             serviceRegistration.unregister();
             this.serviceRegistration = null;
         }
-
-        ServiceTracker<HazelcastConfigurationService, HazelcastConfigurationService> configTracker = this.configTracker;
-        if (null != configTracker) {
-            configTracker.close();
-            this.configTracker = null;
-        }
-
-        ServiceTracker<HazelcastInstanceNotActiveException, HazelcastInstanceNotActiveException> inactiveTracker = this.inactiveTracker;
-        if (null != inactiveTracker) {
-            inactiveTracker.close();
-            this.inactiveTracker = null;
-        }
-
+        closeTrackers();
         try {
             stopHazelcast();
         } catch (Exception e) {
@@ -217,20 +220,29 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
             serviceRegistration.unregister();
             this.serviceRegistration = null;
         }
+        closeTrackers();
+        stopHazelcast();
+    }
 
+    /**
+     * Closes all opened service trackers.
+     */
+    private void closeTrackers() {
         ServiceTracker<HazelcastConfigurationService, HazelcastConfigurationService> tracker = this.configTracker;
         if (null != tracker) {
             tracker.close();
             this.configTracker = null;
         }
-
         ServiceTracker<HazelcastInstanceNotActiveException, HazelcastInstanceNotActiveException> inactiveTracker = this.inactiveTracker;
         if (null != inactiveTracker) {
             inactiveTracker.close();
             this.inactiveTracker = null;
         }
-
-        stopHazelcast();
+        ServiceTracker<ManagementService, ManagementService> managementTracker = this.managementTracker;
+        if (null != managementTracker) {
+            managementTracker.close();
+            this.managementTracker = null;
+        }
     }
 
     void stopHazelcast() throws Exception {
@@ -243,6 +255,7 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
             // Do shut-down
             hazelcast.getLifecycleService().shutdown();
             this.hazelcastInstance = null;
+            HazelcastMBeanImpl.setHazelcastInstance(null);
 
             LOG.info("{}Hazelcast:{}    Shutdown completed after {} msec.{}", lf, lf, (System.currentTimeMillis() - start), lf);
         }
