@@ -230,7 +230,6 @@ public class Activator extends HousekeepingActivator {
             daemon.unregisterRMI(context);
             this.daemon = null;
         }
-        log.info("Thanks for using Open-Xchange AdminDaemon");
     }
 
     @Override
