@@ -211,7 +211,6 @@ abstract class CheckPermission {
      * @param folderId The folder identifier
      * @param deleted <code>true</code> if deleted; otherwise changed
      * @param eventAdmin The event admin service reference
-     * @param writeCon2
      * @throws OXException
      */
     protected void broadcastEvent(final int folderId, final boolean deleted, final EventAdmin eventAdmin) throws OXException {

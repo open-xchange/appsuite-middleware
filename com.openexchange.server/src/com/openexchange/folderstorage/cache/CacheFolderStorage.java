@@ -587,6 +587,17 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
         removeFromCache(id, treeId, singleOnly, session, null);
     }
 
+    /**
+     * Removes specified folder and all of its predecessor folders from cache.
+     *
+     * @param id The folder identifier
+     * @param treeId The tree identifier
+     * @param singleOnly <code>true</code> if only specified folder should be removed; otherwise <code>false</code> for complete folder's
+     *            path to root folder
+     * @param session The session providing user information
+     * @param folderPath The folderPath to <code>rootFolder</code>, if known
+     * @throws OXException If removal fails
+     */
     public void removeFromCache(final String id, final String treeId, final boolean singleOnly, final Session session, List<String> folderPath) throws OXException {
         Lock lock = TreeLockManagement.getInstance().getFor(treeId, session).writeLock();
         acquire(lock);
