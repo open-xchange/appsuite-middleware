@@ -130,7 +130,7 @@ public class AppSuiteLoginRampUp implements LoginRampUpService {
             @Override
             public Void call() throws Exception {
                 try {
-                    JSONObject folderlist = new JSONObject();
+                    JSONObject folderlist = new JSONObject(2);
                     folderlist.put("1", ox.perform(request().module("folders").action("list").params("parent", "1", "tree", "0", "altNames", "true", "timezone", "UTC", "columns", "1,2,3,4,5,6,20,23,300,301,302,304,305,306,307,308,309,310,311,312,313,314,315,316,317,3010,3020,3030").format("json").build(), null, session).getResultObject());
                     rampUp.put(RampUpKey.FOLDER_LIST.key, folderlist);
                 } catch (OXException x) {
@@ -144,7 +144,7 @@ public class AppSuiteLoginRampUp implements LoginRampUpService {
 
             @Override
             public Void call() throws Exception {
-                JSONObject folder = new JSONObject();
+                JSONObject folder = new JSONObject(3);
                 try {
                     folder.put("1", ox.perform(request().module("folders").action("get").params("id", "1", "tree", "1", "altNames", "true", "timezone", "UTC").format("json").build(), null, session).getResultObject());
                 } catch (OXException x) {
@@ -202,7 +202,7 @@ public class AppSuiteLoginRampUp implements LoginRampUpService {
 
             @Override
             public Void call() throws Exception {
-                JSONObject oauth = new JSONObject();
+                JSONObject oauth = new JSONObject(3);
                 rampUp.put(RampUpKey.OAUTH.key, oauth);
 
                 try {
