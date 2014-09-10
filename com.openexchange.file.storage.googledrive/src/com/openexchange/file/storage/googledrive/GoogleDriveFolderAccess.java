@@ -199,7 +199,14 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
 
     @Override
     public FileStorageFolder getRootFolder() throws OXException {
-        return getFolder(FileStorageFolder.ROOT_FULLNAME);
+        GoogleDriveFolder rootFolder = new GoogleDriveFolder(userId);
+        rootFolder.setRootFolder(true);
+        rootFolder.setId(FileStorageFolder.ROOT_FULLNAME);
+        rootFolder.setParentId(null);
+        rootFolder.setName(accountDisplayName);
+        rootFolder.setSubfolders(true);
+        rootFolder.setSubscribedSubfolders(true);
+        return rootFolder;
     }
 
     @Override
