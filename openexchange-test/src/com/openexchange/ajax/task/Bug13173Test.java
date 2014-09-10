@@ -154,7 +154,7 @@ public class Bug13173Test extends AbstractAJAXSession {
         ArrayList<Task> returnList = new ArrayList<Task>();
         if (allTasks.length != 0) {
             for (Task t : allTasks) {
-                boolean title = t.getTitle().equals(testTask.getTitle());
+                boolean title = null != t.getTitle() && t.getTitle().equals(testTask.getTitle());
                 boolean creater = t.getCreatedBy() == testTask.getCreatedBy();
                 boolean startDate = null != t.getStartDate() && t.getStartDate().equals(testTask.getStartDate());
                 boolean percentComplete = t.getPercentComplete() == testTask.getPercentComplete();
