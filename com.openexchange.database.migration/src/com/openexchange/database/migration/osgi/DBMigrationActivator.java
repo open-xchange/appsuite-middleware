@@ -51,6 +51,7 @@ package com.openexchange.database.migration.osgi;
 
 import liquibase.servicelocator.CustomResolverServiceLocator;
 import liquibase.servicelocator.ServiceLocator;
+import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.migration.DBMigrationExecutorService;
@@ -72,18 +73,14 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class DBMigrationActivator extends HousekeepingActivator {
 
-    private static final Class<?>[] NEEDED_SERVICES = { DatabaseService.class, SignalStartedService.class, ThreadPoolService.class };
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DBMigrationActivator.class);
-
-    private ServiceTracker<ManagementService, ManagementService> managementServiceTracker;
+    volatile ServiceTracker<ManagementService, ManagementService> managementServiceTracker;
 
     /**
      * {@inheritDoc}
      */
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+        return new Class<?>[] { DatabaseService.class, SignalStartedService.class, ThreadPoolService.class };
     }
 
     /**
@@ -91,7 +88,8 @@ public class DBMigrationActivator extends HousekeepingActivator {
      */
     @Override
     protected void startBundle() throws Exception {
-        LOG.info("Starting bundle: " + this.context.getBundle().getSymbolicName());
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(DBMigrationActivator.class);
+        logger.info("Starting bundle: {}", this.context.getBundle().getSymbolicName());
 
         Services.setServiceLookup(this);
         // Important: Enable liquibase to load required classes (e.g. liquibase.logging.Logger implementation) from this bundle
@@ -99,6 +97,7 @@ public class DBMigrationActivator extends HousekeepingActivator {
 
         final DatabaseService databaseService = getService(DatabaseService.class);
         final ThreadPoolService threadPoolService = Services.getService(ThreadPoolService.class);
+        final BundleContext context = this.context;
         threadPoolService.submit(new AbstractTask<Void>() {
 
             @Override
@@ -107,10 +106,11 @@ public class DBMigrationActivator extends HousekeepingActivator {
                 dbMigrationExecutorService.runConfigDBCoreMigrations();
                 context.registerService(DBMigrationExecutorService.class, dbMigrationExecutorService, null);
 
-                managementServiceTracker = new ServiceTracker<ManagementService, ManagementService>(
+                ServiceTracker<ManagementService, ManagementService> managementServiceTracker = new ServiceTracker<ManagementService, ManagementService>(
                     context,
                     ManagementService.class,
                     new ManagementServiceTracker(context, dbMigrationExecutorService, databaseService));
+                DBMigrationActivator.this.managementServiceTracker = managementServiceTracker;
                 managementServiceTracker.open();
                 return null;
             }
@@ -122,10 +122,13 @@ public class DBMigrationActivator extends HousekeepingActivator {
      */
     @Override
     protected void stopBundle() throws Exception {
-        LOG.info("Stopping bundle: " + this.context.getBundle().getSymbolicName());
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(DBMigrationActivator.class);
+        logger.info("Stopping bundle: {}", this.context.getBundle().getSymbolicName());
+
+        ServiceTracker<ManagementService, ManagementService> managementServiceTracker = this.managementServiceTracker;
         if (managementServiceTracker != null) {
             managementServiceTracker.close();
-            managementServiceTracker = null;
+            this.managementServiceTracker = null;
         }
 
         Services.setServiceLookup(null);
