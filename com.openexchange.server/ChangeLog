@@ -1,3 +1,7 @@
+* 2014-09-10 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 34355: Use secured SAXBuilder in the replay WebDAV request 
+
 * 2014-09-01 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 33354: Added display message for invalid characters in folder name
