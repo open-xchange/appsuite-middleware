@@ -234,7 +234,9 @@ public class JSONCoercion {
         } else if (value instanceof AtomicBoolean) {
             return Boolean.valueOf(((AtomicBoolean) value).get());
         }
-        throw new IllegalStateException("Value cannot be coerced to JSON (type passed " + value.getClass().getName() + ")");
+
+        // As string as last resort
+        return value.toString();
     }
 
     /**
