@@ -25,6 +25,10 @@ if ( $ARGV[0] and $ARGV[0] eq "config")
 	print "graph_vlabel Number\n";
 	print "a.label Sessions\n";
 	print "a.draw LINE1\n";
+	print "b.label Local owned entries\n";
+	print "b.draw LINE1\n";
+	print "c.label Local backup entries\n";
+	print "c.draw LINE1\n";
 	exit 0;
 }
 
@@ -32,7 +36,10 @@ my $url = $ENV{oxJolokiaUrl};
 my $username = $ENV{oxJolokiaUser};
 my $password = $ENV{oxJolokiaPassword};
 
-callUrl("a","/read/com.hazelcast:*,type=IMap,name=sessions-*/size");
+testHazelcast();
+callUrl("a","/read/com.hazelcast:*,type=IMap,name=sessions-*/size","size");
+callUrl("b","/read/com.hazelcast:*,type=IMap,name=sessions-*/localBackupEntryCount","localBackupEntryCount");
+callUrl("c","/read/com.hazelcast:*,type=IMap,name=sessions-*/localOwnedEntryCount","localOwnedEntryCount",);
 
 sub callUrl {
 	my $ua = LWP::UserAgent->new();
@@ -49,8 +56,74 @@ sub callUrl {
 			my $jsonValues = $json->{value};
 			foreach my $val (values %$jsonValues){
 				print "$_[0].value ";
-				print $val->{size},"\n";
+				print $val->{$_[2]},"\n";
 			}
+		}
+	}
+	else {
+		my $status = $response->status_line;
+		if ($status == 404) {
+			die "Link to servlet might not be set correctly, this can be done by altering /etc/munin/plugin-conf.d/ox and setting the correct path to your jolokia servlet";
+		}
+		elsif ($status == 401) {
+			die "Credentials to login might be not set correctly. The credentials are set inside /opt/open-xchange/etc/jolokia.properties on the OX, for munin, those need to be altered at /etc/munin/plugin-conf.d/ox";
+		}
+		else {
+			die "Something went wrong:\n",$status;
+		}
+	}
+}
+
+sub testHazelcast {
+
+	my $ua = LWP::UserAgent->new();
+	my $req = HTTP::Request->new(GET => "$url"."/exec/com.openexchange.hazelcast:name=Hazelcast%20Toolkit/getPartitionOwner/probe");
+	$req->authorization_basic($username,$password);
+	
+	$req->header('Accept', => 'text/html');
+	
+	my $response = $ua->request($req);
+	
+	if ($response->is_success) {
+		my $json = decode_json($response->decoded_content);
+		if (defined $json->{value}){
+			if ( $json->{value} eq "null" ) {
+				die "No partition owners detected, unable to retrieve map statistics. value=".$json->{value}."\n";
+			}
+		} else {
+			die "No partition owners detected, unable to retrieve map statistics.\n";
+		}
+	}
+	else {
+		my $status = $response->status_line;
+		if ($status == 404) {
+			die "Link to servlet might not be set correctly, this can be done by altering /etc/munin/plugin-conf.d/ox and setting the correct path to your jolokia servlet";
+		}
+		elsif ($status == 401) {
+			die "Credentials to login might be not set correctly. The credentials are set inside /opt/open-xchange/etc/jolokia.properties on the OX, for munin, those need to be altered at /etc/munin/plugin-conf.d/ox";
+		} else {
+			die "Something went wrong:\n",$status;
+		}
+	}
+	
+	$req = HTTP::Request->new(GET => "$url"."/exec/com.openexchange.hazelcast:name=Hazelcast%20Toolkit/supportsPartitionReplicas/");
+	$req->header('Accept', => 'text/html');
+	$req->authorization_basic($username,$password);
+	
+	$response = $ua->request($req);
+	
+	if ($response->is_success) {
+		my $json = decode_json($response->decoded_content);
+		if (defined $json->{value}){
+			if ( $json->{value} eq "null" ) {
+				die "No owner for all configured partition replicas detected, unable to retrieve map statistic. value=".$json->{value}."\n";
+			}
+			if ( $json->{value} eq "false" ) {
+				die "No owner for all configured partition replicas detected, unable to retrieve map statistic. value=".$json->{value}."\n";
+			}
+			print "supportsPartitionReplicas value=".$json->{value}."\n";
+		} else {
+			die "No owner for all configured partition replicas detected, unable to retrieve map statistics.\n";
 		}
 	}
 	else {
