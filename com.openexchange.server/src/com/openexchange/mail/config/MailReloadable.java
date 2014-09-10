@@ -117,7 +117,7 @@ public final class MailReloadable implements Reloadable {
                 mailProperties.resetProperties();
                 mailProperties.loadProperties();
             }
-            
+
             // Clear capabilities cache as "com.openexchange.mail.adminMailLoginEnabled" affects them
             final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
             if (null != cacheService) {
