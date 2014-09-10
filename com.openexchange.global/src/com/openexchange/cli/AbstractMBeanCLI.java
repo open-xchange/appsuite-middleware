@@ -309,6 +309,8 @@ public abstract class AbstractMBeanCLI<R> {
 
     /**
      * Performs appropriate administrative authentication.
+     * <p>
+     * This method needs only to be implemented in case {@link #requiresAdministrativePermission()} is supposed to return <code>true</code>.
      *
      * @param login The administrator login
      * @param password The administrator password
