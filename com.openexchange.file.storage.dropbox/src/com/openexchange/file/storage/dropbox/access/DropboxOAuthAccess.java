@@ -51,10 +51,6 @@ package com.openexchange.file.storage.dropbox.access;
 
 import java.util.Map;
 import com.dropbox.client2.DropboxAPI;
-import com.dropbox.client2.DropboxAPI.Account;
-import com.dropbox.client2.exception.DropboxException;
-import com.dropbox.client2.exception.DropboxServerException;
-import com.dropbox.client2.exception.DropboxUnlinkedException;
 import com.dropbox.client2.session.AccessTokenPair;
 import com.dropbox.client2.session.AppKeyPair;
 import com.dropbox.client2.session.Session.AccessType;
@@ -97,16 +93,6 @@ public final class DropboxOAuthAccess {
         }
         return dropboxOAuthAccess;
     }
-
-    /**
-     * The Dropbox user identifier.
-     */
-    private final long dropboxUserId;
-
-    /**
-     * The Dropbox user's full name
-     */
-    private final String dropboxUserName;
 
     /**
      * The Web-authenticating session.
@@ -163,22 +149,10 @@ public final class DropboxOAuthAccess {
             // Re-auth specific stuff
             final AccessTokenPair reAuthTokens = new AccessTokenPair(oauthAccount.getToken(), oauthAccount.getSecret());
             dropboxApi.getSession().setAccessTokenPair(reAuthTokens);
-            // Get account information
-            final Account accountInfo = dropboxApi.accountInfo();
-            dropboxUserId = accountInfo.uid;
-            dropboxUserName = accountInfo.displayName;
         } catch (OXException e) {
             throw e;
         } catch (org.scribe.exceptions.OAuthException e) {
             throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (DropboxUnlinkedException e) {
-            throw DropboxExceptionCodes.UNLINKED_ERROR.create(e, new Object[0]);
-        } catch (DropboxServerException e) {
-            com.dropbox.client2.exception.DropboxServerException.Error body = e.body;
-            int error = e.error;
-            throw DropboxExceptionCodes.DROPBOX_SERVER_ERROR.create(e, Integer.valueOf(error), null == body.userError ? body.error : body.userError);
-        } catch (DropboxException e) {
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -198,24 +172,6 @@ public final class DropboxOAuthAccess {
      */
     public void dispose() {
         // So far nothing known to me that needs to be disposed
-    }
-
-    /**
-     * Gets the Dropbox user identifier.
-     *
-     * @return The Dropbox user identifier
-     */
-    public long getDropboxUserId() {
-        return dropboxUserId;
-    }
-
-    /**
-     * Gets the Dropbox user's display name.
-     *
-     * @return The Dropbox user's display name.
-     */
-    public String getDropboxUserName() {
-        return dropboxUserName;
     }
 
 }

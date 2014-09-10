@@ -57,7 +57,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -413,22 +412,26 @@ public final class FileStorageFolderStorage implements FolderStorage {
              * 2. Strip Unified-FileStorage account from obtained list
              */
 
-            final List<FileStorageFolder> rootFolders = new ArrayList<FileStorageFolder>(Arrays.asList(folderAccess.getRootFolders(session.getUser().getLocale())));
-            if (isRealTree) {
-                for (final Iterator<FileStorageFolder> it = rootFolders.iterator(); it.hasNext();) {
-                    if (INFOSTORE.equals(it.next().getId())) {
-                        it.remove();
-                    }
-                }
-            }
+            FileStorageFolder[] rootFolders = folderAccess.getRootFolders(session.getUser().getLocale());
 
-            final int size = rootFolders.size();
+            int size = rootFolders.length;
             if (size <= 0) {
                 return new SortableId[0];
             }
-            final List<SortableId> list = new ArrayList<SortableId>(size);
-            for (int j = 0; j < size; j++) {
-                list.add(new FileStorageId(rootFolders.get(j).getId(), j, null));
+
+            List<SortableId> list = new ArrayList<SortableId>(size);
+            if (isRealTree) {
+                int index = 0;
+                for (int j = 0; j < size; j++) {
+                    String id = rootFolders[j].getId();
+                    if (!INFOSTORE.equals(id)) {
+                        list.add(new FileStorageId(id, index++, null));
+                    }
+                }
+            } else {
+                for (int j = 0; j < size; j++) {
+                    list.add(new FileStorageId(rootFolders[j].getId(), j, null));
+                }
             }
             return list.toArray(new SortableId[list.size()]);
         }
