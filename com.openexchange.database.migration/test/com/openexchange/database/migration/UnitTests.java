@@ -1,7 +1,6 @@
-package com.openexchange.database.migration;
 /*
- *
  *    OPEN-XCHANGE legal information
+ *
  *
  *    All intellectual property rights in the Software are protected by
  *    international copyright laws.
@@ -48,6 +47,8 @@ package com.openexchange.database.migration;
  *
  */
 
+package com.openexchange.database.migration;
+
 import liquibase.precondition.ext.ColumnSizePreconditionTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -61,7 +62,7 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
- ColumnSizePreconditionTest.class
+    ColumnSizePreconditionTest.class
 })
 public class UnitTests {
 

@@ -74,8 +74,6 @@ public final class InterfaceTests {
         tests.addTestSuite(com.openexchange.ajax.MultipleTest.class);
         tests.addTestSuite(com.openexchange.ajax.UserTest.class);
 
-        tests.addTest(com.openexchange.ajax.database.DatabaseTestSuite.suite());
-
         tests.addTest(com.openexchange.ajax.mailaccount.MailAccountSuite.suite());
         tests.addTest(com.openexchange.ajax.appointment.AppointmentAJAXSuite.suite());
         tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.attach.AttachmentTests.class));
