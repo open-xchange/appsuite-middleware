@@ -363,9 +363,15 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
                 accounts = fsService.getAccountManager().getAccounts(session);
             }
             for (FileStorageAccount fileStorageAccount : accounts) {
-                FileStorageAccountAccess accountAccess = fsService.getAccountAccess(fileStorageAccount.getId(), session);
-                connect(accountAccess);
-                accountAccesses.add(new AccessWrapper(accountAccess, fileStorageAccount.getDisplayName()));
+                try {
+                    FileStorageAccountAccess accountAccess = fsService.getAccountAccess(fileStorageAccount.getId(), session);
+                    connect(accountAccess);
+                    accountAccesses.add(new AccessWrapper(accountAccess, fileStorageAccount.getDisplayName()));
+                } catch (OXException e) {
+                    if (!"OAUTH-0004".equals(e.getErrorCode())) { // OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA
+                        throw e;
+                    }
+                }
             }
         }
         return accountAccesses;
