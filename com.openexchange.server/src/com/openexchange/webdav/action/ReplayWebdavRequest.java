@@ -49,16 +49,14 @@
 
 package com.openexchange.webdav.action;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import org.jdom2.Document;
 import org.jdom2.JDOMException;
+import com.openexchange.java.Streams;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.webdav.action.ifheader.IfHeader;
 import com.openexchange.webdav.action.ifheader.IfHeaderParseException;
 import com.openexchange.webdav.protocol.WebdavCollection;
@@ -69,33 +67,25 @@ import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.xml.jdom.JDOMParser;
 
 public class ReplayWebdavRequest implements WebdavRequest{
+
 	private final WebdavRequest delegate;
 	private byte[] body;
 
+	/**
+	 * Initializes a new {@link ReplayWebdavRequest}.
+	 *
+	 * @param req The delegate request
+	 */
 	public ReplayWebdavRequest(final WebdavRequest req) {
 		this.delegate = req;
 	}
 
 	@Override
     public InputStream getBody() throws IOException {
-		if(this.body != null) {
-			return new ByteArrayInputStream(this.body);
-		}
-
-		final ByteArrayOutputStream bout = new UnsynchronizedByteArrayOutputStream();
-		InputStream in = null;
-
-		in = delegate.getBody();
-
-		final byte[] buffer = new byte[200];
-		int b = 0;
-
-		while((b = in.read(buffer)) > 0) {
-			bout.write(buffer,0,b);
-		}
-		this.body = bout.toByteArray();
-
-		return new ByteArrayInputStream(this.body);
+	    if (null == body) {
+	        body = Streams.stream2bytes(delegate.getBody());
+	    }
+	    return Streams.newByteArrayInputStream(body);
 	}
 
 	@Override
