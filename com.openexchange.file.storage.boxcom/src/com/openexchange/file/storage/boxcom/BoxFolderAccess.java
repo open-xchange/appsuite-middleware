@@ -222,7 +222,14 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
 
     @Override
     public FileStorageFolder getRootFolder() throws OXException {
-        return getFolder(FileStorageFolder.ROOT_FULLNAME);
+        com.openexchange.file.storage.boxcom.BoxFolder rootFolder = new com.openexchange.file.storage.boxcom.BoxFolder(userId);
+        rootFolder.setRootFolder(true);
+        rootFolder.setId(FileStorageFolder.ROOT_FULLNAME);
+        rootFolder.setParentId(null);
+        rootFolder.setName(accountDisplayName);
+        rootFolder.setSubfolders(true);
+        rootFolder.setSubscribedSubfolders(true);
+        return rootFolder;
     }
 
     @Override
