@@ -161,7 +161,7 @@ public class BoxAccess {
                 oauthAccountId = ((Integer) accountId).intValue();
             } else {
                 try {
-                    oauthAccountId = Integer.parseInt(accountId.toString());
+                    oauthAccountId = Strings.parseInt(accountId.toString());
                 } catch (NumberFormatException e) {
                     throw BoxExceptionCodes.MISSING_CONFIG.create(e, fsAccount.getId());
                 }
