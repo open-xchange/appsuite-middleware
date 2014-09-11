@@ -60,6 +60,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -1356,12 +1357,13 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
                         }
                     }
                 } else {
-                    allSubfolderIds = new ArrayList<SortableId>(neededStorages.length * 8);
+                    allSubfolderIds = new LinkedList<SortableId>();
+
+                    // Query storages (except first one) using dedicated threads
                     CompletionService<java.util.List<SortableId>> completionService = new ThreadPoolCompletionService<java.util.List<SortableId>>(ThreadPools.getThreadPool()).setTrackable(true);
-                    /*
-                     * Get all visible subfolders from each storage
-                     */
-                    for (final FolderStorage neededStorage : neededStorages) {
+                    int submittedTasks = 0;
+                    for (int i = 1; i < neededStorages.length; i++) {
+                        final FolderStorage neededStorage = neededStorages[i];
                         completionService.submit(new TrackableCallable<java.util.List<SortableId>>() {
 
                             @Override
@@ -1382,23 +1384,38 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
                                 }
                             }
                         });
+                        submittedTasks++;
                     }
-                    /*
-                     * Wait for completion
-                     */
-                    List<List<SortableId>> results = ThreadPools.takeCompletionService(completionService, neededStorages.length, FACTORY);
+
+                    // Query the first one with this thread
+                    {
+                        final FolderStorage neededStorage = neededStorages[0];
+                        boolean started = neededStorage.startTransaction(storageParameters, false);
+                        try {
+                            java.util.List<SortableId> l = Arrays.asList(neededStorage.getSubfolders(treeId, parentId, storageParameters));
+                            if (started) {
+                                neededStorage.commitTransaction(storageParameters);
+                                started = false;
+                            }
+                            allSubfolderIds.addAll(l);
+                        } finally {
+                            if (started) {
+                                neededStorage.rollback(storageParameters);
+                            }
+                        }
+                    }
+
+                    // Wait for completion
+                    List<List<SortableId>> results = ThreadPools.takeCompletionService(completionService, submittedTasks, FACTORY);
                     for (List<SortableId> result : results) {
                         allSubfolderIds.addAll(result);
                     }
                 }
-                /*
-                 * Sort them
-                 */
+
+                // Sort them
                 Collections.sort(allSubfolderIds);
                 return allSubfolderIds.toArray(new SortableId[allSubfolderIds.size()]);
-            } catch (final OXException e) {
-                throw e;
-            } catch (final Exception e) {
+            } catch (RuntimeException e) {
                 throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         } finally {
