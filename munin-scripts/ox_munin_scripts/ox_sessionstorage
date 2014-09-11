@@ -24,9 +24,9 @@ if ( $ARGV[0] and $ARGV[0] eq "config")
 	print "graph_vlabel Number\n";
 	print "a.label Overall count\n";
 	print "a.draw LINE1\n";
-	print "b.label Local owned entries\n";
+	print "b.label Locally owned\n";
 	print "b.draw LINE1\n";
-	print "c.label Local backup entries\n";
+	print "c.label Locally backed up\n";
 	print "c.draw LINE1\n";
 	exit 0;
 }
