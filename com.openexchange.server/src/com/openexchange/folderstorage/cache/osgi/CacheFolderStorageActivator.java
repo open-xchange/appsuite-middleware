@@ -51,6 +51,7 @@ package com.openexchange.folderstorage.cache.osgi;
 
 import static com.openexchange.folderstorage.cache.CacheServiceRegistry.getServiceRegistry;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
@@ -74,6 +75,7 @@ import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.folderstorage.cache.lock.TreeLockManagement;
 import com.openexchange.folderstorage.cache.lock.UserLockManagement;
 import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
+import com.openexchange.folderstorage.cache.service.FolderCacheInvalidationService;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.DeferredActivator;
@@ -94,14 +96,11 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
  */
 public final class CacheFolderStorageActivator extends DeferredActivator {
 
-    static final org.slf4j.Logger LOG =
-        org.slf4j.LoggerFactory.getLogger(CacheFolderStorageActivator.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CacheFolderStorageActivator.class);
 
-    private List<ServiceRegistration<?>> registrations;
-
-    private CacheFolderStorage cacheFolderStorage;
-
-    private List<ServiceTracker<?,?>> serviceTrackers;
+    private volatile CacheFolderStorage cacheFolderStorage;
+    private volatile List<ServiceRegistration<?>> registrations;
+    private volatile List<ServiceTracker<?,?>> serviceTrackers;
 
     /**
      * Initializes a new {@link CacheFolderStorageActivator}.
@@ -162,7 +161,8 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
             }
             initCacheFolderStorage();
             // Register service trackers
-            serviceTrackers = new ArrayList<ServiceTracker<?,?>>(4);
+            List<ServiceTracker<?,?>> serviceTrackers = new ArrayList<ServiceTracker<?,?>>(4);
+            this.serviceTrackers = serviceTrackers;
             serviceTrackers.add(new ServiceTracker<FolderStorage,FolderStorage>(context, FolderStorage.class, new CacheFolderStorageServiceTracker(context)));
             serviceTrackers.add(new ServiceTracker<CacheEventService, CacheEventService>(context, CacheEventService.class, new FolderMapInvalidator(context)));
             for (final ServiceTracker<?,?> serviceTracker : serviceTrackers) {
@@ -178,12 +178,13 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
     protected void stopBundle() throws Exception {
         try {
             // Drop service trackers
+            List<ServiceTracker<?, ?>> serviceTrackers = this.serviceTrackers;
             if (null != serviceTrackers) {
                 for (final ServiceTracker<?,?> serviceTracker : serviceTrackers) {
                     serviceTracker.close();
                 }
                 serviceTrackers.clear();
-                serviceTrackers = null;
+                this.serviceTrackers = null;
             }
             disposeCacheFolderStorage();
             /*
@@ -200,23 +201,28 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
         // Unregister folder storage
         unregisterCacheFolderStorage();
         // Shut-down folder storage
+        CacheFolderStorage cacheFolderStorage = this.cacheFolderStorage;
         if (null != cacheFolderStorage) {
             cacheFolderStorage.onCacheAbsent();
-            cacheFolderStorage = null;
+            this.cacheFolderStorage = null;
         }
     }
 
     private void initCacheFolderStorage() throws OXException {
         // Start-up folder storage
-        cacheFolderStorage = CacheFolderStorage.getInstance();
-        cacheFolderStorage.onCacheAvailable();
+        final CacheFolderStorage cache = CacheFolderStorage.getInstance();
+        cacheFolderStorage = cache;
+        cache.onCacheAvailable();
         // Register folder storage
-        final Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
-        dictionary.put("tree", FolderStorage.ALL_TREE_ID);
-        registrations = new ArrayList<ServiceRegistration<?>>(4);
-        registrations.add(context.registerService(FolderStorage.class, cacheFolderStorage, dictionary));
+        List<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>(4);
+        this.registrations = registrations;
+        {
+            final Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
+            dictionary.put("tree", FolderStorage.ALL_TREE_ID);
+            registrations.add(context.registerService(FolderStorage.class, cache, dictionary));
+            registrations.add(context.registerService(FolderCacheInvalidationService.class, cache, null));
+        }
         // Register event handler for content-related changes on a mail folder
-        final CacheFolderStorage cache = cacheFolderStorage;
         {
             final EventHandler eventHandler = new EventHandler() {
 
@@ -311,11 +317,17 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                     final Integer userId = ((Integer) event.getProperty(FolderEventConstants.PROPERTY_USER));
                     final String folderId = (String) event.getProperty(FolderEventConstants.PROPERTY_FOLDER);
                     final Boolean contentRelated = (Boolean) event.getProperty(FolderEventConstants.PROPERTY_CONTENT_RELATED);
+                    final String[] folderPath = (String[]) event.getProperty(FolderEventConstants.PROPERTY_FOLDER_PATH);
                     try {
                         if (null == session) {
                             tmp.removeSingleFromCache(sanitizeFolderId(folderId), FolderStorage.REAL_TREE_ID, null == userId ? -1 : userId.intValue(), contextId.intValue(), true, session);
                         } else {
-                            tmp.removeFromCache(sanitizeFolderId(folderId), FolderStorage.REAL_TREE_ID, null != contentRelated && contentRelated.booleanValue(), session);
+                            if (null != folderPath) {
+                                tmp.removeFromCache(sanitizeFolderId(folderId), FolderStorage.REAL_TREE_ID, null != contentRelated && contentRelated.booleanValue(), session, Arrays.asList(folderPath));
+                            } else {
+                                tmp.removeFromCache(sanitizeFolderId(folderId), FolderStorage.REAL_TREE_ID, null != contentRelated && contentRelated.booleanValue(), session);
+                            }
+
                         }
                     } catch (final OXException e) {
                         LOG.error("", e);
@@ -433,8 +445,13 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                     try {
                         final String folderID = (String)event.getProperty(FileStorageEventConstants.FOLDER_ID);
                         final Session session = (Session)event.getProperty(FileStorageEventConstants.SESSION);
+                        final String[] folderPath = (String[]) event.getProperty(FileStorageEventConstants.FOLDER_PATH);
                         tmp.removeFromGlobalCache(folderID, FolderStorage.REAL_TREE_ID, session.getContextId());
-                        tmp.removeFromCache(folderID, FolderStorage.REAL_TREE_ID, false, session);
+                        if (null != folderPath) {
+                            tmp.removeFromCache(folderID, FolderStorage.REAL_TREE_ID, false, session, Arrays.asList(folderPath));
+                        } else {
+                            tmp.removeFromCache(folderID, FolderStorage.REAL_TREE_ID, false, session);
+                        }
                     } catch (final OXException e) {
                         LOG.error("", e);
                     }
@@ -468,11 +485,12 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
 
     private void unregisterCacheFolderStorage() {
         // Unregister
+        List<ServiceRegistration<?>> registrations = this.registrations;
         if (null != registrations) {
             while (!registrations.isEmpty()) {
                 registrations.remove(0).unregister();
             }
-            registrations = null;
+            this.registrations = null;
         }
     }
 

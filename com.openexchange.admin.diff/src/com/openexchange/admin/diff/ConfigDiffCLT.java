@@ -140,5 +140,4 @@ public class ConfigDiffCLT {
         hf.printHelp("Help", options);
         System.exit(exitCode);
     }
-
 }

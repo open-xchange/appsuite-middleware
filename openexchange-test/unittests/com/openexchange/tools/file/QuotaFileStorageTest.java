@@ -389,6 +389,18 @@ public class QuotaFileStorageTest extends TestCase {
         public void initPartitions(int writePoolId, String schema, int... partitions) throws OXException {
             //nothing to do
         }
+
+        @Override
+        public Connection getForUpdateTask() throws OXException {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public void backForUpdateTask(Connection con) {
+            // TODO Auto-generated method stub
+
+        }
     }
 
     private static void rmdir(final File tempFile) {

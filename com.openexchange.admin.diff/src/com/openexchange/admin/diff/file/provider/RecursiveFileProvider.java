@@ -55,6 +55,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -82,9 +83,9 @@ public class RecursiveFileProvider implements IConfigurationFileProvider {
         Collection<File> listFiles = FileUtils.listFiles(rootFolder, null, true);
 
         if (listFiles != null) {
-            return new ArrayList<File>(listFiles);
+            return Collections.synchronizedList(new ArrayList<File>(listFiles));
         }
-        return new ArrayList<File>();
+        return Collections.synchronizedList(new ArrayList<File>());
     }
 
     /**
@@ -104,9 +105,9 @@ public class RecursiveFileProvider implements IConfigurationFileProvider {
                 ConfigurationFile configurationFile = new ConfigurationFile(currentFile.getName(), rootDirectory.getAbsolutePath(), FilenameUtils.getFullPath(FileProviderUtil.removeRootFolder(currentFile.getAbsolutePath(), rootDirectory.getAbsolutePath())), fileContent, isOriginal);
                 ConfFileHandler.addConfigurationFile(diffResult, configurationFile);
             } catch (FileNotFoundException e) {
-                diffResult.getProcessingErrors().add("Error adding configuration file to queue" + e.getLocalizedMessage() + "\n");
+                diffResult.getProcessingErrors().add("Error adding configuration file to queue: " + e.getLocalizedMessage() + ". Please run with root.\n");
             } catch (IOException e) {
-                diffResult.getProcessingErrors().add("Error adding configuration file to queue" + e.getLocalizedMessage() + "\n");
+                diffResult.getProcessingErrors().add("Error adding configuration file to queue: " + e.getLocalizedMessage() + ". Please run with root.\n");
             }
         }
     }

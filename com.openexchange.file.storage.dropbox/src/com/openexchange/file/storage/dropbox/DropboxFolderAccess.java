@@ -73,6 +73,7 @@ import com.openexchange.session.Session;
 public final class DropboxFolderAccess extends AbstractDropboxAccess implements FileStorageFolderAccess {
 
     private final DropboxAccountAccess accountAccess;
+    private final String accountDisplayName;
     private final int userId;
 
     /**
@@ -82,6 +83,7 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
         super(dropboxOAuthAccess, account, session);
         this.accountAccess = accountAccess;
         userId = session.getUserId();
+        accountDisplayName = accountAccess.getAccount().getDisplayName();
     }
 
     @Override
@@ -108,7 +110,7 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
             if (!entry.isDir || entry.isDeleted) {
                 throw DropboxExceptionCodes.NOT_FOUND.create(folderId);
             }
-            return new DropboxFolder(userId).parseDirEntry(entry, accountAccess.getAccount().getDisplayName());
+            return new DropboxFolder(userId).parseDirEntry(entry, accountDisplayName);
         } catch (final DropboxServerException e) {
             throw handleServerError(folderId, e);
         } catch (final DropboxException e) {
@@ -159,7 +161,14 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
 
     @Override
     public FileStorageFolder getRootFolder() throws OXException {
-        return getFolder(FileStorageFolder.ROOT_FULLNAME);
+        DropboxFolder rootFolder = new DropboxFolder(userId);
+        rootFolder.setRootFolder(true);
+        rootFolder.setId(FileStorageFolder.ROOT_FULLNAME);
+        rootFolder.setParentId(null);
+        rootFolder.setName(accountDisplayName);
+        rootFolder.setSubfolders(true);
+        rootFolder.setSubscribedSubfolders(true);
+        return rootFolder;
     }
 
     @Override

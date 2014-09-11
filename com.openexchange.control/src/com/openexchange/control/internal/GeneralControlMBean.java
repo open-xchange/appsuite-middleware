@@ -158,4 +158,14 @@ public interface GeneralControlMBean {
      */
     public String version();
 
+    /**
+     * Returns whether this node is currently executing any update tasks.
+     * If so, you must not call <code>shutdown()</code> until this method
+     * returns <code>false</code>.
+     *
+     * @return <code>true</code> if update tasks are currently running on
+     * this node.
+     */
+    public boolean updateTasksRunning();
+
 }

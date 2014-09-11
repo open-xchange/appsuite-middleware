@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.update.internal;
 
+import java.util.Collection;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.SchemaStore;
@@ -125,4 +126,10 @@ public class UpdaterImpl extends Updater {
         final List<UpdateTask> retval = UpdateTaskCollection.getInstance().getListWithoutExcludes();
         return retval.toArray(new UpdateTask[retval.size()]);
     }
+
+    @Override
+    public Collection<SchemaUpdateState> getLocallyScheduledTasks() {
+        return LocalUpdateTaskMonitor.getInstance().getScheduledStates();
+    }
+
 }

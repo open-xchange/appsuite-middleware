@@ -49,7 +49,13 @@
 
 package com.openexchange.mail.json.actions;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
@@ -66,11 +72,13 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
@@ -84,6 +92,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -211,12 +220,61 @@ public final class ArchiveAction extends AbstractMailAction {
                 CacheFolderStorage.getInstance().removeFromCache(parentFullName, "0", true, session);
             }
             // Move to archive folder
-            final int length = uids.length();
-            final String[] mailIds = new String[length];
+            Calendar cal = Calendar.getInstance(TimeZoneUtils.getTimeZone("UTC"));
+
+            int length = uids.length();
+            String[] mailIds = new String[length];
             for (int i = 0; i < length; i++) {
                 mailIds[i] = uids.getString(i);
             }
-            mailAccess.getMessageStorage().moveMessages(fa.getFullname(), archiveFullname, mailIds, true);
+
+            MailMessage[] msgs = mailAccess.getMessageStorage().getMessages(fa.getFullname(), mailIds, new MailField[] { MailField.ID, MailField.RECEIVED_DATE});
+            if (null == msgs || msgs.length <= 0) {
+                return new AJAXRequestResult(Boolean.TRUE, "native");
+            }
+
+            Map<Integer, List<String>> map = new HashMap<Integer, List<String>>(4);
+            for (MailMessage mailMessage : msgs) {
+                Date receivedDate = mailMessage.getReceivedDate();
+                cal.setTime(receivedDate);
+                Integer year = Integer.valueOf(cal.get(Calendar.YEAR));
+                List<String> ids = map.get(year);
+                if (null == ids) {
+                    ids = new LinkedList<String>();
+                    map.put(year, ids);
+                }
+                ids.add(mailMessage.getMailId());
+            }
+
+            for (Map.Entry<Integer, List<String>> entry : map.entrySet() ) {
+                String sYear = entry.getKey().toString();
+                String fn = archiveFullname + separator + sYear;
+                if (!mailAccess.getFolderStorage().exists(fn)) {
+                    final MailFolderDescription toCreate = new MailFolderDescription();
+                    toCreate.setAccountId(accountId);
+                    toCreate.setParentAccountId(accountId);
+                    toCreate.setParentFullname(archiveFullname);
+                    toCreate.setExists(false);
+                    toCreate.setFullname(fn);
+                    toCreate.setName(sYear);
+                    toCreate.setSeparator(separator);
+                    {
+                        final DefaultMailPermission mp = new DefaultMailPermission();
+                        mp.setEntity(session.getUserId());
+                        final int p = MailPermission.ADMIN_PERMISSION;
+                        mp.setAllPermission(p, p, p, p);
+                        mp.setFolderAdmin(true);
+                        mp.setGroupPermission(false);
+                        toCreate.addPermission(mp);
+                    }
+                    mailAccess.getFolderStorage().createFolder(toCreate);
+                    CacheFolderStorage.getInstance().removeFromCache(archiveFullname, "0", true, session);
+                }
+
+                List<String> ids = entry.getValue();
+                mailAccess.getMessageStorage().moveMessages(fa.getFullname(), fn, ids.toArray(new String[ids.size()]), true);
+            }
+
             return new AJAXRequestResult(Boolean.TRUE, "native");
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());

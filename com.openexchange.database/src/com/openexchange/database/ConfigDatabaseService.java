@@ -76,6 +76,14 @@ public interface ConfigDatabaseService {
     Connection getWritable() throws OXException;
 
     /**
+     * Returns a writable connection to the config database. This connection will not have a
+     * connection timeout to support long running update tasks.
+     * @return a writable connection to the config database without a connection timeout.
+     * @throws OXException if no connection can be obtained.
+     */
+    Connection getForUpdateTask() throws OXException;
+
+    /**
      * Returns a read only connection to the config database to the pool.
      * @param con Connection to return.
      */
@@ -86,6 +94,13 @@ public interface ConfigDatabaseService {
      * @param con Connection to return.
      */
     void backWritable(Connection con);
+
+    /**
+     * Returns a writable connection to the config database to the pool. This method must be used if
+     * the connection is obtained with {@link #getForUpdateTask()}.
+     * @param con Writable connection to return.
+     */
+    void backForUpdateTask(Connection con);
 
     int[] listContexts(int poolId) throws OXException;
 

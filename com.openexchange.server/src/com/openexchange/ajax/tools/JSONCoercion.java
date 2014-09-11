@@ -56,6 +56,9 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -212,7 +215,28 @@ public class JSONCoercion {
             return jsonArray;
         }
 
-        return new JSONObject(2).put("tmp", value).get("tmp");
+        if (value instanceof String) {
+            return value.toString();
+        }
+        if (value instanceof Number) {
+            Number n = (Number) value;
+            if (n instanceof AtomicInteger) {
+                return Integer.valueOf(((AtomicInteger) n).get());
+            } else if (n instanceof AtomicLong) {
+                return Long.valueOf(((AtomicLong) n).get());
+            } else {
+                return n;
+            }
+        } else if (value instanceof byte[]) {
+            return (value);
+        } else if (value instanceof Boolean) {
+            return (value);
+        } else if (value instanceof AtomicBoolean) {
+            return Boolean.valueOf(((AtomicBoolean) value).get());
+        }
+
+        // As string as last resort
+        return value.toString();
     }
 
     /**
@@ -229,4 +253,5 @@ public class JSONCoercion {
         // return (null != object && object.getClass().isArray());
         return (null != object && '[' == object.getClass().getName().charAt(0));
     }
+
 }

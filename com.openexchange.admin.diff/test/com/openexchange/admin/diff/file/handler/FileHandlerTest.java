@@ -87,7 +87,7 @@ public class FileHandlerTest {
     }
 
     @Test
-    public void testReadConfFiles_noConfigurationFileProvider_doNothing() throws IOException {
+    public void testReadConfFiles_noConfigurationFileProvider_doNothing() throws IOException, TooManyFilesException {
         Mockito.doNothing().when(fileHandler).validateDirectory((File) Matchers.any());
 
         fileHandler.readConfFiles(new DiffResult(), rootFolder, isOriginal, null);
@@ -97,7 +97,7 @@ public class FileHandlerTest {
     }
 
     @Test
-    public void testReadConfFiles_configurationFileProvider_readAndAddFiles() throws IOException {
+    public void testReadConfFiles_configurationFileProvider_readAndAddFiles() throws IOException, TooManyFilesException {
         Mockito.doNothing().when(fileHandler).validateDirectory((File) Matchers.any());
 
         fileHandler.readConfFiles(new DiffResult(), rootFolder, isOriginal, configurationFileProvider);

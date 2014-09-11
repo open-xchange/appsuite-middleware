@@ -43,4 +43,5 @@ Export-Package: com.hazelcast.config,
  com.hazelcast.nio.serialization,
  com.hazelcast.query,
  com.hazelcast.queue,
- com.hazelcast.transaction
+ com.hazelcast.transaction,
+ com.hazelcast.util

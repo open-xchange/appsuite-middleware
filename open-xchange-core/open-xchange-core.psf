@@ -38,6 +38,9 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.crypto"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.data.conversion.ical.ical4j"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.database"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.database"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.database.migration"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.database.migration.clt"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.dataretention"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.datatypes.genericonf"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.datatypes.genericonf.storage"/>
@@ -152,6 +155,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.version"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.xml"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,javax.mail"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,liquibase.core"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.apache.felix.eventadmin.monitoring"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.apache.tika"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.ho.jyaml"/>

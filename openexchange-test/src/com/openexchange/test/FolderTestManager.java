@@ -183,9 +183,19 @@ public class FolderTestManager implements TestManager{
      * Deletes a folder via HTTP-API
      */
     public void deleteFolderOnServer(final FolderObject folderToDelete) throws OXException, IOException, SAXException, JSONException {
+        deleteFolderOnServer(folderToDelete, Boolean.FALSE);
+    }
+
+    /**
+     * Deletes a folder via HTTP-API
+     */
+    public void deleteFolderOnServer(final FolderObject folderToDelete, Boolean hardDelete) throws OXException, IOException, SAXException, JSONException {
         final DeleteRequest request = new DeleteRequest(EnumAPI.OX_OLD, folderToDelete);
+        request.setHardDelete(hardDelete);
         setLastResponse(client.execute(request));
-        removeFolderFromCleanupList(folderToDelete);
+        if (hardDelete) {
+            removeFolderFromCleanupList(folderToDelete);
+        }
     }
 
     /**
@@ -313,7 +323,7 @@ public class FolderTestManager implements TestManager{
         try {
             for (final FolderObject folder : deleteMe) {
                 folder.setLastModified(new Date(Long.MAX_VALUE));
-                deleteFolderOnServer(folder);
+                deleteFolderOnServer(folder, Boolean.TRUE);
             }
         } catch (final Exception e) {
             doExceptionHandling(e, "clean-up");

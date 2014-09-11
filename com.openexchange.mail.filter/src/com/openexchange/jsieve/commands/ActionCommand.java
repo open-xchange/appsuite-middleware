@@ -77,12 +77,22 @@ public class ActionCommand extends ControlOrActionCommand {
         DISCARD("discard", 0, new Hashtable<String, Integer>(), "discard", Collections.<String> emptyList()),
         REDIRECT("redirect", 1, new Hashtable<String, Integer>(), "redirect", Collections.<String> emptyList()),
         FILEINTO("fileinto", 1, new Hashtable<String, Integer>(), "move", Collections.singletonList("fileinto")),
+        ADDHEADER("addheader", 0, addheadertags(), "addheader", Collections.singletonList("editheader")),
         REJECT("reject", 1, new Hashtable<String, Integer>(), "reject", Collections.singletonList("reject")),
         STOP("stop", 0, new Hashtable<String, Integer>(), "stop", Collections.<String> emptyList()),
         VACATION("vacation", 1, vacationtags(), "vacation", Collections.singletonList("vacation")),
         ENOTIFY("notify", 1, enotifytags(), "notify", Collections.singletonList("enotify")),
         ADDFLAG("addflag", 1, new Hashtable<String, Integer>(), "addflags", java.util.Arrays.asList("imapflags", "imap4flags")),
         PGP_ENCRYPT("pgp_encrypt", 0, pgp_encrypt_tags(), "pgp", java.util.Arrays.asList("vnd.dovecot.pgp-encrypt"));
+
+        private static Hashtable<String, Integer> addheadertags() {
+            /*
+             * "addheader" [":last"] <field-name: string> <value: string>
+             */
+            final Hashtable<String, Integer> retval = new Hashtable<String, Integer>();
+            retval.put(":last", Integer.valueOf(2));
+            return retval;
+        }
 
         private static Hashtable<String, Integer> vacationtags() {
             final Hashtable<String, Integer> retval = new Hashtable<String, Integer>();

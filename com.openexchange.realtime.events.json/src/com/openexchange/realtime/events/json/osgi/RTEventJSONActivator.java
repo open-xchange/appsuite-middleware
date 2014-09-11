@@ -69,7 +69,6 @@ public class RTEventJSONActivator extends AJAXModuleActivator {
     @Override
     protected void startBundle() throws Exception {
         registerModule(new EventsActionFactory(this), "events");
-        
     }
 
 }

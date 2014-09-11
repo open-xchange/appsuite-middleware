@@ -174,6 +174,17 @@ public interface UnifiedInboxManagement {
      * <p>
      * The Unified Mail account is considered to be enabled if at least one account indicates its subscription to Unified Mail.
      *
+     * @param session The associated session
+     * @return <code>true</code> if the Unified Mail account is enabled for given user in specified context; otherwise <code>false</code>
+     * @throws OXException If checking Unified Mail account's enabled status fails
+     */
+    public boolean isEnabled(Session session) throws OXException;
+
+    /**
+     * Checks if the Unified Mail account is enabled for given user in specified context.
+     * <p>
+     * The Unified Mail account is considered to be enabled if at least one account indicates its subscription to Unified Mail.
+     *
      * @param userId The user ID
      * @param contextId The context ID
      * @return <code>true</code> if the Unified Mail account is enabled for given user in specified context; otherwise <code>false</code>

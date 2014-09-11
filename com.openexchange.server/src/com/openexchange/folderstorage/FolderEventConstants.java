@@ -144,4 +144,10 @@ public final class FolderEventConstants {
      */
     public static final String PROPERTY_DELIMITER = "com.openexchange.folderstorage.delimiter";
 
+    /**
+     * The path to the default folder in an array of folder IDs in their absolute/unique form, i.e. all containing the service/account
+     * information.
+     */
+    public static final String PROPERTY_FOLDER_PATH = "com.openexchange.folderstorage.folderPath";
+
 }

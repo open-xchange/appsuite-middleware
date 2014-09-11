@@ -473,6 +473,7 @@ public class SieveHandler {
         }
         boolean inQuote = false;
         boolean okStart = false;
+        boolean inComment = false;
         while (true) {
             int ch = bis_sieve.read();
             switch (ch) {
@@ -512,12 +513,26 @@ public class SieveHandler {
                 break;
             case 'K': // OK\r\n
                 {
-                    if (!inQuote && okStart) {
+                    if (!inQuote && okStart && !inComment) {
                         sb.setLength(sb.length() - 1);
                         consumeUntilCRLF(); // OK "Getscript completed."\r\n
                         return returnScript(sb);
                     }
                     okStart = false;
+                    sb.append((char) ch);
+                }
+                break;
+            case '#': 
+                {
+                    inComment = true;
+                    sb.append((char) ch);
+                }
+                break;
+            case '\n':
+                {
+                    if (inComment) {
+                        inComment = false;
+                    }
                     sb.append((char) ch);
                 }
                 break;
