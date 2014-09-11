@@ -1,3 +1,16 @@
+* 2014-09-11 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 34281: Facebook made access to permissions more restrictive since April 30th 2014. Removed these permissions, because they
+                      were unused.
+
+* 2014-09-11 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 34361: Case insensitive check for organizer.
+
+* 2014-09-11 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29269: Added support for "Time" types for task start- and end-dates along with "full_time" flag
+
 * 2014-09-10 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 34355: Use secured SAXBuilder in the replay WebDAV request 
