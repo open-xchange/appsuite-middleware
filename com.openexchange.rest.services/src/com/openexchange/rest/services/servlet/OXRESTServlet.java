@@ -58,6 +58,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.config.ConfigurationService;
@@ -115,8 +117,23 @@ public class OXRESTServlet extends HttpServlet implements Servlet {
         String authPassword = service.getProperty("com.openexchange.rest.services.basic-auth.password");
         if (!Strings.isEmpty(authLogin) && !Strings.isEmpty(authPassword)) {
             doBasicAuth = true;
-            this.authLogin = authLogin.trim();
-            this.authPassword = authPassword.trim();
+            authLogin = authLogin.trim();
+            this.authLogin = authLogin;
+            authPassword = authPassword.trim();
+            this.authPassword = authPassword;
+
+            Logger logger = null;
+            if ("open-xchange".equalsIgnoreCase(authLogin)) {
+                logger = LoggerFactory.getLogger(OXRESTServlet.class);
+                logger.warn("The value 'open-xchange' for 'com.openexchange.rest.services.basic-auth.login' has not been changed from its default. Please do so to secure access.");
+            }
+
+            if ("secret".equalsIgnoreCase(authLogin)) {
+                if (null == logger) {
+                    logger = LoggerFactory.getLogger(OXRESTServlet.class);
+                }
+                logger.warn("The value 'secret' for 'com.openexchange.rest.services.basic-auth.password' has not been changed from its default. Please do so to secure access.");
+            }
         }
     }
 
