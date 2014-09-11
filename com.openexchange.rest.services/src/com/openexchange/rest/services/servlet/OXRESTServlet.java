@@ -125,14 +125,16 @@ public class OXRESTServlet extends HttpServlet implements Servlet {
             Logger logger = null;
             if ("open-xchange".equalsIgnoreCase(authLogin)) {
                 logger = LoggerFactory.getLogger(OXRESTServlet.class);
-                logger.warn("The value 'open-xchange' for 'com.openexchange.rest.services.basic-auth.login' has not been changed from its default. Please do so to secure access.");
+                String lf = Strings.getLineSeparator();
+                logger.warn("{}{}The value 'open-xchange' for 'com.openexchange.rest.services.basic-auth.login' has not been changed from its default. Please do so to secure access.{}", lf, lf, lf);
             }
 
             if ("secret".equalsIgnoreCase(authLogin)) {
                 if (null == logger) {
                     logger = LoggerFactory.getLogger(OXRESTServlet.class);
                 }
-                logger.warn("The value 'secret' for 'com.openexchange.rest.services.basic-auth.password' has not been changed from its default. Please do so to secure access.");
+                String lf = Strings.getLineSeparator();
+                logger.warn("{}{}The value 'secret' for 'com.openexchange.rest.services.basic-auth.password' has not been changed from its default. Please do so to secure access.{}", lf, lf, lf);
             }
         }
     }
