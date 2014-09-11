@@ -86,6 +86,7 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
@@ -171,8 +172,11 @@ public class AutoLogin extends AbstractLoginRequestHandler {
                             throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
                         }
 
+                        // Trigger client-specific ramp-up
+                        Future<JSONObject> optRampUp = rampUpAsync(ServerSessionAdapter.valueOf(session), req);
+
                         // Request modules
-                        final Future<Object> optModules = getModulesAsync(session, req);
+                        Future<Object> optModules = getModulesAsync(session, req);
 
                         // Create JSON object
                         final JSONObject json = new JSONObject(8);
@@ -196,7 +200,23 @@ public class AutoLogin extends AbstractLoginRequestHandler {
                             }
                         }
 
-                        performRampUp(req, json, ServerSessionAdapter.valueOf(session));
+                        // Await client-specific ramp-up and add to JSON object
+                        if (null != optRampUp) {
+                            try {
+                                JSONObject jsonObject = optRampUp.get();
+                                for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
+                                    json.put(entry.getKey(), entry.getValue());
+                                }
+                            } catch (InterruptedException e) {
+                                // Keep interrupted state
+                                Thread.currentThread().interrupt();
+                                throw LoginExceptionCodes.UNKNOWN.create(e, "Thread interrupted.");
+                            } catch (ExecutionException e) {
+                                // Cannot occur
+                                final Throwable cause = e.getCause();
+                                LOG.warn("Ramp-up information could not be added to login JSON response", cause);
+                            }
+                        }
 
                         // Set data
                         response.setData(json);
@@ -308,4 +328,5 @@ public class AutoLogin extends AbstractLoginRequestHandler {
             req.getServerPort(),
             httpSessionId);
     }
+
 }
