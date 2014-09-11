@@ -1,3 +1,7 @@
+* 2014-09-10 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 34355: Use secured SAXBuilder in the replay WebDAV request 
+
 * 2014-09-09 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 34325: Don't try to query distributed map statistics if no owners for all configured partition replicas detected

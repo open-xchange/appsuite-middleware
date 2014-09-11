@@ -70,8 +70,6 @@ public abstract class AbstractDropboxAccess {
     protected final DropboxOAuthAccess dropboxOAuthAccess;
     protected final Session session;
     protected final FileStorageAccount account;
-    protected final long dropboxUserId;
-    protected final String dropboxUserName;
     protected final DropboxAPI<WebAuthSession> dropboxAPI;
 
     /**
@@ -83,18 +81,7 @@ public abstract class AbstractDropboxAccess {
         this.account = account;
         this.session = session;
         // Other fields
-        this.dropboxUserId = dropboxOAuthAccess.getDropboxUserId();
-        this.dropboxUserName = dropboxOAuthAccess.getDropboxUserName();
         this.dropboxAPI = dropboxOAuthAccess.getDropboxAPI();
-    }
-
-    /**
-     * Gets the user name
-     *
-     * @return The user name
-     */
-    public String getDropboxUserName() {
-        return dropboxUserName;
     }
 
     /**

@@ -1323,89 +1323,84 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
         final Lock lock = readLockFor(treeId, storageParameters);
         acquire(lock);
         try {
-            final Folder parent = getFolder(treeId, parentId, storageParameters);
-            final String[] subfolders = ROOT_ID.equals(parentId) ? null : parent.getSubfolderIDs();
-            final SortableId[] ret;
-            if (null == subfolders) {
-                /*
-                 * Get needed storages
-                 */
-                final FolderStorage[] neededStorages = registry.getFolderStoragesForParent(treeId, parentId);
-                if (0 == neededStorages.length) {
-                    return new SortableId[0];
-                }
-                try {
-                    final java.util.List<SortableId> allSubfolderIds;
-                    if (1 == neededStorages.length) {
-                        final FolderStorage neededStorage = neededStorages[0];
-                        boolean started = neededStorage.startTransaction(storageParameters, false);
-                        try {
-                            allSubfolderIds = Arrays.asList(neededStorage.getSubfolders(treeId, parentId, storageParameters));
-                            if (started) {
-                                neededStorage.commitTransaction(storageParameters);
-                                started = false;
-                            }
-                        } finally {
-                            if (started) {
-                                neededStorage.rollback(storageParameters);
-                            }
-                        }
-                    } else {
-                        allSubfolderIds = new ArrayList<SortableId>(neededStorages.length * 8);
-                        final CompletionService<java.util.List<SortableId>> completionService =
-                            new ThreadPoolCompletionService<java.util.List<SortableId>>(ThreadPools.getThreadPool()).setTrackable(true);
-                        /*
-                         * Get all visible subfolders from each storage
-                         */
-                        for (final FolderStorage neededStorage : neededStorages) {
-                            completionService.submit(new TrackableCallable<java.util.List<SortableId>>() {
-
-                                @Override
-                                public java.util.List<SortableId> call() throws Exception {
-                                    final StorageParameters newParameters = newStorageParameters(storageParameters);
-                                    boolean started = neededStorage.startTransaction(newParameters, false);
-                                    try {
-                                        final java.util.List<SortableId> l =
-                                            Arrays.asList(neededStorage.getSubfolders(treeId, parentId, newParameters));
-                                        if (started) {
-                                            neededStorage.commitTransaction(newParameters);
-                                            started = false;
-                                        }
-                                        return l;
-                                    } finally {
-                                        if (started) {
-                                            neededStorage.rollback(newParameters);
-                                        }
-                                    }
-                                }
-                            });
-                        }
-                        /*
-                         * Wait for completion
-                         */
-                        final List<List<SortableId>> results =
-                            ThreadPools.takeCompletionService(completionService, neededStorages.length, FACTORY);
-                        for (final List<SortableId> result : results) {
-                            allSubfolderIds.addAll(result);
-                        }
-                    }
-                    /*
-                     * Sort them
-                     */
-                    Collections.sort(allSubfolderIds);
-                    ret = allSubfolderIds.toArray(new SortableId[allSubfolderIds.size()]);
-                } catch (final OXException e) {
-                    throw e;
-                } catch (final Exception e) {
-                    throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
-                }
-            } else {
-                ret = new SortableId[subfolders.length];
+            Folder parent = getFolder(treeId, parentId, storageParameters);
+            String[] subfolders = ROOT_ID.equals(parentId) ? null : parent.getSubfolderIDs();
+            if (null != subfolders) {
+                SortableId[] ret = new SortableId[subfolders.length];
                 for (int i = 0; i < ret.length; i++) {
                     ret[i] = new CacheSortableId(subfolders[i], i, null);
                 }
+                return ret;
             }
-            return ret;
+
+            // Get needed storages
+            FolderStorage[] neededStorages = registry.getFolderStoragesForParent(treeId, parentId);
+            if (0 == neededStorages.length) {
+                return new SortableId[0];
+            }
+
+            try {
+                java.util.List<SortableId> allSubfolderIds;
+                if (1 == neededStorages.length) {
+                    FolderStorage neededStorage = neededStorages[0];
+                    boolean started = neededStorage.startTransaction(storageParameters, false);
+                    try {
+                        allSubfolderIds = Arrays.asList(neededStorage.getSubfolders(treeId, parentId, storageParameters));
+                        if (started) {
+                            neededStorage.commitTransaction(storageParameters);
+                            started = false;
+                        }
+                    } finally {
+                        if (started) {
+                            neededStorage.rollback(storageParameters);
+                        }
+                    }
+                } else {
+                    allSubfolderIds = new ArrayList<SortableId>(neededStorages.length * 8);
+                    CompletionService<java.util.List<SortableId>> completionService = new ThreadPoolCompletionService<java.util.List<SortableId>>(ThreadPools.getThreadPool()).setTrackable(true);
+                    /*
+                     * Get all visible subfolders from each storage
+                     */
+                    for (final FolderStorage neededStorage : neededStorages) {
+                        completionService.submit(new TrackableCallable<java.util.List<SortableId>>() {
+
+                            @Override
+                            public java.util.List<SortableId> call() throws Exception {
+                                StorageParameters newParameters = newStorageParameters(storageParameters);
+                                boolean started = neededStorage.startTransaction(newParameters, false);
+                                try {
+                                    java.util.List<SortableId> l = Arrays.asList(neededStorage.getSubfolders(treeId, parentId, newParameters));
+                                    if (started) {
+                                        neededStorage.commitTransaction(newParameters);
+                                        started = false;
+                                    }
+                                    return l;
+                                } finally {
+                                    if (started) {
+                                        neededStorage.rollback(newParameters);
+                                    }
+                                }
+                            }
+                        });
+                    }
+                    /*
+                     * Wait for completion
+                     */
+                    List<List<SortableId>> results = ThreadPools.takeCompletionService(completionService, neededStorages.length, FACTORY);
+                    for (List<SortableId> result : results) {
+                        allSubfolderIds.addAll(result);
+                    }
+                }
+                /*
+                 * Sort them
+                 */
+                Collections.sort(allSubfolderIds);
+                return allSubfolderIds.toArray(new SortableId[allSubfolderIds.size()]);
+            } catch (final OXException e) {
+                throw e;
+            } catch (final Exception e) {
+                throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
         } finally {
             lock.unlock();
         }

@@ -70,21 +70,16 @@ import com.openexchange.management.ManagementService;
  */
 public class ManagementServiceTracker implements ServiceTrackerCustomizer<ManagementService, ManagementService> {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManagementServiceTracker.class);
-
     private final BundleContext context;
 
     private ObjectName objectName;
 
-    private DatabaseService databaseService;
+    private final DatabaseService databaseService;
 
-    private DBMigrationExecutorServiceImpl dbMigrationExecutorService;
+    private final DBMigrationExecutorServiceImpl dbMigrationExecutorService;
 
     /**
      * Initializes a new {@link ManagementServiceTracker}.
-     *
-     * @param context
-     * @param databaseService
      */
     public ManagementServiceTracker(final BundleContext context, DBMigrationExecutorServiceImpl dbMigrationExecutorService, DatabaseService databaseService) {
         super();
@@ -130,11 +125,11 @@ public class ManagementServiceTracker implements ServiceTrackerCustomizer<Manage
                     dbMigrationExecutorService,
                     databaseService));
             } catch (final MalformedObjectNameException e) {
-                LOG.error("", e);
+                org.slf4j.LoggerFactory.getLogger(ManagementServiceTracker.class).error("", e);
             } catch (final OXException e) {
-                LOG.error("", e);
+                org.slf4j.LoggerFactory.getLogger(ManagementServiceTracker.class).error("", e);
             } catch (final Exception e) {
-                LOG.error("", e);
+                org.slf4j.LoggerFactory.getLogger(ManagementServiceTracker.class).error("", e);
             }
         }
     }
@@ -144,7 +139,7 @@ public class ManagementServiceTracker implements ServiceTrackerCustomizer<Manage
             try {
                 management.unregisterMBean(objectName);
             } catch (final OXException e) {
-                LOG.error("", e);
+                org.slf4j.LoggerFactory.getLogger(ManagementServiceTracker.class).error("", e);
             } finally {
                 objectName = null;
             }

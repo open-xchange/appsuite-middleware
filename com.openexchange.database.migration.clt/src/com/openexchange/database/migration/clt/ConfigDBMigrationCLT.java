@@ -51,7 +51,6 @@ package com.openexchange.database.migration.clt;
 
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
-import javax.management.MBeanServerInvocationHandler;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
@@ -147,11 +146,7 @@ public class ConfigDBMigrationCLT extends AbstractMBeanCLI<Void> {
      */
     @Override
     protected Void invoke(Options options, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        ConfigDBMigrationMBean migrationMBean = MBeanServerInvocationHandler.newProxyInstance(
-            mbsc,
-            getObjectName(ConfigDBMigrationMBean.class.getName(), ConfigDBMigrationMBean.DOMAIN),
-            ConfigDBMigrationMBean.class,
-            false);
+        ConfigDBMigrationMBean migrationMBean = getMBean(mbsc, ConfigDBMigrationMBean.class, ConfigDBMigrationMBean.DOMAIN);
 
         if (cmd.hasOption(OPT_RUN_SHORT)) {
             migrationMBean.forceMigration();
