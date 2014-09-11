@@ -3709,9 +3709,13 @@ public class CalendarMySQL implements CalendarSqlImp {
                                         pu.setInt(3, cdao.getActionFolder());
                                         mup.setPersonalFolderId(cdao.getActionFolder());
                                     }
-                                } else {
+                                } else if (cdao.getSharedFolderOwner() == mup.getIdentifier()){
                                     pu.setInt(3, cdao.getGlobalFolderID());
                                     mup.setPersonalFolderId(cdao.getGlobalFolderID());
+                                } else {
+                                    int pfid = access.getDefaultFolder(mup.getIdentifier(), FolderObject.CALENDAR).getObjectID();
+                                    pu.setInt(3, pfid);
+                                    mup.setPersonalFolderId(pfid);
                                 }
                             } else {
                                 pu.setInt(3, mup.getPersonalFolderId());
