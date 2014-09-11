@@ -318,8 +318,19 @@ public abstract class CalendarWriter extends CommonWriter {
         }
     };
 
+    protected static final FieldWriter<CalendarObject> FULL_TIME_WRITER = new FieldWriter<CalendarObject>() {
+        @Override
+        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONArray json, Session session) {
+            writeValue(obj.getFullTime(), json, obj.containsFullTime());
+        }
+        @Override
+        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONObject json, Session session) throws JSONException {
+            writeParameter(CalendarFields.FULL_TIME, obj.getFullTime(), json, obj.containsFullTime());
+        }
+    };
+
     static {
-        final TIntObjectHashMap<FieldWriter<CalendarObject>> m = new TIntObjectHashMap<FieldWriter<CalendarObject>>(1, 1);
+        final TIntObjectHashMap<FieldWriter<CalendarObject>> m = new TIntObjectHashMap<FieldWriter<CalendarObject>>(8, 1);
         m.put(CalendarObject.CONFIRMATIONS, CONFIRMATIONS_WRITER);
         m.put(CalendarObject.ORGANIZER, ORGANIZER_WRITER);
         m.put(CommonObject.UID, UID_WRITER);
@@ -327,6 +338,7 @@ public abstract class CalendarWriter extends CommonWriter {
         m.put(CalendarObject.ORGANIZER_ID, ORGANIZER_ID_WRITER);
         m.put(CalendarObject.PRINCIPAL, PRINCIPAL_WRITER);
         m.put(CalendarObject.PRINCIPAL_ID, PRINCIPAL_ID_WRITER);
+        m.put(CalendarObject.FULL_TIME, FULL_TIME_WRITER);
         WRITER_MAP = m;
     }
 

@@ -1233,6 +1233,45 @@ public final class Mapping {
             public void set(final Task task, final Integer value) {
                 task.setNumberOfAttachments(value.intValue());
             }
+        },
+        new Mapper<Boolean>() {
+            @Override
+            public int getId() {
+                return CalendarObject.FULL_TIME;
+            }
+            @Override
+            public boolean isSet(Task task) {
+                return task.containsFullTime();
+            }
+            @Override
+            public String getDBColumnName() {
+                return "full_time";
+            }
+            @Override
+            public String getDisplayName() {
+                throw new UnsupportedOperationException();
+            }
+            @Override
+            public void toDB(PreparedStatement stmt, int pos, Task task) throws SQLException {
+                stmt.setBoolean(pos, task.getFullTime());
+            }
+            @Override
+            public void fromDB(ResultSet result, int pos, Task task) throws SQLException {
+                // NOT NULL constraint
+                task.setFullTime(result.getBoolean(pos));
+            }
+            @Override
+            public boolean equals(Task task1, Task task2) {
+                return task1.getFullTime() == task2.getFullTime();
+            }
+            @Override
+            public Boolean get(Task task) {
+                return Boolean.valueOf(task.getFullTime());
+            }
+            @Override
+            public void set(Task task, Boolean value) {
+                task.setFullTime(value.booleanValue());
+            }
         }
     };
 

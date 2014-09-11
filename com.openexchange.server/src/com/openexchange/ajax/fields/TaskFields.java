@@ -81,4 +81,8 @@ public final class TaskFields implements CalendarFields {
 
     public static final String DATE_COMPLETED = "date_completed";
 
+    public static final String START_TIME = "start_time";
+
+    public static final String END_TIME = "end_time";
+
 }

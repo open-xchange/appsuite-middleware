@@ -90,6 +90,7 @@ public final class TaskTestSuite {
         tests.addTestSuite(ListAliasTest.class);
         tests.addTestSuite(TaskDurationAndCostsTest.class);
         tests.addTestSuite(DeleteMultipleTaskTest.class);
+        tests.addTest(new JUnit4TestAdapter(DateTimeTest.class));
 
         // Nodes
         tests.addTestSuite(LastModifiedUTCTest.class);

@@ -108,4 +108,7 @@ public interface CalendarFields extends CommonFields {
     public static final String PRINCIPAL_ID = "principalId";
 
     public static final String SEQUENCE = "sequence";
+
+    static final String FULL_TIME = "full_time";
+
 }

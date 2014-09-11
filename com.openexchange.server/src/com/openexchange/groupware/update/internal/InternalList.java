@@ -749,6 +749,9 @@ public final class InternalList {
         // Check if foreign keys in date tables are dropped and drop them if necessary
         list.add(new com.openexchange.groupware.update.tasks.CheckAndDropDateExternalForeignKeysUpdateTask());
 
+        // Adds the 'full_time' column to the tasks tables
+        list.add(new com.openexchange.groupware.update.tasks.TasksAddFulltimeColumnTask());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 }

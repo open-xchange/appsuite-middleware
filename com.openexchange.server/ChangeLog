@@ -1,3 +1,7 @@
+* 2014-09-11 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29269: Added support for "Time" types for task start- and end-dates along with "full_time" flag
+
 * 2014-09-10 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 34355: Use secured SAXBuilder in the replay WebDAV request 
