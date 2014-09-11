@@ -1917,7 +1917,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
         String mail;
         mail = UserStorage.getInstance().getUser(user, cal.getContext()).getMail();
-        if (cal.getOrganizer() != null && cal.getOrganizer().equals(mail)) {
+        if (cal.getOrganizer() != null && cal.getOrganizer().equalsIgnoreCase(mail)) {
             return true;
         }
 
