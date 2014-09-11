@@ -58,8 +58,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.config.ConfigurationService;
@@ -84,6 +82,8 @@ public class OXRESTServlet extends HttpServlet implements Servlet {
 
     private static final long serialVersionUID = -1956702653546932381L;
 
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OXRESTServlet.class);
+
     private static final String PREFIX = "/preliminary";
 
     /**
@@ -93,7 +93,7 @@ public class OXRESTServlet extends HttpServlet implements Servlet {
 
     // ---------------------------------------------------------------------------------------------------------------------------------------------- //
 
-    private volatile boolean doBasicAuth;
+    private volatile boolean doFail;
     private volatile String authLogin;
     private volatile String authPassword;
 
@@ -115,27 +115,14 @@ public class OXRESTServlet extends HttpServlet implements Servlet {
 
         String authLogin = service.getProperty("com.openexchange.rest.services.basic-auth.login");
         String authPassword = service.getProperty("com.openexchange.rest.services.basic-auth.password");
-        if (!Strings.isEmpty(authLogin) && !Strings.isEmpty(authPassword)) {
-            doBasicAuth = true;
-            authLogin = authLogin.trim();
-            this.authLogin = authLogin;
-            authPassword = authPassword.trim();
-            this.authPassword = authPassword;
-
-            Logger logger = null;
-            if ("open-xchange".equalsIgnoreCase(authLogin)) {
-                logger = LoggerFactory.getLogger(OXRESTServlet.class);
-                String lf = Strings.getLineSeparator();
-                logger.warn("{}{}The value 'open-xchange' for 'com.openexchange.rest.services.basic-auth.login' has not been changed from its default. Please do so to secure access.{}", lf, lf, lf);
-            }
-
-            if ("secret".equalsIgnoreCase(authPassword)) {
-                if (null == logger) {
-                    logger = LoggerFactory.getLogger(OXRESTServlet.class);
-                }
-                String lf = Strings.getLineSeparator();
-                logger.warn("{}{}The value 'secret' for 'com.openexchange.rest.services.basic-auth.password' has not been changed from its default. Please do so to secure access.{}", lf, lf, lf);
-            }
+        if (Strings.isEmpty(authLogin) || Strings.isEmpty(authPassword)) {
+            doFail = true;
+            this.authLogin = null;
+            this.authPassword = null;
+        } else {
+            doFail = false;
+            this.authLogin = authLogin.trim();
+            this.authPassword = authPassword.trim();
         }
     }
 
@@ -156,8 +143,9 @@ public class OXRESTServlet extends HttpServlet implements Servlet {
     }
 
     private boolean authenticated(HttpServletRequest req) {
-        if (false == doBasicAuth) {
-            return true;
+        if (doFail) {
+            LOGGER.error("Denied incoming HTTP request to REST interface due to unset Basic-Auth configuration. Please set properties 'com.openexchange.rest.services.basic-auth.login' annd 'com.openexchange.rest.services.basic-auth.password' appropriately.", new Throwable("Denied request to REST interface"));
+            return false;
         }
 
         final String auth = req.getHeader("authorization");
