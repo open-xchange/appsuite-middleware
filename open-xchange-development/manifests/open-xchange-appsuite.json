@@ -299,6 +299,11 @@
     },
     {
         "namespace": "portal",
+        "requires": "oauth xing",
+        "path": "plugins/portal/xing/register"
+    },
+    {
+        "namespace": "portal",
         "path": "plugins/portal/flickr/register"
     },
     {
