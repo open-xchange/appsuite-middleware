@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
@@ -90,6 +91,21 @@ public abstract class AbstractTaskRequest<T extends AbstractAJAXResponse> implem
     }
 
     protected JSONObject convert(Task task, TimeZone timeZone) throws JSONException {
+        JSONObject json = convertCommon(task, timeZone);
+        json.remove(TaskFields.START_TIME);
+        json.remove(TaskFields.END_TIME);
+        json.remove(CalendarFields.FULL_TIME);
+        return json;
+    }
+
+    protected JSONObject convertNew(Task task, TimeZone timeZone) throws JSONException {
+        JSONObject json = convertCommon(task, timeZone);
+        json.remove(TaskFields.START_DATE);
+        json.remove(TaskFields.END_DATE);
+        return json;
+    }
+
+    private JSONObject convertCommon(Task task, TimeZone timeZone) throws JSONException {
         JSONObject retval = new JSONObject();
         new TaskWriter(timeZone).writeTask(task, retval);
         // Add explicit values for start and end date if they are set and null

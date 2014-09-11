@@ -53,6 +53,8 @@ import java.util.Locale;
 import java.util.TimeZone;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.fields.CalendarFields;
+import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.parser.TaskParser;
 import com.openexchange.exception.OXException;
@@ -63,8 +65,6 @@ import com.openexchange.groupware.tasks.Task;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class GetResponse extends AbstractAJAXResponse {
-
-    private Task task;
 
     /**
      * @param response
@@ -78,18 +78,33 @@ public class GetResponse extends AbstractAJAXResponse {
      * @throws OXException parsing the task out of the response fails.
      */
     public Task getTask(final TimeZone timeZone) throws OXException {
-        if (null == task) {
-            final Task parsed = new Task();
-            new TaskParser(true, timeZone).parse(parsed, (JSONObject) getData(), Locale.ENGLISH);
-            this.task = parsed;
-        }
-        return task;
+        return getTask(timeZone, true);
     }
 
     /**
-     * @param task the task to set
+     * Parses the task from the response.
+     *
+     * @param timeZone The client timezone
+     * @param useLegacyDates <code>true</code> to convert the start- and end-date in legacy mode with <code>Date</code>-types,
+     *                       <code>false</code> to write start- and end-time properties along with the full-time flag
+     * @return The task
+     * @throws OXException
      */
-    public void setTask(final Task task) {
-        this.task = task;
+    public Task getTask(final TimeZone timeZone, boolean useLegacyDates) throws OXException {
+        JSONObject json = (JSONObject) getData();
+        if (useLegacyDates) {
+            json = new JSONObject(json);
+            json.remove(CalendarFields.FULL_TIME);
+            json.remove(TaskFields.START_TIME);
+            json.remove(TaskFields.END_TIME);
+        }
+        return parseTask(json, timeZone);
     }
+
+    private Task parseTask(JSONObject json, TimeZone timeZone) throws OXException {
+        Task task = new Task();
+        new TaskParser(true, timeZone).parse(task, json, Locale.ENGLISH);
+        return task;
+    }
+
 }

@@ -74,6 +74,8 @@ public class UpdateRequest extends AbstractTaskRequest<UpdateResponse> {
 
     private final boolean failOnError;
 
+    private final boolean useLegacyDates;
+
     /**
      * Constructor if the task should not be moved.
      * @param task Task object with updated attributes. This task must contain
@@ -86,6 +88,19 @@ public class UpdateRequest extends AbstractTaskRequest<UpdateResponse> {
 
     public UpdateRequest(final Task task, final TimeZone timeZone, boolean failOnError) {
         this(task.getParentFolderID(), true, task, timeZone, failOnError);
+    }
+
+    /**
+     * Initializes a new {@link UpdateRequest} to update a task without changing the folder.
+     *
+     * @param task The task to update
+     * @param timeZone The timezone to use
+     * @param failOnError <code>true</code> to fail on errors, <code>false</code>, otherwise
+     * @param useLegacyDates <code>true</code> to convert the start- and end-date in legacy mode with <code>Date</code>-types,
+     *                       <code>false</code> to write start- and end-time properties along with the full-time flag
+     */
+    public UpdateRequest(final Task task, final TimeZone timeZone, boolean failOnError, boolean useLegacyDates) {
+        this(task.getParentFolderID(), true, task, timeZone, failOnError, useLegacyDates);
     }
 
     /**
@@ -113,17 +128,23 @@ public class UpdateRequest extends AbstractTaskRequest<UpdateResponse> {
 
     private UpdateRequest(final int folderId, final boolean removeFolderId,
         final Task task, final TimeZone timeZone, boolean failOnError) {
+        this(folderId, removeFolderId, task, timeZone, failOnError, true);
+    }
+
+    private UpdateRequest(final int folderId, final boolean removeFolderId,
+        final Task task, final TimeZone timeZone, boolean failOnError, boolean useLegacyDates) {
         super();
         this.folderId = folderId;
         this.removeFolderId = removeFolderId;
         this.task = task;
         this.timeZone = timeZone;
         this.failOnError = failOnError;
+        this.useLegacyDates = useLegacyDates;
     }
 
     @Override
     public JSONObject getBody() throws JSONException {
-        final JSONObject json = convert(task, timeZone);
+        final JSONObject json = useLegacyDates ? convert(task, timeZone) : convertNew(task, timeZone);
         if (removeFolderId) {
             json.remove(TaskFields.FOLDER_ID);
         }

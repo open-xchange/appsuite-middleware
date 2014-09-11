@@ -67,13 +67,29 @@ public class InsertRequest extends AbstractTaskRequest<InsertResponse> {
     private final TimeZone timeZone;
     private final boolean timeZoneParam;
     private final boolean failOnError;
+    private final boolean useLegacyDates;
 
-    public InsertRequest(Task task, TimeZone timeZone, boolean timeZoneParam, boolean failOnError) {
+    /**
+     * Initializes a new {@link InsertRequest}.
+     *
+     * @param task The task to insert
+     * @param timeZone The timezone to use
+     * @param timeZoneParam <code>true</code> to add the timezone as request parameter, <code>false</code>, otherwise
+     * @param failOnError <code>true</code> to fail on errors, <code>false</code>, otherwise
+     * @param useLegacyDates <code>true</code> to convert the start- and end-date in legacy mode with <code>Date</code>-types,
+     *                       <code>false</code> to write start- and end-time properties along with the full-time flag
+     */
+    public InsertRequest(Task task, TimeZone timeZone, boolean timeZoneParam, boolean failOnError, boolean useLegacyDates) {
         super();
         this.task = task;
         this.timeZone = timeZone;
         this.timeZoneParam = timeZoneParam;
         this.failOnError = failOnError;
+        this.useLegacyDates = useLegacyDates;
+    }
+
+    public InsertRequest(Task task, TimeZone timeZone, boolean timeZoneParam, boolean failOnError) {
+        this(task, timeZone, timeZoneParam, failOnError, true);
     }
 
     public InsertRequest(Task task, TimeZone timeZone, boolean failOnError) {
@@ -86,7 +102,7 @@ public class InsertRequest extends AbstractTaskRequest<InsertResponse> {
 
     @Override
     public JSONObject getBody() throws JSONException {
-        return convert(task, timeZone);
+        return useLegacyDates ? convert(task, timeZone) : convertNew(task, timeZone);
     }
 
     @Override

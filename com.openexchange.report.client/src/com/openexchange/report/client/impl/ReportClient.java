@@ -79,7 +79,7 @@ import com.openexchange.tools.console.TableWriter.ColumnFormat.Align;
 
 public class ReportClient extends AbstractJMXTools {
 
-    private static final String NO_REPORT_FOUND_MSG = "No report found. Please generate a report first by using parameter -e or -x or having a look into the CLT help (-h)!";
+    protected static final String NO_REPORT_FOUND_MSG = "No report found. Please generate a report first by using parameter -e or -x or having a look into the CLT help (-h)!";
 
     private static final char OPT_SEND_ONLY_SHORT = 's';
 
@@ -500,7 +500,7 @@ public class ReportClient extends AbstractJMXTools {
         return null;
     }
 
-    private void getASReport(Object reportType, ReportMode mode, boolean savereport, MBeanServerConnection server) {
+    protected void getASReport(Object reportType, ReportMode mode, boolean savereport, MBeanServerConnection server) {
         if (reportType == null) {
             reportType = "default";
         }
@@ -513,7 +513,7 @@ public class ReportClient extends AbstractJMXTools {
 
             if (report == null) {
                 System.out.println(NO_REPORT_FOUND_MSG);
-                System.exit(0);
+                return;
             }
             System.out.println("");
             switch (mode) {

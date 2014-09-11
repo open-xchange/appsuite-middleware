@@ -1,6 +1,6 @@
 /*
- *
  *    OPEN-XCHANGE legal information
+ *
  *
  *    All intellectual property rights in the Software are protected by
  *    international copyright laws.
@@ -47,42 +47,29 @@
  *
  */
 
-package com.openexchange.ajax.fields;
+package com.openexchange.report.client;
 
-public final class TaskFields implements CalendarFields {
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.report.client.impl.ReportClientTest;
 
-    public static final String STATUS = "status";
+/**
+ * Unit tests for the project com.openexchange.report.client
+ *
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.6.1
+ */
+@RunWith(Suite.class)
+@SuiteClasses({
+ ReportClientTest.class
+})
+public class UnitTests {
 
-    public static final String PERCENT_COMPLETED = "percent_completed";
-
-    public static final String ACTUAL_COSTS = "actual_costs";
-
-    public static final String ACTUAL_DURATION = "actual_duration";
-
-    public static final String AFTER_COMPLETE = "after_complete";
-
-    public static final String BILLING_INFORMATION = "billing_information";
-
-    public static final String PROJECT_ID = "project_id";
-
-    public static final String TARGET_COSTS = "target_costs";
-
-    public static final String TARGET_DURATION = "target_duration";
-
-    public static final String PRIORITY = "priority";
-
-    public static final String DURATION_TYPE = "duration_type";
-
-    public static final String CURRENCY = "currency";
-
-    public static final String TRIP_METER = "trip_meter";
-
-    public static final String COMPANIES = "companies";
-
-    public static final String DATE_COMPLETED = "date_completed";
-
-    public static final String START_TIME = "start_time";
-
-    public static final String END_TIME = "end_time";
-
+    /**
+     * Initializes a new {@link UnitTests}.
+     */
+    public UnitTests() {
+        super();
+    }
 }

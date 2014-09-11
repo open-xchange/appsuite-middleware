@@ -47,42 +47,55 @@
  *
  */
 
-package com.openexchange.ajax.fields;
+package com.openexchange.report.client.impl;
 
-public final class TaskFields implements CalendarFields {
+import static org.junit.Assert.assertEquals;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import javax.management.MBeanServerConnection;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import com.openexchange.report.client.impl.ReportClient.ReportMode;
 
-    public static final String STATUS = "status";
 
-    public static final String PERCENT_COMPLETED = "percent_completed";
+/**
+ * {@link ReportClientTest}
+ *
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.6.1
+ */
+public class ReportClientTest {
 
-    public static final String ACTUAL_COSTS = "actual_costs";
+    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
 
-    public static final String ACTUAL_DURATION = "actual_duration";
+    @InjectMocks
+    private ReportClient reportClient;
 
-    public static final String AFTER_COMPLETE = "after_complete";
+    @Mock
+    private MBeanServerConnection serverConnection;
 
-    public static final String BILLING_INFORMATION = "billing_information";
+    /**
+     * @throws java.lang.Exception
+     */
+    @Before
+    public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
 
-    public static final String PROJECT_ID = "project_id";
+        System.setOut(new PrintStream(outContent));
+    }
 
-    public static final String TARGET_COSTS = "target_costs";
+    @After
+    public void cleanUpStreams() {
+        System.setOut(null);
+    }
 
-    public static final String TARGET_DURATION = "target_duration";
-
-    public static final String PRIORITY = "priority";
-
-    public static final String DURATION_TYPE = "duration_type";
-
-    public static final String CURRENCY = "currency";
-
-    public static final String TRIP_METER = "trip_meter";
-
-    public static final String COMPANIES = "companies";
-
-    public static final String DATE_COMPLETED = "date_completed";
-
-    public static final String START_TIME = "start_time";
-
-    public static final String END_TIME = "end_time";
-
+    @Test
+    public void testGetASReport_noReportFound_outputHint() {
+        reportClient.getASReport(null, ReportMode.NONE, false, serverConnection);
+        assertEquals(ReportClient.NO_REPORT_FOUND_MSG.trim(), outContent.toString().trim());
+    }
 }

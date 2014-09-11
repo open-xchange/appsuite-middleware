@@ -84,14 +84,18 @@ public class Task extends CalendarObject {
     public static final int TRIP_METER = 313;
     public static final int COMPANIES = 314;
     public static final int DATE_COMPLETED = 315;
+    public static final int START_TIME = 316;
+    public static final int END_TIME = 317;
 
     public static final int[] ALL_COLUMNS = {
         // From Task itself
         STATUS, PERCENT_COMPLETED, ACTUAL_COSTS, ACTUAL_DURATION, BILLING_INFORMATION, TARGET_COSTS, TARGET_DURATION, PRIORITY, CURRENCY,
         TRIP_METER, COMPANIES, DATE_COMPLETED,
+        // already covered by START_DATE: START_TIME,
+        // already covered by END_DATE: END_TIME,
 
         // From CalendarObject
-        TITLE, START_DATE, END_DATE, NOTE, ALARM, RECURRENCE_TYPE, DAYS, DAY_IN_MONTH, MONTH, INTERVAL, UNTIL, PARTICIPANTS, UID,
+        TITLE, START_DATE, END_DATE, NOTE, ALARM, RECURRENCE_TYPE, DAYS, DAY_IN_MONTH, MONTH, INTERVAL, UNTIL, PARTICIPANTS, UID, FULL_TIME,
         // not yet implemented: NOTIFICATION, USERS,
         // not implemented anymore: RECURRING_OCCURRENCE, PROJECT_ID,
 

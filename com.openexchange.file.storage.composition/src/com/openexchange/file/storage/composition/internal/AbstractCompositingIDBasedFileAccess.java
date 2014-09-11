@@ -108,7 +108,6 @@ import com.openexchange.file.storage.composition.IDBasedRandomFileAccess;
 import com.openexchange.file.storage.composition.IDBasedSequenceNumberProvider;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.file.storage.search.SearchTerm;
-import com.openexchange.groupware.results.AbstractTimedResult;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.CallerRunsCompletionService;
@@ -482,25 +481,59 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
     @Override
     public TimedResult<File> getDocuments(final List<String> ids, final List<Field> columns) throws OXException {
-        final List<File> files = new ArrayList<File>(ids.size());
-        for (final String id : ids) {
-            try {
-                files.add(getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION));
-            } catch (OXException e) {
-                if (exists(id, FileStorageFileAccess.CURRENT_VERSION)) {
-                    throw e;
+        Map<FileStorageFileAccess, List<IDTuple>> getOperations = getFilesPerFileAccesses(ids);
+        if (1 == getOperations.size()) {
+            /*
+             * get files from single storage
+             */
+            Entry<FileStorageFileAccess, List<IDTuple>> getOp = getOperations.entrySet().iterator().next();
+            FileStorageFileAccess access = getOp.getKey();
+            return fixIDs(access.getDocuments(getOp.getValue(), columns),
+                access.getAccountAccess().getService().getId(), access.getAccountAccess().getAccountId());
+        }
+        /*
+         * get files from multiple storages
+         */
+        List<File> documents = new ArrayList<File>(ids.size());
+        for (Map.Entry<FileStorageFileAccess, List<IDTuple>> getOp : getOperations.entrySet()) {
+            FileStorageFileAccess access = getOp.getKey();
+            TimedResult<File> results = fixIDs(access.getDocuments(getOp.getValue(), columns),
+                access.getAccountAccess().getService().getId(), access.getAccountAccess().getAccountId());
+            documents.addAll(SearchIteratorAdapter.toList(results.results()));
+        }
+        /*
+         * re-order according to requested order, extract sequence number
+         */
+        List<File> orderedDocuments = new ArrayList<File>(documents.size());
+        long sequenceNumber = 0;
+        for (String id : ids) {
+            File file = find(documents, id);
+            if (null != file) {
+                orderedDocuments.add(file);
+                if (file.getSequenceNumber() > sequenceNumber) {
+                    sequenceNumber = file.getSequenceNumber();
                 }
-                // Ignore non-existing item
+            } else {
+                FileID fileID = new FileID(id);
+                throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(fileID.getFileId(), fileID.getFolderId());
             }
         }
-
-        return new AbstractTimedResult<File>(new SearchIteratorAdapter<File>(files.iterator())) {
+        /*
+         * wrap result in search iterator
+         */
+        final long finalSequenceNumber = sequenceNumber;
+        final SearchIterator<File> searchIterator = new SearchIteratorAdapter<File>(orderedDocuments.iterator(), orderedDocuments.size());
+        return new TimedResult<File>() {
 
             @Override
-            protected long extractTimestamp(final File object) {
-                return object.getSequenceNumber();
+            public long sequenceNumber() throws OXException {
+                return finalSequenceNumber;
             }
 
+            @Override
+            public SearchIterator<File> results() throws OXException {
+                return searchIterator;
+            }
         };
     }
 
@@ -582,22 +615,9 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
     @Override
     public List<String> removeDocument(final List<String> ids, final long sequenceNumber, final boolean hardDelete) throws OXException {
         /*
-         * get affected file storages
-         */
-        final Map<FileStorageFileAccess, List<IDTuple>> deleteOperations = new HashMap<FileStorageFileAccess, List<IDTuple>>();
-        for (final String id : ids) {
-            final FileID fileID = new FileID(id);
-            final FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
-            List<IDTuple> deletes = deleteOperations.get(fileAccess);
-            if (deletes == null) {
-                deletes = new ArrayList<IDTuple>();
-                deleteOperations.put(fileAccess, deletes);
-            }
-            deletes.add(new FileStorageFileAccess.IDTuple(fileID.getFolderId(), fileID.getFileId()));
-        }
-        /*
          * delete files per storage
          */
+        Map<FileStorageFileAccess, List<IDTuple>> deleteOperations = getFilesPerFileAccesses(ids);
         final List<String> notDeleted = new ArrayList<String>(ids.size());
         for (final Map.Entry<FileStorageFileAccess, List<IDTuple>> deleteOp : deleteOperations.entrySet()) {
             final FileStorageFileAccess access = deleteOp.getKey();
@@ -1391,6 +1411,28 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
     }
 
     /**
+     * Gets all file accesses being responsible for the supplied list of unique identifiers.
+     *
+     * @param ids The unique file identifiers to get the file accesses for
+     * @return The file accesses, each one mapped to the corresponding, file access relative, ID tuples
+     * @throws OXException
+     */
+    protected Map<FileStorageFileAccess, List<IDTuple>> getFilesPerFileAccesses(List<String> ids) throws OXException {
+        Map<FileStorageFileAccess, List<IDTuple>> fileAccesses = new HashMap<FileStorageFileAccess, List<IDTuple>>();
+        for (String id : ids) {
+            FileID fileID = new FileID(id);
+            FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
+            List<IDTuple> gets = fileAccesses.get(fileAccess);
+            if (null == gets) {
+                gets = new ArrayList<IDTuple>();
+                fileAccesses.put(fileAccess, gets);
+            }
+            gets.add(new IDTuple(fileID.getFolderId(), fileID.getFileId()));
+        }
+        return fileAccesses;
+    }
+
+    /**
      * Gets the file access.
      *
      * @param serviceId The service identifier
@@ -1711,6 +1753,22 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
                 return fixIDs(searchIterator, accountAccess.getService().getId(), accountAccess.getAccountId());
             }
         };
+    }
+
+    /**
+     * Looks up a file in a collection based on its unique identifier.
+     *
+     * @param files The files to search
+     * @param uniqueID The ID to find
+     * @return The file, or <code>null</code> if not found
+     */
+    private static File find(Collection<File> files, String uniqueID) {
+        for (File file : files) {
+            if (uniqueID.equals(file.getId())) {
+                return file;
+            }
+        }
+        return null;
     }
 
 }

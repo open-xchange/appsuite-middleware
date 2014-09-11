@@ -123,6 +123,8 @@ public abstract class CalendarObject extends CommonObject {
 
 	public static final int PRINCIPAL_ID = 229;
 
+    public static final int FULL_TIME = 401;
+
 	public static final int NONE = 0;
 
 	public static final int ACCEPT = 1;
@@ -226,6 +228,8 @@ public abstract class CalendarObject extends CommonObject {
 
     protected int principalId;
 
+    protected boolean fulltime;
+
 	protected boolean b_title;
 
 	protected boolean b_start_date;
@@ -285,6 +289,8 @@ public abstract class CalendarObject extends CommonObject {
     protected boolean b_principal;
 
     protected boolean b_principalId;
+
+    protected boolean b_fulltime;
 
 	// GET METHODS
 	public String getTitle() {
@@ -393,6 +399,10 @@ public abstract class CalendarObject extends CommonObject {
 
     public int getPrincipalId() {
         return this.principalId;
+    }
+
+    public boolean getFullTime() {
+        return fulltime;
     }
 
 	// SET METHODS
@@ -554,6 +564,11 @@ public abstract class CalendarObject extends CommonObject {
         b_principalId = true;
     }
 
+    public void setFullTime(final boolean fulltime) {
+        this.fulltime = fulltime;
+        b_fulltime = true;
+    }
+
 	// REMOVE METHODS
 	public void removeTitle() {
 		title = null;
@@ -675,6 +690,11 @@ public abstract class CalendarObject extends CommonObject {
         b_principalId = false;
     }
 
+    public void removeFullTime() {
+        fulltime = false;
+        b_fulltime = false;
+    }
+
 	// CONTAINS METHODS
 	public boolean containsTitle() {
 		return b_title;
@@ -787,6 +807,10 @@ public abstract class CalendarObject extends CommonObject {
         return b_principalId;
     }
 
+    public boolean containsFullTime() {
+        return b_fulltime;
+    }
+
 	public void setParticipants(final List<? extends Participant> participants) {
 		this.participants = participants.toArray(new Participant[participants
 				.size()]);
@@ -896,6 +920,7 @@ public abstract class CalendarObject extends CommonObject {
 		organizerId = 0;
 		principal = null;
 		principalId = 0;
+        fulltime = false;
 
 		b_title = false;
 		b_start_date = false;
@@ -919,6 +944,7 @@ public abstract class CalendarObject extends CommonObject {
 		b_organizerId = false;
 		b_principal = false;
 		b_principalId = false;
+        b_fulltime = false;
 	}
 
 	/**
@@ -1195,6 +1221,10 @@ public abstract class CalendarObject extends CommonObject {
             differingFields.add(PRINCIPAL_ID);
         }
 
+        if ((!containsFullTime() && other.containsFullTime()) || (containsFullTime() && other.containsFullTime() && getFullTime() != other.getFullTime())) {
+            differingFields.add(FULL_TIME);
+        }
+
 		return differingFields;
 	}
 
@@ -1385,6 +1415,9 @@ public abstract class CalendarObject extends CommonObject {
 		case PRINCIPAL_ID:
 		    setPrincipalId((Integer) value);
 		    break;
+        case FULL_TIME:
+            setFullTime((Boolean) value);
+            break;
 		default:
 			super.set(field, value);
 		}
@@ -1454,6 +1487,8 @@ public abstract class CalendarObject extends CommonObject {
 		    return getPrincipal();
 		case PRINCIPAL_ID:
 		    return getPrincipalId();
+        case FULL_TIME:
+            return getFullTime();
 		default:
 			return super.get(field);
 		}
@@ -1519,6 +1554,8 @@ public abstract class CalendarObject extends CommonObject {
 		    return containsPrincipal();
 		case PRINCIPAL_ID:
 		    return containsPrincipalId();
+        case FULL_TIME:
+            return containsFullTime();
 		default:
 			return super.contains(field);
 		}
@@ -1608,6 +1645,9 @@ public abstract class CalendarObject extends CommonObject {
         case PRINCIPAL_ID:
             removePrincipalId();
             break;
+        case FULL_TIME:
+            removeFullTime();
+            break;
         default:
             super.remove(field);
 
@@ -1657,6 +1697,10 @@ public abstract class CalendarObject extends CommonObject {
                     clonedUsers[i] = getUsers()[i].getClone();
                 }
                 retval.setUsers(clonedUsers);
+            }
+
+            if (containsFullTime()) {
+                retval.setFullTime(getFullTime());
             }
 
         } catch (CloneNotSupportedException e) {
