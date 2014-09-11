@@ -129,7 +129,7 @@ public class OXRESTServlet extends HttpServlet implements Servlet {
                 logger.warn("{}{}The value 'open-xchange' for 'com.openexchange.rest.services.basic-auth.login' has not been changed from its default. Please do so to secure access.{}", lf, lf, lf);
             }
 
-            if ("secret".equalsIgnoreCase(authLogin)) {
+            if ("secret".equalsIgnoreCase(authPassword)) {
                 if (null == logger) {
                     logger = LoggerFactory.getLogger(OXRESTServlet.class);
                 }
