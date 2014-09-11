@@ -987,8 +987,8 @@ PFILE=/opt/open-xchange/etc/sessiond.properties
 ox_comment com.openexchange.sessiond.remoteParameterNames= add $PFILE
 
 # SoftwareChange_Request-2055
-ox_add_property com.openexchange.rest.services.basic-auth.login open-xchange /opt/open-xchange/etc/server.properties
-ox_add_property com.openexchange.rest.services.basic-auth.password secret /opt/open-xchange/etc/server.properties
+ox_add_property com.openexchange.rest.services.basic-auth.login "" /opt/open-xchange/etc/server.properties
+ox_add_property com.openexchange.rest.services.basic-auth.password "" /opt/open-xchange/etc/server.properties
 
 # SoftwareChange_Request-2081
 PFILE=/opt/open-xchange/etc/configdb.properties
@@ -1030,6 +1030,17 @@ ox_add_property com.openexchange.mail.enforceSecureConnection false /opt/open-xc
 # SoftwareChange_Request-2079
 ox_add_property com.openexchange.passwordchange.allowedPattern "" /opt/open-xchange/etc/passwordchange.properties
 ox_add_property com.openexchange.passwordchange.allowedPatternHint "" /opt/open-xchange/etc/passwordchange.properties
+
+# SoftwareChange_Request-2171
+PFILE=/opt/open-xchange/etc/server.properties
+VALUE=$(ox_read_property com.openexchange.rest.services.basic-auth.login $PFILE)
+if [ "open-xchange" = "$VALUE" ]; then
+    ox_set_property com.openexchange.rest.services.basic-auth.login "" $PFILE
+fi
+VALUE=$(ox_read_property com.openexchange.rest.services.basic-auth.password $PFILE)
+if [ "secret" = "$VALUE" ]; then
+    ox_set_property com.openexchange.rest.services.basic-auth.password "" $PFILE
+fi
 
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
