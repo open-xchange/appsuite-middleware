@@ -49,11 +49,15 @@
 
 package com.openexchange.html;
 
-import static com.openexchange.java.Strings.toLowerCase;
+import static com.openexchange.java.Strings.asciiLowerCase;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import com.openexchange.html.internal.WhitelistedSchemes;
 import com.openexchange.html.tools.HTMLUtils;
 
 
@@ -94,13 +98,13 @@ public final class HtmlServices {
         if (null == val) {
             return false;
         }
-        String lc = toLowerCase(val.trim());
+        String lc = asciiLowerCase(val.trim());
         if (lc.indexOf("javascript:") >= 0 || lc.indexOf("vbscript:") >= 0) {
             return false;
         }
         if (null != more && more.length > 0) {
             for (final String token : more) {
-                if (lc.indexOf(toLowerCase(token)) >= 0) {
+                if (lc.indexOf(asciiLowerCase(token)) >= 0) {
                     return false;
                 }
             }
@@ -119,7 +123,7 @@ public final class HtmlServices {
         }
         if (null != more && more.length > 0) {
             for (final String token : more) {
-                if (lc.indexOf(toLowerCase(token)) >= 0) {
+                if (lc.indexOf(asciiLowerCase(token)) >= 0) {
                     return false;
                 }
             }
@@ -135,6 +139,53 @@ public final class HtmlServices {
      */
     public static boolean isJavaScriptURL(final String val) {
         return !isNonJavaScriptURL(val);
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------------------- //
+
+    /**
+     * Checks given possible URI it is safe being appended/inserted to HTML content.
+     *
+     * @param possibleUrl The possible URI to check
+     * @return <code>true</code> if safe; otherwise <code>false</code>
+     */
+    public static boolean isSafe(String possibleUrl) {
+        if (null == possibleUrl) {
+            return true;
+        }
+
+        // Check for possible URI
+        URI uri;
+        try {
+            uri = new URI(possibleUrl.trim());
+        } catch (URISyntaxException x) {
+            // At least check for common attach vectors
+            return isNonJavaScriptURL(possibleUrl);
+        }
+
+        // Get URI's scheme and compare against possible whitelist
+        String scheme = uri.getScheme();
+        if (null == scheme) {
+            // No scheme...
+            return true;
+        }
+
+        List<String> schemes = WhitelistedSchemes.getWhitelistedSchemes();
+        if (schemes.isEmpty()) {
+            // No allowed schemes specified
+            return isNonJavaScriptURL(possibleUrl);
+        }
+
+        String lc = asciiLowerCase(scheme);
+        for (String s : schemes) {
+            if (lc.equals(s)) {
+                // Matches an allowed scheme
+                return isNonJavaScriptURL(possibleUrl);
+            }
+        }
+
+        // Not allowed...
+        return false;
     }
 
 }
