@@ -236,8 +236,9 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         final FileStorageFileAccess.IDTuple tuple = new FileStorageFileAccess.IDTuple(fileId.getFolderId(), fileId.getFileId());
         final FileStorageFileAccess.IDTuple tuple2 = new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId());
 
-        fileAccess.expectCall("hashCode").andReturn(1);
-        fileAccess.expectCall("hashCode").andReturn(1);
+        fileAccess.expectCall("hashCode").andReturn(1);// Look if it's there
+        //      fileAccess.expectCall("hashCode").andReturn(1); // Store it (uncomment this line if running in eclipse.
+        // There is an optimization when running on jenkins, as there is no second hash needed
         fileAccess.expectCall("hashCode").andReturn(1);
         fileAccess.expectCall("getDocuments", Arrays.asList(tuple,tuple2), Arrays.asList(
             File.Field.TITLE));
