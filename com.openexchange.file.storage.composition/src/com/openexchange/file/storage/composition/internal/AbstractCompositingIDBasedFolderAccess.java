@@ -369,7 +369,8 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
                     connect(accountAccess);
                     accountAccesses.add(new AccessWrapper(accountAccess, fileStorageAccount.getDisplayName()));
                 } catch (OXException e) {
-                    if (!"OAUTH-0004".equals(e.getErrorCode())) { // OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA
+                    // OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA -- 'OAUTH-0004'
+                    if (4 != e.getCode() || !"OAUTH".equals(e.getPrefix())) {
                         throw e;
                     }
                 }

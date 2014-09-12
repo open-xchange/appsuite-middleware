@@ -1079,27 +1079,29 @@ public final class MailFolderStorage implements FolderStorage {
                     tmp.addAll(Arrays.asList(accountsArr));
                     Collections.sort(tmp, new MailAccountComparator(session.getUser().getLocale()));
                     accounts = tmp;
+
+                    if (!accounts.isEmpty() && UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(accounts.get(0).getMailProtocol())) {
+                        /*
+                         * Ensure Unified Mail is enabled; meaning at least one account is subscribed to Unified Mail
+                         */
+                        boolean suppressUnifiedMail = StorageParametersUtility.getBoolParameter("suppressUnifiedMail", storageParameters);
+                        if (suppressUnifiedMail) {
+                            accounts.remove(0);
+                        } else {
+                            UnifiedInboxManagement uim = Services.getService(UnifiedInboxManagement.class);
+                            if (null == uim || !uim.isEnabled(session)) {
+                                accounts.remove(0);
+                            }
+                        }
+                    }
                 } else {
                     accounts = new ArrayList<MailAccount>(1);
                     final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
                     accounts.add(storageService.getDefaultMailAccount(session.getUserId(), session.getContextId()));
                 }
-                if (!accounts.isEmpty() && UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(accounts.get(0).getMailProtocol())) {
-                    /*
-                     * Ensure Unified Mail is enabled; meaning at least one account is subscribed to Unified Mail
-                     */
-                    final boolean suppressUnifiedMail = StorageParametersUtility.getBoolParameter("suppressUnifiedMail", storageParameters);
-                    if (suppressUnifiedMail) {
-                        accounts.remove(0);
-                    } else {
-                        final UnifiedInboxManagement uim = Services.getService(UnifiedInboxManagement.class);
-                        if (null == uim || !uim.isEnabled(session)) {
-                            accounts.remove(0);
-                        }
-                    }
-                }
-                final int size = accounts.size();
-                final List<SortableId> list = new ArrayList<SortableId>(size);
+
+                int size = accounts.size();
+                List<SortableId> list = new ArrayList<SortableId>(size);
                 for (int j = 0; j < size; j++) {
                     list.add(new MailId(prepareFullname(accounts.get(j).getId(), MailFolder.DEFAULT_FOLDER_ID), j).setName(MailFolder.DEFAULT_FOLDER_NAME));
                 }
