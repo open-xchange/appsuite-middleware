@@ -294,6 +294,11 @@
     },
     {
         "namespace": "portal",
+        "requires": "oauth xing",
+        "path": "plugins/portal/xing/register"
+    },
+    {
+        "namespace": "portal",
         "requires": "oauth facebook",
         "path": "plugins/portal/facebook/register"
     },
