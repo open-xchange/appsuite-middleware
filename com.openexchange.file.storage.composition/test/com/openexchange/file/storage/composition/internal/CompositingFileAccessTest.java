@@ -232,10 +232,17 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         defaultFile.setId(fileId.getFileId());
         defaultFile.setFolderId(fileId.getFolderId());
 
-        fileAccess.expectCall("getFileMetadata", fileId.getFolderId(), fileId.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(
-            defaultFile);
-        fileAccess.expectCall("getFileMetadata", fileId2.getFolderId(), fileId2.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(
-            defaultFile);
+
+        final FileStorageFileAccess.IDTuple tuple = new FileStorageFileAccess.IDTuple(fileId.getFolderId(), fileId.getFileId());
+        final FileStorageFileAccess.IDTuple tuple2 = new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId());
+
+        fileAccess.expectCall("hashCode").andReturn(1);
+        fileAccess.expectCall("hashCode").andReturn(1);
+        fileAccess.expectCall("hashCode").andReturn(1);
+        fileAccess.expectCall("getDocuments", Arrays.asList(tuple,tuple2), Arrays.asList(
+            File.Field.TITLE));
+        fileAccess.expectCall("getAccountAccess").andReturn(this);
+        fileAccess.expectCall("getAccountAccess").andReturn(this);
 
         getDocuments(Arrays.asList(fileId.toUniqueID(), fileId2.toUniqueID()), Arrays.asList(File.Field.TITLE));
 
