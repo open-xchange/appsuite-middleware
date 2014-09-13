@@ -47,61 +47,61 @@
  *
  */
 
-package com.openexchange.jslob.test;
+package com.openexchange.groupware.settings.tree.modules.mail;
 
-import org.json.JSONObject;
-import com.openexchange.jslob.DefaultJSlob;
-import com.openexchange.jslob.JSlob;
-import com.openexchange.jslob.JSlobId;
-import com.openexchange.jslob.shared.SharedJSlobService;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.session.Session;
 
 /**
- * {@link SimSharedJSlobService}
+ * {@link DefaultArchiveDays} - Checks if <tt>"com.openexchange.mail.enforceSecureConnection"</tt> option is enabled.
+ * <p>
+ * Path in config tree:<br>
+ * <code>modules -&gt; mail -&gt; enforcesecureconnection</code>
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SimSharedJSlobService implements SharedJSlobService {
-
-    private final String serviceId;
-
-    private final DefaultJSlob jslob;
+public class DefaultArchiveDays implements PreferencesItemService {
 
     /**
-     * Initializes a new {@link SimSharedJSlobService}.
+     * Default constructor.
      */
-    public SimSharedJSlobService(JSONObject jsonObject) {
+    public DefaultArchiveDays() {
         super();
-        serviceId = "com.openexchange.jslob.config";
-        jslob = new DefaultJSlob(jsonObject);
-        jslob.setId(new JSlobId(serviceId, "sharedjslob", 0, 0));
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.jslob.shared.SharedJSlobService#getServiceId()
+    /**
+     * {@inheritDoc}
      */
     @Override
-    public String getServiceId() {
-        return serviceId;
+    public String[] getPath() {
+        return new String[] { "modules", "mail", "defaultarchivedays" };
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.jslob.shared.SharedJSlobService#getJSlob()
+    /**
+     * {@inheritDoc}
      */
     @Override
-    public JSlob getJSlob(Session session) {
-        return jslob;
-    }
+    public IValueHandler getSharedValue() {
+        return new ReadOnlyValue() {
+            @Override
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return userConfig.hasWebMail();
+            }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.jslob.shared.SharedJSlobService#getId()
-     */
-    @Override
-    public String getId() {
-        return jslob.getId().getId();
+            @Override
+            public void getValue(Session session, Context ctx, User user,
+                    UserConfiguration userConfig, Setting setting) throws OXException {
+                setting.setSingleValue(Integer.valueOf(MailProperties.getInstance().getDefaultArchiveDays()));
+            }
+        };
     }
 
 }

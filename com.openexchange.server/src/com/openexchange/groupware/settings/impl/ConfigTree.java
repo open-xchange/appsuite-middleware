@@ -374,6 +374,7 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.mail.LineWrap.class,
             com.openexchange.groupware.settings.tree.modules.mail.Module.class,
             com.openexchange.groupware.settings.tree.modules.mail.MsgFormat.class,
+            com.openexchange.groupware.settings.tree.modules.mail.DefaultArchiveDays.class,
             com.openexchange.groupware.settings.tree.modules.mail.EnforceSecureConnection.class,
             com.openexchange.groupware.settings.tree.modules.mail.PhishingHeaders.class,
             com.openexchange.groupware.settings.tree.modules.mail.MailProtocols.class,
