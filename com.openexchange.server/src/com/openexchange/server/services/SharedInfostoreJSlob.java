@@ -71,7 +71,7 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
  * {@link SharedInfostoreJSlob}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class SharedInfostoreJSlob implements SharedJSlobService {
@@ -122,7 +122,7 @@ public class SharedInfostoreJSlob implements SharedJSlobService {
             long attachmentQuota = mailUploadQuotaChecker.getQuotaMax();
             long attachmentQuotaPerFile = mailUploadQuotaChecker.getFileQuotaMax();
 
-            JSONObject json = new JSONObject();
+            JSONObject json = new JSONObject(10);
             json.put("maxBodySize", maxBodySize);
             json.put("infostoreMaxUploadSize", infostoreMaxUploadSize);
             json.put("attachmentMaxUploadSize", attachmentMaxUploadSize);
