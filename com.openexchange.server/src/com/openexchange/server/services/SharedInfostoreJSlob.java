@@ -77,32 +77,17 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 public class SharedInfostoreJSlob implements SharedJSlobService {
 
     private final String serviceId;
-
-    private final DefaultJSlob jslob;
+    private final String id;
 
     /**
      * Initializes a new {@link SharedInfostoreJSlob}.
      */
     public SharedInfostoreJSlob() {
         super();
-        this.serviceId = "com.openexchange.jslob.config";
-        this.jslob = new DefaultJSlob();
-        jslob.setId(new JSlobId(serviceId, "io.ox/core/properties", 0, 0));
+        serviceId = "com.openexchange.jslob.config";
+        id = "io.ox/core/properties";
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.jslob.shared.SharedJSlobService#getServiceId()
-     */
-    @Override
-    public String getServiceId() {
-        return serviceId;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.jslob.shared.SharedJSlobService#getJSlob()
-     */
     @Override
     public JSlob getJSlob(Session session) throws OXException {
         try {
@@ -130,39 +115,19 @@ public class SharedInfostoreJSlob implements SharedJSlobService {
             json.put("infostoreUsage", infostoreUsage);
             json.put("attachmentQuota", attachmentQuota);
             json.put("attachmentQuotaPerFile", attachmentQuotaPerFile);
+
+            DefaultJSlob jslob = new DefaultJSlob();
             jslob.setJsonObject(json);
-            jslob.setId(new JSlobId(serviceId, "io.ox/core/properties", session.getUserId(), session.getContextId()));
+            jslob.setId(new JSlobId(serviceId, id, session.getUserId(), session.getContextId()));
             return jslob;
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e);
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.jslob.shared.SharedJSlobService#getId()
-     */
     @Override
     public String getId() {
-        return jslob.getId().getId();
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.jslob.shared.SharedJSlobService#setJSONObject(org.json.JSONObject)
-     */
-    @Override
-    public void setJSONObject(JSONObject jsonObject) {
-        jslob.setJsonObject(jsonObject);
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.jslob.shared.SharedJSlobService#setMetaObject(org.json.JSONObject)
-     */
-    @Override
-    public void setMetaObject(JSONObject metaObject) {
-        jslob.setMetaObject(metaObject);
+        return id;
     }
 
 }
