@@ -126,6 +126,11 @@ public class SharedInfostoreJSlob implements SharedJSlobService {
     }
 
     @Override
+    public String getServiceId() {
+        return serviceId;
+    }
+
+    @Override
     public String getId() {
         return id;
     }

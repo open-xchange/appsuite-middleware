@@ -80,10 +80,17 @@ public interface SharedJSlobService {
     JSlob getJSlob(Session session) throws OXException;
 
     /**
-     * Returns the jslob's id
+     * Returns the jslob's identifier
      *
-     * @return The jslob's id
+     * @return The jslob's identifier
      */
     String getId();
+
+    /**
+     * Returns the jslob's service identifier
+     *
+     * @return The jslob's service identifier
+     */
+    String getServiceId();
 
 }
