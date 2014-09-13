@@ -73,31 +73,43 @@ public abstract class AbstractGoogleDriveAccess {
     protected final GoogleDriveAccess googleDriveAccess;
     protected final Session session;
     protected final FileStorageAccount account;
-    protected final String rootFolderId;
+    protected String rootFolderIdentifier;
 
     /**
      * Initializes a new {@link AbstractGoogleDriveAccess}.
      */
-    protected AbstractGoogleDriveAccess(final GoogleDriveAccess googleDriveAccess, final FileStorageAccount account, final Session session) throws OXException {
+    protected AbstractGoogleDriveAccess(final GoogleDriveAccess googleDriveAccess, final FileStorageAccount account, final Session session) {
         super();
         this.googleDriveAccess = googleDriveAccess;
         this.account = account;
         this.session = session;
+    }
 
-        String key = "com.openexchange.file.storage.googledrive.rootFolderId";
-        String tmp = (String) session.getParameter(key);
-        if (null == tmp) {
-            try {
-                Drive drive = googleDriveAccess.getDrive();
-                tmp = drive.files().get("root").execute().getId();
-                session.setParameter(key, tmp);
-            } catch (HttpResponseException e) {
-                throw handleHttpResponseError(null, e);
-            } catch (IOException e) {
-                throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+    /**
+     * Gets the root folder identifier
+     *
+     * @return The root folder identifier
+     * @throws OXException If root folder cannot be returned
+     */
+    protected String getRootFolderId() throws OXException {
+        String rootFolderId = rootFolderIdentifier;
+        if (null == rootFolderId) {
+            String key = "com.openexchange.file.storage.googledrive.rootFolderId";
+            rootFolderId = (String) session.getParameter(key);
+            if (null == rootFolderId) {
+                try {
+                    Drive drive = googleDriveAccess.getDrive(session);
+                    rootFolderId = drive.files().get("root").execute().getId();
+                    session.setParameter(key, rootFolderId);
+                } catch (HttpResponseException e) {
+                    throw handleHttpResponseError(null, e);
+                } catch (IOException e) {
+                    throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                }
             }
+            rootFolderIdentifier = rootFolderId;
         }
-        rootFolderId = tmp;
+        return rootFolderId;
     }
 
     /** Status code (401) indicating that the request requires HTTP authentication. */
@@ -170,9 +182,10 @@ public abstract class AbstractGoogleDriveAccess {
      *
      * @param folderId The file storage folder identifier
      * @return The appropriate Google Drive folder identifier
+     * @throws OXException If operation fails
      */
-    protected String toGoogleDriveFolderId(String folderId) {
-        return FileStorageFolder.ROOT_FULLNAME.equals(folderId) ? rootFolderId : folderId;
+    protected String toGoogleDriveFolderId(String folderId) throws OXException {
+        return FileStorageFolder.ROOT_FULLNAME.equals(folderId) ? getRootFolderId() : folderId;
     }
 
     /**
@@ -180,9 +193,10 @@ public abstract class AbstractGoogleDriveAccess {
      *
      * @param googleId The Google Drive folder identifier
      * @return The appropriate file storage folder identifier
+     * @throws OXException If operation fails
      */
-    protected String toFileStorageFolderId(String googleId) {
-        return rootFolderId.equals(googleId) || "root".equals(googleId) ? FileStorageFolder.ROOT_FULLNAME : googleId;
+    protected String toFileStorageFolderId(String googleId) throws OXException {
+        return getRootFolderId().equals(googleId) || "root".equals(googleId) ? FileStorageFolder.ROOT_FULLNAME : googleId;
     }
 
 }
