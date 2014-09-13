@@ -192,6 +192,8 @@ public final class MailProperties implements IMailProperties {
 
     private boolean enforceSecureConnection;
 
+    private int defaultArchiveDays;
+
     /**
      * Initializes a new {@link MailProperties}
      */
@@ -284,6 +286,7 @@ public final class MailProperties implements IMailProperties {
         supportMsisdnAddresses = false;
         accountBlacklistRanges = null;
         enforceSecureConnection = false;
+        defaultArchiveDays = 90;
     }
 
     private void loadProperties0() throws OXException {
@@ -598,6 +601,19 @@ public final class MailProperties implements IMailProperties {
                 rateLimit = 0;
                 logBuilder.append("\tSent Rate limit: Invalid value \"").append(rateLimitStr).append("\". Setting to fallback ").append(
                     rateLimit).append('\n');
+
+            }
+        }
+
+        {
+            final String tmp = configuration.getProperty("com.openexchange.mail.archive.defaultDays", "90").trim();
+            try {
+                defaultArchiveDays = Strings.parseInt(tmp);
+                logBuilder.append("\tDefault archive days: ").append(rateLimit).append('\n');
+            } catch (final NumberFormatException e) {
+                defaultArchiveDays = 90;
+                logBuilder.append("\tDefault archive days: Invalid value \"").append(tmp).append("\". Setting to fallback ").append(
+                    defaultArchiveDays).append('\n');
 
             }
         }
@@ -990,4 +1006,14 @@ public final class MailProperties implements IMailProperties {
     public boolean isSupportMsisdnAddresses() {
         return supportMsisdnAddresses;
     }
+
+    /**
+     * Gets the default days when archiving messages.
+     *
+     * @return The default days
+     */
+    public int getDefaultArchiveDays() {
+        return defaultArchiveDays;
+    }
+
 }
