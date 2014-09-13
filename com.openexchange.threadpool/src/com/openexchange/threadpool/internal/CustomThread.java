@@ -76,12 +76,8 @@ public final class CustomThread extends Thread implements ThreadRenamer, OXThrea
 
     private void applyName(final String name) {
         originalName = name;
-        final int pos = originalName.indexOf('-');
-        if (pos > 0) {
-            appendix = name.substring(pos);
-        } else {
-            appendix = null;
-        }
+        int pos = originalName.indexOf('-');
+        appendix = pos > 0 ? name.substring(pos) : null;
     }
 
     /**
