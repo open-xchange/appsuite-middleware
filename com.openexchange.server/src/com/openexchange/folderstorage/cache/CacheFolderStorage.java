@@ -1838,7 +1838,7 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
                         /*
                          * Load them & commit
                          */
-                        final List<Folder> folders = fs.getFolders(treeId, ids, storageType, newParameters);
+                        List<Folder> folders = fs.getFolders(treeId, ids, storageType, newParameters);
                         if (started) {
                             fs.commitTransaction(newParameters);
                             started = false;
@@ -1846,14 +1846,14 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
                         /*
                          * Fill into map
                          */
-                        for (final Folder folder : folders) {
+                        for (Folder folder : folders) {
                             ret.put(folder.getID(), folder);
                         }
                         /*
                          * Return
                          */
                         return null;
-                    } catch (final RuntimeException e) {
+                    } catch (RuntimeException e) {
                         throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e);
                     } finally {
                         if (started) {

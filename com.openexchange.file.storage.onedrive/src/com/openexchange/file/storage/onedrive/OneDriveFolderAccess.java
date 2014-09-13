@@ -117,7 +117,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
     /**
      * Initializes a new {@link OneDriveFolderAccess}.
      */
-    public OneDriveFolderAccess(final OneDriveAccess oneDriveAccess, final FileStorageAccount account, final Session session, final OneDriveAccountAccess accountAccess) throws OXException {
+    public OneDriveFolderAccess(final OneDriveAccess oneDriveAccess, final FileStorageAccount account, final Session session, final OneDriveAccountAccess accountAccess) {
         super(oneDriveAccess, account, session);
         this.accountAccess = accountAccess;
         userId = session.getUserId();
@@ -152,11 +152,11 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
     }
 
     protected OneDriveFolder parseFolder(String oneDriveFolderId, RestFolder restFolder, DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
-        return new OneDriveFolder(userId).parseDirEntry(restFolder, rootFolderId, accountDisplayName, hasSubfolders(oneDriveFolderId, httpClient));
+        return new OneDriveFolder(userId).parseDirEntry(restFolder, getRootFolderId(), accountDisplayName, hasSubfolders(oneDriveFolderId, httpClient));
     }
 
     protected OneDriveFolder parseFolder(String oneDriveFolderId, JSONObject jFolder, DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
-        return new OneDriveFolder(userId).parseDirEntry(jFolder, rootFolderId, accountDisplayName, hasSubfolders(oneDriveFolderId, httpClient));
+        return new OneDriveFolder(userId).parseDirEntry(jFolder, getRootFolderId(), accountDisplayName, hasSubfolders(oneDriveFolderId, httpClient));
     }
 
     @Override

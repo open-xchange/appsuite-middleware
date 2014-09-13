@@ -218,7 +218,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
     UserizedFolder[] doList(final String treeId, final String parentId, final boolean all, final java.util.Collection<FolderStorage> openedStorages, final boolean checkOnly) throws OXException {
         final FolderStorage folderStorage = getOpenedStorage(parentId, treeId, storageParameters, openedStorages);
         try {
-            final Folder parent = folderStorage.getFolder(treeId, parentId, storageParameters);
+            Folder parent = folderStorage.getFolder(treeId, parentId, storageParameters);
             {
                 /*
                  * Check folder permission for parent folder
@@ -413,25 +413,25 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
         /*
          * Determine needed storages for given parent
          */
-        final FolderStorage[] neededStorages = folderStorageDiscoverer.getFolderStoragesForParent(treeId, parentId);
+        FolderStorage[] neededStorages = folderStorageDiscoverer.getFolderStoragesForParent(treeId, parentId);
         if (null == neededStorages || 0 == neededStorages.length) {
             return new UserizedFolder[0];
         }
         final List<SortableId> allSubfolderIds;
         if (1 == neededStorages.length) {
-            final FolderStorage neededStorage = neededStorages[0];
-            final boolean started = neededStorage.startTransaction(storageParameters, false);
+            FolderStorage neededStorage = neededStorages[0];
+            boolean started = neededStorage.startTransaction(storageParameters, false);
             try {
                 allSubfolderIds = Arrays.asList(neededStorage.getSubfolders(treeId, parentId, storageParameters));
                 if (started) {
                     neededStorage.commitTransaction(storageParameters);
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 if (started) {
                     neededStorage.rollback(storageParameters);
                 }
                 throw e;
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 if (started) {
                     neededStorage.rollback(storageParameters);
                 }
@@ -439,8 +439,11 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             }
         } else {
             allSubfolderIds = new ArrayList<SortableId>(neededStorages.length * 8);
-            final CompletionService<List<SortableId>> completionService =
-                    new ThreadPoolCompletionService<List<SortableId>>(getInstance().getService(ThreadPoolService.class, true));
+            CompletionService<List<SortableId>> completionService;
+            {
+                ThreadPoolService threadPool = getInstance().getService(ThreadPoolService.class, true);
+                completionService = new ThreadPoolCompletionService<List<SortableId>>(threadPool);
+            }
             /*
              * Get all visible subfolders from each storage
              */
@@ -449,8 +452,8 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
 
                     @Override
                     public List<SortableId> call() throws OXException {
-                        final StorageParameters newParameters = newStorageParameters();
-                        final boolean started = neededStorage.startTransaction(newParameters, false);
+                        StorageParameters newParameters = newStorageParameters();
+                        boolean started = neededStorage.startTransaction(newParameters, false);
                         try {
                             final List<SortableId> l;
                             if (MailProperties.getInstance().isHidePOP3StorageFolders() && FOLDER_TYPE_MAIL.servesFolderId(parentId)) {
@@ -471,13 +474,13 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                 neededStorage.commitTransaction(newParameters);
                             }
                             return l;
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             if (started) {
                                 neededStorage.rollback(newParameters);
                             }
                             addWarning(e);
                             return Collections.<SortableId> emptyList();
-                        } catch (final RuntimeException e) {
+                        } catch (RuntimeException e) {
                             if (started) {
                                 neededStorage.rollback(newParameters);
                             }
@@ -491,9 +494,8 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             /*
              * Wait for completion
              */
-            final List<List<SortableId>> results =
-                ThreadPools.takeCompletionService(completionService, neededStorages.length, FACTORY);
-            for (final List<SortableId> result : results) {
+            List<List<SortableId>> results = ThreadPools.takeCompletionService(completionService, neededStorages.length, FACTORY);
+            for (List<SortableId> result : results) {
                 allSubfolderIds.addAll(result);
             }
             /*
@@ -503,7 +505,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                 /*
                  * Throw first warning in set
                  */
-                final OXException e = getWarnings().iterator().next();
+                OXException e = getWarnings().iterator().next();
                 e.addCategory(Category.CATEGORY_ERROR);
                 throw e;
             }
@@ -514,11 +516,9 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
         Collections.sort(allSubfolderIds);
         final int size = allSubfolderIds.size();
         final UserizedFolder[] subfolders = new UserizedFolder[size];
-        /*
+        /*-
          * Get corresponding user-sensitive folders
-         */
-
-        /*
+         *
          * Collect by folder storage
          */
         final Map<FolderStorage, TIntList> map = new HashMap<FolderStorage, TIntList>(4);
@@ -572,8 +572,10 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                             for (final int index : indexes) {
                                 ids.add(allSubfolderIds.get(index).getId());
                             }
+
                             folders = tmp.getFolders(treeId, ids, newParameters);
-                            final Set<OXException> warnings = newParameters.getWarnings();
+
+                            Set<OXException> warnings = newParameters.getWarnings();
                             if (!warnings.isEmpty()) {
                                 addWarning(warnings.iterator().next());
                             }
@@ -609,7 +611,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                             /*
                              * Convert to userized folders and put into array
                              */
-                            final int size = folders.size();
+                            int size = folders.size();
                             int j = 0;
                             for (final int index : indexes) {
                                 if (j < size) {
