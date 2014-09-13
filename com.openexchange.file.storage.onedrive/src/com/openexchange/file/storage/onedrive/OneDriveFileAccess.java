@@ -760,8 +760,11 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                         request = method;
 
                         RestFileResponse restResponse = handleHttpResponse(execute(method, httpClient), RestFileResponse.class);
-                        RestFile restFile = restResponse.getData().get(0);
-                        files.add(new OneDriveFile(id.getFolder(), id.getId(), userId, getRootFolderId()).parseOneDriveFile(restFile));
+                        List<RestFile> data = restResponse.getData();
+                        if (!data.isEmpty()) {
+                            RestFile restFile = data.get(0);
+                            files.add(new OneDriveFile(id.getFolder(), id.getId(), userId, getRootFolderId()).parseOneDriveFile(restFile));
+                        }
                         reset(request);
                         request = null;
                     }
