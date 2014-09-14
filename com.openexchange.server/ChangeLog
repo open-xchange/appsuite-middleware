@@ -1,3 +1,7 @@
+* 2014-09-14 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 34396: Added proper exception messages for password change service
+
 * 2014-09-12 - thorben.betten@open-xchange.com
 
  - Fix for bug 26090: Check URIs' protocols/schemes against a white-list filter and discard/deny the ones not contained
