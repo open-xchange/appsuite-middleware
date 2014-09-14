@@ -140,6 +140,15 @@ public abstract class PasswordChangeService {
      */
     protected void check(final PasswordChangeEvent event) throws OXException {
         /*
+         * verify mandatory parameters
+         */
+        if (Strings.isEmpty(event.getOldPassword())) {
+            throw UserExceptionCode.MISSING_CURRENT_PASSWORD.create();
+        }
+        if (Strings.isEmpty(event.getNewPassword())) {
+            throw UserExceptionCode.MISSING_NEW_PASSWORD.create();
+        }
+        /*
          * Verify old password prior to applying new one
          */
         final AuthenticationService authenticationService = Authentication.getService();
@@ -154,9 +163,12 @@ public abstract class PasswordChangeService {
             UserStorage.getStorageUser(session);
             authenticationService.handleLoginInfo(new _LoginInfo(session.getLogin(), event.getOldPassword()));
         } catch (final OXException e) {
-            /*
-             * Verification of old password failed
-             */
+            if ("LGI-0006".equals(e.getErrorCode())) {
+                /*
+                 * Verification of old password failed
+                 */
+                throw UserExceptionCode.INCORRECT_CURRENT_PASSWORD.create(e);
+            }
             throw e;
         }
         /*
