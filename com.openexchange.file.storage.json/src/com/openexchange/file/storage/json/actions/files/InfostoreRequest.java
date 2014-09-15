@@ -174,6 +174,12 @@ public interface InfostoreRequest {
 
     AttachmentBase getAttachmentBase();
 
+    /**
+     * Gets the folder identifier at given position
+     *
+     * @param i The index position
+     * @return The folder identifier or <code>null</code>
+     */
     String getFolderAt(int i);
 
     List<String> getFolders();

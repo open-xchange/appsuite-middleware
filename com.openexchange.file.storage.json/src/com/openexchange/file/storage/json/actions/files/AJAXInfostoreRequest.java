@@ -235,7 +235,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     @Override
     public String getFolderAt(final int index) {
-        return folders.get(index);
+        return index < 0 || index >= folders.size() ? null : folders.get(index);
     }
 
     @Override
