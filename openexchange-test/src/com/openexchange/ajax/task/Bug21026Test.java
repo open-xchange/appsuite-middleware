@@ -157,7 +157,7 @@ public class Bug21026Test extends AbstractAJAXSession {
     }
 
     public static Task findNextOccurrence(AJAXClient client, Task previous) throws IOException, JSONException, OXException {
-        final CommonAllResponse response = client.execute(new AllRequest(previous.getParentFolderID(), new int[] { Task.OBJECT_ID, Task.TITLE, Task.RECURRENCE_COUNT, Task.START_DATE, Task.END_DATE, Task.LAST_MODIFIED }, 0, null));
+        final CommonAllResponse response = client.execute(new AllRequest(previous.getParentFolderID(), new int[] { Task.OBJECT_ID, Task.TITLE, Task.RECURRENCE_COUNT, Task.START_DATE, Task.END_DATE, Task.LAST_MODIFIED_UTC }, 0, null));
         Task retval = null;
         Calendar cal = new GregorianCalendar(TimeZones.UTC);
         cal.setTime(previous.getEndDate());
@@ -176,7 +176,7 @@ public class Bug21026Test extends AbstractAJAXSession {
                 }
                 retval.setStartDate(new Date(l((Long) data[response.getColumnPos(Task.START_DATE)])));
                 retval.setEndDate(new Date(l((Long) data[response.getColumnPos(Task.END_DATE)])));
-                retval.setLastModified(new Date(l((Long) data[response.getColumnPos(Task.LAST_MODIFIED)])));
+                retval.setLastModified(new Date(l((Long) data[response.getColumnPos(Task.LAST_MODIFIED_UTC)])));
                 break;
             }
         }
