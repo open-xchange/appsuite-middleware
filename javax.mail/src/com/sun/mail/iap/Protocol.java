@@ -40,13 +40,17 @@
 
 package com.sun.mail.iap;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Vector;
 import java.util.Properties;
 import java.io.*;
 import java.nio.channels.SocketChannel;
 import java.net.*;
 import java.util.logging.Level;
+
 import javax.net.ssl.SSLSocket;
+
 import com.sun.mail.util.*;
 
 /**
@@ -303,7 +307,7 @@ public class Protocol {
      */
     public synchronized Response[] command(String command, Argument args) {
 	commandStart(command);
-	Vector v = new Vector();
+	List<Response> v = new LinkedList<Response>();
 	boolean done = false;
 	String tag = null;
 	Response r = null;
@@ -312,11 +316,11 @@ public class Protocol {
 	try {
 	    tag = writeCommand(command, args);
 	} catch (LiteralException lex) {
-	    v.addElement(lex.getResponse());
+	    v.add(lex.getResponse());
 	    done = true;
 	} catch (Exception ex) {
 	    // Convert this into a BYE response
-	    v.addElement(Response.byeResponse(ex));
+	    v.add(Response.byeResponse(ex));
 	    done = true;
 	}
 
@@ -338,7 +342,7 @@ public class Protocol {
 		continue;
 	    }
 
-	    v.addElement(r);
+	    v.add(r);
 
 	    // If this is a matching command completion response, we are done
 	    if (r.isTagged() && r.getTag().equals(tag))
@@ -346,9 +350,8 @@ public class Protocol {
 	}
 
 	if (byeResp != null)
-		v.addElement(byeResp);	// must be last
-	Response[] responses = new Response[v.size()];
-	v.copyInto(responses);
+		v.add(byeResp);	// must be last
+	Response[] responses = v.toArray(new Response[v.size()]);
         timestamp = System.currentTimeMillis();
 	commandEnd();
 	return responses;
