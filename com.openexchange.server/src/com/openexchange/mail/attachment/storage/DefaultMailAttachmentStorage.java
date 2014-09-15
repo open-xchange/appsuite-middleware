@@ -76,6 +76,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.MailStrings;
+import com.openexchange.groupware.infostore.utils.UploadSizeValidation;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
@@ -244,6 +245,10 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
             }
         }
 
+        // Check size
+        long size = attachment.getSize();
+        UploadSizeValidation.checkSize(size);
+
         // Create document meta data for current attachment
         String name = attachment.getFileName();
         if (name == null) {
@@ -255,7 +260,7 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
         file.setFileName(name);
         file.setFileMIMEType(attachment.getContentType().getBaseType());
         file.setTitle(name);
-        file.setFileSize(attachment.getSize());
+        file.setFileSize(size);
         if (null != storeProps) {
             String description = (String) storeProps.get("description");
             if (null != description) {
