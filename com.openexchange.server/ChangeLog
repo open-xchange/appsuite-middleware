@@ -1,3 +1,11 @@
+* 2014-09-01 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 33354: Added display message for invalid characters in folder name
+
+* 2014-08-14 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 34041: Ignore additional elements in autoconfig xml.
+
 * 2014-08-08 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 33818: Added update task to check foreign keys and drop them if necessary
