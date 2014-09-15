@@ -67,6 +67,9 @@ public class SearchSequence {
      */
     public Argument generateSequence(SearchTerm term, String charset) 
 		throws SearchException, IOException {
+    if (null == term) {
+    	throw new SearchException("Search term is null");
+	}
 	/*
 	 * Call the appropriate handler depending on the type of
 	 * the search-term ...
