@@ -1,7 +1,7 @@
 * 2014-09-14 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 34396: Added proper exception messages for password change service
- - Fix for bug 34394: Fixed escaping in example patterns for com.openexchange.passwordchange.allowedPattern 
+ - Fix for bug 34394: Fixed escaping in example patterns for com.openexchange.passwordchange.allowedPattern
 
 * 2014-09-12 - thorben.betten@open-xchange.com
 
@@ -80,6 +80,10 @@
 * 2014-09-01 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 32695: Try to lookup existing stored session during form login if auto-login is enabled
+
+* 2014-09-01 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 33354: Added display message for invalid characters in folder name
 
 * 2014-08-29 - thorben.betten@open-xchange.com
 

@@ -75,6 +75,8 @@ fi
 
 
 %changelog
+* Mon Sep 08 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-09-15
 * Fri Sep 05 2014 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 7.6.1
 * Thu Aug 21 2014 Marcus Klein <marcus.klein@open-xchange.com>
