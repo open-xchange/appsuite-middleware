@@ -55,6 +55,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
 
@@ -78,7 +79,9 @@ public class WhitelistedSchemes {
         for (int i = 0; i < schemas.length; i++) {
             schemas[i] = Strings.asciiLowerCase(schemas[i]);
         }
-        instance = new WhitelistedSchemes(new LinkedHashSet<String>(Arrays.asList(schemas)));
+        Set<String> schemes = new LinkedHashSet<String>(Arrays.asList(schemas));
+        schemes.add("cid");
+        instance = new WhitelistedSchemes(schemes);
     }
 
     /**
