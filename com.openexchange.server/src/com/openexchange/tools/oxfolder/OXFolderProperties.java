@@ -49,9 +49,6 @@
 
 package com.openexchange.tools.oxfolder;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
@@ -61,20 +58,13 @@ import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.cache.registry.CacheAvailabilityListener;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.FolderStorage;
-import com.openexchange.folderstorage.cache.CacheFolderStorage;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.management.ManagementService;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
 import com.openexchange.tools.oxfolder.permissionLoader.PermissionLoaderService;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * <tt>OXFolderProperties</tt> contains both folder properties and folder cache properties
@@ -358,57 +348,4 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
         final int pos = className.lastIndexOf('.');
         return new ObjectName(domain, "name", pos == -1 ? className : className.substring(pos + 1));
     }
-
-    /**
-     * Updates according to given flag.
-     *
-     * @param enableInternalUsersEdit The flag
-     * @param contextId The context identifier
-     */
-    public static void updatePermissions(final boolean enableInternalUsersEdit, final int contextId) {
-        Connection con = null;
-        try {
-            con = Database.get(contextId, true);
-            /*
-             * Update permissions
-             */
-            updateGABWritePermission(enableInternalUsersEdit, contextId, con);
-            /*
-             * Clear folder cache to ensure removal of all cached instances of global address book
-             */
-            final int folderId = FolderObject.SYSTEM_LDAP_FOLDER_ID;
-            if (FolderCacheManager.isInitialized()) {
-                final Context ctx = ContextStorage.getStorageContext(contextId);
-                try {
-                    final FolderObject fo = OXFolderLoader.loadFolderObjectFromDB(folderId, ctx, con, true, false, "oxfolder_tree", "oxfolder_permissions");
-                    FolderCacheManager.getInstance().putFolderObject(fo, ctx, true, null);
-                } catch (OXException e) {
-                    FolderCacheManager.getInstance().removeFolderObject(folderId, ctx);
-                }
-            }
-            CacheFolderStorage.getInstance().removeFromGlobalCache(FolderStorage.GLOBAL_ADDRESS_BOOK_ID, FolderStorage.REAL_TREE_ID, contextId);
-        } catch (final OXException e) {
-            LOG.error("", e);
-        } finally {
-            if (null != con) {
-                Database.back(contextId, true, con);
-            }
-        }
-    }
-
-    private static void updateGABWritePermission(final boolean enableInternalUsersEdit, final int contextId, final Connection con) {
-        PreparedStatement ps = null;
-        try {
-            ps = con.prepareStatement("UPDATE oxfolder_permissions SET owp = ? WHERE cid = ? AND fuid = ?");
-            ps.setInt(1, enableInternalUsersEdit ? OCLPermission.WRITE_OWN_OBJECTS : OCLPermission.NO_PERMISSIONS);
-            ps.setInt(2, contextId);
-            ps.setInt(3, FolderObject.SYSTEM_LDAP_FOLDER_ID);
-            ps.executeUpdate();
-        } catch (final SQLException e) {
-            LOG.error("", e);
-        } finally {
-            DBUtils.closeSQLStuff(ps);
-        }
-    }
-
 }
