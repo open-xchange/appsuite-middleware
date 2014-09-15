@@ -653,7 +653,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
             }
         } else if (HTMLElementName.TD == tagName || HTMLElementName.TH == tagName) {
             CellPadding cellPadding = tablePaddings.peek();
-            if (CELLPADDING_EMPTY != cellPadding) {
+            if (CELLPADDING_EMPTY != cellPadding && null != cellPadding) {
                 String style = attrMap.get("style");
                 if (null == style || style.indexOf("padding") < 0) {
                     prependToStyle("padding: " + cellPadding.cellPadding + "px;", attrMap);
