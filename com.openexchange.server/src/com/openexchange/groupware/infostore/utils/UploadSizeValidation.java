@@ -47,58 +47,42 @@
  *
  */
 
-package com.openexchange.groupware.infostore.validation;
+package com.openexchange.groupware.infostore.utils;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.utils.InfostoreConfigUtils;
+import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
 
 
 /**
- * {@link SizeInfostoreValidator}
+ * {@link UploadSizeValidation}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.1
  */
-public class SizeInfostoreValidator implements InfostoreValidator {
-
-    private static final String NAME = SizeInfostoreValidator.class.getSimpleName();
+public class UploadSizeValidation {
 
     /**
-     * Initializes a new {@link SizeInfostoreValidator}.
+     * Initializes a new {@link UploadSizeValidation}.
      */
-    public SizeInfostoreValidator() {
+    private UploadSizeValidation() {
         super();
     }
 
-    @Override
-    public DocumentMetadataValidation validate(DocumentMetadata metadata) {
-        DocumentMetadataValidation validation = new DocumentMetadataValidation();
-        OXException exception = checkSize(metadata);
-        if (null != exception) {
-            validation.setFatalException(exception);
-        }
-
-        return validation;
-    }
-
-    private OXException checkSize(final DocumentMetadata metadata) {
+    /**
+     * Checks the given size against Infostore upload quota restriction.
+     *
+     * @param size The size to check
+     * @throws UploadException If upload quota is exceeded
+     */
+    public static void checkSize(long size) throws UploadException {
         final long maxSize = InfostoreConfigUtils.determineRelevantUploadSize();
         if (maxSize == 0) {
-            return null;
+            return;
         }
 
-        final long size = metadata.getFileSize();
         if (size > maxSize) {
-            return UploadSizeExceededException.create(size, maxSize, true);
+            throw UploadSizeExceededException.create(size, maxSize, true);
         }
-        return null;
-    }
-
-    @Override
-    public String getName() {
-        return NAME;
     }
 
 }

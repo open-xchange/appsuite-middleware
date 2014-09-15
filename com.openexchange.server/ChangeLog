@@ -1,3 +1,7 @@
+* 2014-09-15 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 34433: Do not depend on background update tasks
+
 * 2014-09-14 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 34396: Added proper exception messages for password change service

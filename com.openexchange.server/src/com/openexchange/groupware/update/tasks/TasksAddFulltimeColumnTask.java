@@ -87,7 +87,7 @@ public class TasksAddFulltimeColumnTask extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[] { TasksDeleteInvalidPriorityTask.class.getName() };
+        return new String[] { DropFKTaskv2.class.getName() };
     }
 
     @Override

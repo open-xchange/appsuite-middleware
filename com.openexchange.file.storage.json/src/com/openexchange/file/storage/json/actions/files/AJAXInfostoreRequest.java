@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import static com.openexchange.groupware.infostore.utils.UploadSizeValidation.checkSize;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -235,7 +236,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     @Override
     public String getFolderAt(final int index) {
-        return folders.get(index);
+        return index < 0 || index >= folders.size() ? null : folders.get(index);
     }
 
     @Override
@@ -405,6 +406,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         if (data.hasUploads()) {
             try {
                 final UploadFile uploadFile = data.getFiles().get(0);
+                checkSize(uploadFile.getSize());
                 java.io.File tmpFile = uploadFile.getTmpFile();
                 return new FileKnowingInputStream(new FileInputStream(tmpFile), tmpFile);
             } catch (final FileNotFoundException e) {

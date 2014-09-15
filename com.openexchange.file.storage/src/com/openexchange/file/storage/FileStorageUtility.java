@@ -51,7 +51,10 @@ package com.openexchange.file.storage;
 
 import java.net.MalformedURLException;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 
 
 /**
@@ -60,6 +63,9 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FileStorageUtility {
+
+    private static final Pattern IS_NUMBERED_WITH_EXTENSION = Pattern.compile("\\(\\d+\\)\\.");
+    private static final Pattern IS_NUMBERED = Pattern.compile("\\(\\d+\\)$");
 
     /**
      * Initializes a new {@link FileStorageUtility}.
@@ -83,7 +89,7 @@ public final class FileStorageUtility {
      *
      * @param id The file identifier
      * @param version The optional version
-     * @param lastModified 
+     * @param lastModified
      * @return The Etag
      */
     public static String getETagFor(final String id, final String version, Date lastModified) {
@@ -94,7 +100,7 @@ public final class FileStorageUtility {
         if (null != version) {
             sb.append('/').append(version);
         }
-        
+
         if (null != lastModified) {
             sb.append('/').append(lastModified.getTime());
         }
@@ -118,7 +124,7 @@ public final class FileStorageUtility {
      * @throws OXException If URL string is invalid
      */
     public static void checkUrl(final String sUrl) throws OXException {
-        if (isEmpty(sUrl)) {
+        if (Strings.isEmpty(sUrl)) {
             // Nothing to check
             return;
         }
@@ -133,17 +139,34 @@ public final class FileStorageUtility {
         }
     }
 
-    /** Checks for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
+    /**
+     * Appends or modifies a counter in the 'name' part of the supplied filename. For example, passing the filename
+     * <code>test.txt</code> and a counter of <code>2</code> will result in the string <code>test (2).txt</code>, while the filename
+     * <code>test (1).txt</code> would be changed to <code>test (2).txt</code>.
+     *
+     * @param filename The filename to enhance
+     * @param counter The counter to append
+     * @return The enhanced filename
+     */
+    public static String enhance(String filename, int counter) {
+        if (null == filename) {
+            return filename;
         }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
+        String counterString = '(' + String.valueOf(counter) + ')';
+        Matcher matcher = IS_NUMBERED_WITH_EXTENSION.matcher(filename);
+        if (matcher.find()) {
+            return new StringBuilder(filename).replace(matcher.start(), matcher.end() - 1, counterString).toString();
         }
-        return isWhitespace;
+        matcher = IS_NUMBERED.matcher(filename);
+        if (matcher.find()) {
+            return new StringBuilder(filename).replace(matcher.start(), matcher.end(), counterString).toString();
+        }
+        int index = filename.lastIndexOf('.');
+        if (0 >= index) {
+            index = filename.length();
+        }
+
+        return new StringBuilder(filename).insert(index, ' ' + counterString).toString();
     }
 
 }
