@@ -75,6 +75,7 @@ import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.ReuseReadConProvider;
 import com.openexchange.database.tx.DBService;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.index.Attachment;
 import com.openexchange.groupware.attach.index.AttachmentUUID;
@@ -104,7 +105,6 @@ import com.openexchange.groupware.infostore.database.impl.InfostoreSecurity;
 import com.openexchange.groupware.infostore.database.impl.InfostoreSecurityImpl;
 import com.openexchange.groupware.infostore.database.impl.ReplaceDocumentIntoDelTableAction;
 import com.openexchange.groupware.infostore.database.impl.SelectForUpdateFilenameReserver;
-import com.openexchange.groupware.infostore.database.impl.Tools;
 import com.openexchange.groupware.infostore.database.impl.UpdateDocumentAction;
 import com.openexchange.groupware.infostore.database.impl.UpdateVersionAction;
 import com.openexchange.groupware.infostore.index.InfostoreUUID;
@@ -741,7 +741,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     throw InfostoreExceptionCodes.FILENAME_NOT_UNIQUE.create(filename, "");
                 }
                 int cnt = count;
-                InfostoreFilenameReservation r = reserve(Tools.enhance(filename, ++cnt), folderId, id, ctx, cnt);
+                InfostoreFilenameReservation r = reserve(FileStorageUtility.enhance(filename, ++cnt), folderId, id, ctx, cnt);
                 r.setWasAdjusted(true);
                 return r;
             }
