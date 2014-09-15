@@ -74,6 +74,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.MailStrings;
+import com.openexchange.groupware.infostore.utils.UploadSizeValidation;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -167,6 +168,13 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                 exceeded = true;
             }
         }
+
+        // Check size against Drive upload quota
+        long size = attachment.getSize();
+        if (size > 0) {
+            UploadSizeValidation.checkSize(size);
+        }
+
         attachments.add(attachment);
     }
 
