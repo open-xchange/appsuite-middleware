@@ -195,6 +195,18 @@ public final class ThresholdFileHolder implements IFileHolder {
     }
 
     /**
+     * Gets the optional temporary file.
+     * <p>
+     * If {@link #isInMemory()} signals <code>true</code>, then this method will return <code>null</code>, and the content should rather be obtained by {@link #getBuffer()}.
+     *
+     * @return The temporary file or <code>null</code>
+     * @see #isInMemory()
+     */
+    public File getTempFile() {
+        return tempFile;
+    }
+
+    /**
      * Gets the {@link OutputStream} view on this file holder.
      *
      * @return An {@link OutputStream} that writes data into this file holder
