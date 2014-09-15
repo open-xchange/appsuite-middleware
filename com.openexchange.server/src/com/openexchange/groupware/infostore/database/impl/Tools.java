@@ -66,47 +66,6 @@ public class Tools {
     private static final Pattern IS_NUMBERED = Pattern.compile("\\(\\d+\\)$");
 
     /**
-     * Appends or modifies a counter in the 'name' part of the supplied filename. For example, passing the filename
-     * <code>test.txt</code> and a counter of <code>2</code> will result in the string <code>test (2).txt</code>, while the filename
-     * <code>test (1).txt</code> would be changed to <code>test (2).txt</code>.
-     *
-     * @param filename The filename to enhance
-     * @param counter The counter to append
-     * @return The enhanced filename
-     */
-    public static String enhance(final String filename, final int counter) {
-        if (null == filename) {
-            return filename;
-        }
-        StringBuilder stringBuilder = new StringBuilder(filename);
-
-        Matcher matcher = IS_NUMBERED_WITH_EXTENSION.matcher(filename);
-        if (matcher.find()) {
-            final int start = matcher.start();
-            final int end = matcher.end();
-            stringBuilder.replace(start, end - 1, "(" + counter + ")");
-            return stringBuilder.toString();
-        }
-
-        matcher = IS_NUMBERED.matcher(filename);
-        if (matcher.find()) {
-            final int start = matcher.start();
-            final int end = matcher.end();
-            stringBuilder.replace(start, end, "(" + counter + ")");
-            return stringBuilder.toString();
-        }
-
-        int index = filename.lastIndexOf('.');
-        if (0 >= index) {
-            index = filename.length();
-        }
-
-        stringBuilder.insert(index, " (" + counter + ")");
-
-        return stringBuilder.toString();
-    }
-
-    /**
      * Creates a string containing a placeholder for a possible enhancement counter for each of the supplied filenames. Those strings
      * are meant to be used in SQL <code>LIKE</code> statements to detect conflicting filenames.
      *
