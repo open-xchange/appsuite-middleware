@@ -165,6 +165,7 @@ public final class MailAccountWriter implements MailAccountFields {
             json.put(SPAM, account.getSpam());
             json.put(CONFIRMED_SPAM, account.getConfirmedSpam());
             json.put(CONFIRMED_HAM, account.getConfirmedHam());
+            json.put(ARCHIVE, account.getArchive());
 
             // Folder full names
             json.put(TRASH_FULLNAME, prepareFullname(accountId, account.getTrashFullname()));
@@ -173,6 +174,7 @@ public final class MailAccountWriter implements MailAccountFields {
             json.put(SPAM_FULLNAME, prepareFullname(accountId, account.getSpamFullname()));
             json.put(CONFIRMED_SPAM_FULLNAME, prepareFullname(accountId, account.getConfirmedSpamFullname()));
             json.put(CONFIRMED_HAM_FULLNAME, prepareFullname(accountId, account.getConfirmedHamFullname()));
+            json.put(ARCHIVE_FULLNAME, prepareFullname(accountId, account.getArchiveFullname()));
 
             // Unified Mail enabled
             json.put(UNIFIED_INBOX_ENABLED, account.isUnifiedINBOXEnabled());
@@ -232,6 +234,7 @@ public final class MailAccountWriter implements MailAccountFields {
             json.put(SPAM, account.getSpam());
             json.put(CONFIRMED_SPAM, account.getConfirmedSpam());
             json.put(CONFIRMED_HAM, account.getConfirmedHam());
+            json.put(ARCHIVE, account.getArchive());
 
             // Folder full names
             json.put(INBOX_FULLNAME, prepareFullname(accountId, "INBOX"));
@@ -241,6 +244,7 @@ public final class MailAccountWriter implements MailAccountFields {
             json.put(SPAM_FULLNAME, prepareFullname(accountId, account.getSpamFullname()));
             json.put(CONFIRMED_SPAM_FULLNAME, prepareFullname(accountId, account.getConfirmedSpamFullname()));
             json.put(CONFIRMED_HAM_FULLNAME, prepareFullname(accountId, account.getConfirmedHamFullname()));
+            json.put(ARCHIVE_FULLNAME, prepareFullname(accountId, account.getArchiveFullname()));
 
             // Unified Mail enabled
             json.put(UNIFIED_INBOX_ENABLED, account.isUnifiedINBOXEnabled());
@@ -285,7 +289,8 @@ public final class MailAccountWriter implements MailAccountFields {
         Attribute.DRAFTS_FULLNAME_LITERAL,
         Attribute.SPAM_FULLNAME_LITERAL,
         Attribute.CONFIRMED_HAM_FULLNAME_LITERAL,
-        Attribute.CONFIRMED_SPAM_FULLNAME_LITERAL);
+        Attribute.CONFIRMED_SPAM_FULLNAME_LITERAL,
+        Attribute.ARCHIVE_FULLNAME_LITERAL);
 
     /**
      * Writes specified attributes for each mail account contained in given array in an own JSON array surrounded by a super JSON array.
