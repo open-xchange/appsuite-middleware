@@ -83,7 +83,7 @@ import com.openexchange.admin.rmi.exceptions.MissingOptionException;
  */
 public abstract class AbstractJMXTools extends BasicCommandlineOptions {
 
-    protected static final String JMX_SERVER_PORT = "9996";
+    protected static final String JMX_SERVER_PORT = "9999";
 
     protected static final char OPT_HOST_SHORT = 'H';
     protected static final String OPT_HOST_LONG = "host";
@@ -251,7 +251,7 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
                 return "";
             }
     }
-
+    
     protected static Object doOperation(final MBeanServerConnection mbc, final String fullqualifiedoperationname) throws MalformedObjectNameException, NullPointerException, IOException, InvalidDataException, InstanceNotFoundException, MBeanException, ReflectionException {
         final String[] split = fullqualifiedoperationname.split("!");
         if (2 == split.length) {

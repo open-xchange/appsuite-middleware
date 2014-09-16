@@ -701,6 +701,10 @@ public class StatisticTools extends AbstractJMXTools {
          * probe if detailed map statistics are available
          */
         ObjectName toolkitName = new ObjectName("com.openexchange.hazelcast", "name", "Hazelcast Toolkit");
+        Set<ObjectInstance> mBeans = mbc.queryMBeans(toolkitName, null);
+        if (null == mBeans || 0 == mBeans.size()) {
+            return sb.append("[Hazelcast Toolkit MBean not available, unable to retrieve map statistics]").append(LINE_SEPARATOR).toString();
+        }
         if (null == mbc.invoke(toolkitName, "getPartitionOwner", new Object[] { "probe" }, new String[] { String.class.getName() })) {
             return sb.append("[No partition owners detected, unable to retrieve map statistics]").append(LINE_SEPARATOR).toString();
         }
