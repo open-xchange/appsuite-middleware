@@ -115,7 +115,6 @@ import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.tools.servlet.RateLimitedException;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * This is a super class of all AJAX servlets providing common methods.
