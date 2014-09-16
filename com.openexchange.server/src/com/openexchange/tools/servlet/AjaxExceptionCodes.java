@@ -166,12 +166,7 @@ public enum AjaxExceptionCodes implements DisplayableOXExceptionCode {
      * Missing the following field in JSON data: %1$s
      */
     MISSING_FIELD("Missing the following field in JSON data: %1$s", AjaxExceptionMessages.MISSING_FIELD_MSG, Category.CATEGORY_ERROR, 2), // Yapp, the same error code
-    /**
-     * An error with a yell() call-back: %1$s
-     * <p>
-     * Returns a yell() call-back to client.
-     */
-    HTTP_ERROR_YELL_CALLBACK("An error with a yell() call-back: %1$s", MESSAGE, Category.CATEGORY_ERROR, 26),
+
     ;
 
     public static final String PREFIX = "SVL";

@@ -69,13 +69,18 @@ public class Dispatchers {
         super();
     }
 
+    private static final String CALLBACK = "callback";
+
     /**
-     * Check if common JSON response is expected for specified HTTP request
+     * Check if common API response is expected for specified HTTP request
      *
      * @param req The HTTP request to check
-     * @return <code>true</code> if common JSON response is expected; otherwise <code>false</code>
+     * @return <code>true</code> if common API response is expected; otherwise <code>false</code>
      */
-    public static boolean isJsonOutputExpectedFor(HttpServletRequest req) {
+    public static boolean isApiOutputExpectedFor(HttpServletRequest req) {
+        if ("yell".equalsIgnoreCase(req.getParameter(CALLBACK))) {
+            return true;
+        }
         String prefix = DispatcherServlet.getPrefix();
         if (req.getRequestURI().startsWith(prefix)) {
             // Common dispatcher action - Try to determine if JSON is expected or not
@@ -83,7 +88,7 @@ public class Dispatchers {
             String module = requestDataTools.getModule(PREFIX.get(), req);
             AJAXActionServiceFactory factory = DispatcherServlet.getDispatcher().lookupFactory(module);
             if (factory != null) {
-                return isJsonOutputExpectedFor(optActionFor(requestDataTools.getAction(req), factory));
+                return isApiOutputExpectedFor(optActionFor(requestDataTools.getAction(req), factory));
             }
         }
         return true;
@@ -98,12 +103,12 @@ public class Dispatchers {
     }
 
     /**
-     * Check if common JSON response is expected for specified AJAX action.
+     * Check if common API response is expected for specified AJAX action.
      *
      * @param action The AJAX action to check
-     * @return <code>true</code> if no common JSON response is expected; otherwise <code>false</code>
+     * @return <code>true</code> if no common API response is expected; otherwise <code>false</code>
      */
-    public static boolean isJsonOutputExpectedFor(AJAXActionService action) {
+    public static boolean isApiOutputExpectedFor(AJAXActionService action) {
         if (null == action) {
             return true;
         }
