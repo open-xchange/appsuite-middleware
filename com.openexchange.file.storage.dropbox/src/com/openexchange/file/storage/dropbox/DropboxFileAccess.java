@@ -52,10 +52,8 @@ package com.openexchange.file.storage.dropbox;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import com.dropbox.client2.DropboxAPI.Entry;
 import com.dropbox.client2.DropboxAPI.ThumbFormat;
 import com.dropbox.client2.DropboxAPI.ThumbSize;
@@ -68,6 +66,8 @@ import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.dropbox.access.DropboxOAuthAccess;
@@ -77,6 +77,7 @@ import com.openexchange.file.storage.search.OrTerm;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -138,14 +139,15 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     @Override
     public boolean exists(final String folderId, final String id, final String version) throws OXException {
+        String path = toPath(folderId, id);
         try {
-            final Entry entry = dropboxAPI.metadata(id, 1, null, false, version);
+            final Entry entry = dropboxAPI.metadata(path, 1, null, false, version);
             return !entry.isDir && !entry.isDeleted;
         } catch (final DropboxServerException e) {
             if (404 == e.error) {
                 return false;
             }
-            throw handleServerError(null, e);
+            throw handleServerError(path, e);
         } catch (final DropboxException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -155,17 +157,29 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     @Override
     public File getFileMetadata(final String folderId, final String id, final String version) throws OXException {
+        String path = toPath(folderId, id);
         try {
-            final Entry entry = dropboxAPI.metadata(id, 1, null, false, version);
+            final Entry entry = dropboxAPI.metadata(path, 1, null, false, version);
             if (entry.isDir) {
-                throw DropboxExceptionCodes.NOT_A_FILE.create(id);
+                throw DropboxExceptionCodes.NOT_A_FILE.create(path);
             }
             if (entry.isDeleted) {
-                throw DropboxExceptionCodes.NOT_FOUND.create(id);
+                throw DropboxExceptionCodes.NOT_FOUND.create(path);
             }
-            return new DropboxFile(entry.parentPath(), entry.path, userId).parseDropboxFile(entry);
+            return new DropboxFile(entry.parentPath(), entry.fileName(), userId).parseDropboxFile(entry);
         } catch (final DropboxServerException e) {
-            throw handleServerError(id, e);
+
+            try {
+                List<Entry> revisions = dropboxAPI.revisions(path, 0);
+
+                System.out.println(revisions);
+
+            } catch (DropboxException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
+
+            throw handleServerError(path, e);
         } catch (final DropboxException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -180,21 +194,40 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     @Override
     public void saveFileMetadata(final File file, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
-        /*
-         * only rename possible
-         */
-        if (null == modifiedFields || modifiedFields.contains(Field.FILENAME)) {
+        if (FileStorageFileAccess.NEW == file.getId()) {
+            /*
+             * create new, empty file ("touch")
+             */
+            String path = toPath(file.getFolderId(), file.getFileName());
             try {
-                String fromPath = file.getId();
-                String toPath = toPath(file.getFolderId()) + '/' + file.getFileName();
-                Entry entry = dropboxAPI.move(fromPath, toPath);
-                file.setId(entry.path);
-            } catch (final DropboxServerException e) {
-                throw handleServerError(file.getId(), e);
-            } catch (final DropboxException e) {
+                Entry entry = dropboxAPI.putFile(path, Streams.EMPTY_INPUT_STREAM, 0, null, null);
+                file.setId(entry.fileName());
+                file.setVersion(entry.rev);
+            } catch (DropboxServerException e) {
+                throw handleServerError(path, e);
+            } catch (DropboxException e) {
                 throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
+        } else {
+            /*
+             * only rename possible
+             */
+            if (null == modifiedFields || modifiedFields.contains(Field.FILENAME)) {
+                String path = toPath(file.getFolderId(), file.getId());
+                String toPath = toPath(file.getFolderId(), file.getFileName());
+                try {
+                    Entry entry = dropboxAPI.move(path, toPath);
+                    file.setId(entry.fileName());
+                    file.setVersion(entry.rev);
+                } catch (final DropboxServerException e) {
+                    throw handleServerError(path, e);
+                } catch (final DropboxException e) {
+                    throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+                } catch (final RuntimeException e) {
+                    throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                }
             }
         }
     }
@@ -205,73 +238,53 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             // can only copy the current revision
             throw DropboxExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
         }
-        final String id = source.getId();
+        String path = toPath(source.getFolder(), source.getId());
+        String destName = null != update && null != modifiedFields && modifiedFields.contains(Field.FILENAME) ? update.getFileName() : source.getId();
         try {
-            String name = id.substring(id.lastIndexOf('/') + 1);
-            String destPath = toPath(destFolder);
-
-            int pos = destPath.lastIndexOf('/');
-            String toPath = pos > 0 ? new StringBuilder(destPath).append('/').append(name).toString() : new StringBuilder(name.length() + 1).append('/').append(name).toString();
-
-            String baseName;
-            String ext;
-            {
-                int dotPos = name.lastIndexOf('.');
-                if (dotPos > 0) {
-                    baseName = name.substring(0, dotPos);
-                    ext = name.substring(dotPos);
-                } else {
-                    baseName = name;
-                    ext = "";
-                }
+            /*
+             * ensure filename uniqueness in target folder
+             */
+            for (int i = 1; exists(destFolder, destName, CURRENT_VERSION); i++) {
+                destName = FileStorageUtility.enhance(destName, i);
             }
-            int count = 1;
-            while (exists(destFolder, toPath, version)) {
-                name = new StringBuilder(baseName).append(" (").append(count++).append(')').append(ext).toString();
-                pos = toPath.lastIndexOf('/');
-                toPath = pos > 0 ? new StringBuilder(toPath.substring(0, pos)).append('/').append(name).toString() : new StringBuilder(name.length() + 1).append('/').append(name).toString();
-            }
-
-            Entry entry = dropboxAPI.copy(id, toPath);
-            return new IDTuple(entry.parentPath(), entry.path);
-        } catch (final DropboxServerException e) {
-            throw handleServerError(id, e);
-        } catch (final DropboxException e) {
+            /*
+             * perform copy
+             */
+            Entry entry = dropboxAPI.copy(path, toPath(destFolder, destName));
+            return new IDTuple(entry.parentPath(), entry.fileName());
+        } catch (DropboxServerException e) {
+            throw handleServerError(path, e);
+        } catch (DropboxException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
     @Override
     public IDTuple move(IDTuple source, String destFolder, long sequenceNumber, File update, List<File.Field> modifiedFields) throws OXException {
-        final String id = source.getId();
+        String path = toPath(source.getFolder(), source.getId());
+        String destName = null != update && null != modifiedFields && modifiedFields.contains(Field.FILENAME) ? update.getFileName() : source.getId();
+        String destPath = toPath(destFolder, destName);
         try {
-            String name = null != update && null != modifiedFields && modifiedFields.contains(Field.FILENAME) ? update.getFileName() : id.substring(id.lastIndexOf('/') + 1);
-            String destPath = toPath(destFolder);
-            if (!destPath.endsWith("/")) {
-                destPath = new StringBuilder(destPath.length() + 1).append(destPath).append('/').toString();
-            }
-
-            int pos = destPath.lastIndexOf('/');
-            Entry entry = dropboxAPI.move(id, pos > 0 ? new StringBuilder(destPath).append('/').append(name).toString() : new StringBuilder(name.length() + 1).append('/').append(name).toString());
-
-            return new IDTuple(entry.parentPath(), entry.path);
-        } catch (final DropboxServerException e) {
-            throw handleServerError(id, e);
-        } catch (final DropboxException e) {
+            Entry entry = dropboxAPI.move(path, destPath);
+            return new IDTuple(entry.parentPath(), entry.fileName());
+        } catch (DropboxServerException e) {
+            throw handleServerError(path, e);
+        } catch (DropboxException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
     @Override
     public InputStream getDocument(final String folderId, final String id, final String version) throws OXException {
+        String path = toPath(folderId, id);
         try {
-            return dropboxAPI.getFileStream(id, version);
+            return dropboxAPI.getFileStream(path, version);
         } catch (final DropboxServerException e) {
-            throw handleServerError(id, e);
+            throw handleServerError(path, e);
         } catch (final DropboxException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -281,13 +294,14 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     @Override
     public InputStream getThumbnailStream(String folderId, String id, String version) throws OXException {
+        String path = toPath(folderId, id);
         try {
-            return dropboxAPI.getThumbnailStream(id, ThumbSize.ICON_128x128, ThumbFormat.JPEG);
+            return dropboxAPI.getThumbnailStream(path, ThumbSize.ICON_128x128, ThumbFormat.JPEG);
         } catch (final DropboxServerException e) {
             if (404 == e.error) {
                 return null;
             }
-            throw handleServerError(null, e);
+            throw handleServerError(path, e);
         } catch (final DropboxException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -302,12 +316,12 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     @Override
     public void saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
-        final String id = file.getId();
+        String path = FileStorageFileAccess.NEW == file.getId() ? null : toPath(file.getFolderId(), file.getId());
         try {
             final long fileSize = file.getFileSize();
             final long length = fileSize > 0 ? fileSize : -1L;
             final Entry entry;
-            if (Strings.isEmpty(id) || !exists(null, id, CURRENT_VERSION)) {
+            if (Strings.isEmpty(path) || !exists(file.getFolderId(), file.getId(), CURRENT_VERSION)) {
                 // Create
                 entry = dropboxAPI.putFile(
                     new StringBuilder(file.getFolderId()).append('/').append(file.getFileName()).toString(),
@@ -317,11 +331,12 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                     null);
             } else {
                 // Update
-                entry = dropboxAPI.putFileOverwrite(id, data, length, null);
+                entry = dropboxAPI.putFileOverwrite(path, data, length, null);
             }
-            file.setId(entry.path);
+            file.setId(entry.fileName());
+            file.setVersion(entry.rev);
         } catch (final DropboxServerException e) {
-            throw handleServerError(id, e);
+            throw handleServerError(path, e);
         } catch (final DropboxException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -360,8 +375,9 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         try {
             final List<IDTuple> ret = new ArrayList<IDTuple>(ids.size());
             for (final IDTuple id : ids) {
+                String path = toPath(id.getFolder(), id.getId());
                 try {
-                    dropboxAPI.delete(id.getId());
+                    dropboxAPI.delete(path);
                 } catch (final DropboxServerException e) {
                     if (404 != e.error) {
                         ret.add(id);
@@ -388,14 +404,15 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                 throw DropboxExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
             }
         }
+        String path = toPath(folderId, id);
         try {
-            dropboxAPI.delete(id);
+            dropboxAPI.delete(path);
             return new String[0];
         } catch (final DropboxServerException e) {
             if (404 == e.error) {
                 return new String[0];
             }
-            throw handleServerError(null, e);
+            throw handleServerError(path, e);
         } catch (final DropboxException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -429,7 +446,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             final List<File> files = new ArrayList<File>(contents.size());
             for (final Entry childEntry : contents) {
                 if (!childEntry.isDir && !childEntry.isDeleted) {
-                    files.add(new DropboxFile(folderId, childEntry.path, userId).parseDropboxFile(childEntry));
+                    files.add(new DropboxFile(folderId, childEntry.fileName(), userId).parseDropboxFile(childEntry));
                 }
             }
             return new FileTimedResult(files);
@@ -458,7 +475,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             final List<File> files = new ArrayList<File>(contents.size());
             for (final Entry childEntry : contents) {
                 if (!childEntry.isDir && !childEntry.isDeleted) {
-                    files.add(new DropboxFile(folderId, childEntry.path, userId).parseDropboxFile(childEntry));
+                    files.add(new DropboxFile(folderId, childEntry.fileName(), userId).parseDropboxFile(childEntry));
                 }
             }
             // Sort collection if needed
@@ -498,17 +515,18 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     @Override
     public TimedResult<File> getVersions(final String folderId, final String id, final List<Field> fields, final Field sort, final SortDirection order) throws OXException {
+        String path = toPath(folderId, id);
         try {
-            final List<Entry> revisions = dropboxAPI.revisions(id, 0);
+            final List<Entry> revisions = dropboxAPI.revisions(path, 0);
             final List<File> files = new ArrayList<File>(revisions.size());
             for (final Entry revisionEntry : revisions) {
-                files.add(new DropboxFile(folderId, id, userId).parseDropboxFile(revisionEntry));
+                files.add(new DropboxFile(folderId, revisionEntry.fileName(), userId).parseDropboxFile(revisionEntry));
             }
             // Sort collection
             sort(files, sort, order);
             return new FileTimedResult(files);
         } catch (final DropboxServerException e) {
-            throw handleServerError(id, e);
+            throw handleServerError(path, e);
         } catch (final DropboxException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -521,7 +539,8 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         try {
             final List<File> files = new ArrayList<File>(ids.size());
             for (final IDTuple id : ids) {
-                final Entry entry = dropboxAPI.metadata(id.getId(), 1, null, false, null);
+                String path = toPath(id.getFolder(), id.getId());
+                final Entry entry = dropboxAPI.metadata(path, 1, null, false, null);
                 if (!entry.isDeleted && !entry.isDir) {
                     files.add(new DropboxFile(id.getFolder(), id.getId(), userId).parseDropboxFile(entry));
                 }
@@ -614,22 +633,6 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         return getSearchIterator(searchInFolder(folderId, pattern), sort, order, start, end);
     }
 
-    private void gatherAllFolders(final String path, final Set<String> folderPaths) throws DropboxException {
-        final Entry metadata = dropboxAPI.metadata(path, 0, null, true, null);
-        final List<Entry> contents = metadata.contents;
-        final List<String> collectedPaths = new ArrayList<String>(contents.size());
-        for (final Entry childEntry : contents) {
-            final String childPath = childEntry.path;
-            if (childEntry.isDir && !childEntry.isDeleted && folderPaths.add(childPath)) {
-                // No direct recursive invocation to maintain hierarchical order in linked set
-                collectedPaths.add(childPath);
-            }
-        }
-        for (final String childPath : collectedPaths) {
-            gatherAllFolders(childPath, folderPaths);
-        }
-    }
-
     private void gatherAllFiles(final String path, final List<File> files) throws DropboxException, OXException {
         final Entry metadata = dropboxAPI.metadata(path, 0, null, true, null);
         final List<Entry> contents = metadata.contents;
@@ -639,7 +642,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                 if (childEntry.isDir) {
                     gatherAllFiles(childPath, files);
                 } else {
-                    files.add(new DropboxFile(toId(path), childPath, userId).parseDropboxFile(childEntry));
+                    files.add(new DropboxFile(toId(path), childEntry.fileName(), userId).parseDropboxFile(childEntry));
                 }
             }
         }
@@ -662,18 +665,15 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     private List<File> searchInFolder(String folderId, String pattern) throws OXException {
         try {
             if (null == folderId) {
-                // All folders...
-                final Set<String> folderPaths = new LinkedHashSet<String>(16);
-                folderPaths.add("/");
-                gatherAllFolders("/", folderPaths);
-                // Search in them
-                List<File> results = new LinkedList<File>();
-                for (final String folderPath : folderPaths) {
-                    results.addAll(searchInPath(folderPath, pattern));
-                }
-                return results;
+                /*
+                 * all folders (dropbox search is recursive by default)
+                 */
+                return searchInPath("/", pattern, true);
             } else {
-                return searchInPath(toPath(folderId), pattern);
+                /*
+                 * specific folder
+                 */
+                return searchInPath(toPath(folderId), pattern, false);
             }
         } catch (final DropboxServerException e) {
             throw handleServerError(null, e);
@@ -689,11 +689,13 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      *
      * @param folderPath The dropbox folder path
      * @param pattern The pattern
+     * @param recursive <code>true</code> to search in the supplied folder and all subfolders recursively, <code>false</code>, to include
+     *                  matches in the supplied folder only
      * @return The found files
      * @throws OXException
      * @throws DropboxException
      */
-    private List<File> searchInPath(String folderPath, String pattern) throws OXException, DropboxException {
+    private List<File> searchInPath(String folderPath, String pattern, boolean recursive) throws OXException, DropboxException {
         if (Strings.isEmpty(pattern)) {
             List<File> files = new LinkedList<File>();
             gatherAllFiles(folderPath, files);
@@ -702,9 +704,10 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         // Dropbox API only supports searching by file name
         List<Entry> results = dropboxAPI.search(folderPath, pattern, 0, false);
         List<File> files = new ArrayList<File>(results.size());
-        for (final Entry resultsEntry : results) {
-            if (!resultsEntry.isDir) {
-                files.add(new DropboxFile(toId(folderPath), resultsEntry.path, userId).parseDropboxFile(resultsEntry));
+        for (Entry entry : results) {
+            if (false == entry.isDir && (recursive ||
+                Utils.normalizeFolderId(folderPath).equals(Utils.normalizeFolderId(entry.parentPath())))) {
+                files.add(new DropboxFile(entry.parentPath(), entry.fileName(), userId).parseDropboxFile(entry));
             }
         }
         return files;
@@ -760,3 +763,5 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     }
 
 }
+
+

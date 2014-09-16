@@ -65,8 +65,8 @@ public class Slf4jLogger extends AbstractLogger {
     private static final int PRIORITY = 5;
 
     private Logger logger;
-    private String changeLogName = null;
-    private String changeSetName = null;
+    private String changeLogName;
+    private String changeSetName;
 
     /**
      * Takes the given logger name argument and associates it with a SLF4J logger.
@@ -109,7 +109,7 @@ public class Slf4jLogger extends AbstractLogger {
      */
     @Override
     public void severe(String message) {
-        this.logger.error(buildMessage(message));
+        this.logger.error("{}", buildMessage(message));
     }
 
     /**
@@ -120,7 +120,7 @@ public class Slf4jLogger extends AbstractLogger {
      */
     @Override
     public void severe(String message, Throwable throwable) {
-        this.logger.error(buildMessage(message), throwable);
+        this.logger.error("{}", buildMessage(message), throwable);
     }
 
     /**
@@ -130,7 +130,7 @@ public class Slf4jLogger extends AbstractLogger {
      */
     @Override
     public void warning(String message) {
-        this.logger.warn(buildMessage(message));
+        this.logger.warn("{}", buildMessage(message));
     }
 
     /**
@@ -141,7 +141,7 @@ public class Slf4jLogger extends AbstractLogger {
      */
     @Override
     public void warning(String message, Throwable throwable) {
-        this.logger.warn(buildMessage(message), throwable);
+        this.logger.warn("{}", buildMessage(message), throwable);
     }
 
     /**
@@ -151,7 +151,7 @@ public class Slf4jLogger extends AbstractLogger {
      */
     @Override
     public void info(String message) {
-        this.logger.info(buildMessage(message));
+        this.logger.info("{}", buildMessage(message));
     }
 
     /**
@@ -162,7 +162,7 @@ public class Slf4jLogger extends AbstractLogger {
      */
     @Override
     public void info(String message, Throwable throwable) {
-        this.logger.info(buildMessage(message), throwable);
+        this.logger.info("{}", buildMessage(message), throwable);
     }
 
     /**
@@ -172,7 +172,7 @@ public class Slf4jLogger extends AbstractLogger {
      */
     @Override
     public void debug(String message) {
-        this.logger.debug(buildMessage(message));
+        this.logger.debug("{}", buildMessage(message));
     }
 
     /**
@@ -183,7 +183,7 @@ public class Slf4jLogger extends AbstractLogger {
      */
     @Override
     public void debug(String message, Throwable throwable) {
-        this.logger.debug(buildMessage(message), throwable);
+        this.logger.debug("{}", buildMessage(message), throwable);
     }
 
     /**
@@ -204,15 +204,23 @@ public class Slf4jLogger extends AbstractLogger {
      * @param message The basic log message before optional data.
      * @return the complete log message to print to the logger.
      */
-    protected String buildMessage(String message) {
-        StringBuilder msg = new StringBuilder();
-        if(changeLogName != null) {
-            msg.append(changeLogName).append(": ");
-        }
-        if(changeSetName != null) {
-            msg.append(changeSetName.replace(changeLogName + "::", "")).append(": ");
-        }
-        msg.append(message);
-        return msg.toString();
+    protected Object buildMessage(final String message) {
+        final String changeLogName = this.changeLogName;
+        final String changeSetName = this.changeSetName;
+        return new Object() {
+
+            @Override
+            public String toString() {
+                StringBuilder msg = new StringBuilder(256);
+                if(changeLogName != null) {
+                    msg.append(changeLogName).append(": ");
+                }
+                if(changeSetName != null) {
+                    msg.append(changeSetName.replace(changeLogName + "::", "")).append(": ");
+                }
+                msg.append(message);
+                return msg.toString();
+            }
+        };
     }
 }

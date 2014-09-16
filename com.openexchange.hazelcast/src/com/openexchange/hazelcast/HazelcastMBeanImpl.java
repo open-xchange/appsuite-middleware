@@ -98,6 +98,21 @@ public class HazelcastMBeanImpl extends StandardMBean implements HazelcastMBean 
     }
 
     @Override
+    public boolean usesCustomPartitioning() {
+        HazelcastInstance hazelcastInstance = REF_HAZELCAST_INSTANCE.get();
+        if (null != hazelcastInstance) {
+            Config config = hazelcastInstance.getConfig();
+            if (null != config) {
+                PartitionGroupConfig partitionGroupConfig = config.getPartitionGroupConfig();
+                if (null != partitionGroupConfig) {
+                    return partitionGroupConfig.isEnabled();
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
     public boolean supportsPartitionReplicas() {
         Set<Member> partitionOwningMembers = getPartitionOwningMembers();
         if (null != partitionOwningMembers) {
