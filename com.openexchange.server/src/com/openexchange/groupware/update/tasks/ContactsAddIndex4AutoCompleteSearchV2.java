@@ -90,7 +90,7 @@ public class ContactsAddIndex4AutoCompleteSearchV2 extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[] { ContactClearDelTablesTasks.class.getName() };
+        return new String[] { MakeFolderIdPrimaryForDelContactsTable.class.getName() };
     }
 
     @Override
