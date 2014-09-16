@@ -52,6 +52,7 @@ package com.openexchange.file.storage.dropbox;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import com.dropbox.client2.DropboxAPI.Account;
 import com.dropbox.client2.DropboxAPI.Entry;
 import com.dropbox.client2.exception.DropboxException;
 import com.dropbox.client2.exception.DropboxServerException;
@@ -316,7 +317,21 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
 
     @Override
     public Quota getStorageQuota(final String folderId) throws OXException {
-        return Type.STORAGE.getUnlimited();
+        /*
+         * quota_info/normal   The user's used quota outside of shared folders (bytes).
+         * quota_info/shared   The user's used quota in shared folders (bytes).
+         * quota_info/quota    The user's total quota allocation (bytes).
+         */
+        try {
+            Account accountInfo = dropboxAPI.accountInfo();
+            return new Quota(accountInfo.quota, accountInfo.quotaNormal + accountInfo.quotaShared, Type.STORAGE);
+        } catch (DropboxServerException e) {
+            throw handleServerError(toPath(folderId), e);
+        } catch (DropboxException e) {
+            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     @Override
@@ -326,11 +341,23 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
 
     @Override
     public Quota[] getQuotas(final String folder, final Type[] types) throws OXException {
-        final Quota[] ret = new Quota[types.length];
-        for (int i = 0; i < types.length; i++) {
-            ret[i] = types[i].getUnlimited();
+        if (null == types) {
+            return null;
         }
-        return ret;
+        Quota[] quotas = new Quota[types.length];
+        for (int i = 0; i < types.length; i++) {
+            switch (types[i]) {
+            case FILE:
+                quotas[i] = getFileQuota(folder);
+                break;
+            case STORAGE:
+                quotas[i] = getStorageQuota(folder);
+                break;
+            default:
+                throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create("Quota " + types[i]);
+            }
+        }
+        return quotas;
     }
 
 }

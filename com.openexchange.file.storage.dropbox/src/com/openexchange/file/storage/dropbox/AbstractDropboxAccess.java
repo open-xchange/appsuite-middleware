@@ -101,7 +101,7 @@ public abstract class AbstractDropboxAccess {
     }
 
     /**
-     * Gets the path for specified folder identifier.
+     * Gets the (dropbox-)path for specified folder identifier.
      *
      * @param folderId The folder identifier
      * @return The associated path
@@ -111,6 +111,18 @@ public abstract class AbstractDropboxAccess {
             return null;
         }
         return FileStorageFolder.ROOT_FULLNAME.equals(folderId) ? "/" : folderId;
+    }
+
+    /**
+     * Gets the (dropbox-)path for the specified folder- and file-identifier.
+     *
+     * @param folderId The folder identifier
+     * @param fileId The file identifier
+     * @return The associated path
+     */
+    protected static String toPath(String folderId, String fileId) {
+        String parentPath = toPath(folderId);
+        return parentPath.endsWith("/") ? parentPath + fileId : parentPath + '/' + fileId;
     }
 
     /**
