@@ -198,6 +198,9 @@ public interface SessiondService {
 
     /**
      * Gets the first session that matches the given userId and contextId.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
      */
     public Session getAnyActiveSessionForUser(int userId, int contextId);
 
