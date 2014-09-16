@@ -305,7 +305,7 @@ public final class ConfigJSlobService implements JSlobService {
                     try {
                         attributes.put(preferencePath, new AttributedProperty(preferencePath, entry.getKey(), property));
                     } catch (final Exception e) {
-                        logger.warn("Couldn''t initialize preference path: {}", preferencePath, e);
+                        logger.warn("Couldn't initialize preference path: {}", preferencePath, e);
                     }
                 }
             }
