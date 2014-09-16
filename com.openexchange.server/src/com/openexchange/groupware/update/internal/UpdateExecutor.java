@@ -200,12 +200,15 @@ public final class UpdateExecutor {
 
     private final void lockSchema(final boolean blocking) throws OXException {
         store.lockSchema(state, contextId, !blocking);
-        LocalUpdateTaskMonitor.getInstance().addState(state);
+        LocalUpdateTaskMonitor.getInstance().addState(state.getSchema());
     }
 
     private final void unlockSchema(final boolean blocking) throws OXException {
-        store.unlockSchema(state, contextId, !blocking);
-        LocalUpdateTaskMonitor.getInstance().removeState(state);
+        try {
+            store.unlockSchema(state, contextId, !blocking);
+        } finally {
+            LocalUpdateTaskMonitor.getInstance().removeState(state.getSchema());
+        }
     }
 
     private final void addExecutedTask(final String taskName, final boolean success, final int poolId, final String schema) throws OXException {
