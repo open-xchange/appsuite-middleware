@@ -96,7 +96,7 @@ public interface SessiondService {
      * @param sessionId The Session identifier
      * @return <code>true</code> if the session was removed or <code>false</code> if the session identifier doesn't exist
      */
-    public boolean removeSession(final String sessionId);
+    public boolean removeSession(String sessionId);
 
     /**
      * Removes all sessions belonging to given user in specified context.
@@ -105,14 +105,14 @@ public interface SessiondService {
      * @param ctx The context
      * @return The number of removed session or zero if no session was removed
      */
-    public int removeUserSessions(final int userId, final Context ctx);
+    public int removeUserSessions(int userId, Context ctx);
 
     /**
      * Removes all sessions belonging to given context.
      *
      * @param contextId The context identifier
      */
-    public void removeContextSessions(final int contextId);
+    public void removeContextSessions(int contextId);
 
     /**
      * Gets the number of active sessions belonging to given user in specified context.
@@ -121,7 +121,7 @@ public interface SessiondService {
      * @param contextId The context identifier
      * @return The number of active sessions belonging to given user in specified context
      */
-    public int getUserSessions(final int userId, final int contextId);
+    public int getUserSessions(int userId, int contextId);
 
     /**
      * Gets the <b>local-only</b> sessions associated with specified user in given context.
@@ -168,7 +168,7 @@ public interface SessiondService {
      * @param localIp The new local IP to apply to session; pass <code>null</code> to not replace existing IP in session
      * @return The session object or <code>null</code> if no session exists for the given random token or if the random token is already expired
      */
-    public Session getSessionByRandomToken(final String randomToken, final String localIp);
+    public Session getSessionByRandomToken(String randomToken, String localIp);
 
     /**
      * Get the session object related to the given random token.
@@ -176,7 +176,7 @@ public interface SessiondService {
      * @param randomToken The random token of the session
      * @return The session object or <code>null</code> if no session exists for the given random token or if the random token is already expired
      */
-    public Session getSessionByRandomToken(final String randomToken);
+    public Session getSessionByRandomToken(String randomToken);
 
     /**
      * Picks up the session associated with the given client and server token. If a session exists for the given tokens and both tokens
