@@ -49,6 +49,7 @@
 
 package com.openexchange.data.conversion.ical.ical4j.internal.task;
 
+import static com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools.toDate;
 import static com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools.toDateTime;
 import java.util.Date;
 import java.util.List;
@@ -80,9 +81,16 @@ public class DueDate extends AbstractVerifyingAttributeConverter<VToDo, Task> {
 
     @Override
     public void emit(final Mode mode, final int index, final Task task, final VToDo vToDo, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
-        String tz = EmitterTools.extractTimezoneIfPossible(task);
-        net.fortuna.ical4j.model.Date date = toDateTime(mode.getZoneInfo(), task.getEndDate(), tz);
-        vToDo.getProperties().add(new Due(date));
+        /*
+         * emit as date or date-time depending on fulltime flag
+         */
+        Due due = new Due();
+        if (task.getFullTime()) {
+            due.setDate(toDate(task.getEndDate()));
+        } else {
+            due.setDate(toDateTime(mode.getZoneInfo(), task.getEndDate(), EmitterTools.extractTimezoneIfPossible(task)));
+        }
+        vToDo.getProperties().add(due);
     }
 
     @Override
@@ -101,5 +109,7 @@ public class DueDate extends AbstractVerifyingAttributeConverter<VToDo, Task> {
         }
         final Date endDate = ParserTools.toDateConsideringDateType(due, timeZone);
         task.setEndDate(endDate);
+        task.setFullTime(false == ParserTools.isDateTime(vToDo, due));
     }
+
 }

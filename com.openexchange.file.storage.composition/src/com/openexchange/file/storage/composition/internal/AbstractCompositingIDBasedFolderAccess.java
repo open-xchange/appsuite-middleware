@@ -329,10 +329,12 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
 
     @Override
     public FileStorageFolder[] getRootFolders(final Locale locale) throws OXException {
-        List<AccessWrapper> accessWrappers = getAllAccountAccesses();
-        List<FileStorageFolder> folders = new ArrayList<FileStorageFolder>(accessWrappers.size());
         // Sort according to account name
+        List<AccessWrapper> accessWrappers = getAllAccountAccesses();
         Collections.sort(accessWrappers, new AccessWrapperComparator(locale == null ? Locale.US : locale));
+
+        // Get root folders
+        List<FileStorageFolder> folders = new ArrayList<FileStorageFolder>(accessWrappers.size());
         for (AccessWrapper accessWrapper : accessWrappers) {
             FileStorageAccountAccess accountAccess = accessWrapper.accountAccess;
             FileStorageFolderAccess folderAccess = accountAccess.getFolderAccess();
@@ -369,7 +371,8 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
                     connect(accountAccess);
                     accountAccesses.add(new AccessWrapper(accountAccess, fileStorageAccount.getDisplayName()));
                 } catch (OXException e) {
-                    if (!"OAUTH-0004".equals(e.getErrorCode())) { // OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA
+                    // OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA -- 'OAUTH-0004'
+                    if (4 != e.getCode() || !"OAUTH".equals(e.getPrefix())) {
                         throw e;
                     }
                 }

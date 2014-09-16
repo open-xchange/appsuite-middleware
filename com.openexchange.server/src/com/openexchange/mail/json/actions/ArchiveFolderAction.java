@@ -59,8 +59,6 @@ import java.util.Map;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -79,7 +77,7 @@ import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.config.MailReloadable;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -123,41 +121,6 @@ public final class ArchiveFolderAction extends AbstractMailAction {
         super(services);
     }
 
-    private static volatile Integer defaultDays;
-    private static int defaultDays() {
-        Integer tmp = defaultDays;
-        if (null == tmp) {
-            synchronized (ArchiveFolderAction.class) {
-                tmp = defaultDays;
-                if (null == tmp) {
-                    int defaultInt = 90;
-                    ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    if (null == service) {
-                        return defaultInt;
-                    }
-                    tmp = Integer.valueOf(service.getIntProperty("com.openexchange.mail.archive.defaultDays", defaultInt));
-                    defaultDays = tmp;
-                }
-            }
-        }
-        return tmp.intValue();
-    }
-
-    static {
-        MailReloadable.getInstance().addReloadable(new Reloadable() {
-
-            @Override
-            public void reloadConfiguration(ConfigurationService configService) {
-                defaultDays = null;
-            }
-
-            @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
-            }
-        });
-    }
-
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
@@ -168,11 +131,7 @@ public final class ArchiveFolderAction extends AbstractMailAction {
             int days;
             {
                 String sDays = req.getRequest().getParameter("days");
-                if (Strings.isEmpty(sDays)) {
-                    days = defaultDays();
-                } else {
-                    days = Strings.parsePositiveInt(sDays.trim());
-                }
+                days = Strings.isEmpty(sDays) ? MailProperties.getInstance().getDefaultArchiveDays() : Strings.parsePositiveInt(sDays.trim());
             }
             String sourceFolder = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
             // Check service

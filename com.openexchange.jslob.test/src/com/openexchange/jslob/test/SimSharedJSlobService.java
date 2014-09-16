@@ -104,22 +104,4 @@ public class SimSharedJSlobService implements SharedJSlobService {
         return jslob.getId().getId();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.jslob.shared.SharedJSlobService#setJSONObject()
-     */
-    @Override
-    public void setJSONObject(JSONObject jsonObject) {
-        jslob.setJsonObject(jsonObject);
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.jslob.shared.SharedJSlobService#setMetaObject()
-     */
-    @Override
-    public void setMetaObject(JSONObject metaObject) {
-        jslob.setMetaObject(metaObject);
-    }
-
 }

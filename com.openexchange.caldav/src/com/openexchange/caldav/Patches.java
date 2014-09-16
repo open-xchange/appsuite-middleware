@@ -326,6 +326,22 @@ public class Patches {
         }
 
         /**
+         * Removes the start date of a task in case the updated task's end date is set to a time before the set start date.
+         *
+         * @param originalTask The original task
+         * @param updatedTask The updated task
+         */
+        public static void adjustTaskStart(Task originalTask, Task updatedTask) {
+            Date startDate = updatedTask.containsStartDate() ? updatedTask.getStartDate() : originalTask.getStartDate();
+            if (null != startDate && updatedTask.containsEndDate() && updatedTask.getEndDate().before(startDate)) {
+                /*
+                 * remove currently set start date
+                 */
+                updatedTask.setStartDate(null);
+            }
+        }
+
+        /**
          * Removes the appointment's participants other than the user with the given user ID in case the supplied folder is a 'public' one.
          *
          * @param userID The user ID

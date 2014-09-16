@@ -46,6 +46,7 @@ modules/mail/unifiedinboxidentifier > io.ox/mail//unifiedInboxIdentifier
 modules/mail/msgformat > io.ox/mail//messageFormat
 modules/mail/displayReceiptNotification > io.ox/mail//sendDispositionNotification
 modules/mail/enforcesecureconnection > io.ox/mail//enforcesecureconnection
+modules/mail/defaultarchivedays > io.ox/mail//defaultarchivedays
 
 # Migration
 gui > io.ox/migration//gui

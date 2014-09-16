@@ -139,15 +139,11 @@ public final class GoogleDriveAccess {
         }
 
         // Grab Google OAuth account
-        OAuthAccount googleAccount = GoogleApiClients.getGoogleAccount(oauthAccountId, session);
+        OAuthAccount googleAccount = GoogleApiClients.getGoogleAccount(oauthAccountId, session, false);
         this.googleAccount = googleAccount;
 
-        // Generate appropriate credentials for it
-        GoogleCredential credentials = GoogleApiClients.getCredentials(googleAccount, session);
-
-        // Establish Drive instance
-        Drive drive = new Drive.Builder(credentials.getTransport(), credentials.getJsonFactory(), credentials).setApplicationName(GoogleApiClients.getGoogleProductName()).build();
-        driveRef = new AtomicReference<Drive>(drive);
+        // Establish Drive reference
+        driveRef = new AtomicReference<Drive>();
         lastAccessed = System.nanoTime();
     }
 
@@ -159,20 +155,27 @@ public final class GoogleDriveAccess {
      * @throws OXException If check fails
      */
     private GoogleDriveAccess ensureNotExpired(Session session) throws OXException {
+        if (null == driveRef.get()) {
+            return this;
+        }
+
         long now = System.nanoTime();
         if (TimeUnit.NANOSECONDS.toSeconds(now - lastAccessed) > RECHECK_THRESHOLD) {
             synchronized (this) {
-                OAuthAccount newAccount = GoogleApiClients.ensureNonExpiredGoogleAccount(googleAccount, session);
-                if (newAccount != null) {
-                    this.googleAccount = newAccount;
+                now = System.nanoTime();
+                if (TimeUnit.NANOSECONDS.toSeconds(now - lastAccessed) > RECHECK_THRESHOLD) {
+                    OAuthAccount newAccount = GoogleApiClients.ensureNonExpiredGoogleAccount(googleAccount, session);
+                    if (newAccount != null) {
+                        this.googleAccount = newAccount;
 
-                    // Generate appropriate credentials for it
-                    GoogleCredential credentials = GoogleApiClients.getCredentials(newAccount, session);
+                        // Generate appropriate credentials for it
+                        GoogleCredential credentials = GoogleApiClients.getCredentials(newAccount, session);
 
-                    // Establish Drive instance
-                    Drive drive = new Drive.Builder(credentials.getTransport(), credentials.getJsonFactory(), credentials).setApplicationName(GoogleApiClients.getGoogleProductName()).build();
-                    driveRef.set(drive);
-                    lastAccessed = System.nanoTime();
+                        // Establish Drive instance
+                        Drive drive = new Drive.Builder(credentials.getTransport(), credentials.getJsonFactory(), credentials).setApplicationName(GoogleApiClients.getGoogleProductName()).build();
+                        driveRef.set(drive);
+                        lastAccessed = System.nanoTime();
+                    }
                 }
             }
         }
@@ -183,9 +186,34 @@ public final class GoogleDriveAccess {
      * Gets the Drive reference
      *
      * @return The Drive reference
+     * @throws OXException If Drive reference cannot be returned
      */
-    public Drive getDrive() {
-        return driveRef.get();
+    public Drive getDrive(Session session) throws OXException {
+        Drive drive = driveRef.get();
+        if (null == drive) {
+            synchronized (this) {
+                drive = driveRef.get();
+                if (null == drive) {
+                    OAuthAccount oauthAccount = googleAccount;
+                    {
+                        OAuthAccount newAccount = GoogleApiClients.ensureNonExpiredGoogleAccount(oauthAccount, session);
+                        if (null != newAccount) {
+                            oauthAccount = newAccount;
+                            this.googleAccount = newAccount;
+                        }
+                    }
+
+                    // Generate appropriate credentials for it
+                    GoogleCredential credentials = GoogleApiClients.getCredentials(oauthAccount, session);
+
+                    // Establish Drive instance
+                    drive = new Drive.Builder(credentials.getTransport(), credentials.getJsonFactory(), credentials).setApplicationName(GoogleApiClients.getGoogleProductName()).build();
+                    driveRef.set(drive);
+                    lastAccessed = System.nanoTime();
+                }
+            }
+        }
+        return drive;
     }
 
     /**

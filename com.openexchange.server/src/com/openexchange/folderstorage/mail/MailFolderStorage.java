@@ -761,17 +761,17 @@ public final class MailFolderStorage implements FolderStorage {
         if (StorageType.BACKUP.equals(storageType)) {
             throw FolderExceptionErrorMessage.UNSUPPORTED_STORAGE_TYPE.create(storageType);
         }
-        final TIntObjectMap<MailAccess<?, ?>> accesses = new TIntObjectHashMap<MailAccess<?, ?>>(2);
+        TIntObjectMap<MailAccess<?, ?>> accesses = new TIntObjectHashMap<MailAccess<?, ?>>(2);
         try {
-            final ServerSession session = getServerSession(storageParameters);
+            ServerSession session = getServerSession(storageParameters);
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
-            final TIntObjectMap<MailAccount> accounts = new TIntObjectHashMap<MailAccount>(2);
-            final List<Folder> ret = new ArrayList<Folder>(folderIds.size());
-            for (final String folderId : folderIds) {
-                final FullnameArgument argument = prepareMailFolderParam(folderId);
-                final int accountId = argument.getAccountId();
+            TIntObjectMap<MailAccount> accounts = new TIntObjectHashMap<MailAccount>(2);
+            List<Folder> ret = new ArrayList<Folder>(folderIds.size());
+            for (String folderId : folderIds) {
+                FullnameArgument argument = prepareMailFolderParam(folderId);
+                int accountId = argument.getAccountId();
                 MailAccess<?, ?> mailAccess = accesses.get(accountId);
                 if (null == mailAccess) {
                     mailAccess = MailAccess.getInstance(session, accountId);
@@ -779,7 +779,7 @@ public final class MailFolderStorage implements FolderStorage {
                 }
                 MailAccount mailAccount = accounts.get(argument.getAccountId());
                 if (null == mailAccount) {
-                    final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
+                    MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
                     mailAccount = storageService.getMailAccount(accountId, storageParameters.getUserId(), storageParameters.getContextId());
                     accounts.put(accountId, mailAccount);
                 }
@@ -1085,6 +1085,21 @@ public final class MailFolderStorage implements FolderStorage {
                     tmp.addAll(Arrays.asList(accountsArr));
                     Collections.sort(tmp, new MailAccountComparator(session.getUser().getLocale()));
                     accounts = tmp;
+
+                    if (!accounts.isEmpty() && UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(accounts.get(0).getMailProtocol())) {
+                        /*
+                         * Ensure Unified Mail is enabled; meaning at least one account is subscribed to Unified Mail
+                         */
+                        boolean suppressUnifiedMail = StorageParametersUtility.getBoolParameter("suppressUnifiedMail", storageParameters);
+                        if (suppressUnifiedMail) {
+                            accounts.remove(0);
+                        } else {
+                            UnifiedInboxManagement uim = Services.getService(UnifiedInboxManagement.class);
+                            if (null == uim || !uim.isEnabled(session)) {
+                                accounts.remove(0);
+                            }
+                        }
+                    }
                 } else {
                     accounts = new ArrayList<MailAccount>(1);
                     final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
@@ -1096,22 +1111,9 @@ public final class MailFolderStorage implements FolderStorage {
                         }
                     }
                 }
-                if (!accounts.isEmpty() && UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(accounts.get(0).getMailProtocol())) {
-                    /*
-                     * Ensure Unified Mail is enabled; meaning at least one account is subscribed to Unified Mail
-                     */
-                    final boolean suppressUnifiedMail = StorageParametersUtility.getBoolParameter("suppressUnifiedMail", storageParameters);
-                    if (suppressUnifiedMail) {
-                        accounts.remove(0);
-                    } else {
-                        final UnifiedInboxManagement uim = Services.getService(UnifiedInboxManagement.class);
-                        if (null == uim || !uim.isEnabled(session)) {
-                            accounts.remove(0);
-                        }
-                    }
-                }
-                final int size = accounts.size();
-                final List<SortableId> list = new ArrayList<SortableId>(size);
+
+                int size = accounts.size();
+                List<SortableId> list = new ArrayList<SortableId>(size);
                 for (int j = 0; j < size; j++) {
                     list.add(new MailId(prepareFullname(accounts.get(j).getId(), MailFolder.DEFAULT_FOLDER_ID), j).setName(MailFolder.DEFAULT_FOLDER_NAME));
                 }

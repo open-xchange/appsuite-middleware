@@ -105,7 +105,7 @@ public class ListAction extends AbstractFileAction {
             private int threshhold = 0;
 
             @Override
-            protected boolean accept(final File thing) throws OXException {
+            protected boolean accept(File thing) throws OXException {
                 int i = threshhold;
                 while(i < ids.size()) {
                     if(ids.get(i).equals(thing.getId())) {
@@ -114,8 +114,8 @@ public class ListAction extends AbstractFileAction {
                     }
                     i++;
                 }
-                final String folderForID = request.getFolderAt(i);
-                return folderForID.equals(thing.getFolderId());
+                String folderForID = request.getFolderAt(i);
+                return null != folderForID && folderForID.equals(thing.getFolderId());
             }
 
         };

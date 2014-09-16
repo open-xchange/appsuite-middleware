@@ -67,6 +67,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.internal.HtmlServiceImpl;
+import com.openexchange.html.internal.WhitelistedSchemes;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLImageFilterHandler;
 import com.openexchange.html.services.ServiceRegistry;
@@ -107,7 +108,8 @@ public class HTMLServiceActivator extends HousekeepingActivator {
             /*
              * Configure
              */
-            apply(getService(ConfigurationService.class));
+            ConfigurationService configService = getService(ConfigurationService.class);
+            apply(configService);
             /*
              * Service trackers
              */
@@ -121,6 +123,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
              */
             Config.LoggerProvider = LoggerProvider.DISABLED;
             HTMLFilterHandler.loadWhitelist();
+            WhitelistedSchemes.initInstance(configService);
         } catch (final Exception e) {
             LOG.error("", e);
             throw e;
@@ -133,6 +136,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
             /*
              * Other shut-down stuff
              */
+            WhitelistedSchemes.dropInstance();
             HTMLFilterHandler.resetWhitelist();
             /*
              * Close trackers

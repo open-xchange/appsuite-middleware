@@ -98,7 +98,7 @@ public class ScriptableActionFactory implements AJAXActionServiceFactory {
 
 	public static AJAXRequestResult adapt(Object object) throws OXException {
 		if (object == Undefined.instance) {
-			return new AJAXRequestResult(null, "null");
+			return new AJAXRequestResult(null, "native");
 		}
 		if (object instanceof Wrapper) {
 			object = ((Wrapper)object).unwrap();

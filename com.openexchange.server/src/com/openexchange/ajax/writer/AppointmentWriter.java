@@ -175,9 +175,6 @@ public class AppointmentWriter extends CalendarWriter {
         if (appointmentObject.containsNote()) {
             writeParameter(CalendarFields.NOTE, appointmentObject.getNote(), jsonObj);
         }
-        if (appointmentObject.containsFullTime()) {
-            writeParameter(AppointmentFields.FULL_TIME, appointmentObject.getFullTime(), jsonObj);
-        }
         if (appointmentObject.containsAlarm()) {
             writeParameter(CalendarFields.ALARM, appointmentObject.getAlarm(), jsonObj);
         } else if (appointmentObject.containsUserParticipants() && null != session && isPublicFolder(appointmentObject)) {
@@ -324,12 +321,6 @@ public class AppointmentWriter extends CalendarWriter {
             @Override
             public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
                 writeValue(appointmentObject.getLocation(), jsonArray);
-            }
-        });
-        m.put(Appointment.FULL_TIME, new AppointmentFieldWriter() {
-            @Override
-            public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
-                writeValue(appointmentObject.getFullTime(), jsonArray, appointmentObject.containsFullTime());
             }
         });
         m.put(CalendarObject.NOTE, new AppointmentFieldWriter() {

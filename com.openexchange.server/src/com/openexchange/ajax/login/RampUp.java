@@ -90,9 +90,20 @@ public class RampUp extends AbstractLoginRequestHandler implements LoginRequestH
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                 return;
             }
-            session = sessiondService.getSession(req.getParameter("session"));
-            final JSONObject json = new JSONObject(8);
 
+            String sessionId = req.getParameter("session");
+            if (null == sessionId) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing \"session\" parameter.");
+                return;
+            }
+
+            session = sessiondService.getSession(sessionId);
+            if (null == session) {
+                resp.sendError(HttpServletResponse.SC_FORBIDDEN, "No such session: " + sessionId);
+                return;
+            }
+
+            JSONObject json = new JSONObject(8);
             performRampUp(req, json, ServerSessionAdapter.valueOf(session), true);
 
             // Set data
@@ -101,6 +112,7 @@ public class RampUp extends AbstractLoginRequestHandler implements LoginRequestH
         } catch (OXException e) {
             response.setException(e);
         }
+
         // The magic spell to disable caching
         Tools.disableCaching(resp);
         resp.setStatus(HttpServletResponse.SC_OK);
@@ -114,7 +126,6 @@ public class RampUp extends AbstractLoginRequestHandler implements LoginRequestH
         } catch (final JSONException e) {
             LoginServlet.sendError(resp);
         }
-
     }
 
 }

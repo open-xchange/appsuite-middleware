@@ -112,7 +112,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
     /**
      * Initializes a new {@link OneDriveFileAccess}.
      */
-    public OneDriveFileAccess(OneDriveAccess oneDriveAccess, FileStorageAccount account, Session session, OneDriveAccountAccess accountAccess) throws OXException {
+    public OneDriveFileAccess(OneDriveAccess oneDriveAccess, FileStorageAccount account, Session session, OneDriveAccountAccess accountAccess) {
         super(oneDriveAccess, account, session);
         this.accountAccess = accountAccess;
         userId = session.getUserId();
@@ -192,7 +192,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                     request = method;
 
                     RestFile restFile = handleHttpResponse(execute(method, httpClient), RestFile.class);
-                    return new OneDriveFile(folderId, id, userId, rootFolderId).parseOneDriveFile(restFile);
+                    return new OneDriveFile(folderId, id, userId, getRootFolderId()).parseOneDriveFile(restFile);
                 } finally {
                     if (null != request) {
                         request.releaseConnection();
@@ -626,7 +626,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                         for (int i = 0; i < length; i++) {
                             JSONObject jItem = jData.getJSONObject(i);
                             if (isFile(jItem)) {
-                                files.add(new OneDriveFile(folderId, jItem.getString("id"), userId, rootFolderId).parseOneDriveFile(jItem));
+                                files.add(new OneDriveFile(folderId, jItem.getString("id"), userId, getRootFolderId()).parseOneDriveFile(jItem));
                             }
                         }
                         reset(request);
@@ -677,7 +677,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                         for (int i = 0; i < length; i++) {
                             JSONObject jItem = jData.getJSONObject(i);
                             if (isFile(jItem)) {
-                                files.add(new OneDriveFile(folderId, jItem.getString("id"), userId, rootFolderId).parseOneDriveFile(jItem));
+                                files.add(new OneDriveFile(folderId, jItem.getString("id"), userId, getRootFolderId()).parseOneDriveFile(jItem));
                             }
                         }
 
@@ -711,7 +711,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
                     RestFileResponse restResponse = handleHttpResponse(execute(method, httpClient), RestFileResponse.class);
                     RestFile restFile = restResponse.getData().get(0);
-                    return new FileTimedResult(Collections.<File> singletonList(new OneDriveFile(folderId, id, userId, rootFolderId).parseOneDriveFile(restFile)));
+                    return new FileTimedResult(Collections.<File> singletonList(new OneDriveFile(folderId, id, userId, getRootFolderId()).parseOneDriveFile(restFile)));
                 } finally {
                     reset(request);
                 }
@@ -737,7 +737,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
                     RestFileResponse restResponse = handleHttpResponse(execute(method, httpClient), RestFileResponse.class);
                     RestFile restFile = restResponse.getData().get(0);
-                    return new FileTimedResult(Collections.<File> singletonList(new OneDriveFile(folderId, id, userId, rootFolderId).parseOneDriveFile(restFile)));
+                    return new FileTimedResult(Collections.<File> singletonList(new OneDriveFile(folderId, id, userId, getRootFolderId()).parseOneDriveFile(restFile)));
                 } finally {
                     reset(request);
                 }
@@ -760,8 +760,11 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                         request = method;
 
                         RestFileResponse restResponse = handleHttpResponse(execute(method, httpClient), RestFileResponse.class);
-                        RestFile restFile = restResponse.getData().get(0);
-                        files.add(new OneDriveFile(id.getFolder(), id.getId(), userId, rootFolderId).parseOneDriveFile(restFile));
+                        List<RestFile> data = restResponse.getData();
+                        if (!data.isEmpty()) {
+                            RestFile restFile = data.get(0);
+                            files.add(new OneDriveFile(id.getFolder(), id.getId(), userId, getRootFolderId()).parseOneDriveFile(restFile));
+                        }
                         reset(request);
                         request = null;
                     }
@@ -828,10 +831,10 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                             if (isFile(jItem)) {
                                 if (null != fid) {
                                     if (fid.equals(jItem.optString("parent_id", null))) {
-                                        files.add(new OneDriveFile(folderId, jItem.getString("id"), userId, rootFolderId).parseOneDriveFile(jItem));
+                                        files.add(new OneDriveFile(folderId, jItem.getString("id"), userId, getRootFolderId()).parseOneDriveFile(jItem));
                                     }
                                 } else {
-                                    files.add(new OneDriveFile(folderId, jItem.getString("id"), userId, rootFolderId).parseOneDriveFile(jItem));
+                                    files.add(new OneDriveFile(folderId, jItem.getString("id"), userId, getRootFolderId()).parseOneDriveFile(jItem));
                                 }
                             }
                         }

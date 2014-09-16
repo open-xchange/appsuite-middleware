@@ -1,6 +1,32 @@
+* 2014-09-15 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 34433: Do not depend on background update tasks
+
+* 2014-09-14 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 34396: Added proper exception messages for password change service
+ - Fix for bug 34394: Fixed escaping in example patterns for com.openexchange.passwordchange.allowedPattern
+
+* 2014-09-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26090: Check URIs' protocols/schemes against a white-list filter and discard/deny the ones not contained
+
+* 2014-09-11 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 34281: Facebook made access to permissions more restrictive since April 30th 2014. Removed these permissions, because they
+                      were unused.
+
+* 2014-09-11 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 34361: Case insensitive check for organizer.
+
+* 2014-09-11 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29269: Added support for "Time" types for task start- and end-dates along with "full_time" flag
+
 * 2014-09-10 - tobias.friedrich@open-xchange.com
 
- - Fix for bug 34355: Use secured SAXBuilder in the replay WebDAV request 
+ - Fix for bug 34355: Use secured SAXBuilder in the replay WebDAV request
 
 * 2014-09-09 - tobias.friedrich@open-xchange.com
 
@@ -58,6 +84,10 @@
 * 2014-09-01 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 32695: Try to lookup existing stored session during form login if auto-login is enabled
+
+* 2014-09-01 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 33354: Added display message for invalid characters in folder name
 
 * 2014-08-29 - thorben.betten@open-xchange.com
 

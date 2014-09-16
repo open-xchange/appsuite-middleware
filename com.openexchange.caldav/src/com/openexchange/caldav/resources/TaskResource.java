@@ -110,6 +110,7 @@ public class TaskResource extends CalDAVResource<Task> {
         final Task originalTask = parent.load(object);
         this.checkForExplicitRemoves(originalTask, taskToSave);
         Patches.Incoming.adjustTaskStatus(originalTask, taskToSave);
+        Patches.Incoming.adjustTaskStart(originalTask, taskToSave);
         getTaskInterface().updateTaskObject(taskToSave, parentFolderID, object.getLastModified());
     }
 

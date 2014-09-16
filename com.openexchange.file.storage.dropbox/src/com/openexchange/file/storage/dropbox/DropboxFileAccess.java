@@ -282,16 +282,12 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     @Override
     public InputStream getThumbnailStream(String folderId, String id, String version) throws OXException {
         try {
-            final Entry entry = dropboxAPI.metadata(id, 1, null, false, version);
-            if (entry.isDir) {
-                throw DropboxExceptionCodes.NOT_A_FILE.create(id);
-            }
-            if (entry.isDeleted) {
-                throw DropboxExceptionCodes.NOT_FOUND.create(id);
-            }
-            return entry.thumbExists ? dropboxAPI.getThumbnailStream(id, ThumbSize.ICON_128x128, ThumbFormat.JPEG) : null;
+            return dropboxAPI.getThumbnailStream(id, ThumbSize.ICON_128x128, ThumbFormat.JPEG);
         } catch (final DropboxServerException e) {
-            throw handleServerError(id, e);
+            if (404 == e.error) {
+                return null;
+            }
+            throw handleServerError(null, e);
         } catch (final DropboxException e) {
             throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {

@@ -98,6 +98,7 @@ public abstract class AbstractTaskTestForAJAXClient extends AbstractAJAXSession 
         Task resultingTask = testManager.getTaskFromServer(task);
         Set<Integer> ignore = new HashSet<Integer>();
         ignore.add(I(Task.UID));
+        ignore.add(I(Task.FULL_TIME)); // mimic legacy behavior
         TaskAsserts.assertAllTaskFieldsMatchExcept(task, resultingTask, ignore);
         testManager.cleanUp();
     }
@@ -116,6 +117,7 @@ public abstract class AbstractTaskTestForAJAXClient extends AbstractAJAXSession 
         changingFields.add(I(Task.CREATION_DATE));
         changingFields.add(I(Task.LAST_MODIFIED)); //must be different afterwards
         changingFields.add(I(Task.UID));
+        changingFields.add(I(Task.FULL_TIME)); // mimic legacy behavior
 
         TaskTestManager testManager = new TaskTestManager(getClient());
         testManager.insertTaskOnServer(insertTask);

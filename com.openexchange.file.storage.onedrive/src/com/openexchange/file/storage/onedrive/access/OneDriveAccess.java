@@ -223,11 +223,14 @@ public class OneDriveAccess {
         long now = System.nanoTime();
         if (TimeUnit.NANOSECONDS.toSeconds(now - lastAccessed) > RECHECK_THRESHOLD) {
             synchronized (this) {
-                OAuthAccount newAccount = recreateTokenIfExpired(false, liveconnectOAuthAccount, session);
-                if (newAccount != null) {
-                    this.liveconnectOAuthAccount = newAccount;
-                    accessToken = liveconnectOAuthAccount.getToken();
-                    lastAccessed = System.nanoTime();
+                now = System.nanoTime();
+                if (TimeUnit.NANOSECONDS.toSeconds(now - lastAccessed) > RECHECK_THRESHOLD) {
+                    OAuthAccount newAccount = recreateTokenIfExpired(false, liveconnectOAuthAccount, session);
+                    if (newAccount != null) {
+                        this.liveconnectOAuthAccount = newAccount;
+                        accessToken = liveconnectOAuthAccount.getToken();
+                        lastAccessed = System.nanoTime();
+                    }
                 }
             }
         }

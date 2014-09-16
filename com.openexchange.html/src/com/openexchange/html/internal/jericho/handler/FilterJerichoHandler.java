@@ -50,6 +50,7 @@
 package com.openexchange.html.internal.jericho.handler;
 
 import static com.openexchange.html.HtmlServices.isNonJavaScriptURL;
+import static com.openexchange.html.HtmlServices.isSafe;
 import static com.openexchange.html.internal.HtmlServiceImpl.PATTERN_URL;
 import static com.openexchange.html.internal.HtmlServiceImpl.PATTERN_URL_SOLE;
 import static com.openexchange.html.internal.css.CSSMatcher.checkCSS;
@@ -652,7 +653,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
             }
         } else if (HTMLElementName.TD == tagName || HTMLElementName.TH == tagName) {
             CellPadding cellPadding = tablePaddings.peek();
-            if (CELLPADDING_EMPTY != cellPadding) {
+            if (CELLPADDING_EMPTY != cellPadding && null != cellPadding) {
                 String style = attrMap.get("style");
                 if (null == style || style.indexOf("padding") < 0) {
                     prependToStyle("padding: " + cellPadding.cellPadding + "px;", attrMap);
@@ -688,7 +689,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
             } else {
                 final String val = attribute.getValue();
                 if (null == allowedAttributes) { // No restrictions
-                    if (isNonJavaScriptURL(val)) {
+                    if (isSafe(val)) {
                         if (dropExternalImages && "background".equals(attr) && PATTERN_URL.matcher(val).matches()) {
                             attrBuilder.append(' ').append(attr).append("=\"\"");
                             imageURLFound = true;
@@ -715,7 +716,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                         } else {
                             final Set<String> allowedValues = allowedAttributes.get(attr);
                             if (null == allowedValues || allowedValues.contains(toLowerCase(val))) {
-                                if (isNonJavaScriptURL(val)) {
+                                if (isSafe(val)) {
                                     if (dropExternalImages && "background".equals(attr) && PATTERN_URL.matcher(val).matches()) {
                                         attrBuilder.append(' ').append(attr).append("=\"\"");
                                         imageURLFound = true;

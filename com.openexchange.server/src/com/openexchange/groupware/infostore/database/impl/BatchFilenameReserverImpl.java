@@ -65,6 +65,7 @@ import java.util.UUID;
 import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
@@ -158,7 +159,7 @@ public class BatchFilenameReserverImpl implements BatchFilenameReserver {
                         adjusted = true;
                         int count = 0;
                         do {
-                            fileName = Tools.enhance(fileName, ++count);
+                            fileName = FileStorageUtility.enhance(fileName, ++count);
                         } while (usedNames.contains(fileName));
                     }
                     BatchFilenameReservation reservation = new BatchFilenameReservation(

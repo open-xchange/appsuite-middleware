@@ -160,4 +160,19 @@ public class UserExceptionMessage implements LocalizableStrings {
      */
     public final static String NOT_ALLOWED_PASSWORD_DISPLAY = "The entered password is illegal and can't be saved. Allowed characters are: %1$s";
 
+    /**
+     * The current password is incorrect. Please enter your correct current password and try again.
+     */
+    public final static String INCORRECT_CURRENT_PASSWORD_DISPLAY = "The current password is incorrect. Please enter your correct current password and try again.";
+
+    /**
+     * The current password is missing. Please enter your current password and try again.
+     */
+    public final static String MISSING_CURRENT_PASSWORD_DISPLAY = "The current password is missing. Please enter your current password and try again.";
+
+    /**
+     * The new password is missing. Please enter your new password and try again.
+     */
+    public final static String MISSING_NEW_PASSWORD_DISPLAY = "The new password is missing. Please enter your new password and try again.";
+
 }

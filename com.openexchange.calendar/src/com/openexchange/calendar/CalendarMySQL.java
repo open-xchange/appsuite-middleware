@@ -1917,7 +1917,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
         String mail;
         mail = UserStorage.getInstance().getUser(user, cal.getContext()).getMail();
-        if (cal.getOrganizer() != null && cal.getOrganizer().equals(mail)) {
+        if (cal.getOrganizer() != null && cal.getOrganizer().equalsIgnoreCase(mail)) {
             return true;
         }
 
@@ -3711,9 +3711,13 @@ public class CalendarMySQL implements CalendarSqlImp {
                                         pu.setInt(3, cdao.getActionFolder());
                                         mup.setPersonalFolderId(cdao.getActionFolder());
                                     }
-                                } else {
+                                } else if (cdao.getSharedFolderOwner() == mup.getIdentifier()){
                                     pu.setInt(3, cdao.getGlobalFolderID());
                                     mup.setPersonalFolderId(cdao.getGlobalFolderID());
+                                } else {
+                                    int pfid = access.getDefaultFolder(mup.getIdentifier(), FolderObject.CALENDAR).getObjectID();
+                                    pu.setInt(3, pfid);
+                                    mup.setPersonalFolderId(pfid);
                                 }
                             } else {
                                 pu.setInt(3, mup.getPersonalFolderId());

@@ -323,7 +323,7 @@ public final class HtmlServiceImpl implements HtmlService {
             int lastMatch = 0;
             while (m.find()) {
                 final String url = m.group();
-                if (HtmlServices.isNonJavaScriptURL(url)) {
+                if (HtmlServices.isSafe(url)) {
                     final int startOpeningPos = m.start();
                     targetBuilder.append(content.substring(lastMatch, startOpeningPos));
                     sb.setLength(0);

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,58 +47,55 @@
  *
  */
 
-package com.openexchange.groupware.infostore.validation;
+package com.openexchange.report.client.impl;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.utils.InfostoreConfigUtils;
-import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
+import static org.junit.Assert.assertEquals;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import javax.management.MBeanServerConnection;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import com.openexchange.report.client.impl.ReportClient.ReportMode;
 
 
 /**
- * {@link SizeInfostoreValidator}
+ * {@link ReportClientTest}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.1
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.6.1
  */
-public class SizeInfostoreValidator implements InfostoreValidator {
+public class ReportClientTest {
 
-    private static final String NAME = SizeInfostoreValidator.class.getSimpleName();
+    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+
+    @InjectMocks
+    private ReportClient reportClient;
+
+    @Mock
+    private MBeanServerConnection serverConnection;
 
     /**
-     * Initializes a new {@link SizeInfostoreValidator}.
+     * @throws java.lang.Exception
      */
-    public SizeInfostoreValidator() {
-        super();
+    @Before
+    public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+
+        System.setOut(new PrintStream(outContent));
     }
 
-    @Override
-    public DocumentMetadataValidation validate(DocumentMetadata metadata) {
-        DocumentMetadataValidation validation = new DocumentMetadataValidation();
-        OXException exception = checkSize(metadata);
-        if (null != exception) {
-            validation.setFatalException(exception);
-        }
-
-        return validation;
+    @After
+    public void cleanUpStreams() {
+        System.setOut(null);
     }
 
-    private OXException checkSize(final DocumentMetadata metadata) {
-        final long maxSize = InfostoreConfigUtils.determineRelevantUploadSize();
-        if (maxSize == 0) {
-            return null;
-        }
-
-        final long size = metadata.getFileSize();
-        if (size > maxSize) {
-            return UploadSizeExceededException.create(size, maxSize, true);
-        }
-        return null;
+    @Test
+    public void testGetASReport_noReportFound_outputHint() {
+        reportClient.getASReport(null, ReportMode.NONE, false, serverConnection);
+        assertEquals(ReportClient.NO_REPORT_FOUND_MSG.trim(), outContent.toString().trim());
     }
-
-    @Override
-    public String getName() {
-        return NAME;
-    }
-
 }

@@ -64,8 +64,6 @@ public class Appointment extends CalendarObject implements Cloneable {
 
     public static final int LOCATION = 400;
 
-    public static final int FULL_TIME = 401;
-
     public static final int SHOWN_AS = 402;
 
     public static final int TIMEZONE = 408;
@@ -74,13 +72,13 @@ public class Appointment extends CalendarObject implements Cloneable {
 
     public static final int[] ALL_COLUMNS = {
         // From AppointmentObject itself
-        LOCATION, FULL_TIME, SHOWN_AS,
+        LOCATION, SHOWN_AS,
         TIMEZONE,
         RECURRENCE_START,
         // From CalendarObject
         TITLE, START_DATE, END_DATE, NOTE, ALARM, RECURRENCE_ID, RECURRENCE_POSITION, RECURRENCE_DATE_POSITION, RECURRENCE_TYPE,
         CHANGE_EXCEPTIONS, DELETE_EXCEPTIONS, DAYS, DAY_IN_MONTH, MONTH, INTERVAL, UNTIL, NOTIFICATION, RECURRENCE_CALCULATOR,
-        PARTICIPANTS, USERS, CONFIRMATIONS, RECURRENCE_COUNT, UID, ORGANIZER, SEQUENCE, ORGANIZER_ID, PRINCIPAL, PRINCIPAL_ID,
+        PARTICIPANTS, USERS, CONFIRMATIONS, RECURRENCE_COUNT, UID, ORGANIZER, SEQUENCE, ORGANIZER_ID, PRINCIPAL, PRINCIPAL_ID, FULL_TIME,
         // From CommonObject
         CATEGORIES, PRIVATE_FLAG,
         COLOR_LABEL, NUMBER_OF_ATTACHMENTS,
@@ -91,13 +89,13 @@ public class Appointment extends CalendarObject implements Cloneable {
 
     public static final int[] ALL_COLUMNS_FOR_CLONE = {
         // From AppointmentObject itself
-        LOCATION, FULL_TIME, SHOWN_AS,
+        LOCATION, SHOWN_AS,
         TIMEZONE,
         RECURRENCE_START,
         // From CalendarObject
         TITLE, START_DATE, END_DATE, NOTE, ALARM, RECURRENCE_ID, RECURRENCE_POSITION, RECURRENCE_DATE_POSITION, RECURRENCE_TYPE,
         CHANGE_EXCEPTIONS, DELETE_EXCEPTIONS, DAYS, DAY_IN_MONTH, MONTH, INTERVAL, UNTIL, NOTIFICATION, RECURRENCE_CALCULATOR,
-        RECURRENCE_COUNT, UID, ORGANIZER, SEQUENCE, ORGANIZER_ID, PRINCIPAL, PRINCIPAL_ID,
+        RECURRENCE_COUNT, UID, ORGANIZER, SEQUENCE, ORGANIZER_ID, PRINCIPAL, PRINCIPAL_ID, FULL_TIME,
         // From CommonObject
         CATEGORIES, PRIVATE_FLAG,
         COLOR_LABEL, NUMBER_OF_ATTACHMENTS,
@@ -118,8 +116,6 @@ public class Appointment extends CalendarObject implements Cloneable {
 
     protected String location;
 
-    protected boolean fulltime;
-
     protected int shown_as;
 
     protected int alarm;
@@ -133,8 +129,6 @@ public class Appointment extends CalendarObject implements Cloneable {
     protected boolean ignoreOutdatedSequence;
 
     protected boolean b_location;
-
-    protected boolean b_fulltime;
 
     protected boolean b_shown_as;
 
@@ -155,10 +149,6 @@ public class Appointment extends CalendarObject implements Cloneable {
     // GET METHODS
     public String getLocation() {
         return location;
-    }
-
-    public boolean getFullTime() {
-        return fulltime;
     }
 
     public int getShownAs() {
@@ -214,11 +204,6 @@ public class Appointment extends CalendarObject implements Cloneable {
         b_location = true;
     }
 
-    public void setFullTime(final boolean fulltime) {
-        this.fulltime = fulltime;
-        b_fulltime = true;
-    }
-
     public void setShownAs(final int shown_as) {
         this.shown_as = shown_as;
         b_shown_as = true;
@@ -242,11 +227,6 @@ public class Appointment extends CalendarObject implements Cloneable {
     public void removeLocation() {
         location = null;
         b_location = false;
-    }
-
-    public void removeFullTime() {
-        fulltime = false;
-        b_fulltime = false;
     }
 
     public void removeShownAs() {
@@ -279,10 +259,6 @@ public class Appointment extends CalendarObject implements Cloneable {
         return b_location;
     }
 
-    public boolean containsFullTime() {
-        return b_fulltime;
-    }
-
     public boolean containsShownAs() {
         return b_shown_as;
     }
@@ -308,13 +284,11 @@ public class Appointment extends CalendarObject implements Cloneable {
         super.reset();
 
         location = null;
-        fulltime = false;
         shown_as = 0;
         alarm = 0;
         timezone = null;
 
         b_location = false;
-        b_fulltime = false;
         b_shown_as = false;
         b_Alarm = false;
         b_timezone = false;
@@ -348,9 +322,6 @@ public class Appointment extends CalendarObject implements Cloneable {
 
         if (containsLabel()) {
             appointmentobject.setLabel(getLabel());
-        }
-        if (containsFullTime()) {
-            appointmentobject.setFullTime(getFullTime());
         }
         if (containsLocation()) {
             appointmentobject.setLocation(getLocation());
@@ -396,10 +367,6 @@ public class Appointment extends CalendarObject implements Cloneable {
             differingFields.add(ALARM);
         }
 
-        if ((!containsFullTime() && other.containsFullTime()) || (containsFullTime() && other.containsFullTime() && getFullTime() != other.getFullTime())) {
-            differingFields.add(FULL_TIME);
-        }
-
         if ((!containsLocation() && other.containsLocation()) || (containsLocation() && other.containsLocation() && getLocation() != other.getLocation() && (getLocation() == null || !getLocation().equals(
             other.getLocation())))) {
             differingFields.add(LOCATION);
@@ -429,9 +396,6 @@ public class Appointment extends CalendarObject implements Cloneable {
         case ALARM:
             setAlarm((Integer) value);
             break;
-        case FULL_TIME:
-            setFullTime((Boolean) value);
-            break;
         case TIMEZONE:
             setTimezone((String) value);
             break;
@@ -453,8 +417,6 @@ public class Appointment extends CalendarObject implements Cloneable {
             return getShownAs();
         case ALARM:
             return getAlarm();
-        case FULL_TIME:
-            return getFullTime();
         case TIMEZONE:
             return getTimezone();
         case RECURRENCE_START:
@@ -473,8 +435,6 @@ public class Appointment extends CalendarObject implements Cloneable {
             return containsShownAs();
         case ALARM:
             return containsAlarm();
-        case FULL_TIME:
-            return containsFullTime();
         case TIMEZONE:
             return containsTimezone();
         case RECURRENCE_START:
@@ -494,9 +454,6 @@ public class Appointment extends CalendarObject implements Cloneable {
             break;
         case ALARM:
             removeAlarm();
-            break;
-        case FULL_TIME:
-            removeFullTime();
             break;
         case TIMEZONE:
             removeTimezone();
