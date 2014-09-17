@@ -61,16 +61,22 @@ public interface LoginHandlerService {
     /**
      * Handles the specified performed login.
      *
-     * @param login The performed login.
+     * @param login The parameter object transporting all known values regarding this login process.
      * @throws OXException If an error occurs while handling the login
      */
-    public void handleLogin(LoginResult login) throws OXException;
+    void handleLogin(LoginResult login) throws OXException;
 
     /**
      * Handles the specified performed logout.
+     * This method is called in a very early step of the complete logout process. It can be used to terminate resources bound to a session
+     * that are not required anymore in the complete logout process.
+     * If you need to perform any actions after the complete logout process then listen to the OSGi events of the session daemon under the
+     * topic of removed sessions. The session object is passed in this event and your actions on it are performed as last steps right before
+     * the session is finally gone. You need to implement the OSGi {@link org.osgi.service.event.EventHandler} and listen to the topics
+     * defined in {@link com.openexchange.sessiond.SessiondEventConstants}.
      *
-     * @param logout The performed logout.
+     * @param logout The parameter object transporting all known values regarding this logout process.
      * @throws OXException If an error occurs while handling the logout
      */
-    public void handleLogout(LoginResult logout) throws OXException;
+    void handleLogout(LoginResult logout) throws OXException;
 }
