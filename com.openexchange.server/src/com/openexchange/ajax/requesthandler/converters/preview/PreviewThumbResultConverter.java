@@ -87,7 +87,7 @@ import com.openexchange.tools.session.ServerSession;
  *       <code>com.openexchange.preview.thumbnail.blockingWorker</code> property</li>
  *   <ol>
  *     <li>If true: Block the current thread(client request) until the thumbnail was generated</li>
- *     <li>If false: Return/make client use default thumbnail</li>
+ *     <li>If false: Fail with PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE</li>
  *   </ol>
  * </ol>
  * 
