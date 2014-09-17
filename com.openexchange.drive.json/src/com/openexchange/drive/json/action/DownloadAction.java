@@ -122,6 +122,7 @@ public class DownloadAction extends AbstractDriveAction {
             /*
              * indicate error by setting HTTP status code
              */
+            LOG.warn("Error performing download with parameters: {}", requestData.getParameters(), e);
             throw getHttpError(e);
         } catch (RuntimeException e) {
             /*
@@ -135,7 +136,8 @@ public class DownloadAction extends AbstractDriveAction {
     private static OXException getHttpError(OXException e) throws OXException {
         int status;
         if (DriveExceptionCodes.FILEVERSION_NOT_FOUND.equals(e) || DriveExceptionCodes.FILE_NOT_FOUND.equals(e) ||
-            DriveExceptionCodes.PATH_NOT_FOUND.equals(e) || "FLS-017".equals(e.getErrorCode())) {
+            DriveExceptionCodes.PATH_NOT_FOUND.equals(e) || "FLS-017".equals(e.getErrorCode()) ||
+            "DROPBOX-0005".equals(e.getErrorCode())) {
             status = HttpServletResponse.SC_NOT_FOUND;
         } else if (DriveExceptionCodes.INVALID_FILE_OFFSET.equals(e) || "FLS-018".equals(e.getErrorCode())
             || "FLS-019".equals(e.getErrorCode()) || "FLS-020".equals(e.getErrorCode())) {

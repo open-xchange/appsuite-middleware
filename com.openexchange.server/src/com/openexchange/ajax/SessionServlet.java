@@ -227,8 +227,8 @@ public abstract class SessionServlet extends AJAXServlet {
             handleSessiondException(e, req, resp);
 
             // Check expected output format
-            if (Dispatchers.isJsonOutputExpectedFor(req)) {
-                // JSON response
+            if (Dispatchers.isApiOutputExpectedFor(req)) {
+                // API response
                 String action = req.getParameter(PARAMETER_ACTION);
                 APIResponseRenderer.writeResponse(new Response().setException(e), null == action ? Strings.toUpperCase(req.getMethod()) : action, req, resp);
             } else {
@@ -241,8 +241,8 @@ public abstract class SessionServlet extends AJAXServlet {
             e.log(LOG);
 
             // Check expected output format
-            if (Dispatchers.isJsonOutputExpectedFor(req)) {
-                // JSON response
+            if (Dispatchers.isApiOutputExpectedFor(req)) {
+                // API response
                 String action = req.getParameter(PARAMETER_ACTION);
                 APIResponseRenderer.writeResponse(new Response().setException(e), null == action ? Strings.toUpperCase(req.getMethod()) : action, req, resp);
             } else {

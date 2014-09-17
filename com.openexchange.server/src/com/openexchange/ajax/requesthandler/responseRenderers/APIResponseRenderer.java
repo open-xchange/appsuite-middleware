@@ -59,7 +59,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
@@ -67,6 +66,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.session.ServerSession;
 
@@ -89,6 +89,8 @@ public class APIResponseRenderer implements ResponseRenderer {
     private static final String PLAIN_JSON = "plainJson";
 
     private static final String INCLUDE_STACK_TRACE_ON_ERROR = com.openexchange.ajax.AJAXServlet.PARAMETER_INCLUDE_STACK_TRACE_ON_ERROR;
+
+    private static final String CONTENTTYPE_HTML = com.openexchange.ajax.AJAXServlet.CONTENTTYPE_HTML;
 
     /**
      * Initializes a new {@link APIResponseRenderer}.
@@ -189,14 +191,45 @@ public class APIResponseRenderer implements ResponseRenderer {
     private static final char[] JS_FRAGMENT_PART3 = ")</script></head></html>".toCharArray();
 
     private static final Pattern PATTERN_QUOTE = Pattern.compile("(^|[^\\\\])\"");
+    private static final Pattern PATTERN_SINGLE_QUOTE = Pattern.compile("(^|[^\\\\])'");
 
     private static void writeResponse(final Response response, final String action, final HttpServletRequest req, final HttpServletResponse resp, final boolean plainJson) {
         try {
             if (plainJson) {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(req));
             } else if (isMultipartContent(req) || isRespondWithHTML(req) || req.getParameter(CALLBACK) != null) {
-                resp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
                 String callback = req.getParameter(CALLBACK);
+                if ("yell".equalsIgnoreCase(callback)) {
+                    OXException exception = response.getException();
+                    if (exception != null) {
+                        String yellCb = exception.getDisplayMessage(localeFrom(req));
+                        if (null != yellCb) {
+                            resp.setStatus(HttpServletResponse.SC_OK);
+                            resp.setContentType(CONTENTTYPE_HTML);
+                            resp.setHeader("Content-Disposition", "inline");
+                            if (yellCb.indexOf('"') >= 0) {
+                                yellCb = PATTERN_SINGLE_QUOTE.matcher(yellCb).replaceAll("$1\\\\'");
+                            }
+                            PrintWriter writer = resp.getWriter();
+
+                            StringBuilder sb = new StringBuilder(512).append("<!DOCTYPE html>");
+                            sb.append("<head><META http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><script type=\"text/javascript\">");
+                            sb.append("(window.parent || window.opener).require(['io.ox/core/yell'], function (yell) { yell('error', '");
+                            sb.append(yellCb).append("'); });");
+                            sb.append("</script></head></html>");
+
+                            writer.write(sb.toString());
+                            writer.flush();
+                            return;
+                        }
+                    }
+                }
+
+                // Regular HTML call-back...
+                resp.setStatus(HttpServletResponse.SC_OK);
+                resp.setContentType(CONTENTTYPE_HTML);
+                resp.setHeader("Content-Disposition", "inline");
+
                 if (callback == null) {
                     callback = action;
                 } else {
@@ -205,6 +238,7 @@ public class APIResponseRenderer implements ResponseRenderer {
                     }
                 }
                 callback = AJAXUtility.sanitizeParam(callback);
+
                 final PrintWriter writer = resp.getWriter();
                 writer.write(JS_FRAGMENT_PART1);
                 writer.write(callback);
@@ -273,7 +307,7 @@ public class APIResponseRenderer implements ResponseRenderer {
         return Boolean.parseBoolean(req.getParameter("respondWithHTML"));
     }
 
-    private static final String JS_FRAGMENT = AJAXServlet.JS_FRAGMENT;
+    private static final String JS_FRAGMENT = com.openexchange.ajax.AJAXServlet.JS_FRAGMENT;
 
     private static final Pattern RPL_JSON = Pattern.compile("**json**", Pattern.LITERAL);
 

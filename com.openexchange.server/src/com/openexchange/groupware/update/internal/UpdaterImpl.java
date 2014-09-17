@@ -128,7 +128,7 @@ public class UpdaterImpl extends Updater {
     }
 
     @Override
-    public Collection<SchemaUpdateState> getLocallyScheduledTasks() {
+    public Collection<String> getLocallyScheduledTasks() {
         return LocalUpdateTaskMonitor.getInstance().getScheduledStates();
     }
 

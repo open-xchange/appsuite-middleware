@@ -61,11 +61,10 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import org.slf4j.Logger;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 import com.openexchange.admin.rmi.extensions.OXUserExtensionInterface;
-import com.openexchange.tools.net.URIDefaults;
-import com.openexchange.tools.net.URIParser;
+import com.openexchange.admin.rmi.utils.URIDefaults;
+import com.openexchange.admin.rmi.utils.URIParser;
 
 /**
  * Class representing a user.
@@ -2174,8 +2173,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
             try {
                 return URIParser.parse(imapServer, URIDefaults.IMAP).getPort();
             } catch (final URISyntaxException e) {
-                final Logger logger = org.slf4j.LoggerFactory.getLogger(User.class);
-                logger.warn("Invalid URI: {}", imapServer, e);
+                // Ignore
             }
         }
         return 143;
@@ -2193,8 +2191,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
             try {
                 return URIParser.parse(imapServer, URIDefaults.IMAP).getHost();
             } catch (final URISyntaxException e) {
-                final Logger logger = org.slf4j.LoggerFactory.getLogger(User.class);
-                logger.warn("Invalid URI: {}", imapServer, e);
+                // Ignore
             }
         }
         return null;
@@ -2223,8 +2220,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
                 final String scheme = URIParser.parse(imapServer, URIDefaults.IMAP).getScheme();
                 return null == scheme ? "imap://" : scheme + "://";
             } catch (final URISyntaxException e) {
-                final Logger logger = org.slf4j.LoggerFactory.getLogger(User.class);
-                logger.warn("Invalid URI: {}", imapServer, e);
+                // Ignore
             }
         }
         return "imap://";
@@ -2280,8 +2276,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
             try {
                 return URIParser.parse(smtpServer, URIDefaults.SMTP).getHost();
             } catch (final URISyntaxException e) {
-                final Logger logger = org.slf4j.LoggerFactory.getLogger(User.class);
-                logger.warn("Invalid URI: {}", smtpServer, e);
+                // Ignore
             }
         }
         return null;
@@ -2300,8 +2295,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
                 final String scheme = URIParser.parse(smtpServer, URIDefaults.SMTP).getScheme();
                 return null == scheme ? "smtp://" : scheme + "://";
             } catch (final URISyntaxException e) {
-                final Logger logger = org.slf4j.LoggerFactory.getLogger(User.class);
-                logger.warn("Invalid URI: {}", smtpServer, e);
+                // Ignore
             }
         }
         return "smtp://";
@@ -2346,8 +2340,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
             try {
                 return URIParser.parse(smtpServer, URIDefaults.SMTP).getPort();
             } catch (final URISyntaxException e) {
-                final Logger logger = org.slf4j.LoggerFactory.getLogger(User.class);
-                logger.warn("Invalid URI: {}", smtpServer, e);
+                // Ignore
             }
         }
         return 25;

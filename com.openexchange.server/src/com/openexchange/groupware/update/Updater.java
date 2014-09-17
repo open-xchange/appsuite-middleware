@@ -103,10 +103,10 @@ public abstract class Updater {
     public abstract UpdateTask[] getAvailableUpdateTasks();
 
     /**
-     * Gets a list of {@link SchemaUpdateState}s that have been scheduled for execution
+     * Gets a list of schemas whose update tasks have been scheduled for execution
      * or are currently running on this node.
      *
-     * @return The list of states
+     * @return The list of schemas
      */
-    public abstract Collection<SchemaUpdateState> getLocallyScheduledTasks();
+    public abstract Collection<String> getLocallyScheduledTasks();
 }

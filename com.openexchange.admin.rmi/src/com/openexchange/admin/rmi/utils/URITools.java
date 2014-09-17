@@ -47,48 +47,38 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.admin.rmi.utils;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.i18n.LocalizableStrings;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
- * {@link OXExceptionMessages} - Exception messages for {@link OXException} that needs to be translated.
+ * {@link URITools}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.18.2
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class FileStorageExceptionMessages implements LocalizableStrings {
+public final class URITools {
 
-    // The folder you requested does not exist.
-    public static final String FOLDER_NOT_EXISTS_MSG = "The folder you requested does not exist.";
-
-    // The file you requested does not exist.
-    public static final String FILE_NOT_EXISTS_MSG = "The file you requested does not exist.";
-
-    // A folder named "%1$s" already exists below the parent folder "%2$s".
-    public static final String DUPLICATE_FOLDER_MSG = "A folder named \"%1$s\" already exists below the parent folder \"%2$s\".";
-
-    // You do not have the appropriate permissions to create a subfolder below the folder "%1$s".
-    public static final String NO_CREATE_ACCESS_MSG = "You do not have the appropriate permissions to create a subfolder below the folder \"%1$s\".";
-
-    // In order to accomplish the search, %1$d or more characters are required.
-    public static final String PATTERN_NEEDS_MORE_CHARACTERS_MSG = "In order to accomplish the search, %1$d or more characters are required.";
-
-    // Invalid URL \"%1$s\". Please correct the value and try again.
-    public static final String INVALID_URL_MSG = "Invalid URL \"%1$s\". Please correct the value and try again.";
-
-    // The allowed quota is reached. Please delete some items in order to store new ones.
-    public static final String QUOTA_REACHED_MSG = "The allowed quota is reached. Please delete some items in order to store new ones.";
-
-    // ZIP archive exceeds max. allowed size of %1$s
-    public static final String ARCHIVE_MAX_SIZE_EXCEEDED_MSG = "ZIP archive exceeds max. allowed size of %1$s";
-
-    /**
-     * Initializes a new {@link OXExceptionMessages}.
-     */
-    private FileStorageExceptionMessages() {
+    private URITools() {
         super();
     }
 
+    public static final URI changeHost(final URI uri, final String newHost) throws URISyntaxException {
+        return new URI(uri.getScheme(), uri.getUserInfo(), newHost, uri.getPort(), uri.getPath(), uri.getQuery(), uri.getFragment());
+    }
+
+    public static final URI generateURI(final String protocol, final String host, final int port) throws URISyntaxException {
+        return new URI(protocol, null, host, port, null, null, null);
+    }
+
+    public static final String getHost(final URI uri) {
+        String retval = uri.getHost();
+        if (null == retval || retval.length() == 0) {
+            return retval;
+        }
+        if (retval.indexOf(':') > 0 && (retval.length() > 0 && retval.charAt(0) == '[') && retval.endsWith("]")) {
+            retval = retval.substring(1, retval.length() -1);
+        }
+        return retval;
+    }
 }

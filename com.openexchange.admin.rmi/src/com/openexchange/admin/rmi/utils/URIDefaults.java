@@ -47,48 +47,101 @@
  *
  */
 
-package com.openexchange.file.storage;
-
-import com.openexchange.exception.OXException;
-import com.openexchange.i18n.LocalizableStrings;
+package com.openexchange.admin.rmi.utils;
 
 /**
- * {@link OXExceptionMessages} - Exception messages for {@link OXException} that needs to be translated.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.18.2
+ * This interface defines the defaults for the {@link URIParser}. If no protocol or port is specified in the input, this defaults are used.
+ * The non SSL defaults are always preferred. The SSL defaults only help in determining the protocol or the port if the other part is parsed.
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class FileStorageExceptionMessages implements LocalizableStrings {
+public interface URIDefaults {
 
-    // The folder you requested does not exist.
-    public static final String FOLDER_NOT_EXISTS_MSG = "The folder you requested does not exist.";
+    String getProtocol();
 
-    // The file you requested does not exist.
-    public static final String FILE_NOT_EXISTS_MSG = "The file you requested does not exist.";
+    String getSSLProtocol();
 
-    // A folder named "%1$s" already exists below the parent folder "%2$s".
-    public static final String DUPLICATE_FOLDER_MSG = "A folder named \"%1$s\" already exists below the parent folder \"%2$s\".";
+    int getPort();
 
-    // You do not have the appropriate permissions to create a subfolder below the folder "%1$s".
-    public static final String NO_CREATE_ACCESS_MSG = "You do not have the appropriate permissions to create a subfolder below the folder \"%1$s\".";
+    int getSSLPort();
 
-    // In order to accomplish the search, %1$d or more characters are required.
-    public static final String PATTERN_NEEDS_MORE_CHARACTERS_MSG = "In order to accomplish the search, %1$d or more characters are required.";
+    static URIDefaults IMAP = new URIDefaults() {
+        @Override
+        public String getProtocol() {
+            return "imap";
+        }
+        @Override
+        public String getSSLProtocol() {
+            return "imaps";
+        }
+        @Override
+        public int getPort() {
+            return 143;
+        }
+        @Override
+        public int getSSLPort() {
+            return 993;
+        }
+    };
 
-    // Invalid URL \"%1$s\". Please correct the value and try again.
-    public static final String INVALID_URL_MSG = "Invalid URL \"%1$s\". Please correct the value and try again.";
+    static URIDefaults NULL = new URIDefaults() {
+        @Override
+        public String getProtocol() {
+            return null;
+        }
+        @Override
+        public String getSSLProtocol() {
+            return null;
+        }
+        @Override
+        public int getPort() {
+            return -1;
+        }
+        @Override
+        public int getSSLPort() {
+            return -1;
+        }
+    };
 
-    // The allowed quota is reached. Please delete some items in order to store new ones.
-    public static final String QUOTA_REACHED_MSG = "The allowed quota is reached. Please delete some items in order to store new ones.";
+    static URIDefaults SMTP = new URIDefaults() {
+        @Override
+        public String getProtocol() {
+            return "smtp";
+        }
+        @Override
+        public String getSSLProtocol() {
+            return "smtps";
+        }
+        @Override
+        public int getPort() {
+            return 25;
+        }
+        @Override
+        public int getSSLPort() {
+            return 465;
+        }
+    };
 
-    // ZIP archive exceeds max. allowed size of %1$s
-    public static final String ARCHIVE_MAX_SIZE_EXCEEDED_MSG = "ZIP archive exceeds max. allowed size of %1$s";
+    static URIDefaults POP3 = new URIDefaults() {
 
-    /**
-     * Initializes a new {@link OXExceptionMessages}.
-     */
-    private FileStorageExceptionMessages() {
-        super();
-    }
+        @Override
+        public String getProtocol() {
+            return "pop3";
+        }
+
+        @Override
+        public String getSSLProtocol() {
+            return "pop3s";
+        }
+
+        @Override
+        public int getPort() {
+            return 110;
+        }
+
+        @Override
+        public int getSSLPort() {
+            return 995;
+        }
+    };
 
 }

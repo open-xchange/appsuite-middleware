@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import com.openexchange.groupware.update.SchemaUpdateState;
 
 
 /**
@@ -66,7 +65,7 @@ public class LocalUpdateTaskMonitor {
 
     private static final LocalUpdateTaskMonitor INSTANCE = new LocalUpdateTaskMonitor();
 
-    private final ConcurrentMap<SchemaUpdateState, Thread> statesBySchema = new ConcurrentHashMap<SchemaUpdateState, Thread>();
+    private final ConcurrentMap<String, Thread> statesBySchema = new ConcurrentHashMap<String, Thread>();
 
     private LocalUpdateTaskMonitor() {
         super();
@@ -77,39 +76,37 @@ public class LocalUpdateTaskMonitor {
     }
 
     /**
-     * Adds a {@link SchemaUpdateState} to this monitor. This
-     * indicates that one or more update tasks for this schema have been
-     * scheduled and are going to be executed by the same thread that
+     * Adds a schema to this monitor. This indicates that one or more update tasks for
+     * this schema have been scheduled and are going to be executed by the same thread that
      * performs this call.
      *
-     * @param state The state
-     * @return Whether the state was added or not. If the same thread already added
-     * a state, <code>false</code> is returned and the state is not added.
+     * @param schema The schema
+     * @return Whether the schema was added or not. If the same thread already added
+     * a schema, <code>false</code> is returned and the schema is not added.
      */
-    public boolean addState(SchemaUpdateState state) {
-        return statesBySchema.putIfAbsent(state, Thread.currentThread()) == null;
+    public boolean addState(String schema) {
+        return statesBySchema.putIfAbsent(schema, Thread.currentThread()) == null;
     }
 
     /**
-     * Removes the given {@link SchemaUpdateState} if it has been added
+     * Removes the given schema if it has been added
      * by this thread.
      *
-     * @param state The state
-     * @return Whether a state has been removed or not (i.e. wasn't added before).
+     * @param schema The schema
+     * @return Whether a schema has been removed or not (i.e. wasn't added before).
      */
-    public boolean removeState(SchemaUpdateState state) {
-        return statesBySchema.remove(state, Thread.currentThread());
+    public boolean removeState(String schema) {
+        return statesBySchema.remove(schema, Thread.currentThread());
     }
 
     /**
-     * Returns a list {@link SchemaUpdateState}s. Every item
-     * indicates that one or more update tasks for this schema have been
-     * scheduled and are going to be executed or are currently running.
+     * Returns a list schemas. Every item indicates that one or more update tasks for this schema
+     * have been scheduled and are going to be executed or are currently running.
      *
-     * @return A list of states
+     * @return A list of schemas
      */
-    public Collection<SchemaUpdateState> getScheduledStates() {
-        return new ArrayList<SchemaUpdateState>(statesBySchema.keySet());
+    public Collection<String> getScheduledStates() {
+        return new ArrayList<String>(statesBySchema.keySet());
     }
 
 }

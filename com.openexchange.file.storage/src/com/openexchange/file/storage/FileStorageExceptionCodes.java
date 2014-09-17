@@ -191,6 +191,10 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
      * Search term no supported: %1$s.
      */
     SEARCH_TERM_NOT_SUPPORTED("Search term no supported: %1$s.", Category.CATEGORY_ERROR, 33),
+    /**
+     * ZIP archive exceeds max. allowed size of %1$s
+     */
+    ARCHIVE_MAX_SIZE_EXCEEDED(" ZIP archive exceeds max. allowed size of %1$s", Category.CATEGORY_PERMISSION_DENIED, 34, FileStorageExceptionMessages.ARCHIVE_MAX_SIZE_EXCEEDED_MSG),
 
     ;
 

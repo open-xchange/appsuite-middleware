@@ -6,7 +6,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-oauth
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 1
+%define        ox_release 2
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -178,6 +178,10 @@ fi
 %doc docs/
 
 %changelog
+* Tue Sep 16 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 7.6.1
+* Mon Sep 08 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-09-15
 * Mon Sep 08 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-09-15
 * Fri Sep 05 2014 Marcus Klein <marcus.klein@open-xchange.com>

@@ -518,7 +518,7 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
                     final CacheKey cacheKey = newCacheKey(createdFolder.getParentID(), tid);
                     cache.removeFromGroup(cacheKey, sContextId);
                     // Cleanse parent from caches, too
-                    folderMapManagement.dropFor(folder.getParentID(), tid, userId, contextId, session);
+                    folderMapManagement.dropFor(createdFolder.getParentID(), tid, userId, contextId, session);
                 }
             }
             /*

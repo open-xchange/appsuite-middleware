@@ -64,4 +64,6 @@ public interface HazelcastMBean {
 
     boolean supportsPartitionReplicas();
 
+    boolean usesCustomPartitioning();
+
 }
