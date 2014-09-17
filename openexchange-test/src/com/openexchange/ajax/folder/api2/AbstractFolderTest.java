@@ -73,7 +73,7 @@ import com.openexchange.server.impl.OCLPermission;
 
 /**
  * {@link AbstractFolderTest}
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class AbstractFolderTest extends AbstractAJAXSession {
@@ -84,7 +84,7 @@ public class AbstractFolderTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link AbstractFolderTest}.
-     * 
+     *
      * @param name
      */
     protected AbstractFolderTest(String name) {
@@ -106,7 +106,7 @@ public class AbstractFolderTest extends AbstractAJAXSession {
 
     /**
      * Create several simple folders whose type is chosen by rotating over calendar, contact and task.
-     * 
+     *
      * @param name The prefix of the folder's name, final name will be name-module-{0..amount-1}
      * @param amount The amount of folders to create
      * @return a list of created folders
@@ -129,7 +129,7 @@ public class AbstractFolderTest extends AbstractAJAXSession {
 
     /**
      * Create a new folder in the private folder tree
-     * 
+     *
      * @return The new FolderObject
      */
     protected FolderObject createSingle(int folderModule, String folderName) {
@@ -152,7 +152,7 @@ public class AbstractFolderTest extends AbstractAJAXSession {
 
     /**
      * Persist several folders on the server.
-     * 
+     *
      * @param newFolders the folders to persist
      * @return the persisted folders with updated id and lastmodified infos
      * @throws Exception
@@ -170,7 +170,7 @@ public class AbstractFolderTest extends AbstractAJAXSession {
 
     /**
      * Update the folders with the infos from the MultipleResponse
-     * 
+     *
      * @param folders the folders
      * @param insertResponses the MultipleResponse
      * @return the folders with updated id and lastmodified infos
@@ -191,7 +191,7 @@ public class AbstractFolderTest extends AbstractAJAXSession {
 
     /**
      * Update one or several folders on the server and additionally update the lastmodified infos.
-     * 
+     *
      * @param folders The folders to update
      */
     public void updateFolders(List<FolderObject> folders) {
@@ -200,7 +200,7 @@ public class AbstractFolderTest extends AbstractAJAXSession {
 
     /**
      * Update one or several folders on the server and additionally update the lastmodified infos.
-     * 
+     *
      * @param folders The folders to update
      */
     public void updateFolders(FolderObject... folders) {
@@ -220,7 +220,7 @@ public class AbstractFolderTest extends AbstractAJAXSession {
 
     /**
      * Delete one or several folders on the server.
-     * 
+     *
      * @param folders The folders to delete
      */
     public void deleteFolders(List<FolderObject> folders) {
@@ -229,11 +229,26 @@ public class AbstractFolderTest extends AbstractAJAXSession {
 
     /**
      * Delete one or several folders on the server.
-     * 
+     *
      * @param folders The folders to delete
      */
     public void deleteFolders(FolderObject... folders) {
         DeleteRequest deleteRequest = new DeleteRequest(EnumAPI.OUTLOOK, folders);
+        CommonDeleteResponse deleteResponse = client.executeSafe(deleteRequest);
+        JSONArray failures = (JSONArray) deleteResponse.getData();
+        assertTrue(failures.isEmpty());
+    }
+
+    /**
+     * Delete one or several folders on the server.
+     *
+     * @param folders The folders to delete
+     */
+    public void deleteFolders(boolean hardDelete, FolderObject... folders) {
+        DeleteRequest deleteRequest = new DeleteRequest(EnumAPI.OUTLOOK, folders);
+        if (hardDelete) {
+            deleteRequest.setHardDelete(hardDelete);
+        }
         CommonDeleteResponse deleteResponse = client.executeSafe(deleteRequest);
         JSONArray failures = (JSONArray) deleteResponse.getData();
         assertTrue(failures.isEmpty());
@@ -255,7 +270,7 @@ public class AbstractFolderTest extends AbstractAJAXSession {
 
     /**
      * {@link FolderType} - Enumeration of the module ids and associated names.
-     * 
+     *
      * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
      */
     public enum FolderType {
