@@ -71,7 +71,6 @@ import com.openexchange.ajax.requesthandler.cache.ResourceCaches;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.InterruptibleInputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -340,9 +339,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
             }
 
             // Prepare response
-            if("com.openexchange.documentpreview.OfficePreviewDocument".equals(previewDocument.getClass().getName())) {
-                requestData.putParameter("transformationNeeded", "false");
-            }
+            preventTransformations(requestData, previewDocument);
 
             // (Asynchronously) Put to cache if ETag is available
             final String fileName = previewDocument.getMetaData().get("resourcename");
@@ -397,20 +394,6 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
         } catch (final RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-    }
-
-    private String getUserLanguage(final ServerSession session) {
-        final User sessionUser = session.getUser();
-        return null == sessionUser ? null : sessionUser.getPreferredLanguage();
-    }
-
-    private void setDefaulThumbnail(final AJAXRequestData requestData, final AJAXRequestResult result) {
-        requestData.setFormat("file");
-        final byte[] bytes = PreviewConst.DEFAULT_THUMBNAIL;
-        InputStream thumbnail = Streams.newByteArrayInputStream(bytes);
-        requestData.putParameter("transformationNeeded", "false");
-        final FileHolder responseFileHolder = new FileHolder(thumbnail, bytes.length, "image/jpeg", "thumbs.jpg");
-        result.setResultObject(responseFileHolder, "file");
     }
 
 }

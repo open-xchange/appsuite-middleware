@@ -86,6 +86,7 @@ import com.openexchange.ajax.requesthandler.converters.preview.MailFilteredHTMLP
 import com.openexchange.ajax.requesthandler.converters.preview.MailTextPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.PreviewImageResultConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.TextPreviewResultConverter;
+import com.openexchange.ajax.requesthandler.converters.preview.PreviewThumbResultConverter;
 import com.openexchange.ajax.requesthandler.customizer.ConversionCustomizer;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
@@ -93,6 +94,7 @@ import com.openexchange.ajax.requesthandler.responseRenderers.PreviewResponseRen
 import com.openexchange.ajax.requesthandler.responseRenderers.StringResponseRenderer;
 import com.openexchange.ajax.response.IncludeStackTraceService;
 import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.continuation.ContinuationRegistryService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.filestore.FilestoreLocationUpdater;
@@ -155,6 +157,8 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
             defaultConverter.addConverter(filteredHTMLPreviewResultConverter);
             defaultConverter.addConverter(new DownloadPreviewResultConverter());
             defaultConverter.addConverter(new PreviewImageResultConverter());
+            defaultConverter.addConverter(new PreviewThumbResultConverter(getOptionalService(ConfigurationService.class)));
+
             /*-
              * TODO: Mail converters
              *

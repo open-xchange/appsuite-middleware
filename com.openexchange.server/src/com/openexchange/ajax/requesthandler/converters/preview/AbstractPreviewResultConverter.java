@@ -67,6 +67,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.codec.binary.Base64;
+import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
@@ -76,9 +77,11 @@ import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.cache.CachedResource;
 import com.openexchange.ajax.requesthandler.cache.ResourceCache;
 import com.openexchange.ajax.requesthandler.cache.ResourceCaches;
+import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -91,8 +94,10 @@ import com.openexchange.preview.ContentTypeChecker;
 import com.openexchange.preview.PreviewDocument;
 import com.openexchange.preview.PreviewOutput;
 import com.openexchange.preview.PreviewService;
+import com.openexchange.preview.RemoteInternalPreviewService;
 import com.openexchange.preview.cache.CachedPreviewDocument;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -514,6 +519,167 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
         pin.unread(read);
         ref.setValue(pin);
         return false;
+    }
+
+    /**
+     * Get the user language based on the current {@link Session}.
+     * 
+     * @param session The session used for the language lookup.
+     * @return Null or the preferred language of the user in a "en-gb" like notation.
+     */
+    public static String getUserLanguage(final ServerSession session) {
+        final User sessionUser = session.getUser();
+        return null == sessionUser ? null : sessionUser.getPreferredLanguage();
+    }
+
+    /**
+     * Checks if a {@link ResourceCache} is enabled fo the given context.
+     * 
+     * @param contextId The context identifier
+     * @return true if a {@link ResourceCache} is enabled for the context
+     * @throws OXException if check fails
+     */
+    public static boolean isResourceCacheEnabled(int contextId) throws OXException {
+        return isResourceCacheEnabled(contextId, -1);
+    }
+
+    /**
+     * Checks if a {@link ResourceCache} is enabled fo the given context and user.
+     * 
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @return true if a {@link ResourceCache} is enabled for the context, user
+     * @throws OXException if check fails
+     */
+    public static boolean isResourceCacheEnabled(int contextId, int userId) throws OXException {
+        boolean isEnabled = false;
+        final ResourceCache cache = ResourceCaches.getResourceCache();
+        if (cache != null) {
+            isEnabled = cache.isEnabledFor(contextId, userId);
+        }
+        return isEnabled;
+    }
+
+    /**
+     * Get the {@link ResourceCache}.
+     * 
+     * @return The preview cache or null if cache is either absent or not enabled for context, user 
+     */
+    public static ResourceCache getResourceCache(int contextId, int userId) {
+        ResourceCache cache = null;
+        try {
+            if(isResourceCacheEnabled(contextId, userId)) {
+                cache = ResourceCaches.getResourceCache();
+            }
+        } catch (OXException e) {
+            LOG.warn("Failed to check if ResourceCache is enabled for context {} and user {}", contextId, userId, e);
+        }
+        return cache;
+    }
+
+    /**
+     * Try to get a context global cached resource.
+     * 
+     * @param session The current session
+     * @param cacheKey The cacheKey
+     * @param resourceCache The resourceCache to use
+     * @return Null or the found {@link CachedResource}
+     */
+    public static CachedResource getCachedResourceForContext(ServerSession session, String cacheKey, ResourceCache resourceCache) {
+        CachedResource cachedResource= null;
+        final int contextId = session.getContextId();
+        if(!Strings.isEmpty(cacheKey)) {
+            if(resourceCache != null) {
+                try {
+                    cachedResource = resourceCache.get(cacheKey, 0, contextId);
+                } catch (OXException e) {
+                    LOG.debug("Error while trying to look up CachedResource with key {} in context {}", e);
+                }
+            }
+        }
+        return cachedResource;
+    }
+
+    /**
+     * Detect if the previewService should be called via a current thread or worker thread strategy.
+     * @param previewService
+     * @return
+     */
+    public static long getAwaitThreshold(PreviewService previewService) {
+        long timeToWaitMillis = 0;
+        if (previewService instanceof RemoteInternalPreviewService) {
+            timeToWaitMillis = ((RemoteInternalPreviewService) previewService).getTimeToWaitMillis();
+        }
+        return timeToWaitMillis;
+    }
+
+    public static void setDefaulThumbnail(final AJAXRequestData requestData, final AJAXRequestResult result) {
+        requestData.setFormat("file");
+        final byte[] bytes = PreviewConst.DEFAULT_THUMBNAIL;
+        InputStream thumbnail = Streams.newByteArrayInputStream(bytes);
+        requestData.putParameter("transformationNeeded", "false");
+        final FileHolder responseFileHolder = new FileHolder(thumbnail, bytes.length, "image/jpeg", "thumbs.jpg");
+        result.setResultObject(responseFileHolder, "file");
+    }
+
+    /**
+     * Get the {@link IFileHolder} from the given {@link AJAXRequestResult}.
+     * 
+     * @param result
+     * @return The {@link IFileHolder} from the given {@link AJAXRequestResult}.
+     * @throws OXException if the result object isn't compatible
+     */
+    public static IFileHolder getFileHolderFromResult(AJAXRequestResult result) throws OXException {
+        
+        final Object resultObject = result.getResultObject();
+        if (!(resultObject instanceof IFileHolder)) {
+            throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(IFileHolder.class.getSimpleName(), null == resultObject ? "null" : resultObject.getClass().getSimpleName());
+        }
+        return (IFileHolder) resultObject;
+    }
+
+    /**
+     * Check if the client actively wants to prevent caching.
+     * 
+     * @param requestData The requestData
+     * @return True if the client didn't actively specify caching=false
+     */
+    public static boolean useCache(AJAXRequestData requestData) {
+        return AJAXRequestDataTools.parseBoolParameter("cache", requestData, true);
+    }
+
+    /**
+     * Check if the ETag is valid iow. non empty
+     * 
+     * @param eTag The ETag to check
+     * @return True if !Strings.isEmpty(eTag)
+     */
+    public static boolean isValidETag(String eTag) {
+        return !Strings.isEmpty(eTag);
+    }
+
+    /**
+     * Detect if the {@link PreviewDocument} needs further transformations or not and set <code>transformationNeeded</code> parameter on the
+     * given {@link AJAXRequestData} that will be evaluated by the {@link FileResponseRenderer} on the way back to the client.
+     * 
+     * @param requestData The {@link AJAXRequestData} that will be evaluated by the {@link FileResponseRenderer} on the way back to the
+     *            client.
+     * @param previewDocument The current {@link PreviewDocument}
+     */
+    public static void preventTransformations(AJAXRequestData requestData, PreviewDocument previewDocument) {
+        if ("com.openexchange.documentpreview.OfficePreviewDocument".equals(previewDocument.getClass().getName())) {
+            preventTransformations(requestData);
+        }
+    }
+
+    /**
+     * Set <code>transformationNeeded</code> parameter to <code>false</code> on the given {@link AJAXRequestData}.
+     * 
+     * @param requestData The {@link AJAXRequestData} that will be evaluated by the {@link FileResponseRenderer} on the way back to the
+     *            client.
+     */
+    public static void preventTransformations(AJAXRequestData requestData) {
+        requestData.putParameter("transformationNeeded", "false");
     }
 
     /** Simple reference class */
