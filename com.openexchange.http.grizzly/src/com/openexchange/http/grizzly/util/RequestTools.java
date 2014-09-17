@@ -280,10 +280,10 @@ public final class RequestTools {
     }
 
     /**
-     * Checks if given requests signals to be an EAS Ping request
+     * Checks if given requests signals to be an EAS Ping or Sync request
      *
      * @param request The request to check
-     * @return <code>true</code> if given requests signals to be an EAS Ping request; otherwise <code>false</code>
+     * @return <code>true</code> if given requests signals to be an EAS Ping or Sync request; otherwise <code>false</code>
      */
     public static boolean isEasPingOrSyncRequest(HttpServletRequest request) {
         if (easUri().equals(request.getRequestURI())) {
@@ -311,10 +311,10 @@ public final class RequestTools {
     }
 
     /**
-     * Checks if given requests signals to be an EAS Ping request
+     * Checks if given requests signals to be an EAS Ping or Sync request
      *
      * @param request The request to check
-     * @return <code>true</code> if given requests signals to be an EAS Ping request; otherwise <code>false</code>
+     * @return <code>true</code> if given requests signals to be an EAS Ping or Sync request; otherwise <code>false</code>
      */
     public static boolean isEasPingOrSyncRequest(Request request) {
         if (easUri().equals(request.getRequestURI())) {
