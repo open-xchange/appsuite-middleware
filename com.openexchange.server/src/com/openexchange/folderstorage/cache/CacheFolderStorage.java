@@ -1695,7 +1695,7 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
         return loadFolder(treeId, folderId, storageType, false, storageParameters);
     }
 
-    private Folder loadFolder(final String treeId, final String folderId, final StorageType storageType, final boolean readWrite, final StorageParameters storageParameters) throws OXException {
+    private Folder loadFolder(String treeId, String folderId, StorageType storageType, boolean readWrite, StorageParameters storageParameters) throws OXException {
         final FolderStorage storage = registry.getFolderStorage(treeId, folderId);
         if (null == storage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
@@ -1703,7 +1703,7 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
         final boolean started = startTransaction(readWrite ? Mode.WRITE_AFTER_READ : Mode.READ, storageParameters, storage);
         boolean rollback = true;
         try {
-            storageParameters.setIgnoreCache(true);
+            storageParameters.setIgnoreCache(Boolean.valueOf(readWrite));
             final Folder folder = storage.getFolder(treeId, folderId, storageType, storageParameters);
             if (started) {
                 storage.commitTransaction(storageParameters);
@@ -1843,7 +1843,6 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
                         /*
                          * Load them & commit
                          */
-                        newParameters.setIgnoreCache(true);
                         List<Folder> folders = fs.getFolders(treeId, ids, storageType, newParameters);
                         if (started) {
                             fs.commitTransaction(newParameters);
@@ -1862,7 +1861,6 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
                     } catch (RuntimeException e) {
                         throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e);
                     } finally {
-                        newParameters.setIgnoreCache(null);
                         if (started) {
                             fs.rollback(newParameters);
                         }

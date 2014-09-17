@@ -1868,11 +1868,17 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
 
     private static FolderObject getFolderObject(final int folderId, final Context ctx, final Connection con, StorageParameters storageParameters) throws OXException {
         Boolean ignoreCache = storageParameters.getIgnoreCache();
-        if ((null != ignoreCache && true == ignoreCache) || !FolderCacheManager.isEnabled()) {
+        if (!FolderCacheManager.isEnabled()) {
             return FolderObject.loadFolderObjectFromDB(folderId, ctx, con, true, true);
         }
 
-        final FolderCacheManager cacheManager = FolderCacheManager.getInstance();
+        FolderCacheManager cacheManager = FolderCacheManager.getInstance();
+        if (Boolean.TRUE.equals(ignoreCache)) {
+            FolderObject fo = FolderObject.loadFolderObjectFromDB(folderId, ctx, con, true, true);
+            cacheManager.putFolderObject(fo, ctx, true, null);
+            return fo;
+        }
+
         FolderObject fo = cacheManager.getFolderObject(folderId, ctx);
         if (null == fo) {
             fo = FolderObject.loadFolderObjectFromDB(folderId, ctx, con, true, true);
@@ -1883,19 +1889,26 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
 
     private static List<FolderObject> getFolderObjects(final int[] folderIds, final Context ctx, final Connection con, StorageParameters storageParameters) throws OXException {
         Boolean ignoreCache = storageParameters.getIgnoreCache();
-        if ((null != ignoreCache && true == ignoreCache) || !FolderCacheManager.isEnabled()) {
+        if (!FolderCacheManager.isEnabled()) {
             /*
              * OX folder cache not enabled
              */
             return OXFolderBatchLoader.loadFolderObjectsFromDB(folderIds, ctx, con, true, true);
         }
-        /*
-         * Load them either from cache or from database
-         */
+
+        FolderCacheManager cacheManager = FolderCacheManager.getInstance();
+        if (Boolean.TRUE.equals(ignoreCache)) {
+            List<FolderObject> folders = OXFolderBatchLoader.loadFolderObjectsFromDB(folderIds, ctx, con, true, true);
+            for (FolderObject fo : folders) {
+                cacheManager.putFolderObject(fo, ctx, true, null);
+            }
+            return folders;
+        }
+
+        // Load them either from cache or from database
         final int length = folderIds.length;
         final FolderObject[] ret = new FolderObject[length];
         final TIntIntMap toLoad = new TIntIntHashMap(length);
-        final FolderCacheManager cacheManager = FolderCacheManager.getInstance();
         for (int index = 0; index < length; index++) {
             final int folderId = folderIds[index];
             final FolderObject fo = cacheManager.getFolderObject(folderId, ctx);
