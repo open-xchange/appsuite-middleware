@@ -58,7 +58,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.codec.binary.Base64;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.grizzly.GrizzlyExceptionCode;
@@ -66,8 +65,6 @@ import com.openexchange.http.grizzly.osgi.Services;
 import com.openexchange.http.grizzly.util.RequestTools;
 import com.openexchange.http.requestwatcher.osgi.services.RequestRegistryEntry;
 import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
-import com.openexchange.java.Charsets;
-import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 
 /**
@@ -139,7 +136,7 @@ public class RequestReportingFilter implements Filter {
     }
 
     private boolean isLongRunning(final HttpServletRequest request) {
-        return RequestTools.isDriveRequest(request) || RequestTools.isEasPingRequest(request);
+        return RequestTools.isDriveRequest(request) || RequestTools.isEasPingOrSyncRequest(request);
     }
 
 }

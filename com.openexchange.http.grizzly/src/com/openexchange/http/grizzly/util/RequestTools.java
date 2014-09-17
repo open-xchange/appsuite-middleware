@@ -223,7 +223,9 @@ public final class RequestTools {
 
     private static final String EAS_CMD = "Cmd";
     private static final String EAS_PING = "Ping";
+    private static final String EAS_SYNC = "Sync";
     private static final int EAS_COMMAND_CODE_PING = 18;
+    private static final int EAS_COMMAND_CODE_SYNC = 0;
 
     /**
      * Checks if given requests signals to be an EAS Ping request
@@ -271,6 +273,68 @@ public final class RequestTools {
             final byte[] bytes = getBase64Bytes(request.getQueryString());
             if (null != bytes && bytes.length > 2 && EAS_COMMAND_CODE_PING == bytes[1]) {
                 return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks if given requests signals to be an EAS Ping request
+     *
+     * @param request The request to check
+     * @return <code>true</code> if given requests signals to be an EAS Ping request; otherwise <code>false</code>
+     */
+    public static boolean isEasPingOrSyncRequest(HttpServletRequest request) {
+        if (easUri().equals(request.getRequestURI())) {
+            String cmd = request.getParameter(EAS_CMD);
+            if (EAS_PING.equals(cmd) || EAS_SYNC.equals(cmd)) {
+                return true;
+            }
+
+            /*-
+             * Check for possibly EAS base64-encoded query string;
+             * see http://download.microsoft.com/download/5/D/D/5DD33FDF-91F5-496D-9884-0A0B0EE698BB/[MS-ASHTTP].pdf
+             *
+             * Second byte reflects EAS command
+             */
+            byte[] bytes = getBase64Bytes(request.getQueryString());
+            if (null != bytes && bytes.length > 2) {
+                byte code = bytes[1];
+                if (EAS_COMMAND_CODE_PING == code || EAS_COMMAND_CODE_SYNC == code) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks if given requests signals to be an EAS Ping request
+     *
+     * @param request The request to check
+     * @return <code>true</code> if given requests signals to be an EAS Ping request; otherwise <code>false</code>
+     */
+    public static boolean isEasPingOrSyncRequest(Request request) {
+        if (easUri().equals(request.getRequestURI())) {
+            String cmd = request.getParameter(EAS_CMD);
+            if (EAS_PING.equals(cmd) || EAS_SYNC.equals(cmd)) {
+                return true;
+            }
+
+            /*-
+             * Check for possibly EAS base64-encoded query string;
+             * see http://download.microsoft.com/download/5/D/D/5DD33FDF-91F5-496D-9884-0A0B0EE698BB/[MS-ASHTTP].pdf
+             *
+             * Second byte reflects EAS command
+             */
+            byte[] bytes = getBase64Bytes(request.getQueryString());
+            if (null != bytes && bytes.length > 2) {
+                byte code = bytes[1];
+                if (EAS_COMMAND_CODE_PING == code || EAS_COMMAND_CODE_SYNC == code) {
+                    return true;
+                }
             }
         }
 
