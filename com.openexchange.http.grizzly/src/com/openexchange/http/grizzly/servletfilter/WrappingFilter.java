@@ -217,6 +217,7 @@ public class WrappingFilter implements Filter {
                 }
             }
 
+            // Tracking identifier
             String trackingId = request.getParameter("trackingId");
             if (trackingId == null) {
                 trackingId = UUIDs.getUnformattedString(UUID.randomUUID());
