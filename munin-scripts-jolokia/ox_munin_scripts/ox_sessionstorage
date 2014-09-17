@@ -75,7 +75,12 @@ sub callUrl {
 }
 
 sub testHazelcast {
+	testHazelcastgetPartitionOwner();
+	testHazelusesCustomPartitioning();	
+}
 
+sub testHazelcastgetPartitionOwner{
+	
 	my $ua = LWP::UserAgent->new();
 	my $req = HTTP::Request->new(GET => "$url"."/exec/com.openexchange.hazelcast:name=Hazelcast%20Toolkit/getPartitionOwner/probe");
 	$req->authorization_basic($username,$password);
@@ -105,25 +110,61 @@ sub testHazelcast {
 			die "Something went wrong:\n",$status;
 		}
 	}
+}
+
+sub testHazelcastsupportsPartitionReplicas{
 	
-	$req = HTTP::Request->new(GET => "$url"."/exec/com.openexchange.hazelcast:name=Hazelcast%20Toolkit/supportsPartitionReplicas/");
+	my $ua = LWP::UserAgent->new();
+	my $req = HTTP::Request->new(GET => "$url"."/exec/com.openexchange.hazelcast:name=Hazelcast%20Toolkit/supportsPartitionReplicas/");
 	$req->header('Accept', => 'text/html');
 	$req->authorization_basic($username,$password);
 	
-	$response = $ua->request($req);
+	my $response = $ua->request($req);
 	
 	if ($response->is_success) {
 		my $json = decode_json($response->decoded_content);
 		if (defined $json->{value}){
-			if ( $json->{value} eq "null" ) {
+			print "2 ".$json->{value}."\n";
+			if ( "true" ne $json->{value} ) {
+			} else {
 				die "No owner for all configured partition replicas detected, unable to retrieve map statistic. value=".$json->{value}."\n";
 			}
-			if ( $json->{value} eq "false" ) {
-				die "No owner for all configured partition replicas detected, unable to retrieve map statistic. value=".$json->{value}."\n";
-			}
-			print "supportsPartitionReplicas value=".$json->{value}."\n";
 		} else {
 			die "No owner for all configured partition replicas detected, unable to retrieve map statistics.\n";
+		}
+	}
+	else {
+		my $status = $response->status_line;
+		if ($status == 404) {
+			die "Link to servlet might not be set correctly, this can be done by altering /etc/munin/plugin-conf.d/ox and setting the correct path to your jolokia servlet";
+		}
+		elsif ($status == 401) {
+			die "Credentials to login might be not set correctly. The credentials are set inside /opt/open-xchange/etc/jolokia.properties on the OX, for munin, those need to be altered at /etc/munin/plugin-conf.d/ox";
+		}
+		else {
+			die "Something went wrong:\n",$status;
+		}
+	}
+}
+
+sub testHazelusesCustomPartitioning{
+	
+	my $ua = LWP::UserAgent->new();
+	my $req = HTTP::Request->new(GET => "$url"."/exec/com.openexchange.hazelcast:name=Hazelcast%20Toolkit/usesCustomPartitioning/");
+	$req->header('Accept', => 'text/html');
+	$req->authorization_basic($username,$password);
+	
+	my $response = $ua->request($req);
+	
+	if ($response->is_success) {
+		my $json = decode_json($response->decoded_content);
+		if (defined $json->{value}){
+			if ( "false" eq $json->{value}) {
+			} else {
+				testHazelcastsupportsPartitionReplicas();
+			}
+		} else {
+			testHazelcastsupportsPartitionReplicas();
 		}
 	}
 	else {
