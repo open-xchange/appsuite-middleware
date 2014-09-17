@@ -49,6 +49,8 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import static com.google.common.net.HttpHeaders.ETAG;
+import static com.google.common.net.HttpHeaders.LAST_MODIFIED;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -120,11 +122,11 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
             AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
             String etag = document.getEtag();
             if (null != etag) {
-                result.setHeader("ETag", etag);
+                result.setHeader(ETAG, etag);
             }
             long lastModified = document.getLastModified();
             if (lastModified > 0) {
-                result.setHeader("Last-Modified", Tools.formatHeaderDate(new Date(lastModified)));
+                result.setHeader(LAST_MODIFIED, Tools.formatHeaderDate(new Date(lastModified)));
             }
             return result;
         }
@@ -175,7 +177,7 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
 
         Date lastModified = fileMetadata.getLastModified();
         if (null != lastModified) {
-            result.setHeader("Last-Modified", Tools.formatHeaderDate(lastModified));
+            result.setHeader(LAST_MODIFIED, Tools.formatHeaderDate(lastModified));
         }
 
         return result;
@@ -235,7 +237,7 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
     public void setETag(String eTag, long expires, AJAXRequestResult result) throws OXException {
         result.setExpires(expires);
         if (eTag != null) {
-            result.setHeader("ETag", eTag);
+            result.setHeader(ETAG, eTag);
         }
     }
 
