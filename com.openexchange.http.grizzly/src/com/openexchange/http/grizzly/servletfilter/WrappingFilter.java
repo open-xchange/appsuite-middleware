@@ -65,9 +65,11 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper;
 import com.openexchange.http.grizzly.http.servlet.HttpServletResponseWrapper;
+import com.openexchange.http.grizzly.osgi.Services;
 import com.openexchange.http.grizzly.util.IPTools;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
@@ -84,24 +86,16 @@ public class WrappingFilter implements Filter {
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(WrappingFilter.class);
 
     IPTools remoteIPFinder;
-
     private String forHeader;
-
     private List<String> knownProxies;
-
     private String protocolHeader;
-
     private String httpsProtoValue;
-
     private int httpPort;
-
     private int httpsPort;
-
     private boolean isConsiderXForwards = false;
-
     private String echoHeader;
-
     private String contentSecurityPolicy = null;
+    private String dispatcherPrefix = DispatcherPrefixService.DEFAULT_PREFIX;
 
     @Override
     public void init(FilterConfig filterConfig) {
@@ -124,6 +118,13 @@ public class WrappingFilter implements Filter {
                 knownProxies = config.getKnownProxies();
             }
         });
+
+        String prefix = DispatcherPrefixService.DEFAULT_PREFIX;
+        DispatcherPrefixService service = Services.optService(DispatcherPrefixService.class);
+        if (null != service) {
+            prefix = service.getPrefix();
+        }
+        this.dispatcherPrefix = prefix;
     }
 
     @Override
@@ -193,10 +194,27 @@ public class WrappingFilter implements Filter {
             final String userAgent = httpServletRequest.getHeader("User-Agent");
             LogProperties.put(LogProperties.Name.GRIZZLY_USER_AGENT, null == userAgent ? "<unknown>" : userAgent);
 
-            // AJAX action
-            final String action = request.getParameter("action");
-            if (null != action) {
-                LogProperties.put(LogProperties.Name.AJAX_ACTION, action);
+            // AJAX module/action
+            {
+                String action = request.getParameter("action");
+                if (null != action) {
+                    LogProperties.put(LogProperties.Name.AJAX_ACTION, action);
+                }
+
+                String requestURI = httpServletRequest.getRequestURI();
+                if (requestURI.startsWith(dispatcherPrefix) && requestURI.length() > dispatcherPrefix.length()) {
+                    String pathInfo = requestURI;
+                    int lastIndex = pathInfo.lastIndexOf(';');
+                    if (lastIndex > 0) {
+                        pathInfo = pathInfo.substring(0, lastIndex);
+                    }
+                    String module = pathInfo.substring(dispatcherPrefix.length());
+                    int mlen = module.length() - 1;
+                    if (mlen > 0 && '/' == module.charAt(mlen)) {
+                        module = module.substring(0, mlen);
+                    }
+                    LogProperties.put(LogProperties.Name.AJAX_MODULE, module);
+                }
             }
 
             String trackingId = request.getParameter("trackingId");

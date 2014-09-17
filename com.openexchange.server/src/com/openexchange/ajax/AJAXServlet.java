@@ -72,7 +72,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
@@ -458,7 +457,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         super();
     }
 
-    private static final AtomicLong REQUEST_NUMBER = new AtomicLong(0L);
+    // private static final AtomicLong REQUEST_NUMBER = new AtomicLong(0L);
 
     /**
      * Gets the locale for given server session
@@ -513,7 +512,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         incrementRequests();
-        LogProperties.putProperty(LogProperties.Name.AJAX_REQUEST_NUMBER, Long.toString(REQUEST_NUMBER.incrementAndGet()));
+        // We already have a tracking id...
+        // LogProperties.putProperty(LogProperties.Name.AJAX_REQUEST_NUMBER, Long.toString(REQUEST_NUMBER.incrementAndGet()));
         try {
             // create a new HttpSession if missing
             req.getSession(true);

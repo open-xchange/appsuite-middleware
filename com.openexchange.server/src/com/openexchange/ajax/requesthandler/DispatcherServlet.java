@@ -53,7 +53,6 @@ import static com.openexchange.ajax.requesthandler.Dispatcher.PREFIX;
 import static com.openexchange.tools.servlet.http.Tools.isMultipartContent;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -434,29 +433,7 @@ public class DispatcherServlet extends SessionServlet {
                 logException(e, LogLevel.DEBUG, sc);
                 return;
             }
-            if (AjaxExceptionCodes.HTTP_ERROR_YELL_CALLBACK.equals(e)) {
-                Object[] logArgs = e.getLogArgs();
-                String yellCb = logArgs.length > 0 ? logArgs[0].toString() : null;
-                if (null != yellCb) {
-                    httpResponse.setStatus(HttpServletResponse.SC_OK);
-                    httpResponse.setContentType("text/html; charset=UTF-8");
-                    httpResponse.setHeader("Content-Disposition", "inline");
-                    if (yellCb.indexOf('"') >= 0) {
-                        yellCb = PATTERN_SINGLE_QUOTE.matcher(yellCb).replaceAll("$1\\\\'");
-                    }
-                    PrintWriter writer = httpResponse.getWriter();
 
-                    StringBuilder sb = new StringBuilder(512).append("<!DOCTYPE html>");
-                    sb.append("<head><META http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><script type=\"text/javascript\">");
-                    sb.append("(window.parent || window.opener).require(['io.ox/core/yell'], function (yell) { yell('error', '");
-                    sb.append(yellCb).append("'); });");
-                    sb.append("</script></head></html>");
-
-                    writer.write(sb.toString());
-                    writer.flush();
-                    return;
-                }
-            }
             // Handle other OXExceptions
             if (AjaxExceptionCodes.UNEXPECTED_ERROR.equals(e)) {
                 LOG.error("Unexpected error", e);

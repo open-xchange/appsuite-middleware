@@ -70,6 +70,7 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
@@ -220,8 +221,7 @@ public class ZipFolderAction extends AbstractFileAction {
                 if (fileSize > 0) {
                     total += fileSize;
                     if (total > threshold) {
-                        String msg = "ZIP archive exceeds max. allowed size of " + UploadUtility.getSize(threshold, 2, false, true);
-                        throw AjaxExceptionCodes.HTTP_ERROR_YELL_CALLBACK.create(msg);
+                        throw FileStorageExceptionCodes.ARCHIVE_MAX_SIZE_EXCEEDED.create(UploadUtility.getSize(threshold, 2, false, true));
                     }
                 }
             }

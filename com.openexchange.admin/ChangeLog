@@ -1,3 +1,7 @@
+* 2014-09-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 34386: Decouple 'com.openexchange.admin.rmi' from other bundles
+
 * 2014-07-11 - pascal.bleser@open-xchange.com
 
  - Fix for bug 33506: Fix primary key violation when changing more than one user attribute that had not been set before in OXUserInterface
@@ -152,7 +156,7 @@
 
 * 2011-12-29 - tobias.friedrich@open-xchange.com
 
- - Fix for bug 21083: Populating uid field during contact insertion for users 
+ - Fix for bug 21083: Populating uid field during contact insertion for users
 
 * 2011-12-14 - thorben.betten@open-xchange.com
 
@@ -226,9 +230,9 @@
  - Bugfix #19184: Improved Spanish name for the Spam folder.
 
 * 2011-05-11 - tobias.prinz@open-xchange.com
-  
+
  - Bugfix #19047: Chinese names for default mail folders have been added to User.properties
- 
+
 * 2011-03-31 - marcus.klein@open-xchange.com
 
  - Bugfix #18788: Using database connection without timeout to create new schemas.
@@ -469,11 +473,11 @@
 
 * 2009-06-26 - marcus.klein@open-xchange.com
 
- - Bugfix #13951: Writing understandable exception to RMI client if database is updated.  
+ - Bugfix #13951: Writing understandable exception to RMI client if database is updated.
 
 * 2009-06-25 - marcus.klein@open-xchange.com
 
- - Bugfix #13987: Removed using of general classes that are not available in command line tools.  
+ - Bugfix #13987: Removed using of general classes that are not available in command line tools.
 
 * 2009-06-23 - marcus.klein@open-xchange.com
 
@@ -491,7 +495,7 @@
 
  - Bugfix #13733: antispam plugin cannot be enabled via soap
      renamed variable inside of user object
-     
+
 * 2009-05-21 - dennis.sieben@open-xchange.com
 
  - Bugfix #13606: [L3] Admin doesn't provide parameters to edit a user's mail_upload quota settings
@@ -507,7 +511,7 @@
 
 * 2009-02-23 - marcus.klein@open-xchange.com
 
- - Bugfix #13248: Checking existance of a group on already existing connection to prevent problems with not committed groups. 
+ - Bugfix #13248: Checking existance of a group on already existing connection to prevent problems with not committed groups.
 
 * 2009-02-20 - thorben.betten@open-xchange.com
 
@@ -582,7 +586,7 @@
 
  - Setting writeOnly to true per default on new and updated installations (postinst)
    (see Bug #11595)
-   
+
 * 2008-09-03 - choeger@open-xchange.com
 
  - added new option writeOnly to configdb to be able to
@@ -617,7 +621,7 @@
 * 2008-07-18 - choeger@open-xchange.com
 
  - Bugfix ID#11682 [L3] NullPointerException when switching to debug mode for admin daemon
- 
+
 * 2008-07-15 - choeger@open-xchange.com
 
  - Bugfix #11642 RHEL5 Packages don't depend on Sun Java 1.5 and mysql-server
@@ -630,7 +634,7 @@
    User.setTimezone and User.getTimezone now uses java.lang.String instead of java.util.TimeZone
  - Bugfix ID#11594 Unable to create a user via commandline tool when setting a timezone
  - Bugfix ID#11596 Installation fails on SLES10 64Bit
-   
+
 * 2008-06-30 - choeger@open-xchange.com
 
  - Bugfix ID#11401 module access changes only take affect after restarting the groupware
@@ -660,7 +664,7 @@
   - Bugfix ID#11179 deleteuser doesn't delete user configuration
   - Bugfix ID#11147 "Last modified from" should not be 0
   - Bugfix ID#11185 No protocol identifier created when adding a user with --imap/smtpserver attribute
-  
+
 * 2008-01-21 - dennis.sieben@open-xchange.com
 
   - Bugfix ID#10805 One PreparedStatement isn't closed in OXToolMySQLStorage
@@ -682,15 +686,15 @@
 
   - Bugfix ID#10180 RuntimeExceptions aren't logged
   - Bugfix ID#10188 Everytime a write connection is used it should be checked if a rollback is made there
-  
+
 * 2007-11-12 - choeger@open-xchange.com
 
   - Bugfix ID#9835 [L3] hanging or long taking command line tools
-  
+
 * 2007-11-08 - dennis.sieben@open-xchange.com
 
   - Bugfix ID#10125 No rollback if filestore creation fails during createuser
-  
+
 * 2007-11-07 - manuel.kraft@open-xchange.com
 
   - Bugfix ID#10050 Database leftovers of deleted contexts
@@ -698,7 +702,7 @@
 * 2007-11-06 - dennis.sieben@open-xchange.com
 
   - Bugfix ID#10072 L3: display name of contact blocks creation of new user
-  
+
 * 2007-10-31 - manuel.kraft@open-xchange.com
 
    - Bugfix ID#10005 [HEAD] Connections to database not returned in admindaemon
@@ -720,18 +724,18 @@
    - Bugfix ID#9860 Unable to delete Contact: Context 30 Contact 2 on delete context
 
 * 2007-10-15 - manuel.kraft@open-xchange.com
- 
+
   - Bugfix ID#9806 [HEAD] username can't be changed
   - Bugfix ID#9805 [HEAD] No error message when username is going to be changed
 
 * 2007-10-12 - dennis.sieben@open-xchange.com
- 
+
   - Bugfix ID#9786 L3: IMAP port is stripped from commandline
- 
+
 * 2007-10-11 - dennis.sieben@open-xchange.com
- 
+
   - Bugfix ID#9777 no adequate description of parameters
- 
+
 * 2007-10-10 - choeger@open-xchange.com
 
  - Bugfix ID#9767 [L3] changing admin password with disabled authentication does not work
@@ -748,11 +752,11 @@
 * 2007-09-20 - dennis.sieben@open-xchange.com
 
   - Bugfix ID#9592 Language is not in the output of listuser --csv CLT
-  
+
 * 2007-09-11 - dennis.sieben@open-xchange.com
 
   - Bugfix ID#9362 <addmembers> should be <userid>
-  
+
 * 2007-09-07 - choeger@open-xchange.com
 
  - Bugfix #9235 Crypt implementation should be able to handle UTF-8
@@ -760,7 +764,7 @@
 * 2007-09-05 - dennis.sieben@open-xchange.com
 
   - Bugfix ID#9254 showruntimestats gives NullPointerException
-  
+
 * 2007-08-31 - choeger@open-xchange.com
 
   - Bugfix ID#9156 Malformed path to HTMLEntities.properties
@@ -772,7 +776,7 @@
   - Bugfix ID#9046 createuser text for --extendedoptions printed on sterr
   - Bugfix ID#9034 createcontext null printed instead of cid in case of error
   - Bugfix ID#8735 Some code clean open-xchange-admin
-  
+
 * 2007-08-21 - choeger@open-xchange.com
 
   - Bugfix ID#8995 oxinstaller return value is always 0
@@ -782,7 +786,7 @@
 
   - Bugfix ID#8998 --nonl not consistent
   - Bugfix ID#8985 createuser doesn't check --timezone format
- 
+
 * 2007-08-20 - manuel.kraft@open-xchange.com
 
  - Bugfix ID#8875 No email validation for /opt/open-xchange/sbin/createcontext
@@ -790,7 +794,7 @@
 * 2007-08-16 - dennis.sieben@open-xchange.com
 
  - Bugfix ID#8830 if user is deleted and plugin error occures, no message is shown.
- 
+
 * 2007-08-16 - manuel.kraft@open-xchange.com
 
  - Bugfix ID#8839 "Virtual" PIM folders are not updated when changing users displayname
@@ -803,7 +807,7 @@
 
   - Bugfix ID#8802 no error message when display_name is changed
   - Bugfix ID#8837 'createuser' command line tool shows wrong default settings for modularization
-  
+
 * 2007-08-07 - dennis.sieben@open-xchange.com
 
   - Bugfix ID#8593 Operations by name not possible
@@ -813,7 +817,7 @@
 * 2007-08-07 - choeger@open-xchange.com
 
  - Bugfix ID#8679 new admin does not work with log4j
-   
+
 * 2007-08-06 - manuel.kraft@open-xchange.com
 
  - Bugfix ID#8694: Users which are downgraded to "Basic" are still able to create public folders.
@@ -828,7 +832,7 @@
 * 2007-07-26 - dennis.sieben@open-xchange.com
 
  - Bugfix ID#8553 CLT: After running CLT no reasonable message on console appear for user
- 
+
 * 2007-07-25 - choeger@open-xchange.com
 
  - Bugfix ID#8556 CLTs: <datevalue> not working in "createuser"
@@ -850,7 +854,7 @@
 * 2007-07-05 - choeger@open-xchange.com
 
  - Bugfix ID#7682 (user setup) deleted user is not automatically logged off (syntax error message is displayed)
- 
+
 * 2007-07-02 - choeger@open-xchange.com
 
  - Bugfix ID#8254 Cryptic error message when updatetask is started
@@ -876,7 +880,7 @@
  - Bugfix ID#7843 admin can only handle unix crypt in RMI auth
  - Bugfix ID#7757 (spam) spam training in GUI is available if spam is disabled for user
    added missing spam_trainer disable method
-   
+
 * 2007-06-15 - manuel.kraft@open-xchange.com
 
  - Bugfix #8019  	OXEE password of new created contexts is always secret
@@ -885,7 +889,7 @@
 
  - Bugfix ID#7972 Fresh install - admin cannot login
  - Bugfix ID#7803 FQDN is replaced by a DHCP value after installation
- 
+
 * 2007-06-12 - dennis.sieben@open-xchange.com
 
  - Bugfix #7816: User: Error when explicitly adding a new user to Group users
@@ -910,12 +914,12 @@
 * 2007-05-25 - choeger@open-xchange.com
 
   - Bugfix ID#7568 alias can't be set without the need to set PRIMARY_MAIL or EMAIL1
-  
+
 * 2007-05-21 - choeger@open-xchange.com
 
   - Bugfix ID#7340 user create -> can add aliases which are not acceptable
   - Bugfix ID#7342 can create a group with invalid email address
-  
+
 * 2007-05-18 - manuel.kraft@open-xchange.com
 
   -  Bugfix ID#7345 After update, login as admin not possible

@@ -1,3 +1,9 @@
+open-xchange-sessionstorage-hazelcast (7.6.1-2) stable; urgency=low
+
+  * Second release candidate for 7.6.1
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 16 Sep 2014 15:48:15 +0200
+
 open-xchange-sessionstorage-hazelcast (7.6.1-1) stable; urgency=low
 
   * First release candidate for 7.6.1
