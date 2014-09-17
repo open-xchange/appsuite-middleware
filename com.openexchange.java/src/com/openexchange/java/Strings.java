@@ -1029,4 +1029,46 @@ public class Strings {
         return new StringBuilder(string).reverse().toString();
     }
 
+    /**
+     * Removes all leading occurrences of the supplied characters from the given string.
+     *
+     * @param string The string to trim
+     * @param trimChars The characters to remove
+     * @return The trimmed string
+     */
+    public static String trimStart(String string, char...trimChars) {
+        if (null != string && null != trimChars && 0 < trimChars.length) {
+            while (0 < string.length() && contains(string.charAt(0), trimChars)) {
+                string = string.substring(1, string.length() - 1);
+            }
+        }
+        return string;
+    }
+
+    /**
+     * Removes all trailing occurrences of the supplied characters from the given string.
+     *
+     * @param string The string to trim
+     * @param trimChars The characters to remove
+     * @return The trimmed string
+     */
+    public static String trimEnd(String string, char...trimChars) {
+        if (null != string && null != trimChars && 0 < trimChars.length) {
+            while (0 < string.length() && contains(string.charAt(string.length() - 1), trimChars)) {
+                string = string.substring(0, string.length() - 1);
+            }
+        }
+        return string;
+    }
+
+    private static boolean contains(char c, char[] charArray) {
+        for (char character : charArray) {
+            if (c == character) {
+                return true;
+            }
+        }
+        return false;
+
+    }
+
 }

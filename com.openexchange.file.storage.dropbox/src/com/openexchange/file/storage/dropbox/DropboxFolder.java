@@ -52,6 +52,7 @@ package com.openexchange.file.storage.dropbox;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import com.dropbox.client2.DropboxAPI.Entry;
 import com.dropbox.client2.RESTUtility;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
@@ -69,6 +70,19 @@ import com.openexchange.file.storage.TypeAware;
 public final class DropboxFolder extends DefaultFileStorageFolder implements TypeAware {
 
     private FileStorageFolderType type;
+
+    /**
+     * Initializes a new {@link DropboxFolder}.
+     *
+     * @param entry The dropbox entry representing the folder
+     * @param userID The identifier of the user to use as created-/modified-by information
+     * @param accountDisplayName The display name of the dropbox account
+     * @throws OXException
+     */
+    public DropboxFolder(Entry entry, int userID, String accountDisplayName) throws OXException {
+        this(userID);
+        parseDirEntry(entry, accountDisplayName);
+    }
 
     /**
      * Initializes a new {@link DropboxFolder}.
