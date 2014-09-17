@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.requesthandler.converters.preview;
 
-import static com.google.common.net.HttpHeaders.ETAG;
 import static com.openexchange.java.Charsets.toAsciiBytes;
 import static com.openexchange.java.Charsets.toAsciiString;
 import static com.openexchange.java.Strings.isEmpty;

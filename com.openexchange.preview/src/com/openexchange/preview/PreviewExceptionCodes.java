@@ -82,11 +82,11 @@ public enum PreviewExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Thumbnail image not available.
      */
-    THUMBNAIL_NOT_AVAILABLE("Thumbnail image not available.", PreviewExceptionMessages.THUMBNAIL_NOT_AVAILABLE, CATEGORY_USER_INPUT, 5),
+    THUMBNAIL_NOT_AVAILABLE("Thumbnail image not available.", PreviewExceptionMessages.THUMBNAIL_NOT_AVAILABLE, CATEGORY_ERROR, 5),
     /**
      * No preview service for MIME type %1$s
      */
-    NO_PREVIEW_SERVICE("No preview service for MIME type %1$s", PreviewExceptionMessages.NO_PREVIEW_SERVICE, CATEGORY_USER_INPUT, 6),
+    NO_PREVIEW_SERVICE("No preview service for MIME type %1$s", PreviewExceptionMessages.NO_PREVIEW_SERVICE, CATEGORY_ERROR, 6),
     /**
      * No preview service for MIME type %1$s (file name %2$s)
      */

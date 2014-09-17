@@ -159,8 +159,11 @@ final class PreviewDocumentCallable extends AbstractTask<PreviewDocument> {
      * @throws IOException if an I/O error occurs
      */
     public void interrupt() throws IOException {
-        fileHolder.close();
-        stream.interrupt();
+        try {
+            fileHolder.close();
+        } finally { 
+            stream.interrupt();
+        }
     }
 
     /**

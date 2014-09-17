@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.requesthandler.converters.preview;
 
+import static com.google.common.net.HttpHeaders.RETRY_AFTER;
 import java.io.IOException;
 import java.io.InputStream;
 import org.slf4j.Logger;
@@ -65,7 +66,9 @@ import com.openexchange.ajax.requesthandler.converters.preview.cache.PreviewThum
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.preview.PreviewDocument;
+import com.openexchange.preview.PreviewExceptionCodes;
 import com.openexchange.preview.PreviewOutput;
 import com.openexchange.preview.PreviewService;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -77,11 +80,11 @@ import com.openexchange.tools.session.ServerSession;
  * {@link PreviewThumbResultConverter} - Tries to quickly deliver thumbnail_images from cache or fail fast so the response returns to the
  * client and doesn't occupy a precious client-server connection.
  * <ol>
- * <li>Deliver the existing thumbnail from cache if possible and not forbidden by client</li>
- * <li>If the image isn't in the cache already trigger the asynchronous {@link PreviewAndCacheTask} while quickly returning a
- * 202 Accepted to the client so he can try again later</li>
- * <li>If there is no cache available at all or the client fobids cache usage decide based on 
- * <code>com.openexchange.preview.thumbnail.blockingWorker</code> property</li>
+ *   <li>Deliver the existing thumbnail from cache if possible and not forbidden by client</li>
+ *   <li>If the image isn't in the cache already trigger the asynchronous {@link PreviewAndCacheTask} while quickly returning a 202 Accepted
+ *       to the client so he can try again later</li>
+ *   <li>If there is no cache available at all or the client fobids cache usage decide based on
+ *       <code>com.openexchange.preview.thumbnail.blockingWorker</code> property</li>
  *   <ol>
  *     <li>If true: Block the current thread(client request) until the thumbnail was generated</li>
  *     <li>If false: Return/make client use default thumbnail</li>
@@ -100,6 +103,14 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
     /** Maximum time we are willing to wait for preview generation */
     private static final long THRESHOLD = 10000;
 
+    private static final String WIDTH = "width";
+
+    private static final int DEFAULT_THUMB_WIDTH = 160;
+
+    private static final String HEIGHT = "height";
+
+    private static final int DEFAULT_THUMB_HEIGHT = 160;
+
     private boolean isBlockingWorkerAllowed = false;
 
     /**
@@ -114,7 +125,7 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
 
     @Override
     public String getOutputFormat() {
-         return "thumbnail_image";
+        return "thumbnail_image";
     }
 
     @Override
@@ -131,12 +142,15 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
     public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
         final int contextId = session.getContextId();
         final int userId = session.getUserId();
-        //Use the generator for cache lookup and store operations
+        // validate request data before using it for cacheKeyGenerator and further processing
+        validateRequest(requestData);
+
+        // Use the generator for cache lookup and store operations
         PreviewThumbCacheKeyGenerator cacheKeyGenerator = new PreviewThumbCacheKeyGenerator(result, requestData);
         PreviewService previewService = ServerServiceRegistry.getInstance().getService(PreviewService.class);
 
         try {
-            //do we have a usable resource cache and are we allowed to use it?
+            // do we have a usable resource cache and are we allowed to use it?
             if (isResourceCacheEnabled(contextId, userId) && useCache(requestData)) {
                 ResourceCache resourceCache = getResourceCache(contextId, userId);
                 if (resourceCache != null) {
@@ -145,21 +159,39 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
                         // apply to request/response
                         applyCachedPreview(requestData, result, cachedPreview);
                         preventTransformations(requestData);
-                        LOG.debug("Applied cached preview for file {} with MIME type {} from cache for user {} in context {}",
-                            cachedPreview.getFileName(), cachedPreview.getFileType(), userId, contextId);
+                        LOG.debug(
+                            "Applied cached preview for file {} with MIME type {} from cache for user {} in context {}",
+                            cachedPreview.getFileName(),
+                            cachedPreview.getFileType(),
+                            userId,
+                            contextId);
                     } else {
                         // generate async and put to cache
-                        PreviewAndCacheTask previewAndCache = new PreviewAndCacheTask(result, requestData, session, previewService, THRESHOLD, false, cacheKeyGenerator);
+                        PreviewAndCacheTask previewAndCache = new PreviewAndCacheTask(
+                            result,
+                            requestData,
+                            session,
+                            previewService,
+                            THRESHOLD,
+                            false,
+                            cacheKeyGenerator);
                         ThreadPools.getExecutorService().submit(previewAndCache);
                         result.setHttpStatusCode(202);
+                        result.setHeader(RETRY_AFTER, String.valueOf(THRESHOLD / 1000));
                     }
                 }
             } else if (isBlockingWorkerAllowed) {
                 // there is no cached resource but we are allowed to wait for thumbnail generation
                 // do as callable anyway
-                PreviewDocument previewDocument = PreviewImageGenerator.getPreviewDocument(result, requestData, session, previewService, THRESHOLD, false);
+                PreviewDocument previewDocument = PreviewImageGenerator.getPreviewDocument(
+                    result,
+                    requestData,
+                    session,
+                    previewService,
+                    THRESHOLD,
+                    false);
                 if (previewDocument == null || previewDocument.getThumbnail() == null) {
-                    throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("PreviewService didn't provide a thumbnail");
+                    throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create();
                 }
 
                 InputStream thumbnail = previewDocument.getThumbnail();
@@ -176,11 +208,7 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
                 result.setResultObject(responseFileHolder, "file");
                 preventTransformations(requestData, previewDocument);
             } else {
-                LOG.debug(
-                    "No cache enabled for user {} in context {} and not allowed to generate a thumbnail based on {}",
-                    contextId,
-                    userId,
-                    BLOCKING_WORKER_NAME);
+                throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create();
             }
         } catch (final RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -208,7 +236,7 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
             {
                 InputStream inputStream = cachedPreview.getInputStream();
                 if (null == inputStream) {
-                    @SuppressWarnings("resource") // see implementation of close
+                    @SuppressWarnings("resource")// see implementation of close
                     final ByteArrayFileHolder bafh = new ByteArrayFileHolder(cachedPreview.getBytes());
                     bafh.setContentType(contentType);
                     bafh.setName(cachedPreview.getFileName());
@@ -223,4 +251,21 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
         }
     }
 
+    /**
+     * Validate the incoming {@link AJAXRequestData} before starting the preview process.
+     * <ul>
+     * <li>Set default thumbnail dimensions if width and height are missing from the request</li>
+     * <li>...</li>
+     * </ul>
+     * 
+     * @param requestData The incoming {@link AJAXRequestData}
+     */
+    protected void validateRequest(AJAXRequestData requestData) {
+        if (Strings.isEmpty(requestData.getParameter(WIDTH))) {
+            requestData.putParameter(WIDTH, String.valueOf(DEFAULT_THUMB_WIDTH));
+        }
+        if (Strings.isEmpty(requestData.getParameter(HEIGHT))) {
+            requestData.putParameter(HEIGHT, String.valueOf(DEFAULT_THUMB_HEIGHT));
+        }
+    }
 }

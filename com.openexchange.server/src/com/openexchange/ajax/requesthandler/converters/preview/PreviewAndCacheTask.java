@@ -49,10 +49,7 @@
 
 package com.openexchange.ajax.requesthandler.converters.preview;
 
-import static com.google.common.net.HttpHeaders.ETAG;
 import static com.openexchange.ajax.requesthandler.converters.preview.AbstractPreviewResultConverter.getResourceCache;
-import static com.openexchange.ajax.requesthandler.converters.preview.AbstractPreviewResultConverter.isValidETag;
-import static com.openexchange.ajax.requesthandler.converters.preview.AbstractPreviewResultConverter.useCache;
 import java.io.IOException;
 import java.io.InputStream;
 import org.apache.commons.lang.Validate;
@@ -136,21 +133,33 @@ public class PreviewAndCacheTask extends AbstractTask<Void> {
             return null;
         }
 
-        PreviewDocument previewDocument = PreviewImageGenerator.getPreviewDocument(result, requestData, session, previewService, threshold, respectLanguage, cacheKeyGenerator.generateCacheKey());
-        if (previewDocument == null || previewDocument.getThumbnail() == null) {
-            throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create();
-        }
+        String cacheKey = cacheKeyGenerator.generateCacheKey();
+        if (cacheKey != null) {
+            PreviewDocument previewDocument = PreviewImageGenerator.getPreviewDocument(
+                result,
+                requestData,
+                session,
+                previewService,
+                threshold,
+                respectLanguage,
+                cacheKey);
+            if (previewDocument == null || previewDocument.getThumbnail() == null) {
+                throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create();
+            }
 
-        InputStream thumbnail = previewDocument.getThumbnail();
-        final String fileName = previewDocument.getMetaData().get("resourcename");
-        byte[] thumbnailBytes;
-        try {
-            thumbnailBytes = Streams.stream2bytes(thumbnail);
-        } catch (IOException ioex) {
-            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(ioex, ioex.getMessage());
-        }
+            InputStream thumbnail = previewDocument.getThumbnail();
+            final String fileName = previewDocument.getMetaData().get("resourcename");
+            byte[] thumbnailBytes;
+            try {
+                thumbnailBytes = Streams.stream2bytes(thumbnail);
+            } catch (IOException ioex) {
+                throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(ioex, ioex.getMessage());
+            }
 
-        syncToCache(session, requestData, thumbnailBytes, fileName, resourceCache);
+            syncToCache(session, requestData, thumbnailBytes, fileName, resourceCache, cacheKey);
+        } else {
+            LOG.error("Refusing to generate and cache preview without valid cache key");
+        }
 
         return null;
     }
@@ -165,19 +174,8 @@ public class PreviewAndCacheTask extends AbstractTask<Void> {
      * @param resourceCache The {@link ResourceCache to use}
      * @throws OXException if caching fails
      */
-    public void syncToCache(final ServerSession session, AJAXRequestData requestData, final byte[] input, final String fileName, final ResourceCache resourceCache) throws OXException {
-        final String eTag = result.getHeader(ETAG);
-        if (!isValidETag(eTag)) {
-            LOG.info("Refusing to save to cache because ETag '{}' isn't valid.", eTag);
-            return;
-        }
-        if (!useCache(requestData)) {
-            LOG.debug("Not saving to cache as demanded by client");
-            return;
-        }
-
-        if (null != resourceCache) {
-            final String cacheKey = cacheKeyGenerator.generateCacheKey();
+    private void syncToCache(final ServerSession session, AJAXRequestData requestData, final byte[] input, final String fileName, final ResourceCache resourceCache, final String cacheKey) throws OXException {
+        if (null != resourceCache && null != cacheKey) {
             try {
                 final CachedResource preview = new CachedResource(input, fileName, "image/jpeg", input.length);
                 resourceCache.save(cacheKey, preview, 0, session.getContextId());
