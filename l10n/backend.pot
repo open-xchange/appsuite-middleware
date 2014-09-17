@@ -3506,11 +3506,11 @@ msgid ""
 "Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:67
 msgid "MAIL-AUTOCONFIG"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:69
 msgid "The E-Mail address %1$s is invalid."
 msgstr ""
 
