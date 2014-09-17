@@ -638,6 +638,7 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
             List<String> ids;
             if (null != pathPerformer) {
                 try {
+                    pathPerformer.getStorageParameters().setIgnoreCache(true);
                     if (existsFolder(treeId, id, StorageType.WORKING, pathPerformer.getStorageParameters())) {
                         final UserizedFolder[] path = pathPerformer.doPath(treeId, id, true);
                         ids = new ArrayList<String>(path.length);
@@ -657,6 +658,8 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
                         log.debug("", e1);
                         ids = Collections.singletonList(id);
                     }
+                } finally {
+                    pathPerformer.getStorageParameters().setIgnoreCache(null);
                 }
             } else {
                 ids = folderPath;
@@ -1700,6 +1703,7 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
         final boolean started = startTransaction(readWrite ? Mode.WRITE_AFTER_READ : Mode.READ, storageParameters, storage);
         boolean rollback = true;
         try {
+            storageParameters.setIgnoreCache(true);
             final Folder folder = storage.getFolder(treeId, folderId, storageType, storageParameters);
             if (started) {
                 storage.commitTransaction(storageParameters);
@@ -1709,6 +1713,7 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
         } catch (final RuntimeException e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
+            storageParameters.setIgnoreCache(null);
             if (started && rollback) {
                 storage.rollback(storageParameters);
             }
@@ -1838,6 +1843,7 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
                         /*
                          * Load them & commit
                          */
+                        newParameters.setIgnoreCache(true);
                         List<Folder> folders = fs.getFolders(treeId, ids, storageType, newParameters);
                         if (started) {
                             fs.commitTransaction(newParameters);
@@ -1856,6 +1862,7 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
                     } catch (RuntimeException e) {
                         throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e);
                     } finally {
+                        newParameters.setIgnoreCache(null);
                         if (started) {
                             fs.rollback(newParameters);
                         }

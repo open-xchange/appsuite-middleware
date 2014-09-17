@@ -97,6 +97,8 @@ public final class StorageParametersImpl implements StorageParameters {
 
     private final Map<OXException, Object> warnings;
 
+    private Boolean ignoreCache;
+
     /**
      * Initializes a new {@link StorageParametersImpl} from given session.
      *
@@ -341,6 +343,16 @@ public final class StorageParametersImpl implements StorageParameters {
             }
         }
         return sBuilder.toString();
+    }
+
+    @Override
+    public Boolean getIgnoreCache() {
+        return ignoreCache;
+    }
+
+    @Override
+    public void setIgnoreCache(Boolean ignoreCache) {
+        this.ignoreCache = ignoreCache;
     }
 
 }
