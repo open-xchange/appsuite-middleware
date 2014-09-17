@@ -78,7 +78,7 @@ public class Dispatchers {
      * @return <code>true</code> if common API response is expected; otherwise <code>false</code>
      */
     public static boolean isApiOutputExpectedFor(HttpServletRequest req) {
-        if ("yell".equalsIgnoreCase(req.getParameter(CALLBACK))) {
+        if (null != req.getParameter(CALLBACK)) {
             return true;
         }
         String prefix = DispatcherServlet.getPrefix();
