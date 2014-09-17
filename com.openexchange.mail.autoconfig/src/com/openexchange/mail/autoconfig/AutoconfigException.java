@@ -52,6 +52,7 @@ package com.openexchange.mail.autoconfig;
 import java.io.IOException;
 import org.xmlpull.v1.XmlPullParserException;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.i18n.LocalizableStrings;
 
 /**
@@ -67,19 +68,23 @@ public class AutoconfigException extends OXException implements LocalizableStrin
 
     public static final String INVALID_MAIL = "The E-Mail address %1$s is invalid.";
 
-    public static OXException unexpected(final String logMessage) {
+    public static OXException unexpected(String logMessage) {
         return new OXException(1).setPrefix(PREFIX).setLogMessage(logMessage);
     }
 
-    public static OXException invalidMail(final String mail) {
+    public static OXException unexpected(String logMessage, Throwable cause) {
+        return new OXException(1, OXExceptionStrings.DEFAULT_MESSAGE, cause, new Object[0]).setPrefix(PREFIX).setLogMessage(logMessage);
+    }
+
+    public static OXException invalidMail(String mail) {
         return new OXException(2, INVALID_MAIL, mail).setPrefix(PREFIX);
     }
 
-    public static OXException xml(final XmlPullParserException e) {
+    public static OXException xml(XmlPullParserException e) {
         return new OXException(3, null, e).setPrefix(PREFIX);
     }
 
-    public static OXException io(final IOException e) {
+    public static OXException io(IOException e) {
         return new OXException(4, null, e).setPrefix(PREFIX);
     }
 
