@@ -127,8 +127,8 @@ public class JsonFilePattern extends AbstractJsonPattern implements FilePattern 
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + ((namePattern == null) ? 0 : namePattern.hashCode());
-        result = prime * result + ((pathPattern == null) ? 0 : pathPattern.hashCode());
+        result = prime * result + ((namePattern == null) ? 0 : namePattern.pattern().hashCode());
+        result = prime * result + ((pathPattern == null) ? 0 : pathPattern.pattern().hashCode());
         return result;
     }
 
@@ -148,14 +148,14 @@ public class JsonFilePattern extends AbstractJsonPattern implements FilePattern 
             if (other.namePattern != null) {
                 return false;
             }
-        } else if (!namePattern.equals(other.namePattern)) {
+        } else if (!namePattern.pattern().equals(other.namePattern.pattern())) {
             return false;
         }
         if (pathPattern == null) {
             if (other.pathPattern != null) {
                 return false;
             }
-        } else if (!pathPattern.equals(other.pathPattern)) {
+        } else if (!pathPattern.pattern().equals(other.pathPattern.pattern())) {
             return false;
         }
         return true;
