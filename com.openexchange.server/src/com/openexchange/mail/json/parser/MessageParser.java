@@ -518,7 +518,7 @@ public final class MessageParser {
             final int size = jHeaders.length();
             final HeaderCollection headers = new HeaderCollection(size);
             final Iterator<String> iter = jHeaders.keys();
-            for (int i = 0; i < size; i++) {
+            for (int i = size; i-- > 0;) {
                 final String key = iter.next();
                 if (isCustomOrReplyHeader(key) && !key.equalsIgnoreCase("x-original-headers")) {
                     headers.setHeader(key, jHeaders.getString(key));
