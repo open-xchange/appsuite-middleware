@@ -57,6 +57,7 @@ import gnu.trove.list.linked.TIntLinkedList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import javax.mail.FetchProfile;
 import javax.mail.FolderClosedException;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -135,6 +136,11 @@ public final class IMAPSearch {
              * plain-text out of HTML content.
              */
             final Message[] allMsgs = imapFolder.getMessages();
+            {
+                FetchProfile fp = new FetchProfile();
+                searchTerm.contributeTo(fp);
+                imapFolder.fetch(allMsgs, fp);
+            }
             final TIntList list = new TIntArrayList(msgCount);
             for (int i = 0; i < allMsgs.length; i++) {
                 if (searchTerm.matches(allMsgs[i])) {
@@ -155,6 +161,9 @@ public final class IMAPSearch {
         final Message[] allMsgs;
         if (mailFields.contains(MailField.BODY) || mailFields.contains(MailField.FULL)) {
             allMsgs = imapFolder.getMessages();
+            FetchProfile fp = new FetchProfile();
+            searchTerm.contributeTo(fp);
+            imapFolder.fetch(allMsgs, fp);
         } else {
             mailFields.add(MailField.CONTENT_TYPE); // Possibly checked by search term
             final long start = System.currentTimeMillis();

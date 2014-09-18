@@ -51,13 +51,14 @@ package com.openexchange.mail.search;
 
 import static com.openexchange.mail.utils.StorageUtility.getAllAddresses;
 import java.util.Collection;
-import java.util.Locale;
+import javax.mail.FetchProfile;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.search.RecipientStringTerm;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -109,7 +110,7 @@ public final class ToTerm extends SearchTerm<String> {
         if (containsWildcard()) {
             return toRegex(addr).matcher(getAllAddresses(mailMessage.getTo())).find();
         }
-        return (getAllAddresses(mailMessage.getTo()).toLowerCase(Locale.ENGLISH).indexOf(addr.toLowerCase(Locale.ENGLISH)) != -1);
+        return (Strings.asciiLowerCase(getAllAddresses(mailMessage.getTo())).indexOf(Strings.asciiLowerCase(addr)) != -1);
     }
 
     @Override
@@ -129,7 +130,7 @@ public final class ToTerm extends SearchTerm<String> {
             if (containsWildcard()) {
                 return toRegex(addr).matcher(getAllAddresses(addresses)).find();
             }
-            return (getAllAddresses(addresses).toLowerCase(Locale.ENGLISH).indexOf(addr.toLowerCase(Locale.ENGLISH)) != -1);
+            return (Strings.asciiLowerCase(getAllAddresses(addresses)).indexOf(Strings.asciiLowerCase(addr)) != -1);
         } catch (final MessagingException e) {
             org.slf4j.LoggerFactory.getLogger(ToTerm.class).warn("Error during search.", e);
             return false;
@@ -144,6 +145,13 @@ public final class ToTerm extends SearchTerm<String> {
     @Override
     public javax.mail.search.SearchTerm getNonWildcardJavaMailSearchTerm() {
         return new RecipientStringTerm(Message.RecipientType.TO, getNonWildcardPart(addr));
+    }
+
+    @Override
+    public void contributeTo(FetchProfile fetchProfile) {
+        if (!fetchProfile.contains(FetchProfile.Item.ENVELOPE)) {
+            fetchProfile.add(FetchProfile.Item.ENVELOPE);
+        }
     }
 
     @Override

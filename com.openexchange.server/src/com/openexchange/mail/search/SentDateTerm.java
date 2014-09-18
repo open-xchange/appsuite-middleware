@@ -51,6 +51,7 @@ package com.openexchange.mail.search;
 
 import java.util.Collection;
 import java.util.Date;
+import javax.mail.FetchProfile;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import com.openexchange.exception.OXException;
@@ -169,4 +170,12 @@ public final class SentDateTerm extends SearchTerm<ComparablePattern<java.util.D
     public javax.mail.search.SearchTerm getNonWildcardJavaMailSearchTerm() {
         return getJavaMailSearchTerm();
     }
+
+    @Override
+    public void contributeTo(FetchProfile fetchProfile) {
+        if (!fetchProfile.contains(FetchProfile.Item.ENVELOPE)) {
+            fetchProfile.add(FetchProfile.Item.ENVELOPE);
+        }
+    }
+
 }

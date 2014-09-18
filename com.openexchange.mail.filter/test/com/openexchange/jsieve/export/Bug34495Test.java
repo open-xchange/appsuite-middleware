@@ -47,81 +47,77 @@
  *
  */
 
-package com.openexchange.exception.interception;
+package com.openexchange.jsieve.export;
 
-import java.util.Collection;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import com.openexchange.exception.OXException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.StringReader;
+import java.util.StringTokenizer;
+import org.junit.Before;
+import org.junit.Test;
+import com.openexchange.jsieve.export.exceptions.OXSieveHandlerException;
 
 
 /**
- * Abstract implementation of {@link OXExceptionInterceptor} that should be used to create custom {@link OXExceptionInterceptor}s.<br>
- * <br>
- * With that you only have to define responsibilities and implement what should be do while intercepting by overriding {@link
- * AbstractOXExceptionInterceptor.intercept(OXException)}
+ * {@link Bug34495Test}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.6.1
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public abstract class AbstractOXExceptionInterceptor implements OXExceptionInterceptor {
+public class Bug34495Test extends SieveHandler {
 
-    /** List of {@link Responsibility} the extending {@link OXExceptionInterceptor} is responsible for **/
-    protected final Queue<Responsibility> responsibilitites = new ConcurrentLinkedQueue<Responsibility>();
 
-    /** The service ranking */
-    protected final int ranking;
+    private static final String ERROR_MSG_1 = "\"Zeile 7: Fehlender String: Hier muss entweder \\\"text:\\\" oder `\\\"` folgen\"";
 
-    /**
-     * Initializes a new {@link AbstractOXExceptionInterceptor}.
-     *
-     * @param ranking The ranking of this {@link OXExceptionInterceptor} compared to other ones
-     */
-    protected AbstractOXExceptionInterceptor(int ranking) {
-        super();
-        this.ranking = ranking;
+    private static final String ERROR_MSG_2 = "\"Cited from RFC 5804: \\\"Client implementations should note that this may be a\r\n" +
+                                              "multiline literal string with more than one error message separated\r\n" +
+                                              "by CRLFs.\\\"\"";
+
+    private static final String DELIMS = "\"\\\r\n ";
+
+    public Bug34495Test() {
+        super(null, null, null, 0, null);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public abstract OXExceptionArguments intercept(OXException oxException);
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Collection<Responsibility> getResponsibilities() {
-        return responsibilitites;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void addResponsibility(Responsibility responsibility) {
-        this.responsibilitites.add(responsibility);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isResponsible(String module, String action) {
-        for (Responsibility responsibility : responsibilitites) {
-            if (responsibility.equals(new Responsibility(module, action))) {
-                return true;
+    @Before
+    public void setUp() {
+        AUTH = true;
+        bos_sieve = new BufferedOutputStream(new OutputStream() {
+            @Override
+            public void write(int b) throws IOException {
             }
-        }
-        return false;
+        });
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int getRanking() {
-        return ranking;
+    @Test
+    public void testParseMessageWithQuotes() throws Exception {
+        testParseMessage(ERROR_MSG_1);
     }
+
+    @Test
+    public void testParseMessageWithLineBreaks() throws Exception {
+        testParseMessage(ERROR_MSG_2);
+    }
+
+    private void testParseMessage(String msg) throws Exception {
+        bis_sieve = new BufferedReader(new StringReader("NO " + msg));
+        boolean errorThrown = false;
+        try {
+            setScript("test", new byte[1], new StringBuilder());
+        } catch (OXSieveHandlerException e) {
+            errorThrown = true;
+//          System.out.println(e.getMessage());
+          int c1 = new StringTokenizer(msg, DELIMS, false).countTokens();
+          int c2 = new StringTokenizer(e.getMessage(), DELIMS, false).countTokens();
+          assertTrue(c1 > 1);
+          assertEquals(c1, c2);
+        }
+
+        assertTrue(errorThrown);
+    }
+
 }

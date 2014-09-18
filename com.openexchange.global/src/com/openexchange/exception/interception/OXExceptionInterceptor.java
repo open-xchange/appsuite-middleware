@@ -82,9 +82,9 @@ public interface OXExceptionInterceptor {
      * {@link OXExceptionInterceptor} is responsible for the module / action combination by using {@link #isResponsible(String, String)}
      *
      * @param oxException The {@link OXException} to intercept
-     * @return {@link OXException} that was processed by the interceptor
+     * @return {@link OXExceptionArguments} that was processed by this interceptor or <code>null</code> to signal no intervention
      */
-    OXException intercept(OXException oxException);
+    OXExceptionArguments intercept(OXException oxException);
 
     /**
      * Checks if the interceptor is responsible for the given module and action combination
