@@ -146,7 +146,7 @@ public class OXExceptionInterceptorRegistration {
      * @return boolean - true if a {@link OXExceptionInterceptor} is already registered for the given ranking and module/action combination,
      *         otherwise false
      */
-    protected boolean isResponsibleInterceptorRegistered(OXExceptionInterceptor interceptorCandidate) {
+    public boolean isResponsibleInterceptorRegistered(OXExceptionInterceptor interceptorCandidate) {
         final List<OXExceptionInterceptor> interceptors = this.interceptors;
 
         for (OXExceptionInterceptor interceptor : interceptors) {
