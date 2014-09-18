@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,71 +47,62 @@
  *
  */
 
-package com.openexchange.server;
+package com.openexchange.exception.interception.internal;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import com.openexchange.exception.OXException;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.exception.interception.OXExceptionInterceptor;
 
 /**
- * {@link ServerInitialization} - The {@link Initialization initialization} for server.
+ * Tracker for new registered {@link OXExceptionInterceptor}s
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.6.1
  */
-final class ServerInitialization implements Initialization {
+public class OXExceptionInterceptorTracker implements ServiceTrackerCustomizer<OXExceptionInterceptor, OXExceptionInterceptor> {
 
-    private final AtomicBoolean started;
-
-    private String previousTTL;
-
-    private String previousNegativeTTL;
+    private final BundleContext context;
 
     /**
-     * Initializes a new {@link ServerInitialization}.
+     * Initializes a new {@link OXExceptionInterceptorTracker}.
      */
-    ServerInitialization() {
+    public OXExceptionInterceptorTracker(BundleContext context) {
         super();
-        started = new AtomicBoolean();
+        this.context = context;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void start() throws OXException {
-        if (!started.compareAndSet(false, true)) {
-            return;
+    public OXExceptionInterceptor addingService(ServiceReference<OXExceptionInterceptor> reference) {
+        OXExceptionInterceptor interceptor = context.getService(reference);
+
+        if (OXExceptionInterceptorRegistration.getInstance().isResponsibleInterceptorRegistered(interceptor)) {
+            context.ungetService(reference);
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(OXExceptionInterceptorTracker.class);
+            logger.error("Interceptor for the given ranking {} and desired module/action combination already registered! Discard the new one from type: {}", interceptor.getRanking(), interceptor.getClass());
+            return null;
         }
-        /*
-         * Remember previous settings
-         */
-        previousTTL = java.security.Security.getProperty("networkaddress.cache.ttl");
-        previousNegativeTTL = java.security.Security.getProperty("networkaddress.cache.negative.ttl");
-        /*
-         * The number of seconds to cache the successful lookup
-         */
-        java.security.Security.setProperty("networkaddress.cache.ttl", Integer.toString(3600));
-        System.setProperty("sun.net.inetaddr.ttl", Integer.toString(3600));
-        /*
-         * The number of seconds to cache the failure for un-successful lookups
-         */
-        java.security.Security.setProperty("networkaddress.cache.negative.ttl", Integer.toString(10));
+
+        OXExceptionInterceptorRegistration.getInstance().put(interceptor);
+        return interceptor;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void stop() throws OXException {
-        if (!started.compareAndSet(true, false)) {
-            return;
-        }
-        if (null == previousTTL) {
-            java.security.Security.setProperty("networkaddress.cache.ttl", "-1");
-        } else {
-            /*
-             * Restore previous settings
-             */
-            java.security.Security.setProperty("networkaddress.cache.ttl", previousTTL);
-        }
-        if (null == previousNegativeTTL) {
-            java.security.Security.setProperty("networkaddress.cache.negative.ttl", "10");
-        } else {
-            java.security.Security.setProperty("networkaddress.cache.negative.ttl", previousNegativeTTL);
-        }
+    public void modifiedService(ServiceReference<OXExceptionInterceptor> reference, OXExceptionInterceptor service) {
+        // Nothing to do.
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void removedService(ServiceReference<OXExceptionInterceptor> reference, OXExceptionInterceptor service) {
+        OXExceptionInterceptorRegistration.getInstance().remove(service);
+    }
 }

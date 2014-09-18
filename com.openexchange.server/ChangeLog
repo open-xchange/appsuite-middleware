@@ -1,3 +1,19 @@
+* 2014-09-18 - marc.arens@open-xchange.com
+
+ - Fix for bug 34002: Implement asynchronous thumbnail converter that fails fast if no cached thumbnail is found.
+ 
+* 2014-09-18 - steffen.templin@open-xchange.com
+
+ - Fix for bug 34495: Implemented more sophisticated parsing of SIEVE response errors
+
+* 2014-09-18 - steffen.templin@open-xchange.com
+
+ - Fix for bug 34470: Use the client-provided time zone for conversion of mail dates
+
+ * 2014-09-18 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 34507: Added user-friendly error message
+
 * 2014-09-17 - marcus.klein@open-xchange.com
 
  - Fix for bug 34467: Documented LoginHandlerService.handleLogout() method in more detail when it is called and for what it can be used.

@@ -55,6 +55,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
+import javax.mail.FetchProfile;
 import javax.mail.Message;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
@@ -134,6 +135,13 @@ public abstract class SearchTerm<T> implements Serializable {
      * @see #containsWildcard()
      */
     public abstract javax.mail.search.SearchTerm getNonWildcardJavaMailSearchTerm();
+
+    /**
+     * Contributes this search terms target fetch item to given fetch profile
+     *
+     * @param fetchProfile The fetch profile
+     */
+    public abstract void contributeTo(FetchProfile fetchProfile);
 
     /**
      * Generates a search term with the unsupported search terms specified through <code>filter</code> removed.

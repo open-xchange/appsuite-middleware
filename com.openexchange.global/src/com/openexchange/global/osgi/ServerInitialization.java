@@ -47,107 +47,65 @@
  *
  */
 
-package com.openexchange.mail.search;
+package com.openexchange.global.osgi;
 
-import java.util.Collection;
-import javax.mail.FetchProfile;
-import javax.mail.Message;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.MailField;
-import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.server.Initialization;
 
 /**
- * {@link BooleanTerm}
+ * {@link ServerInitialization} - The {@link Initialization initialization} for server.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class BooleanTerm extends SearchTerm<Boolean> {
+final class ServerInitialization implements Initialization {
 
-    private static final long serialVersionUID = 5351872902045670432L;
-
-    private static final class BooleanSearchTerm extends javax.mail.search.SearchTerm {
-
-        private static final BooleanSearchTerm _TRUE = new BooleanSearchTerm(true);
-
-        private static final BooleanSearchTerm _FALSE = new BooleanSearchTerm(false);
-
-        public static BooleanSearchTerm getInstance(final boolean value) {
-            return value ? _TRUE : _FALSE;
-        }
-
-        private static final long serialVersionUID = -8073302646525000957L;
-
-        private final boolean value;
-
-        private BooleanSearchTerm(final boolean value) {
-            super();
-            this.value = value;
-        }
-
-        @Override
-        public boolean match(final Message msg) {
-            return value;
-        }
-
-    }
+    private volatile String previousTTL;
+    private volatile String previousNegativeTTL;
 
     /**
-     * The boolean term for <code>true</code>
+     * Initializes a new {@link ServerInitialization}.
      */
-    public static final BooleanTerm TRUE = new BooleanTerm(true);
-
-    /**
-     * The boolean term for <code>false</code>
-     */
-    public static final BooleanTerm FALSE = new BooleanTerm(false);
-
-    private final boolean value;
-
-    /**
-     * Initializes a new {@link BooleanTerm}
-     */
-    private BooleanTerm(final boolean value) {
+    ServerInitialization() {
         super();
-        this.value = value;
     }
 
     @Override
-    public void accept(SearchTermVisitor visitor) {
-        visitor.visit(this);
+    public void start() throws OXException {
+        /*
+         * Remember previous settings
+         */
+        previousTTL = java.security.Security.getProperty("networkaddress.cache.ttl");
+        previousNegativeTTL = java.security.Security.getProperty("networkaddress.cache.negative.ttl");
+        /*
+         * The number of seconds to cache the successful lookup
+         */
+        java.security.Security.setProperty("networkaddress.cache.ttl", Integer.toString(3600));
+        System.setProperty("sun.net.inetaddr.ttl", Integer.toString(3600));
+        /*
+         * The number of seconds to cache the failure for un-successful lookups
+         */
+        java.security.Security.setProperty("networkaddress.cache.negative.ttl", Integer.toString(10));
     }
 
     @Override
-    public Boolean getPattern() {
-        return Boolean.valueOf(value);
+    public void stop() throws OXException {
+        String previousTTL = this.previousTTL;
+        if (null == previousTTL) {
+            java.security.Security.setProperty("networkaddress.cache.ttl", "-1");
+        } else {
+            /*
+             * Restore previous settings
+             */
+            java.security.Security.setProperty("networkaddress.cache.ttl", previousTTL);
+            this.previousTTL = null;
+        }
+        String previousNegativeTTL = this.previousNegativeTTL;
+        if (null == previousNegativeTTL) {
+            java.security.Security.setProperty("networkaddress.cache.negative.ttl", "10");
+        } else {
+            java.security.Security.setProperty("networkaddress.cache.negative.ttl", previousNegativeTTL);
+            this.previousNegativeTTL = null;
+        }
     }
 
-    @Override
-    public void addMailField(final Collection<MailField> col) {
-        // Nothing
-    }
-
-    @Override
-    public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
-        return BooleanSearchTerm.getInstance(value);
-    }
-
-    @Override
-    public javax.mail.search.SearchTerm getNonWildcardJavaMailSearchTerm() {
-        return getJavaMailSearchTerm();
-    }
-
-    @Override
-    public void contributeTo(FetchProfile fetchProfile) {
-        // Nothing
-    }
-
-    @Override
-    public boolean matches(final Message msg) throws OXException {
-        return value;
-    }
-
-    @Override
-    public boolean matches(final MailMessage mailMessage) {
-        return value;
-    }
 }

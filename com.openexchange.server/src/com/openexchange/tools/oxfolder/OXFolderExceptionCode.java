@@ -109,7 +109,8 @@ public enum OXFolderExceptionCode implements DisplayableOXExceptionCode  {
      * Operation was canceled due to a missing folder attribute
      * </p>
      */
-    MISSING_FOLDER_ATTRIBUTE("Missing field %1$s in folder %2$s in context %3$s", MESSAGE, Category.CATEGORY_USER_INPUT, 7),
+    MISSING_FOLDER_ATTRIBUTE("Missing field %1$s in folder %2$s in context %3$s", OXFolderExceptionMessage.NO_FOLDER_NAME_MSG,
+        Category.CATEGORY_USER_INPUT, 7),
     /**
      * Folder %1$s does not exist in context %2$s
      * <p>

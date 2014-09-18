@@ -47,30 +47,59 @@
  *
  */
 
-package com.openexchange.global;
+package com.openexchange.exception.interception;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import com.openexchange.exception.interception.OXExceptionInterceptorRegistrationTest;
-import com.openexchange.global.tools.id.IDManglerTest;
-import com.openexchange.global.tools.iterator.MergingSearchIteratorTest;
+import java.util.Collection;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link UnitTests}
+ * {@link OXExceptionInterceptor} interface that might be implemented to register a new interceptor for exception handling.
+ * <p>
+ * Have a look at {@link AbstractOXExceptionInterceptor} that defines a default implementation.
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
+ * @since 7.6.1
  */
-public class UnitTests {
+public interface OXExceptionInterceptor {
 
-    public UnitTests() {
-        super();
-    }
+    /**
+     * Gets the module / action combinations this interceptor is responsible for.
+     *
+     * @return The responsibilities for this interceptor
+     */
+    Collection<Responsibility> getResponsibilities();
 
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(IDManglerTest.class);
-        tests.addTestSuite(MergingSearchIteratorTest.class);
-        tests.addTestSuite(OXExceptionInterceptorRegistrationTest.class);
-        return tests;
-    }
+    /**
+     * Adds a new {@link Responsibility} to the interceptor
+     *
+     * @param responsibility The module/action combination the interceptor should be responsible for
+     */
+    void addResponsibility(Responsibility responsibility);
+
+    /**
+     * Intercepts the given {@link OXException} for the defined module / action. Previously check if the given
+     * {@link OXExceptionInterceptor} is responsible for the module / action combination by using {@link #isResponsible(String, String)}
+     *
+     * @param oxException The {@link OXException} to intercept
+     * @return {@link OXExceptionArguments} that was processed by this interceptor or <code>null</code> to signal no intervention
+     */
+    OXExceptionArguments intercept(OXException oxException);
+
+    /**
+     * Checks if the interceptor is responsible for the given module and action combination
+     *
+     * @param module The module that should be tested
+     * @param action The action that should be tested
+     * @return <code>true</code> if the interceptor is responsible (means that {@link #intercept(OXException)} will be executed); otherwise <code>false</code>
+     */
+    boolean isResponsible(String module, String action);
+
+    /**
+     * Returns the ranking of this {@link OXExceptionInterceptor}
+     *
+     * @return An <code>int</code> value representing the interceptor's ranking
+     */
+    int getRanking();
+
 }

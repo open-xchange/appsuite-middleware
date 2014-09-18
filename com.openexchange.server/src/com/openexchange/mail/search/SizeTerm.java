@@ -50,9 +50,9 @@
 package com.openexchange.mail.search;
 
 import java.util.Collection;
+import javax.mail.FetchProfile;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -152,4 +152,12 @@ public final class SizeTerm extends SearchTerm<ComparablePattern<Integer>> {
     public javax.mail.search.SearchTerm getNonWildcardJavaMailSearchTerm() {
         return getJavaMailSearchTerm();
     }
+
+    @Override
+    public void contributeTo(FetchProfile fetchProfile) {
+        if (!fetchProfile.contains(FetchProfile.Item.SIZE)) {
+            fetchProfile.add(FetchProfile.Item.SIZE);
+        }
+    }
+
 }

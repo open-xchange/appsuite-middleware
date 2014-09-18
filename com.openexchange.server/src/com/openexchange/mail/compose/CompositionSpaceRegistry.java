@@ -47,107 +47,88 @@
  *
  */
 
-package com.openexchange.mail.search;
+package com.openexchange.mail.compose;
 
-import java.util.Collection;
-import javax.mail.FetchProfile;
-import javax.mail.Message;
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.MailField;
-import com.openexchange.mail.dataobjects.MailMessage;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import com.openexchange.session.Session;
+
 
 /**
- * {@link BooleanTerm}
+ * {@link CompositionSpaceRegistry}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class BooleanTerm extends SearchTerm<Boolean> {
+class CompositionSpaceRegistry {
 
-    private static final long serialVersionUID = 5351872902045670432L;
-
-    private static final class BooleanSearchTerm extends javax.mail.search.SearchTerm {
-
-        private static final BooleanSearchTerm _TRUE = new BooleanSearchTerm(true);
-
-        private static final BooleanSearchTerm _FALSE = new BooleanSearchTerm(false);
-
-        public static BooleanSearchTerm getInstance(final boolean value) {
-            return value ? _TRUE : _FALSE;
-        }
-
-        private static final long serialVersionUID = -8073302646525000957L;
-
-        private final boolean value;
-
-        private BooleanSearchTerm(final boolean value) {
-            super();
-            this.value = value;
-        }
-
-        @Override
-        public boolean match(final Message msg) {
-            return value;
-        }
-
-    }
+    private final Map<String, CompositionSpace> spaces;
 
     /**
-     * The boolean term for <code>true</code>
+     * Initializes a new {@link CompositionSpaceRegistry}.
      */
-    public static final BooleanTerm TRUE = new BooleanTerm(true);
-
-    /**
-     * The boolean term for <code>false</code>
-     */
-    public static final BooleanTerm FALSE = new BooleanTerm(false);
-
-    private final boolean value;
-
-    /**
-     * Initializes a new {@link BooleanTerm}
-     */
-    private BooleanTerm(final boolean value) {
+    CompositionSpaceRegistry() {
         super();
-        this.value = value;
+        spaces = new HashMap<String, CompositionSpace>(8);
     }
 
-    @Override
-    public void accept(SearchTermVisitor visitor) {
-        visitor.visit(this);
+    /**
+     * Removes all composition spaces.
+     *
+     * @return The removed composition spaces
+     */
+    synchronized List<CompositionSpace> removeAllCompositionSpaces() {
+        List<CompositionSpace> l = new LinkedList<CompositionSpace>(spaces.values());
+        for (CompositionSpace space : l) {
+            space.markInactive();
+        }
+        spaces.clear();
+        return l;
     }
 
-    @Override
-    public Boolean getPattern() {
-        return Boolean.valueOf(value);
+    /**
+     * Gets the composition space associated with given identifier.
+     * <p>
+     * A new composition space is created if absent.
+     *
+     * @param csid The composition space identifier
+     * @param session The associated session
+     * @return The associated composition space
+     */
+    synchronized CompositionSpace getCompositionSpace(String csid, Session session) {
+        CompositionSpace space = spaces.get(csid);
+        if (null == space) {
+            CompositionSpace newSpace = new CompositionSpace(csid, session);
+            spaces.put(csid, newSpace);
+            space = newSpace;
+            space.markActive();
+        }
+        return space;
     }
 
-    @Override
-    public void addMailField(final Collection<MailField> col) {
-        // Nothing
+    /**
+     * Optionally gets the composition space associated with given identifier.
+     *
+     * @param csid The composition space identifier
+     * @return The associated composition space or <code>null</code>
+     */
+    synchronized CompositionSpace optCompositionSpace(String csid) {
+        return spaces.get(csid);
     }
 
-    @Override
-    public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
-        return BooleanSearchTerm.getInstance(value);
+    /**
+     * Removes the composition space associated with given identifier.
+     *
+     * @param csid The composition space identifier
+     * @return The removed composition space or <code>null</code> if no such composition space was available
+     */
+    synchronized CompositionSpace removeCompositionSpace(String csid) {
+        CompositionSpace space = spaces.remove(csid);
+        if (null != space) {
+            space.markInactive();
+        }
+        return space;
     }
 
-    @Override
-    public javax.mail.search.SearchTerm getNonWildcardJavaMailSearchTerm() {
-        return getJavaMailSearchTerm();
-    }
-
-    @Override
-    public void contributeTo(FetchProfile fetchProfile) {
-        // Nothing
-    }
-
-    @Override
-    public boolean matches(final Message msg) throws OXException {
-        return value;
-    }
-
-    @Override
-    public boolean matches(final MailMessage mailMessage) {
-        return value;
-    }
 }

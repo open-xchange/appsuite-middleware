@@ -116,5 +116,6 @@ public class OXFolderExceptionMessage implements LocalizableStrings {
     public final static String ADMIN_OP_ONLY_MSG = "Operation may only be performed for context administrator.";
     public static final String DELETE_DENIED_MSG = "The folder \"%1$s\" cannot be deleted.";
     public static final String CREATOR_STAYS_ADMIN_MSG = "The administrative permissions of the owner \"%1$s\" in folder \"%2$s\" were restored.";
+    public static final String NO_FOLDER_NAME_MSG = "You must enter a folder name.";
 
 }

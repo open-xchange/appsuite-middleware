@@ -50,6 +50,7 @@
 package com.openexchange.ajax.requesthandler.converters.preview;
 
 import static com.google.common.net.HttpHeaders.RETRY_AFTER;
+import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
 import java.io.IOException;
 import java.io.InputStream;
 import org.slf4j.Logger;
@@ -176,8 +177,7 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
                             false,
                             cacheKeyGenerator);
                         ThreadPools.getExecutorService().submit(previewAndCache);
-                        result.setHttpStatusCode(202);
-                        result.setHeader(RETRY_AFTER, String.valueOf(THRESHOLD / 1000));
+                        indicateRequestAccepted(result);
                     }
                 }
             } else if (isBlockingWorkerAllowed) {
@@ -267,5 +267,15 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
         if (Strings.isEmpty(requestData.getParameter(HEIGHT))) {
             requestData.putParameter(HEIGHT, String.valueOf(DEFAULT_THUMB_HEIGHT));
         }
+    }
+    
+    /**
+     * Indicate that the request has been accepted for processing, but the processing has not been completed
+     * @param result The current {@link AJAXRequestResult}
+     */
+    protected void indicateRequestAccepted(AJAXRequestResult result) {
+        //can't remove Content-Type, see DispatcherServlet handleError
+        result.setHttpStatusCode(202);
+        result.setHeader(RETRY_AFTER, String.valueOf(THRESHOLD / 1000));
     }
 }

@@ -61,9 +61,9 @@ import java.util.Map;
  */
 public class RequestOptions {
 
-    private static final String INCLUDE_CONTEXT_ADMIN = "admin";
+    public static final String INCLUDE_CONTEXT_ADMIN = "admin";
 
-    private static final String CLIENT_TIMEZONE = "timezone";
+    public static final String CLIENT_TIMEZONE = "timezone";
 
     private final Map<String, String> optionMap;
 

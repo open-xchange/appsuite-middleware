@@ -147,15 +147,12 @@ public final class MailPath implements Cloneable, Serializable {
     }
 
     /*-
-     * Fields
+     * --------------------------------------------------------- Fields ---------------------------------------------------------
      */
 
     private int accountId;
-
     private String folder;
-
     private String str;
-
     private String mailID;
 
     /**
@@ -207,7 +204,7 @@ public final class MailPath implements Cloneable, Serializable {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
+        int prime = 31;
         int result = 1;
         result = prime * result + accountId;
         result = prime * result + ((folder == null) ? 0 : folder.hashCode());
@@ -216,25 +213,15 @@ public final class MailPath implements Cloneable, Serializable {
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
+        if (!(obj instanceof MailPath)) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final MailPath other = (MailPath) obj;
+        MailPath other = (MailPath) obj;
         if (accountId != other.accountId) {
-            return false;
-        }
-        if (folder == null) {
-            if (other.folder != null) {
-                return false;
-            }
-        } else if (!folder.equals(other.folder)) {
             return false;
         }
         if (mailID == null) {
@@ -242,6 +229,13 @@ public final class MailPath implements Cloneable, Serializable {
                 return false;
             }
         } else if (!mailID.equals(other.mailID)) {
+            return false;
+        }
+        if (folder == null) {
+            if (other.folder != null) {
+                return false;
+            }
+        } else if (!folder.equals(other.folder)) {
             return false;
         }
         return true;

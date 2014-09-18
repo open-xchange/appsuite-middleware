@@ -47,107 +47,81 @@
  *
  */
 
-package com.openexchange.mail.search;
+package com.openexchange.exception.interception;
 
 import java.util.Collection;
-import javax.mail.FetchProfile;
-import javax.mail.Message;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.MailField;
-import com.openexchange.mail.dataobjects.MailMessage;
+
 
 /**
- * {@link BooleanTerm}
+ * Abstract implementation of {@link OXExceptionInterceptor} that should be used to create custom {@link OXExceptionInterceptor}s.<br>
+ * <br>
+ * With that you only have to define responsibilities and implement what should be do while intercepting by overriding {@link
+ * AbstractOXExceptionInterceptor.intercept(OXException)}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.6.1
  */
-public final class BooleanTerm extends SearchTerm<Boolean> {
+public abstract class AbstractOXExceptionInterceptor implements OXExceptionInterceptor {
 
-    private static final long serialVersionUID = 5351872902045670432L;
+    /** List of {@link Responsibility} the extending {@link OXExceptionInterceptor} is responsible for **/
+    protected final Queue<Responsibility> responsibilitites = new ConcurrentLinkedQueue<Responsibility>();
 
-    private static final class BooleanSearchTerm extends javax.mail.search.SearchTerm {
-
-        private static final BooleanSearchTerm _TRUE = new BooleanSearchTerm(true);
-
-        private static final BooleanSearchTerm _FALSE = new BooleanSearchTerm(false);
-
-        public static BooleanSearchTerm getInstance(final boolean value) {
-            return value ? _TRUE : _FALSE;
-        }
-
-        private static final long serialVersionUID = -8073302646525000957L;
-
-        private final boolean value;
-
-        private BooleanSearchTerm(final boolean value) {
-            super();
-            this.value = value;
-        }
-
-        @Override
-        public boolean match(final Message msg) {
-            return value;
-        }
-
-    }
+    /** The service ranking */
+    protected final int ranking;
 
     /**
-     * The boolean term for <code>true</code>
+     * Initializes a new {@link AbstractOXExceptionInterceptor}.
+     *
+     * @param ranking The ranking of this {@link OXExceptionInterceptor} compared to other ones
      */
-    public static final BooleanTerm TRUE = new BooleanTerm(true);
-
-    /**
-     * The boolean term for <code>false</code>
-     */
-    public static final BooleanTerm FALSE = new BooleanTerm(false);
-
-    private final boolean value;
-
-    /**
-     * Initializes a new {@link BooleanTerm}
-     */
-    private BooleanTerm(final boolean value) {
+    protected AbstractOXExceptionInterceptor(int ranking) {
         super();
-        this.value = value;
+        this.ranking = ranking;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void accept(SearchTermVisitor visitor) {
-        visitor.visit(this);
+    public abstract OXExceptionArguments intercept(OXException oxException);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Collection<Responsibility> getResponsibilities() {
+        return responsibilitites;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public Boolean getPattern() {
-        return Boolean.valueOf(value);
+    public void addResponsibility(Responsibility responsibility) {
+        this.responsibilitites.add(responsibility);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void addMailField(final Collection<MailField> col) {
-        // Nothing
+    public boolean isResponsible(String module, String action) {
+        for (Responsibility responsibility : responsibilitites) {
+            if (responsibility.equals(new Responsibility(module, action))) {
+                return true;
+            }
+        }
+        return false;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
-        return BooleanSearchTerm.getInstance(value);
-    }
-
-    @Override
-    public javax.mail.search.SearchTerm getNonWildcardJavaMailSearchTerm() {
-        return getJavaMailSearchTerm();
-    }
-
-    @Override
-    public void contributeTo(FetchProfile fetchProfile) {
-        // Nothing
-    }
-
-    @Override
-    public boolean matches(final Message msg) throws OXException {
-        return value;
-    }
-
-    @Override
-    public boolean matches(final MailMessage mailMessage) {
-        return value;
+    public int getRanking() {
+        return ranking;
     }
 }

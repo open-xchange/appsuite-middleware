@@ -72,12 +72,12 @@ import com.openexchange.log.LogProperties;
  * EAS Requests aren't tracked as they are long running requests simulating server side message pushing.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class RequestReportingFilter implements Filter {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RequestReportingFilter.class);
-
     private final boolean isFilterEnabled;
+    private final String serviceName;
 
     /**
      * Initializes a new {@link RequestReportingFilter}.
@@ -90,42 +90,42 @@ public class RequestReportingFilter implements Filter {
             throw GrizzlyExceptionCode.NEEDED_SERVICE_MISSING.create(ConfigurationService.class.getSimpleName());
         }
         this.isFilterEnabled = configService.getBoolProperty("com.openexchange.server.requestwatcher.isEnabled", true);
+        serviceName = RequestWatcherService.class.getSimpleName();
     }
 
     @Override
-    public void init(final FilterConfig filterConfig) throws ServletException {
+    public void init(FilterConfig filterConfig) throws ServletException {
         // nothing to do here
     }
 
     @Override
-    public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         if (isFilterEnabled) {
-            final RequestWatcherService requestWatcher = Services.optService(RequestWatcherService.class);
-            // Request watcher is enabled but service is missing, bundle not started etc ..
+            RequestWatcherService requestWatcher = Services.optService(RequestWatcherService.class);
             if (requestWatcher == null) {
-                LOG.debug("{} is not available. Unable to watch this request.", RequestWatcherService.class.getSimpleName());
+                // Request watcher is enabled but service is missing, bundle not started etc ..
+                org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(RequestReportingFilter.class);
+                logger.debug("{} is not available. Unable to watch this request.", serviceName);
                 chain.doFilter(request, response);
             } else {
-                final HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-                final HttpServletResponse httpServletResponse = (HttpServletResponse) response;
-                if (isLongRunning(httpServletRequest)) {
+                HttpServletRequest httpRequest = (HttpServletRequest) request;
+                if (isLongRunning(httpRequest)) {
                     // Do not track long running requests
                     chain.doFilter(request, response);
                 } else {
-                    final RequestRegistryEntry requestRegistryEntry = requestWatcher.registerRequest(httpServletRequest, httpServletResponse, Thread.currentThread(), LogProperties.getPropertyMap());
+                    HttpServletResponse httpResponse = (HttpServletResponse) response;
+                    RequestRegistryEntry entry = requestWatcher.registerRequest(httpRequest, httpResponse, Thread.currentThread(), LogProperties.getPropertyMap());
                     try {
                         // Proceed processing
                         chain.doFilter(request, response);
-
-                        // Debug duration
-                        LOG.debug("Request took {}ms  for URL: {}", requestRegistryEntry.getAge(), httpServletRequest.getRequestURL());
                     } finally {
                         // Remove request from watcher after processing finished
-                        requestWatcher.unregisterRequest(requestRegistryEntry);
+                        requestWatcher.unregisterRequest(entry);
                     }
                 }
             }
-        } else { // Filter is not enabled
+        } else {
+            // Filter is not enabled
             chain.doFilter(request, response);
         }
     }
@@ -135,7 +135,7 @@ public class RequestReportingFilter implements Filter {
         // nothing to do here
     }
 
-    private boolean isLongRunning(final HttpServletRequest request) {
+    private boolean isLongRunning(HttpServletRequest request) {
         return RequestTools.isDriveRequest(request) || RequestTools.isEasPingOrSyncRequest(request);
     }
 
