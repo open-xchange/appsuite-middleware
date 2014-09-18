@@ -51,7 +51,6 @@ package com.openexchange.mail.search;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Locale;
 import javax.mail.FetchProfile;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -60,6 +59,7 @@ import javax.mail.Part;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.CharsetDetector;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -119,7 +119,7 @@ public final class BodyTerm extends SearchTerm<String> {
         if (containsWildcard()) {
             return toRegex(pattern).matcher(text).find();
         }
-        return (text.toLowerCase(Locale.ENGLISH).indexOf(pattern.toLowerCase(Locale.ENGLISH)) > -1);
+        return (Strings.asciiLowerCase(text).indexOf(Strings.asciiLowerCase(pattern)) > -1);
     }
 
     @Override
@@ -138,7 +138,7 @@ public final class BodyTerm extends SearchTerm<String> {
             if (containsWildcard()) {
                 return toRegex(pattern).matcher(text).find();
             }
-            return (text.toLowerCase(Locale.ENGLISH).indexOf(pattern.toLowerCase(Locale.ENGLISH)) > -1);
+            return (Strings.asciiLowerCase(text).indexOf(Strings.asciiLowerCase(pattern)) > -1);
         } catch (final OXException e) {
             org.slf4j.LoggerFactory.getLogger(FromTerm.class).warn("Error during search.", e);
             return false;

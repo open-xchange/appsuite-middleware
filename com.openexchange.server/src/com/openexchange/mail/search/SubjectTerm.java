@@ -50,11 +50,11 @@
 package com.openexchange.mail.search;
 
 import java.util.Collection;
-import java.util.Locale;
 import javax.mail.FetchProfile;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
 
@@ -108,7 +108,7 @@ public final class SubjectTerm extends SearchTerm<String> {
             if (containsWildcard()) {
                 return toRegex(unicodeSubject).matcher(subject).find();
             }
-            return (subject.toLowerCase(Locale.ENGLISH).indexOf(unicodeSubject.toLowerCase(Locale.ENGLISH)) != -1);
+            return (Strings.asciiLowerCase(subject).indexOf(Strings.asciiLowerCase(unicodeSubject)) != -1);
         }
         return false;
     }
@@ -128,7 +128,7 @@ public final class SubjectTerm extends SearchTerm<String> {
         if (containsWildcard()) {
             return toRegex(unicodeSubject).matcher(subject).find();
         }
-        return (subject.toLowerCase(Locale.ENGLISH).indexOf(unicodeSubject.toLowerCase(Locale.ENGLISH)) != -1);
+        return (Strings.asciiLowerCase(subject).indexOf(Strings.asciiLowerCase(unicodeSubject)) != -1);
     }
 
     @Override
