@@ -47,30 +47,74 @@
  *
  */
 
-package com.openexchange.global;
+package com.openexchange.exception.interception;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import com.openexchange.exception.interception.OXExceptionInterceptorRegistrationTest;
-import com.openexchange.global.tools.id.IDManglerTest;
-import com.openexchange.global.tools.iterator.MergingSearchIteratorTest;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
 
 /**
- * {@link UnitTests}
+ * {@link OXExceptionArguments} - Arguments to yield an appropriate {@link OXException}.
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class UnitTests {
+public class OXExceptionArguments {
 
-    public UnitTests() {
+    private final OXExceptionCode code;
+    private final Category category;
+    private final Throwable cause;
+    private final Object[] args;
+
+    /**
+     * Initializes a new {@link OXExceptionArguments}.
+     *
+     * @param code The exception code
+     * @param category The optional category to use
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     */
+    public OXExceptionArguments(OXExceptionCode code, Category category, Throwable cause, Object... args) {
         super();
+        this.code = code;
+        this.category = category;
+        this.cause = cause;
+        this.args = args;
     }
 
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(IDManglerTest.class);
-        tests.addTestSuite(MergingSearchIteratorTest.class);
-        tests.addTestSuite(OXExceptionInterceptorRegistrationTest.class);
-        return tests;
+    /**
+     * Gets the code
+     *
+     * @return The code
+     */
+    public OXExceptionCode getCode() {
+        return code;
     }
+
+    /**
+     * Gets the category
+     *
+     * @return The category
+     */
+    public Category getCategory() {
+        return category;
+    }
+
+    /**
+     * Gets the cause
+     *
+     * @return The cause
+     */
+    public Throwable getCause() {
+        return cause;
+    }
+
+    /**
+     * Gets the arguments
+     *
+     * @return The arguments
+     */
+    public Object[] getArgs() {
+        return args;
+    }
+
 }

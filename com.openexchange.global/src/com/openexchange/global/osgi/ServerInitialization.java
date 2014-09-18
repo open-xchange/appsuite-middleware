@@ -47,30 +47,65 @@
  *
  */
 
-package com.openexchange.global;
+package com.openexchange.global.osgi;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import com.openexchange.exception.interception.OXExceptionInterceptorRegistrationTest;
-import com.openexchange.global.tools.id.IDManglerTest;
-import com.openexchange.global.tools.iterator.MergingSearchIteratorTest;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.Initialization;
 
 /**
- * {@link UnitTests}
+ * {@link ServerInitialization} - The {@link Initialization initialization} for server.
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class UnitTests {
+final class ServerInitialization implements Initialization {
 
-    public UnitTests() {
+    private volatile String previousTTL;
+    private volatile String previousNegativeTTL;
+
+    /**
+     * Initializes a new {@link ServerInitialization}.
+     */
+    ServerInitialization() {
         super();
     }
 
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(IDManglerTest.class);
-        tests.addTestSuite(MergingSearchIteratorTest.class);
-        tests.addTestSuite(OXExceptionInterceptorRegistrationTest.class);
-        return tests;
+    @Override
+    public void start() throws OXException {
+        /*
+         * Remember previous settings
+         */
+        previousTTL = java.security.Security.getProperty("networkaddress.cache.ttl");
+        previousNegativeTTL = java.security.Security.getProperty("networkaddress.cache.negative.ttl");
+        /*
+         * The number of seconds to cache the successful lookup
+         */
+        java.security.Security.setProperty("networkaddress.cache.ttl", Integer.toString(3600));
+        System.setProperty("sun.net.inetaddr.ttl", Integer.toString(3600));
+        /*
+         * The number of seconds to cache the failure for un-successful lookups
+         */
+        java.security.Security.setProperty("networkaddress.cache.negative.ttl", Integer.toString(10));
     }
+
+    @Override
+    public void stop() throws OXException {
+        String previousTTL = this.previousTTL;
+        if (null == previousTTL) {
+            java.security.Security.setProperty("networkaddress.cache.ttl", "-1");
+        } else {
+            /*
+             * Restore previous settings
+             */
+            java.security.Security.setProperty("networkaddress.cache.ttl", previousTTL);
+            this.previousTTL = null;
+        }
+        String previousNegativeTTL = this.previousNegativeTTL;
+        if (null == previousNegativeTTL) {
+            java.security.Security.setProperty("networkaddress.cache.negative.ttl", "10");
+        } else {
+            java.security.Security.setProperty("networkaddress.cache.negative.ttl", previousNegativeTTL);
+            this.previousNegativeTTL = null;
+        }
+    }
+
 }

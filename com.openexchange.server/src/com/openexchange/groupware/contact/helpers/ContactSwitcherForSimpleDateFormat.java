@@ -55,8 +55,6 @@ import java.text.SimpleDateFormat;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
-
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.container.Contact;
@@ -150,7 +148,10 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
             final int size = dateFormats.size();
             for (int index = 0; index < size; index++) {
                 try {
-                    objects[1] = dateFormats.get(index).parse(dateString);
+                    DateFormat dateFormat = dateFormats.get(index);
+                    synchronized (dateFormat) {
+                        objects[1] = dateFormat.parse(dateString);
+                    }
                     /*
                      * Parse successful so far. Is invalid?
                      */

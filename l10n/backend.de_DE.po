@@ -19,15 +19,15 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-09-03 11:59+0000\n"
-"Last-Translator: testuser <mk@open-xchange.com>\n"
+"PO-Revision-Date: 2014-09-17 14:02+0100\n"
+"Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Pootle 2.5.1.1\n"
+"X-Generator: Poedit 1.6.5\n"
 "X-POOTLE-MTIME: 1409745551.000000\n"
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
@@ -2279,7 +2279,6 @@ msgstr "Versionierung wird nicht vom Google Drive-Dateispeicher unterstützt."
 
 #. The file %1$s doesn't have any content stored on Drive
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:98
-#, fuzzy
 msgid "The file %1$s doesn't have any content stored on Drive"
 msgstr "Für die Datei %1$s ist kein Inhalt auf Drive gespeichert"
 
@@ -2415,6 +2414,11 @@ msgid ""
 msgstr ""
 "Die zulässige Quota wurde überschritten. Bitte löschen Sie einige Objekte, "
 "um neue speichern zu können."
+
+#. ZIP archive exceeds max. allowed size of %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:85
+msgid "ZIP archive exceeds max. allowed size of %1$s"
+msgstr "ZIP-Archiv übersteigt die maximal zulässige Größe von %1$s"
 
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
@@ -2707,7 +2711,9 @@ msgstr "Im Anlagenamen"
 msgid "My Status"
 msgstr "Mein Status"
 
+#. Search for items by their creation date
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:83
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:76
 msgid "Date"
 msgstr "Datum"
 
@@ -2757,11 +2763,6 @@ msgstr "Ordnertyp"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:73
 msgid "Folder"
 msgstr "Ordner"
-
-#. Search items in a given time frame
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:76
-msgid "Time"
-msgstr "Zeit"
 
 #. ------------------------- i18n strings for folder types ------------------------------------- //
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:80
@@ -3740,11 +3741,11 @@ msgstr ""
 "Referenzierter JSlob %1$s darf für den Dienst %2$s nicht gesetzt werden. Es "
 "wird keine Aktion ausgeführt."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:67
 msgid "MAIL-AUTOCONFIG"
 msgstr "MAIL-AUTOCONFIG"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:69
 msgid "The E-Mail address %1$s is invalid."
 msgstr "Die E-Mail-Adresse %1$s ist ungültig."
 
@@ -4723,7 +4724,6 @@ msgstr ""
 
 #. * The recipient you tried to reach is currently unavailable
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:80
-#, fuzzy
 msgid "The recipient you tried to reach is currently unavailable: %1$s"
 msgstr ""
 "Der von Ihnen angeforderte Teilnehmer ist derzeit nicht verfügbar: %1$s"
@@ -7250,6 +7250,38 @@ msgid ""
 msgstr ""
 "Das eingegebene Passwort enthält unzulässige Zeichen und kann nicht "
 "gespeichert werden. Zulässige Zeichen: %1$s"
+
+#. *
+#. * The current password is incorrect. Please enter your correct current password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:166
+msgid ""
+"The current password is incorrect. Please enter your correct current "
+"password and try again."
+msgstr ""
+"Das aktuelle Passwort ist falsch. Bitte geben Sie Ihr korrektes aktuelles "
+"Passwort ein und versuchen Sie es erneut."
+
+#. *
+#. * The current password is missing. Please enter your current password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:171
+msgid ""
+"The current password is missing. Please enter your current password and try "
+"again."
+msgstr ""
+"Das aktuelle Passwort fehlt. Bitte geben Sie Ihr aktuelles Passwort ein und "
+"versuchen Sie es erneut."
+
+#. *
+#. * The new password is missing. Please enter your new password and try again.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:176
+msgid ""
+"The new password is missing. Please enter your new password and try again."
+msgstr ""
+"Das neue Passwort fehlt. Bitte geben Sie Ihr neues Passwort ein und "
+"versuchen Sie es erneut."
 
 #. *
 #. * User is missing for the reminder.
@@ -11281,6 +11313,9 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:522
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "Time"
+#~ msgstr "Zeit"
 
 #~ msgid "in appointments"
 #~ msgstr "in Terminen"
@@ -16181,10 +16216,6 @@ msgstr "Zulu"
 
 #~ msgid "Identifier of the object is missing."
 #~ msgstr "Fehlende Objekt-ID"
-
-#~ msgid "Integer value exceeds max allowed value (65535): %1$d"
-#~ msgstr ""
-#~ "Ganzzahliger Wert übersteigt den maximal erlaubten Wert (65535): %1$d."
 
 #~ msgid "Invalid content-type header value: %1$s"
 #~ msgstr "Ungültiger Content-Type Header-Wert: %1$s"

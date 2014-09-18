@@ -51,6 +51,7 @@ package com.openexchange.mail.json.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.mail.internet.InternetAddress;
 import org.json.JSONArray;
@@ -60,6 +61,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -85,6 +89,7 @@ import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorage;
 import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorageRegistry;
 import com.openexchange.mail.attachment.storage.MailAttachmentStorage;
 import com.openexchange.mail.attachment.storage.MailAttachmentStorageRegistry;
+import com.openexchange.mail.compose.CompositionSpace;
 import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailActionFactory;
@@ -95,6 +100,7 @@ import com.openexchange.mail.transport.config.TransportReloadable;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -194,6 +200,36 @@ public final class MailJSONActivator extends AJAXModuleActivator {
             Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
             properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
             registerService(MailAttachmentStorage.class, new DefaultMailAttachmentStorage(), properties);
+        }
+
+        {
+            final String topicRemoveSession = SessiondEventConstants.TOPIC_REMOVE_SESSION;
+            final String topicRemoveContainer = SessiondEventConstants.TOPIC_REMOVE_CONTAINER;
+            final String topicRemoveData = SessiondEventConstants.TOPIC_REMOVE_DATA;
+
+            EventHandler eventHandler = new EventHandler() {
+
+                @Override
+                public void handleEvent(Event event) {
+                    String topic = event.getTopic();
+                    if (topicRemoveSession.equals(topic)) {
+                        handleSession((Session) event.getProperty(SessiondEventConstants.PROP_SESSION));
+                    } else if (topicRemoveContainer.equals(topic) || topicRemoveData.equals(topic)) {
+                        @SuppressWarnings("unchecked") Map<String, Session> sessions = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
+                        for (Session session : sessions.values()) {
+                            handleSession(session);
+                        }
+                    }
+                }
+
+                private void handleSession(Session session) {
+                    CompositionSpace.dropCompositionSpaces(session);
+                }
+            };
+
+            Dictionary<String, Object> props = new Hashtable<String, Object>(2);
+            props.put(EventConstants.EVENT_TOPIC, new String[] { topicRemoveSession, topicRemoveContainer, topicRemoveData });
+            registerService(EventHandler.class, eventHandler, props);
         }
 
         registerModule(new MailActionFactory(serviceLookup), "mail");
