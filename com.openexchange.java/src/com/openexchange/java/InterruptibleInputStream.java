@@ -178,7 +178,7 @@ public class InterruptibleInputStream extends InputStream {
                 if (interrupted != null) {
                     throw new IllegalStateException("Input stream already interrupted.");
                 }
-                interrupted = exc;
+                this.interrupted = exc;
                 // close the decorated stream
                 Streams.close(in);
             }

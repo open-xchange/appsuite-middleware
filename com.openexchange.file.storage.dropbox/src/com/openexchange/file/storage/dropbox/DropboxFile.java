@@ -51,16 +51,11 @@ package com.openexchange.file.storage.dropbox;
 
 import static com.openexchange.file.storage.dropbox.Utils.normalizeFolderId;
 import java.util.Date;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
-import org.slf4j.Logger;
 import com.dropbox.client2.DropboxAPI.Entry;
-import com.dropbox.client2.RESTUtility;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
-import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.java.Strings;
 import com.openexchange.mime.MimeTypeMap;
 
 /**
@@ -70,116 +65,48 @@ import com.openexchange.mime.MimeTypeMap;
  */
 public final class DropboxFile extends DefaultFile {
 
+    private final long sequenceNumber;
+
     /**
      * Initializes a new {@link DropboxFile}.
      *
-     * @param folderId The folder identifier
-     * @param id The file identifier
-     * @param userId The user identifier
+     * @param entry The dropbox entry representing the file
+     * @param userID The identifier of the user to use as created-/modified-by information
+     * @throws OXException
      */
-    public DropboxFile(final String folderId, final String id, final int userId) {
+    public DropboxFile(Entry entry, int userID) throws OXException {
         super();
-        setFolderId("/".equals(folderId) ? FileStorageFolder.ROOT_FULLNAME : normalizeFolderId(folderId));
-        setCreatedBy(userId);
-        setModifiedBy(userId);
-        setId(id);
-        setFileName(id);
-        setVersion(FileStorageFileAccess.CURRENT_VERSION);
+        if (entry.isDir) {
+            throw DropboxExceptionCodes.NOT_A_FILE.create(entry.path);
+        }
+        String parentPath = entry.parentPath();
+        setId(entry.fileName());
+        setFolderId("/".equals(parentPath) ? FileStorageFolder.ROOT_FULLNAME : normalizeFolderId(parentPath));
+        setCreatedBy(userID);
+        setModifiedBy(userID);
+        Date modified = Utils.parseDate(entry.modified);
+        Date clientModified = Utils.parseDate(entry.clientMtime);
+        setCreated(null == clientModified ? modified : clientModified);
+        setLastModified(null == clientModified ? modified : clientModified);
+        sequenceNumber = null != modified ? modified.getTime() : 0;
+        setVersion(entry.rev);
         setIsCurrentVersion(true);
+        setFileSize(entry.bytes);
+        setFileMIMEType(Strings.isEmpty(entry.mimeType) ?
+            DropboxServices.getService(MimeTypeMap.class).getContentType(entry.fileName()) : entry.mimeType);
+        setFileName(entry.fileName());
+        setTitle(entry.fileName());
+    }
+
+    @Override
+    public long getSequenceNumber() {
+        return 0 != this.sequenceNumber ? sequenceNumber : super.getSequenceNumber();
     }
 
     @Override
     public String toString() {
-        final String url = getURL();
-        return url == null ? super.toString() : url;
+        String folder = normalizeFolderId(getFolderId());
+        return null == folder ? '/' + getId() : folder + '/' + getId();
     }
 
-    /**
-     * Parses specified Dropbox file entry.
-     *
-     * @param entry The Dropbox file entry
-     * @throws OXException If parsing SMB file fails
-     * @return This Dropbox file
-     */
-    public DropboxFile parseDropboxFile(final Entry entry) throws OXException {
-        return parseDropboxFile(entry, null);
-    }
-
-    /**
-     * Parses specified Dropbox file entry.
-     *
-     * @param entry The Dropbox file entry
-     * @param fields The fields to consider
-     * @throws OXException If parsing SMB file fails
-     * @return This Dropbox file with property set applied
-     */
-    public DropboxFile parseDropboxFile(final Entry entry, final List<Field> fields) throws OXException {
-        if (null != entry && !entry.isDir) {
-            try {
-                final String name = entry.fileName();
-                setTitle(name);
-                setFileName(name);
-                setVersion(entry.rev);
-                final Set<Field> set = null == fields || fields.isEmpty() ? EnumSet.allOf(Field.class) : EnumSet.copyOf(fields);
-                try {
-                    final Date date;
-                    synchronized (RESTUtility.class) {
-                        date = RESTUtility.parseDate(entry.modified);
-                    }
-                    if (set.contains(Field.CREATED)) {
-                        setCreated(new Date(date.getTime()));
-                    }
-                    if (set.contains(Field.LAST_MODIFIED) || set.contains(Field.LAST_MODIFIED_UTC)) {
-                        setLastModified(new Date(date.getTime()));
-                    }
-                } catch (NumberFormatException nfe) {
-                    Logger logger = org.slf4j.LoggerFactory.getLogger(DropboxFile.class);
-                    logger.warn("Cannot parse date from: {}", entry.modified, nfe);
-                }
-                if (set.contains(Field.FILE_MIMETYPE)) {
-                    String contentType = entry.mimeType;
-                    if (isEmpty(contentType)) {
-                        final MimeTypeMap map = DropboxServices.getService(MimeTypeMap.class);
-                        contentType = map.getContentType(name);
-                    }
-                    setFileMIMEType(contentType);
-                }
-                if (set.contains(Field.FILE_SIZE)) {
-                    setFileSize(entry.bytes);
-                }
-                /*
-                if (set.contains(Field.URL)) {
-                    setURL(entry.path);
-                }
-                */
-                if (set.contains(Field.COLOR_LABEL)) {
-                    setColorLabel(0);
-                }
-                if (set.contains(Field.CATEGORIES)) {
-                    setCategories(null);
-                }
-                if (set.contains(Field.DESCRIPTION)) {
-                    setDescription(null);
-                }
-                if (set.contains(Field.VERSION_COMMENT)) {
-                    setVersionComment(null);
-                }
-            } catch (final RuntimeException e) {
-                throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            }
-        }
-        return this;
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
 }

@@ -47,45 +47,17 @@
  *
  */
 
-package com.openexchange.mail.autoconfig;
+package com.openexchange.ajax.requesthandler.converters.preview.cache;
 
-import java.io.IOException;
-import org.xmlpull.v1.XmlPullParserException;
-import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionStrings;
-import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link AutoconfigException}
+ * {@link CacheKeyGenerator} - A cache key generator
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since 7.6.1
  */
-public class AutoconfigException extends OXException implements LocalizableStrings {
+public interface CacheKeyGenerator {
 
-    private static final long serialVersionUID = 4909345337720686173L;
-
-    private static final String PREFIX = "MAIL-AUTOCONFIG";
-
-    public static final String INVALID_MAIL = "The E-Mail address %1$s is invalid.";
-
-    public static OXException unexpected(String logMessage) {
-        return new OXException(1).setPrefix(PREFIX).setLogMessage(logMessage);
-    }
-
-    public static OXException unexpected(String logMessage, Throwable cause) {
-        return new OXException(1, OXExceptionStrings.DEFAULT_MESSAGE, cause, new Object[0]).setPrefix(PREFIX).setLogMessage(logMessage);
-    }
-
-    public static OXException invalidMail(String mail) {
-        return new OXException(2, INVALID_MAIL, mail).setPrefix(PREFIX);
-    }
-
-    public static OXException xml(XmlPullParserException e) {
-        return new OXException(3, null, e).setPrefix(PREFIX);
-    }
-
-    public static OXException io(IOException e) {
-        return new OXException(4, null, e).setPrefix(PREFIX);
-    }
+    String generateCacheKey();
 
 }

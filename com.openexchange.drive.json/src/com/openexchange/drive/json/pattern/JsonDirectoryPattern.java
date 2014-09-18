@@ -123,7 +123,7 @@ public class JsonDirectoryPattern extends AbstractJsonPattern implements Directo
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + ((pathPattern == null) ? 0 : pathPattern.hashCode());
+        result = prime * result + ((pathPattern == null) ? 0 : pathPattern.pattern().hashCode());
         return result;
     }
 
@@ -143,7 +143,7 @@ public class JsonDirectoryPattern extends AbstractJsonPattern implements Directo
             if (other.pathPattern != null) {
                 return false;
             }
-        } else if (!pathPattern.equals(other.pathPattern)) {
+        } else if (!pathPattern.pattern().equals(other.pathPattern.pattern())) {
             return false;
         }
         return true;

@@ -130,7 +130,7 @@ public final class DropboxAccountAccess implements FileStorageAccountAccess {
 
     @Override
     public FileStorageFolderAccess getFolderAccess() throws OXException {
-        return new DropboxFolderAccess(dropboxOAuthAccess, account, session, this);
+        return new DropboxFolderAccess(dropboxOAuthAccess, account, session);
     }
 
     @Override
