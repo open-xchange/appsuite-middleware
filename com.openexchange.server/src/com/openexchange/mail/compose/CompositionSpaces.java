@@ -49,16 +49,15 @@
 
 package com.openexchange.mail.compose;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.session.Session;
 
 
@@ -88,34 +87,8 @@ public final class CompositionSpaces {
         CompositionSpaceRegistry registry = CompositionSpace.getRegistry(mailAccess.getSession());
         CompositionSpace space = registry.removeCompositionSpace(csid);
         if (null != space) {
-            // Check for reply
-            try {
-                MailPath replyFor = space.getReplyFor();
-                if (null != replyFor) {
-                    if (replyFor.getAccountId() == mailAccess.getAccountId()) {
-                        mailAccess.getMessageStorage().updateMessageFlags(replyFor.getFolder(), new String[] {replyFor.getMailID()}, MailMessage.FLAG_ANSWERED, true);
-                    } else {
-                        LOGGER.warn("Account identifier mismatch. Reply for {}, but access for {} ({})", replyFor.getAccountId(), mailAccess.getAccountId(), mailAccess);
-                    }
-                }
-            } catch (Exception e) {
-                LOGGER.warn("Failed applying \\Answered flag", e);
-            }
 
-            // Check for forward
-            try {
-                MailPath forwardFor = space.getForwardFor();
-                if (null != forwardFor) {
-                    if (forwardFor.getAccountId() == mailAccess.getAccountId()) {
-                        mailAccess.getMessageStorage().updateMessageFlags(forwardFor.getFolder(), new String[] {forwardFor.getMailID()}, MailMessage.FLAG_FORWARDED, true);
-                    } else {
-                        LOGGER.warn("Account identifier mismatch. Forward for {}, but access for {} ({})", forwardFor.getAccountId(), mailAccess.getAccountId(), mailAccess);
-                    }
-                }
-            } catch (Exception e) {
-                LOGGER.warn("Failed applying \\Forwarded flag", e);
-            }
-
+            // Delete clean-ups
             Queue<MailPath> cleanUps = space.getCleanUps();
             for (MailPath mailPath; (mailPath = cleanUps.poll()) != null;) {
                 try {
@@ -125,7 +98,7 @@ public final class CompositionSpaces {
                         LOGGER.warn("Account identifier mismatch. Clean-up for {}, but access for {} ({})", mailPath.getAccountId(), mailAccess.getAccountId(), mailAccess);
                     }
                 } catch (Exception e) {
-                    LOGGER.warn("Failed deleting {}", mailPath, e);
+                    LOGGER.warn("Failed to delete {}", mailPath, e);
                 }
             }
         }
@@ -134,14 +107,124 @@ public final class CompositionSpaces {
     /**
      * Destroys the denoted composition space.
      *
+     * @param csid The composition space identifier
+     * @param session The session
+     */
+    public static void destroy(String csid, Session session) {
+        CompositionSpaceRegistry registry = CompositionSpace.getRegistry(session);
+        CompositionSpace space = registry.removeCompositionSpace(csid);
+        if (null != space) {
+            Map<Integer, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> accesses = new ConcurrentHashMap<Integer, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage>>(4);
+            try {
+
+                // Delete clean-ups
+                Queue<MailPath> cleanUps = space.getCleanUps();
+                for (MailPath mailPath; (mailPath = cleanUps.poll()) != null;) {
+                    MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = accesses.get(Integer.valueOf(mailPath.getAccountId()));
+                    if (null == mailAccess) {
+                        try {
+                            mailAccess = MailAccess.getNewInstance(session, mailPath.getAccountId());
+                            mailAccess.connect(false);
+                            accesses.put(Integer.valueOf(mailPath.getAccountId()), mailAccess);
+                        } catch (OXException e) {
+                            LOGGER.warn("Could not obtain access for {}", mailPath.getAccountId(), e);
+                        }
+                    }
+
+                    if (null != mailAccess) {
+                        try {
+                            mailAccess.getMessageStorage().deleteMessages(mailPath.getFolder(), new String[] { mailPath.getMailID() }, true);
+                        } catch (Exception e) {
+                            LOGGER.warn("Failed to delete {}", mailPath, e);
+                        }
+                    }
+                }
+            } finally {
+                for (MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access : accesses.values()) {
+                    access.close(false);
+                }
+            }
+        }
+    }
+
+    /**
+     * Destroys the given session's composition spaces.
+     *
      * @param session The session
      */
     public static void destroyFor(Session session) {
         Map<Integer, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> accesses = new ConcurrentHashMap<Integer, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage>>(4);
+        try {
+            for (CompositionSpace space : CompositionSpace.getRegistry(session).removeAllCompositionSpaces()) {
 
-        List<CompositionSpace> spaces = CompositionSpace.getRegistry(session).clearCompositionSpaces();
-        for (CompositionSpace space : spaces) {
+                // Delete clean-ups
+                Queue<MailPath> cleanUps = space.getCleanUps();
+                for (MailPath mailPath; (mailPath = cleanUps.poll()) != null;) {
+                    MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access = accesses.get(Integer.valueOf(mailPath.getAccountId()));
+                    if (null == access) {
+                        try {
+                            access = MailAccess.getNewInstance(session, mailPath.getAccountId());
+                            access.connect(false);
+                            accesses.put(Integer.valueOf(mailPath.getAccountId()), access);
+                        } catch (Exception e) {
+                            LOGGER.warn("Could not obtain access for {}", mailPath.getAccountId(), e);
+                        }
+                    }
 
+                    if (null != access) {
+                        try {
+                            access.getMessageStorage().deleteMessages(mailPath.getFolder(), new String[] { mailPath.getMailID() }, true);
+                        } catch (Exception e) {
+                            LOGGER.warn("Failed to delete {}", mailPath, e);
+                        }
+                    }
+                }
+            }
+        } finally {
+            for (MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access : accesses.values()) {
+                access.close(false);
+            }
+        }
+    }
+
+    /**
+     * Destroys the given composition space registry.
+     *
+     * @param registry The composition space registry
+     * @param session The associated session
+     */
+    static void destroy(CompositionSpaceRegistry registry, Session session) {
+        Map<Integer, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> accesses = new ConcurrentHashMap<Integer, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage>>(4);
+        try {
+            for (CompositionSpace space : registry.removeAllCompositionSpaces()) {
+
+                // Delete clean-ups
+                Queue<MailPath> cleanUps = space.getCleanUps();
+                for (MailPath mailPath; (mailPath = cleanUps.poll()) != null;) {
+                    MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access = accesses.get(Integer.valueOf(mailPath.getAccountId()));
+                    if (null == access) {
+                        try {
+                            access = MailAccess.getNewInstance(session, mailPath.getAccountId());
+                            access.connect(false);
+                            accesses.put(Integer.valueOf(mailPath.getAccountId()), access);
+                        } catch (Exception e) {
+                            LOGGER.warn("Could not obtain access for {}", mailPath.getAccountId(), e);
+                        }
+                    }
+
+                    if (null != access) {
+                        try {
+                            access.getMessageStorage().deleteMessages(mailPath.getFolder(), new String[] { mailPath.getMailID() }, true);
+                        } catch (Exception e) {
+                            LOGGER.warn("Failed to delete {}", mailPath, e);
+                        }
+                    }
+                }
+            }
+        } finally {
+            for (MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access : accesses.values()) {
+                access.close(false);
+            }
         }
     }
 

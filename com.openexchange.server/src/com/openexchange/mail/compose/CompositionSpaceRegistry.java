@@ -49,10 +49,11 @@
 
 package com.openexchange.mail.compose;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.Map;
+import com.openexchange.session.Session;
 
 
 /**
@@ -62,31 +63,22 @@ import java.util.concurrent.ConcurrentMap;
  */
 class CompositionSpaceRegistry {
 
-    private final ConcurrentMap<String, CompositionSpace> spaces;
+    private final Map<String, CompositionSpace> spaces;
 
     /**
      * Initializes a new {@link CompositionSpaceRegistry}.
      */
     CompositionSpaceRegistry() {
         super();
-        spaces = new ConcurrentHashMap<String, CompositionSpace>(8);
+        spaces = new HashMap<String, CompositionSpace>(8);
     }
 
     /**
-     * Gets the composition spaces.
+     * Removes all composition spaces.
      *
-     * @return The composition spaces
+     * @return The removed composition spaces
      */
-    ConcurrentMap<String, CompositionSpace> getCompositionSpaces() {
-        return spaces;
-    }
-
-    /**
-     * Clears the composition spaces.
-     *
-     * @return The cleared composition spaces
-     */
-    List<CompositionSpace> clearCompositionSpaces() {
+    synchronized List<CompositionSpace> removeAllCompositionSpaces() {
         List<CompositionSpace> l = new LinkedList<CompositionSpace>(spaces.values());
         spaces.clear();
         return l;
@@ -98,16 +90,16 @@ class CompositionSpaceRegistry {
      * A new composition space is created if absent.
      *
      * @param csid The composition space identifier
+     * @param session The associated session
      * @return The associated composition space
      */
-    CompositionSpace getCompositionSpace(String csid) {
+    synchronized CompositionSpace getCompositionSpace(String csid, Session session) {
         CompositionSpace space = spaces.get(csid);
         if (null == space) {
-            CompositionSpace newSpace = new CompositionSpace(csid);
-            space = spaces.putIfAbsent(csid, newSpace);
-            if (null == space) {
-                space = newSpace;
-            }
+            CompositionSpace newSpace = new CompositionSpace(csid, session);
+            spaces.put(csid, newSpace);
+            space = newSpace;
+            space.markActive();
         }
         return space;
     }
@@ -118,7 +110,7 @@ class CompositionSpaceRegistry {
      * @param csid The composition space identifier
      * @return The associated composition space or <code>null</code>
      */
-    CompositionSpace optCompositionSpace(String csid) {
+    synchronized CompositionSpace optCompositionSpace(String csid) {
         return spaces.get(csid);
     }
 
@@ -128,7 +120,7 @@ class CompositionSpaceRegistry {
      * @param csid The composition space identifier
      * @return The removed composition space or <code>null</code> if no such composition space was available
      */
-    CompositionSpace removeCompositionSpace(String csid) {
+    synchronized CompositionSpace removeCompositionSpace(String csid) {
         return spaces.remove(csid);
     }
 

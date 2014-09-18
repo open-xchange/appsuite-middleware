@@ -51,9 +51,12 @@ package com.openexchange.mail.compose;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
 import com.openexchange.mail.MailPath;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link CompositionSpace} - Represents a composition space.
@@ -90,24 +93,84 @@ public class CompositionSpace {
      * @return The composition space
      */
     public static CompositionSpace getCompositionSpace(String csid, Session session) {
-        return getRegistry(session).getCompositionSpace(csid);
+        return getRegistry(session).getCompositionSpace(csid, session);
     }
 
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------
-    // //
+    /**
+     * Drops composition spaces from given session
+     *
+     * @param session The associated session
+     */
+    public static void dropCompositionSpaces(Session session) {
+        CompositionSpaceRegistry registry = (CompositionSpaceRegistry) session.getParameter(PARAM_REGISTRY);
+        if (null != registry) {
+            try {
+                CompositionSpaces.destroy(registry, session);
+            } finally {
+                session.setParameter(PARAM_REGISTRY, null);
+            }
+        }
+    }
 
-    private final String id;
+    // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    final String id;
     private volatile MailPath replyFor;
     private volatile MailPath forwardFor;
+    private volatile MailPath draftEditFor;
+    volatile long lastAccessed;
     private final Queue<MailPath> cleanUps;
+    final long idleTime;
+    final Session session;
 
     /**
      * Initializes a new {@link CompositionSpace}.
+     * @param session
      */
-    CompositionSpace(String id) {
+    CompositionSpace(String id, Session session) {
         super();
+        this.session = session;
         this.id = id;
         cleanUps = new ConcurrentLinkedQueue<MailPath>();
+        idleTime = TimeUnit.MINUTES.toMillis(10); // 10 minutes idle time
+        lastAccessed = System.currentTimeMillis();
+    }
+
+    /**
+     * Marks this composition space as active
+     */
+    void markActive() {
+        Runnable task = new Runnable() {
+
+            @Override
+            public void run() {
+                if (System.currentTimeMillis() - lastAccessed > idleTime) {
+                    CompositionSpaces.destroy(id, session);
+                }
+            }
+        };
+
+        TimerService timerService = ServerServiceRegistry.getInstance().getService(TimerService.class);
+        timerService.scheduleAtFixedRate(task, 5, 5, TimeUnit.MINUTES);
+    }
+
+    /**
+     * Gets the last-accessed time stamp
+     *
+     * @return The last-accessed time stamp
+     */
+    public long getLastAccessed() {
+        return lastAccessed;
+    }
+
+    /**
+     * Touches this composition space.
+     *
+     * @return This composition space with updated last-accessed time stamp
+     */
+    public CompositionSpace touch() {
+        lastAccessed = System.currentTimeMillis();
+        return this;
     }
 
     /**
@@ -117,6 +180,25 @@ public class CompositionSpace {
      */
     public String getId() {
         return id;
+    }
+
+    /**
+     * Gets the <code>draftEditFor</code> reference
+     *
+     * @return The <code>draftEditFor</code> reference
+     */
+    public MailPath getDraftEditFor() {
+        return draftEditFor;
+    }
+
+    /**
+     * Sets the <code>draftEditFor</code> reference
+     *
+     * @param draftEditFor The <code>draftEditFor</code> reference to set
+     */
+    public void setDraftEditFor(MailPath draftEditFor) {
+        this.draftEditFor = draftEditFor;
+        lastAccessed = System.currentTimeMillis();
     }
 
     /**
@@ -135,6 +217,7 @@ public class CompositionSpace {
      */
     public void setReplyFor(MailPath replyFor) {
         this.replyFor = replyFor;
+        lastAccessed = System.currentTimeMillis();
     }
 
     /**
@@ -153,6 +236,7 @@ public class CompositionSpace {
      */
     public void setForwardFor(MailPath forwardFor) {
         this.forwardFor = forwardFor;
+        lastAccessed = System.currentTimeMillis();
     }
 
     /**
@@ -162,6 +246,7 @@ public class CompositionSpace {
      */
     public void addCleanUp(MailPath mailPath) {
         cleanUps.offer(mailPath);
+        lastAccessed = System.currentTimeMillis();
     }
 
     /**
