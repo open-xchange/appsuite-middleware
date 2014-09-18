@@ -47,30 +47,78 @@
  *
  */
 
-package com.openexchange.global;
+package com.openexchange.exception.interception;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import com.openexchange.exception.interception.OXExceptionInterceptorRegistrationTest;
-import com.openexchange.global.tools.id.IDManglerTest;
-import com.openexchange.global.tools.iterator.MergingSearchIteratorTest;
 
 /**
- * {@link UnitTests}
+ * Module / action combination to define one responsibility of an {@link OXExceptionInterceptor}. An {@link OXExceptionInterceptor} is able
+ * to deal with (almost) unlimited {@link OXExceptionInterceptorResponsibility}s
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.6.1
  */
-public class UnitTests {
+public class OXExceptionInterceptorResponsibility {
 
-    public UnitTests() {
-        super();
+    private final String module;
+
+    private final String action;
+
+    /**
+     * Initializes a new {@link OXExceptionInterceptorResponsibility}.
+     *
+     * @param module - the module the {@link OXExceptionInterceptor} is responsible for
+     * @param action - the module the {@link OXExceptionInterceptor} is responsible for.
+     */
+    public OXExceptionInterceptorResponsibility(String module, String action) {
+        if (module == null) {
+            throw new IllegalArgumentException("Module might not be null");
+        }
+        if (action == null) {
+            throw new IllegalArgumentException("Action might not be null");
+        }
+
+        this.module = module;
+        this.action = action;
     }
 
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(IDManglerTest.class);
-        tests.addTestSuite(MergingSearchIteratorTest.class);
-        tests.addTestSuite(OXExceptionInterceptorRegistrationTest.class);
-        return tests;
+    /**
+     * Gets the module
+     *
+     * @return The module
+     */
+    public String getModule() {
+        return module;
+    }
+
+    /**
+     * Gets the action
+     *
+     * @return The action
+     */
+    public String getAction() {
+        return action;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (o == null) {
+            return false;
+        }
+        if (!(o instanceof OXExceptionInterceptorResponsibility)) {
+            return false;
+        }
+        OXExceptionInterceptorResponsibility pairo = (OXExceptionInterceptorResponsibility) o;
+        return this.module.equals(pairo.getModule()) && this.action.equals(pairo.getAction());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return module.hashCode() ^ action.hashCode();
     }
 }

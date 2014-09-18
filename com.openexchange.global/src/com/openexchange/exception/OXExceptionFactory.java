@@ -51,7 +51,11 @@ package com.openexchange.exception;
 
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
+import com.openexchange.exception.interception.OXExceptionInterceptor;
+import com.openexchange.exception.interception.OXExceptionInterceptorRegistration;
+import com.openexchange.log.LogProperties;
 
 /**
  * {@link OXExceptionFactory} - A factory for {@link OXException} instances.
@@ -159,7 +163,7 @@ public class OXExceptionFactory {
      */
     public OXException create(final OXExceptionCode code, final Category category, final Throwable cause, final Object... args) {
         final Category cat = null == category ? code.getCategory() : category;
-        final OXException ret;
+        OXException ret;
         if (DisplayableOXExceptionCode.class.isInstance(code)) {
             ret = new OXException(code.getNumber(), ((DisplayableOXExceptionCode) code).getDisplayMessage(), cause, args).setLogMessage(code.getMessage(), args);
         } else {
@@ -175,6 +179,15 @@ public class OXExceptionFactory {
                 }
             }
         }
+
+        final String module = LogProperties.getLogProperty(LogProperties.Name.AJAX_MODULE);
+        final String action = LogProperties.getLogProperty(LogProperties.Name.AJAX_ACTION);
+
+        List<OXExceptionInterceptor> interceptors = OXExceptionInterceptorRegistration.getInstance().getResponsibleInterceptors(module, action);
+        for (OXExceptionInterceptor interceptor : interceptors) {
+            ret = interceptor.intercept(ret);
+        }
+
         return ret.addCategory(cat).setPrefix(code.getPrefix()).setExceptionCode(code);
     }
 

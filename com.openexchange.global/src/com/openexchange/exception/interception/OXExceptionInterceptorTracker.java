@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,30 +47,63 @@
  *
  */
 
-package com.openexchange.global;
+package com.openexchange.exception.interception;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import com.openexchange.exception.interception.OXExceptionInterceptorRegistrationTest;
-import com.openexchange.global.tools.id.IDManglerTest;
-import com.openexchange.global.tools.iterator.MergingSearchIteratorTest;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
 
 /**
- * {@link UnitTests}
+ * Tracker for new registered {@link OXExceptionInterceptor}s
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.6.1
  */
-public class UnitTests {
+public class OXExceptionInterceptorTracker implements ServiceTrackerCustomizer<OXExceptionInterceptor, OXExceptionInterceptor> {
 
-    public UnitTests() {
+    private final BundleContext context;
+
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(OXExceptionInterceptorTracker.class);
+
+    /**
+     * Initializes a new {@link OXExceptionInterceptorTracker}.
+     */
+    public OXExceptionInterceptorTracker(BundleContext context) {
         super();
+        this.context = context;
     }
 
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(IDManglerTest.class);
-        tests.addTestSuite(MergingSearchIteratorTest.class);
-        tests.addTestSuite(OXExceptionInterceptorRegistrationTest.class);
-        return tests;
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public OXExceptionInterceptor addingService(ServiceReference<OXExceptionInterceptor> reference) {
+        OXExceptionInterceptor interceptor = context.getService(reference);
+
+        if (OXExceptionInterceptorRegistration.getInstance().isResponsibleInterceptorRegistered(interceptor)) {
+            context.ungetService(reference);
+            LOG.error("Interceptor for the given ranking " + interceptor.getRanking() + " and desired module/action combination already registered! Discard the new one from type: " + interceptor.getClass());
+            return null;
+        }
+
+        OXExceptionInterceptorRegistration.getInstance().put(interceptor);
+        return interceptor;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void modifiedService(ServiceReference<OXExceptionInterceptor> reference, OXExceptionInterceptor service) {
+        // Nothing to do.
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void removedService(ServiceReference<OXExceptionInterceptor> reference, OXExceptionInterceptor service) {
+        OXExceptionInterceptorRegistration.getInstance().remove(service);
     }
 }

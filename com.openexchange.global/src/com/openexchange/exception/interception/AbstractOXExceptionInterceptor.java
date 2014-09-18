@@ -47,30 +47,80 @@
  *
  */
 
-package com.openexchange.global;
+package com.openexchange.exception.interception;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import com.openexchange.exception.interception.OXExceptionInterceptorRegistrationTest;
-import com.openexchange.global.tools.id.IDManglerTest;
-import com.openexchange.global.tools.iterator.MergingSearchIteratorTest;
+import java.util.LinkedList;
+import java.util.List;
+import com.openexchange.exception.OXException;
+
 
 /**
- * {@link UnitTests}
+ * Abstract implementation of {@link OXExceptionInterceptor} that should be used to create custom {@link OXExceptionInterceptor}s.<br>
+ * <br>
+ * With that you only have to define responsibilities and implement what should be do while intercepting by overriding {@link
+ * AbstractOXExceptionInterceptor.intercept(OXException)}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.6.1
  */
-public class UnitTests {
+public abstract class AbstractOXExceptionInterceptor implements OXExceptionInterceptor {
 
-    public UnitTests() {
+    /** List of {@link OXExceptionInterceptorResponsibility} the extending {@link OXExceptionInterceptor} is responsible for **/
+    protected List<OXExceptionInterceptorResponsibility> responsibilitites = new LinkedList<OXExceptionInterceptorResponsibility>();
+
+    /** The service ranking */
+    private final int ranking;
+
+    /**
+     * Initializes a new {@link AbstractOXExceptionInterceptor}.
+     *
+     * @param ranking - ranking of this {@link OXExceptionInterceptor} compared to other ones
+     */
+    public AbstractOXExceptionInterceptor(int ranking) {
         super();
+        this.ranking = ranking;
     }
 
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(IDManglerTest.class);
-        tests.addTestSuite(MergingSearchIteratorTest.class);
-        tests.addTestSuite(OXExceptionInterceptorRegistrationTest.class);
-        return tests;
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public abstract OXException intercept(OXException oxException);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<OXExceptionInterceptorResponsibility> getResponsibilities() {
+        return responsibilitites;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void addResponsibility(OXExceptionInterceptorResponsibility responsibility) {
+        this.responsibilitites.add(responsibility);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isResponsible(String module, String action) {
+        for (OXExceptionInterceptorResponsibility responsibility : responsibilitites) {
+            if (responsibility.equals(new OXExceptionInterceptorResponsibility(module, action))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int getRanking() {
+        return ranking;
     }
 }
