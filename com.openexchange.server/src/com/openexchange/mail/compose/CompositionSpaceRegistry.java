@@ -121,7 +121,11 @@ class CompositionSpaceRegistry {
      * @return The removed composition space or <code>null</code> if no such composition space was available
      */
     synchronized CompositionSpace removeCompositionSpace(String csid) {
-        return spaces.remove(csid);
+        CompositionSpace space = spaces.remove(csid);
+        if (null != space) {
+            space.markInactive();
+        }
+        return space;
     }
 
 }

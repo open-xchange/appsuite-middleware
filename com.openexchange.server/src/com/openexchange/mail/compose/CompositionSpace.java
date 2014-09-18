@@ -56,6 +56,7 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
+import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
 /**
@@ -122,10 +123,13 @@ public class CompositionSpace {
     private final Queue<MailPath> cleanUps;
     final long idleTime;
     final Session session;
+    private volatile ScheduledTimerTask scheduledTimerTask;
 
     /**
      * Initializes a new {@link CompositionSpace}.
-     * @param session
+     *
+     * @param id The composition space identifier
+     * @param session The associated session
      */
     CompositionSpace(String id, Session session) {
         super();
@@ -151,7 +155,18 @@ public class CompositionSpace {
         };
 
         TimerService timerService = ServerServiceRegistry.getInstance().getService(TimerService.class);
-        timerService.scheduleAtFixedRate(task, 5, 5, TimeUnit.MINUTES);
+        scheduledTimerTask = timerService.scheduleAtFixedRate(task, 5, 5, TimeUnit.MINUTES);
+    }
+
+    /**
+     * Marks this composition space as inactive
+     */
+    void markInactive() {
+        ScheduledTimerTask scheduledTimerTask = this.scheduledTimerTask;
+        if (null != scheduledTimerTask) {
+            scheduledTimerTask.cancel();
+            this.scheduledTimerTask = null;
+        }
     }
 
     /**
