@@ -80,6 +80,9 @@ class CompositionSpaceRegistry {
      */
     synchronized List<CompositionSpace> removeAllCompositionSpaces() {
         List<CompositionSpace> l = new LinkedList<CompositionSpace>(spaces.values());
+        for (CompositionSpace space : l) {
+            space.markInactive();
+        }
         spaces.clear();
         return l;
     }
