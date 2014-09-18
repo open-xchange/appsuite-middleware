@@ -57,7 +57,6 @@ import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -1639,7 +1638,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 
     private int[] addColumnIfNecessary(final int[] cols, final int... columnsToAdd) {
 
-        final ArrayList<Integer> columns = new LinkedList<Integer>();
+        final List<Integer> columns = new LinkedList<Integer>();
         for (final int c : cols) {
             columns.add(c);
         }
